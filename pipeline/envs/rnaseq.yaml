@@ -1,0 +1,12 @@
+name: rnaseq_env
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - fastp
+  - salmon
+  - kraken2
+  - pandas
+  - python=3.10
+  - snakemake

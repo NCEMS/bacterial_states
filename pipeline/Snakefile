@@ -1,0 +1,35 @@
+configfile: "config.yaml"
+
+ASSAY = config["assay"]
+USE_GRAPH = config.get("use_graph", False)
+
+#Getting assay information and pipeline selection
+if ASSAY == "rna-seq":
+    include: "workflow/rnaseq_rules.smk"
+    if USE_GRAPH:
+        include: "workflow/vg_rules.smk"
+elif ASSAY == "microarray":
+    include: "workflow/microarray_rules.smk"
+else:
+    raise ValueError(f"Unknown assay type: {ASSAY}")
+
+#Expected outputs rnaseq
+rna_seq_outputs = [
+    "results/stats.txt",
+    "results/counts_salmon_raw.tsv"
+    "results/counts_salmon_orthogroups.tsv"
+]
+if USE_GRAPH:
+    rna_seq_outputs.append("results/counts_vg_k12.tsv")
+    rna_seq_outputs.append("results/counts_vg.gam")
+
+#Expected outputs microarray
+microarray_outputs = [
+    "results/stats.txt",
+    "results/microarray_expression_matrix.tsv",
+]
+
+#Rule for total output
+rule all:
+    input:
+        rna_seq_outputs if ASSAY == "rna-seq" else microarray_outputs
