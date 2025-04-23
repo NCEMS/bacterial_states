@@ -16,7 +16,7 @@ else:
 #Expected outputs rnaseq
 rna_seq_outputs = [
     "results/stats.txt",
-    "results/counts_salmon_raw.tsv"
+    "results/counts_salmon_raw.tsv",
     "results/counts_salmon_orthogroups.tsv"
 ]
 if USE_GRAPH:
