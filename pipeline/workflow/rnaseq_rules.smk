@@ -1,13 +1,12 @@
-#Trimming
 rule fastp:
     input:
         r1=config["r1"],
         r2=config.get("r2", None)
     output:
-        r1=temp("results/clean_R1.fastq"),
-        r2=temp("results/clean_R2.fastq"),
-        html=temp("results/fastp.html"),
-        json=temp("results/fastp.json")
+        r1="results/clean_R1.fastq",
+        r2="results/clean_R2.fastq",
+        html="results/fastp.html",
+        json="results/fastp.json"
     shell:
         """
         fastp -i {input.r1} -o {output.r1} \
@@ -16,20 +15,41 @@ rule fastp:
         """
     conda: "envs/rnaseq.yaml"
 
-#Getting contamination levels
-rule kraken2:
+
+rule fastqc:
     input:
         r1="results/clean_R1.fastq",
         r2="results/clean_R2.fastq"
     output:
-        report=temp("results/kraken_report.txt")
-    params:
-        db=config["kraken_db"]
+        r1_html="results/fastqc/clean_R1_fastqc.html",
+        r1_zip="results/fastqc/clean_R1_fastqc.zip",
+        r2_html="results/fastqc/clean_R2_fastqc.html",
+        r2_zip="results/fastqc/clean_R2_fastqc.zip"
     shell:
-        "kraken2 --db {params.db} --paired {input.r1} {input.r2} --report {output.report} > /dev/null"
+        """
+        fastqc {input.r1} {input.r2 if input.r2 else ''} -o results/fastqc
+        """
     conda: "envs/rnaseq.yaml"
 
-#Alignment
+
+rule centrifuge:
+    input:
+        r1="results/clean_R1.fastq",
+        r2="results/clean_R2.fastq"
+    output:
+        report="results/centrifuge_report.tsv",
+        summary="results/centrifuge_summary.tsv"
+    params:
+        db=config["centrifuge_index"]
+    shell:
+        """
+        centrifuge -x {params.db} \
+        {("-1 " + input.r1 + " -2 " + input.r2) if input.r2 else ("-U " + input.r1)} \
+        -S {output.report} --report-file {output.summary}
+        """
+    conda: "envs/rnaseq.yaml"
+
+
 rule salmon_quant:
     input:
         r1="results/clean_R1.fastq",
@@ -38,28 +58,36 @@ rule salmon_quant:
     output:
         quant="results/salmon/quant.sf"
     shell:
-        "salmon quant -i {input.index} -l A -1 {input.r1} -2 {input.r2} -o results/salmon --validateMappings"
+        """
+        salmon quant -i {input.index} -l ISR \
+        {("-1 " + input.r1 + " -2 " + input.r2) if input.r2 else ("-r " + input.r1)} \
+        -o results/salmon --validateMappings
+        """
     conda: "envs/rnaseq.yaml"
-
-#Summing together counts for orthologs
+    
+    
 rule sum_orthologs:
     input:
         quant="results/salmon/quant.sf",
-        map=config["ortholog_map"]
+        map=config["ortholog_map"]  # TSV: transcript_id \t orthogroup
     output:
         tsv="results/counts_salmon_orthogroups.tsv"
     script:
         "scripts/sum_orthologs.py"
     conda: "envs/rnaseq.yaml"
+    
 
-#Cleaning up log files into one summarized stats file
-rule parse_stats:
+rule multiqc:
     input:
-        fastp_json="results/fastp.json",
-        kraken_report="results/kraken_report.txt"
+        fastp="results/fastp.json",
+        fastqc_r1="results/fastqc/clean_R1_fastqc.zip",
+        fastqc_r2="results/fastqc/clean_R2_fastqc.zip",
+        salmon="results/salmon/quant.sf",
+        centrifuge="results/centrifuge_summary.tsv"
     output:
-        stats="results/stats.txt"
-    script:
-        "scripts/parse_stats.py"
+        html="results/multiqc_report.html"
+    shell:
+        """
+        multiqc results/ -o results
+        """
     conda: "envs/rnaseq.yaml"
-

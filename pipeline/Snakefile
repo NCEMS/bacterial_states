@@ -3,7 +3,7 @@ configfile: "config.yaml"
 ASSAY = config["assay"]
 USE_GRAPH = config.get("use_graph", False)
 
-#Getting assay information and pipeline selection
+#Check assay
 if ASSAY == "rna-seq":
     include: "workflow/rnaseq_rules.smk"
     if USE_GRAPH:
@@ -13,23 +13,30 @@ elif ASSAY == "microarray":
 else:
     raise ValueError(f"Unknown assay type: {ASSAY}")
 
-#Expected outputs rnaseq
+#Expected outputs
 rna_seq_outputs = [
-    "results/stats.txt",
+    "results/salmon/quant.sf",
     "results/counts_salmon_raw.tsv",
-    "results/counts_salmon_orthogroups.tsv"
+    "results/counts_salmon_orthogroups.tsv",
+    "results/centrifuge_report.tsv",
+    "results/centrifuge_summary.tsv",
+    "results/fastqc/clean_R1_fastqc.zip",
+    "results/fastqc/clean_R2_fastqc.zip",
+    "results/fastp.json",
+    "results/multiqc_report.html"
 ]
+
 if USE_GRAPH:
-    rna_seq_outputs.append("results/counts_vg_k12.tsv")
-    rna_seq_outputs.append("results/counts_vg.gam")
+    rna_seq_outputs.extend([
+        "results/counts_vg_k12.tsv",
+        "results/counts_vg.gam"
+    ])
 
-#Expected outputs microarray
 microarray_outputs = [
-    "results/stats.txt",
     "results/microarray_expression_matrix.tsv",
+    "results/multiqc_report.html"
 ]
 
-#Rule for total output
 rule all:
     input:
         rna_seq_outputs if ASSAY == "rna-seq" else microarray_outputs
