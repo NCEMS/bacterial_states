@@ -1,6 +1,6 @@
-SE = config.get("r2") is None
+SE = config.get("r2") is None 
 
-# ------------ Single-end RNA-seq rules ------------
+########################## Single-end Rules
 if SE:
     rule fastp_se:
         input:
@@ -55,7 +55,7 @@ if SE:
             -o results/salmon --validateMappings
             """
 
-# ------------ Paired-end RNA-seq rules ------------
+########################## Paired-end Rules
 else:
     rule fastp_pe:
         input:
@@ -119,7 +119,7 @@ else:
             -o results/salmon --validateMappings
             """
 
-# ------------ Shared rules ------------
+########################## Shared Rules
 rule sum_orthologs:
     input:
         quant="results/salmon/quant.sf",
@@ -129,8 +129,7 @@ rule sum_orthologs:
     conda: "../envs/rnaseq.yaml"
     script:
         "../scripts/sum_orthologs.py"
-
-# Build clean input dict for multiqc
+#MultiQC inputs
 multiqc_inputs = {
     "fastp": "results/fastp.json",
     "salmon": "results/salmon/quant.sf",
@@ -153,4 +152,6 @@ rule multiqc:
     conda: "../envs/rnaseq.yaml"
     shell:
         "multiqc results/ -o results"
+
+
 

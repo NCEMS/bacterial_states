@@ -10,3 +10,4 @@ dependencies:
   - kraken2
   - pandas
   - numpy
+  - multiqc

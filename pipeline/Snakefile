@@ -3,7 +3,6 @@ configfile: "config.yaml"
 ASSAY = config["assay"]
 USE_GRAPH = config.get("use_graph", False)
 
-# Check assay
 if ASSAY == "rna-seq":
     include: "workflow/rnaseq_rules.smk"
     if USE_GRAPH:
@@ -13,7 +12,6 @@ elif ASSAY == "microarray":
 else:
     raise ValueError(f"Unknown assay type: {ASSAY}")
 
-# Set expected outputs for RNA-seq
 rna_seq_outputs = [
     "results/clean_R1.fastq",
     "results/salmon/quant.sf",
@@ -25,7 +23,6 @@ rna_seq_outputs = [
     "results/multiqc_report.html"
 ]
 
-# Add paired-end outputs if needed
 if config.get("r2"):
     rna_seq_outputs.extend([
         "results/fastqc/clean_R2_fastqc.zip",
@@ -33,20 +30,12 @@ if config.get("r2"):
         "results/kraken/clean_PE_kraken_output.txt"
     ])
 
-# Add VG outputs if enabled
 if USE_GRAPH:
     rna_seq_outputs.extend([
         "results/counts_vg_k12.tsv",
         "results/counts_vg.gam"
     ])
 
-# Microarray output expectations
-microarray_outputs = [
-    "results/microarray_expression_matrix.tsv",
-    "results/multiqc_report.html"
-]
-
-# Rule to define pipeline's final targets
 rule all:
     input:
-        rna_seq_outputs if ASSAY == "rna-seq" else microarray_outputs
+        rna_seq_outputs
