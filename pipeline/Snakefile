@@ -4,9 +4,10 @@ ASSAY = config["assay"]
 USE_GRAPH = config.get("use_graph", False)
 
 if ASSAY == "rna-seq":
-    include: "workflow/rnaseq_rules.smk"
     if USE_GRAPH:
         include: "workflow/vg_rules.smk"
+    else:
+        include: "workflow/rnaseq_rules.smk"
 elif ASSAY == "microarray":
     include: "workflow/microarray_rules.smk"
 else:
@@ -14,8 +15,6 @@ else:
 
 rna_seq_outputs = [
     "results/clean_R1.fastq",
-    "results/salmon/quant.sf",
-    "results/counts_salmon_orthogroups.tsv",
     "results/fastqc/clean_R1_fastqc.zip",
     "results/kraken/clean_R1_kraken_report.txt",
     "results/kraken/clean_R1_kraken_output.txt",
@@ -30,10 +29,18 @@ if config.get("r2"):
         "results/kraken/clean_PE_kraken_output.txt"
     ])
 
+if not USE_GRAPH:
+    rna_seq_outputs.extend([
+    "results/salmon/quant.sf",
+    "results/counts_salmon_orthogroups.tsv",
+    ])
+
+
 if USE_GRAPH:
     rna_seq_outputs.extend([
-        "results/counts_vg_k12.tsv",
-        "results/counts_vg.gam"
+        "results/aligned.gam",
+        "results/aligned.bam",
+        "results/vg/stats.txt",
     ])
 
 rule all:
