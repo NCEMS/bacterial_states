@@ -1,21 +1,31 @@
 import pandas as pd
-from collections import defaultdict
 
+# Snakemake inputs/outputs
 quant = snakemake.input["quant"]
-orthomap = snakemake.input["map"]
 output = snakemake.output["tsv"]
 
-#Load quant.sf
+# Load quant.sf
 df = pd.read_csv(quant, sep="\t")
-tpm_dict = dict(zip(df["Name"], df["TPM"]))
 
-#Load ortholog map
-ortho_map = pd.read_csv(orthomap, sep="\t", header=None, names=["transcript", "orthogroup"])
-orthogroup_tpm = defaultdict(float)
+# Only keep transcripts from W3110
+df = df[df["Name"].str.startswith("NC_004431|")].copy()
 
-for _, row in ortho_map.iterrows():
-    orthogroup_tpm[row["orthogroup"]] += tpm_dict.get(row["transcript"], 0.0)
+# Extract gene name and orthogroup
+df[["Genome", "Gene", "Orthogroup"]] = df["Name"].str.split("|", expand=True)
 
-#Write final summed TPMs
-pd.DataFrame(orthogroup_tpm.items(), columns=["Orthogroup", "TPM"]).to_csv(output, sep="\t", index=False)
+# Compute scaled NumReads / EffectiveLength
+df["scaled"] = df["NumReads"] / df["EffectiveLength"]
+scaling_factor = df["scaled"].sum()
+
+# Compute TPM per orthogroup
+grouped = df.groupby(["Orthogroup", "Gene"]).agg({
+    "NumReads": "sum",
+    "EffectiveLength": "mean"
+}).reset_index()
+
+grouped["scaled"] = grouped["NumReads"] / grouped["EffectiveLength"]
+grouped["TPM"] = grouped["scaled"] / scaling_factor * 1e6
+
+# Output: one gene per orthogroup (W3110-based)
+grouped[["Gene", "TPM"]].to_csv(output, sep="\t", index=False)
 

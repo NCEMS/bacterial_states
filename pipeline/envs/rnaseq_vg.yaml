@@ -1,4 +1,4 @@
-name: rnaseq_vg_env
+name: rnaseq_vg
 channels:
   - conda-forge
   - bioconda
@@ -7,9 +7,9 @@ dependencies:
   - python=3.10
   - fastp
   - fastqc
-  - kraken2
   - pandas
   - numpy
   - multiqc
-  - vg
+  - centrifuge
   - subread
+  - vg=1.44.0

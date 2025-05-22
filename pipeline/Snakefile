@@ -16,8 +16,8 @@ else:
 rna_seq_outputs = [
     "results/clean_R1.fastq",
     "results/fastqc/clean_R1_fastqc.zip",
-    "results/kraken/clean_R1_kraken_report.txt",
-    "results/kraken/clean_R1_kraken_output.txt",
+    "results/centrifuge/clean_R1_report.txt",
+    "results/centrifuge/clean_R1_output.tsv",
     "results/fastp.json",
     "results/multiqc_report.html"
 ]
@@ -25,24 +25,24 @@ rna_seq_outputs = [
 if config.get("r2"):
     rna_seq_outputs.extend([
         "results/fastqc/clean_R2_fastqc.zip",
-        "results/kraken/clean_PE_kraken_report.txt",
-        "results/kraken/clean_PE_kraken_output.txt"
+        "results/centrifuge/clean_PE_report.txt",
+        "results/centrifuge/clean_PE_output.tsv"
     ])
 
 if not USE_GRAPH:
     rna_seq_outputs.extend([
-    "results/salmon/quant.sf",
-    "results/counts_salmon_orthogroups.tsv",
+        "results/salmon/quant.sf",
+        "results/counts_salmon_orthogroups.tsv",
     ])
-
 
 if USE_GRAPH:
     rna_seq_outputs.extend([
         "results/aligned.gam",
         "results/aligned.bam",
-        "results/vg/stats.txt",
+        "results/vg/giraffe.stats.txt",
     ])
 
 rule all:
     input:
         rna_seq_outputs
+

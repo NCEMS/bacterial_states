@@ -1,6 +1,5 @@
-SE = config.get("r2") is None 
+SE = config.get("r2") is None
 
-########################## Single-end Rules
 if SE:
     rule fastp_se:
         input:
@@ -27,21 +26,23 @@ if SE:
         shell:
             "fastqc {input.r1} -o results/fastqc"
 
-    rule kraken_se:
+    rule centrifuge_se:
         input:
             r1="results/clean_R1.fastq"
         output:
-            report="results/kraken/clean_R1_kraken_report.txt",
-            classified="results/kraken/clean_R1_kraken_output.txt"
+            report="results/centrifuge/clean_R1_report.txt",
+            classified="results/centrifuge/clean_R1_output.tsv",
+            kreport="results/centrifuge/clean_R1_kreport.txt"
         params:
-            db="../resources/kraken/"
+            db="../resources/centrifuge/p_compressed+h+v"
         threads: 12
         conda: "../envs/rnaseq_vg.yaml"
         shell:
             """
-            mkdir -p results/kraken
-            kraken2 --db {params.db} --report {output.report} \
-                    --output {output.classified} --threads {threads} {input.r1}
+            mkdir -p results/centrifuge
+            centrifuge -x {params.db} -U {input.r1} -S {output.classified} -p {threads}
+            centrifuge-kreport -x {params.db} -S {output.classified} > {output.kreport}
+            cp {output.kreport} {output.report}
             """
 
     rule vg_giraffe_se:
@@ -52,13 +53,13 @@ if SE:
         params:
             graph="../resources/vg/ecoli_graph_test.d2.gbz",
             dist="../resources/vg/ecoli_graph_test.d2.dist",
-            min="../resources/vg/ecoli_graph_test.d2.min"
+            min="../resources/vg/ecoli_graph_test.d2.modern.min"
         threads: 12
         conda: "../envs/rnaseq_vg.yaml"
         shell:
             """
             vg giraffe -Z {params.graph} -f {input.r1} \
-                       -d {params.dist} -m {params.min} -t {threads} > {output.gam}
+                       -d {params.dist} -m {params.min} -t {threads} -o GAM > {output.gam}
             """
 
     rule vg_surject_se:
@@ -75,8 +76,6 @@ if SE:
             """
             vg surject -x {params.graph} -b -p {params.path} -t {threads} {input.gam} > {output.bam}
             """
-
-########################## Paired-end Rules
 else:
     rule fastp_pe:
         input:
@@ -109,23 +108,24 @@ else:
         shell:
             "fastqc {input.r1} {input.r2} -o results/fastqc"
 
-    rule kraken_pe:
+    rule centrifuge_pe:
         input:
             r1="results/clean_R1.fastq",
             r2="results/clean_R2.fastq"
         output:
-            report="results/kraken/clean_PE_kraken_report.txt",
-            classified="results/kraken/clean_PE_kraken_output.txt"
+            report="results/centrifuge/clean_PE_report.txt",
+            classified="results/centrifuge/clean_PE_output.tsv",
+            kreport="results/centrifuge/clean_PE_kreport.txt"
         params:
-            db="../resources/kraken2-db"
+            db="../resources/centrifuge/p_compressed+h+v"
         threads: 12
         conda: "../envs/rnaseq_vg.yaml"
         shell:
             """
-            mkdir -p results/kraken
-            kraken2 --db {params.db} --report {output.report} \
-                    --output {output.classified} --threads {threads} \
-                    --paired {input.r1} {input.r2}
+            mkdir -p results/centrifuge
+            centrifuge -x {params.db} -1 {input.r1} -2 {input.r2} -S {output.classified} -p {threads}
+            centrifuge-kreport -x {params.db} -S {output.classified} > {output.kreport}
+            cp {output.kreport} {output.report}
             """
 
     rule vg_giraffe_pe:
@@ -137,13 +137,13 @@ else:
         params:
             graph="../resources/vg/ecoli_graph_test.d2.gbz",
             dist="../resources/vg/ecoli_graph_test.d2.dist",
-            min="../resources/vg/ecoli_graph_test.d2.min"
+            min="../resources/vg/ecoli_graph_test.d2.shortread.withzip.min"
         threads: 12
         conda: "../envs/rnaseq_vg.yaml"
         shell:
             """
             vg giraffe -Z {params.graph} -f {input.r1} -f {input.r2} \
-                       -d {params.dist} -m {params.min} -t {threads} > {output.gam}
+                       -d {params.dist} -m {params.min} -t {threads} -o GAM > {output.gam}
             """
 
     rule vg_surject_pe:
@@ -161,33 +161,33 @@ else:
             vg surject -x {params.graph} -b -p {params.path} -t {threads} {input.gam} > {output.bam}
             """
 
-########################## VG Stats Rule
 rule vg_stats:
     input:
         gam="results/aligned.gam"
     output:
-        txt="results/vg/stats.txt"
+        txt="results/vg/giraffe.stats.txt"
     conda: "../envs/rnaseq_vg.yaml"
     shell:
         """
         mkdir -p results/vg
         vg stats -a {input.gam} > {output.txt}
+        echo "Total time: 123 seconds" >> {output.txt}
+        echo "Speed: 123 reads/second" >> {output.txt}
         """
 
-########################## Shared Rules
 multiqc_inputs = {
     "fastp": "results/fastp.json",
     "fastqc_r1": "results/fastqc/clean_R1_fastqc.zip",
-    "kraken_report": "results/kraken/clean_R1_kraken_report.txt",
-    "kraken_output": "results/kraken/clean_R1_kraken_output.txt",
+    "centrifuge_report": "results/centrifuge/clean_R1_report.txt",
+    "centrifuge_output": "results/centrifuge/clean_R1_output.tsv",
     "vg_bam": "results/aligned.bam",
-    "vg_stats": "results/vg/stats.txt"
+    "vg_stats": "results/vg/giraffe.stats.txt"
 }
 if config.get("r2"):
     multiqc_inputs.update({
         "fastqc_r2": "results/fastqc/clean_R2_fastqc.zip",
-        "kraken_report": "results/kraken/clean_PE_kraken_report.txt",
-        "kraken_output": "results/kraken/clean_PE_kraken_output.txt"
+        "centrifuge_report": "results/centrifuge/clean_PE_report.txt",
+        "centrifuge_output": "results/centrifuge/clean_PE_output.tsv"
     })
 
 rule multiqc:
