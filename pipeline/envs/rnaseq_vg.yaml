@@ -1,7 +1,7 @@
 name: rnaseq_vg
 channels:
-  - conda-forge
   - bioconda
+  - conda-forge
   - defaults
 dependencies:
   - python=3.10
@@ -12,4 +12,5 @@ dependencies:
   - multiqc
   - centrifuge
   - subread
-  - vg=1.44.0
+  - vg=1.63.1
+  - rseqc

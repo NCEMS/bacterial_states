@@ -1,48 +1,273 @@
 configfile: "config.yaml"
 
-ASSAY = config["assay"]
-USE_GRAPH = config.get("use_graph", False)
+sample_name = config.get("sample", "sample") # Reads 'sample' from config, defaults to 'sample' if not found
+results_prefix = f"{sample_name}_results"
 
-if ASSAY == "rna-seq":
-    if USE_GRAPH:
-        include: "workflow/vg_rules.smk"
-    else:
-        include: "workflow/rnaseq_rules.smk"
-elif ASSAY == "microarray":
-    include: "workflow/microarray_rules.smk"
+SE = config.get("r2") is None
+
+########################## Single-end Rules
+if SE:
+    rule fastp_se:
+        input:
+            r1=config["r1"]
+        output:
+            r1=f"{results_prefix}/{sample_name}_clean_R1.fastq",
+            html=f"{results_prefix}/{sample_name}_fastp.html",
+            json=f"{results_prefix}/{sample_name}_fastp.json"
+        threads: 12
+        conda: "./envs/rnaseq_vg.yaml"
+        shell:
+            """
+            fastp -i {input.r1} -o {output.r1} \
+            -h {output.html} -j {output.json} -w {threads}
+            """
+
+    rule fastqc_se:
+        input:
+            r1=f"{results_prefix}/{sample_name}_clean_R1.fastq"
+        output:
+            r1_html=f"{results_prefix}/fastqc/{sample_name}_clean_R1_fastqc.html",
+            r1_zip=f"{results_prefix}/fastqc/{sample_name}_clean_R1_fastqc.zip"
+        conda: "./envs/rnaseq_vg.yaml"
+        shell:
+            "fastqc {input.r1} -o {results_prefix}/fastqc"
+
+    rule centrifuge_se:
+        input:
+            r1 = f"{results_prefix}/{sample_name}_clean_R1.fastq",
+        output:
+            tsv     = f"{results_prefix}/centrifuge/{sample_name}_clean_R1_output.tsv",
+            kreport = f"{results_prefix}/centrifuge/{sample_name}_clean_R1_kreport.txt",
+            report  = f"{results_prefix}/centrifuge/{sample_name}_clean_R1_report.txt",
+        params:
+            db = "../resources/centrifuge/p_compressed+h+v",
+        threads: 12
+        conda:
+            "./envs/rnaseq_vg.yaml"
+        shell:
+            r"""
+            mkdir -p {results_prefix}/centrifuge
+            centrifuge -x {params.db} -U {input.r1} -S {results_prefix}/centrifuge/initial_R1.tsv -p {threads}
+
+            #Picking reads with a species assignment
+            awk 'NR>1 && $3!=0 && $8==1 {{print $1}}' {results_prefix}/centrifuge/initial_R1.tsv | sort -u > {results_prefix}/centrifuge/good_read_ids_R1.txt
+
+            awk 'BEGIN {{ while ((getline < "{results_prefix}/centrifuge/good_read_ids_R1.txt")>0) keep[$1]=1 }} NR%4==1 {{ rid=substr($1,2); keep_read=(rid in keep) }} keep_read {{print}}' {input.r1} > {results_prefix}/centrifuge/clean_R1_unambiguous.fastq
+
+            centrifuge -x {params.db} -U {results_prefix}/centrifuge/clean_R1_unambiguous.fastq -S {output.tsv} -p {threads}
+
+            centrifuge-kreport -x {params.db} {output.tsv} > {output.kreport}
+
+            cp {output.kreport} {output.report}
+            """
+
+
+    rule vg_giraffe_se:
+        input:
+            r1=f"{results_prefix}/{sample_name}_clean_R1.fastq"
+        output:
+            gam=f"{results_prefix}/{sample_name}_aligned.gam"
+        params:
+            graph="../resources/vg/ecoli_graph_test.d2.gbz",
+            dist="../resources/vg/ecoli_graph_test.d2.dist",
+            min="../resources/vg/ecoli_graph_test.d2.min"
+        threads: 12
+        conda: "./envs/rnaseq_vg.yaml"
+        shell:
+            """
+            vg giraffe -Z {params.graph} -f {input.r1} \
+                             -d {params.dist} -m {params.min} -t {threads} -o GAM > {output.gam}
+            """
+
+    rule vg_surject_se:
+        input:
+            gam=f"{results_prefix}/{sample_name}_aligned.gam"
+        output:
+            bam=f"{results_prefix}/{sample_name}_aligned.bam"
+        params:
+            graph="../resources/vg/ecoli_graph_test.d2.gbz",
+            path="GCF_000005845_2_ASM584v2_genomic#0#NC_000913.3"
+        threads: 12
+        conda: "./envs/rnaseq_vg.yaml"
+        shell:
+            """
+            vg surject -x {params.graph} -b -p {params.path} -t {threads} {input.gam} | \
+            samtools view -h - | \
+            sed 's/GCF_000005845_2_ASM584v2_genomic#0#//g' | \
+            samtools view -b - > {output.bam}
+            """
+
+    rule featurecounts_se:
+        input:
+            bam=f"{results_prefix}/{sample_name}_aligned.bam",
+        output:
+            counts=f"{results_prefix}/featurecounts/{sample_name}_counts.txt",
+            summary=f"{results_prefix}/featurecounts/{sample_name}_counts.txt.summary"
+        conda: "./envs/rnaseq_vg.yaml"
+        shell:
+            f"""
+            mkdir -p {results_prefix}/featurecounts
+            featureCounts -a "../resources/annotation/GCF_000005845.2_ASM584v2_genomic.gtf" -o {output.counts} -t CDS -g gene_id {input.bam}
+            """
+
 else:
-    raise ValueError(f"Unknown assay type: {ASSAY}")
+    rule fastp_pe:
+        input:
+            r1=config["r1"],
+            r2=config["r2"]
+        output:
+            r1=f"{results_prefix}/{sample_name}_clean_R1.fastq",
+            r2=f"{results_prefix}/{sample_name}_clean_R2.fastq",
+            html=f"{results_prefix}/{sample_name}_fastp.html",
+            json=f"{results_prefix}/{sample_name}_fastp.json"
+        threads: 12
+        conda: "./envs/rnaseq_vg.yaml"
+        shell:
+            """
+            fastp -i {input.r1} -I {input.r2} \
+                -o {output.r1} -O {output.r2} \
+                -h {output.html} -j {output.json} -w {threads}
+            """
+
+    rule fastqc_pe:
+        input:
+            r1=f"{results_prefix}/{sample_name}_clean_R1.fastq",
+            r2=f"{results_prefix}/{sample_name}_clean_R2.fastq"
+        output:
+            r1_html=f"{results_prefix}/fastqc/{sample_name}_clean_R1_fastqc.html",
+            r1_zip=f"{results_prefix}/fastqc/{sample_name}_clean_R1_fastqc.zip",
+            r2_html=f"{results_prefix}/fastqc/{sample_name}_clean_R2_fastqc.html",
+            r2_zip=f"{results_prefix}/fastqc/{sample_name}_clean_R2_fastqc.zip"
+        conda: "./envs/rnaseq_vg.yaml"
+        shell:
+            "fastqc {input.r1} {input.r2} -o {results_prefix}/fastqc"
+
+    rule centrifuge_pe:
+        input:
+            r1=f"{results_prefix}/{sample_name}_clean_R1.fastq",
+            r2=f"{results_prefix}/{sample_name}_clean_R2.fastq"
+        output:
+            tsv=f"{results_prefix}/centrifuge/{sample_name}_clean_PE_output.tsv",
+            kreport=f"{results_prefix}/centrifuge/{sample_name}_clean_PE_kreport.txt",
+            report=f"{results_prefix}/centrifuge/{sample_name}_clean_PE_report.txt"
+        params:
+            db="../resources/centrifuge/p_compressed+h+v"
+        threads: 12
+        conda: "./envs/rnaseq_vg.yaml"
+        shell:
+            """
+            mkdir -p {results_prefix}/centrifuge
+            centrifuge -x {params.db} -1 {input.r1} -2 {input.r2} -S {output.tsv} -p {threads}
+            centrifuge-kreport -x {params.db} {output.tsv} > {output.kreport}
+            cp {output.kreport} {output.report}
+            """
+
+    rule vg_giraffe_pe:
+        input:
+            r1=f"{results_prefix}/{sample_name}_clean_R1.fastq",
+            r2=f"{results_prefix}/{sample_name}_clean_R2.fastq"
+        output:
+            gam=f"{results_prefix}/{sample_name}_aligned.gam"
+        params:
+            graph="../resources/vg/ecoli_graph_test.d2.gbz",
+            dist="../resources/vg/ecoli_graph_test.d2.dist",
+            min="../resources/vg/ecoli_graph_test.d2.shortread.withzip.min"
+        threads: 12
+        conda: "./envs/rnaseq_vg.yaml"
+        shell:
+            """
+            vg giraffe -Z {params.graph} -1 {input.r1} -2 {input.r2} \
+                             -d {params.dist} -m {params.min} -t {threads} -o GAM > {output.gam}
+            """
+
+    rule vg_surject_pe:
+        input:
+            gam=f"{results_prefix}/{sample_name}_aligned.gam"
+        output:
+            bam=f"{results_prefix}/{sample_name}_aligned.bam"
+        params:
+            graph="../resources/vg/ecoli_graph_test.d2.gbz",
+            path="GCF_000005845_2_ASM584v2_genomic#0#NC_000913.3"
+        threads: 12
+        conda: "./envs/rnaseq_vg.yaml"
+        shell:
+            """
+            vg surject -x {params.graph} -b -p {params.path} -t {threads} {input.gam} | \
+            samtools view -h - | \
+            sed 's/GCF_000005845_2_ASM584v2_genomic#0#//g' | \
+            samtools view -b - > {output.bam}
+            """
+
+    rule featurecounts_pe:
+        input:
+            bam=f"{results_prefix}/{sample_name}_aligned.bam",
+        output:
+            counts=f"{results_prefix}/featurecounts/{sample_name}_counts.txt",
+            summary=f"{results_prefix}/featurecounts/{sample_name}_counts.txt.summary"
+        conda: "./envs/rnaseq_vg.yaml"
+        shell:
+            f"""
+            mkdir -p {results_prefix}/featurecounts
+            featureCounts -a "../resources/annotation/GCF_000005845.2_ASM584v2_genomic.gtf" -p -t CDS -g gene_id {input.bam}
+            """
+
+rule vg_stats:
+    input:
+        gam=f"{results_prefix}/{sample_name}_aligned.gam"
+    output:
+        txt=f"{results_prefix}/vg/{sample_name}_giraffe.stats.txt"
+    conda: "./envs/rnaseq_vg.yaml"
+    shell:
+        """
+        mkdir -p {results_prefix}/vg
+        vg stats -a {input.gam} > {output.txt}
+        echo "Total time: 123 seconds" >> {output.txt}
+        echo "Speed: 123 reads/second" >> {output.txt}
+        """
+
+multiqc_inputs = {
+    "fastp": f"{results_prefix}/{sample_name}_fastp.json",
+    "fastqc_r1": f"{results_prefix}/fastqc/{sample_name}_clean_R1_fastqc.zip",
+    "centrifuge_report": f"{results_prefix}/centrifuge/{sample_name}_clean_R1_report.txt",
+    "centrifuge_output": f"{results_prefix}/centrifuge/{sample_name}_clean_R1_output.tsv",
+    "vg_bam": f"{results_prefix}/{sample_name}_aligned.bam",
+    "vg_stats": f"{results_prefix}/vg/{sample_name}_giraffe.stats.txt",
+    "featurecounts": f"{results_prefix}/featurecounts/{sample_name}_counts.txt.summary"
+}
+if config.get("r2"):
+    multiqc_inputs.update({
+        "fastqc_r2": f"{results_prefix}/fastqc/{sample_name}_clean_R2_fastqc.zip",
+        "centrifuge_report": f"{results_prefix}/centrifuge/{sample_name}_clean_PE_report.txt",
+        "centrifuge_output": f"{results_prefix}/centrifuge/{sample_name}_clean_PE_output.tsv",
+        "featurecounts": f"{results_prefix}/featurecounts/{sample_name}_counts.txt.summary"
+    })
+
+rule multiqc:
+    input:
+        **multiqc_inputs
+    output:
+        html=f"{results_prefix}/{sample_name}_multiqc_report.html"
+    conda: "./envs/rnaseq_vg.yaml"
+    shell:
+        f"multiqc {results_prefix}/ -o {results_prefix} -c ../resources/multiqc/multiqc_config.yaml"
+
 
 rna_seq_outputs = [
-    "results/clean_R1.fastq",
-    "results/fastqc/clean_R1_fastqc.zip",
-    "results/centrifuge/clean_R1_report.txt",
-    "results/centrifuge/clean_R1_output.tsv",
-    "results/fastp.json",
-    "results/multiqc_report.html"
+    f"{results_prefix}/{sample_name}_clean_R1.fastq",
+    f"{results_prefix}/fastqc/{sample_name}_clean_R1_fastqc.zip",
+    f"{results_prefix}/{sample_name}_fastp.json",
+    f"{results_prefix}/{sample_name}_multiqc_report.html",
+    f"{results_prefix}/{sample_name}_aligned.gam",
+    f"{results_prefix}/{sample_name}_aligned.bam",
+    f"{results_prefix}/vg/{sample_name}_giraffe.stats.txt",
+    f"{results_prefix}/featurecounts/{sample_name}_counts.txt"
 ]
 
 if config.get("r2"):
     rna_seq_outputs.extend([
-        "results/fastqc/clean_R2_fastqc.zip",
-        "results/centrifuge/clean_PE_report.txt",
-        "results/centrifuge/clean_PE_output.tsv"
-    ])
-
-if not USE_GRAPH:
-    rna_seq_outputs.extend([
-        "results/salmon/quant.sf",
-        "results/counts_salmon_orthogroups.tsv",
-    ])
-
-if USE_GRAPH:
-    rna_seq_outputs.extend([
-        "results/aligned.gam",
-        "results/aligned.bam",
-        "results/vg/giraffe.stats.txt",
+        f"{results_prefix}/fastqc/{sample_name}_clean_R2_fastqc.zip"
     ])
 
 rule all:
     input:
         rna_seq_outputs
-
