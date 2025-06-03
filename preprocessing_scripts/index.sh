@@ -54,3 +54,7 @@ singularity exec cactus_latest.sif cactus-pangenome ./jobstore genomes.txt \
   --reference GCF_000005845_2_ASM584v2_genomic \
   --vcf --giraffe --gfa --gbz --xg
 
+
+
+grep -v "^#" GCF_000005845.2_ASM584v2_genomic.gtf | awk -v OFS='\t' '{print $1,$4,$5,$24":"$10,$6,$7}' | sed 's/\.3//g; s/[";]//g' > GCF_000005845.2_ASM584v2_genomic.bed
+

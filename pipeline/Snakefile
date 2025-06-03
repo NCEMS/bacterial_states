@@ -3,6 +3,11 @@ configfile: "config.yaml"
 sample_name = config.get("sample", "sample") # Reads 'sample' from config, defaults to 'sample' if not found
 results_prefix = f"{sample_name}_results"
 
+
+annotation_gtf = config.get("annotation_gtf")
+annotation_bed = config.get("annotation_bed")
+
+
 SE = config.get("r2") is None
 
 ########################## Single-end Rules
@@ -107,7 +112,7 @@ if SE:
         shell:
             f"""
             mkdir -p {results_prefix}/featurecounts
-            featureCounts -a "../resources/annotation/GCF_000005845.2_ASM584v2_genomic.gtf" -o {output.counts} -t CDS -g gene_id {input.bam}
+            featureCounts -a {annotation_gtf} -o {output.counts} -t CDS -g gene_id {input.bam}
             """
 
 else:
@@ -208,7 +213,7 @@ else:
         shell:
             f"""
             mkdir -p {results_prefix}/featurecounts
-            featureCounts -a "../resources/annotation/GCF_000005845.2_ASM584v2_genomic.gtf" -p -t CDS -g gene_id {input.bam}
+            featureCounts -a {annotation_gtf} -p -t CDS -g gene_id {input.bam}
             """
 
 rule vg_stats:
@@ -225,6 +230,33 @@ rule vg_stats:
         echo "Speed: 123 reads/second" >> {output.txt}
         """
 
+rule rseqc:
+    input:
+        bam = f"{results_prefix}/{sample_name}_aligned.bam"
+    output:
+        infer_experiment = f"{results_prefix}/rseqc/{sample_name}_infer_experiment.txt",
+        read_distribution = f"{results_prefix}/rseqc/{sample_name}_read_distribution.txt"
+    conda: "./envs/rnaseq_vg.yaml"
+    shell:
+        """
+        mkdir -p {results_prefix}/rseqc
+        infer_experiment.py -i {input.bam} -r {annotation_bed} > {output.infer_experiment}
+        """
+        
+        
+rule feature_overlap:
+    input:
+        bam = f"{results_prefix}/{sample_name}_aligned.bam"
+    output:
+        feature_overlap = f"{results_prefix}/feature_overlap/{sample_name}_feature_overlap.txt"
+    conda: "./envs/rnaseq_vg.yaml"
+    shell:
+        """
+        mkdir -p {results_prefix}/feature_overlap
+        bash scripts/gene_type.sh {annotation_bed} {input.bam} {output.feature_overlap}
+        """
+
+
 multiqc_inputs = {
     "fastp": f"{results_prefix}/{sample_name}_fastp.json",
     "fastqc_r1": f"{results_prefix}/fastqc/{sample_name}_clean_R1_fastqc.zip",
@@ -232,8 +264,11 @@ multiqc_inputs = {
     "centrifuge_output": f"{results_prefix}/centrifuge/{sample_name}_clean_R1_output.tsv",
     "vg_bam": f"{results_prefix}/{sample_name}_aligned.bam",
     "vg_stats": f"{results_prefix}/vg/{sample_name}_giraffe.stats.txt",
-    "featurecounts": f"{results_prefix}/featurecounts/{sample_name}_counts.txt.summary"
+    "featurecounts": f"{results_prefix}/featurecounts/{sample_name}_counts.txt.summary",
+    "rseqc_infer_experiment": f"{results_prefix}/rseqc/{sample_name}_infer_experiment.txt",
+    "feature_overlap": f"{results_prefix}/rseqc/{sample_name}_feature_overlap.txt"
 }
+
 if config.get("r2"):
     multiqc_inputs.update({
         "fastqc_r2": f"{results_prefix}/fastqc/{sample_name}_clean_R2_fastqc.zip",
@@ -249,7 +284,7 @@ rule multiqc:
         html=f"{results_prefix}/{sample_name}_multiqc_report.html"
     conda: "./envs/rnaseq_vg.yaml"
     shell:
-        f"multiqc {results_prefix}/ -o {results_prefix} -c ../resources/multiqc/multiqc_config.yaml"
+        f"multiqc {results_prefix}/ -o {results_prefix} -c ../resources/multiqc/multiqc_config.yaml --filename {sample_name}_multiqc_report.html"
 
 
 rna_seq_outputs = [

@@ -1,0 +1,9 @@
+# id: "feature_overlap"
+# section_name: "Feature Overlap"
+# description: "Proportion of reads overlapping genomic features using bedtools intersect. Note: Overlapping features permitted so percentages will not add to 100%."
+# format: "tsv"
+# plot_type: "bargraph"
+# pconfig:
+#   id: "feature_overlap_barplot"
+#   title: "Feature Overlap"
+#   ylab: "Percentage of Reads"

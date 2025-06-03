@@ -1,10 +1,11 @@
 name: rnaseq_vg
 channels:
-  - bioconda
   - conda-forge
+  - bioconda
   - defaults
 dependencies:
   - python=3.10
+  - pip
   - fastp
   - fastqc
   - pandas
