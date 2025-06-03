@@ -235,7 +235,6 @@ rule rseqc:
         bam = f"{results_prefix}/{sample_name}_aligned.bam"
     output:
         infer_experiment = f"{results_prefix}/rseqc/{sample_name}_infer_experiment.txt",
-        read_distribution = f"{results_prefix}/rseqc/{sample_name}_read_distribution.txt"
     conda: "./envs/rnaseq_vg.yaml"
     shell:
         """
@@ -243,12 +242,12 @@ rule rseqc:
         infer_experiment.py -i {input.bam} -r {annotation_bed} > {output.infer_experiment}
         """
         
-        
+#Custom addition to multiqc, have to keep mqc name or it will not be parsed        
 rule feature_overlap:
     input:
         bam = f"{results_prefix}/{sample_name}_aligned.bam"
     output:
-        feature_overlap = f"{results_prefix}/feature_overlap/{sample_name}_feature_overlap.txt"
+        feature_overlap = f"{results_prefix}/feature_overlap/{sample_name}_feature_overlap_mqc.tsv"
     conda: "./envs/rnaseq_vg.yaml"
     shell:
         """
@@ -266,7 +265,7 @@ multiqc_inputs = {
     "vg_stats": f"{results_prefix}/vg/{sample_name}_giraffe.stats.txt",
     "featurecounts": f"{results_prefix}/featurecounts/{sample_name}_counts.txt.summary",
     "rseqc_infer_experiment": f"{results_prefix}/rseqc/{sample_name}_infer_experiment.txt",
-    "feature_overlap": f"{results_prefix}/rseqc/{sample_name}_feature_overlap.txt"
+    "feature_overlap": f"{results_prefix}/feature_overlap/{sample_name}_feature_overlap_mqc.tsv"
 }
 
 if config.get("r2"):
@@ -306,3 +305,4 @@ if config.get("r2"):
 rule all:
     input:
         rna_seq_outputs
+
