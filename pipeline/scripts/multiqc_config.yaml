@@ -1,0 +1,34 @@
+title: "NCEMS Bacterial Cell State Atlas"
+intro_text: "."
+
+custom_logo: "scripts/logo.png"
+custom_logo_url: "https://ncems.psu.edu/"
+custom_logo_title: "NCEMS"
+
+skip_generalstats: true
+
+top_modules:
+  - fastp:
+      name: "fastp: trimming and filtering"
+  - fastqc:
+      name: "fastqc: sequencing quality control"
+  - kraken:
+      name: "Centrifuge: contamination identification"
+      info: "Classification by Centrifuge of all reads assigned at the species level. Species ambiguous reads were removed."
+      description: "Results from the Centrifuge taxonomic classification tool."
+      anchor: "centrifuge_taxa"
+      pattern: "results/centrifuge/clean_R1_report.txt"
+      href: "https://ccb.jhu.edu/software/centrifuge/manual.shtml"
+  - vg:
+      name: "vg: graph based alignment"
+  - featurecounts:
+      name: "featureCounts: gene level quantification of reads"
+
+remove_sections:
+  - fastp-seq-content-gc
+  - fastp-seq-content-n
+  - fastqc_sequence_length_distribution
+  - fastqc_overrepresented_sequences
+  - fastqc_status_checks
+  - fastqc_sequence_counts
+  - fastqc_top_overrepresented_sequences

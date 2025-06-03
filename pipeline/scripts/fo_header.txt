@@ -1,6 +1,6 @@
 # id: "feature_overlap"
 # section_name: "Feature Overlap"
-# description: "Proportion of reads overlapping genomic features using bedtools intersect (overlapping features permitted). Note: if library is not stranded, ncRNA quantification is likely inaccurate."
+# description: "Proportion of reads overlapping genomic features using bedtools intersect (overlapping features permitted). Can be used to evaluate rRNA/tRNA contamination. Note: if library is not stranded, ncRNA quantification is likely inaccurate."
 # format: "tsv"
 # plot_type: "bargraph"
 # pconfig:

@@ -105,14 +105,16 @@ if SE:
     rule featurecounts_se:
         input:
             bam=f"{results_prefix}/{sample_name}_aligned.bam",
+            strandedness=f"{results_prefix}/rseqc/{sample_name}_strandedness.txt"
         output:
             counts=f"{results_prefix}/featurecounts/{sample_name}_counts.txt",
             summary=f"{results_prefix}/featurecounts/{sample_name}_counts.txt.summary"
         conda: "./envs/rnaseq_vg.yaml"
         shell:
-            f"""
+            """
             mkdir -p {results_prefix}/featurecounts
-            featureCounts -a {annotation_gtf} -o {output.counts} -t CDS -g gene_id {input.bam}
+            strand=$(cat {input.strandedness})
+            featureCounts -a {annotation_gtf} -o {output.counts} -t CDS -g gene_id -s $strand {input.bam}
             """
 
 else:
@@ -206,15 +208,18 @@ else:
     rule featurecounts_pe:
         input:
             bam=f"{results_prefix}/{sample_name}_aligned.bam",
+            strandedness=f"{results_prefix}/rseqc/{sample_name}_strandedness.txt"
         output:
             counts=f"{results_prefix}/featurecounts/{sample_name}_counts.txt",
             summary=f"{results_prefix}/featurecounts/{sample_name}_counts.txt.summary"
         conda: "./envs/rnaseq_vg.yaml"
         shell:
-            f"""
-            mkdir -p {results_prefix}/featurecounts
-            featureCounts -a {annotation_gtf} -p -t CDS -g gene_id {input.bam}
             """
+            mkdir -p {results_prefix}/featurecounts
+            strand=$(cat {input.strandedness})
+            featureCounts -a {annotation_gtf} -o {output.counts} -t CDS -g gene_id -p -s $strand {input.bam}
+            """
+
 
 rule vg_stats:
     input:
@@ -241,6 +246,18 @@ rule rseqc:
         mkdir -p {results_prefix}/rseqc
         infer_experiment.py -i {input.bam} -r {annotation_bed} > {output.infer_experiment}
         """
+        
+        
+rule parse_strandedness:
+    input:
+        infer=f"{results_prefix}/rseqc/{sample_name}_infer_experiment.txt"
+    output:
+        txt=f"{results_prefix}/rseqc/{sample_name}_strandedness.txt"
+    conda: "./envs/rnaseq_vg.yaml"
+    shell:
+        "python scripts/parse_strandedness.py {input.infer} {output.txt}"
+
+
         
 #Custom addition to multiqc, have to keep mqc name or it will not be parsed        
 rule feature_overlap:
@@ -283,7 +300,7 @@ rule multiqc:
         html=f"{results_prefix}/{sample_name}_multiqc_report.html"
     conda: "./envs/rnaseq_vg.yaml"
     shell:
-        f"multiqc {results_prefix}/ -o {results_prefix} -c ../resources/multiqc/multiqc_config.yaml --filename {sample_name}_multiqc_report.html"
+        f"multiqc {results_prefix}/ -o {results_prefix} -c scripts/multiqc_config.yaml --filename {sample_name}_multiqc_report.html"
 
 
 rna_seq_outputs = [
@@ -294,7 +311,8 @@ rna_seq_outputs = [
     f"{results_prefix}/{sample_name}_aligned.gam",
     f"{results_prefix}/{sample_name}_aligned.bam",
     f"{results_prefix}/vg/{sample_name}_giraffe.stats.txt",
-    f"{results_prefix}/featurecounts/{sample_name}_counts.txt"
+    f"{results_prefix}/featurecounts/{sample_name}_counts.txt",
+    f"{results_prefix}/rseqc/{sample_name}_strandedness.txt"
 ]
 
 if config.get("r2"):
