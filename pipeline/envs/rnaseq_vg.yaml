@@ -17,6 +17,12 @@ dependencies:
   - vg=1.63.1
   - bioconda::rseqc
   - bioconda::snakemake=9.3.3
-  - bioconda::allo
   - bedtools
   - samtools
+  - scikit-learn
+  - seaborn
+  - matplotlib
+  - pytorch::pytorch
+  - pytorch::torchvision
+  - pytorch::torchaudio
+  - bioconda::entrez-direct
