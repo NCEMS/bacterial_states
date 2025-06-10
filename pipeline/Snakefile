@@ -117,7 +117,7 @@ if SE:
             strand=$(cat {input.strandedness})
             if [ "$strand" -eq 0 ]; then
                 grep -v "ncRNA" {annotation_gff} > {output.temp_gff}
-                featureCounts -a {output.temp_gff} -o {output.counts} -t gene -g locus_tag -s 0 {input.bam}
+                featureCounts -a {output.temp_gff} -o {output.counts} -t gene -g Dbxref -s 0 {input.bam}
             else
                 awk -F"\t" 'BEGIN{{OFS="\t"}} $3=="gene" && $9 ~ /gene_biotype=ncRNA/ {{next}} {{if($3=="ncRNA") $3="gene"; print}}' {annotation_gff} > {output.temp_gff}
                 featureCounts -a {output.temp_gff} -o {output.counts} -t gene -g Dbxref -s $strand {input.bam}
@@ -125,6 +125,7 @@ if SE:
             """
 
 else:
+    #Trimming and low quality reads removed
     rule fastp_pe:
         input:
             r1=config["r1"],
@@ -142,6 +143,7 @@ else:
                 -h {output.html} -j {output.json} -w {threads}
             """
 
+    #Sequencing QC check
     rule fastqc_pe:
         input:
             r1=f"{results_prefix}/{sample_name}_clean_R1.fastq",
@@ -152,27 +154,42 @@ else:
             r2_html=f"{results_prefix}/fastqc/{sample_name}_clean_R2_fastqc.html",
             r2_zip=f"{results_prefix}/fastqc/{sample_name}_clean_R2_fastqc.zip"
         shell:
-            "fastqc {input.r1} {input.r2} -o {results_prefix}/fastqc"
-
+            r"""
+            mkdir -p {results_prefix}/fastqc
+            fastqc {input.r1} -o {results_prefix}/fastqc
+            fastqc {input.r2} -o {results_prefix}/fastqc
+            """
+            
+            
+    #Contamination check
     rule centrifuge_pe:
         input:
-            r1=f"{results_prefix}/{sample_name}_clean_R1.fastq",
-            r2=f"{results_prefix}/{sample_name}_clean_R2.fastq"
+            r1 = f"{results_prefix}/{sample_name}_clean_R1.fastq",
+            r2 = f"{results_prefix}/{sample_name}_clean_R2.fastq"
         output:
-            tsv=f"{results_prefix}/centrifuge/{sample_name}_clean_PE_output.tsv",
-            kreport=f"{results_prefix}/centrifuge/{sample_name}_clean_PE_kreport.txt",
-            report=f"{results_prefix}/centrifuge/{sample_name}_clean_PE_report.txt"
+            temp_report = temp(f"{results_prefix}/centrifuge/initial_R1.tsv"),
+            temp_reads = temp(f"{results_prefix}/centrifuge/good_reads.txt"),
+            temp_fastq_r1 = temp(f"{results_prefix}/centrifuge/clean_R1_unambiguous.fastq"),
+            temp_fastq_r2 = temp(f"{results_prefix}/centrifuge/clean_R2_unambiguous.fastq"),
+            tsv     = temp(f"{results_prefix}/centrifuge/{sample_name}_clean_output.tsv"),
+            report  = f"{results_prefix}/centrifuge/{sample_name}_clean_report.txt"
         params:
-            db="../resources/centrifuge/p_compressed+h+v"
+            db = "../resources/centrifuge/p_compressed+h+v",
         threads: 12
         shell:
-            """
+            r"""
             mkdir -p {results_prefix}/centrifuge
-            centrifuge -x {params.db} -1 {input.r1} -2 {input.r2} -S {output.tsv} -p {threads}
-            centrifuge-kreport -x {params.db} {output.tsv} > {output.kreport}
-            cp {output.kreport} {output.report}
+            centrifuge -x {params.db} -1 {input.r1} -2 {input.r2} -S {output.temp_report} -p {threads} > /dev/null
+            #Picking reads with a species assignment
+            awk 'NR>1 && $3!=0 && $8==1 {{print $1}}' {output.temp_report} | sort -u > {output.temp_reads}
+            awk 'BEGIN {{ while ((getline < "{output.temp_reads}")>0) keep[$1]=1 }} NR%4==1 {{ rid=substr($1,2); keep_read=(rid in keep) }} keep_read {{print}}' {input.r1} > {output.temp_fastq_r1}
+            awk 'BEGIN {{ while ((getline < "{output.temp_reads}")>0) keep[$1]=1 }} NR%4==1 {{ rid=substr($1,2); keep_read=(rid in keep) }} keep_read {{print}}' {input.r2} > {output.temp_fastq_r2}
+            #Rerunning centrifuge on reads that have species assignment (not ambiguous)
+            centrifuge -x {params.db} -1 {output.temp_fastq_r1} -2 {output.temp_fastq_r2} -S {output.tsv} -p {threads} > /dev/null
+            centrifuge-kreport -x {params.db} {output.tsv} > {output.report}
             """
 
+    #Alignment
     rule vg_giraffe_pe:
         input:
             r1=f"{results_prefix}/{sample_name}_clean_R1.fastq",
@@ -186,7 +203,7 @@ else:
         threads: 12
         shell:
             """
-            vg giraffe -Z {params.graph} -1 {input.r1} -2 {input.r2} \
+            vg giraffe -Z {params.graph} -f {input.r1} -f {input.r2} \
                              -d {params.dist} -m {params.min} -t {threads} -o GAM > {output.gam}
             """
 
@@ -197,18 +214,21 @@ else:
         output:
             bam=f"{results_prefix}/vg/{sample_name}.bam"
         params:
-            graph = vg_index + ".d2.gbz",
-            ref = ref,
-            strip_prefix = "#".join(ref.split("#")[:-1]) + "#"
+            graph= vg_index + ".d2.gbz",
+            ref= ref,
+            strip_prefix= "#".join(ref.split("#")[:-1]) + "#"
         threads: 12
         shell:
             """
-            vg surject -x {params.graph} -b -p {params.ref} -t {threads} {input.gam} | \
+            vg surject -x {params.graph} -b -i -p {params.ref} -t {threads} {input.gam} | \
             samtools view -h - | \
             sed 's/{params.strip_prefix}//g' | \
             samtools view -b - > {output.bam}
             """
+            
+            
 
+    #Quanification of read counts
     rule featurecounts_pe:
         input:
             bam=f"{results_prefix}/vg/{sample_name}.bam",
@@ -220,10 +240,9 @@ else:
         shell:
             """
             strand=$(cat {input.strandedness})
-
             if [ "$strand" -eq 0 ]; then
                 grep -v "ncRNA" {annotation_gff} > {output.temp_gff}
-                featureCounts -a {output.temp_gff} -o {output.counts} -t gene -g locus_tag -s 0 -p {input.bam}
+                featureCounts -a {output.temp_gff} -o {output.counts} -t gene -g Dbxref -s 0 -p {input.bam}
             else
                 awk -F"\t" 'BEGIN{{OFS="\t"}} $3=="gene" && $9 ~ /gene_biotype=ncRNA/ {{next}} {{if($3=="ncRNA") $3="gene"; print}}' {annotation_gff} > {output.temp_gff}
                 featureCounts -a {output.temp_gff} -o {output.counts} -t gene -g Dbxref -s $strand -p {input.bam}
@@ -296,10 +315,11 @@ rule feature_overlap:
         """
 
 
+#Getting list of expected inputs for multiqc
 multiqc_inputs = {
     "fastp": f"{results_prefix}/fastp/{sample_name}_fastp.json",
     "fastqc_r1": f"{results_prefix}/fastqc/{sample_name}_clean_R1_fastqc.zip",
-    "centrifuge_report": f"{results_prefix}/centrifuge/{sample_name}_clean_R1_report.txt",
+    "centrifuge_report": f"{results_prefix}/centrifuge/{sample_name}_clean_report.txt",
     "vg_bam": f"{results_prefix}/vg/{sample_name}.gam",
     "vg_bam": f"{results_prefix}/vg/{sample_name}.bam",
     "vg_stats": f"{results_prefix}/vg/{sample_name}_giraffe.stats.txt",
@@ -311,11 +331,8 @@ multiqc_inputs = {
 if config.get("r2"):
     multiqc_inputs.update({
         "fastqc_r2": f"{results_prefix}/fastqc/{sample_name}_clean_R2_fastqc.zip",
-        "centrifuge_report": f"{results_prefix}/centrifuge/{sample_name}_clean_PE_report.txt",
-        "centrifuge_output": f"{results_prefix}/centrifuge/{sample_name}_clean_PE_output.tsv",
-        "featurecounts": f"{results_prefix}/featurecounts/{sample_name}_counts.txt.summary"
     })
-
+#Creating QC html with multiqc
 rule multiqc:
     input:
         **multiqc_inputs
@@ -325,6 +342,7 @@ rule multiqc:
         f"multiqc {results_prefix}/ -o {results_prefix} -c scripts/multiqc_config.yaml --filename {sample_name}_multiqc_report.html"
 
 
+#Expected outputs
 rna_seq_outputs = [
     f"{results_prefix}/fastqc/{sample_name}_clean_R1_fastqc.zip",
     f"{results_prefix}/fastp/{sample_name}_fastp.json",
@@ -334,7 +352,8 @@ rna_seq_outputs = [
     f"{results_prefix}/vg/{sample_name}_giraffe.stats.txt",
     f"{results_prefix}/featurecounts/{sample_name}_counts_extended.tsv",
     f"{results_prefix}/featurecounts/{sample_name}_gene_symbols.tsv",
-    f"{results_prefix}/rseqc/{sample_name}_strandedness.txt"
+    f"{results_prefix}/rseqc/{sample_name}_strandedness.txt",
+    f"{results_prefix}/feature_overlap/{sample_name}_feature_overlap_mqc.tsv"
 ]
 
 if config.get("r2"):

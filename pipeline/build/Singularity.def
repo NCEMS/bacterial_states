@@ -1,0 +1,23 @@
+Bootstrap: docker
+From: continuumio/miniconda3
+
+%files
+    ../envs/rnaseq_vg.yaml /env.yaml
+
+%post
+    conda config --add channels conda-forge
+    conda config --add channels bioconda
+    conda config --add channels defaults
+    conda install -y mamba
+    mamba env create -f /env.yaml
+    conda clean -a -y
+
+%environment
+    source /opt/conda/etc/profile.d/conda.sh
+    conda activate rnaseq_vg
+    export PATH=/opt/conda/envs/rnaseq_vg/bin:$PATH
+
+%labels
+    Author Alexis_Morrissey_NCEMS_PSU
+    Version v1.0
+
