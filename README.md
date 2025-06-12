@@ -1,4 +1,6 @@
-# Bacterial Cell State Atlas
+[![NCEMS Logo](https://ncems.psu.edu/wp-content/uploads/2024/02/psu-ncems_logo-wordmark-white33.png "Click to visit NCEMS")](https://ncems.psu.edu/)
+# Integrative Gene Expression Synthesis Tool (inGEST)
+
 
 ## Command line instructions
 ### Basic setup
