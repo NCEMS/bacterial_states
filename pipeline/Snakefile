@@ -4,7 +4,7 @@
 configfile: "config.yaml"
 sample_name = config.get("sample", "sample_unknown")
 experiment_name = config.get("experiment", "experiment_unknown")
-results_prefix = f"{experiment_name}_results"
+results_prefix = f"{experiment_name}_results/{sample_name}"
 annotation_gff = config.get("annotation_gff")
 annotation_bed = config.get("annotation_bed")
 ref = config.get("ref")
@@ -46,11 +46,11 @@ if SE:
         input:
             r1 = f"{results_prefix}/{sample_name}_clean_R1.fastq",
         output:
-            temp_report = temp(f"{results_prefix}/centrifuge/initial_R1.tsv"),
-            temp_reads = temp(f"{results_prefix}/centrifuge/good_read_ids_R1.txt"),
-            temp_fastq = temp(f"{results_prefix}/centrifuge/clean_R1_unambiguous.fastq"),
-            tsv     = temp(f"{results_prefix}/centrifuge/{sample_name}_clean_R1_output.tsv"),
-            report  = f"{results_prefix}/centrifuge/{sample_name}_clean_R1_report.txt",
+            temp_report = temp(f"{results_prefix}/centrifuge/initial.tsv"),
+            temp_reads = temp(f"{results_prefix}/centrifuge/good_read.txt"),
+            temp_fastq = temp(f"{results_prefix}/centrifuge/_unambiguous.fastq"),
+            tsv     = temp(f"{results_prefix}/centrifuge/{sample_name}_output.tsv"),
+            report  = f"{results_prefix}/centrifuge/{sample_name}_report.txt",
         params:
             db = "../resources/centrifuge/p_compressed+h+v",
         threads: 12
@@ -167,12 +167,12 @@ else:
             r1 = f"{results_prefix}/{sample_name}_clean_R1.fastq",
             r2 = f"{results_prefix}/{sample_name}_clean_R2.fastq"
         output:
-            temp_report = temp(f"{results_prefix}/centrifuge/initial_R1.tsv"),
+            temp_report = temp(f"{results_prefix}/centrifuge/initial.tsv"),
             temp_reads = temp(f"{results_prefix}/centrifuge/good_reads.txt"),
             temp_fastq_r1 = temp(f"{results_prefix}/centrifuge/clean_R1_unambiguous.fastq"),
             temp_fastq_r2 = temp(f"{results_prefix}/centrifuge/clean_R2_unambiguous.fastq"),
-            tsv     = temp(f"{results_prefix}/centrifuge/{sample_name}_clean_output.tsv"),
-            report  = f"{results_prefix}/centrifuge/{sample_name}_clean_report.txt"
+            tsv     = temp(f"{results_prefix}/centrifuge/{sample_name}_output.tsv"),
+            report  = f"{results_prefix}/centrifuge/{sample_name}_report.txt"
         params:
             db = "../resources/centrifuge/p_compressed+h+v",
         threads: 12
@@ -319,7 +319,7 @@ rule feature_overlap:
 multiqc_inputs = {
     "fastp": f"{results_prefix}/fastp/{sample_name}_fastp.json",
     "fastqc_r1": f"{results_prefix}/fastqc/{sample_name}_clean_R1_fastqc.zip",
-    "centrifuge_report": f"{results_prefix}/centrifuge/{sample_name}_clean_report.txt",
+    "centrifuge_report": f"{results_prefix}/centrifuge/{sample_name}_report.txt",
     "vg_bam": f"{results_prefix}/vg/{sample_name}.gam",
     "vg_bam": f"{results_prefix}/vg/{sample_name}.bam",
     "vg_stats": f"{results_prefix}/vg/{sample_name}_giraffe.stats.txt",
@@ -332,6 +332,7 @@ if config.get("r2"):
     multiqc_inputs.update({
         "fastqc_r2": f"{results_prefix}/fastqc/{sample_name}_clean_R2_fastqc.zip",
     })
+    
 #Creating QC html with multiqc
 rule multiqc:
     input:
