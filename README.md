@@ -1,4 +1,7 @@
-[![NCEMS Logo](https://ncems.psu.edu/wp-content/uploads/2024/02/psu-ncems_logo-wordmark-white33.png "Click to visit NCEMS")](https://ncems.psu.edu/)
+<a href="https://ncems.psu.edu/">
+  <img src="https://ncems.psu.edu/wp-content/uploads/2024/02/psu-ncems_logo-wordmark-white33.png" style="width: 60%;">
+</a>
+
 # Integrative Gene Expression Synthesis Tool (inGEST)
 
 
