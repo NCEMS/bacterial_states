@@ -57,12 +57,12 @@ if SE:
         shell:
             r"""
             mkdir -p {results_prefix}/centrifuge
-            centrifuge -x {params.db} -U {input.r1} -S {output.temp_report} -p {threads} > /dev/null
+            centrifuge -x {params.db} -U {input.r1} -S {output.temp_report} -p {threads} >/dev/null 2>&1
             #Picking reads with a species assignment
             awk 'NR>1 && $3!=0 && $8==1 {{print $1}}' {output.temp_report} | sort -u > {output.temp_reads}
             awk 'BEGIN {{ while ((getline < "{output.temp_reads}")>0) keep[$1]=1 }} NR%4==1 {{ rid=substr($1,2); keep_read=(rid in keep) }} keep_read {{print}}' {input.r1} > {output.temp_fastq}
             #Rerunning centrifuge on reads that have species assignment (not ambiguous)
-            centrifuge -x {params.db} -U {output.temp_fastq} -S {output.tsv} -p {threads} > /dev/null
+            centrifuge -x {params.db} -U {output.temp_fastq} -S {output.tsv} -p {threads} >/dev/null 2>&1
             centrifuge-kreport -x {params.db} {output.tsv} > {output.report}
             """
 
@@ -88,7 +88,7 @@ if SE:
         input:
             gam=f"{results_prefix}/vg/{sample_name}.gam"
         output:
-            bam=f"{results_prefix}/vg/{sample_name}.bam"
+            bam=temp(f"{results_prefix}/vg/{sample_name}.bam")
         params:
             graph= vg_index + ".d2.gbz",
             ref= ref,
@@ -179,13 +179,13 @@ else:
         shell:
             r"""
             mkdir -p {results_prefix}/centrifuge
-            centrifuge -x {params.db} -1 {input.r1} -2 {input.r2} -S {output.temp_report} -p {threads} > /dev/null
+            centrifuge -x {params.db} -1 {input.r1} -2 {input.r2} -S {output.temp_report} -p {threads} >/dev/null 2>&1
             #Picking reads with a species assignment
             awk 'NR>1 && $3!=0 && $8==1 {{print $1}}' {output.temp_report} | sort -u > {output.temp_reads}
             awk 'BEGIN {{ while ((getline < "{output.temp_reads}")>0) keep[$1]=1 }} NR%4==1 {{ rid=substr($1,2); keep_read=(rid in keep) }} keep_read {{print}}' {input.r1} > {output.temp_fastq_r1}
             awk 'BEGIN {{ while ((getline < "{output.temp_reads}")>0) keep[$1]=1 }} NR%4==1 {{ rid=substr($1,2); keep_read=(rid in keep) }} keep_read {{print}}' {input.r2} > {output.temp_fastq_r2}
             #Rerunning centrifuge on reads that have species assignment (not ambiguous)
-            centrifuge -x {params.db} -1 {output.temp_fastq_r1} -2 {output.temp_fastq_r2} -S {output.tsv} -p {threads} > /dev/null
+            centrifuge -x {params.db} -1 {output.temp_fastq_r1} -2 {output.temp_fastq_r2} -S {output.tsv} -p {threads} >/dev/null 2>&1
             centrifuge-kreport -x {params.db} {output.tsv} > {output.report}
             """
 
@@ -208,11 +208,11 @@ else:
             """
 
     #Surjecting alignments to K-12 for annotation purposes
-    rule vg_surject_se:
+    rule vg_surject_pe:
         input:
             gam=f"{results_prefix}/vg/{sample_name}.gam"
         output:
-            bam=f"{results_prefix}/vg/{sample_name}.bam"
+            bam=temp(f"{results_prefix}/vg/{sample_name}.bam")
         params:
             graph= vg_index + ".d2.gbz",
             ref= ref,
@@ -273,10 +273,19 @@ rule rseqc:
         bam = f"{results_prefix}/vg/{sample_name}.bam"
     output:
         infer_experiment = f"{results_prefix}/rseqc/{sample_name}_infer_experiment.txt",
+        genebody_cov_txt = f"{results_prefix}/rseqc/{sample_name}_genebody_cov.geneBodyCoverage.txt",
+        genebody_cov_r = f"{results_prefix}/rseqc/{sample_name}_genebody_cov.geneBodyCoverage.r",
+        sorted_bam = f"{results_prefix}/vg/{sample_name}_sort.bam",
+        bam_index = f"{results_prefix}/vg/{sample_name}_sort.bam.bai"
+    params:
+        annotation_bed = config["annotation_bed"]
     shell:
-        """
+        r"""
         mkdir -p {results_prefix}/rseqc
-        infer_experiment.py -i {input.bam} -r {annotation_bed} > {output.infer_experiment}
+        infer_experiment.py -i {input.bam} -r {params.annotation_bed} > {output.infer_experiment}
+        samtools sort {input.bam} > {output.sorted_bam}
+        samtools index {output.sorted_bam}
+        geneBody_coverage.py -r <(grep "gene" {params.annotation_bed}) -i {output.sorted_bam} -o {results_prefix}/rseqc/{sample_name}_genebody_cov >/dev/null 2>&1
         """
         
 #Parsing strandedness information for featureCounts
@@ -320,8 +329,6 @@ multiqc_inputs = {
     "fastp": f"{results_prefix}/fastp/{sample_name}_fastp.json",
     "fastqc_r1": f"{results_prefix}/fastqc/{sample_name}_clean_R1_fastqc.zip",
     "centrifuge_report": f"{results_prefix}/centrifuge/{sample_name}_report.txt",
-    "vg_bam": f"{results_prefix}/vg/{sample_name}.gam",
-    "vg_bam": f"{results_prefix}/vg/{sample_name}.bam",
     "vg_stats": f"{results_prefix}/vg/{sample_name}_giraffe.stats.txt",
     "featurecounts": f"{results_prefix}/featurecounts/{sample_name}_counts.txt.summary",
     "rseqc_infer_experiment": f"{results_prefix}/rseqc/{sample_name}_infer_experiment.txt",
@@ -349,7 +356,7 @@ rna_seq_outputs = [
     f"{results_prefix}/fastp/{sample_name}_fastp.json",
     f"{results_prefix}/{sample_name}_multiqc_report.html",
     f"{results_prefix}/vg/{sample_name}.gam",
-    f"{results_prefix}/vg/{sample_name}.bam",
+    f"{results_prefix}/vg/{sample_name}_sort.bam",
     f"{results_prefix}/vg/{sample_name}_giraffe.stats.txt",
     f"{results_prefix}/featurecounts/{sample_name}_counts_extended.tsv",
     f"{results_prefix}/featurecounts/{sample_name}_gene_symbols.tsv",

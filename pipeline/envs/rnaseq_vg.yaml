@@ -26,3 +26,14 @@ dependencies:
   - pytorch::torchvision
   - pytorch::torchaudio
   - bioconda::entrez-direct
+  - r-base
+  - r-essentials
+  - bioconductor-deseq2
+  - r-ggplot2
+  - r-dplyr
+  - r-tidyr
+  - r-readr
+  - r-pheatmap
+  - r-gplots
+  - r-rcpp
+  - r-biocmanager
