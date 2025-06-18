@@ -1,62 +1,61 @@
-#Snakefile for NCEMS inGEST RNA-seq pipeline designed by Alexis Morrissey (contact on git)
+#Snakefile for NCEMS inGEST RNA-seq pipeline designed by Alexis Morrissey (contact on github)
 
 #Getting config information
 configfile: "config.yaml"
-sample_name = config.get("sample", "sample_unknown")
 experiment_name = config.get("experiment", "experiment_unknown")
-results_prefix = f"{experiment_name}_results/{sample_name}"
 annotation_gff = config.get("annotation_gff")
 annotation_bed = config.get("annotation_bed")
 ref = config.get("ref")
 vg_index = config.get("vg_index")
-SE = config.get("r2") is None
 
 
+#Determine if any sample is paired-end
+SE = all("r2" not in SAMPLES[s] for s in SAMPLES)
 
 
-########################## Single-end Rules
+##########################Single-end Rules
 if SE:
     #Trimming and low quality reads removed
     rule fastp_se:
         input:
-            r1=config["r1"]
+            r1=lambda wildcards: SAMPLES[wildcards.sample]["r1"]
         output:
-            r1=temp(f"{results_prefix}/{sample_name}_clean_R1.fastq"),
-            html=f"{results_prefix}/fastp/{sample_name}_fastp.html",
-            json=f"{results_prefix}/fastp/{sample_name}_fastp.json"
+            temp(f"{experiment_name}_results/{{sample}}/{{sample}}_clean_R1.fastq"),
+            html=f"{experiment_name}_results/{{sample}}/fastp/{{sample}}_fastp.html",
+            json=f"{experiment_name}_results/{{sample}}/fastp/{{sample}}_fastp.json"
         threads: 12
         shell:
             """
-            fastp -i {input.r1} -o {output.r1} \
+            fastp -i {input.r1} -o {output[0]} \\
             -h {output.html} -j {output.json} -w {threads}
             """
-    
+
     #Sequencing QC check
     rule fastqc_se:
         input:
-            r1=f"{results_prefix}/{sample_name}_clean_R1.fastq"
+            r1=f"{experiment_name}_results/{{sample}}/{{sample}}_clean_R1.fastq"
         output:
-            r1_html=f"{results_prefix}/fastqc/{sample_name}_clean_R1_fastqc.html",
-            r1_zip=f"{results_prefix}/fastqc/{sample_name}_clean_R1_fastqc.zip"
+            html=f"{experiment_name}_results/{{sample}}/fastqc/{{sample}}_clean_R1_fastqc.html",
+            zip=f"{experiment_name}_results/{{sample}}/fastqc/{{sample}}_clean_R1_fastqc.zip"
         shell:
-            "fastqc {input.r1} -o {results_prefix}/fastqc"
+            "fastqc {input.r1} -o {experiment_name}_results/{wildcards.sample}/fastqc"
 
     #Contamination check
     rule centrifuge_se:
         input:
-            r1 = f"{results_prefix}/{sample_name}_clean_R1.fastq",
+            r1 = f"{experiment_name}_results/{{sample}}/{{sample}}_clean_R1.fastq",
         output:
-            temp_report = temp(f"{results_prefix}/centrifuge/initial.tsv"),
-            temp_reads = temp(f"{results_prefix}/centrifuge/good_read.txt"),
-            temp_fastq = temp(f"{results_prefix}/centrifuge/_unambiguous.fastq"),
-            tsv     = temp(f"{results_prefix}/centrifuge/{sample_name}_output.tsv"),
-            report  = f"{results_prefix}/centrifuge/{sample_name}_report.txt",
+            temp_report = temp(f"{experiment_name}_results/{{sample}}/centrifuge/initial.tsv"),
+            temp_reads = temp(f"{experiment_name}_results/{{sample}}/centrifuge/good_read.txt"),
+            temp_fastq = temp(f"{experiment_name}_results/{{sample}}/centrifuge/_unambiguous.fastq"),
+            tsv       = temp(f"{experiment_name}_results/{{sample}}/centrifuge/{{sample}}_output.tsv"),
+            report  = f"{experiment_name}_results/{{sample}}/centrifuge/{{sample}}_report.txt",
         params:
             db = "../resources/centrifuge/p_compressed+h+v",
         threads: 12
         shell:
             r"""
-            mkdir -p {results_prefix}/centrifuge
+            mkdir -p {experiment_name}_results/{wildcards.sample}/centrifuge
             centrifuge -x {params.db} -U {input.r1} -S {output.temp_report} -p {threads} >/dev/null 2>&1
             #Picking reads with a species assignment
             awk 'NR>1 && $3!=0 && $8==1 {{print $1}}' {output.temp_report} | sort -u > {output.temp_reads}
@@ -69,9 +68,9 @@ if SE:
     #Alignment with vg
     rule vg_giraffe_se:
         input:
-            r1=f"{results_prefix}/{sample_name}_clean_R1.fastq"
+            r1=f"{experiment_name}_results/{{sample}}/{{sample}}_clean_R1.fastq"
         output:
-            gam=f"{results_prefix}/vg/{sample_name}.gam"
+            gam=f"{experiment_name}_results/{{sample}}/vg/{{sample}}.gam"
         params:
             graph=vg_index+".d2.gbz",
             dist=vg_index+".d2.dist",
@@ -79,16 +78,16 @@ if SE:
         threads: 12
         shell:
             """
-            vg giraffe -Z {params.graph} -f {input.r1} \
-                             -d {params.dist} -m {params.min} -t {threads} -o GAM > {output.gam}
+            mkdir -p {experiment_name}_results/{wildcards.sample}/vg
+            vg giraffe -Z {params.graph} -f {input.r1} -d {params.dist} -m {params.min} -t {threads} -o GAM > {output.gam}
             """
-    
+
     #Surjecting alignments to K-12 for annotation purposes
     rule vg_surject_se:
         input:
-            gam=f"{results_prefix}/vg/{sample_name}.gam"
+            gam=f"{experiment_name}_results/{{sample}}/vg/{{sample}}.gam"
         output:
-            bam=temp(f"{results_prefix}/vg/{sample_name}.bam")
+            bam=temp(f"{experiment_name}_results/{{sample}}/vg/{{sample}}.bam")
         params:
             graph= vg_index + ".d2.gbz",
             ref= ref,
@@ -96,89 +95,66 @@ if SE:
         threads: 12
         shell:
             """
-            vg surject -x {params.graph} -b -p {params.ref} -t {threads} {input.gam} | \
-            samtools view -h - | \
-            sed 's/{params.strip_prefix}//g' | \
+            vg surject -x {params.graph} -b -p {params.ref} -t {threads} {input.gam} | \\
+            samtools view -h - | \\
+            sed 's/{params.strip_prefix}//g' | \\
             samtools view -b - > {output.bam}
-            """
-
-    #Quanification of read counts
-    rule featurecounts_se:
-        input:
-            bam=f"{results_prefix}/vg/{sample_name}.bam",
-            #Will only quanification small RNAs if stranded protocol
-            strandedness=f"{results_prefix}/rseqc/{sample_name}_strandedness.txt"
-        output:
-            counts=temp(f"{results_prefix}/featurecounts/{sample_name}_counts.txt"),
-            summary=f"{results_prefix}/featurecounts/{sample_name}_counts.txt.summary",
-            temp_gff=temp(f"{results_prefix}/featurecounts/temp_gff")
-        shell:
-            """
-            strand=$(cat {input.strandedness})
-            if [ "$strand" -eq 0 ]; then
-                grep -v "ncRNA" {annotation_gff} > {output.temp_gff}
-                featureCounts -a {output.temp_gff} -o {output.counts} -t gene -g Dbxref -s 0 {input.bam}
-            else
-                awk -F"\t" 'BEGIN{{OFS="\t"}} $3=="gene" && $9 ~ /gene_biotype=ncRNA/ {{next}} {{if($3=="ncRNA") $3="gene"; print}}' {annotation_gff} > {output.temp_gff}
-                featureCounts -a {output.temp_gff} -o {output.counts} -t gene -g Dbxref -s $strand {input.bam}
-            fi
             """
 
 else:
     #Trimming and low quality reads removed
     rule fastp_pe:
         input:
-            r1=config["r1"],
-            r2=config["r2"]
+            r1=lambda wildcards: SAMPLES[wildcards.sample]["r1"],
+            r2=lambda wildcards: SAMPLES[wildcards.sample]["r2"]
         output:
-            r1=temp(f"{results_prefix}/{sample_name}_clean_R1.fastq"),
-            r2=temp(f"{results_prefix}/{sample_name}_clean_R2.fastq"),
-            html=f"{results_prefix}/fastp/{sample_name}_fastp.html",
-            json=f"{results_prefix}/fastp/{sample_name}_fastp.json"
+            r1=temp(f"{experiment_name}_results/{{sample}}/{{sample}}_clean_R1.fastq"),
+            r2=temp(f"{experiment_name}_results/{{sample}}/{{sample}}_clean_R2.fastq"),
+            html=f"{experiment_name}_results/{{sample}}/fastp/{{sample}}_fastp.html",
+            json=f"{experiment_name}_results/{{sample}}/fastp/{{sample}}_fastp.json"
         threads: 12
         shell:
             """
-            fastp -i {input.r1} -I {input.r2} \
-                -o {output.r1} -O {output.r2} \
-                -h {output.html} -j {output.json} -w {threads}
+            mkdir -p {experiment_name}_results/{wildcards.sample}/fastp
+            fastp -i {input.r1} -I {input.r2} -o {output.r1} -O {output.r2} -h {output.html} -j {output.json} -w {threads}
             """
 
     #Sequencing QC check
     rule fastqc_pe:
         input:
-            r1=f"{results_prefix}/{sample_name}_clean_R1.fastq",
-            r2=f"{results_prefix}/{sample_name}_clean_R2.fastq"
+            r1=f"{experiment_name}_results/{{sample}}/{{sample}}_clean_R1.fastq",
+            r2=f"{experiment_name}_results/{{sample}}/{{sample}}_clean_R2.fastq"
         output:
-            r1_html=f"{results_prefix}/fastqc/{sample_name}_clean_R1_fastqc.html",
-            r1_zip=f"{results_prefix}/fastqc/{sample_name}_clean_R1_fastqc.zip",
-            r2_html=f"{results_prefix}/fastqc/{sample_name}_clean_R2_fastqc.html",
-            r2_zip=f"{results_prefix}/fastqc/{sample_name}_clean_R2_fastqc.zip"
+            r1_html=f"{experiment_name}_results/{{sample}}/fastqc/{{sample}}_clean_R1_fastqc.html",
+            r1_zip=f"{experiment_name}_results/{{sample}}/fastqc/{{sample}}_clean_R1_fastqc.zip",
+            r2_html=f"{experiment_name}_results/{{sample}}/fastqc/{{sample}}_clean_R2_fastqc.html",
+            r2_zip=f"{experiment_name}_results/{{sample}}/fastqc/{{sample}}_clean_R2_fastqc.zip"
         shell:
             r"""
-            mkdir -p {results_prefix}/fastqc
-            fastqc {input.r1} -o {results_prefix}/fastqc
-            fastqc {input.r2} -o {results_prefix}/fastqc
+            mkdir -p {experiment_name}_results/{wildcards.sample}/fastqc
+            fastqc {input.r1} -o {experiment_name}_results/{wildcards.sample}/fastqc
+            fastqc {input.r2} -o {experiment_name}_results/{wildcards.sample}/fastqc
             """
-            
-            
+
+
     #Contamination check
     rule centrifuge_pe:
         input:
-            r1 = f"{results_prefix}/{sample_name}_clean_R1.fastq",
-            r2 = f"{results_prefix}/{sample_name}_clean_R2.fastq"
+            r1 = f"{experiment_name}_results/{{sample}}/{{sample}}_clean_R1.fastq",
+            r2 = f"{experiment_name}_results/{{sample}}/{{sample}}_clean_R2.fastq"
         output:
-            temp_report = temp(f"{results_prefix}/centrifuge/initial.tsv"),
-            temp_reads = temp(f"{results_prefix}/centrifuge/good_reads.txt"),
-            temp_fastq_r1 = temp(f"{results_prefix}/centrifuge/clean_R1_unambiguous.fastq"),
-            temp_fastq_r2 = temp(f"{results_prefix}/centrifuge/clean_R2_unambiguous.fastq"),
-            tsv     = temp(f"{results_prefix}/centrifuge/{sample_name}_output.tsv"),
-            report  = f"{results_prefix}/centrifuge/{sample_name}_report.txt"
+            temp_report = temp(f"{experiment_name}_results/{{sample}}/centrifuge/initial.tsv"),
+            temp_reads = temp(f"{experiment_name}_results/{{sample}}/centrifuge/good_reads.txt"),
+            temp_fastq_r1 = temp(f"{experiment_name}_results/{{sample}}/centrifuge/clean_R1_unambiguous.fastq"),
+            temp_fastq_r2 = temp(f"{experiment_name}_results/{{sample}}/centrifuge/clean_R2_unambiguous.fastq"),
+            tsv       = temp(f"{experiment_name}_results/{{sample}}/centrifuge/{{sample}}_output.tsv"),
+            report  = f"{experiment_name}_results/{{sample}}/centrifuge/{{sample}}_report.txt"
         params:
             db = "../resources/centrifuge/p_compressed+h+v",
         threads: 12
         shell:
             r"""
-            mkdir -p {results_prefix}/centrifuge
+            mkdir -p {experiment_name}_results/{wildcards.sample}/centrifuge
             centrifuge -x {params.db} -1 {input.r1} -2 {input.r2} -S {output.temp_report} -p {threads} >/dev/null 2>&1
             #Picking reads with a species assignment
             awk 'NR>1 && $3!=0 && $8==1 {{print $1}}' {output.temp_report} | sort -u > {output.temp_reads}
@@ -192,27 +168,27 @@ else:
     #Alignment
     rule vg_giraffe_pe:
         input:
-            r1=f"{results_prefix}/{sample_name}_clean_R1.fastq",
-            r2=f"{results_prefix}/{sample_name}_clean_R2.fastq"
+            r1=f"{experiment_name}_results/{{sample}}/{{sample}}_clean_R1.fastq",
+            r2=f"{experiment_name}_results/{{sample}}/{{sample}}_clean_R2.fastq"
         output:
-            gam=f"{results_prefix}/vg/{sample_name}.gam"
+            gam=f"{experiment_name}_results/{{sample}}/vg/{{sample}}.gam"
         params:
-            graph=vg_index + ".d2.gbz",
-            dist=vg_index + ".d2.dist",
-            min=vg_index + ".d2.min"
+            graph=vg_index+".d2.gbz",
+            dist=vg_index+".d2.dist",
+            min=vg_index+".d2.min"
         threads: 12
         shell:
             """
-            vg giraffe -Z {params.graph} -f {input.r1} -f {input.r2} \
-                             -d {params.dist} -m {params.min} -t {threads} -o GAM > {output.gam}
+            mkdir -p {experiment_name}_results/{wildcards.sample}/vg
+            vg giraffe -Z {params.graph} -f {input.r1} -f {input.r2} -d {params.dist} -m {params.min} -t {threads} -o GAM > {output.gam}
             """
 
     #Surjecting alignments to K-12 for annotation purposes
     rule vg_surject_pe:
         input:
-            gam=f"{results_prefix}/vg/{sample_name}.gam"
+            gam=f"{experiment_name}_results/{{sample}}/vg/{{sample}}.gam"
         output:
-            bam=temp(f"{results_prefix}/vg/{sample_name}.bam")
+            bam=temp(f"{experiment_name}_results/{{sample}}/vg/{{sample}}.bam")
         params:
             graph= vg_index + ".d2.gbz",
             ref= ref,
@@ -220,156 +196,170 @@ else:
         threads: 12
         shell:
             """
-            vg surject -x {params.graph} -b -i -p {params.ref} -t {threads} {input.gam} | \
-            samtools view -h - | \
-            sed 's/{params.strip_prefix}//g' | \
+            vg surject -x {params.graph} -b -i -p {params.ref} -t {threads} {input.gam} | \\
+            samtools view -h - | \\
+            sed 's/{params.strip_prefix}//g' | \\
             samtools view -b - > {output.bam}
             """
-            
-            
-
-    #Quanification of read counts
-    rule featurecounts_pe:
-        input:
-            bam=f"{results_prefix}/vg/{sample_name}.bam",
-            strandedness=f"{results_prefix}/rseqc/{sample_name}_strandedness.txt"
-        output:
-            counts=temp(f"{results_prefix}/featurecounts/{sample_name}_counts.txt"),
-            summary=f"{results_prefix}/featurecounts/{sample_name}_counts.txt.summary",
-            temp_gff=temp(f"{results_prefix}/featurecounts/temp_gff")
-        shell:
-            """
-            strand=$(cat {input.strandedness})
-            if [ "$strand" -eq 0 ]; then
-                grep -v "ncRNA" {annotation_gff} > {output.temp_gff}
-                featureCounts -a {output.temp_gff} -o {output.counts} -t gene -g Dbxref -s 0 -p {input.bam}
-            else
-                awk -F"\t" 'BEGIN{{OFS="\t"}} $3=="gene" && $9 ~ /gene_biotype=ncRNA/ {{next}} {{if($3=="ncRNA") $3="gene"; print}}' {annotation_gff} > {output.temp_gff}
-                featureCounts -a {output.temp_gff} -o {output.counts} -t gene -g Dbxref -s $strand -p {input.bam}
-            fi
-            """
 
 
+#Quanification of read counts for all samples at once
+rule featurecounts_combined:
+    input:
+        bams=expand(f"{experiment_name}_results/{{sample}}/vg/{{sample}}_sort.bam", sample=list(SAMPLES.keys())),
+        infer_experiment_for_strand=f"{experiment_name}_results/{list(SAMPLES.keys())[0]}/rseqc/{list(SAMPLES.keys())[0]}_infer_experiment.txt"
+    output:
+        counts=f"{experiment_name}_results/all_samples_raw_counts.txt",
+        summary=f"{experiment_name}_results/all_samples_raw_counts.txt.summary",
+        temp_gff=temp(f"{experiment_name}_results/featurecounts_temp_gff")
+    params:
+        pe_param = "-p" if not SE else ""
+    shell:
+        r"""
+        mkdir -p $(dirname {output.counts})
+    
+        strand=$(awk '
+          /1\+\+,1--/ || /\+\+,--/ {{ strand1 = $NF + 0 }}
+          /1\+-,1-\+/ || /\+\-,-\+/ {{ strand2 = $NF + 0 }}
+          END {{
+            if (strand1 > 80) print 1;
+            else if (strand2 > 80) print 2;
+            else print 0;
+          }}' {input.infer_experiment_for_strand})
+    
+        if [ "$strand" -eq 0 ]; then
+            grep -v "ncRNA" {annotation_gff} > {output.temp_gff}
+            featureCounts -a {output.temp_gff} -o {output.counts} -t gene -g Dbxref -s 0 {params.pe_param} {input.bams}
+        else
+            awk -F"\t" 'BEGIN{{OFS="\t"}} $3=="gene" && $9 ~ /gene_biotype=ncRNA/ {{next}} {{if($3=="ncRNA") $3="gene"; print}}' {annotation_gff} > {output.temp_gff}
+            featureCounts -a {output.temp_gff} -o {output.counts} -t gene -g Dbxref -s "$strand" {params.pe_param} {input.bams}
+        fi
+        """
 
 
 #Getting statistics for vg alignment
 rule vg_stats:
     input:
-        gam=f"{results_prefix}/vg/{sample_name}.gam"
+        gam=f"{experiment_name}_results/{{sample}}/vg/{{sample}}.gam"
     output:
-        txt=f"{results_prefix}/vg/{sample_name}_giraffe.stats.txt"
+        txt=f"{experiment_name}_results/{{sample}}/vg/{{sample}}_giraffe.stats.txt"
     #Add time information at end to meet multiqc requirements
     shell:
         """
-        mkdir -p {results_prefix}/vg
         vg stats -a {input.gam} > {output.txt}
         echo "Total time: 123 seconds" >> {output.txt}
         echo "Speed: 123 reads/second" >> {output.txt}
         """
 
-#Getting strandedness information for sequencing library
+#Getting strandedness information for sequencing library (used by multiqc)
 rule rseqc:
     input:
-        bam = f"{results_prefix}/vg/{sample_name}.bam"
+        bam = f"{experiment_name}_results/{{sample}}/vg/{{sample}}.bam"
     output:
-        infer_experiment = f"{results_prefix}/rseqc/{sample_name}_infer_experiment.txt",
-        genebody_cov_txt = f"{results_prefix}/rseqc/{sample_name}_genebody_cov.geneBodyCoverage.txt",
-        genebody_cov_r = f"{results_prefix}/rseqc/{sample_name}_genebody_cov.geneBodyCoverage.r",
-        sorted_bam = f"{results_prefix}/vg/{sample_name}_sort.bam",
-        bam_index = f"{results_prefix}/vg/{sample_name}_sort.bam.bai"
+        infer_experiment = f"{experiment_name}_results/{{sample}}/rseqc/{{sample}}_infer_experiment.txt",
+        genebody_cov_txt = f"{experiment_name}_results/{{sample}}/rseqc/{{sample}}_genebody_cov.geneBodyCoverage.txt",
+        genebody_cov_r = f"{experiment_name}_results/{{sample}}/rseqc/{{sample}}_genebody_cov.geneBodyCoverage.r",
+        sorted_bam = f"{experiment_name}_results/{{sample}}/vg/{{sample}}_sort.bam",
+        bam_index = f"{experiment_name}_results/{{sample}}/vg/{{sample}}_sort.bam.bai"
     params:
         annotation_bed = config["annotation_bed"]
     shell:
         r"""
-        mkdir -p {results_prefix}/rseqc
+        mkdir -p {experiment_name}_results/{wildcards.sample}/rseqc
         infer_experiment.py -i {input.bam} -r {params.annotation_bed} > {output.infer_experiment}
         samtools sort {input.bam} > {output.sorted_bam}
         samtools index {output.sorted_bam}
-        geneBody_coverage.py -r <(grep "gene" {params.annotation_bed}) -i {output.sorted_bam} -o {results_prefix}/rseqc/{sample_name}_genebody_cov >/dev/null 2>&1
+        geneBody_coverage.py -r <(grep "gene" {params.annotation_bed}) -i {output.sorted_bam} -o {experiment_name}_results/{wildcards.sample}/rseqc/{wildcards.sample}_genebody_cov
         """
-        
-#Parsing strandedness information for featureCounts
-rule parse_strandedness:
-    input:
-        infer=f"{results_prefix}/rseqc/{sample_name}_infer_experiment.txt"
-    output:
-        txt=temp(f"{results_prefix}/rseqc/{sample_name}_strandedness.txt")
-    shell:
-        "python scripts/parse_strandedness.py {input.infer} {output.txt}"
 
-
-#Annotating the counts files with metadata from NCBI
+#Annotating the combined counts file with metadata from NCBI
 rule annotate_counts:
     input:
-        counts=f"{results_prefix}/featurecounts/{sample_name}_counts.txt"
+        counts=f"{experiment_name}_results/all_samples_raw_counts.txt"
     output:
-        extended=f"{results_prefix}/featurecounts/{sample_name}_counts_extended.tsv",
-        clean=f"{results_prefix}/featurecounts/{sample_name}_gene_symbols.tsv"
+        extended=f"{experiment_name}_results/all_samples_counts_extended.tsv",
+        clean=f"{experiment_name}_results/all_samples_gene_symbols.tsv"
     shell:
         """
+        mkdir -p {experiment_name}_results/featurecounts
         bash scripts/get_metadata.sh {input.counts} > {output.extended}
         awk 'NR == 1 || $2 != "Geneid"' {output.extended} | cut -f1,4- > {output.clean}
         """
-        
-#Custom addition to multiqc, have to keep mqc name or it will not be parsed        
+
+#Custom addition to multiqc, have to keep mqc name or it will not be parsed
 rule feature_overlap:
     input:
-        bam = f"{results_prefix}/vg/{sample_name}.bam"
+        bam = f"{experiment_name}_results/{{sample}}/vg/{{sample}}.bam"
     output:
-        feature_overlap = f"{results_prefix}/feature_overlap/{sample_name}_feature_overlap_mqc.tsv"
+        feature_overlap = f"{experiment_name}_results/{{sample}}/feature_overlap/{{sample}}_feature_overlap_mqc.tsv"
     shell:
         """
-        mkdir -p {results_prefix}/feature_overlap
+        mkdir -p {experiment_name}_results/{wildcards.sample}/feature_overlap
         bash scripts/gene_type.sh {annotation_bed} {input.bam} {output.feature_overlap}
         """
 
 
 #Getting list of expected inputs for multiqc
-multiqc_inputs = {
-    "fastp": f"{results_prefix}/fastp/{sample_name}_fastp.json",
-    "fastqc_r1": f"{results_prefix}/fastqc/{sample_name}_clean_R1_fastqc.zip",
-    "centrifuge_report": f"{results_prefix}/centrifuge/{sample_name}_report.txt",
-    "vg_stats": f"{results_prefix}/vg/{sample_name}_giraffe.stats.txt",
-    "featurecounts": f"{results_prefix}/featurecounts/{sample_name}_counts.txt.summary",
-    "rseqc_infer_experiment": f"{results_prefix}/rseqc/{sample_name}_infer_experiment.txt",
-    "feature_overlap": f"{results_prefix}/feature_overlap/{sample_name}_feature_overlap_mqc.tsv"
+multiqc_inputs_template = {
+    "fastp": f"{experiment_name}_results/{{sample}}/fastp/{{sample}}_fastp.json",
+    "fastqc_r1": f"{experiment_name}_results/{{sample}}/fastqc/{{sample}}_clean_R1_fastqc.zip",
+    "centrifuge_report": f"{experiment_name}_results/{{sample}}/centrifuge/{{sample}}_report.txt",
+    "vg_stats": f"{experiment_name}_results/{{sample}}/vg/{{sample}}_giraffe.stats.txt",
+    "rseqc_infer_experiment": f"{experiment_name}_results/{{sample}}/rseqc/{{sample}}_infer_experiment.txt",
+    "feature_overlap": f"{experiment_name}_results/{{sample}}/feature_overlap/{{sample}}_feature_overlap_mqc.tsv"
 }
 
-if config.get("r2"):
-    multiqc_inputs.update({
-        "fastqc_r2": f"{results_prefix}/fastqc/{sample_name}_clean_R2_fastqc.zip",
-    })
+multiqc_all_inputs = []
+for sample_name in SAMPLES:
+    sample_inputs_dict = {k: v.format(sample=sample_name) for k, v in multiqc_inputs_template.items()}
+    if SAMPLES[sample_name].get("r2"):
+        sample_inputs_dict["fastqc_r2"] = f"{experiment_name}_results/{sample_name}/fastqc/{sample_name}_clean_R2_fastqc.zip"
     
+    multiqc_all_inputs.extend(list(sample_inputs_dict.values()))
+
+#Add the combined featurecounts summary to multiqc inputs
+multiqc_all_inputs.append(f"{experiment_name}_results/all_samples_raw_counts.txt.summary")
+
+
 #Creating QC html with multiqc
 rule multiqc:
     input:
-        **multiqc_inputs
+        multiqc_all_inputs
     output:
-        html=f"{results_prefix}/{sample_name}_multiqc_report.html"
+        html=f"{experiment_name}_results/multiqc_report.html"
+    params:
+        results_dir=f"{experiment_name}_results/"
     shell:
-        f"multiqc {results_prefix}/ -o {results_prefix} -c scripts/multiqc_config.yaml --filename {sample_name}_multiqc_report.html"
+        f"multiqc {params.results_dir} -o {params.results_dir} -c scripts/multiqc_config.yaml --filename multiqc_report.html"
 
 
 #Expected outputs
-rna_seq_outputs = [
-    f"{results_prefix}/fastqc/{sample_name}_clean_R1_fastqc.zip",
-    f"{results_prefix}/fastp/{sample_name}_fastp.json",
-    f"{results_prefix}/{sample_name}_multiqc_report.html",
-    f"{results_prefix}/vg/{sample_name}.gam",
-    f"{results_prefix}/vg/{sample_name}_sort.bam",
-    f"{results_prefix}/vg/{sample_name}_giraffe.stats.txt",
-    f"{results_prefix}/featurecounts/{sample_name}_counts_extended.tsv",
-    f"{results_prefix}/featurecounts/{sample_name}_gene_symbols.tsv",
-    f"{results_prefix}/rseqc/{sample_name}_strandedness.txt",
-    f"{results_prefix}/feature_overlap/{sample_name}_feature_overlap_mqc.tsv"
-]
+rna_seq_outputs = []
+for sample_name in SAMPLES:
+    results_prefix_sample = f"{experiment_name}_results/{sample_name}"
+    outputs = [
+        f"{results_prefix_sample}/fastqc/{sample_name}_clean_R1_fastqc.zip",
+        f"{results_prefix_sample}/fastp/{sample_name}_fastp.json",
+        f"{results_prefix_sample}/vg/{sample_name}.gam",
+        f"{results_prefix_sample}/vg/{sample_name}_sort.bam",
+        f"{results_prefix_sample}/vg/{sample_name}_giraffe.stats.txt",
+        f"{results_prefix_sample}/rseqc/{sample_name}_infer_experiment.txt",
+        f"{results_prefix_sample}/feature_overlap/{sample_name}_feature_overlap_mqc.tsv"
+    ]
+    if SAMPLES[sample_name].get("r2"):
+        outputs.append(f"{results_prefix_sample}/fastqc/{sample_name}_clean_R2_fastqc.zip")
+    rna_seq_outputs.extend(outputs)
 
-if config.get("r2"):
-    rna_seq_outputs.extend([
-        f"{results_prefix}/fastqc/{sample_name}_clean_R2_fastqc.zip"
-    ])
+#Add the combined outputs
+rna_seq_outputs.extend([
+    f"{experiment_name}_results/all_samples_raw_counts.txt",
+    f"{experiment_name}_results/all_samples_raw_counts.txt.summary",
+    f"{experiment_name}_results/all_samples_counts_extended.tsv",
+    f"{experiment_name}_results/all_samples_gene_symbols.tsv",
+    f"{experiment_name}_results/multiqc_report.html"
+])
+
 
 rule all:
     input:
         rna_seq_outputs
-
