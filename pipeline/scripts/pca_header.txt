@@ -1,0 +1,10 @@
+# id: "pca"
+# section_name: "DESeq2: PCA analysis of samples"
+# description: "PCA after DESeq2 normalization"
+# format: "tsv"
+# plot_type: "scatter"
+# pconfig:
+#   id: "pca_scatter"
+#   title: "PCA Plot"
+#   xlab: "PC1"
+#   ylab: "PC2"

@@ -21,6 +21,8 @@ top_modules:
       href: "https://ccb.jhu.edu/software/centrifuge/manual.shtml"
   - vg:
       name: "vg: graph based alignment"
+  - rseqc:
+      name: "RSeQC: RNA specific quality control"
   - featurecounts:
       name: "featureCounts: gene level quantification of reads"
 
@@ -32,3 +34,6 @@ remove_sections:
   - fastqc_status_checks
   - fastqc_sequence_counts
   - fastqc_top_overrepresented_sequences
+  - fastqc_per_base_sequence_content
+  - fastqc_per_sequence_quality_scores
+  - fastqc_sequence_duplication_levels

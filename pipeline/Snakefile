@@ -8,8 +8,35 @@ annotation_bed = config.get("annotation_bed")
 ref = config.get("ref")
 vg_index = config.get("vg_index")
 
+deseq2_contrasts = config.get("deseq2", {}).get("contrasts", [])
+contrast_names = []
+for cont in deseq2_contrasts:
+    factor, ref, test = cont
+    contrast_names.append(f"{ref}_vs_{test}")
+
+
+#Generate metadata for DESeq2 comparisons
+rule generate_sample_metadata:
+    output:
+        temp(f"{experiment_name}_results/sample_metadata.tsv")
+    run:
+        import pandas as pd
+
+        samples = config["samples"]
+        metadata = []
+
+        for sample_id, info in samples.items():
+            row = {"sample_id": sample_id}
+            row["condition"] = info.get("condition", "NA")
+            if "condition2" in info:
+                row["condition2"] = info["condition2"]
+            metadata.append(row)
+
+        df = pd.DataFrame(metadata)
+        df.to_csv(output[0], sep="\t", index=False)
 
 #Determine if any sample is paired-end
+SAMPLES = config.get("samples", {})
 SE = all("r2" not in SAMPLES[s] for s in SAMPLES)
 
 
@@ -236,7 +263,6 @@ rule featurecounts_combined:
         fi
         """
 
-
 #Getting statistics for vg alignment
 rule vg_stats:
     input:
@@ -298,6 +324,42 @@ rule feature_overlap:
         bash scripts/gene_type.sh {annotation_bed} {input.bam} {output.feature_overlap}
         """
 
+#Running DEseq using comparison listed in config file
+rule run_deseq2:
+    input:
+        counts=f"{experiment_name}_results/all_samples_gene_symbols.tsv",
+        metadata=f"{experiment_name}_results/sample_metadata.tsv",
+        extended=f"{experiment_name}_results/all_samples_counts_extended.tsv"
+    output:
+        pca_coords=temp(f"{experiment_name}_results/deseq2/pca_coordinates.tsv"),
+        pca_plot=f"{experiment_name}_results/deseq2/pca_plot.png",
+        pca_mqc = f"{experiment_name}_results/deseq2/pca_mqc.tsv",
+        norm_counts=f"{experiment_name}_results/deseq2/normalized_counts.tsv",
+        results = temp(expand(f"{experiment_name}_results/deseq2/{{contrast}}_deseq_results.tsv", contrast=contrast_names)),
+        results_summary = expand(f"{experiment_name}_results/deseq2/{{contrast}}_deseq_results_summary.tsv", contrast=contrast_names)
+    params:
+        outdir=f"{experiment_name}_results/deseq2",
+        contrasts=deseq2_contrasts
+    shell:
+        """
+        mkdir -p {params.outdir}
+        Rscript scripts/run_deseq2.R {input.counts} {input.metadata} {params.outdir}
+
+        cat scripts/pca_header.txt <(
+            echo -e "id\\tPC1\\tPC2\\tcondition"
+            sed '1d' {output.pca_coords} | awk 'BEGIN{{OFS="\\t"}} {{print $1, $2, $3, $NF}}'
+        ) > {output.pca_mqc}
+        #Joining with summary information and database IDs
+        for result_file in {params.outdir}/*_deseq_results.tsv; do
+            summary_file="${{result_file%.tsv}}_summary.tsv"
+            awk 'BEGIN{{FS=OFS="\\t"}}
+                NR==FNR && FNR>1 {{id[$1]=$2; summary[$1]=$3; next}}
+                FNR==1 {{print $0, "Gene_IDs_Field", "Gene_Summary"; next}}
+                {{print $0, id[$1], summary[$1]}}
+            ' {input.extended} "$result_file" > "$summary_file"
+        done
+        """
+
 
 #Getting list of expected inputs for multiqc
 multiqc_inputs_template = {
@@ -306,7 +368,8 @@ multiqc_inputs_template = {
     "centrifuge_report": f"{experiment_name}_results/{{sample}}/centrifuge/{{sample}}_report.txt",
     "vg_stats": f"{experiment_name}_results/{{sample}}/vg/{{sample}}_giraffe.stats.txt",
     "rseqc_infer_experiment": f"{experiment_name}_results/{{sample}}/rseqc/{{sample}}_infer_experiment.txt",
-    "feature_overlap": f"{experiment_name}_results/{{sample}}/feature_overlap/{{sample}}_feature_overlap_mqc.tsv"
+    "feature_overlap": f"{experiment_name}_results/{{sample}}/feature_overlap/{{sample}}_feature_overlap_mqc.tsv",
+    "pca": f"{experiment_name}_results/deseq2/pca_mqc.tsv"
 }
 
 multiqc_all_inputs = []
@@ -315,8 +378,7 @@ for sample_name in SAMPLES:
     if SAMPLES[sample_name].get("r2"):
         sample_inputs_dict["fastqc_r2"] = f"{experiment_name}_results/{sample_name}/fastqc/{sample_name}_clean_R2_fastqc.zip"
     
-    multiqc_all_inputs.extend(list(sample_inputs_dict.values()))
-
+multiqc_all_inputs.extend(list(sample_inputs_dict.values()))
 #Add the combined featurecounts summary to multiqc inputs
 multiqc_all_inputs.append(f"{experiment_name}_results/all_samples_raw_counts.txt.summary")
 
@@ -331,7 +393,7 @@ rule multiqc:
         results_dir=f"{experiment_name}_results/"
     shell:
         f"multiqc {params.results_dir} -o {params.results_dir} -c scripts/multiqc_config.yaml --filename multiqc_report.html"
-
+        
 
 #Expected outputs
 rna_seq_outputs = []
@@ -357,6 +419,7 @@ rna_seq_outputs.extend([
     f"{experiment_name}_results/all_samples_counts_extended.tsv",
     f"{experiment_name}_results/all_samples_gene_symbols.tsv",
     f"{experiment_name}_results/multiqc_report.html"
+    f"{experiment_name}_results/deseq2/normalized_counts.tsv"
 ])
 
 
