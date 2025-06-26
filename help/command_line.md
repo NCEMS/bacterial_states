@@ -78,10 +78,19 @@ cat config.yaml
 
 
 Time to run the pipeline! We are telling apptainer to pull down the image that includes all the packages needed in the ".sif" file. It will use our "config.yaml" file as input for the SnakeMake pipeline found in the "Snakefile". We are also telling it to run "all" of the rules in that Snakefile and to use 12 processors. Change the number of processors as is appropriate for your resources:
+
 ```
 apptainer exec \
   --bind "$(pwd)/..:/mnt" \
   ../resources/build/rnaseq_vg.sif \
   snakemake --cores 12 all
 ```
+
+During the run you will see some output as it completes each step. The final results will be in this directory as shown, with subdirectories for specific steps:
+
+![image](https://github.com/user-attachments/assets/887a0193-094f-4143-8653-879cac80b88d)
+
+For differential expression analysis, the final results will be in the deseq2 folder. For example:
+
+![image](https://github.com/user-attachments/assets/32d74d65-1b3c-4b5d-8e61-6076a799f55f)
 
