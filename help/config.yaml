@@ -1,0 +1,31 @@
+experiment: "experiment3"
+
+samples:
+  wt_1:
+    r1: "../data/SRR33308274_1.fastq.gz"
+    r2: "../data/SRR33308274_2.fastq.gz"
+    condition: "wildtype"
+  wt_2:
+    r1: "../data/SRR33308273_1.fastq.gz"
+    r2: "../data/SRR33308273_2.fastq.gz"
+    condition: "wildtype"
+  KO_1:
+    r1: "../data/SRR33308266_1.fastq.gz"
+    r2: "../data/SRR33308266_2.fastq.gz"
+    condition: "knockout"
+  KO_2:
+    r1: "../data/SRR33308265_1.fastq.gz"
+    r2: "../data/SRR33308265_2.fastq.gz"
+    condition: "knockout"
+
+#Conditions to be compared in DESeq2, the first condition listed will always be the reference level used
+deseq2:
+  contrasts:
+    - ["condition", "wildtype", "knockout"]
+
+vg_index: "../resources/vg/ecoli_graph_test"
+ref: "GCF_000005845_2_ASM584v2_genomic#0#NC_000913.3"
+
+annotation_gff: "../resources/annotation/GCF_000005845.2_ASM584v2_genomic.gff"
+annotation_bed: "../resources/annotation/GCF_000005845.2_ASM584v2_genomic.bed"
+
