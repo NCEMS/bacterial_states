@@ -8,7 +8,7 @@ For the basic setup of this pipeline, you will need a few dependencies installed
 
 [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 
-[GoCommands](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+[GoCommands](https://learning.cyverse.org/ds/gocommands/#table-of-contents)
 
 Note: Apptainer requires sudo (super user) access to properly install. Contact an administrator if you do not have these permissions on your system.
 
