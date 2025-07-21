@@ -8,12 +8,13 @@ annotation_bed = config.get("annotation_bed")
 gref = config.get("ref")
 vg_index = config.get("vg_index")
 
+import json
 deseq2_contrasts = config.get("deseq2", {}).get("contrasts", [])
 contrast_names = []
 for cont in deseq2_contrasts:
     factor, ref, test = cont
     contrast_names.append(f"{ref}_vs_{test}")
-
+    
 
 #Generate metadata for DESeq2 comparisons
 rule generate_sample_metadata:
@@ -331,20 +332,27 @@ rule run_deseq2:
         metadata=f"{experiment_name}_results/sample_metadata.tsv",
         extended=f"{experiment_name}_results/all_samples_counts_extended.tsv"
     output:
-        pca_coords=temp(f"{experiment_name}_results/deseq2/pca_coordinates.tsv"),
+        pca_coords=f"{experiment_name}_results/deseq2/pca_coordinates.tsv",
         pca_plot=f"{experiment_name}_results/deseq2/pca_plot.png",
         pca_mqc = f"{experiment_name}_results/deseq2/pca_mqc.tsv",
         norm_counts=f"{experiment_name}_results/deseq2/normalized_counts.tsv",
-        results = temp(expand(f"{experiment_name}_results/deseq2/{{contrast}}_deseq_results.tsv", contrast=contrast_names)),
+        # This expands correctly using ref_vs_test from contrast_names
+        results = expand(f"{experiment_name}_results/deseq2/{{contrast}}_deseq_results.tsv", contrast=contrast_names),
         results_summary = expand(f"{experiment_name}_results/deseq2/{{contrast}}_deseq_results_summary.tsv", contrast=contrast_names)
     params:
         outdir=f"{experiment_name}_results/deseq2",
-        contrasts=deseq2_contrasts
+        contrasts_json=json.dumps(deseq2_contrasts) 
     shell:
         """
         mkdir -p {params.outdir}
-        Rscript scripts/run_deseq2.R {input.counts} {input.metadata} {params.outdir}
 
+        Rscript scripts/run_deseq2.R \\
+            {input.counts} \\
+            {input.metadata} \\
+            {params.outdir} \\
+            '{params.contrasts_json}'
+
+        # Existing shell commands for post-processing:
         cat scripts/pca_header.txt <(
             echo -e "id\\tPC1\\tPC2\\tcondition"
             sed '1d' {output.pca_coords} | awk 'BEGIN{{OFS="\\t"}} {{print $1, $2, $3, $NF}}'
@@ -352,10 +360,10 @@ rule run_deseq2:
         for result_file in {params.outdir}/*_deseq_results.tsv; do
             summary_file="${{result_file%.tsv}}_summary.tsv"
             awk 'BEGIN{{FS=OFS="\\t"}}
-                 NR==FNR && FNR>1 {{id[$1]=$2; summary[$1]=$3; next}}
-                 FNR==1 {{print $0, "Gene_IDs_Field", "Gene_Summary"; next}}
-                 FNR>1 {{print $0, id[$1], summary[$1]}}
-                ' {input.extended} "$result_file" > "$summary_file"
+                  NR==FNR && FNR>1 {{id[$1]=$2; summary[$1]=$3; next}}
+                  FNR==1 {{print $0, "Gene_IDs_Field", "Gene_Summary"; next}}
+                  FNR>1 {{print $0, id[$1], summary[$1]}}
+                  ' {input.extended} "$result_file" > "$summary_file"
         done
         """
 
