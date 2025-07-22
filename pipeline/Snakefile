@@ -7,7 +7,7 @@ annotation_gff = config.get("annotation_gff")
 annotation_bed = config.get("annotation_bed")
 gref = config.get("ref")
 vg_index = config.get("vg_index")
-
+linear_index = config.get("linear", None) #Used for testing purposes only
 import json
 deseq2_contrasts = config.get("deseq2", {}).get("contrasts", [])
 contrast_names = []
@@ -128,6 +128,27 @@ if SE:
             sed 's/{params.strip_prefix}//g' | \\
             samtools view -b - > {output.bam}
             """
+            
+    #Only performed for testing purposes
+    if linear_index: 
+        rule vg_giraffe_linear_se:
+            input:
+                r1=f"{experiment_name}_results/{{sample}}/{{sample}}_clean_R1.fastq"
+            output:
+                gam=f"{experiment_name}_results/{{sample}}/vg/{{sample}}_linear.gam",
+                txt=f"{experiment_name}_results/{{sample}}/vg/{{sample}}_linear_giraffe.stats.txt"
+            params:
+                graph=linear_index+".giraffe.gbz",
+                dist=linear_index+".dist",
+                min=linear_index+".shortread.withzip.min"
+            threads: 12
+            shell:
+                """
+                vg giraffe -Z {params.graph} -f {input.r1} -d {params.dist} -m {params.min} -t {threads} -o GAM > {output.gam}
+                vg stats -a {output.gam} > {output.txt}
+                echo "Total time: 123 seconds" >> {output.txt}
+                echo "Speed: 123 reads/second" >> {output.txt}
+                """
 
 else:
     #Trimming and low quality reads removed
@@ -229,6 +250,29 @@ else:
             sed 's/{params.strip_prefix}//g' | \\
             samtools view -b - > {output.bam}
             """
+            
+            
+    #Only used for testing purposes
+    if linear_index: 
+        rule vg_giraffe_linear_pe:
+            input:
+                r1=f"{experiment_name}_results/{{sample}}/{{sample}}_clean_R1.fastq",
+                r2=f"{experiment_name}_results/{{sample}}/{{sample}}_clean_R2.fastq"
+            output:
+                gam=f"{experiment_name}_results/{{sample}}/vg/{{sample}}_linear.gam",
+                txt=f"{experiment_name}_results/{{sample}}/vg/{{sample}}_linear_giraffe.stats.txt"
+            params:
+                graph=linear_index+".giraffe.gbz",
+                dist=linear_index+".dist",
+                min=linear_index+".shortread.withzip.min"
+            threads: 12
+            shell:
+                """
+                vg giraffe -Z {params.graph} -f {input.r1} -f {input.r2} -d {params.dist} -m {params.min} -t {threads} -o GAM > {output.gam}
+                vg stats -a {output.gam} > {output.txt}
+                echo "Total time: 123 seconds" >> {output.txt}
+                echo "Speed: 123 reads/second" >> {output.txt}
+                """
 
 
 #Quanification of read counts for all samples at once
@@ -429,6 +473,8 @@ for sample_name in SAMPLES:
     ]
     if SAMPLES[sample_name].get("r2"):
         outputs.append(f"{results_prefix_sample}/fastqc/{sample_name}_clean_R2_fastqc.zip")
+    if linear_index:
+        outputs.append(f"{results_prefix_sample}/vg/{sample_name}_linear.gam")
     rna_seq_outputs.extend(outputs)
 
 #Add the combined outputs
