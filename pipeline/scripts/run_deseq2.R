@@ -59,39 +59,40 @@ ggsave(
 norm_counts <- counts(dds, normalized = TRUE)
 write.table(norm_counts, file = file.path(output_dir, "normalized_counts.tsv"),
             sep = "\t", quote = FALSE, col.names = NA)
-
-for (contrast_info in deseq2_contrasts) {
-  factor_name <- contrast_info[[1]]
-  ref_level <- contrast_info[[2]]
-  test_level <- contrast_info[[3]]
-
-  if (!factor_name %in% colnames(colData(dds))) {
-    warning(paste0("Factor '", factor_name, "' not found in sample metadata. Skipping contrast: ",
-                   ref_level, " vs ", test_level, "."))
-    next
+if (length(deseq2_contrasts) > 0) {
+  for (contrast_info in deseq2_contrasts) {
+    factor_name <- contrast_info[[1]]
+    ref_level <- contrast_info[[2]]
+    test_level <- contrast_info[[3]]
+  
+    if (!factor_name %in% colnames(colData(dds))) {
+      warning(paste0("Factor '", factor_name, "' not found in sample metadata. Skipping contrast: ",
+                     ref_level, " vs ", test_level, "."))
+      next
+    }
+  
+    current_factor_levels <- levels(colData(dds)[[factor_name]])
+    if (!(ref_level %in% current_factor_levels)) {
+      warning(paste0("Reference level '", ref_level, "' not found in levels for factor '", factor_name,
+                     "'. Skipping contrast: ", ref_level, " vs ", test_level, "."))
+      next
+    }
+    if (!(test_level %in% current_factor_levels)) {
+      warning(paste0("Test level '", test_level, "' not found in levels for factor '", factor_name,
+                     "'. Skipping contrast: ", ref_level, " vs ", test_level, "."))
+      next
+    }
+  
+    res <- results(dds, contrast = c(factor_name, test_level, ref_level))
+  
+    res_df <- as.data.frame(res) %>%
+      rownames_to_column("Gene_Symbol") %>%
+      mutate(Gene_Symbol = trimws(as.character(Gene_Symbol))) %>%
+      arrange(padj)
+  
+    file_name <- paste0(ref_level, "_vs_", test_level, "_deseq_results.tsv")
+    write.table(res_df,
+                file = file.path(output_dir, file_name),
+                sep = "\t", quote = FALSE, row.names = FALSE)
   }
-
-  current_factor_levels <- levels(colData(dds)[[factor_name]])
-  if (!(ref_level %in% current_factor_levels)) {
-    warning(paste0("Reference level '", ref_level, "' not found in levels for factor '", factor_name,
-                   "'. Skipping contrast: ", ref_level, " vs ", test_level, "."))
-    next
-  }
-  if (!(test_level %in% current_factor_levels)) {
-    warning(paste0("Test level '", test_level, "' not found in levels for factor '", factor_name,
-                   "'. Skipping contrast: ", ref_level, " vs ", test_level, "."))
-    next
-  }
-
-  res <- results(dds, contrast = c(factor_name, test_level, ref_level))
-
-  res_df <- as.data.frame(res) %>%
-    rownames_to_column("Gene_Symbol") %>%
-    mutate(Gene_Symbol = trimws(as.character(Gene_Symbol))) %>%
-    arrange(padj)
-
-  file_name <- paste0(ref_level, "_vs_", test_level, "_deseq_results.tsv")
-  write.table(res_df,
-              file = file.path(output_dir, file_name),
-              sep = "\t", quote = FALSE, row.names = FALSE)
 }
