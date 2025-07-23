@@ -370,9 +370,8 @@ rule feature_overlap:
         """
 
 #Running DEseq using comparison listed in config file
-deseq_results_outputs = expand(f"{experiment_name}_results/deseq2/{{contrast}}_deseq_results.tsv", contrast=contrast_names)
+deseq_results_outputs = expand(f"{experiment_name}_results/deseq2/{{contrast}}_deseq_results.tsv", contrast=contrast_names) #Need a list of outputs from contrasts
 deseq_summary_outputs = expand(f"{experiment_name}_results/deseq2/{{contrast}}_deseq_results_summary.tsv", contrast=contrast_names)
-
 rule run_deseq2:
     input:
         counts=f"{experiment_name}_results/all_samples_gene_symbols.tsv",
@@ -391,11 +390,7 @@ rule run_deseq2:
         """
         mkdir -p {params.outdir}
 
-        Rscript scripts/run_deseq2.R \\
-            {input.counts} \\
-            {input.metadata} \\
-            {params.outdir} \\
-            '{params.contrasts_json}'
+        Rscript scripts/run_deseq2.R {input.counts} {input.metadata} {params.outdir} '{params.contrasts_json}'
 
         cat scripts/pca_header.txt <(
             echo -e "id\\tPC1\\tPC2\\tcondition"
@@ -473,7 +468,7 @@ for sample_name in SAMPLES:
     ]
     if SAMPLES[sample_name].get("r2"):
         outputs.append(f"{results_prefix_sample}/fastqc/{sample_name}_clean_R2_fastqc.zip")
-    if linear_index:
+    if linear_index: #For testing purposes only
         outputs.append(f"{results_prefix_sample}/vg/{sample_name}_linear.gam")
     rna_seq_outputs.extend(outputs)
 
