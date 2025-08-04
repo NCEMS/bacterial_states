@@ -29,6 +29,37 @@ if ("condition2" %in% colnames(sample_table)) {
   sample_table$condition2 <- factor(sample_table$condition2)
 }
 
+#Some datasets dont have proper groupings to perform DESeq2 normalization
+if (nlevels(sample_table$condition) < 2) {
+  dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+  
+  output_files <- c(
+    file.path(output_dir, "pca_coordinates.tsv"),
+    file.path(output_dir, "pca_plot.png"),
+    file.path(output_dir, "normalized_counts.tsv")
+  )
+  for (contrast_info in deseq2_contrasts) {
+    ref_level <- contrast_info[[2]]
+    test_level <- contrast_info[[3]]
+    file_name <- paste0(ref_level, "_vs_", test_level, "_deseq_results.tsv")
+    output_files <- c(output_files, file.path(output_dir, file_name))
+  }
+  
+  for (f in output_files) {
+    if (grepl("\\.png$", f)) {
+      png(f)
+      plot.new()
+      text(0.5, 0.5, "Insufficient metadata", cex = 1.5)
+      dev.off()
+    } else {
+      writeLines("Insufficient metadata", f)
+    }
+  }
+  
+  quit(save = "no", status = 0)
+}
+
+
 if ("condition2" %in% colnames(sample_table)) {
   dds <- DESeqDataSetFromMatrix(countData = counts,
                                 colData = sample_table,
