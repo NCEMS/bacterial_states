@@ -28,4 +28,4 @@ ref: "GCF_000005845_2_ASM584v2_genomic#0#NC_000913.3"
 
 annotation_gff: "../resources/annotation/GCF_000005845.2_ASM584v2_genomic.gff"
 annotation_bed: "../resources/annotation/GCF_000005845.2_ASM584v2_genomic.bed"
-
+centrifuge_index_path: "../resources/centrifuge/p_compressed+h+v"

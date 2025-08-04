@@ -8,6 +8,21 @@ annotation_bed = config.get("annotation_bed")
 gref = config.get("ref")
 vg_index = config.get("vg_index")
 linear_index = config.get("linear", None) #Used for testing purposes only
+
+
+#Sample info
+SAMPLES = config.get("samples", {})
+def get_sample_type():
+    has_any_missing_r2 = any("r2" not in info for info in SAMPLES.values())
+    return has_any_missing_r2
+SE = get_sample_type()
+num_se = sum("r2" not in info for info in SAMPLES.values())
+num_pe = len(SAMPLES) - num_se
+if num_se > 0 and num_pe > 0:
+    print("WARNING: Mixed SE and PE samples detected. Defaulting to SE mode for all.", flush=True)
+    
+    
+#Contrast info
 import json
 deseq2_contrasts = config.get("deseq2", {}).get("contrasts", [])
 contrast_names = []
@@ -35,10 +50,6 @@ rule generate_sample_metadata:
 
         df = pd.DataFrame(metadata)
         df.to_csv(output[0], sep="\t", index=False)
-
-#Determine if any sample is paired-end
-SAMPLES = config.get("samples", {})
-SE = all("r2" not in SAMPLES[s] for s in SAMPLES)
 
 
 ##########################Single-end Rules
@@ -79,7 +90,7 @@ if SE:
             tsv       = temp(f"{experiment_name}_results/{{sample}}/centrifuge/{{sample}}_output.tsv"),
             report  = f"{experiment_name}_results/{{sample}}/centrifuge/{{sample}}_report.txt",
         params:
-            db = "../resources/centrifuge/p_compressed+h+v",
+            db = config.get("centrifuge_index_path"),
         threads: 12
         shell:
             r"""
@@ -199,7 +210,7 @@ else:
             tsv       = temp(f"{experiment_name}_results/{{sample}}/centrifuge/{{sample}}_output.tsv"),
             report  = f"{experiment_name}_results/{{sample}}/centrifuge/{{sample}}_report.txt"
         params:
-            db = "../resources/centrifuge/p_compressed+h+v",
+            db = config.get("centrifuge_index_path"),
         threads: 12
         shell:
             r"""
@@ -408,16 +419,20 @@ rule summarize_deseq_results:
         outdir=f"{experiment_name}_results/deseq2"
     shell:
         """
-        awk -v extended_input="{input.extended}" '
-            BEGIN{{FS=OFS="\\t"}}
-            NR==FNR && FILENAME == extended_input {{
-                id[$1]=$2;
-                summary[$1]=$3;
-                next
-            }}
-            FNR==1 {{print $0, "Gene_IDs_Field", "Gene_Summary"; next}}
-            FNR>1 {{print $0, id[$1], summary[$1]}}
-        ' "{input.extended}" "{input.deseq_result}" > "{output.summary_file}"
+        if [ "$(wc -l < {input.deseq_result})" -le 1 ] || grep -q "Insufficient metadata" "{input.deseq_result}"; then
+            echo "Insufficient metadata" > "{output.summary_file}"
+        else
+            awk -v extended_input="{input.extended}" '
+                BEGIN{{FS=OFS="\\t"}}
+                NR==FNR && FILENAME == extended_input {{
+                    id[$1]=$2;
+                    summary[$1]=$3;
+                    next
+                }}
+                FNR==1 {{print $0, "Gene_IDs_Field", "Gene_Summary"; next}}
+                FNR>1 {{print $0, id[$1], summary[$1]}}
+            ' "{input.extended}" "{input.deseq_result}" > "{output.summary_file}"
+        fi
         """
 
 #Getting list of expected inputs for multiqc
@@ -434,10 +449,8 @@ multiqc_inputs_template = {
 multiqc_all_inputs = []
 for sample_name in SAMPLES:
     sample_inputs_dict = {k: v.format(sample=sample_name) for k, v in multiqc_inputs_template.items()}
-    if SAMPLES[sample_name].get("r2"):
-        sample_inputs_dict["fastqc_r2"] = f"{experiment_name}_results/{sample_name}/fastqc/{sample_name}_clean_R2_fastqc.zip"
-    multiqc_all_inputs.extend(list(sample_inputs_dict.values())) 
-    
+    multiqc_all_inputs.extend(list(sample_inputs_dict.values()))
+
 multiqc_all_inputs.append(f"{experiment_name}_results/all_samples_raw_counts.txt.summary")
 
 
@@ -451,7 +464,7 @@ rule multiqc:
         results_dir=f"{experiment_name}_results/"
     shell:
         f"multiqc {params.results_dir} -o {params.results_dir} -c scripts/multiqc_config.yaml --filename multiqc_report.html"
-        
+
 
 #Expected outputs
 rna_seq_outputs = []
@@ -466,9 +479,7 @@ for sample_name in SAMPLES:
         f"{results_prefix_sample}/rseqc/{sample_name}_infer_experiment.txt",
         f"{results_prefix_sample}/feature_overlap/{sample_name}_feature_overlap_mqc.tsv"
     ]
-    if SAMPLES[sample_name].get("r2"):
-        outputs.append(f"{results_prefix_sample}/fastqc/{sample_name}_clean_R2_fastqc.zip")
-    if linear_index: #For testing purposes only
+    if linear_index:
         outputs.append(f"{results_prefix_sample}/vg/{sample_name}_linear.gam")
     rna_seq_outputs.extend(outputs)
 
