@@ -122,7 +122,7 @@ if SE:
             vg giraffe -Z {params.graph} -f {input.r1} -d {params.dist} -m {params.min} -t {threads} -o GAM > {output.gam}
             """
 
-    #Surjecting alignments to K-12 for annotation purposes
+    #Surjecting alignments to K-12 for purposes
     rule vg_surject_se:
         input:
             gam=f"{experiment_name}_results/{{sample}}/vg/{{sample}}.gam"
@@ -372,13 +372,13 @@ rule annotate_counts:
 #Custom addition to multiqc, have to keep mqc name or it will not be parsed
 rule feature_overlap:
     input:
-        bam = f"{experiment_name}_results/{{sample}}/vg/{{sample}}.bam"
+        bam = f"{experiment_name}_results/{{sample}}/vg/{{sample}}_sort.bam"
     output:
         feature_overlap = f"{experiment_name}_results/{{sample}}/feature_overlap/{{sample}}_feature_overlap_mqc.tsv"
     shell:
         """
         mkdir -p {experiment_name}_results/{wildcards.sample}/feature_overlap
-        bash {scripts_dir}/gene_type.sh {annotation_bed} {input.bam} {output.feature_overlap}
+        bash {scripts_dir}/gene_type.sh {annotation_bed} {input.bam} {output.feature_overlap} {scripts_dir}
         """
 
 #Running DEseq using comparison listed in config file

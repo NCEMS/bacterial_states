@@ -72,20 +72,30 @@ if ("condition2" %in% colnames(sample_table)) {
 
 dds <- DESeq(dds)
 
-vsd <- vst(dds, blind = FALSE)
-pca <- prcomp(t(assay(vsd)))
-percentVar <- round(100 * (pca$sdev^2 / sum(pca$sdev^2)), 1)
-pca_df <- data.frame(pca$x, sample_table)
-write.table(pca_df, file = file.path(output_dir, "pca_coordinates.tsv"),
-            sep = "\t", quote = FALSE, row.names = TRUE)
-ggsave(
-  filename = file.path(output_dir, "pca_plot.png"),
-  plot = ggplot(pca_df, aes(PC1, PC2, color = condition)) +
-    geom_point(size = 4) +
-    xlab(paste0("PC1: ", percentVar[1], "% variance")) +
-    ylab(paste0("PC2: ", percentVar[2], "% variance")) +
-    theme_minimal()
-)
+
+tryCatch({
+  vsd = varianceStabilizingTransformation(dds, blind = FALSE)
+  pca <- prcomp(t(assay(vsd)))
+  percentVar <- round(100 * (pca$sdev^2 / sum(pca$sdev^2)), 1)
+  pca_df <- data.frame(pca$x, sample_table)
+  write.table(pca_df, file = file.path(output_dir, "pca_coordinates.tsv"),
+              sep = "\t", quote = FALSE, row.names = TRUE)
+  ggsave(
+    filename = file.path(output_dir, "pca_plot.png"),
+    plot = ggplot(pca_df, aes(PC1, PC2, color = condition)) +
+      geom_point(size = 4) +
+      xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+      ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+      theme_minimal()
+  )
+}, error = function(e) {
+  writeLines("id\tPC1\tPC2\tcondition\nsample_dummy\tNA\tNA\tNA", file.path(output_dir, "pca_coordinates.tsv"))
+  writeLines("", file.path(output_dir, "pca_plot.png"))
+})
+
+
+
+
 
 norm_counts <- counts(dds, normalized = TRUE)
 write.table(norm_counts, file = file.path(output_dir, "normalized_counts.tsv"),

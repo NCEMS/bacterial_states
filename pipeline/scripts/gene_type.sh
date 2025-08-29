@@ -1,9 +1,10 @@
 bed_file="$1"
 bam_file="$2"
 output_file="$3"
+scripts_dir="$4"
 
 bedtools intersect -c -a "$bed_file" -b "$bam_file" > ${bam_file}_temp
-cat scripts/fo_header.txt <(
+cat "$scripts_dir"/fo_header.txt <(
   awk -F'\t' '
     BEGIN { OFS="\t" }
     {
