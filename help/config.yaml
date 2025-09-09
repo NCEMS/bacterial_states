@@ -30,3 +30,12 @@ annotation_gff: "../resources/annotation/GCF_000005845.2_ASM584v2_genomic.gff"
 annotation_bed: "../resources/annotation/GCF_000005845.2_ASM584v2_genomic.bed"
 centrifuge_index_path: "../resources/centrifuge/p_compressed+h+v"
 scripts_dir: "./scripts"
+
+#QC cutoff if you choose to use them
+#organism of your sample
+centrifuge_organism: "Escherichia coli"
+#minimum percentage of reads that must be from that organism
+centrifuge_min_percentage: 30.0
+#minimum number of reads that must pass the fastp filter
+fastp_min_kept_percentage: 75.0
+
