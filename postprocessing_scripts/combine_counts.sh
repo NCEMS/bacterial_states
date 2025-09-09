@@ -42,6 +42,7 @@ for GSE_DIR in GSE*/; do
 done
 
 #Loop over files and join them after sorting on gene name
+FILES=( "$TMP_DIR"/*.tsv )
 cp "${FILES[0]}" "$OUTPUT_FILE"
 for F in "${FILES[@]}"; do
     [[ "$F" == "${FILES[0]}" ]] && continue
