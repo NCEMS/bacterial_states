@@ -1,0 +1,57 @@
+name: ingest
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - snakemake
+  - fastp
+  - fastqc
+  - pandas
+  - numpy
+  - multiqc=1.26
+  - centrifuge
+  - subread
+  - vg=1.63.1
+  - bioconda::rseqc
+  - bioconda::snakemake=9.3.3
+  - bedtools
+  - samtools
+  - scikit-learn
+  - seaborn
+  - matplotlib
+  - pytorch::pytorch
+  - pytorch::torchvision
+  - pytorch::torchaudio
+  - bioconda::entrez-direct
+  - r-base
+  - r-essentials
+  - bioconductor-deseq2
+  - r-ggplot2
+  - r-dplyr
+  - r-tidyr
+  - r-readr
+  - r-pheatmap
+  - r-gplots
+  - r-rcpp
+  - r-biocmanager
+  - altair
+  - bokeh
+  - cmake
+  - eigen
+  - gdal
+  - geojson
+  - geopandas
+  - laszip
+  - libxml2
+  - matplotlib
+  - numpy
+  - pandas
+  - pdal
+  - python-pdal
+  - pip
+  - scipy
+  - seaborn
+
