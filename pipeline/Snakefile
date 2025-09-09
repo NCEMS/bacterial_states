@@ -130,7 +130,7 @@ checkpoint qc_passed_samples:
         with open(failures_file, "w") as fh:
             json.dump(failures, fh, indent=2)
 
-###Helper functions for collecting samples that passed QC
+####Helper functions for collecting samples that passed QC
 import glob, os
 #Get samples that went through the checkpoints successfully to use for rule all
 def get_passed_samples_from_checkpoint(wildcards):
@@ -358,46 +358,7 @@ else:
             samtools view -b - > {output.bam}
             """
 
-
-
-####Rules that require all samples in an experiment
-rule featurecounts_combined:
-    input:
-        bams=lambda wc: expand(
-            f"{experiment_name}_results/{{sample}}/vg/{{sample}}_sort.bam",
-            sample=get_passed_samples_from_checkpoint(wc)
-        ),
-        infer_experiment_for_strand=lambda wc:
-            f"{experiment_name}_results/{get_first_passed_sample(wc)}/rseqc/{get_first_passed_sample(wc)}_infer_experiment.txt"
-    output:
-        counts=f"{experiment_name}_results/all_samples_raw_counts.txt",
-        summary=f"{experiment_name}_results/all_samples_raw_counts.txt.summary",
-        temp_gff=temp(f"{experiment_name}_results/featurecounts_temp_gff")
-    params:
-        pe_param = "-p" if not SE else ""
-    benchmark: f"benchmarks/{{sample}}_featurecounts_benchmark.txt"
-    shell:
-        r"""
-        mkdir -p $(dirname {output.counts})
-    
-        strand=$(awk '
-          /1\+\+,1--/ || /\+\+,--/ {{ strand1 = $NF + 0 }}
-          /1\+-,1-\+/ || /\+\-,-\+/ {{ strand2 = $NF + 0 }}
-          END {{
-            if (strand1 > 80) print 1;
-            else if (strand2 > 80) print 2;
-            else print 0;
-          }}' {input.infer_experiment_for_strand})
-    
-        if [ "$strand" -eq 0 ]; then
-            grep -v "ncRNA" {annotation_gff} > {output.temp_gff}
-            featureCounts -a {output.temp_gff} -o {output.counts} -t gene -g Dbxref -s 0 {params.pe_param} {input.bams}
-        else
-            awk -F"\t" 'BEGIN{{OFS="\t"}} $3=="gene" && $9 ~ /gene_biotype=ncRNA/ {{next}} {{if($3=="ncRNA") $3="gene"; print}}' {annotation_gff} > {output.temp_gff}
-            featureCounts -a {output.temp_gff} -o {output.counts} -t gene -g Dbxref -s "$strand" {params.pe_param} {input.bams}
-        fi
-        """
-
+####Not PE/SE specific rules
 #Getting statistics for vg alignment
 rule vg_stats:
     input:
@@ -434,31 +395,43 @@ rule rseqc:
         geneBody_coverage.py -r <(grep "gene" {params.annotation_bed}) -i {output.sorted_bam} -o {experiment_name}_results/{wildcards.sample}/rseqc/{wildcards.sample}_genebody_cov
         """
 
-#Annotating the combined counts file with metadata from NCBI
-rule annotate_counts:
-    input:
-        counts=f"{experiment_name}_results/all_samples_raw_counts.txt"
-    output:
-        extended=f"{experiment_name}_results/all_samples_counts_extended.tsv",
-        clean=f"{experiment_name}_results/all_samples_gene_symbols.tsv"
-    shell:
-        """
-        mkdir -p {experiment_name}_results/featurecounts
-        bash {scripts_dir}/get_metadata.sh {input.counts} > {output.extended}
-        awk 'NR == 1 || $2 != "Geneid"' {output.extended} | cut -f1,4- > {output.clean}
-        """
 
-#Custom addition to multiqc, have to keep mqc name or it will not be parsed
-rule feature_overlap:
+####Rules that require all samples in an experiment
+rule featurecounts_combined:
     input:
-        bam = f"{experiment_name}_results/{{sample}}/vg/{{sample}}_sort.bam"
+        bams=lambda wc: expand(
+            f"{experiment_name}_results/{{sample}}/vg/{{sample}}_sort.bam",
+            sample=get_passed_samples_from_checkpoint(wc)
+        ),
+        infer_experiment_for_strand=lambda wc:
+            f"{experiment_name}_results/{get_first_passed_sample(wc)}/rseqc/{get_first_passed_sample(wc)}_infer_experiment.txt"
     output:
-        feature_overlap = f"{experiment_name}_results/{{sample}}/feature_overlap/{{sample}}_feature_overlap_mqc.tsv"
-    benchmark: f"benchmarks/{{sample}}_overlap_benchmark.txt"
+        counts=f"{experiment_name}_results/all_samples_raw_counts.txt",
+        summary=f"{experiment_name}_results/all_samples_raw_counts.txt.summary",
+        temp_gff=temp(f"{experiment_name}_results/featurecounts_temp_gff")
+    params:
+        pe_param = "-p" if not SE else ""
+    benchmark: f"benchmarks/featurecounts_benchmark.txt"
     shell:
-        """
-        mkdir -p {experiment_name}_results/{wildcards.sample}/feature_overlap
-        bash {scripts_dir}/gene_type.sh {annotation_bed} {input.bam} {output.feature_overlap} {scripts_dir}
+        r"""
+        mkdir -p $(dirname {output.counts})
+    
+        strand=$(awk '
+          /1\+\+,1--/ || /\+\+,--/ {{ strand1 = $NF + 0 }}
+          /1\+-,1-\+/ || /\+\-,-\+/ {{ strand2 = $NF + 0 }}
+          END {{
+            if (strand1 > 80) print 1;
+            else if (strand2 > 80) print 2;
+            else print 0;
+          }}' {input.infer_experiment_for_strand})
+    
+        if [ "$strand" -eq 0 ]; then
+            grep -v "ncRNA" {annotation_gff} > {output.temp_gff}
+            featureCounts -a {output.temp_gff} -o {output.counts} -t gene -g Dbxref -s 0 {params.pe_param} {input.bams}
+        else
+            awk -F"\t" 'BEGIN{{OFS="\t"}} $3=="gene" && $9 ~ /gene_biotype=ncRNA/ {{next}} {{if($3=="ncRNA") $3="gene"; print}}' {annotation_gff} > {output.temp_gff}
+            featureCounts -a {output.temp_gff} -o {output.counts} -t gene -g Dbxref -s "$strand" {params.pe_param} {input.bams}
+        fi
         """
         
 #Sample metadata for DESeq2        
@@ -470,7 +443,7 @@ rule generate_sample_metadata:
 
         samples = config["samples"]
 
-        # Use checkpoint function to get passed samples
+        #Use only passed samples
         passed_samples = get_passed_samples_from_checkpoint(None)
 
         metadata = []
@@ -503,7 +476,7 @@ rule run_deseq2:
     params:
         outdir=f"{experiment_name}_results/deseq2",
         contrasts_json=json.dumps(deseq2_contrasts)
-    benchmark: f"benchmarks/{{sample}}_deseq_benchmark.txt"
+    benchmark: f"benchmarks/deseq_benchmark.txt"
     shell:
         """
         mkdir -p {params.outdir}
@@ -514,6 +487,20 @@ rule run_deseq2:
             echo -e "id\\tPC1\\tPC2\\tcondition"
             sed '1d' {output.pca_coords} | awk 'BEGIN{{OFS="\\t"}} {{print $1, $2, $3, $NF}}'
         ) > {output.pca_mqc}
+        """
+        
+#Annotating the combined counts file with metadata from NCBI
+rule annotate_counts:
+    input:
+        counts=f"{experiment_name}_results/all_samples_raw_counts.txt"
+    output:
+        extended=f"{experiment_name}_results/all_samples_counts_extended.tsv",
+        clean=f"{experiment_name}_results/all_samples_gene_symbols.tsv"
+    shell:
+        """
+        mkdir -p {experiment_name}_results/featurecounts
+        bash {scripts_dir}/get_metadata.sh {input.counts} > {output.extended}
+        awk 'NR == 1 || $2 != "Geneid"' {output.extended} | cut -f1,4- > {output.clean}
         """
 
 rule summarize_deseq_results:
@@ -536,6 +523,19 @@ rule summarize_deseq_results:
             FNR==1 {{print $0, "Gene_IDs_Field", "Gene_Summary"; next}}
             FNR>1 {{print $0, id[$1], summary[$1]}}
         ' "{input.extended}" "{input.deseq_result}" > "{output.summary_file}"
+        """
+
+#Custom addition to multiqc, have to keep mqc name or it will not be parsed
+rule feature_overlap:
+    input:
+        bam = f"{experiment_name}_results/{{sample}}/vg/{{sample}}_sort.bam"
+    output:
+        feature_overlap = f"{experiment_name}_results/{{sample}}/feature_overlap/{{sample}}_feature_overlap_mqc.tsv"
+    benchmark: f"benchmarks/{{sample}}_overlap_benchmark.txt"
+    shell:
+        """
+        mkdir -p {experiment_name}_results/{wildcards.sample}/feature_overlap
+        bash {scripts_dir}/gene_type.sh {annotation_bed} {input.bam} {output.feature_overlap} {scripts_dir}
         """
 
 #Summarizing all outputs with MultiQC
