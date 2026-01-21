@@ -11,6 +11,46 @@ vg_index = config.get("vg_index")
 linear_index = config.get("linear", None)
 scripts_dir = config.get("scripts_dir")
 
+#Getting read length for vg minimizer
+def get_minimizer_for_sample(sample_name):
+    fastq_path = None
+    cleaned_path = f"{experiment_name}_results/{sample_name}/{sample_name}_clean_R1.fastq"
+    
+    if os.path.exists(cleaned_path):
+        fastq_path = cleaned_path
+    
+    if fastq_path is None or not os.path.exists(fastq_path):
+        print(f"Warning: Could not find fastq for {sample_name}, using default minimizer", flush=True)
+        return vg_index + ".d2.min"
+    
+    total_length = 0
+    read_count = 0
+    max_reads = 1000
+    
+    try:
+        opener = open
+        mode = 'r'
+        with opener(fastq_path, mode) as f:
+            for i, line in enumerate(f):
+                if i % 4 == 1:
+                    total_length += len(line.strip())
+                    read_count += 1
+                    if read_count >= max_reads:
+                        break
+        
+        if read_count > 0:
+            avg_length = total_length / read_count
+            print(f"Sample {sample_name}: Average read length = {avg_length:.1f}bp", flush=True)
+            
+            if avg_length < 50:
+                print(f"Using shortest read minimizer (k=15)", flush=True)
+                return vg_index + ".d2.k15.min"
+            else:
+                print(f"Using standard minimizer (k=29)", flush=True)
+                return vg_index + ".d2.min"
+    except Exception as e:
+        return vg_index + ".d2.min"
+
 
 #Getting SE or PE
 SAMPLES = config.get("samples", {})
@@ -229,7 +269,7 @@ if SE:
         params:
             graph=vg_index+".d2.gbz",
             dist=vg_index+".d2.dist",
-            min=vg_index+".d2.min"
+            min=lambda wc: get_minimizer_for_sample(wc.sample)
         threads: 12
         benchmark: f"benchmarks/{{sample}}_giraffe_benchmark.txt"
         shell:
@@ -329,7 +369,7 @@ else:
         params:
             graph=vg_index+".d2.gbz",
             dist=vg_index+".d2.dist",
-            min=vg_index+".d2.min"
+            min=lambda wc: get_minimizer_for_sample(wc.sample)
         threads: 12
         benchmark: f"benchmarks/{{sample}}_giraffe_benchmark.txt"
         shell:

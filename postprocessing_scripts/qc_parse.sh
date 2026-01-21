@@ -1,98 +1,122 @@
 #Script used to extract QC information from GSEs after they run
 
 OUTPUT="sample_metrics.tsv"
-#QC metrics we are looking for
-echo -e "sample\tgrowth_phase\tstrandedness_t_ratio\ttRNA_fraction\trRNA_fraction\tcontamination_percent\tpaired_single_end\tGC_bias\tTotal_reads" > "$OUTPUT"
+INDEX="sample_dirs.tsv"
 
-while read SAMPLE GROWTH; do
+#Getting directories
+> "$INDEX"
+
+for d in GSE*/*_results/GSM*; do
+    [[ -d "$d" ]] || continue
+    sample=$(basename "$d")
+    echo -e "$sample\t$d" >> "$INDEX"
+done
+
+#QC metrics we are looking for
+echo -e "sample\tstrandedness_t_ratio\ttRNA_fraction\trRNA_fraction\tcontamination_percent\tpaired_single_end\tGC_bias\tfraction_aligned\tfraction_perfect_aligned" > "$OUTPUT"
+
+while IFS=$'\t' read -r SAMPLE SAMPLE_DIR; do
     echo "Processing $SAMPLE..."
 
-    GSM_PREFIX=$(echo "$SAMPLE" | cut -d'_' -f1)
+    GSM_PREFIX=${SAMPLE%%_*}
 
-    #Look for sample directory (have list of total GSE)
-    SAMPLE_DIR=$(find . -type d -path "*/GSE*/*_results/${GSM_PREFIX}_*" 2>/dev/null | head -1 || true)
+    #Strandedness
+    shopt -s nullglob
+    INFER_FILES=("$SAMPLE_DIR"/rseqc/"${GSM_PREFIX}"*_infer_experiment.txt)
+    shopt -u nullglob
 
-    if [[ -z "$SAMPLE_DIR" ]]; then
-        echo "Warning: $SAMPLE directory not found, filling with NAs"
-        echo -e "$SAMPLE\t$GROWTH\tNA\tNA\tNA\tNA\tNA\tNA\tNA" >> "$OUTPUT"
-        continue
-    fi
-
-    #Strandedness ratio
-    INFER_FILE=$(find "$SAMPLE_DIR/rseqc" -name "*_infer_experiment.txt" 2>/dev/null | head -1 || true)
-    if [[ -f "$INFER_FILE" ]]; then
+    if (( ${#INFER_FILES[@]} )); then
         STRANDED=$(awk '
-            BEGIN{val="NA"}
-            /^This is/ {if($3=="SingleEnd") type="Single"; else type="Paired"}
-            /Fraction of reads explained/ {
-                match($0, /: ([0-9.]+)/, arr)
-                if(arr[1]!="") val=arr[1]
+            /Fraction of reads explained/{
+                match($0, /: ([0-9.]+)/, a); print a[1]; exit
             }
-            END {printf "%s", val}
-        ' "$INFER_FILE")
+        ' "${INFER_FILES[0]}")
     else
         STRANDED="NA"
     fi
 
-    #tRNA and rRNA fractions
-    FEATURE_FILE=$(find "$SAMPLE_DIR/feature_overlap" -name "*_feature_overlap_mqc.tsv" 2>/dev/null | head -1 || true)
-    if [[ -f "$FEATURE_FILE" ]]; then
-        tRNA=$(awk '$1=="tRNA"{print $2}' "$FEATURE_FILE")
-        rRNA=$(awk '$1=="rRNA"{print $2}' "$FEATURE_FILE")
+    #tRNA / rRNA fractions
+    shopt -s nullglob
+    FEATURE_FILES=("$SAMPLE_DIR"/feature_overlap/"${GSM_PREFIX}"*_feature_overlap_mqc.tsv)
+    shopt -u nullglob
+    
+    if (( ${#FEATURE_FILES[@]} )); then
+        read tRNA rRNA <<< $(awk '
+            BEGIN{t="NA"; r="NA"}
+            $1=="tRNA" && $2 ~ /^[0-9.]+$/ {t=$2/100}
+            $1=="rRNA" && $2 ~ /^[0-9.]+$/ {r=$2/100}
+            END{
+                printf "%s %s",
+                    (t=="NA" ? "NA" : sprintf("%.4f", t)),
+                    (r=="NA" ? "NA" : sprintf("%.4f", r))
+            }
+        ' "${FEATURE_FILES[0]}")
     else
         tRNA="NA"
         rRNA="NA"
     fi
 
-    #Contamination (non e coli reads)
-    CENT_FILE=$(find "$SAMPLE_DIR/centrifuge" -name "*_report.txt" 2>/dev/null | head -1 || true)
-    if [[ -f "$CENT_FILE" ]]; then
-        E_COLI=$(awk '$6=="Escherichia" && $7=="coli"{print $1}' "$CENT_FILE")
-        if [[ -n "$E_COLI" ]]; then
-            CONTAM=$(awk -v x="$E_COLI" 'BEGIN{print 100 - x}')
-        else
-            CONTAM="NA"
-        fi
+    #Contamination percentage
+    shopt -s nullglob
+    CENT_FILES=("$SAMPLE_DIR"/centrifuge/"${GSM_PREFIX}"*_report.txt)
+    shopt -u nullglob
+
+    if (( ${#CENT_FILES[@]} )); then
+        E_COLI=$(awk '$6=="Escherichia" && $7=="coli"{print $1; exit}' "${CENT_FILES[0]}")
+        [[ -n "$E_COLI" ]] && CONTAM=$(awk -v x="$E_COLI" 'BEGIN{print 100-x}') || CONTAM="NA"
     else
         CONTAM="NA"
     fi
 
-    #Paired versus single end
-    if ls "$SAMPLE_DIR/fastqc/"*R2*fastqc.html &> /dev/null; then
-        PAIRED="Paired"
-    else
-        PAIRED="Single"
-    fi
+    #Sequencing type
+    shopt -s nullglob
+    R2_FILES=("$SAMPLE_DIR"/fastqc/*R2*fastqc.html)
+    (( ${#R2_FILES[@]} )) && PAIRED="Paired" || PAIRED="Single"
+    shopt -u nullglob
 
-    #GC bias and total number of reads
-    FASTQC_ZIP=$(find "$SAMPLE_DIR/fastqc" -name "*_clean_R1_fastqc.zip" 2>/dev/null | head -1 || true)
-    FASTQC_DIR=$(find "$SAMPLE_DIR/fastqc" -name "*_clean_R1_fastqc" -type d 2>/dev/null | head -1 || true)
+    #GC bias
+    shopt -s nullglob
+    FASTQC_ZIPS=("$SAMPLE_DIR"/fastqc/*_clean_R1_fastqc.zip)
+    shopt -u nullglob
 
-    if [[ -z "$FASTQC_DIR" && -n "$FASTQC_ZIP" ]]; then
-        unzip -q "$FASTQC_ZIP" -d "$SAMPLE_DIR/fastqc"
-        FASTQC_DIR=$(find "$SAMPLE_DIR/fastqc" -name "*_clean_R1_fastqc" -type d 2>/dev/null | head -1 || true)
-    fi
-
-    FASTQC_FILE="$FASTQC_DIR/fastqc_data.txt"
-
-    if [[ -f "$FASTQC_FILE" ]]; then
-        read GC TOTAL <<< $(awk '
-            BEGIN {gc_sum=0; gc_count=0; total_reads="NA"; in_gc=0; in_basic=0}
-            /^>>Basic Statistics/ {in_basic=1}
-            /^>>Per base sequence content/ {in_gc=1; next}
-            /^>>END_MODULE/ {in_gc=0; in_basic=0}
-            in_gc && !/^#/ {gc_sum+=$2; gc_count++}
-            in_basic && /Total Sequences/ {total_reads=$3}
-            END {if(gc_count>0) printf "%.2f ", gc_sum/gc_count; else printf "NA "; print total_reads}
-        ' "$FASTQC_FILE")
+    if (( ${#FASTQC_ZIPS[@]} )); then
+        GC=$(unzip -p "${FASTQC_ZIPS[0]}" */fastqc_data.txt | awk '
+            BEGIN{gc=0;n=0;g=0}
+            /^>>Per base sequence content/{g=1;next}
+            /^>>END_MODULE/{g=0}
+            g && !/^#/{gc+=$2;n++}
+            END{if(n>0) printf "%.2f\n", gc/n; else print "NA"}
+        ')
     else
         GC="NA"
-        TOTAL="NA"
     fi
 
-    echo -e "$SAMPLE\t$GROWTH\t$STRANDED\t$tRNA\t$rRNA\t$CONTAM\t$PAIRED\t$GC\t$TOTAL" >> "$OUTPUT"
+    #Alignment stats
+    shopt -s nullglob
+    VG_FILES=("$SAMPLE_DIR"/vg/"${SAMPLE}"*_giraffe.stats.txt)
+    shopt -u nullglob
 
-done < labels.txt #List of GSEs analyzed
+    if (( ${#VG_FILES[@]} )); then
+        read TOTAL_ALN ALIGNED PERFECT <<< $(awk '
+            /Total alignments:/ {ta=$3}
+            /Total aligned:/    {al=$3}
+            /Total perfect:/    {pe=$3}
+            END{print ta, al, pe}
+        ' "${VG_FILES[0]}")
 
-echo "Complete. Results saved to $OUTPUT"
+        if [[ -n "${TOTAL_ALN:-}" && "$TOTAL_ALN" -gt 0 ]]; then
+            FRACTION_ALIGNED=$(awk -v a="$ALIGNED" -v t="$TOTAL_ALN" 'BEGIN{printf "%.4f", a/t}')
+            FRACTION_PERFECT=$(awk -v p="$PERFECT" -v t="$TOTAL_ALN" 'BEGIN{printf "%.4f", p/t}')
+        else
+            FRACTION_ALIGNED="NA"
+            FRACTION_PERFECT="NA"
+        fi
+    else
+        FRACTION_ALIGNED="NA"
+        FRACTION_PERFECT="NA"
+    fi
+
+    echo -e "$SAMPLE\t$STRANDED\t$tRNA\t$rRNA\t$CONTAM\t$PAIRED\t$GC\t$FRACTION_ALIGNED\t$FRACTION_PERFECT" >> "$OUTPUT"
+
+done < "$INDEX"
 
