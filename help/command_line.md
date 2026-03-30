@@ -37,7 +37,7 @@ Enter the following information when prompted:
 
 Now we can download the resource folder and unzip it from CyVerse. This may take a while as this directory is quite large.
 ```
-gocmd get --progress -f -K --icat /iplant/home/shared/NCEMS/working-groups/bacterial-states/resources.tar.gz
+gocmd get --progress -f --icat /iplant/home/shared/NCEMS/working-groups/bacterial-states/resources.tar.gz
 tar -xvzf resources.tar.gz
 ```
 
