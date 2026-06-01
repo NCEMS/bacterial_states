@@ -1,0 +1,186 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+BASE_URL="https://data.cyverse.org/dav-anon/iplant/home/shared/NCEMS/working-groups/bacterial-states/atlas/raw_v3"
+WORKDIR="./qc_inputs"
+OUTPUT="sample_metrics.tsv"
+MAX_JOBS=4
+
+#mkdir -p "$WORKDIR"
+
+#Needed because of the slow IO on cyverse
+#stage_sample() {
+#    local SAMPLE=$1 GSE=$2
+#    local REMOTE_BASE="$BASE_URL/$GSE/${GSE}_results/$SAMPLE"
+#    local LOCAL_DIR="$WORKDIR/$GSE/$SAMPLE"
+#    mkdir -p "$LOCAL_DIR"
+
+#    local FILES=(
+#        "rseqc/${SAMPLE}_infer_experiment.txt"
+#        "feature_overlap/${SAMPLE}_feature_overlap_mqc.tsv"
+#        "centrifuge/${SAMPLE}_report.txt"
+#        "fastqc/${SAMPLE}_clean_R1_fastqc.zip"
+#        "fastqc/${SAMPLE}_clean_R2_fastqc.zip"
+#        "vg/${SAMPLE}_giraffe.stats.txt"
+#    )
+#
+#    for f in "${FILES[@]}"; do
+#        local dest="$LOCAL_DIR/$(basename "$f")"
+#        # skip if already downloaded
+#        [[ -f "$dest" ]] && continue
+#        local url="${REMOTE_BASE}/${f}"
+#        echo "  fetching: $(basename "$f")" >&2
+#        local http_code
+#        http_code=$(curl -s -L -o "$dest" -w "%{http_code}" "$url")
+#        if [[ "$http_code" == "200" ]]; then
+#            : # success
+#        elif [[ "$http_code" == "404" ]]; then
+#            echo "WARN: file does not exist on remote (404) ${f}" >&2
+#            rm -f "$dest"
+#        else
+#            echo "WARN: unexpected HTTP ${http_code} for ${f} — will retry next run" >&2
+#            rm -f "$dest"
+#        fi
+#    done
+#    echo "  staged: $SAMPLE"
+#}
+
+#export -f stage_sample
+#export BASE_URL WORKDIR
+
+#if command -v parallel &>/dev/null; then
+#    awk '{print $1"\t"$2}' labels.txt \
+#        | parallel -j "$MAX_JOBS" --line-buffer --colsep '\t' stage_sample {1} {2}
+#else
+#    active=0
+#    while IFS=$'\t' read -r SAMPLE GSE _; do
+#        stage_sample "$SAMPLE" "$GSE" &
+#        (( ++active ))
+#        if (( active >= MAX_JOBS )); then
+#            wait -n 2>/dev/null || wait
+#            (( --active ))        fi
+#    done < labels.txt
+#    wait
+#fi
+
+echo "Staging complete."
+
+echo "Processing..."
+
+process_sample() {
+    local SAMPLE=$1
+    local GSE=$2
+    local SAMPLE_DIR="$WORKDIR/$GSE/$SAMPLE"
+
+    if [[ ! -d "$SAMPLE_DIR" ]]; then
+        echo -e "$SAMPLE\tNA\tNA\tNA\tNA\tNA\tNA\tNA\tNA\tNA"
+        return
+    fi
+
+    #Strandedness (already a fraction from rseqc)
+    local STRANDED="NA"
+    shopt -s nullglob
+    local INFER_FILES=("$SAMPLE_DIR"/*_infer_experiment.txt)
+    shopt -u nullglob
+    if (( ${#INFER_FILES[@]} )); then
+        STRANDED=$(awk '
+            /Fraction of reads explained/ {
+                n = index($0, ":"); if (n > 0) { val = substr($0, n+2); gsub(/[[:space:]]/, "", val) }
+            }
+            END { print (val != "" ? val : "NA") }
+        ' "${INFER_FILES[0]}")
+    fi
+
+    #tRNA / rRNA (raw values are %, convert to fraction)
+    local tRNA="NA" rRNA="NA"
+    shopt -s nullglob
+    local FEATURE_FILES=("$SAMPLE_DIR"/*_feature_overlap_mqc.tsv)
+    shopt -u nullglob
+    if (( ${#FEATURE_FILES[@]} )); then
+        tRNA=$(awk '$1=="tRNA" && $2~/^[0-9.]+$/ { printf "%.4f", $2/100; exit }' "${FEATURE_FILES[0]}"); [[ -z "$tRNA" ]] && tRNA="NA"
+        rRNA=$(awk '$1=="rRNA" && $2~/^[0-9.]+$/ { printf "%.4f", $2/100; exit }' "${FEATURE_FILES[0]}"); [[ -z "$rRNA" ]] && rRNA="NA"
+    fi
+
+    #Contamination (raw is %, convert to fraction)
+    local CONTAM="NA"
+    shopt -s nullglob
+    local CENT_FILES=("$SAMPLE_DIR"/*_report.txt)
+    shopt -u nullglob
+    if (( ${#CENT_FILES[@]} )); then
+        local E_COLI
+        E_COLI=$(awk '$6=="Escherichia" && $7=="coli" {print $1; exit}' "${CENT_FILES[0]}")
+        [[ -n "$E_COLI" ]] && CONTAM=$(awk -v x="$E_COLI" 'BEGIN { printf "%.4f", (100 - x) / 100 }')
+    fi
+
+    #Paired vs single (based on whether R2 fastqc zip was downloaded)
+    local PAIRED="Single"
+    shopt -s nullglob
+    local R2_FILES=("$SAMPLE_DIR"/*_clean_R2_fastqc.zip)
+    shopt -u nullglob
+    (( ${#R2_FILES[@]} )) && PAIRED="Paired"
+
+    #GC bias (raw is %, convert to fraction) + total reads
+    local GC="NA" TOTAL="NA"
+    shopt -s nullglob
+    local FASTQC_ZIPS=("$SAMPLE_DIR"/*_clean_R1_fastqc.zip)
+    shopt -u nullglob
+    if (( ${#FASTQC_ZIPS[@]} )); then
+        local FASTQC_FILE
+        FASTQC_FILE=$(unzip -Z1 "${FASTQC_ZIPS[0]}" 2>/dev/null | grep "fastqc_data.txt" | head -n1)
+        if [[ -n "$FASTQC_FILE" ]]; then
+            read -r GC TOTAL <<< "$(unzip -p "${FASTQC_ZIPS[0]}" "$FASTQC_FILE" | awk '
+                BEGIN { gc_sum=0; gc_count=0; total_reads="NA"; in_gc=0; in_basic=0 }
+                /^>>Basic Statistics/          { in_basic=1 }
+                /^>>Per base sequence content/ { in_gc=1; next }
+                /^>>END_MODULE/                { in_gc=0; in_basic=0 }
+                in_gc && !/^#/                 { gc_sum += $2; gc_count++ }
+                in_basic && /Total Sequences/  { total_reads = $3 }
+                END { printf "%s %s\n", (gc_count>0 ? sprintf("%.4f", gc_sum/gc_count/100) : "NA"), total_reads }
+            ')"
+        fi
+    fi
+
+    #Alignment fractions
+    local FRACTION_ALIGNED="NA" FRACTION_PERFECT="NA"
+    shopt -s nullglob
+    local ALIGN_FILES=("$SAMPLE_DIR"/*_giraffe.stats.txt)
+    shopt -u nullglob
+    if (( ${#ALIGN_FILES[@]} )); then
+        read -r TOTAL_ALN ALIGNED PERFECT <<< "$(awk '
+            /^Total alignments:/ { ta=$3 }
+            /^Total aligned:/    { al=$3 }
+            /^Total perfect:/    { pe=$3 }
+            END { print ta, al, pe }
+        ' "${ALIGN_FILES[0]}")"
+        if [[ -n "${TOTAL_ALN:-}" && "$TOTAL_ALN" -gt 0 ]]; then
+            FRACTION_ALIGNED=$(awk -v a="$ALIGNED" -v t="$TOTAL_ALN" 'BEGIN { printf "%.4f", a/t }')
+            if [[ -n "${ALIGNED:-}" && "$ALIGNED" -gt 0 ]]; then
+                FRACTION_PERFECT=$(awk -v p="$PERFECT" -v a="$ALIGNED" 'BEGIN { printf "%.4f", p/a }')
+            fi
+        fi
+    fi
+
+    echo -e "$SAMPLE\t$STRANDED\t$tRNA\t$rRNA\t$CONTAM\t$PAIRED\t$GC\t$TOTAL\t$FRACTION_ALIGNED\t$FRACTION_PERFECT"
+}
+
+export -f process_sample
+export WORKDIR
+
+echo -e "sample\tstrandedness_fraction\ttRNA_fraction\trRNA_fraction\tcontamination_fraction\tpaired_single_end\tGC_bias_fraction\tTotal_reads\tfraction_aligned\tfraction_perfect" > "$OUTPUT"
+
+if command -v parallel &>/dev/null; then
+    parallel -j "$MAX_JOBS" --line-buffer --colsep '\t' process_sample {1} {2} < labels.txt >> "$OUTPUT"
+else
+    active=0
+    while IFS=$'\t' read -r SAMPLE GSE _; do
+        process_sample "$SAMPLE" "$GSE" >> "$OUTPUT" &
+        (( ++active ))
+        if (( active >= MAX_JOBS )); then
+            wait -n 2>/dev/null || wait
+            (( --active ))
+        fi
+    done < labels.txt
+    wait
+fi
+
+echo "Done"
