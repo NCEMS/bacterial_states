@@ -155,7 +155,7 @@ For differential expression analysis, the final results will be in the deseq2 fo
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE). Copyright (c) 2026 National Synthesis Center for Emergence in the Molecular and Cellular Sciences (NCEMS)
+This project is licensed under the [MIT License]. Copyright (c) 2026 National Synthesis Center for Emergence in the Molecular and Cellular Sciences (NCEMS)
 
 ## Citation
 
