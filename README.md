@@ -153,19 +153,17 @@ For differential expression analysis, the final results will be in the deseq2 fo
 
 ![image](https://github.com/user-attachments/assets/32d74d65-1b3c-4b5d-8e61-6076a799f55f)
 
-## License
-
-This project is licensed under the [MIT License]. Copyright (c) 2026 National Synthesis Center for Emergence in the Molecular and Cellular Sciences (NCEMS)
 
 ## Citation
 
 If you use inGEST in your research, please cite the associated publication or project documentation when available.
 
-## Acknowledgments
-
-This project is associated with the National Synthesis Center for Emergence in the Molecular and Cellular Sciences (NCEMS).
 
 ## Contact
 
 For questions, bug reports, or contributions, please open an issue in this repository or contact the project maintainers.
+
+## License
+
+This project is licensed under the [MIT License]. Copyright (c) 2026 National Synthesis Center for Emergence in the Molecular and Cellular Sciences (NCEMS)
 
