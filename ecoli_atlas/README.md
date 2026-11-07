@@ -97,13 +97,16 @@ seeds. Judge refits by a **seed sweep**, not by one number:
 
 ```bash
 ecoli_atlas train ... --hparams outputs/models/manifest.json --splits outputs/models/splits.csv --no-tune \
-                  --seeds 1,2,3,4,5,6,7,8 --select best --out outputs/models_repro --write-atlas
+                  --seeds 1,2,3,4,5,6,7,8 --select best --select-on cv --out outputs/models_repro_sweep --write-atlas
 ```
 
 Every seed is fitted on the same split and saved under `<out>/seed_<s>/`; the selected one
-(`best` = highest mean TEST AUROC, `median`, or `first`) is promoted to `<out>/`, and its
-`manifest.json` gains a `seed_sweep` block with the per-seed TEST metrics and their min / max /
-mean / sd (also in `<out>/seed_sweep.tsv`). `verify-models --old <original> --new <out>` then
+(`best` = highest mean AUROC, `median`, or `first`) is promoted to `<out>/`, and its
+`manifest.json` gains a `seed_sweep` block with the per-seed CV and TEST metrics and their min /
+max / mean / sd (also in `<out>/seed_sweep.tsv`). Seeds are ranked on the study-level
+out-of-fold (CV) AUROC of the training pool (`--select-on cv`, the default), so TEST stays an
+unbiased check of the promoted model; `--select-on test` exists only to reproduce older sweeps.
+Re-running with `--resume` re-selects without retraining. `verify-models --old <original> --new <out>` then
 reports `old_within_new_seed_spread`: the original bundle is considered reproduced when its TEST
 metrics fall inside the sweep's range and prediction agreement is above 95 %. Exact agreement (max
 deviation < 1e-4) is expected only when re-loading the same weights.

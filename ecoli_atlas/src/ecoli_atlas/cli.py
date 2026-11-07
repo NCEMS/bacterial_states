@@ -124,7 +124,7 @@ def cmd_train(args) -> int:
     from .data import build_training_data
     from .io import read_counts, read_metadata
     from .splits import load_splits
-    from .sweep import promote_bundle, select_seed, summarize_sweep, write_sweep
+    from .sweep import promote_bundle, seed_score, select_seed, summarize_sweep, write_sweep
     from .train import reload_check, run_training
 
     device = pick_device(args.device)
@@ -146,6 +146,9 @@ def cmd_train(args) -> int:
     seeds = [int(x) for x in args.seeds.split(",") if x.strip()] if args.seeds else [cfg.seed]
     if len(set(seeds)) != len(seeds):
         _info("error: --seeds contains duplicates")
+        return 1
+    if len(seeds) > 1 and args.select != "first" and args.select_on == "cv" and args.no_thresholds:
+        _info("error: ranking seeds on CV needs the out-of-fold refits; drop --no-thresholds or use --select first")
         return 1
 
     counts = read_counts(args.counts, strip_sample_names=False)
@@ -187,15 +190,25 @@ def cmd_train(args) -> int:
         manifests[seed] = reloaded.manifest
     if len(seeds) > 1:
         summary = summarize_sweep(manifests)
-        selected = select_seed(manifests, args.select)
+        try:
+            selected = select_seed(manifests, args.select, args.select_on)
+        except ValueError as exc:
+            _info(f"error: {exc}")
+            return 1
         summary["selected_seed"] = selected
         summary["selection_rule"] = args.select
+        summary["selection_metric"] = None if args.select == "first" else f"mean {args.select_on} AUROC"
         promote_bundle(sweep_dirs[selected], out, summary)
         write_sweep(summary, out)
-        _info(f"seed sweep: selected seed {selected} ({args.select}); per-factor TEST balanced accuracy spread:")
-        for f, st in summary["spread"].items():
-            ba = st["balanced_acc"]
-            _info(f"  {f:14s} min={ba['min']:.3f} mean={ba['mean']:.3f} max={ba['max']:.3f} sd={ba['sd']:.3f}")
+        _info(f"seed sweep: selected seed {selected} ({args.select}"
+              + ("" if args.select == "first" else f" by mean {args.select_on.upper()} AUROC "
+                 f"= {seed_score(manifests[selected], args.select_on):.3f}") + ")")
+        _info("per-factor balanced accuracy spread (CV = out-of-fold on the training pool):")
+        for f in summary["spread"]:
+            for label, block in (("CV", summary["cv_spread"]), ("TEST", summary["spread"])):
+                ba = block[f]["balanced_acc"]
+                if ba.get("n"):
+                    _info(f"  {f:14s} {label:4s} min={ba['min']:.3f} mean={ba['mean']:.3f} max={ba['max']:.3f} sd={ba['sd']:.3f}")
         _info(f"promoted {sweep_dirs[selected]} -> {out}; details in {out / 'seed_sweep.tsv'}")
         reloaded = ModelBundle.load(out, device)
 
@@ -276,9 +289,13 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--min-class-n", type=int)
     sp.add_argument("--seed", type=int, help="seed for the split search and for a single fit (default 77)")
     sp.add_argument("--seeds", help="comma-separated seeds: fit each on the same split, save them under <out>/seed_<s>/, "
-                                    "promote one to <out>/ and record the spread of TEST metrics in its manifest")
+                                    "promote one to <out>/ and record the spread of CV and TEST metrics in its manifest")
     sp.add_argument("--select", default="best", choices=["best", "median", "first"],
-                    help="which seed to promote in a sweep: best = highest mean TEST AUROC, median = closest to the median, first")
+                    help="which seed to promote in a sweep: best = highest mean AUROC (see --select-on), "
+                         "median = closest to the median, first")
+    sp.add_argument("--select-on", default="cv", choices=["cv", "test"],
+                    help="metric the seeds are ranked on: cv = study-level out-of-fold AUROC on the training pool "
+                         "(default; keeps TEST untouched), test = TEST AUROC (biased; only to reproduce old sweeps)")
     sp.add_argument("--resume", action="store_true",
                     help="in a sweep, reuse seeds whose bundle already exists under <out>/seed_<s>/ instead of "
                          "retraining (continue a sweep after a job hit its wall-time limit)")

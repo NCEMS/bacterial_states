@@ -128,7 +128,7 @@ def test_seed_sweep(synthetic, tmp_path):
     rc = main(["train", "--counts", str(synthetic / "merged_count_table.txt"),
                "--metadata", str(synthetic / "metadata_revised.csv"),
                "--feature-table", str(synthetic / "feature_table.txt"),
-               "--out", str(out), "--no-tune", "--factor-epochs", "1", "--top-epochs", "1", "--no-thresholds",
+               "--out", str(out), "--no-tune", "--factor-epochs", "1", "--top-epochs", "1",
                "--min-class-n", "5", "--test-frac", "0.15", "--device", "cpu", "--seeds", "1,2", "--select", "best",
                "--write-atlas"])
     assert rc == 0
@@ -138,8 +138,13 @@ def test_seed_sweep(synthetic, tmp_path):
     assert sweep["seeds"] == [1, 2] and sweep["selected_seed"] in (1, 2) and manifest["seed"] == sweep["selected_seed"]
     assert set(sweep["spread"]) == {"growth_phase", "medium_type", "is_lab_strain"}
     assert sweep["spread"]["growth_phase"]["auroc"]["n"] == 2
+    assert sweep["cv_spread"]["growth_phase"]["auroc"]["n"] == 2
+    # seeds are ranked on the out-of-fold CV AUROC of the training pool, never on TEST
+    assert sweep["selection_metric"] == "mean cv AUROC"
+    cv = {s: np.mean([v["cv_auroc"] for v in sweep["per_seed"][str(s)].values()]) for s in (1, 2)}
+    assert sweep["selected_seed"] == max(cv, key=cv.get)
     tsv = pd.read_csv(out / "seed_sweep.tsv", sep="\t")
-    assert len(tsv) == 6 and tsv["selected"].sum() == 3
+    assert len(tsv) == 6 and tsv["selected"].sum() == 3 and {"cv_auroc", "cv_balanced_acc"} <= set(tsv.columns)
     # the promoted bundle is byte-identical to the selected seed's bundle
     sel = out / f"seed_{sweep['selected_seed']}"
     assert (out / "residual_ae.pt").read_bytes() == (sel / "residual_ae.pt").read_bytes()
@@ -159,7 +164,7 @@ def test_seed_sweep_resume(synthetic, tmp_path):
     base = ["train", "--counts", str(synthetic / "merged_count_table.txt"), "--metadata", str(synthetic / "metadata_revised.csv"),
             "--feature-table", str(synthetic / "feature_table.txt"), "--out", str(out), "--no-tune", "--factor-epochs", "1",
             "--top-epochs", "1", "--no-thresholds", "--min-class-n", "5", "--test-frac", "0.15", "--device", "cpu",
-            "--seeds", "1,2,3", "--threads", "2"]
+            "--select", "first", "--seeds", "1,2,3", "--threads", "2"]
     assert main(base[:-4] + ["--seeds", "1,2", "--threads", "2"]) == 0        # an earlier, shorter sweep
     assert (out / "seed_1" / "manifest.json").exists() and (out / "seed_2" / "manifest.json").exists()
     stamp = (out / "seed_1" / "residual_ae.pt").stat().st_mtime_ns
@@ -167,3 +172,10 @@ def test_seed_sweep_resume(synthetic, tmp_path):
     assert (out / "seed_1" / "residual_ae.pt").stat().st_mtime_ns == stamp         # not retrained
     manifest = json.loads((out / "manifest.json").read_text())
     assert manifest["seed_sweep"]["seeds"] == [1, 2, 3]
+
+
+def test_seed_sweep_cv_selection_needs_thresholds(synthetic, tmp_path):
+    rc = main(["train", "--counts", str(synthetic / "merged_count_table.txt"), "--metadata", str(synthetic / "metadata_revised.csv"),
+               "--feature-table", str(synthetic / "feature_table.txt"), "--out", str(tmp_path / "s"), "--no-tune",
+               "--no-thresholds", "--device", "cpu", "--seeds", "1,2"])
+    assert rc == 1 and not (tmp_path / "s").exists()

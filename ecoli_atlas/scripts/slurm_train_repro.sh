@@ -13,7 +13,7 @@ set -euo pipefail
 
 DATA=${ECOLI_ATLAS_DATA:-atlas_data}
 OLD=${ECOLI_ATLAS_MODELS:-outputs/models}
-NEW=${NEW_MODELS:-outputs/models_repro}
+NEW=${NEW_MODELS:-outputs/models_repro_sweep}
 
 SEEDS=${SEEDS:-1,2,3,4,5,6,7,8}
 

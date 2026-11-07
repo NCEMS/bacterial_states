@@ -1,9 +1,14 @@
-"""Seed sweeps: summarise TEST metrics across seeds, pick one bundle, record the spread.
+"""Seed sweeps: summarise metrics across seeds, pick one bundle, record the spread.
 
 With a TEST set of about 120 samples from a handful of studies, a single fit's balanced accuracy
 moves by 0.1 to 0.2 between seeds. Judging a refit by one number is therefore not meaningful; the
 honest statement is the spread over several seeds, which this module records in the promoted
 bundle's ``manifest.json`` under ``seed_sweep`` and in ``seed_sweep.{json,tsv}``.
+
+Seeds are ranked on the study-level out-of-fold (CV) scores of the training pool
+(``threshold_diagnostics`` in each manifest, ~900 samples per factor), not on TEST: picking the
+best of many seeds by TEST would make the promoted bundle's TEST metrics optimistically biased.
+``on="test"`` is kept only to reproduce older sweeps.
 """
 from __future__ import annotations
 
@@ -26,29 +31,48 @@ def summarize_sweep(manifests: dict) -> dict:
     per_seed = {}
     for s in seeds:
         m = manifests[s]
-        per_seed[str(s)] = {f: {k: m["test_metrics"].get(f, {}).get(k) for k in METRICS} | {"threshold": m["factor_thresholds"].get(f)}
+        cv = m.get("threshold_diagnostics") or {}
+        per_seed[str(s)] = {f: {k: m["test_metrics"].get(f, {}).get(k) for k in METRICS}
+                            | {f"cv_{k}": cv.get(f, {}).get(k) for k in METRICS}
+                            | {"threshold": m["factor_thresholds"].get(f)}
                             for f in factors}
-    spread = {}
-    for f in factors:
-        spread[f] = {}
-        for k in METRICS:
-            vals = np.array([per_seed[str(s)][f][k] for s in seeds if per_seed[str(s)][f][k] is not None], dtype=float)
-            spread[f][k] = ({"n": int(len(vals)), "min": float(vals.min()), "max": float(vals.max()),
-                             "mean": float(vals.mean()), "sd": float(vals.std(ddof=1)) if len(vals) > 1 else 0.0}
-                            if len(vals) else {"n": 0})
-    return {"seeds": seeds, "per_seed": per_seed, "spread": spread}
+
+    def _spread(key):
+        out = {}
+        for f in factors:
+            out[f] = {}
+            for k in METRICS:
+                vals = np.array([per_seed[str(s)][f][key(k)] for s in seeds if per_seed[str(s)][f][key(k)] is not None],
+                                dtype=float)
+                out[f][k] = ({"n": int(len(vals)), "min": float(vals.min()), "max": float(vals.max()),
+                              "mean": float(vals.mean()), "sd": float(vals.std(ddof=1)) if len(vals) > 1 else 0.0}
+                             if len(vals) else {"n": 0})
+        return out
+
+    return {"seeds": seeds, "per_seed": per_seed, "spread": _spread(lambda k: k), "cv_spread": _spread(lambda k: f"cv_{k}")}
 
 
-def _mean_auroc(manifest: dict) -> float:
-    vals = [v.get("auroc") for v in manifest["test_metrics"].values() if v.get("auroc") is not None]
+def seed_score(manifest: dict, on: str = "cv") -> float:
+    """Mean AUROC over factors: out-of-fold CV on the training pool (``cv``) or TEST (``test``)."""
+    if on == "cv":
+        block = manifest.get("threshold_diagnostics") or {}
+    elif on == "test":
+        block = manifest["test_metrics"]
+    else:
+        raise ValueError(f"unknown selection metric {on!r}")
+    vals = [v.get("auroc") for v in block.values() if v.get("auroc") is not None and not np.isnan(v["auroc"])]
     return float(np.mean(vals)) if vals else float("nan")
 
 
-def select_seed(manifests: dict, rule: str = "best") -> int:
+def select_seed(manifests: dict, rule: str = "best", on: str = "cv") -> int:
     seeds = list(manifests)
     if rule == "first":
         return seeds[0]
-    scores = {s: _mean_auroc(manifests[s]) for s in seeds}
+    scores = {s: seed_score(manifests[s], on) for s in seeds}
+    if any(np.isnan(v) for v in scores.values()):
+        missing = [s for s, v in scores.items() if np.isnan(v)]
+        raise ValueError(f"seeds {missing} have no {on} AUROC to rank on"
+                         + (" (trained with --no-thresholds?)" if on == "cv" else ""))
     if rule == "best":
         return max(seeds, key=lambda s: scores[s])
     if rule == "median":
