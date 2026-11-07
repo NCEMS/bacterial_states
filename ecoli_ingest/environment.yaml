@@ -1,0 +1,41 @@
+# Conda environment for running Ecoli_inGEST WITHOUT the Apptainer image.
+#
+#   mamba env create -f ecoli_ingest/environment.yaml
+#   conda activate ecoli_ingest
+#   pip install -e ./ecoli_ingest
+#
+# This list is the single source of truth for the workflow's tool dependencies; the container
+# definition in build/Singularity.def is rebuilt from the same list. Only tools the Snakefile and
+# its scripts actually call are included.
+name: ecoli_ingest
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.11
+  - pip
+  - pyyaml
+  - pandas
+  - numpy
+  - snakemake-minimal>=9,<10
+  # read QC / trimming / contamination
+  - fastp
+  - fastqc=0.12.1       # the Java FastQC; 0.13 is a different program with another CLI
+  - openjdk
+  - centrifuge
+  # alignment to the pangenome graph and BAM handling
+  - vg=1.63.1
+  - samtools
+  - bedtools
+  # quantification and RNA-seq QC
+  - subread
+  - rseqc
+  - multiqc=1.26
+  # differential expression
+  - r-base
+  - bioconductor-deseq2
+  - r-ggplot2
+  - r-tibble
+  - r-dplyr
+  - r-readr
+  - r-jsonlite

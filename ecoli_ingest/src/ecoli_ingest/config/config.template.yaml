@@ -1,0 +1,49 @@
+# Ecoli_inGEST run configuration. Written by `ecoli_ingest init`; edit and then run
+# `ecoli_ingest check` followed by `ecoli_ingest run` in this directory.
+#
+# Paths are relative to this directory. Outputs go to <experiment>_results/ next to this file.
+
+experiment: "my_experiment"
+
+# One entry per sample. Give r2 for paired-end data. If ANY sample lacks r2 the whole run is
+# treated as single-end. `condition` is the DESeq2 grouping variable; an optional `condition2`
+# is added to the model as a second factor.
+samples:
+  wt_1:
+    r1: "reads/WT_1.fastq.gz"
+    condition: "wildtype"
+  wt_2:
+    r1: "reads/WT_2.fastq.gz"
+    condition: "wildtype"
+  ko_1:
+    r1: "reads/KO_1.fastq.gz"
+    condition: "knockout"
+  ko_2:
+    r1: "reads/KO_2.fastq.gz"
+    condition: "knockout"
+# Paired-end example:
+#  sample_a:
+#    r1: "reads/SRR33308274_1.fastq.gz"
+#    r2: "reads/SRR33308274_2.fastq.gz"
+#    condition: "wildtype"
+
+# DESeq2 contrasts as [factor, reference_level, test_level]. The reference is listed first.
+deseq2:
+  contrasts:
+    - ["condition", "wildtype", "knockout"]
+
+# Quality-control gates. A sample that fails any configured gate is excluded from alignment and
+# counting (see checkpoints/qc_failures.json). Remove a line to disable that gate.
+# Centrifuge needs the separately downloaded index (`ecoli_ingest download centrifuge`).
+centrifuge_organism: "Escherichia coli"
+centrifuge_min_percentage: 30.0
+fastp_min_kept_percentage: 75.0
+
+# Reference resources default to the standard files in the resources directory and normally need
+# no changes. Uncomment to override individual files.
+# ref: "GCF_000005845_2_ASM584v2_genomic#0#NC_000913.3"
+# vg_index: "/path/to/resources/vg/ecoli_graph_test"
+# annotation_gff: "/path/to/resources/annotation/GCF_000005845.2_ASM584v2_genomic_siRNA.gff"
+# annotation_source_gff: "/path/to/resources/annotation/GCF_000005845.2_ASM584v2_genomic.gff"
+# annotation_bed: "/path/to/resources/annotation/GCF_000005845.2_ASM584v2_genomic.bed"
+# centrifuge_index_path: "/path/to/resources/centrifuge/p_compressed+h+v"

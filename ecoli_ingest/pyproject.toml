@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ecoli-ingest"
+version = "0.1.0"
+description = "Ecoli_inGEST: Snakemake RNA-seq workflow for E. coli with a launcher that runs in any directory"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "NCEMS, Penn State" }]
+dependencies = [
+    "pyyaml>=5.4",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[project.scripts]
+ecoli_ingest = "ecoli_ingest.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/NCEMS/bacterial_states"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+ecoli_ingest = [
+    "workflow/Snakefile",
+    "workflow/scripts/*",
+    "workflow/envs/*",
+    "config/*",
+    "resources.manifest.tsv",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

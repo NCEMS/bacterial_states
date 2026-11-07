@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Run the ecoli_atlas CLI straight from this checkout without installing it (the active Python
+# still needs the dependencies: torch, numpy, pandas, scipy, scikit-learn, pyyaml).
+repo="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+PYTHONPATH="$repo/ecoli_atlas/src${PYTHONPATH:+:$PYTHONPATH}" exec python3 -m ecoli_atlas.cli "$@"

@@ -2,14 +2,27 @@
 
 ###Getting config information
 
+import glob, json, os
+
 configfile: "config.yaml"
 experiment_name = config.get("experiment", "experiment_unknown")
-annotation_gff = config.get("annotation_gff")
-annotation_bed = config.get("annotation_bed")
-gref = config.get("ref")
-vg_index = config.get("vg_index")
+
+# Resource files default to the standard layout under `resources_dir` (the ecoli_ingest launcher
+# passes --config resources_dir=...). An explicit per-file entry in config.yaml still wins.
+# Keep these relative paths in sync with ecoli_ingest/paths.py (RESOURCE_FILES).
+resources_dir = config.get("resources_dir", "../resources")
+def _resource(key, relpath):
+    return config.get(key) or os.path.join(resources_dir, relpath)
+
+annotation_gff = _resource("annotation_gff", "annotation/GCF_000005845.2_ASM584v2_genomic_siRNA.gff")
+annotation_source_gff = _resource("annotation_source_gff", "annotation/GCF_000005845.2_ASM584v2_genomic.gff")
+annotation_bed = _resource("annotation_bed", "annotation/GCF_000005845.2_ASM584v2_genomic.bed")
+vg_index = _resource("vg_index", "vg/ecoli_graph_test")
+centrifuge_index_path = _resource("centrifuge_index_path", "centrifuge/p_compressed+h+v")
+gref = config.get("ref", "GCF_000005845_2_ASM584v2_genomic#0#NC_000913.3")
 linear_index = config.get("linear", None)
-scripts_dir = config.get("scripts_dir")
+# Workflow scripts live next to this Snakefile; override only for development.
+scripts_dir = config.get("scripts_dir") or os.path.join(workflow.basedir, "scripts")
 
 #Getting read length for vg minimizer
 def get_minimizer_for_sample(sample_name):
@@ -71,14 +84,10 @@ contrast_names = [f"{ref}_vs_{test}" for factor, ref, test in deseq2_contrasts]
 
 #QC checkpoint on/off
 fastp_qc_is_configured = config.get("fastp_min_kept_percentage") is not None
-centrifuge_qc_is_configured = (
-    config.get("centrifuge_min_percentage") is not None
-    and config.get("centrifuge_index_path") is not None
-)
+centrifuge_qc_is_configured = config.get("centrifuge_min_percentage") is not None
 
 
 ###Checkpoint function for QC metrics collected above (fastp and centrifuge)
-import json
 checkpoint qc_passed_samples:
     input:
         fastp_json=lambda wc: [
@@ -171,7 +180,6 @@ checkpoint qc_passed_samples:
             json.dump(failures, fh, indent=2)
 
 ####Helper functions for collecting samples that passed QC
-import glob, os
 #Get samples that went through the checkpoints successfully to use for rule all
 def get_passed_samples_from_checkpoint(wildcards):
     files = sorted(glob.glob("checkpoints/passed/*.pass"))
@@ -247,16 +255,16 @@ if SE:
             tsv        = temp(f"{experiment_name}_results/{{sample}}/centrifuge/{{sample}}_output.tsv"),
             report    = f"{experiment_name}_results/{{sample}}/centrifuge/{{sample}}_report.txt",
         params:
-            db = config.get("centrifuge_index_path"),
+            db = centrifuge_index_path,
         threads: 12
         benchmark: f"benchmarks/{{sample}}_centrifuge_benchmark.txt"
         shell:
             r"""
             mkdir -p {experiment_name}_results/{wildcards.sample}/centrifuge
-            centrifuge -x {params.db} -U {input.r1} -S {output.temp_report} -p {threads} >/dev/null 2>&1
+            centrifuge -x {params.db} -U {input.r1} -S {output.temp_report} -p {threads} --report-file {experiment_name}_results/{wildcards.sample}/centrifuge/{wildcards.sample}_prefilter_abundance.tsv >/dev/null 2>&1
             awk 'NR>1 && $3!=0 && $8==1 {{print $1}}' {output.temp_report} | sort -u > {output.temp_reads}
             awk 'BEGIN {{ while ((getline < "{output.temp_reads}")>0) keep[$1]=1 }} NR%4==1 {{ rid=substr($1,2); keep_read=(rid in keep) }} keep_read {{print}}' {input.r1} > {output.temp_fastq}
-            centrifuge -x {params.db} -U {output.temp_fastq} -S {output.tsv} -p {threads} >/dev/null 2>&1
+            centrifuge -x {params.db} -U {output.temp_fastq} -S {output.tsv} -p {threads} --report-file {experiment_name}_results/{wildcards.sample}/centrifuge/{wildcards.sample}_abundance.tsv >/dev/null 2>&1
             centrifuge-kreport -x {params.db} {output.tsv} > {output.report}
             """
 
@@ -345,17 +353,17 @@ else:
             tsv = temp(f"{experiment_name}_results/{{sample}}/centrifuge/{{sample}}_output.tsv"),
             report = f"{experiment_name}_results/{{sample}}/centrifuge/{{sample}}_report.txt"
         params:
-            db = config.get("centrifuge_index_path"),
+            db = centrifuge_index_path,
         threads: 12
         benchmark: f"benchmarks/{{sample}}_centrifuge_benchmark.txt"
         shell:
             r"""
             mkdir -p {experiment_name}_results/{wildcards.sample}/centrifuge
-            centrifuge -x {params.db} -1 {input.r1} -2 {input.r2} -S {output.temp_report} -p {threads} >/dev/null 2>&1
+            centrifuge -x {params.db} -1 {input.r1} -2 {input.r2} -S {output.temp_report} -p {threads} --report-file {experiment_name}_results/{wildcards.sample}/centrifuge/{wildcards.sample}_prefilter_abundance.tsv >/dev/null 2>&1
             awk 'NR>1 && $3!=0 && $8==1 {{print $1}}' {output.temp_report} | sort -u > {output.temp_reads}
             awk 'BEGIN {{ while ((getline < "{output.temp_reads}")>0) keep[$1]=1 }} NR%4==1 {{ rid=substr($1,2); keep_read=(rid in keep) }} keep_read {{print}}' {input.r1} > {output.temp_fastq_r1}
             awk 'BEGIN {{ while ((getline < "{output.temp_reads}")>0) keep[$1]=1 }} NR%4==1 {{ rid=substr($1,2); keep_read=(rid in keep) }} keep_read {{print}}' {input.r2} > {output.temp_fastq_r2}
-            centrifuge -x {params.db} -1 {output.temp_fastq_r1} -2 {output.temp_fastq_r2} -S {output.tsv} -p {threads} >/dev/null 2>&1
+            centrifuge -x {params.db} -1 {output.temp_fastq_r1} -2 {output.temp_fastq_r2} -S {output.tsv} -p {threads} --report-file {experiment_name}_results/{wildcards.sample}/centrifuge/{wildcards.sample}_abundance.tsv >/dev/null 2>&1
             centrifuge-kreport -x {params.db} {output.tsv} > {output.report}
             """
             
@@ -424,7 +432,7 @@ rule rseqc:
         sorted_bam = f"{experiment_name}_results/{{sample}}/vg/{{sample}}_sort.bam",
         bam_index = f"{experiment_name}_results/{{sample}}/vg/{{sample}}_sort.bam.bai"
     params:
-        annotation_bed = config["annotation_bed"]
+        annotation_bed = annotation_bed
     benchmark: f"benchmarks/{{sample}}_rseqc_benchmark.txt"
     shell:
         r"""
@@ -432,7 +440,9 @@ rule rseqc:
         infer_experiment.py -i {input.bam} -r {params.annotation_bed} > {output.infer_experiment}
         samtools sort {input.bam} > {output.sorted_bam}
         samtools index {output.sorted_bam}
-        geneBody_coverage.py -r <(grep "gene" {params.annotation_bed}) -i {output.sorted_bam} -o {experiment_name}_results/{wildcards.sample}/rseqc/{wildcards.sample}_genebody_cov
+        grep "gene" {params.annotation_bed} > {experiment_name}_results/{wildcards.sample}/rseqc/genes.bed
+        # run inside the rseqc directory: geneBody_coverage.py writes a log.txt into the cwd
+        (cd {experiment_name}_results/{wildcards.sample}/rseqc && geneBody_coverage.py -r genes.bed -i ../vg/{wildcards.sample}_sort.bam -o {wildcards.sample}_genebody_cov)
         """
 
 
@@ -448,13 +458,13 @@ rule featurecounts_combined:
     output:
         counts=f"{experiment_name}_results/all_samples_raw_counts.txt",
         summary=f"{experiment_name}_results/all_samples_raw_counts.txt.summary",
-        temp_gff=temp(f"{experiment_name}_results/featurecounts_temp_gff")
+        temp_gff=f"{experiment_name}_results/featurecounts/featurecounts_annotation.gff"
     params:
         pe_param = "-p" if not SE else ""
     benchmark: f"benchmarks/featurecounts_benchmark.txt"
     shell:
         r"""
-        mkdir -p $(dirname {output.counts})
+        mkdir -p $(dirname {output.counts}) $(dirname {output.temp_gff})
     
         strand=$(awk '
           /1\+\+,1--/ || /\+\+,--/ {{ strand1 = $NF + 0 }}
@@ -465,13 +475,45 @@ rule featurecounts_combined:
             else print 0;
           }}' {input.infer_experiment_for_strand})
     
-        if [ "$strand" -eq 0 ]; then
-            grep -v "ncRNA" {annotation_gff} > {output.temp_gff}
-            featureCounts -a {output.temp_gff} -o {output.counts} -t gene -g Dbxref -s 0 {params.pe_param} {input.bams}
-        else
-            awk -F"\t" 'BEGIN{{OFS="\t"}} $3=="gene" && $9 ~ /gene_biotype=ncRNA/ {{next}} {{if($3=="ncRNA") $3="gene"; print}}' {annotation_gff} > {output.temp_gff}
-            featureCounts -a {output.temp_gff} -o {output.counts} -t gene -g Dbxref -s "$strand" {params.pe_param} {input.bams}
-        fi
+        # Annotation uses generic type "feature" for every row; classify by gbkey instead.
+        #   gbkey=Gene  -> gene-level rows (protein_coding, rRNA, tRNA, pseudogene, ncRNA, ...)
+        #   gbkey=ncRNA -> RefSeq ncRNA transcripts and Rfam ncRNA predictions
+        # Unstranded: count genes only, excluding ncRNA genes.
+        # Stranded:   count non-ncRNA genes plus all gbkey=ncRNA rows (RefSeq ncRNA genes are
+        #             replaced by their ncRNA transcript rows to avoid double entries).
+        # Selected rows are retyped to "gene" so featureCounts -t gene picks them up.
+        # Features are named by gene symbol (the Name attribute), so the Geneid column of the
+        # counts table matches the gene symbols used in the previous counts tables. Rows without
+        # a Name get one: RefSeq ncRNA transcripts use their gene= attribute (same symbol as the
+        # gene row they replace); Rfam rows use their ID (e.g. Thr_leader, ES036_1), with an
+        # "_Rfam" suffix if that ID collides with a gene symbol (e.g. greA, nuoG, rimP).
+        awk -F"\t" -v strand="$strand" 'BEGIN{{OFS="\t"}}
+          /^#/ || NF != 9 {{next}}
+          NR == FNR {{
+            if ($9 ~ /(^|;)gbkey=Gene(;|$)/ && $9 ~ /(^|;)Name=/) {{
+              nm = $9; sub(/^(.*;)?Name=/, "", nm); sub(/;.*$/, "", nm); gene_names[nm] = 1
+            }}
+            next
+          }}
+          {{
+            is_gene  = ($9 ~ /(^|;)gbkey=Gene(;|$)/)
+            is_ncrna = ($9 ~ /(^|;)gbkey=ncRNA(;|$)/)
+            nc_gene  = is_gene && ($9 ~ /(^|;)gene_biotype=ncRNA(;|$)/)
+            if (strand == 0) {{ if (!is_gene || nc_gene) next }}
+            else {{ if (!(is_gene && !nc_gene) && !is_ncrna) next }}
+            if ($9 !~ /(^|;)Name=/) {{
+              if ($9 ~ /(^|;)gene=/) {{
+                nm = $9; sub(/^(.*;)?gene=/, "", nm); sub(/;.*$/, "", nm)
+              }} else {{
+                nm = $9; sub(/^(.*;)?ID=/, "", nm); sub(/;.*$/, "", nm)
+                if (nm in gene_names) nm = nm "_Rfam"
+              }}
+              $9 = $9 ";Name=" nm
+            }}
+            $3 = "gene"
+            print
+          }}' {annotation_gff} {annotation_gff} > {output.temp_gff}
+        featureCounts -a {output.temp_gff} -o {output.counts} -t gene -g Name -s "$strand" {params.pe_param} {input.bams}
         """
         
 #Sample metadata for DESeq2        
@@ -529,18 +571,20 @@ rule run_deseq2:
         ) > {output.pca_mqc}
         """
         
-#Annotating the combined counts file with metadata from NCBI
+#Annotating the combined counts table with gene identifiers (locus tag, database cross-references)
+#and product descriptions. Everything comes from the two annotation GFFs; no network access needed.
 rule annotate_counts:
     input:
-        counts=f"{experiment_name}_results/all_samples_raw_counts.txt"
+        counts=f"{experiment_name}_results/all_samples_raw_counts.txt",
+        gff=f"{experiment_name}_results/featurecounts/featurecounts_annotation.gff",
+        source_gff=annotation_source_gff
     output:
         extended=f"{experiment_name}_results/all_samples_counts_extended.tsv",
         clean=f"{experiment_name}_results/all_samples_gene_symbols.tsv"
     shell:
         """
-        mkdir -p {experiment_name}_results/featurecounts
-        bash {scripts_dir}/get_metadata.sh {input.counts} > {output.extended}
-        awk 'NR == 1 || $2 != "Geneid"' {output.extended} | cut -f1,4- > {output.clean}
+        python {scripts_dir}/annotate_counts.py --counts {input.counts} --gff {input.gff} \
+            --source-gff {input.source_gff} --extended {output.extended} --symbols {output.clean}
         """
 
 rule summarize_deseq_results:
@@ -605,10 +649,15 @@ rule multiqc:
             for s in get_passed_samples_from_checkpoint(wc)
         ] + [
             f"{experiment_name}_results/all_samples_raw_counts.txt.summary"
-        ]
+        ],
+        # MultiQC picks this up as custom content; declare it so MultiQC waits for DESeq2 to finish writing it
+        pca_mqc=f"{experiment_name}_results/deseq2/pca_mqc.tsv"
     output:
         html=f"{experiment_name}_results/multiqc_report.html"
     params:
         results_dir=f"{experiment_name}_results/"
     shell:
-        f"multiqc {params.results_dir} -o {params.results_dir} -c {scripts_dir}/multiqc_config.yaml --filename multiqc_report.html"
+        """
+        multiqc {params.results_dir} -o {params.results_dir} -c {scripts_dir}/multiqc_config.yaml \
+            --cl-config "custom_logo: '{scripts_dir}/logo.png'" --filename multiqc_report.html --force
+        """

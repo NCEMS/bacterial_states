@@ -2,7 +2,7 @@ Bootstrap: docker
 From: continuumio/miniconda3
 
 %files
-    ../envs/rnaseq_vg.yaml /env.yaml
+    ../environment.yaml /env.yaml
 
 %post
     conda config --add channels conda-forge
@@ -14,8 +14,8 @@ From: continuumio/miniconda3
 
 %environment
     source /opt/conda/etc/profile.d/conda.sh
-    conda activate rnaseq_vg
-    export PATH=/opt/conda/envs/rnaseq_vg/bin:$PATH
+    conda activate ecoli_ingest
+    export PATH=/opt/conda/envs/ecoli_ingest/bin:$PATH
 
 %labels
     Author Alexis_Morrissey_NCEMS_PSU

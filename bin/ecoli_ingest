@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Run the ecoli_ingest launcher straight from this checkout without installing it.
+# Equivalent to `pip install -e ./ecoli_ingest` followed by `ecoli_ingest ...`.
+repo="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+PYTHONPATH="$repo/ecoli_ingest/src${PYTHONPATH:+:$PYTHONPATH}" exec python3 -m ecoli_ingest "$@"

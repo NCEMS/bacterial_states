@@ -1,0 +1,47 @@
+# ---- local data / resources: never commit -------------------------------------------------
+/resources/
+/old_resources/
+/atlas_data/
+/raw_data/
+/data/
+/outputs/
+/work/
+/notebooks/
+/scratch/
+*.ipynb
+*.sif
+*.pt
+*.gbz
+*.cf
+*.fastq
+*.fastq.gz
+*.fq
+*.fq.gz
+*.bam
+*.bai
+*.gam
+
+# ---- ingest run artefacts ----------------------------------------------------------------
+.snakemake/
+checkpoints/
+benchmarks/
+*_results/
+config.yaml
+!ecoli_ingest/src/ecoli_ingest/config/config.template.yaml
+*.log
+
+# ---- python --------------------------------------------------------------------------------
+__pycache__/
+*.pyc
+*.egg-info/
+/ecoli_ingest/build/lib/
+/ecoli_ingest/dist/
+/ecoli_atlas/build/
+/ecoli_atlas/dist/
+.pytest_cache/
+.venv/
+
+# ---- editors / os --------------------------------------------------------------------------
+.DS_Store
+.vscode/
+.idea/

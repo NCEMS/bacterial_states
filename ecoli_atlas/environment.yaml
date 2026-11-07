@@ -1,0 +1,26 @@
+# Conda environment for Ecoli_ATLAS.
+#
+#   mamba env create -f ecoli_atlas/environment.yaml
+#   conda activate ecoli_atlas
+#   pip install -e "./ecoli_atlas[dev]"
+#
+# PyTorch here is the CPU build, which is enough for `embed` and `compare` and for small training
+# runs. For full training on a GPU node replace the pytorch line with the build matching your CUDA
+# driver, e.g. `pytorch-gpu` from conda-forge or the official pytorch channel instructions.
+name: ecoli_atlas
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - numpy>=2,<3
+  - pandas>=2.2
+  - scipy>=1.13
+  - scikit-learn>=1.5
+  - pytorch-cpu>=2.4   # CPU build; for a GPU node use `pytorch` with a cuda build instead
+  - pyyaml
+  - optuna>=4          # hyper-parameter tuning (`train --tune`)
+  - umap-learn>=0.5.7  # `compare --umap`, figures
+  - matplotlib>=3.8
+  - seaborn>=0.13
+  - pytest
