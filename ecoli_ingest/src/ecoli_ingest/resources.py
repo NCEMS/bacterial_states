@@ -26,8 +26,10 @@ BUNDLES = {
 BUNDLE_SIZES = {"core": "~650 MB", "centrifuge": "5.4 GB download, 6.9 GB unpacked", "container": "~5.3 GB"}
 BUNDLE_URLS = {
     "core": f"https://TBD/ncems/bacterial_states/ecoli_ingest_core_{RESOURCES_VERSION}.tar.gz",
-    # upstream prebuilt index from the Centrifuge authors (Kim et al. 2016), unchanged since 2016
-    "centrifuge": "https://genome-idx.s3.amazonaws.com/centrifuge/p_compressed%2Bh%2Bv.tar.gz",
+    # upstream prebuilt index from the Centrifuge authors (Kim et al. 2016; built 2016). The file name
+    # is not versioned, so pin the S3 object version; the manifest checksums are verified after unpacking
+    "centrifuge": "https://genome-idx.s3.amazonaws.com/centrifuge/p_compressed%2Bh%2Bv.tar.gz"
+                  "?versionId=KoqnkfTuATv3a5Cq9hBzQxwFWYRx90aj",
     "container": f"https://TBD/ncems/bacterial_states/ecoli_ingest_container_{RESOURCES_VERSION}.tar.gz",
 }
 # directory (relative to the resources dir) a bundle's tarball is unpacked into; our own tarballs carry

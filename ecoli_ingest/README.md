@@ -1,7 +1,7 @@
 # Ecoli_inGEST
 
 Snakemake workflow that takes raw *E. coli* RNA-seq reads to QC reports, a gene count table and a
-DESeq2 analysis: fastp → FastQC → Centrifuge (contamination gate) → `vg giraffe` on an *E. coli*
+DESeq2 analysis: fastp → FastQC → Centrifuge (contamination gate, can be switched off) → `vg giraffe` on an *E. coli*
 pangenome graph → `vg surject` → RSeQC → featureCounts → DESeq2 → MultiQC.
 
 The workflow ships inside the `ecoli_ingest` Python package and is driven by one command that runs
@@ -29,7 +29,7 @@ pip install -e ./ecoli_ingest
 
 ```bash
 pip install ./ecoli_ingest            # only dependency: pyyaml
-ecoli_ingest download --with-container   # core + centrifuge + the image (<resources>/container/rnaseq_vg.sif)
+ecoli_ingest download --with-apptainer   # core + centrifuge + the image (<resources>/container/rnaseq_vg.sif)
 ```
 
 `ecoli_ingest` detects which path you are on: if `snakemake` and `vg` are on your `PATH` it runs
@@ -40,15 +40,16 @@ Without installing you can also run `bin/ecoli_ingest` from the checkout.
 ## 2. Download the resources
 
 ```bash
-ecoli_ingest download                   # core + centrifuge (the default set)
-ecoli_ingest download --with-container  # ... plus the Apptainer image (~5.3 GB), only for install path B
-ecoli_ingest download core              # or name bundles one at a time: core, centrifuge, container
+ecoli_ingest download                       # core + centrifuge (the default set)
+ecoli_ingest download --without-centrifuge  # core only, for runs with `centrifuge: false`
+ecoli_ingest download --with-apptainer      # ... plus the Apptainer image (~5.3 GB), only for install path B
+ecoli_ingest download core                  # or name bundles one at a time: core, centrifuge, container
 ```
 
 | Bundle | Contents | Size | Source |
 |---|---|---|---|
 | `core` | vg graph index + annotation | ~650 MB | this project |
-| `centrifuge` | `p_compressed+h+v` contamination index, only for the Centrifuge QC gate | 5.4 GB download, 6.9 GB unpacked | the Centrifuge authors' prebuilt index (`genome-idx.s3.amazonaws.com/centrifuge/`) |
+| `centrifuge` | `p_compressed+h+v` contamination index, not needed with `centrifuge: false` | 5.4 GB download, 6.9 GB unpacked | the Centrifuge authors' prebuilt index (`genome-idx.s3.amazonaws.com/centrifuge/`, pinned S3 object version) |
 | `container` | Apptainer image `rnaseq_vg.sif` | ~5.3 GB | this project |
 
 Downloads are checked against the packaged SHA-256 manifest. Hosting of `core` and `container`
@@ -66,7 +67,7 @@ resources/
 ├── annotation/GCF_000005845.2_ASM584v2_genomic.gff          # RefSeq (gene products)
 ├── annotation/GCF_000005845.2_ASM584v2_genomic_siRNA.gff    # featureCounts annotation (+ Rfam ncRNAs)
 ├── annotation/GCF_000005845.2_ASM584v2_genomic.bed
-├── centrifuge/p_compressed+h+v.{1,2,3}.cf                    # optional
+├── centrifuge/p_compressed+h+v.{1,2,3}.cf                    # not needed with centrifuge: false
 └── container/rnaseq_vg.sif                                   # optional
 ```
 
@@ -94,6 +95,7 @@ samples:
 deseq2:
   contrasts:
     - ["condition", "wildtype", "knockout"]   # [factor, reference, test]
+centrifuge: true                  # false: skip Centrifuge entirely (not run, not in MultiQC)
 centrifuge_organism: "Escherichia coli"
 centrifuge_min_percentage: 30.0   # remove to disable the contamination gate
 fastp_min_kept_percentage: 75.0   # remove to disable the read-filter gate
@@ -136,8 +138,10 @@ The count tables feed [Ecoli_ATLAS](../ecoli_atlas/README.md): `ecoli_atlas prep
 - Nothing needs network access at run time. Gene identifiers and product descriptions come from
   the two annotation GFFs (`workflow/scripts/annotate_counts.py`).
 - Reads shorter than 50 bp automatically use the k=15 minimizer index.
-- The Centrifuge step runs for every sample when the index is present; the gate only applies when
-  `centrifuge_min_percentage` is set.
+- Centrifuge runs for every sample unless the config says `centrifuge: false` (`ecoli_ingest init
+  --without-centrifuge` writes that); a missing key means on. With it off, Centrifuge is not run, its
+  gate is ignored and old Centrifuge reports are left out of MultiQC. The gate itself applies only
+  when `centrifuge_min_percentage` is set.
 - Maintainers: `ecoli_ingest manifest` regenerates `resources.manifest.tsv` (sha256 of every
   resource file, used by `check --verify` and `download`). The container is rebuilt from
   `build/Singularity.def`, which installs `environment.yaml`.

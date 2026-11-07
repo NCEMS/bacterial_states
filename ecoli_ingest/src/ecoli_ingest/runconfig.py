@@ -46,4 +46,9 @@ def is_paired(cfg: dict) -> tuple[bool, bool]:
 
 
 def centrifuge_enabled(cfg: dict) -> bool:
-    return cfg.get("centrifuge_min_percentage") is not None
+    """Centrifuge runs unless the config says ``centrifuge: false`` (mirrors the Snakefile)."""
+    return bool(cfg.get("centrifuge", True))
+
+
+def centrifuge_gate_enabled(cfg: dict) -> bool:
+    return centrifuge_enabled(cfg) and cfg.get("centrifuge_min_percentage") is not None

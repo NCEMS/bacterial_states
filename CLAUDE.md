@@ -4,7 +4,7 @@
 
 Two independently installable packages in one repo (GitHub `NCEMS/bacterial_states`):
 
-- **`ecoli_ingest/`** — Ecoli_inGEST. A Snakemake RNA-seq workflow (fastp → FastQC → Centrifuge →
+- **`ecoli_ingest/`** — Ecoli_inGEST. A Snakemake RNA-seq workflow (fastp → FastQC → Centrifuge [on unless `centrifuge: false`] →
   `vg giraffe` → featureCounts → DESeq2 → MultiQC) shipped as package data inside a small Python
   package (dependency: pyyaml). The `ecoli_ingest` CLI runs the workflow **in the current
   directory**: `init` writes `config.yaml`, `check` validates tools/resources/reads, `run` executes.

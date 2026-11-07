@@ -19,7 +19,8 @@ def test_template_parses_and_is_single_end():
     assert len(ss) == 4 and all(s.r2 is None for s in ss)
     paired, mixed = runconfig.is_paired(cfg)
     assert (paired, mixed) == (False, False)
-    assert runconfig.centrifuge_enabled(cfg)
+    assert runconfig.centrifuge_enabled(cfg) and cfg["centrifuge"] is True
+    assert runconfig.centrifuge_gate_enabled(cfg)
     # the template must not pin resource paths; those come from the resources directory
     assert not any(k in cfg for k in paths.RESOURCE_FILES)
 
@@ -90,3 +91,41 @@ def test_container_image_legacy_layout(tmp_path):
     (tmp_path / "container" / "rnaseq_vg.sif").write_bytes(b"")
     img, legacy = paths.container_image(tmp_path)
     assert not legacy and img.parent.name == "container"
+
+
+def test_centrifuge_on_unless_switched_off():
+    assert runconfig.centrifuge_enabled({})                                  # old configs keep running it
+    assert not runconfig.centrifuge_enabled({"centrifuge": False})
+    assert not runconfig.centrifuge_gate_enabled({"centrifuge": False, "centrifuge_min_percentage": 30})
+    assert not runconfig.centrifuge_gate_enabled({})                          # no threshold, no gate
+
+
+def _centrifuge_checks(cfg, tmp_path):
+    res = tmp_path / "res"
+    res.mkdir(exist_ok=True)
+    return {c.name: c for c in checks.check_resources(cfg, res, tmp_path) if c.name.startswith("centrifuge")}
+
+
+def test_checks_centrifuge_index(tmp_path):
+    # enabled (even without a gate) needs the index
+    assert _centrifuge_checks({}, tmp_path)["centrifuge index"].status == checks.FAIL
+    cf = tmp_path / "res" / paths.RESOURCE_FILES["centrifuge_index_path"]
+    cf.parent.mkdir(parents=True)
+    for suffix in paths.CENTRIFUGE_SUFFIXES:
+        Path(str(cf) + suffix).write_bytes(b"")
+    assert _centrifuge_checks({}, tmp_path)["centrifuge index"].status == checks.OK
+    # switched off: not needed; a leftover threshold is flagged
+    off = _centrifuge_checks({"centrifuge": False}, tmp_path)
+    assert off["centrifuge index"].status == checks.OK and "not needed" in off["centrifuge index"].detail
+    assert "centrifuge gate" not in off
+    gated = _centrifuge_checks({"centrifuge": False, "centrifuge_min_percentage": 30}, tmp_path)
+    assert gated["centrifuge gate"].status == checks.WARN
+
+
+def test_init_without_centrifuge(tmp_path):
+    from ecoli_ingest.cli import main
+    assert main(["init", "-d", str(tmp_path)]) == 0
+    assert runconfig.load_config(tmp_path / "config.yaml")["centrifuge"] is True
+    assert main(["init", "-d", str(tmp_path), "--force", "--without-centrifuge"]) == 0
+    cfg = runconfig.load_config(tmp_path / "config.yaml")
+    assert cfg["centrifuge"] is False and not runconfig.centrifuge_enabled(cfg)

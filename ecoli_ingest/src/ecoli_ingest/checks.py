@@ -98,10 +98,13 @@ def check_resources(cfg: dict, resources: Path | None, rundir: Path) -> list[Che
             missing = [s for s in paths.CENTRIFUGE_SUFFIXES if not _exists(Path(str(cf) + s))]
             out.append(Check("centrifuge index", FAIL if missing else OK,
                              f"{cf}.*.cf" if not missing else
-                             f"missing {', '.join(cf.name + s for s in missing)}; run `ecoli_ingest download centrifuge` "
-                             "or remove centrifuge_min_percentage from config.yaml"))
+                             f"missing {', '.join(cf.name + s for s in missing)}; run `ecoli_ingest download` "
+                             "or skip Centrifuge with `centrifuge: false` in config.yaml"))
     else:
-        out.append(Check("centrifuge index", OK, "not needed (no centrifuge_min_percentage in config)"))
+        out.append(Check("centrifuge index", OK, "not needed (centrifuge: false)"))
+        if cfg.get("centrifuge_min_percentage") is not None:
+            out.append(Check("centrifuge gate", WARN,
+                             "centrifuge_min_percentage is ignored because centrifuge: false"))
     return out
 
 

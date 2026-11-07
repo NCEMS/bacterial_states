@@ -57,6 +57,7 @@ def test_centrifuge_comes_from_upstream():
     import io
     assert "TBD" not in resources.BUNDLE_URLS["centrifuge"]
     assert resources.BUNDLE_URLS["centrifuge"].startswith("https://genome-idx.s3.amazonaws.com/centrifuge/")
+    assert "versionId=" in resources.BUNDLE_URLS["centrifuge"]           # pinned S3 object version
     buf = io.StringIO()
     assert resources.download("centrifuge", Path("/nonexistent/res"), dry_run=True, log=buf) == 0
 
@@ -93,13 +94,17 @@ def test_download_refuses_members_outside_target(tmp_path, monkeypatch):
     assert not (tmp_path / "res" / "escape.txt").exists()
 
 
-def test_cli_download_defaults_and_with_container(tmp_path, capsys):
+def test_cli_download_defaults_and_flags(tmp_path, capsys):
     from ecoli_ingest.cli import main
     res = str(tmp_path / "res")
     main(["--resources", res, "download", "--dry-run"])
     err = capsys.readouterr().err
     assert "bundle   : core" in err and "bundle   : centrifuge" in err and "bundle   : container" not in err
     assert f"target   : {res}" in err          # an explicit --resources is used even before it exists
-    main(["--resources", res, "download", "--dry-run", "--with-container"])
-    assert "bundle   : container" in capsys.readouterr().err
+    main(["--resources", res, "download", "--dry-run", "--without-centrifuge"])
+    err = capsys.readouterr().err
+    assert "bundle   : core" in err and "bundle   : centrifuge" not in err
+    main(["--resources", res, "download", "--dry-run", "--with-apptainer"])
+    err = capsys.readouterr().err
+    assert "bundle   : centrifuge" in err and "bundle   : container" in err
     assert main(["--resources", res, "download", "--dry-run", "nonsense"]) == 2

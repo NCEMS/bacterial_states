@@ -32,9 +32,12 @@ deseq2:
   contrasts:
     - ["condition", "wildtype", "knockout"]
 
+# Centrifuge contamination screen (needs the index from `ecoli_ingest download`). Set false to skip
+# it: Centrifuge is then not run, its gate is ignored and it is left out of the MultiQC report.
+centrifuge: true
+
 # Quality-control gates. A sample that fails any configured gate is excluded from alignment and
 # counting (see checkpoints/qc_failures.json). Remove a line to disable that gate.
-# Centrifuge needs the separately downloaded index (`ecoli_ingest download centrifuge`).
 centrifuge_organism: "Escherichia coli"
 centrifuge_min_percentage: 30.0
 fastp_min_kept_percentage: 75.0

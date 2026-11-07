@@ -84,7 +84,9 @@ contrast_names = [f"{ref}_vs_{test}" for factor, ref, test in deseq2_contrasts]
 
 #QC checkpoint on/off
 fastp_qc_is_configured = config.get("fastp_min_kept_percentage") is not None
-centrifuge_qc_is_configured = config.get("centrifuge_min_percentage") is not None
+# Centrifuge (contamination screen) runs unless `centrifuge: false`; its gate needs a threshold too
+centrifuge_enabled = bool(config.get("centrifuge", True))
+centrifuge_qc_is_configured = centrifuge_enabled and config.get("centrifuge_min_percentage") is not None
 
 
 ###Checkpoint function for QC metrics collected above (fastp and centrifuge)
@@ -628,10 +630,10 @@ rule multiqc:
         all_qc_inputs=lambda wc: [
             f"{experiment_name}_results/{s}/fastp/{s}_fastp.json"
             for s in SAMPLES.keys()
-        ] + [
+        ] + ([
             f"{experiment_name}_results/{s}/centrifuge/{s}_report.txt"
             for s in SAMPLES.keys()
-        ],
+        ] if centrifuge_enabled else []),
         gated_inputs=lambda wc: [
             f"{experiment_name}_results/{s}/fastqc/{s}_clean_R1_fastqc.zip"
             for s in get_passed_samples_from_checkpoint(wc)
@@ -655,9 +657,12 @@ rule multiqc:
     output:
         html=f"{experiment_name}_results/multiqc_report.html"
     params:
-        results_dir=f"{experiment_name}_results/"
+        results_dir=f"{experiment_name}_results/",
+        # with Centrifuge off, keep reports left over from an earlier run out of the report
+        # (MultiQC matches --ignore against file/directory names, not whole paths)
+        ignore="" if centrifuge_enabled else "--ignore centrifuge"
     shell:
         """
-        multiqc {params.results_dir} -o {params.results_dir} -c {scripts_dir}/multiqc_config.yaml \
+        multiqc {params.results_dir} -o {params.results_dir} -c {scripts_dir}/multiqc_config.yaml {params.ignore} \
             --cl-config "custom_logo: '{scripts_dir}/logo.png'" --filename multiqc_report.html --force
         """

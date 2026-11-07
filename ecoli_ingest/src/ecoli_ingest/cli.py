@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import argparse
 import os
-import shutil
 import sys
 from pathlib import Path
 
@@ -46,7 +45,11 @@ def cmd_init(args) -> int:
     if target.exists() and not args.force:
         _err(f"{target} already exists (use --force to overwrite)")
         return 1
-    shutil.copyfile(paths.config_template(), target)
+    text = paths.config_template().read_text(encoding="utf-8")
+    if args.without_centrifuge:
+        assert text.count("\ncentrifuge: true\n") == 1, "config template must hold one `centrifuge: true` line"
+        text = text.replace("\ncentrifuge: true\n", "\ncentrifuge: false\n")
+    target.write_text(text, encoding="utf-8")
     print(f"wrote {target}\nEdit the samples and conditions, then run `ecoli_ingest check`.", file=sys.stderr)
     return 0
 
@@ -150,7 +153,9 @@ def cmd_download(args) -> int:
         _err(f"unknown bundle(s) {', '.join(unknown)}; choose from {', '.join(sorted(resources.BUNDLES))}")
         return 2
     bundles = list(args.bundles or resources.DEFAULT_BUNDLES)
-    if args.with_container and "container" not in bundles:
+    if args.without_centrifuge and "centrifuge" in bundles:
+        bundles.remove("centrifuge")
+    if args.with_apptainer and "container" not in bundles:
         bundles.append("container")
     rc = 0
     for bundle in bundles:
@@ -195,6 +200,8 @@ def build_parser() -> argparse.ArgumentParser:
     sp = sub.add_parser("init", help="write a config.yaml template into the run directory")
     sp.add_argument("--directory", "-d", help="run directory (default: current directory)")
     sp.add_argument("--force", action="store_true", help="overwrite an existing config.yaml")
+    sp.add_argument("--without-centrifuge", action="store_true",
+                    help="write `centrifuge: false`: skip the contamination screen (no index needed)")
     sp.set_defaults(func=cmd_init)
 
     def run_common(sp):
@@ -230,7 +237,9 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("bundles", nargs="*", metavar="BUNDLE",
                     help="core = vg index + annotation; centrifuge = contamination index (from the Centrifuge "
                          "authors); container = Apptainer image. Default: " + " ".join(resources.DEFAULT_BUNDLES))
-    sp.add_argument("--with-container", action="store_true",
+    sp.add_argument("--without-centrifuge", action="store_true",
+                    help="skip the Centrifuge index (5.4 GB); for runs with `centrifuge: false`")
+    sp.add_argument("--with-apptainer", action="store_true",
                     help="also download the Apptainer image (~5.3 GB); only needed for --container always/auto "
                          "without the conda environment")
     sp.add_argument("--dry-run", action="store_true")
