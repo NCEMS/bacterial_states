@@ -51,3 +51,55 @@ def test_download_stub_prints_interim_instructions(tmp_path, capsys):
     assert rc == 2  # URL still TBD
     out = buf.getvalue()
     assert "gocmd get" in out and "TBD" in out and str(tmp_path / "res") in out
+
+
+def test_centrifuge_comes_from_upstream():
+    import io
+    assert "TBD" not in resources.BUNDLE_URLS["centrifuge"]
+    assert resources.BUNDLE_URLS["centrifuge"].startswith("https://genome-idx.s3.amazonaws.com/centrifuge/")
+    buf = io.StringIO()
+    assert resources.download("centrifuge", Path("/nonexistent/res"), dry_run=True, log=buf) == 0
+
+
+def _bundle_tar(tmp_path, members):
+    import io, tarfile
+    tgz = tmp_path / "bundle.tar.gz"
+    with tarfile.open(tgz, "w:gz") as tar:
+        for name, data in members.items():
+            info = tarfile.TarInfo(name)
+            info.size = len(data)
+            tar.addfile(info, io.BytesIO(data))
+    return tgz
+
+
+def test_download_unpacks_upstream_tarball_into_subdir(tmp_path, monkeypatch):
+    import io
+    tgz = _bundle_tar(tmp_path, {"p_compressed+h+v.1.cf": b"one", "p_compressed+h+v.2.cf": b"two"})
+    monkeypatch.setitem(resources.BUNDLE_URLS, "centrifuge", tgz.as_uri())
+    monkeypatch.setattr(paths, "packaged_manifest", lambda: tmp_path / "no_manifest.tsv")
+    res = tmp_path / "res"
+    assert resources.download("centrifuge", res, log=io.StringIO()) == 0
+    assert (res / "centrifuge" / "p_compressed+h+v.1.cf").read_bytes() == b"one"
+    assert (res / "centrifuge" / "p_compressed+h+v.2.cf").read_bytes() == b"two"
+
+
+def test_download_refuses_members_outside_target(tmp_path, monkeypatch):
+    import io
+    import pytest
+    tgz = _bundle_tar(tmp_path, {"../escape.txt": b"x"})
+    monkeypatch.setitem(resources.BUNDLE_URLS, "centrifuge", tgz.as_uri())
+    with pytest.raises(ValueError, match="outside"):
+        resources.download("centrifuge", tmp_path / "res", log=io.StringIO())
+    assert not (tmp_path / "res" / "escape.txt").exists()
+
+
+def test_cli_download_defaults_and_with_container(tmp_path, capsys):
+    from ecoli_ingest.cli import main
+    res = str(tmp_path / "res")
+    main(["--resources", res, "download", "--dry-run"])
+    err = capsys.readouterr().err
+    assert "bundle   : core" in err and "bundle   : centrifuge" in err and "bundle   : container" not in err
+    assert f"target   : {res}" in err          # an explicit --resources is used even before it exists
+    main(["--resources", res, "download", "--dry-run", "--with-container"])
+    assert "bundle   : container" in capsys.readouterr().err
+    assert main(["--resources", res, "download", "--dry-run", "nonsense"]) == 2

@@ -29,7 +29,7 @@ pip install -e ./ecoli_ingest
 
 ```bash
 pip install ./ecoli_ingest            # only dependency: pyyaml
-ecoli_ingest download container       # the image goes into <resources>/container/rnaseq_vg.sif
+ecoli_ingest download --with-container   # core + centrifuge + the image (<resources>/container/rnaseq_vg.sif)
 ```
 
 `ecoli_ingest` detects which path you are on: if `snakemake` and `vg` are on your `PATH` it runs
@@ -40,14 +40,21 @@ Without installing you can also run `bin/ecoli_ingest` from the checkout.
 ## 2. Download the resources
 
 ```bash
-ecoli_ingest download core            # vg graph index + annotation (~650 MB)
-ecoli_ingest download centrifuge      # contamination database (~6.9 GB), only for the Centrifuge QC gate
-ecoli_ingest download container       # Apptainer image (~5.3 GB), only for install path B
+ecoli_ingest download                   # core + centrifuge (the default set)
+ecoli_ingest download --with-container  # ... plus the Apptainer image (~5.3 GB), only for install path B
+ecoli_ingest download core              # or name bundles one at a time: core, centrifuge, container
 ```
 
-Hosting of these bundles is being set up. Until the URLs are published the command prints the
-interim CyVerse instructions (`gocmd get .../bacterial-states/resources.tar.gz`; after extracting,
-rename `resources/build` to `resources/container`).
+| Bundle | Contents | Size | Source |
+|---|---|---|---|
+| `core` | vg graph index + annotation | ~650 MB | this project |
+| `centrifuge` | `p_compressed+h+v` contamination index, only for the Centrifuge QC gate | 5.4 GB download, 6.9 GB unpacked | the Centrifuge authors' prebuilt index (`genome-idx.s3.amazonaws.com/centrifuge/`) |
+| `container` | Apptainer image `rnaseq_vg.sif` | ~5.3 GB | this project |
+
+Downloads are checked against the packaged SHA-256 manifest. Hosting of `core` and `container`
+is being set up; until their URLs are published the command prints the interim CyVerse
+instructions (`gocmd get .../bacterial-states/resources.tar.gz`; after extracting, rename
+`resources/build` to `resources/container`).
 
 The resources directory is found in this order: `--resources DIR`, `$ECOLI_INGEST_RESOURCES`,
 `$BS_DATA_ROOT/resources`, `./resources`, `~/.local/share/ecoli_ingest/resources`.

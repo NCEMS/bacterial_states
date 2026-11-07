@@ -17,13 +17,13 @@ ENV_DATA_ROOT = "BS_DATA_ROOT"
 
 BUNDLES = {
     "training-data": {
-        "url": f"https://TBD/ncems/bacterial_states/atlas_training_data_{ATLAS_DATA_VERSION}.tar.gz",
+        "url": f"https://TBD/ncems/bacterial_states/ecoli_atlas_training_data_{ATLAS_DATA_VERSION}.tar.gz",
         "size": "~56 MB",
         "contents": ["merged_count_table.txt", "metadata_revised.csv", "GCF_000005845.2_ASM584v2_feature_table.txt"],
         "subdir": "atlas_data",
     },
     "models": {
-        "url": f"https://TBD/ncems/bacterial_states/atlas_models_{ATLAS_DATA_VERSION}.tar.gz",
+        "url": f"https://TBD/ncems/bacterial_states/ecoli_atlas_models_{ATLAS_DATA_VERSION}.tar.gz",
         "size": "~20 MB",
         "contents": ["models/{growth_phase,medium_type,is_lab_strain}_encoder.pt", "models/residual_ae.pt",
                      "models/preprocessing.pt", "models/manifest.json", "models/splits.csv",

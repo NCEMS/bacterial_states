@@ -1,16 +1,15 @@
 """Resource bundles: manifest generation/verification and the download stub.
 
-Hosting is not decided yet. Every URL lives in BUNDLE_URLS below and nowhere else; until they are
-filled in, `download` prints the interim CyVerse instructions instead.
+The Centrifuge index is fetched from its authors' public bucket (the same files, checked against the
+packaged manifest). Hosting of the other bundles is not decided yet. Every URL lives in BUNDLE_URLS
+below and nowhere else; until they are filled in, `download` prints the interim CyVerse instructions.
 """
 from __future__ import annotations
 
 import hashlib
 import os
-import shutil
 import sys
 import tarfile
-import tempfile
 import urllib.request
 from pathlib import Path
 
@@ -24,12 +23,18 @@ BUNDLES = {
     "centrifuge": ("centrifuge",),
     "container": ("container",),
 }
-BUNDLE_SIZES = {"core": "~650 MB", "centrifuge": "~6.9 GB", "container": "~5.3 GB"}
+BUNDLE_SIZES = {"core": "~650 MB", "centrifuge": "5.4 GB download, 6.9 GB unpacked", "container": "~5.3 GB"}
 BUNDLE_URLS = {
-    "core": f"https://TBD/ncems/bacterial_states/ingest_resources_core_{RESOURCES_VERSION}.tar.gz",
-    "centrifuge": f"https://TBD/ncems/bacterial_states/ingest_resources_centrifuge_{RESOURCES_VERSION}.tar.gz",
-    "container": f"https://TBD/ncems/bacterial_states/ingest_container_{RESOURCES_VERSION}.tar.gz",
+    "core": f"https://TBD/ncems/bacterial_states/ecoli_ingest_core_{RESOURCES_VERSION}.tar.gz",
+    # upstream prebuilt index from the Centrifuge authors (Kim et al. 2016), unchanged since 2016
+    "centrifuge": "https://genome-idx.s3.amazonaws.com/centrifuge/p_compressed%2Bh%2Bv.tar.gz",
+    "container": f"https://TBD/ncems/bacterial_states/ecoli_ingest_container_{RESOURCES_VERSION}.tar.gz",
 }
+# directory (relative to the resources dir) a bundle's tarball is unpacked into; our own tarballs carry
+# their top-level directories, the upstream Centrifuge tarball has its .cf files at the root
+BUNDLE_SUBDIR = {"centrifuge": "centrifuge"}
+# downloaded by `ecoli_ingest download` when no bundle is named; the container needs --with-container
+DEFAULT_BUNDLES = ("core", "centrifuge")
 CYVERSE_LEGACY_PATH = "/iplant/home/shared/NCEMS/working-groups/bacterial-states/resources.tar.gz"
 
 MANIFEST_COLUMNS = ("path", "sha256", "bytes", "bundle")
@@ -106,6 +111,15 @@ def verify(resources: Path, rows, bundles: set[str] | None = None, log=None) -> 
     return results
 
 
+def _check_member(member: tarfile.TarInfo, target: Path) -> None:
+    """Refuse members that would land outside ``target`` or are not plain files/directories."""
+    if not (member.isfile() or member.isdir()):
+        raise ValueError(f"refusing to unpack {member.name!r}: not a regular file or directory")
+    resolved = (target / member.name).resolve()
+    if resolved != target.resolve() and target.resolve() not in resolved.parents:
+        raise ValueError(f"refusing to unpack {member.name!r}: outside {target}")
+
+
 def download(bundle: str, dest: Path, dry_run: bool = False, log=None) -> int:
     log = log or sys.stderr
     url = BUNDLE_URLS[bundle]
@@ -121,18 +135,18 @@ def download(bundle: str, dest: Path, dry_run: bool = False, log=None) -> int:
         return 2
     if dry_run:
         return 0
-    dest.mkdir(parents=True, exist_ok=True)
-    with tempfile.NamedTemporaryFile(suffix=".tar.gz", delete=False) as tmp:
-        tmp_path = Path(tmp.name)
-    try:
-        print("downloading ...", file=log, flush=True)
-        with urllib.request.urlopen(url) as resp, open(tmp_path, "wb") as out:
-            shutil.copyfileobj(resp, out, 1 << 24)
-        print("extracting ...", file=log, flush=True)
-        with tarfile.open(tmp_path, "r:gz") as tar:
-            tar.extractall(dest)
-    finally:
-        tmp_path.unlink(missing_ok=True)
+    target = dest / BUNDLE_SUBDIR.get(bundle, "")
+    target.mkdir(parents=True, exist_ok=True)
+    print("downloading and unpacking ...", file=log, flush=True)
+    # streamed: no temporary copy of the (multi-GB) tarball
+    with urllib.request.urlopen(url) as resp, tarfile.open(fileobj=resp, mode="r|gz") as tar:
+        for member in tar:
+            _check_member(member, target)
+            print(f"  {member.name}", file=log, flush=True)
+            if hasattr(tarfile, "data_filter"):
+                tar.extract(member, target, filter="data")
+            else:
+                tar.extract(member, target)
     manifest = paths.packaged_manifest()
     if manifest.exists():
         bad = [(r, s) for r, s in verify(dest, read_manifest(manifest), {bundle}) if s != "ok"]

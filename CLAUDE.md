@@ -32,8 +32,10 @@ Never `git add` any of these (all in `.gitignore`): `resources/`, `old_resources
 | `notebooks/` | the two original Colab notebooks | read-only reference; never edit or commit |
 | `raw_data/` | original Drive dump incl. unused files and the Contreras paper data | `Contreras Paper/Paper1_all_samples_counts.tsv` is the inference test case |
 
-Download URLs are placeholders (`TBD`) in exactly two files:
-`ecoli_ingest/src/ecoli_ingest/resources.py` and `ecoli_atlas/src/ecoli_atlas/download.py`.
+Download URLs live in exactly two files: `ecoli_ingest/src/ecoli_ingest/resources.py` and
+`ecoli_atlas/src/ecoli_atlas/download.py`. All are placeholders (`TBD`) except the Centrifuge index,
+which comes from the Centrifuge authors' bucket (`genome-idx.s3.amazonaws.com/centrifuge/`).
+Bundle file names are `ecoli_ingest_*` / `ecoli_atlas_*` (other microbes may follow).
 
 ## Git
 

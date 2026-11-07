@@ -143,9 +143,17 @@ def cmd_shell(args) -> int:
 
 
 def cmd_download(args) -> int:
-    dest = paths.find_resources(args.resources) or paths.default_resources_target(args.resources)
+    # an explicit --resources is the target even if it does not exist yet
+    dest = Path(args.resources) if args.resources else (paths.find_resources() or paths.default_resources_target())
+    unknown = [b for b in args.bundles if b not in resources.BUNDLES]
+    if unknown:
+        _err(f"unknown bundle(s) {', '.join(unknown)}; choose from {', '.join(sorted(resources.BUNDLES))}")
+        return 2
+    bundles = list(args.bundles or resources.DEFAULT_BUNDLES)
+    if args.with_container and "container" not in bundles:
+        bundles.append("container")
     rc = 0
-    for bundle in args.bundles:
+    for bundle in bundles:
         rc = max(rc, resources.download(bundle, Path(dest), dry_run=args.dry_run))
     return rc
 
@@ -218,9 +226,13 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--bind", action="append", metavar="DIR")
     sp.set_defaults(func=cmd_shell)
 
-    sp = sub.add_parser("download", help="download resource bundles")
-    sp.add_argument("bundles", nargs="+", choices=sorted(resources.BUNDLES),
-                    help="core = vg index + annotation; centrifuge = contamination index; container = Apptainer image")
+    sp = sub.add_parser("download", help="download resource bundles (default: core + centrifuge)")
+    sp.add_argument("bundles", nargs="*", metavar="BUNDLE",
+                    help="core = vg index + annotation; centrifuge = contamination index (from the Centrifuge "
+                         "authors); container = Apptainer image. Default: " + " ".join(resources.DEFAULT_BUNDLES))
+    sp.add_argument("--with-container", action="store_true",
+                    help="also download the Apptainer image (~5.3 GB); only needed for --container always/auto "
+                         "without the conda environment")
     sp.add_argument("--dry-run", action="store_true")
     sp.set_defaults(func=cmd_download)
 
