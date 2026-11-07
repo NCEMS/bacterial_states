@@ -15,12 +15,17 @@ DATA=${ECOLI_ATLAS_DATA:-atlas_data}
 OLD=${ECOLI_ATLAS_MODELS:-outputs/models}
 NEW=${NEW_MODELS:-outputs/models_repro}
 
+SEEDS=${SEEDS:-1,2,3,4,5,6,7,8}
+
+# Sweep several seeds on the recorded split; the best (highest mean TEST AUROC) is promoted to $NEW
+# and its manifest.json records the per-seed metrics and their spread (seed_sweep). The atlas built
+# from the promoted model goes to $NEW/atlas; the original bundle and atlas are never modified.
 ecoli_atlas train \
   --counts "$DATA/merged_count_table.txt" \
   --metadata "$DATA/metadata_revised.csv" \
   --feature-table "$DATA/GCF_000005845.2_ASM584v2_feature_table.txt" \
   --hparams "$OLD/manifest.json" --splits "$OLD/splits.csv" --no-tune \
-  --seed 77 --device cuda --out "$NEW" --write-atlas
+  --seeds "$SEEDS" --select best --device cuda --out "$NEW" --write-atlas --atlas-out "$NEW/atlas"
 
 ecoli_atlas verify-models --old "$OLD" --new "$NEW" \
   --counts "$DATA/merged_count_table.txt" \

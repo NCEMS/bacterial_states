@@ -25,7 +25,8 @@ Never `git add` any of these (all in `.gitignore`): `resources/`, `old_resources
 |---|---|---|
 | `resources/{vg,annotation,centrifuge,container}` | inGEST reference bundle (13 GB) | downloaded; `resources/container/rnaseq_vg.sif` is the image |
 | `atlas_data/` | `merged_count_table.txt`, `metadata_revised.csv`, feature table | atlas training inputs |
-| `outputs/models/` | the Colab-trained bundle + `manifest.json` + `splits.csv` | **do not commit or redistribute until `ecoli_atlas train` reproduces it** (see `ecoli_atlas/scripts/slurm_train_repro.sh`) |
+| `outputs/models/`, `outputs/atlas/` | the Colab-trained bundle (+ `manifest.json`, `splits.csv`) and the atlas built from it | **the originals: never overwrite, commit or redistribute.** Refits go to `outputs/models_repro*/` via `ecoli_atlas train --seeds ...` (see `ecoli_atlas/scripts/slurm_train_repro.sh`); accept a refit when the original's TEST metrics lie within the sweep's spread (`verify-models` → `old_within_new_seed_spread`) |
+| `outputs/models_repro/`, `outputs/atlas_repro/` | first GPU refit (seed 77) and its atlas | kept for comparison |
 | `outputs/predictions/final_embedding.csv` | baseline atlas embeddings (3342 samples) | source of the future `outputs/atlas/` bundle |
 | `work/experiment3/` | the tutorial run (4 samples) used for verification | a run directory; results in `experiment3_results/` |
 | `notebooks/` | the two original Colab notebooks | read-only reference; never edit or commit |

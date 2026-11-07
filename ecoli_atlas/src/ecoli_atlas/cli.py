@@ -118,11 +118,13 @@ def _write_atlas(bundle, counts, meta, feat, atlas_dir: Path, apply_thresholds, 
 
 
 def cmd_train(args) -> int:
+    import copy
     from .artifacts import ModelBundle
     from .config import TrainConfig
     from .data import build_training_data
     from .io import read_counts, read_metadata
     from .splits import load_splits
+    from .sweep import promote_bundle, select_seed, summarize_sweep, write_sweep
     from .train import reload_check, run_training
 
     device = pick_device(args.device)
@@ -141,6 +143,10 @@ def cmd_train(args) -> int:
     cfg.tune = args.tune
     if args.n_trials is not None:
         cfg.n_trials_factor = cfg.n_trials_top = args.n_trials
+    seeds = [int(x) for x in args.seeds.split(",") if x.strip()] if args.seeds else [cfg.seed]
+    if len(set(seeds)) != len(seeds):
+        _info("error: --seeds contains duplicates")
+        return 1
 
     counts = read_counts(args.counts, strip_sample_names=False)
     meta = read_metadata(args.metadata)
@@ -149,17 +155,52 @@ def cmd_train(args) -> int:
         _info("error: --feature-table is required (or put it in $ECOLI_ATLAS_DATA)")
         return 1
     splits = load_splits(args.splits) if args.splits else None
+    # the split is built once (with cfg.seed) and shared by every seed of the sweep
     data = build_training_data(counts, meta, feat, cfg, splits=splits, max_samples=args.max_samples, log=_info)
     _info(f"device: {device}")
-    result = run_training(data, cfg, device, log=_info, compute_thresholds=not args.no_thresholds,
-                          training_data_version=args.training_data_version)
     out = Path(args.out)
-    result.bundle.save(out, splits=data.splits_frame())
-    reloaded = ModelBundle.load(out, device)
-    dev = reload_check(reloaded, data, result.embedding)
-    _info(f"saved bundle to {out} (reload check max deviation {dev:.2e})")
+
+    if args.threads:
+        import torch
+        torch.set_num_threads(args.threads)
+
+    sweep_dirs, manifests = {}, {}
+    for seed in seeds:
+        dest = out / f"seed_{seed}" if len(seeds) > 1 else out
+        if args.resume and (dest / "manifest.json").exists():
+            reloaded = ModelBundle.load(dest, device)
+            _info(f"===== seed {seed}: already trained, reusing {dest} =====")
+            sweep_dirs[seed] = dest
+            manifests[seed] = reloaded.manifest
+            continue
+        cfg_s = copy.deepcopy(cfg)
+        cfg_s.seed = seed
+        if len(seeds) > 1:
+            _info(f"===== seed {seed} ({seeds.index(seed) + 1}/{len(seeds)}) =====")
+        result = run_training(data, cfg_s, device, log=_info, compute_thresholds=not args.no_thresholds,
+                              training_data_version=args.training_data_version)
+        result.bundle.save(dest, splits=data.splits_frame())
+        reloaded = ModelBundle.load(dest, device)
+        dev = reload_check(reloaded, data, result.embedding)
+        _info(f"saved bundle to {dest} (reload check max deviation {dev:.2e})")
+        sweep_dirs[seed] = dest
+        manifests[seed] = reloaded.manifest
+    if len(seeds) > 1:
+        summary = summarize_sweep(manifests)
+        selected = select_seed(manifests, args.select)
+        summary["selected_seed"] = selected
+        summary["selection_rule"] = args.select
+        promote_bundle(sweep_dirs[selected], out, summary)
+        write_sweep(summary, out)
+        _info(f"seed sweep: selected seed {selected} ({args.select}); per-factor TEST balanced accuracy spread:")
+        for f, st in summary["spread"].items():
+            ba = st["balanced_acc"]
+            _info(f"  {f:14s} min={ba['min']:.3f} mean={ba['mean']:.3f} max={ba['max']:.3f} sd={ba['sd']:.3f}")
+        _info(f"promoted {sweep_dirs[selected]} -> {out}; details in {out / 'seed_sweep.tsv'}")
+        reloaded = ModelBundle.load(out, device)
+
     if args.write_atlas:
-        atlas_dir = Path(args.atlas_out) if args.atlas_out else out.parent / "atlas"
+        atlas_dir = Path(args.atlas_out) if args.atlas_out else out / "atlas"
         _write_atlas(reloaded, counts, meta, feat, atlas_dir, tuple(cfg.apply_thresholds), str(device))
     return 0
 
@@ -233,11 +274,19 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--test-frac", type=float)
     sp.add_argument("--n-folds", type=int)
     sp.add_argument("--min-class-n", type=int)
-    sp.add_argument("--seed", type=int)
+    sp.add_argument("--seed", type=int, help="seed for the split search and for a single fit (default 77)")
+    sp.add_argument("--seeds", help="comma-separated seeds: fit each on the same split, save them under <out>/seed_<s>/, "
+                                    "promote one to <out>/ and record the spread of TEST metrics in its manifest")
+    sp.add_argument("--select", default="best", choices=["best", "median", "first"],
+                    help="which seed to promote in a sweep: best = highest mean TEST AUROC, median = closest to the median, first")
+    sp.add_argument("--resume", action="store_true",
+                    help="in a sweep, reuse seeds whose bundle already exists under <out>/seed_<s>/ instead of "
+                         "retraining (continue a sweep after a job hit its wall-time limit)")
+    sp.add_argument("--threads", type=int, help="torch CPU threads (default: all cores)")
     sp.add_argument("--max-samples", type=int, help="(development) random subset of samples")
     sp.add_argument("--no-thresholds", action="store_true", help="skip the out-of-fold threshold refits (use 0.5)")
     sp.add_argument("--write-atlas", action="store_true", help="also embed the whole count table as the atlas")
-    sp.add_argument("--atlas-out", help="atlas directory (default: <out>/../atlas)")
+    sp.add_argument("--atlas-out", help="atlas directory (default: <out>/atlas; never overwrites an existing sibling)")
     sp.add_argument("--training-data-version", default=dl.ATLAS_DATA_VERSION)
     add_device(sp)
     sp.set_defaults(func=cmd_train)

@@ -69,7 +69,7 @@ def test_train_embed_compare_verify(synthetic, tmp_path):
     cs = splits.loc[splits["gse"] == "GSE1012", "split"]                        # case study forced into TEST:
     assert (cs == 3).any() and not (cs == 1).any()                              # reference samples TEST, never TRAIN
     assert not (set(splits.loc[splits["split"] == 1, "gse"]) & set(splits.loc[splits["split"] == 3, "gse"]))
-    atlas = tmp_path / "atlas"
+    atlas = models / "atlas"  # default: inside the models directory
     assert (atlas / "final_embedding.csv").exists() and (atlas / "atlas_metadata.csv").exists()
     emb = pd.read_csv(atlas / "final_embedding.csv", index_col=0)
     assert emb.shape == (N_STUDIES * PER_STUDY, manifest["final_embedding_dim"])
@@ -121,3 +121,49 @@ def test_min_gene_coverage_gate(synthetic, tmp_path, bundle):
     rc = main(["embed", "--counts", str(tmp_path / "half.tsv"), "--models", str(models), "--out", str(tmp_path / "e2"),
                "--feature-table", str(synthetic / "feature_table.txt"), "--device", "cpu", "--min-gene-coverage", "0.4"])
     assert rc == 0
+
+
+def test_seed_sweep(synthetic, tmp_path):
+    out = tmp_path / "sweep"
+    rc = main(["train", "--counts", str(synthetic / "merged_count_table.txt"),
+               "--metadata", str(synthetic / "metadata_revised.csv"),
+               "--feature-table", str(synthetic / "feature_table.txt"),
+               "--out", str(out), "--no-tune", "--factor-epochs", "1", "--top-epochs", "1", "--no-thresholds",
+               "--min-class-n", "5", "--test-frac", "0.15", "--device", "cpu", "--seeds", "1,2", "--select", "best",
+               "--write-atlas"])
+    assert rc == 0
+    assert (out / "seed_1" / "manifest.json").exists() and (out / "seed_2" / "manifest.json").exists()
+    manifest = json.loads((out / "manifest.json").read_text())
+    sweep = manifest["seed_sweep"]
+    assert sweep["seeds"] == [1, 2] and sweep["selected_seed"] in (1, 2) and manifest["seed"] == sweep["selected_seed"]
+    assert set(sweep["spread"]) == {"growth_phase", "medium_type", "is_lab_strain"}
+    assert sweep["spread"]["growth_phase"]["auroc"]["n"] == 2
+    tsv = pd.read_csv(out / "seed_sweep.tsv", sep="\t")
+    assert len(tsv) == 6 and tsv["selected"].sum() == 3
+    # the promoted bundle is byte-identical to the selected seed's bundle
+    sel = out / f"seed_{sweep['selected_seed']}"
+    assert (out / "residual_ae.pt").read_bytes() == (sel / "residual_ae.pt").read_bytes()
+    # both splits identical: one split shared across the sweep
+    assert (out / "seed_1" / "splits.csv").read_text() == (out / "seed_2" / "splits.csv").read_text()
+    assert (out / "atlas" / "final_embedding.csv").exists()          # default atlas location is inside <out>
+    # verify-models reports whether the other bundle is within the sweep's spread
+    rc = main(["verify-models", "--old", str(sel), "--new", str(out), "--counts", str(synthetic / "merged_count_table.txt"),
+               "--feature-table", str(synthetic / "feature_table.txt"), "--report", str(tmp_path / "r.json"), "--device", "cpu"])
+    assert rc == 0
+    rep = json.loads((tmp_path / "r.json").read_text())
+    assert all(v["within"] for f in rep["old_within_new_seed_spread"].values() for v in f.values())
+
+
+def test_seed_sweep_resume(synthetic, tmp_path):
+    out = tmp_path / "sweep2"
+    base = ["train", "--counts", str(synthetic / "merged_count_table.txt"), "--metadata", str(synthetic / "metadata_revised.csv"),
+            "--feature-table", str(synthetic / "feature_table.txt"), "--out", str(out), "--no-tune", "--factor-epochs", "1",
+            "--top-epochs", "1", "--no-thresholds", "--min-class-n", "5", "--test-frac", "0.15", "--device", "cpu",
+            "--seeds", "1,2,3", "--threads", "2"]
+    assert main(base[:-4] + ["--seeds", "1,2", "--threads", "2"]) == 0        # an earlier, shorter sweep
+    assert (out / "seed_1" / "manifest.json").exists() and (out / "seed_2" / "manifest.json").exists()
+    stamp = (out / "seed_1" / "residual_ae.pt").stat().st_mtime_ns
+    assert main(base + ["--resume"]) == 0
+    assert (out / "seed_1" / "residual_ae.pt").stat().st_mtime_ns == stamp         # not retrained
+    manifest = json.loads((out / "manifest.json").read_text())
+    assert manifest["seed_sweep"]["seeds"] == [1, 2, 3]

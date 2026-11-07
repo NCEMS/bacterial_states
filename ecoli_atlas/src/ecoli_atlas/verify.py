@@ -83,5 +83,11 @@ def verify_models(old_dir, new_dir, counts: pd.DataFrame, feat: pd.DataFrame, me
         if old.manifest and "test_metrics" in old.manifest:
             report["test_metrics"]["old_manifest"] = {f: {k2: v[k2] for k2 in ("n", "balanced_acc", "auroc")}
                                                       for f, v in old.manifest["test_metrics"].items()}
+    # seed sweeps: is the other bundle's TEST performance inside the sweep's min..max?
+    from .sweep import within_spread
+    if new.manifest and "seed_sweep" in new.manifest and old.manifest and "test_metrics" in old.manifest:
+        report["old_within_new_seed_spread"] = within_spread(old.manifest["test_metrics"], new.manifest["seed_sweep"])
+    if old.manifest and "seed_sweep" in old.manifest and new.manifest and "test_metrics" in new.manifest:
+        report["new_within_old_seed_spread"] = within_spread(new.manifest["test_metrics"], old.manifest["seed_sweep"])
     log(json.dumps(report, indent=2, default=str))
     return report
