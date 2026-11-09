@@ -2,7 +2,7 @@
 
 ###Getting config information
 
-import glob, json, os
+import glob, json, os, sys
 
 configfile: "config.yaml"
 experiment_name = config.get("experiment", "experiment_unknown")
@@ -65,16 +65,44 @@ def get_minimizer_for_sample(sample_name):
         return vg_index + ".d2.min"
 
 
-#Getting SE or PE
+#Where each sample's reads come from (scripts/sra_reads.py is shared with `ecoli_ingest check`).
+# A sample gives r1/r2 (a file or a list of files per mate, concatenated before fastp) or an
+# `accession` (SRR/SRX/SRS/GSM) whose FASTQ files are downloaded from ENA into `sra_dir`. Resolving
+# an accession needs the network once; the answer is cached under <sra_dir>/manifest/<ACC>.json.
+sys.path.insert(0, scripts_dir)
+import sra_reads
+
 SAMPLES = config.get("samples", {})
-def get_sample_type():
-    has_any_missing_r2 = any("r2" not in info for info in SAMPLES.values())
-    return has_any_missing_r2
-SE = get_sample_type()
-num_se = sum("r2" not in info for info in SAMPLES.values())
-num_pe = len(SAMPLES) - num_se
+SRA_DIR = config.get("sra_dir", "sra")
+READS = sra_reads.resolve_samples(SAMPLES, SRA_DIR, os.path.join(SRA_DIR, "manifest"), log=sys.stderr)
+RUN_FILES = {run: files for spec in READS.values() for run, files in spec["runs"].items()}
+
+# Concurrent downloads are capped by the `download_slots` resource: `--resources download_slots=N`
+# (the launcher's --max-downloads) wins, else config `max_downloads`, else 4.
+if "download_slots" not in workflow.global_resources:
+    workflow.register_resource("download_slots", int(config.get("max_downloads", 4)))
+
+#Getting SE or PE
+num_se = sum(spec["r2"] is None for spec in READS.values())
+num_pe = len(READS) - num_se
+SE = num_se > 0
 if num_se > 0 and num_pe > 0:
     print("WARNING: Mixed SE and PE samples detected. Defaulting to SE mode for all.", flush=True)
+
+def raw_reads(sample, mate):
+    """The file fastp reads for one mate: the configured/downloaded file itself when there is
+    exactly one, otherwise the concatenation made by merge_reads."""
+    files = READS[sample]["r1" if mate == 1 else "r2"]
+    if len(files) == 1:
+        return files[0]
+    ext = "fastq.gz" if sra_reads.is_gz(files[0]) else "fastq"
+    return f"{experiment_name}_results/{sample}/raw/{sample}_R{mate}.{ext}"
+
+wildcard_constraints:
+    sample="[^/]+",
+    run="[SED]RR[0-9]+",
+    mate="[12]",
+    ext="fastq(\\.gz)?"
 
 
 #Getting contrasts
@@ -221,11 +249,39 @@ rule all:
         lambda wc: get_rna_seq_outputs(wc)
 
 
+####Fetching and merging raw reads (only for samples that need it)
+rule sra_download:
+    output:
+        os.path.join(SRA_DIR, "{run}", "{run}_{mate}.fastq.gz")
+    params:
+        url=lambda wc: RUN_FILES[wc.run][wc.mate]["url"],
+        md5=lambda wc: RUN_FILES[wc.run][wc.mate]["md5"] or "",
+        size=lambda wc: RUN_FILES[wc.run][wc.mate]["bytes"] or 0
+    threads: 1
+    resources:
+        download_slots=1
+    retries: 2
+    shell:
+        """
+        python {scripts_dir}/sra_reads.py download --url {params.url} --md5 "{params.md5}" --bytes {params.size} --out {output}
+        """
+
+rule merge_reads:
+    input:
+        lambda wc: READS[wc.sample]["r1" if wc.mate == "1" else "r2"]
+    output:
+        temp(f"{experiment_name}_results/{{sample}}/raw/{{sample}}_R{{mate}}.{{ext}}")
+    shell:
+        """
+        cat {input} > {output}
+        """
+
+
 ####Single-end analysis
 if SE:
     rule fastp_se:
         input:
-            r1=lambda wildcards: SAMPLES[wildcards.sample]["r1"]
+            r1=lambda wildcards: raw_reads(wildcards.sample, 1)
         output:
             temp(f"{experiment_name}_results/{{sample}}/{{sample}}_clean_R1.fastq"),
             html=f"{experiment_name}_results/{{sample}}/fastp/{{sample}}_fastp.html",
@@ -312,8 +368,8 @@ if SE:
 else:
     rule fastp_pe:
         input:
-            r1=lambda wildcards: SAMPLES[wildcards.sample]["r1"],
-            r2=lambda wildcards: SAMPLES[wildcards.sample]["r2"]
+            r1=lambda wildcards: raw_reads(wildcards.sample, 1),
+            r2=lambda wildcards: raw_reads(wildcards.sample, 2)
         output:
             r1=temp(f"{experiment_name}_results/{{sample}}/{{sample}}_clean_R1.fastq"),
             r2=temp(f"{experiment_name}_results/{{sample}}/{{sample}}_clean_R2.fastq"),

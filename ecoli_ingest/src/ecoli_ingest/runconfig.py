@@ -10,9 +10,18 @@ import yaml
 @dataclass
 class Sample:
     name: str
-    r1: str
-    r2: str | None
+    r1: list[str]                 # local files for mate 1 (empty for accession samples)
+    r2: list[str] | None          # local files for mate 2; None = single-end (or unknown for accessions)
+    accessions: list[str]         # SRR/SRX/SRS/GSM ids fetched from ENA
     condition: str | None
+
+
+def _as_list(value) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, (list, tuple)):
+        return [str(v) for v in value]
+    return [str(value)]
 
 
 def load_config(path: Path) -> dict:
@@ -24,12 +33,31 @@ def load_config(path: Path) -> dict:
 
 
 def samples(cfg: dict) -> list[Sample]:
+    """Validate the ``samples:`` block. Each sample gives ``r1`` (and ``r2`` for paired-end), each a
+    file or a list of files that are concatenated in order, *or* an ``accession`` (string or list).
+    Accession layout (single/paired) is only known after resolution (see workflow/scripts/sra_reads.py)."""
     out = []
     for name, info in (cfg.get("samples") or {}).items():
-        if not isinstance(info, dict) or "r1" not in info:
-            raise ValueError(f"sample {name!r}: needs at least an 'r1' entry")
-        out.append(Sample(str(name), str(info["r1"]), info.get("r2"), info.get("condition")))
+        if not isinstance(info, dict):
+            raise ValueError(f"sample {name!r}: must be a mapping with r1/r2 or accession")
+        r1, r2, acc = _as_list(info.get("r1")), _as_list(info.get("r2")), _as_list(info.get("accession"))
+        if acc and (r1 or r2):
+            raise ValueError(f"sample {name!r}: give either r1/r2 or accession, not both")
+        if not acc and not r1:
+            raise ValueError(f"sample {name!r}: needs an 'r1' entry (file or list of files) or an 'accession'")
+        if r2 and len(r2) != len(r1):
+            raise ValueError(f"sample {name!r}: r1 has {len(r1)} file(s) but r2 has {len(r2)}")
+        out.append(Sample(str(name), r1, r2 or None, acc, info.get("condition")))
     return out
+
+
+def uses_accessions(cfg: dict) -> bool:
+    return any(s.accessions for s in samples(cfg))
+
+
+def sra_dir(cfg: dict, rundir: Path) -> Path:
+    """Where accession downloads and the resolution cache live (config ``sra_dir``, default <run dir>/sra)."""
+    return resolve_path(cfg.get("sra_dir") or "sra", rundir)
 
 
 def resolve_path(value: str | Path, base: Path) -> Path:
@@ -38,11 +66,19 @@ def resolve_path(value: str | Path, base: Path) -> Path:
     return p if p.is_absolute() else (base / p)
 
 
-def is_paired(cfg: dict) -> tuple[bool, bool]:
-    """Return (all_paired, mixed). The workflow treats any run with a missing r2 as single-end."""
-    ss = samples(cfg)
-    n_pe = sum(s.r2 is not None for s in ss)
-    return (n_pe == len(ss) and n_pe > 0), (0 < n_pe < len(ss))
+def is_paired(cfg: dict, layouts: dict[str, bool] | None = None) -> tuple[bool, bool]:
+    """Return (all_paired, mixed). The workflow treats any run with a missing r2 as single-end.
+    ``layouts`` maps accession samples to True (paired) / False once they have been resolved; accession
+    samples without an entry are left out (their layout is unknown until resolved)."""
+    known = []
+    for s in samples(cfg):
+        if s.accessions:
+            if layouts and s.name in layouts:
+                known.append(layouts[s.name])
+        else:
+            known.append(s.r2 is not None)
+    n_pe = sum(known)
+    return (n_pe == len(known) and n_pe > 0), (0 < n_pe < len(known))
 
 
 def centrifuge_enabled(cfg: dict) -> bool:

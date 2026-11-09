@@ -106,10 +106,43 @@ single-end. Reference files default to the standard names in the resources direc
 files can be overridden with `vg_index`, `annotation_gff`, `annotation_source_gff`,
 `annotation_bed`, `centrifuge_index_path`.
 
+Reads for a sample can also be several files per mate, or an SRA/GEO accession:
+
+```yaml
+samples:
+  wt_2:   # several lanes: the files of each mate are concatenated in order before fastp
+    r1: ["reads/WT_2_L001_R1.fastq.gz", "reads/WT_2_L002_R1.fastq.gz"]
+    r2: ["reads/WT_2_L001_R2.fastq.gz", "reads/WT_2_L002_R2.fastq.gz"]
+    condition: "wildtype"
+  ko_3:   # downloaded from ENA during the run; single/paired is taken from the archive
+    accession: "GSM1646283"
+    condition: "knockout"
+  ko_4:   # several runs are merged into one sample
+    accession: ["SRR1945182", "SRR1945183"]
+    condition: "knockout"
+```
+
+`accession` takes SRR/ERR/DRR runs, SRX experiments, SRS/SAMN samples or GSM ids (strings or lists);
+study-level ids (GSE, SRP, PRJNA) are rejected because one sample cannot be a whole study. Files go
+to `sra/` in the run directory (`sra_dir:` to share one download directory between runs) and md5s
+are verified. `ecoli_ingest check` resolves the accessions (network needed once; the answer is cached
+under `sra/manifest/`) and reports how much there is to download; `ecoli_ingest run --max-downloads N`
+caps concurrent downloads (default 4).
+
 ### Tutorial data
 
 Wild-type BW25113 versus a *cysG* knockout, four single-end libraries from SRA (BioProject
-PRJNA297600). Place them under `reads/` in the run directory:
+PRJNA297600). Simplest: let the workflow fetch them.
+
+```yaml
+samples:
+  wt_1: {accession: "SRR2547467", condition: "wildtype"}
+  wt_2: {accession: "SRR2547468", condition: "wildtype"}
+  ko_1: {accession: "SRR2547469", condition: "knockout"}
+  ko_2: {accession: "SRR2547470", condition: "knockout"}
+```
+
+Or download them yourself and place them under `reads/` in the run directory:
 
 ```bash
 mkdir reads && cd reads
@@ -135,8 +168,9 @@ The count tables feed [Ecoli_ATLAS](../ecoli_atlas/README.md): `ecoli_atlas prep
 
 ## 5. Notes
 
-- Nothing needs network access at run time. Gene identifiers and product descriptions come from
-  the two annotation GFFs (`workflow/scripts/annotate_counts.py`).
+- Nothing needs network access at run time unless samples are given by `accession`; those are
+  resolved (NCBI/ENA metadata) and downloaded from ENA by the workflow itself. Gene identifiers and
+  product descriptions come from the two annotation GFFs (`workflow/scripts/annotate_counts.py`).
 - Reads shorter than 50 bp automatically use the k=15 minimizer index.
 - Centrifuge runs for every sample unless the config says `centrifuge: false` (`ecoli_ingest init
   --without-centrifuge` writes that); a missing key means on. With it off, Centrifuge is not run, its

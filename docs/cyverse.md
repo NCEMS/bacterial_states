@@ -44,4 +44,6 @@ ecoli_ingest run --container always --cores 12
 ```
 
 `ecoli_ingest` binds the run directory, the resources and the directories holding your reads into
-the container automatically. Results appear in `~/tutorial/<experiment>_results/`.
+the container automatically. Samples given by `accession` are downloaded into `~/tutorial/sra/`
+(inside the run directory, so nothing extra needs binding). Results appear in
+`~/tutorial/<experiment>_results/`.

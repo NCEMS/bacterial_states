@@ -118,14 +118,26 @@ def check_run_dir(cfg: dict, rundir: Path, configfile: Path) -> list[Check]:
         return out + [Check("samples", FAIL, str(e))]
     if not ss:
         return out + [Check("samples", FAIL, "config.yaml has no samples")]
-    missing = []
+    missing, mixed_compression = [], []
     for s in ss:
-        for f in (s.r1, s.r2):
-            if f and not runconfig.resolve_path(f, rundir).exists():
-                missing.append(f)
+        for files in (s.r1, s.r2 or []):
+            for f in files:
+                if not runconfig.resolve_path(f, rundir).exists():
+                    missing.append(f)
+            if len({f.lower().endswith((".gz", ".gzip")) for f in files}) > 1:
+                mixed_compression.append(s.name)
+    n_files = sum(len(s.r1) + len(s.r2 or []) for s in ss)
+    n_local = sum(1 for s in ss if not s.accessions)
+    detail = f"{n_local} samples, {n_files} files" if n_local else "none (all samples use accessions)"
     out.append(Check("sample reads", FAIL if missing else OK,
-                     f"{len(ss)} samples" if not missing else "missing: " + ", ".join(missing)))
-    paired, mixed = runconfig.is_paired(cfg)
+                     detail if not missing else "missing: " + ", ".join(missing)))
+    if mixed_compression:
+        out.append(Check("sample reads", FAIL, "gzipped and plain FASTQ mixed within one mate (files are "
+                                               "concatenated as-is): " + ", ".join(mixed_compression)))
+    layouts: dict[str, bool] = {}
+    if any(s.accessions for s in ss):
+        out.extend(_check_accessions(cfg, rundir, layouts))
+    paired, mixed = runconfig.is_paired(cfg, layouts)
     if mixed:
         out.append(Check("read layout", WARN, "mixed single- and paired-end samples: the workflow runs "
                                                "everything single-end and ignores r2"))
@@ -134,6 +146,24 @@ def check_run_dir(cfg: dict, rundir: Path, configfile: Path) -> list[Check]:
     if not cfg.get("deseq2", {}).get("contrasts"):
         out.append(Check("deseq2 contrasts", WARN, "none configured; DESeq2 outputs will be placeholders"))
     return out
+
+
+def _check_accessions(cfg: dict, rundir: Path, layouts: dict[str, bool]) -> list[Check]:
+    """Resolve accession samples (network once; cached under <sra_dir>/manifest) and summarise the
+    download. Fills ``layouts`` (sample -> paired?) for the read-layout check."""
+    sra = paths.load_script("sra_reads")
+    sdir = runconfig.sra_dir(cfg, rundir)
+    n_acc = sum(len(s.accessions) for s in runconfig.samples(cfg))
+    try:
+        reads = sra.resolve_samples(cfg.get("samples") or {}, str(sdir), str(sdir / "manifest"))
+    except ValueError as e:
+        return [Check("sra accessions", FAIL, str(e))]
+    layouts.update({name: spec["r2"] is not None for name, spec in reads.items() if spec["accessions"]})
+    summ = sra.download_summary(reads, str(sdir))
+    gb = summ["pending_bytes"] / 1e9
+    detail = (f"{n_acc} accession(s) -> {summ['runs']} run(s), {summ['files']} file(s); "
+              f"{summ['present']} already in {sdir}, {gb:.2f} GB to download")
+    return [Check("sra accessions", OK, detail)]
 
 
 def run_all(*, cfg: dict, rundir: Path, configfile: Path, resources: Path | None, mode: str) -> list[Check]:

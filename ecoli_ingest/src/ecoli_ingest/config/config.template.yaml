@@ -8,6 +8,14 @@ experiment: "my_experiment"
 # One entry per sample. Give r2 for paired-end data. If ANY sample lacks r2 the whole run is
 # treated as single-end. `condition` is the DESeq2 grouping variable; an optional `condition2`
 # is added to the model as a second factor.
+#
+# Reads can be given as
+#   r1 / r2:    one file, or a list of files that are concatenated in order (e.g. several lanes);
+#               r2 must list as many files as r1
+#   accession:  an SRA/GEO id (SRR/ERR/DRR run, SRX experiment, SRS/SAMN sample or GSM) or a list
+#               of them. FASTQ files are downloaded from ENA into `sra_dir` during the run and the
+#               layout (single/paired) is taken from the archive. Study ids (GSE, SRP, PRJNA) are not
+#               accepted: list their GSM/SRR ids as separate samples.
 samples:
   wt_1:
     r1: "reads/WT_1.fastq.gz"
@@ -26,6 +34,15 @@ samples:
 #    r1: "reads/SRR33308274_1.fastq.gz"
 #    r2: "reads/SRR33308274_2.fastq.gz"
 #    condition: "wildtype"
+# Several files per mate (merged before fastp):
+#  sample_b:
+#    r1: ["reads/B_L001_R1.fastq.gz", "reads/B_L002_R1.fastq.gz"]
+#    r2: ["reads/B_L001_R2.fastq.gz", "reads/B_L002_R2.fastq.gz"]
+#    condition: "wildtype"
+# Downloaded from SRA (a GEO sample here; several runs are merged into the one sample):
+#  sample_c:
+#    accession: "GSM1646283"
+#    condition: "knockout"
 
 # DESeq2 contrasts as [factor, reference_level, test_level]. The reference is listed first.
 deseq2:
@@ -41,6 +58,12 @@ centrifuge: true
 centrifuge_organism: "Escherichia coli"
 centrifuge_min_percentage: 30.0
 fastp_min_kept_percentage: 75.0
+
+# Samples given by accession: where downloads and the resolution cache go (default: sra/ in this
+# directory; point several run directories at one shared directory to download each run once) and
+# how many files are fetched at the same time (`ecoli_ingest run --max-downloads N` overrides).
+# sra_dir: "sra"
+# max_downloads: 4
 
 # Reference resources default to the standard files in the resources directory and normally need
 # no changes. Uncomment to override individual files.

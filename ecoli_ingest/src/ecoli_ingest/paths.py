@@ -41,6 +41,17 @@ def scripts_dir() -> Path:
     return workflow_dir() / "scripts"
 
 
+def load_script(name: str):
+    """Import ``workflow/scripts/<name>.py`` as a module (they are plain scripts, not a package)."""
+    import importlib.util
+    path = scripts_dir() / f"{name}.py"
+    spec = importlib.util.spec_from_file_location(f"ecoli_ingest_script_{name}", path)
+    mod = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(mod)
+    return mod
+
+
 def config_template() -> Path:
     return package_root() / "config" / "config.template.yaml"
 

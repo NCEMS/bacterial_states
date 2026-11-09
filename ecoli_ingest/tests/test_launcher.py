@@ -30,6 +30,39 @@ def test_mixed_layout_detected():
     assert runconfig.is_paired(cfg) == (False, True)
 
 
+def test_samples_accept_lists_and_accessions():
+    cfg = {"samples": {
+        "one": {"r1": "a.fq.gz", "condition": "x"},
+        "two": {"r1": ["l1.fq.gz", "l2.fq.gz"], "r2": ["l1_2.fq.gz", "l2_2.fq.gz"]},
+        "acc": {"accession": "GSM1646283"},
+        "accs": {"accession": ["SRR1", "SRR2"]},
+    }}
+    ss = {s.name: s for s in runconfig.samples(cfg)}
+    assert ss["one"].r1 == ["a.fq.gz"] and ss["one"].r2 is None and ss["one"].accessions == []
+    assert ss["two"].r1 == ["l1.fq.gz", "l2.fq.gz"] and ss["two"].r2 == ["l1_2.fq.gz", "l2_2.fq.gz"]
+    assert ss["acc"].accessions == ["GSM1646283"] and ss["acc"].r1 == [] and ss["acc"].r2 is None
+    assert ss["accs"].accessions == ["SRR1", "SRR2"]
+    assert runconfig.uses_accessions(cfg) and not runconfig.uses_accessions({"samples": {"a": {"r1": "a.fq"}}})
+    # accession samples are unknown until resolved, then they take part in the layout decision
+    assert runconfig.is_paired(cfg) == (False, True)
+    assert runconfig.is_paired(cfg, {"acc": True, "accs": True}) == (False, True)
+    assert runconfig.is_paired({"samples": {"acc": {"accession": "SRR1"}}}, {"acc": True}) == (True, False)
+    assert runconfig.is_paired({"samples": {"acc": {"accession": "SRR1"}}}) == (False, False)
+    assert runconfig.sra_dir({}, Path("/run")) == Path("/run/sra")
+    assert runconfig.sra_dir({"sra_dir": "/shared/sra"}, Path("/run")) == Path("/shared/sra")
+
+
+@pytest.mark.parametrize("info, msg", [
+    ({"r1": "a.fq", "accession": "SRR1"}, "not both"),
+    ({"condition": "x"}, "needs an 'r1'"),
+    ({"r1": ["a.fq", "b.fq"], "r2": "c.fq"}, "r1 has 2"),
+    ("a.fq", "must be a mapping"),
+])
+def test_samples_reject_bad_entries(info, msg):
+    with pytest.raises(ValueError, match=msg):
+        runconfig.samples({"samples": {"s": info}})
+
+
 def test_compute_binds_dedupes_and_drops_nested(tmp_path):
     top = tmp_path / "top"
     nested = top / "inner" / "deep"
@@ -59,6 +92,12 @@ def test_snakemake_and_container_commands():
                                         cores="8", targets=["all"], dry_run=True, extra=["--unlock"])
     assert inner[:3] == ["snakemake", "--snakefile", "/pkg/Snakefile"]
     assert "--config" in inner and "resources_dir=/res" in inner
+    assert "--resources" not in inner
+    limited = container.snakemake_command(snakefile=Path("/pkg/Snakefile"), rundir=Path("/run"),
+                                          configfile=Path("/run/config.yaml"), resources=Path("/res"),
+                                          resource_limits={"download_slots": 4})
+    assert limited[limited.index("--resources") + 1] == "download_slots=4"
+    assert limited.index("--resources") < limited.index("--cores") < limited.index("all")
     assert inner[-2:] == ["all", "--unlock"] and "--dry-run" in inner  # targets precede pass-through args
     outer = container.container_command("apptainer", Path("/res/container/x.sif"), ["/pkg", "/run"], Path("/run"), inner)
     assert outer[:2] == ["apptainer", "exec"]
@@ -80,6 +119,42 @@ def test_checks_report_missing_everything(tmp_path):
     assert statuses["resources directory"] == checks.FAIL
     assert statuses["sample reads"] == checks.FAIL
     assert statuses["run directory writable"] == checks.OK
+
+
+def test_checks_multi_file_and_accession_samples(tmp_path, monkeypatch):
+    (tmp_path / "a.fq.gz").write_bytes(b"")
+    (tmp_path / "b.fq.gz").write_bytes(b"")
+    cfg = {"samples": {"two": {"r1": ["a.fq.gz", "b.fq.gz"]}, "acc": {"accession": "GSM1646283"}}}
+    sra = paths.load_script("sra_reads")
+
+    def fake_fetch(url, timeout=60, attempts=3):
+        if "runinfo" in url:
+            return "Run,LibraryLayout\nSRR1945181,PAIRED\n"
+        return ("run_accession\tlibrary_layout\tfastq_ftp\tfastq_md5\tfastq_bytes\n"
+                "SRR1945181\tPAIRED\tx/SRR1945181_1.fastq.gz;x/SRR1945181_2.fastq.gz\ta;b\t10;20\n")
+
+    monkeypatch.setattr(paths, "load_script", lambda name: sra)
+    monkeypatch.setattr(sra, "_fetch", fake_fetch)
+    result = {c.name: c for c in checks.check_run_dir(cfg, tmp_path, tmp_path / "config.yaml")}
+    assert result["sample reads"].status == checks.OK and "2 files" in result["sample reads"].detail
+    assert result["sra accessions"].status == checks.OK
+    assert "1 run(s), 2 file(s)" in result["sra accessions"].detail and "0.00 GB" in result["sra accessions"].detail
+    assert (tmp_path / "sra" / "manifest" / "GSM1646283.json").exists()      # cache written in the run dir
+    assert result["read layout"].status == checks.WARN                         # two=SE, acc=PE -> mixed
+
+    cfg["samples"]["acc"]["accession"] = "GSE67218"
+    result = {c.name: c for c in checks.check_run_dir(cfg, tmp_path, tmp_path / "config.yaml")}
+    assert result["sra accessions"].status == checks.FAIL and "study-level" in result["sra accessions"].detail
+
+    cfg = {"samples": {"mix": {"r1": ["a.fq.gz", "c.fq"]}}}
+    (tmp_path / "c.fq").write_bytes(b"")
+    result = checks.check_run_dir(cfg, tmp_path, tmp_path / "config.yaml")
+    assert any(c.name == "sample reads" and c.status == checks.FAIL and "gzipped and plain" in c.detail for c in result)
+
+
+def test_cli_run_max_downloads_default():
+    assert build_parser().parse_args(["run"]).max_downloads == 4
+    assert build_parser().parse_args(["run", "--max-downloads", "2"]).max_downloads == 2
 
 
 def test_container_image_legacy_layout(tmp_path):

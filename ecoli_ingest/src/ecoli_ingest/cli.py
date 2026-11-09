@@ -100,7 +100,12 @@ def cmd_run(args) -> int:
     extra = _extra_snakemake_args(args.snakemake_args)
     inner = container.snakemake_command(
         snakefile=paths.snakefile(), rundir=rundir, configfile=configfile, resources=Path(os.path.realpath(res)),
-        cores=args.cores, targets=args.target, dry_run=args.dry_run, extra=extra)
+        cores=args.cores, targets=args.target, dry_run=args.dry_run, extra=extra,
+        resource_limits={"download_slots": args.max_downloads})
+    uses_sra = runconfig.uses_accessions(cfg)
+    if uses_sra:
+        # downloads land here; it must exist before the bind list is computed (missing paths are dropped)
+        runconfig.sra_dir(cfg, rundir).mkdir(parents=True, exist_ok=True)
 
     if mode == "never":
         cmd = inner
@@ -109,9 +114,10 @@ def cmd_run(args) -> int:
         image, _legacy = paths.container_image(res)
         bind_sources: list = [paths.package_root(), rundir, res, configfile]
         for s in runconfig.samples(cfg):
-            for f in (s.r1, s.r2):
-                if f:
-                    bind_sources.append(runconfig.resolve_path(f, rundir))
+            for f in s.r1 + (s.r2 or []):
+                bind_sources.append(runconfig.resolve_path(f, rundir))
+        if uses_sra:
+            bind_sources.append(runconfig.sra_dir(cfg, rundir))
         bind_sources.extend(args.bind or [])
         binds = container.compute_binds(bind_sources)
         cmd = container.container_command(runtime, Path(os.path.realpath(image)), binds, rundir, inner)
@@ -224,6 +230,8 @@ def build_parser() -> argparse.ArgumentParser:
                     help="snakemake target (repeatable; default: all)")
     sp.add_argument("--bind", action="append", metavar="DIR", help="extra directory to bind into the container")
     sp.add_argument("--skip-checks", action="store_true", help="do not run `check` first")
+    sp.add_argument("--max-downloads", type=int, default=4, metavar="N",
+                    help="concurrent FASTQ downloads for samples given by accession (default: 4)")
     sp.add_argument("snakemake_args", nargs=argparse.REMAINDER,
                     help="additional snakemake arguments, e.g. -- --unlock")
     sp.set_defaults(func=cmd_run)

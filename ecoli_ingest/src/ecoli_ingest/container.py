@@ -65,16 +65,19 @@ def compute_binds(paths: Iterable[str | os.PathLike]) -> list[str]:
 
 def snakemake_command(*, snakefile: Path, rundir: Path, configfile: Path, resources: Path,
                       cores: str = "all", targets: Sequence[str] = ("all",), dry_run: bool = False,
-                      extra: Sequence[str] = ()) -> list[str]:
+                      extra: Sequence[str] = (), resource_limits: dict[str, int] | None = None) -> list[str]:
     cmd = [
         "snakemake",
         "--snakefile", str(snakefile),
         "--directory", str(rundir),
         "--configfile", str(configfile),
         "--config", f"resources_dir={resources}",
-        "--cores", str(cores),
-        "--rerun-incomplete",
     ]
+    if resource_limits:
+        # e.g. download_slots=N caps concurrent `sra_download` jobs (see the Snakefile)
+        cmd.append("--resources")
+        cmd.extend(f"{k}={v}" for k, v in resource_limits.items())
+    cmd += ["--cores", str(cores), "--rerun-incomplete"]
     if dry_run:
         cmd.append("--dry-run")
     # targets go before any pass-through options: several snakemake options take a variable
