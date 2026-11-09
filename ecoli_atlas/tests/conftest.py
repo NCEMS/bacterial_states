@@ -84,3 +84,77 @@ def bundle(model_genes, rng, tmp_path_factory):
     }
     b = ModelBundle(factors, residual, prep, manifest={"seed": 0, "factor_order": list(specs)})
     return b.to("cpu")
+
+
+N_STUDIES, PER_STUDY, N_GENES = 14, 12, 60
+OXYGEN_STUDIES = ("GSE1009", "GSE1012")
+UTI_STUDY = "GSE1012"
+
+
+@pytest.fixture(scope="session")
+def synthetic(tmp_path_factory, feature_table):
+    """A 14-study corpus with phase / medium / lab-strain signal. Two studies (GSE1009, GSE1012) vary
+    oxygen (odd samples low oxygen) so they can serve as oxygen case studies; study GSE1012 doubles as a
+    paired "patient" design through ``uti_titles``."""
+    d = tmp_path_factory.mktemp("synthetic")
+    rng = np.random.RandomState(1)
+    samples, rows = [], []
+    for s in range(N_STUDIES):
+        gse = f"GSE{1000 + s}"
+        lab = s % 3 != 0
+        for j in range(PER_STUDY):
+            sid = f"GSM{s * 100 + j}_SRR{s * 100 + j}"
+            phase = "exponential" if j % 2 == 0 else "late_stationary"
+            medium = "complex" if s % 2 == 0 else "defined"
+            samples.append(sid)
+            rows.append({"sample_id": sid, "gse": gse, "strain": "MG1655" if lab else f"clinical{s}",
+                         "strain_background": "K-12" if lab else "clinical isolate", "is_lab_strain": lab,
+                         "medium_type": medium, "base_medium": "LB" if medium == "complex" else "M9",
+                         "growth_phase": phase, "OD600": 0.5 if phase == "exponential" else 2.0,
+                         "carbon_source": np.nan if medium == "complex" else "glucose", "temperature(C)": 37,
+                         "oxygen": ("anaerobic" if (gse in OXYGEN_STUDIES and j % 2 == 1) else "aerobic"), "culture_vessel": "flask", "culture_volume(mL)": 50,
+                         "stress": np.nan if j < 10 else "heat", "stress_type": np.nan, "stress_subtype": np.nan})
+    meta = pd.DataFrame(rows).set_index("sample_id")
+    # counts: b-number keyed genes x samples, with a signal that depends on phase and medium
+    base = rng.gamma(2.0, 200, size=N_GENES)
+    X = np.zeros((N_GENES, len(samples)))
+    for i, sid in enumerate(samples):
+        m = meta.loc[sid]
+        eff = np.ones(N_GENES)
+        eff[:15] *= 3.0 if m["growth_phase"] == "exponential" else 0.4
+        eff[15:30] *= 2.5 if m["medium_type"] == "defined" else 0.5
+        eff[30:40] *= 2.0 if m["is_lab_strain"] else 0.6
+        eff[40:48] *= 0.3 if m["oxygen"] == "anaerobic" else 1.0
+        X[:, i] = rng.poisson(base * eff * rng.uniform(0.7, 1.3))
+    genes = [f"b{i:04d}" for i in range(N_GENES)] + ["b9001", "b9003"]  # rRNA, tRNA
+    X = np.vstack([X, rng.poisson(5000, size=(2, len(samples)))])
+    counts = pd.DataFrame(X, index=pd.Index(genes, name="Geneid"), columns=samples)
+    counts.to_csv(d / "merged_count_table.txt", sep="\t")
+    meta.to_csv(d / "metadata_revised.csv")
+    feature_table.to_csv(d / "feature_table.txt", sep="\t", index=False)
+    return d
+
+
+
+
+def uti_titles():
+    """GSMs of UTI_STUDY paired as <patient>_<UTI|UR> for the paired case-study test (6 patients)."""
+    s = 12  # GSE1012 -> study index 12
+    gsms = [f"GSM{s * 100 + j}" for j in range(PER_STUDY)]
+    titles = [f"P{j // 2:02d}_{'UTI' if j % 2 == 0 else 'UR'}" for j in range(PER_STUDY)]
+    return gsms, titles
+
+
+@pytest.fixture(scope="session")
+def trained_models(synthetic, tmp_path_factory):
+    """A one-epoch bundle (+ atlas) trained on the synthetic corpus with the oxygen studies forced into TEST."""
+    from ecoli_atlas.cli import main
+    out = tmp_path_factory.mktemp("trained") / "models"
+    rc = main(["train", "--counts", str(synthetic / "merged_count_table.txt"),
+               "--metadata", str(synthetic / "metadata_revised.csv"),
+               "--feature-table", str(synthetic / "feature_table.txt"),
+               "--out", str(out), "--no-tune", "--factor-epochs", "1", "--top-epochs", "1",
+               "--min-class-n", "5", "--withheld-study", "GSE1013", "--case-studies", ",".join(OXYGEN_STUDIES),
+               "--test-frac", "0.15", "--device", "cpu", "--write-atlas", "--threads", "2"])
+    assert rc == 0
+    return out

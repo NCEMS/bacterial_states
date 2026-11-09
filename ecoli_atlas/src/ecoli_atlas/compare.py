@@ -112,17 +112,59 @@ def _check_columns(query: pd.DataFrame, atlas: Atlas) -> None:
                          "were both produced by the same model bundle?")
 
 
-def knn(query: pd.DataFrame, atlas: Atlas, k: int = 15, metric: str = "cosine", blocks="all") -> pd.DataFrame:
+def _study_array(atlas: Atlas) -> np.ndarray:
+    """Study label per atlas row as an object array; rows without one get a unique placeholder."""
+    studies = atlas.studies
+    if studies is None:
+        return np.array([f"__na{i}" for i in range(len(atlas.embedding))], dtype=object)
+    return np.array([x if x is not None else f"__na{i}" for i, x in enumerate(studies)], dtype=object)
+
+
+def _masked_knn(query: pd.DataFrame, atlas: Atlas, cols, k: int, metric: str, exclude_self: bool,
+                exclude_studies: pd.Series | None):
+    """Brute-force neighbours with per-query exclusions (self and/or same-study atlas rows)."""
+    A = atlas.embedding[cols].values
+    D = pairwise_distances(query[cols].values, A, metric=metric)
+    ids = atlas.embedding.index.values
+    if exclude_self:
+        pos = pd.Series(np.arange(len(ids)), index=atlas.embedding.index)
+        for qi, q in enumerate(query.index):
+            if q in pos.index:
+                D[qi, np.atleast_1d(pos.loc[q])] = np.inf
+    if exclude_studies is not None:
+        atlas_study = _study_array(atlas)
+        qs = exclude_studies.reindex(query.index)
+        for qi, s in enumerate(qs.values):
+            if s is not None and not (isinstance(s, float) and np.isnan(s)):
+                D[qi, atlas_study == str(s)] = np.inf
+    kk = min(k, D.shape[1])
+    idx = np.argsort(D, axis=1, kind="stable")[:, :kk]
+    dist = np.take_along_axis(D, idx, axis=1)
+    keep = np.isfinite(dist)
+    return dist, idx, keep
+
+
+def knn(query: pd.DataFrame, atlas: Atlas, k: int = 15, metric: str = "cosine", blocks="all",
+        exclude_self: bool = False, exclude_studies: pd.Series | None = None) -> pd.DataFrame:
+    """k nearest atlas samples per query row. By default the atlas may return the query itself
+    (useful as a sanity check when the query is part of the atlas). ``exclude_self`` drops atlas rows
+    with the query's own id; ``exclude_studies`` (a Series ``query id -> study``) drops atlas rows
+    from the query's own study. Excluded rows are replaced by the next nearest ones."""
     _check_columns(query, atlas)
     cols = atlas.block_columns(blocks)
-    nn = NearestNeighbors(n_neighbors=min(k, len(atlas.embedding)), metric=metric).fit(atlas.embedding[cols].values)
-    dist, idx = nn.kneighbors(query[cols].values)
-    rows = []
     ids = atlas.embedding.index.values
+    if exclude_self or exclude_studies is not None:
+        dist, idx, keep = _masked_knn(query, atlas, cols, k, metric, exclude_self, exclude_studies)
+    else:
+        nn = NearestNeighbors(n_neighbors=min(k, len(atlas.embedding)), metric=metric).fit(atlas.embedding[cols].values)
+        dist, idx = nn.kneighbors(query[cols].values)
+        keep = np.ones_like(dist, dtype=bool)
+    rows = []
     for qi, q in enumerate(query.index):
         for r in range(idx.shape[1]):
-            rows.append({"query": q, "rank": r + 1, "atlas_sample": ids[idx[qi, r]], "distance": float(dist[qi, r])})
-    out = pd.DataFrame(rows)
+            if keep[qi, r]:
+                rows.append({"query": q, "rank": r + 1, "atlas_sample": ids[idx[qi, r]], "distance": float(dist[qi, r])})
+    out = pd.DataFrame(rows, columns=["query", "rank", "atlas_sample", "distance"])
     if atlas.metadata is not None:
         meta_cols = [c for c in NEIGHBOR_META_COLS if c in atlas.metadata.columns]
         out = out.join(atlas.metadata[meta_cols], on="atlas_sample")
@@ -163,37 +205,62 @@ def per_block_distances(query: pd.DataFrame, atlas: Atlas, neighbors: pd.DataFra
     return out
 
 
-def novelty(query: pd.DataFrame, atlas: Atlas, k: int = 15, metric: str = "cosine", blocks="all") -> pd.DataFrame:
+def novelty(query: pd.DataFrame, atlas: Atlas, k: int = 15, metric: str = "cosine", blocks="all",
+            query_studies: pd.Series | None = None) -> pd.DataFrame:
     """Distance to the k-th nearest atlas neighbour, and its percentile within the same statistic
     computed for every atlas sample against other studies (self and same-study samples excluded when
     study labels are known). A percentile near 1 means the query is farther from the atlas than
-    almost any atlas sample is from the rest of the atlas."""
+    almost any atlas sample is from the rest of the atlas. When ``query_studies`` (``query id ->
+    study``) is given, the query's own atlas row and same-study atlas rows are excluded as well, so
+    atlas samples can be scored on the same footing as the reference distribution."""
     cols = atlas.block_columns(blocks)
     A = atlas.embedding[cols].values
     kk = min(k, len(A) - 1)
     D = pairwise_distances(A, A, metric=metric)
     np.fill_diagonal(D, np.inf)
     studies = atlas.studies
+    s = _study_array(atlas)
     if studies is not None:
-        s = np.array([x if x is not None else f"__na{i}" for i, x in enumerate(studies)], dtype=object)
         D[s[:, None] == s[None, :]] = np.inf
     ref = np.partition(D, kk - 1, axis=1)[:, kk - 1]
     ref = ref[np.isfinite(ref)]
     Dq = pairwise_distances(query[cols].values, A, metric=metric)
+    if query_studies is not None:
+        pos = pd.Series(np.arange(len(A)), index=atlas.embedding.index)
+        qs = query_studies.reindex(query.index)
+        for qi, q in enumerate(query.index):
+            if q in pos.index:
+                Dq[qi, np.atleast_1d(pos.loc[q])] = np.inf
+            st = qs.iloc[qi]
+            if st is not None and not (isinstance(st, float) and np.isnan(st)):
+                Dq[qi, s == str(st)] = np.inf
     dq = np.partition(Dq, kk - 1, axis=1)[:, kk - 1]
     pct = np.searchsorted(np.sort(ref), dq, side="right") / max(len(ref), 1)
     return pd.DataFrame({"novelty_knn_dist": dq, "novelty_percentile": pct}, index=pd.Index(query.index, name="sample"))
 
 
-def umap_project(atlas: Atlas, query: pd.DataFrame, seed: int = 77, blocks="all", n_neighbors: int = 30,
-                 min_dist: float = 0.3):
+def umap_fit(E: np.ndarray, seed: int = 77, n_neighbors: int = 30, min_dist: float = 0.3, metric: str = "cosine"):
+    """Fit the notebook's UMAP (n_neighbors=30, min_dist=0.3, cosine) and return the fitted reducer;
+    ``n_neighbors`` is clamped for tiny inputs."""
     try:
         import umap
     except ImportError as e:  # pragma: no cover
-        raise SystemExit("UMAP projection needs umap-learn: pip install 'ecoli-atlas[umap]'") from e
+        raise SystemExit("UMAP needs umap-learn: pip install 'ecoli-atlas[umap]'") from e
+    n = int(np.asarray(E).shape[0])
+    nn = max(2, min(n_neighbors, n - 1))
+    reducer = umap.UMAP(n_neighbors=nn, min_dist=min_dist, metric=metric, random_state=seed)
+    import warnings
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="n_jobs value .* overridden to 1 by setting random_state")
+        reducer.fit(np.asarray(E))
+    return reducer
+
+
+def umap_project(atlas: Atlas, query: pd.DataFrame, seed: int = 77, blocks="all", n_neighbors: int = 30,
+                 min_dist: float = 0.3):
     cols = atlas.block_columns(blocks)
-    reducer = umap.UMAP(n_neighbors=n_neighbors, min_dist=min_dist, metric="cosine", random_state=seed)
-    a_xy = reducer.fit_transform(atlas.embedding[cols].values)
+    reducer = umap_fit(atlas.embedding[cols].values, seed, n_neighbors, min_dist)
+    a_xy = reducer.embedding_
     q_xy = reducer.transform(query[cols].values)
     a = pd.DataFrame(a_xy, index=atlas.embedding.index, columns=["umap1", "umap2"])
     q = pd.DataFrame(q_xy, index=query.index, columns=["umap1", "umap2"])

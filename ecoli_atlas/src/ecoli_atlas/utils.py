@@ -47,8 +47,8 @@ def l2norm(x: np.ndarray, eps: float = 1e-12) -> np.ndarray:
 def spearman_vec(X: np.ndarray, y: np.ndarray) -> np.ndarray:
     """Spearman correlation of every column of X with y."""
     from scipy.stats import rankdata
-    rx = np.apply_along_axis(rankdata, 0, X)
-    ry = rankdata(y)
+    rx = rankdata(np.asarray(X, dtype=float), axis=0)
+    ry = rankdata(np.asarray(y, dtype=float))
     rx = rx - rx.mean(0, keepdims=True)
     ry = ry - ry.mean()
     denom = np.sqrt((rx ** 2).sum(0) * (ry ** 2).sum())
@@ -62,3 +62,12 @@ def boot_ci(values: np.ndarray, stat=np.mean, n_boot: int = 1000, seed: int = 0,
     values = np.asarray(values)
     boots = np.array([stat(values[rng.randint(0, len(values), len(values))]) for _ in range(n_boot)])
     return float(np.quantile(boots, alpha / 2)), float(np.quantile(boots, 1 - alpha / 2))
+
+
+def paired_boot_ci(a: np.ndarray, b: np.ndarray, n_boot: int = 2000, seed: int = 0):
+    """Bootstrap of mean(a) - mean(b) over paired observations: (difference, lo, hi)."""
+    a, b = np.asarray(a, float), np.asarray(b, float)
+    rng = np.random.RandomState(seed)
+    n = len(a)
+    bs = np.array([(a[i] - b[i]).mean() for i in (rng.randint(0, n, n) for _ in range(n_boot))])
+    return float((a - b).mean()), float(np.percentile(bs, 2.5)), float(np.percentile(bs, 97.5))

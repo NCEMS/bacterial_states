@@ -219,7 +219,9 @@ def load_splits(path) -> pd.DataFrame:
 
 
 def check_no_leakage(meta: pd.DataFrame, zfit: np.ndarray, cfg: TrainConfig) -> None:
-    acc = meta.index.to_series().str.extract(r"(GSM\d+)")[0]
+    from .labels import gsm_accession
+    acc = gsm_accession(meta.index)
+    acc.index = meta.index
     train = meta["split"] == 1
     test = meta["split"] == 3
     train_gses = set(meta.loc[train, "gse"].astype(str))

@@ -241,10 +241,85 @@ def cmd_download(args) -> int:
     return rc
 
 
-def cmd_not_implemented(args) -> int:
-    _info(f"`ecoli_atlas {args.command}` is planned for the next round (publication figures and case studies "
-          "are still in the reference notebooks under notebooks/).")
-    return 2
+def _training_tables(args):
+    """(counts, metadata, feature table) for commands that work on the training corpus."""
+    from .io import read_counts, read_metadata
+    counts = read_counts(args.counts, strip_sample_names=False)
+    meta = read_metadata(args.metadata)
+    feat = _feature_table(args.feature_table)
+    if feat is None:
+        raise SystemExit("error: --feature-table is required (or put it in $ECOLI_ATLAS_DATA)")
+    return counts, meta, feat
+
+
+def _set_threads(n):
+    if n:
+        import torch
+        torch.set_num_threads(int(n))
+
+
+def cmd_figures(args) -> int:
+    from .figures import FIGURES
+    from .figures.run import run_figures
+    if args.list:
+        for name, spec in FIGURES.items():
+            flag = "  [refits fold models; skipped with --no-retrain]" if spec.needs_retrain else ""
+            print(f"{name:24s} {spec.doc}{flag}\n{'':24s} -> {', '.join(spec.outputs)}")
+        return 0
+    for req in ("counts", "metadata", "out"):
+        if getattr(args, req) is None:
+            _info(f"error: --{req} is required")
+            return 2
+    _set_threads(args.threads)
+    counts, meta, feat = _training_tables(args)
+    only = args.only.split(",") if args.only else None
+    skip = args.skip.split(",") if args.skip else None
+    formats = tuple(f for f in args.formats.split(",") if f)
+    side, n_failed = run_figures(counts, meta, feat, args.models, args.out, only=only, skip=skip, formats=formats,
+                                 seed=args.seed, device=pick_device(args.device), retrain=not args.no_retrain,
+                                 force_retrain=args.force_retrain, recombat=args.recombat, atlas_dir=args.atlas,
+                                 reference_sweep=args.reference_sweep, log=_info)
+    for k, c in side["checks"].items():
+        status = "pass" if c["pass"] else ("n/a" if c["pass"] is None else "FAIL")
+        _info(f"  check {k:36s} {status:4s} value={c['value']} reference={c['reference']} tol={c['tolerance']}")
+    _info(f"wrote {len(side['figures']) - n_failed} figure sets to {args.out} ({side['total_seconds']}s); "
+          f"details in {Path(args.out) / 'figure_metrics.json'}")
+    if n_failed:
+        _info(f"error: {n_failed} figure(s) failed: {side['failed']}")
+        return 1
+    if args.strict and not side["all_checks_pass"]:
+        _info("error: --strict and at least one check against the manifest failed")
+        return 1
+    return 0
+
+
+def cmd_casestudy(args) -> int:
+    from .casestudy.run import run_casestudies
+    _set_threads(args.threads)
+    rc = run_casestudies(args, log=_info)
+    return rc
+
+
+def cmd_neighbors(args) -> int:
+    from .neighbors import run_neighbors
+    gses = list(args.gse or [])
+    if args.gse_file:
+        gses += [ln.strip().split()[0] for ln in Path(args.gse_file).read_text().splitlines() if ln.strip() and not ln.startswith("#")]
+    if not gses:
+        _info("error: give at least one GSE accession (positional or --gse-file)")
+        return 2
+    blocks = "all" if args.blocks in (None, "all") else tuple(args.blocks.split(","))
+    try:
+        report = run_neighbors(gses, args.atlas or dl.default_atlas_dir(), args.out, models_dir=args.models, k=args.k,
+                               metric=args.metric, blocks=blocks, exclude_same_study=not args.within_study,
+                               collapse_runs=not args.no_collapse_runs, do_umap=args.umap, seed=args.seed,
+                               allow_missing=args.allow_missing, log=_info)
+    except ValueError as exc:
+        _info(f"error: {exc}")
+        return 1
+    _info(f"wrote neighbors.tsv, summary.tsv ({report['n_query']} query samples) and study_summary.tsv "
+          f"({len(report['found'])} studies) to {args.out}")
+    return 0
 
 
 # ---------------------------------------------------------------------------------------------
@@ -349,10 +424,54 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--dry-run", action="store_true")
     sp.set_defaults(func=cmd_download)
 
-    for name in ("figures", "casestudy"):
-        sp = sub.add_parser(name, help="(planned) publication figures / case studies")
-        sp.add_argument("rest", nargs=argparse.REMAINDER)
-        sp.set_defaults(func=cmd_not_implemented)
+    def add_training_inputs(sp, required=True):
+        sp.add_argument("--counts", required=required, help="training count table (merged_count_table.txt)")
+        sp.add_argument("--metadata", required=required, help="metadata_revised.csv")
+        sp.add_argument("--feature-table", help="NCBI feature table (default: $ECOLI_ATLAS_DATA/...)")
+        sp.add_argument("--models", default=None, help=f"model bundle (default: ${dl.ENV_MODELS} or ./outputs/models)")
+        sp.add_argument("--out", required=required, help="output directory (never outputs/figures or the bundle)")
+        sp.add_argument("--formats", default="pdf,png", help="comma-separated figure formats (default pdf,png)")
+        sp.add_argument("--seed", type=int, default=None, help="seed for UMAP / PCA / refits (default: the bundle's seed)")
+        sp.add_argument("--threads", type=int, help="torch CPU threads")
+        add_device(sp)
+
+    sp = sub.add_parser("figures", help="regenerate the paper figures from a bundle and the training tables")
+    add_training_inputs(sp, required=False)
+    sp.add_argument("--only", help="comma-separated figure names (see --list)")
+    sp.add_argument("--skip", help="comma-separated figure names to skip")
+    sp.add_argument("--list", action="store_true", help="list the figures and their outputs, then exit")
+    sp.add_argument("--no-retrain", action="store_true", help="skip figures that refit fold models (threshold_curves)")
+    sp.add_argument("--force-retrain", action="store_true", help="recompute oof_scores.csv even if it exists in --out")
+    sp.add_argument("--recombat", action="store_true", help="include the reComBat bar in study_leakage (needs reComBat installed)")
+    sp.add_argument("--atlas", help="atlas directory to compare the regenerated embedding with (e.g. outputs/atlas)")
+    sp.add_argument("--reference-sweep", metavar="manifest.json",
+                    help="manifest of a seed sweep (e.g. outputs/models_repro_sweep/manifest.json); its CV spread "
+                         "is the acceptance range for the out-of-fold refits of threshold_curves")
+    sp.add_argument("--strict", action="store_true", help="exit 1 when a check against the bundle's manifest fails")
+    sp.set_defaults(func=cmd_figures)
+
+    sp = sub.add_parser("casestudy", help="case studies: uti, oxygen, glu-cas or all (uti + oxygen)")
+    sp.add_argument("which", choices=["uti", "oxygen", "glu-cas", "all"])
+    add_training_inputs(sp, required=False)
+    sp.add_argument("--case-metadata", help="glu-cas: the metadata of the inference count table (metadata_paper1.csv layout)")
+    sp.add_argument("--oxygen-studies", help="oxygen: comma-separated GSEs (default GSE189154,GSE78756)")
+    sp.set_defaults(func=cmd_casestudy)
+
+    sp = sub.add_parser("neighbors", help="nearest atlas neighbours of whole GEO studies already in the atlas")
+    sp.add_argument("gse", nargs="*", help="GSE accessions")
+    sp.add_argument("--gse-file", help="text file with one GSE per line")
+    sp.add_argument("--atlas", help=f"atlas directory (default: ${dl.ENV_MODELS}/../atlas or ./outputs/atlas)")
+    sp.add_argument("--models", help="model bundle; its splits.csv / manifest.json give each sample's split bucket")
+    sp.add_argument("--out", required=True)
+    sp.add_argument("-k", type=int, default=15)
+    sp.add_argument("--metric", default="cosine", choices=["cosine", "euclidean"])
+    sp.add_argument("--blocks", default="all", help="all or comma-separated block names, e.g. growth_phase,residual")
+    sp.add_argument("--within-study", action="store_true", help="allow neighbours from the query's own study")
+    sp.add_argument("--no-collapse-runs", action="store_true", help="keep one row per SRR run instead of averaging runs per GSM")
+    sp.add_argument("--umap", action="store_true", help="also fit a UMAP of the whole atlas and plot the query studies")
+    sp.add_argument("--seed", type=int, default=77)
+    sp.add_argument("--allow-missing", action="store_true", help="continue when some GSEs are not in the atlas")
+    sp.set_defaults(func=cmd_neighbors)
     return p
 
 
@@ -360,7 +479,7 @@ def main(argv: list | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     setup_logging(args.verbose)
-    if args.command == "embed" and args.models is None:
+    if args.command in ("embed", "figures", "casestudy") and getattr(args, "models", None) is None:
         args.models = str(dl.default_models_dir())
     return args.func(args)
 

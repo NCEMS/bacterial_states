@@ -37,6 +37,9 @@ Defaults are relative to `$BS_DATA_ROOT` (or the current directory); override wi
 
 ## Commands
 
+Everyday use: `prepare`, `embed`, `compare`. Reproduction: `train`, `verify-models`, `figures`,
+`casestudy`, `neighbors` (the last three are described further down).
+
 ```bash
 # 1. inGEST results -> atlas input format (counts.tsv genes x samples, samples.tsv)
 ecoli_atlas prepare --ingest-results my_run/tutorial_results --out prepared [--models outputs/models]
@@ -114,6 +117,95 @@ deviation < 1e-4) is expected only when re-loading the same weights.
 `--write-atlas` writes to `<out>/atlas` unless `--atlas-out` is given; it never touches an existing
 `outputs/atlas`.
 
+## Reproducing the paper figures
+
+`figures` rebuilds every figure of the training notebook from a saved bundle and the training
+tables, without retraining the model: the recorded split (`splits.csv`) is re-applied, the input is
+z-scored with the bundle's saved statistics, and the encoders embed every sample. Only
+`threshold_curves` refits the three fold models per factor (about half a minute on 8 CPU threads);
+their out-of-fold scores are cached in `<out>/oof_scores.csv`.
+
+```bash
+ecoli_atlas figures --list
+ecoli_atlas figures --counts atlas_data/merged_count_table.txt --metadata atlas_data/metadata_revised.csv \
+    --feature-table atlas_data/GCF_000005845.2_ASM584v2_feature_table.txt --models outputs/models \
+    --atlas outputs/atlas --reference-sweep outputs/models_repro_sweep/manifest.json \
+    --out outputs/figures_repro --device cpu --threads 8 --strict
+```
+
+| Figure name | Files (pdf + png unless noted) | Notebook |
+|---|---|---|
+| `corpus_composition` | `fig_corpus_composition` | cell 11 |
+| `factor_test_eval` | `fig_factor_test_eval`, `growth_phase_misclassified.tsv` | cells 29, 35 |
+| `split_balance` | `fig_split_balance` | cell 14 |
+| `pca_batch` | `fig_pca_mg1655_batch`, `fig_pca_bw_batch`, `fig_pca_strain_all_complex`, `pca_logcpm_coords.csv` | cell 16 |
+| `batch_genes` | `fig_batch_genes`, `batch_genes.tsv` | cell 17 |
+| `factor_umaps` | `fig_factor_umaps`, `fig_factor_umaps_overlay`, `umap_factor_coords.csv` | cell 27 |
+| `factor_gene_correlates` | `fig_factor_gene_correlates`, `factor_gene_correlations.txt` (GSEA input), `.tsv` | cells 31, 33 |
+| `study_leakage` | `fig_study_leakage` (`--recombat` adds the transductive reComBat bar if the package is installed) | cells 43, 44 |
+| `threshold_curves` | `fig_threshold_curves`, `oof_scores.csv` (skipped with `--no-retrain`) | cell 25 |
+
+Every number behind the figures goes to `<out>/figure_metrics.json`, together with checks against
+the bundle's `manifest.json`: TEST sample counts must match exactly and TEST AUROC / balanced
+accuracy within 0.001 / 0.01 (same weights, so they agree to all digits); the regenerated embedding
+must match `--atlas` within 1e-3; the final embedding must mix studies better than the z-scored
+input. The out-of-fold refits of `threshold_curves` depend on the seed and hardware, so they are
+accepted when they fall inside the CV spread of a seed sweep given with `--reference-sweep`
+(otherwise within 0.03 of the manifest). `--strict` turns a failed check into exit status 1. Figures
+run independently; a failure is recorded in the sidecar and the others still run. The command
+refuses to write into the bundle, `<models>/../figures` or `<models>/../atlas`.
+
+### Case studies
+
+```bash
+ecoli_atlas casestudy all --counts atlas_data/merged_count_table.txt --metadata atlas_data/metadata_revised.csv \
+    --feature-table atlas_data/GCF_000005845.2_ASM584v2_feature_table.txt --models outputs/models --out outputs/figures_repro
+ecoli_atlas casestudy glu-cas --counts "raw_data/Contreras Paper/Paper1_all_samples_counts.tsv" \
+    --case-metadata "raw_data/Contreras Paper/metadata_paper1.csv" --models outputs/models --out outputs/figures_repro
+```
+
+- `uti` (GSE128997): UTI vs urine paired within patient on the full embedding; the GSM list and
+  titles are built in (`casestudy/uti.py`) because the metadata carries no condition. Writes
+  `fig_uti_axis`, `uti_axis_genes.tsv`, `uti_samples.tsv`, `uti_metrics.json`.
+- `oxygen` (GSE189154, GSE78756; `--oxygen-studies` to change): one LDA axis across the two withheld
+  oxygen studies, per-study AUROC, genes along the axis. Writes `fig_oxygen_lda_projection`,
+  `fig_oxygen_axis_genes`, `oxygen_axis_genes.tsv`, `oxygen_samples.tsv`, `oxygen_metrics.json`.
+  Oxygen spellings the notebook did not recognise (e.g. the 376 "aeorbic" rows) stay unlabelled and
+  are reported.
+- `glu-cas`: embeds an inference count table with the bundle and contrasts glucose vs casamino acids,
+  paired within (BioProject, timepoint) and with one LDA on all samples. The metadata columns
+  `treatment` ("GLU condition. timepoint S2") and `BioProject` are those of `metadata_paper1.csv`.
+  Writes `fig_glu_cas_axis`, `fig_glu_cas_lda_projection`, `fig_glu_cas_axis_genes`,
+  `glu_cas_gene_correlations.csv`, `glu_cas_lda_scores.csv`, `glu_cas_metrics.json`.
+
+All case studies assert that their samples are not in TRAIN; sequencing runs of one GSM are averaged.
+The numbers (leave-one-out hits, sign / Wilcoxon / permutation p-values, AUROCs, top genes) are
+collected in `<out>/casestudy_metrics.json`.
+
+## Where do whole studies sit? `neighbors`
+
+```bash
+ecoli_atlas neighbors GSE189154 GSE78756 --atlas outputs/atlas --models outputs/models --out work/neighbors_oxygen --umap
+```
+
+For every sample of the given GEO studies (which must already be in the atlas) this reports the `-k`
+nearest atlas samples in latent space. Same-study neighbours are excluded by default
+(`--within-study` keeps them) and the SRR runs of one GSM are averaged into one row
+(`--no-collapse-runs` keeps run-level rows). `--models` adds each sample's split bucket:
+`test`, `fold1..K`, `train(aug)` (pool samples without a fold), `withheld` (the proof-of-concept
+study), `projected_only` (in the table but never fitted on), `no_metadata`.
+
+- `neighbors.tsv`: one row per (query sample, rank) with the neighbour's metadata, split bucket and
+  encoder predictions.
+- `summary.tsv`: one row per query sample: nearest sample / distance / study, dominant neighbour
+  study and `top_studies`, per factor the kNN vote, its agreement with the sample's own metadata
+  (`<f>_agree_meta`) and with the encoder prediction (`<f>_agree_pred`), per-block neighbour
+  distances, novelty, UMAP coordinates with `--umap`.
+- `study_summary.tsv`: one row per GSE (split buckets, top neighbour studies, dominant votes and
+  agreement fractions, median nearest distance, mean novelty percentile).
+- `neighbors_manifest.json`: parameters and which studies were found; a GSE missing from the atlas
+  stops the command (exit 1) unless `--allow-missing`.
+
 ## Module map
 
 | Module | Role |
@@ -125,4 +217,6 @@ deviation < 1e-4) is expected only when re-loading the same weights.
 | `train_factor.py`, `train_residual.py`, `tune.py`, `train.py` | training, CV objectives, Optuna, orchestration |
 | `artifacts.py` | save / load a model bundle (compatible with the original notebook files) |
 | `embed.py`, `compare.py`, `verify.py` | inference, atlas comparison, bundle comparison |
-| `figures/`, `casestudy/` | reserved for the publication figures and case studies (round 2) |
+| `figures/` | `context.py` rebuilds the notebook state from a bundle; one module per figure; `checks.py`, `run.py` |
+| `casestudy/` | `axis.py` (LDA / leave-one-group-out / permutation), `uti.py`, `oxygen.py`, `glu_cas.py` |
+| `neighbors.py` | whole-study nearest-neighbour report on the atlas |

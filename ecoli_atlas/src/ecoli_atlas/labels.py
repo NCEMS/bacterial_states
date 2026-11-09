@@ -23,6 +23,72 @@ IDENTITY_FIELDS = ["strain", "strain_background", "is_lab_strain", "medium_type"
 CONTROL_FIELDS = ["growth_phase", "medium_type", "carbon_source", "base_medium"]
 K12_PATTERN = r"mg\s*1655|w3110|bw\s*25113|mc4100|dh5|dh10b|jm10[19]|top\s*10|ncm3722|k[\s_-]?12"
 
+# Sample ids are "<GSM accession>_<SRR run>"; one GSM may span several runs.
+GSM_RE = r"(GSM\d+)"
+MULTIRUN_POLICY = "mean"   # how runs of one GSM are collapsed before case-study analyses
+
+# Oxygen is never supervised; these spellings are the ones the notebook recognised. Anything else
+# (including the frequent "aeorbic" typo in the metadata) maps to None and is reported, not fixed.
+OX_LOW = {"anaerobic", "microaerobic", "micro-aerobic", "microaerophilic", "anoxic", "hypoxic",
+          "low oxygen", "low_oxygen", "oxygen limited", "oxygen-limited"}
+OX_AIR = {"aerobic", "oxic", "air", "aerated", "normoxic"}
+
+
+def oxygen_class(v):
+    """Map a raw oxygen annotation to 'low', 'aerobic', or None."""
+    try:
+        if v is None or pd.isna(v):
+            return None
+    except (TypeError, ValueError):
+        pass
+    t = str(v).strip().lower()
+    return "low" if t in OX_LOW else ("aerobic" if t in OX_AIR else None)
+
+
+def gsm_accession(index) -> pd.Series:
+    """GSM accession of every sample id (``GSM123_SRR456`` -> ``GSM123``); NaN when there is none."""
+    idx = pd.Index(index).astype(str)
+    return idx.to_series(index=idx).str.extract(GSM_RE)[0]
+
+
+def rows_of_gsm(index) -> dict:
+    """GSM accession -> list of row positions (one per sequencing run)."""
+    out: dict = {}
+    for i, acc in enumerate(gsm_accession(index).values):
+        if pd.notna(acc):
+            out.setdefault(acc, []).append(i)
+    return out
+
+
+def agg_rows(mat, row_lists, how: str = MULTIRUN_POLICY) -> np.ndarray:
+    """Collapse each sample's sequencing runs (lists of row positions) into one vector."""
+    M = np.asarray(mat)
+    if how == "mean":
+        return np.vstack([M[r].mean(0) for r in row_lists])
+    return np.vstack([M[r[0]] for r in row_lists])
+
+
+def collapse_runs(df: pd.DataFrame, how: str = MULTIRUN_POLICY) -> pd.DataFrame:
+    """Collapse the rows of one GSM into one row indexed by the accession. Numeric columns are
+    averaged (``how="mean"``) or taken from the first run; other columns take the first run's value.
+    Rows whose id carries no GSM accession are kept unchanged under their own id."""
+    acc = gsm_accession(df.index)
+    key = acc.where(acc.notna(), pd.Series(df.index.astype(str), index=acc.index)).values
+    if how == "mean":
+        num = df.select_dtypes(include="number").columns
+        other = [c for c in df.columns if c not in set(num)]
+        parts = []
+        if len(num):
+            parts.append(df[num].groupby(key, sort=False).mean())
+        if other:
+            parts.append(df[other].groupby(key, sort=False).first())
+        out = pd.concat(parts, axis=1)[list(df.columns)] if parts else df.iloc[:0]
+    else:
+        out = df.groupby(key, sort=False).first()
+    out.index = out.index.astype(str)
+    out.index.name = df.index.name
+    return out
+
 
 def canonical_stress(x) -> str:
     return ";".join(sorted(s.strip() for s in str(x).split(";") if s.strip()))
