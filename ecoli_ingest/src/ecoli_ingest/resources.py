@@ -1,6 +1,6 @@
 """Resource bundles: manifest generation/verification and the download stub.
 
-The core bundle is an asset of the GitHub release `v1` of NCEMS/bacterial_states; the Centrifuge
+The core bundle is an asset of the GitHub release `resources-v1` of NCEMS/bacterial_states; the Centrifuge
 index is fetched from its authors' public bucket. Both are checked against the packaged manifest
 after unpacking. The container image (5.3 GB) is over the 2 GB limit for release assets and has no
 download URL yet: for it `download` prints the interim CyVerse instructions. Every URL lives in
@@ -18,8 +18,8 @@ from pathlib import Path
 from . import paths
 
 RESOURCES_VERSION = "v1"
-# assets of the GitHub release whose tag is the resources version
-RELEASE_URL = f"https://github.com/NCEMS/bacterial_states/releases/download/{RESOURCES_VERSION}"
+# assets of the GitHub data release `resources-<version>` (code releases are tagged X.X.X)
+RELEASE_URL = f"https://github.com/NCEMS/bacterial_states/releases/download/resources-{RESOURCES_VERSION}"
 
 # bundle name -> top-level directories (relative to the resources dir) that belong to it
 BUNDLES = {

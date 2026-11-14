@@ -56,7 +56,7 @@ def test_download_stub_prints_interim_instructions(tmp_path, capsys):
 def test_core_is_a_release_asset():
     import io
     url = resources.BUNDLE_URLS["core"]
-    assert url == "https://github.com/NCEMS/bacterial_states/releases/download/v1/ecoli_ingest_core_v1.tar.gz"
+    assert url == "https://github.com/NCEMS/bacterial_states/releases/download/resources-v1/ecoli_ingest_core_v1.tar.gz"
     buf = io.StringIO()
     assert resources.download("core", Path("unused"), dry_run=True, log=buf) == 0
     assert url in buf.getvalue()

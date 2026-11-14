@@ -31,7 +31,7 @@ fastq ──► Ecoli_inGEST ──► counts ──► Ecoli_ATLAS embed ──
 
 Both can be installed and used independently. Data bundles are fetched with
 `ecoli_ingest download …` and `ecoli_atlas download …` from the
-[`v1` release](https://github.com/NCEMS/bacterial_states/releases/tag/v1) of this repository (the
+[`resources-v1` release](https://github.com/NCEMS/bacterial_states/releases/tag/resources-v1) of this repository (the
 Centrifuge index comes from its authors; the optional container image is on CyVerse for now).
 
 ## Quick start

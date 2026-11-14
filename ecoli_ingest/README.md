@@ -48,7 +48,7 @@ ecoli_ingest download core                  # or name bundles one at a time: cor
 
 | Bundle | Contents | Size | Source |
 |---|---|---|---|
-| `core` | vg graph index + annotation | 173 MB download, 674 MB unpacked | this project ([release `v1`](https://github.com/NCEMS/bacterial_states/releases/tag/v1)) |
+| `core` | vg graph index + annotation | 173 MB download, 674 MB unpacked | this project ([release `resources-v1`](https://github.com/NCEMS/bacterial_states/releases/tag/resources-v1)) |
 | `centrifuge` | `p_compressed+h+v` contamination index, not needed with `centrifuge: false` | 5.4 GB download, 6.9 GB unpacked | the Centrifuge authors' prebuilt index (`genome-idx.s3.amazonaws.com/centrifuge/`, pinned S3 object version) |
 | `container` | Apptainer image `rnaseq_vg.sif` | ~5.3 GB | this project (CyVerse for now, see below) |
 

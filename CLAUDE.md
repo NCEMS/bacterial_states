@@ -27,7 +27,7 @@ Never `git add` any of these (all in `.gitignore`): `resources/`, `old_resources
 |---|---|---|
 | `resources/{vg,annotation,centrifuge,container}` | inGEST reference bundle (13 GB) | downloaded; `resources/container/rnaseq_vg.sif` is the image |
 | `atlas_data/` | `merged_count_table.txt`, `metadata_revised.csv`, feature table | atlas training inputs |
-| `outputs/models/`, `outputs/atlas/` | the Colab-trained bundle (+ `manifest.json`, `splits.csv`) and the atlas built from it | **the originals: never overwrite or commit.** They are published as `ecoli_atlas_models_v1.tar.gz` in the `v1` release. Refits go to `outputs/models_repro*/` via `ecoli_atlas train --seeds ...` (see `ecoli_atlas/scripts/slurm_train_repro.sh`); accept a refit when the original's TEST metrics lie within the sweep's spread (`verify-models` → `old_within_new_seed_spread`) |
+| `outputs/models/`, `outputs/atlas/` | the Colab-trained bundle (+ `manifest.json`, `splits.csv`) and the atlas built from it | **the originals: never overwrite or commit.** They are published as `ecoli_atlas_models_v1.tar.gz` in the `resources-v1` release. Refits go to `outputs/models_repro*/` via `ecoli_atlas train --seeds ...` (see `ecoli_atlas/scripts/slurm_train_repro.sh`); accept a refit when the original's TEST metrics lie within the sweep's spread (`verify-models` → `old_within_new_seed_spread`) |
 | `outputs/models_repro/`, `outputs/atlas_repro/` | first GPU refit (seed 77) and its atlas | kept for comparison |
 | `outputs/predictions/final_embedding.csv` | baseline atlas embeddings (3342 samples) | source of the future `outputs/atlas/` bundle |
 | `outputs/figures/`, `outputs/factor_gene_correlations.txt` | Colab reference figures / GSEA gene list | **never overwrite.** Mixed sessions: the stored notebook outputs for cells 25/31/33 and `fig_study_leakage.pdf` come from a later retrained run, not from `outputs/models`. Regenerated figures go to `outputs/figures_repro/` (`ecoli_atlas figures ... --out outputs/figures_repro`) |
@@ -39,7 +39,8 @@ Never `git add` any of these (all in `.gitignore`): `resources/`, `old_resources
 
 Download URLs live in exactly two files: `ecoli_ingest/src/ecoli_ingest/resources.py` and
 `ecoli_atlas/src/ecoli_atlas/download.py`. The inGEST core bundle and both ATLAS bundles are
-assets of the GitHub release `v1` (`.../releases/download/v1/<name>`; built in `work/release_v1/`),
+assets of the GitHub release `resources-v1` (`.../releases/download/resources-v1/<name>`; built in
+`work/release_v1/`; data releases are tagged `resources-vN`, code releases `X.X.X`),
 the Centrifuge index comes from the Centrifuge authors' bucket
 (`genome-idx.s3.amazonaws.com/centrifuge/`), and the container image is still a placeholder (`TBD`).
 Bundle file names are `ecoli_ingest_*` / `ecoli_atlas_*` (other microbes may follow).

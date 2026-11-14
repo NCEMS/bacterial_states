@@ -1,4 +1,4 @@
-"""Data bundles for Ecoli_ATLAS: assets of the GitHub release `v1` of NCEMS/bacterial_states. The
+"""Data bundles for Ecoli_ATLAS: assets of the GitHub release `resources-v1` of NCEMS/bacterial_states. The
 URLs below are the only place that names the download location.
 
 Each bundle pins the SHA-256 of its archive. The archives are built reproducibly, so the same files
@@ -15,8 +15,8 @@ import urllib.request
 from pathlib import Path
 
 ATLAS_DATA_VERSION = "v1"
-# assets of the GitHub release whose tag is the data version
-RELEASE_URL = f"https://github.com/NCEMS/bacterial_states/releases/download/{ATLAS_DATA_VERSION}"
+# assets of the GitHub data release `resources-<version>` (code releases are tagged X.X.X)
+RELEASE_URL = f"https://github.com/NCEMS/bacterial_states/releases/download/resources-{ATLAS_DATA_VERSION}"
 ENV_DATA = "ECOLI_ATLAS_DATA"
 ENV_MODELS = "ECOLI_ATLAS_MODELS"
 ENV_DATA_ROOT = "BS_DATA_ROOT"

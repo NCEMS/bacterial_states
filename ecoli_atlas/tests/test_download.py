@@ -27,7 +27,7 @@ def _point_at(monkeypatch, bundle, tgz, digest):
 def test_every_bundle_pins_a_checksum():
     for info in dl.BUNDLES.values():
         assert len(info["sha256"]) == 64 and int(info["sha256"], 16) >= 0
-        assert info["url"].startswith("https://github.com/NCEMS/bacterial_states/releases/download/v1/ecoli_atlas_")
+        assert info["url"].startswith("https://github.com/NCEMS/bacterial_states/releases/download/resources-v1/ecoli_atlas_")
 
 
 def test_download_verifies_then_unpacks(tmp_path, monkeypatch):

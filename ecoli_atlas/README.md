@@ -25,7 +25,7 @@ GPU node install a CUDA build of `pytorch` instead. Without installing you can r
 ## Data
 
 Code and data are separate. Two bundles, downloaded with `ecoli_atlas download` from the
-[`v1` release](https://github.com/NCEMS/bacterial_states/releases/tag/v1) and checked against a
+[`resources-v1` release](https://github.com/NCEMS/bacterial_states/releases/tag/resources-v1) and checked against a
 pinned SHA-256 before unpacking:
 
 | Bundle | Files | Default location |
