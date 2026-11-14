@@ -108,7 +108,7 @@ def check_resources(cfg: dict, resources: Path | None, rundir: Path) -> list[Che
     return out
 
 
-def check_run_dir(cfg: dict, rundir: Path, configfile: Path) -> list[Check]:
+def check_run_dir(cfg: dict, rundir: Path, configfile: Path, mode: str = "never") -> list[Check]:
     out: list[Check] = []
     out.append(Check("run directory writable", OK if os.access(rundir, os.W_OK) else FAIL, str(rundir)))
     out.append(Check("config file", OK, str(configfile)))
@@ -136,7 +136,7 @@ def check_run_dir(cfg: dict, rundir: Path, configfile: Path) -> list[Check]:
                                                "concatenated as-is): " + ", ".join(mixed_compression)))
     layouts: dict[str, bool] = {}
     if any(s.accessions for s in ss):
-        out.extend(_check_accessions(cfg, rundir, layouts))
+        out.extend(_check_accessions(cfg, rundir, layouts, mode))
     paired, mixed = runconfig.is_paired(cfg, layouts)
     if mixed:
         out.append(Check("read layout", WARN, "mixed single- and paired-end samples: the workflow runs "
@@ -148,7 +148,7 @@ def check_run_dir(cfg: dict, rundir: Path, configfile: Path) -> list[Check]:
     return out
 
 
-def _check_accessions(cfg: dict, rundir: Path, layouts: dict[str, bool]) -> list[Check]:
+def _check_accessions(cfg: dict, rundir: Path, layouts: dict[str, bool], mode: str = "never") -> list[Check]:
     """Resolve accession samples (network once; cached under <sra_dir>/manifest) and summarise the
     download. Fills ``layouts`` (sample -> paired?) for the read-layout check."""
     sra = paths.load_script("sra_reads")
@@ -163,11 +163,40 @@ def _check_accessions(cfg: dict, rundir: Path, layouts: dict[str, bool]) -> list
     gb = summ["pending_bytes"] / 1e9
     detail = (f"{n_acc} accession(s) -> {summ['runs']} run(s), {summ['files']} file(s); "
               f"{summ['present']} already in {sdir}, {gb:.2f} GB to download")
-    return [Check("sra accessions", OK, detail)]
+    out = [Check("sra accessions", OK, detail)]
+    if summ["present"] < summ["files"]:
+        out.append(_check_sra_method(sra, cfg, mode, summ.get("no_ena") or []))
+    return out
+
+
+def _check_sra_method(sra, cfg: dict, mode: str, no_ena: list) -> Check:
+    """Which source the missing runs will come from: sra-tools (prefetch + fasterq-dump) first and
+    ENA as the backup, unless ``sra_method`` names one source."""
+    try:
+        method = sra.check_method(cfg.get("sra_method"))
+    except ValueError as e:
+        return Check("read download method", FAIL, str(e))
+    only_sra = f"; {len(no_ena)} run(s) have no ENA FASTQ (e.g. {no_ena[0]})" if no_ena else ""
+    if method == "ena":
+        if no_ena:
+            return Check("read download method", FAIL, f"sra_method: ena, but ENA has no FASTQ files for {', '.join(no_ena[:5])}")
+        return Check("read download method", OK, "ENA FASTQ files (sra_method: ena)")
+    if mode != "never":
+        return Check("read download method", OK, f"{method}: sra-tools when the image provides them"
+                     + ("" if method == "sra-tools" else ", else ENA") + only_sra)
+    have = sra.sra_tools_available()
+    if have:
+        return Check("read download method", OK, "sra-tools (prefetch + fasterq-dump)"
+                     + ("" if method == "sra-tools" else ", ENA FASTQ files as the backup") + only_sra)
+    if method == "sra-tools" or no_ena:
+        return Check("read download method", FAIL, "prefetch / fasterq-dump not on PATH (conda install -c bioconda sra-tools)"
+                     + only_sra)
+    return Check("read download method", WARN, "prefetch / fasterq-dump not on PATH: downloading from ENA only "
+                                               "(slower; `conda install -c bioconda sra-tools` enables the primary method)")
 
 
 def run_all(*, cfg: dict, rundir: Path, configfile: Path, resources: Path | None, mode: str) -> list[Check]:
-    return check_mode(mode, resources) + check_resources(cfg, resources, rundir) + check_run_dir(cfg, rundir, configfile)
+    return check_mode(mode, resources) + check_resources(cfg, resources, rundir) + check_run_dir(cfg, rundir, configfile, mode)
 
 
 def report(checks: list[Check], out=None) -> bool:

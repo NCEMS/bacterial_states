@@ -91,8 +91,8 @@ def test_resolve_run_single_and_odd_listings(sra, fake_net, tmp_path):
     assert fake_net == [sra.ENA_FILEREPORT.format(acc="SRR2547467")]  # runs skip the NCBI hop
     three = sra.resolve_accession("SRR000001", str(tmp_path))
     assert three["layout"] == "PAIRED" and three["runs"][0]["files"]["1"]["url"].endswith("_1.fastq.gz")
-    with pytest.raises(sra.AccessionError, match="no FASTQ files"):
-        sra.resolve_accession("SRR000002", str(tmp_path))
+    archive_only = sra.resolve_accession("SRR000002", str(tmp_path))          # ENA lists no FASTQ: sra-tools only
+    assert archive_only["layout"] == "SINGLE" and archive_only["runs"][0]["files"] == {"1": {"url": None, "md5": None, "bytes": None}}
     with pytest.raises(sra.AccessionError, match="no SRA runs"):
         sra.resolve_accession("SRX000000", str(tmp_path))
 
@@ -127,7 +127,8 @@ def test_resolve_samples_points_at_sra_dir(sra, fake_net, tmp_path):
     assert set(reads["ko"]["runs"]["SRR1945181"]) == {"1", "2"}
     assert reads["se"]["r2"] is None and reads["se"]["r1"] == ["sra/SRR2547467/SRR2547467_1.fastq.gz"]
     summ = sra.download_summary(reads, str(tmp_path / "sra"))
-    assert summ == {"runs": 2, "files": 3, "present": 0, "pending_bytes": 119494889 + 124362910 + 3233688793}
+    assert summ == {"runs": 2, "files": 3, "present": 0, "pending_bytes": 119494889 + 124362910 + 3233688793,
+                    "no_ena": []}
     (tmp_path / "sra" / "SRR2547467").mkdir(parents=True)
     (tmp_path / "sra" / "SRR2547467" / "SRR2547467_1.fastq.gz").write_bytes(b"")
     assert sra.download_summary(reads, str(tmp_path / "sra"))["present"] == 1
@@ -158,3 +159,148 @@ def test_cli_download(sra, tmp_path, capsys):
     assert out.read_bytes() == b"hello"
     assert sra.main(["download", "--url", src.as_uri(), "--out", str(out), "--md5", "f" * 32]) == 1
     assert "md5" in capsys.readouterr().err
+
+
+def test_download_retries_transient_http_errors(sra, tmp_path, monkeypatch):
+    """ENA answers 403 for a while when throttling; the same URL works again later. 404 is final."""
+    import io
+    import urllib.error
+    calls = []
+
+    def fake_urlopen(codes, payload=b"data"):
+        def urlopen(req, timeout=None):
+            calls.append(req.full_url)
+            code = codes[min(len(calls) - 1, len(codes) - 1)]
+            if code != 200:
+                raise urllib.error.HTTPError(req.full_url, code, "nope", None, None)
+            return io.BytesIO(payload)
+        return urlopen
+
+    out = tmp_path / "a.fastq.gz"
+    monkeypatch.setattr(sra.urllib.request, "urlopen", fake_urlopen([403, 403, 200]))
+    sra.download("https://example.org/a.fastq.gz", str(out), size=4, backoff=0)
+    assert out.read_bytes() == b"data" and len(calls) == 3
+
+    calls.clear()
+    monkeypatch.setattr(sra.urllib.request, "urlopen", fake_urlopen([404]))
+    with pytest.raises(sra.DownloadError, match="404"):
+        sra.download("https://example.org/b.fastq.gz", str(tmp_path / "b.fastq.gz"), backoff=0)
+    assert len(calls) == 1                                           # no second attempt
+
+    calls.clear()
+    monkeypatch.setattr(sra.urllib.request, "urlopen", fake_urlopen([403]))
+    with pytest.raises(sra.DownloadError, match="403"):
+        sra.download("https://example.org/c.fastq.gz", str(tmp_path / "c.fastq.gz"), attempts=3, backoff=0)
+    assert len(calls) == 3 and not (tmp_path / "c.fastq.gz.part").exists()
+
+
+# ---- fetch: sra-tools first, ENA as the backup ---------------------------------------------
+
+FASTQ_1 = b"".join(b"@SRR9.%d r%d/1\nACGT\n+\nIIII\n" % (i, i) for i in range(1, 6))
+FASTQ_2 = b"".join(b"@SRR9.%d r%d/2\nTTTT\n+\nIIII\n" % (i, i) for i in range(1, 6))
+
+
+def _fake_sra_tools(bindir, mode="paired"):
+    """Stand-ins for prefetch / fasterq-dump that write what the real tools would."""
+    bindir.mkdir(exist_ok=True)
+    (bindir / "prefetch").write_text(
+        "#!/bin/sh\nrun=$1; out=$3\n" + ("exit 3\n" if mode == "prefetch_fails" else
+        'mkdir -p "$out/$run" && echo archive > "$out/$run/$run.sra"\n'))
+    body = {"paired": 'cp "$FAKE_SRC/r1.fastq" "$out/${run}_1.fastq"; cp "$FAKE_SRC/r2.fastq" "$out/${run}_2.fastq"',
+            "single": 'cp "$FAKE_SRC/r1.fastq" "$out/${run}.fastq"',
+            "unequal": 'cp "$FAKE_SRC/r1.fastq" "$out/${run}_1.fastq"; head -4 "$FAKE_SRC/r2.fastq" > "$out/${run}_2.fastq"',
+            "prefetch_fails": "exit 1"}[mode]
+    (bindir / "fasterq-dump").write_text(
+        "#!/bin/sh\narchive=$1; run=$(basename \"$archive\" .sra)\n"
+        'while [ $# -gt 0 ]; do [ "$1" = "--outdir" ] && out=$2; shift; done\n' + body + "\n")
+    for tool in ("prefetch", "fasterq-dump"):
+        (bindir / tool).chmod(0o755)
+
+
+@pytest.fixture
+def fetch_env(tmp_path, monkeypatch):
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "r1.fastq").write_bytes(FASTQ_1)
+    (src / "r2.fastq").write_bytes(FASTQ_2)
+    ena = {}
+    for mate, data in (("1", FASTQ_1), ("2", FASTQ_2)):
+        f = src / f"ena_{mate}.fastq.gz"
+        f.write_bytes(b"ENA" + data)                                  # not real gzip: only identity matters here
+        ena[mate] = {"url": f.as_uri(), "md5": hashlib.md5(f.read_bytes()).hexdigest(), "bytes": f.stat().st_size}
+    monkeypatch.setenv("FAKE_SRC", str(src))
+
+    def use_tools(mode):
+        bindir = tmp_path / "bin"
+        if mode is None:
+            monkeypatch.setenv("PATH", str(tmp_path / "empty"))
+        else:
+            _fake_sra_tools(bindir, mode)
+            import os
+            monkeypatch.setenv("PATH", f"{bindir}{os.pathsep}/usr/bin{os.pathsep}/bin")
+    return tmp_path / "sra" / "SRR9", ena, use_tools
+
+
+def _gunzip(path):
+    import gzip
+    return gzip.decompress(Path(path).read_bytes())
+
+
+def test_fetch_prefers_sra_tools(sra, fetch_env):
+    out, ena, use_tools = fetch_env
+    use_tools("paired")
+    assert sra.sra_tools_available()
+    assert sra.fetch_run("SRR9", str(out), ("1", "2"), "auto", ena, threads=1, spots=5) == "sra-tools"
+    assert _gunzip(out / "SRR9_1.fastq.gz") == FASTQ_1 and _gunzip(out / "SRR9_2.fastq.gz") == FASTQ_2
+    assert sorted(p.name for p in out.iterdir()) == ["SRR9_1.fastq.gz", "SRR9_2.fastq.gz"]     # no temp files left
+
+
+def test_fetch_mate_one_only_and_single_end_archive(sra, fetch_env):
+    out, ena, use_tools = fetch_env
+    use_tools("paired")
+    assert sra.fetch_run("SRR9", str(out), ("1",), "sra-tools", None, threads=1) == "sra-tools"
+    assert [p.name for p in out.iterdir()] == ["SRR9_1.fastq.gz"]
+    use_tools("single")                                                 # archive holds one read per spot
+    out2 = out.parent / "SRR8"
+    assert sra.fetch_run("SRR8", str(out2), ("1",), "sra-tools", None, threads=1) == "sra-tools"
+    assert _gunzip(out2 / "SRR8_1.fastq.gz") == FASTQ_1
+    with pytest.raises(sra.DownloadError, match="no mate 2"):
+        sra.fetch_run("SRR8", str(out2), ("1", "2"), "sra-tools", None, threads=1)
+
+
+@pytest.mark.parametrize("mode", [None, "prefetch_fails", "unequal"])
+def test_fetch_falls_back_to_ena(sra, fetch_env, mode):
+    """No tools, a failing prefetch, or mates of different length: `auto` takes the ENA files."""
+    out, ena, use_tools = fetch_env
+    use_tools(mode)
+    assert sra.fetch_run("SRR9", str(out), ("1", "2"), "auto", ena, threads=1) == "ena"
+    assert (out / "SRR9_1.fastq.gz").read_bytes() == b"ENA" + FASTQ_1
+    assert sorted(p.name for p in out.iterdir()) == ["SRR9_1.fastq.gz", "SRR9_2.fastq.gz"]
+    if mode is not None:
+        with pytest.raises(sra.DownloadError):                          # sra-tools only: no fallback
+            sra.fetch_run("SRR9", str(out.parent / "x"), ("1", "2"), "sra-tools", ena, threads=1)
+
+
+def test_fetch_checks_spots_methods_and_missing_backup(sra, fetch_env):
+    out, ena, use_tools = fetch_env
+    use_tools("paired")
+    with pytest.raises(sra.DownloadError, match="ENA lists 99"):
+        sra.fetch_run("SRR9", str(out), ("1", "2"), "sra-tools", ena, threads=1, spots=99)
+    assert sra.fetch_run("SRR9", str(out), ("1", "2"), "ena", ena) == "ena"          # tools present but not used
+    assert (out / "SRR9_2.fastq.gz").read_bytes() == b"ENA" + FASTQ_2
+    use_tools(None)
+    no_url = {"1": {"url": None, "md5": None, "bytes": None}}
+    with pytest.raises(sra.DownloadError, match="ENA has no FASTQ file"):
+        sra.fetch_run("SRR9", str(out.parent / "y"), ("1",), "auto", no_url)
+    assert sra.check_method(None) == "auto" and sra.check_method("SRA_tools") == "sra-tools"
+    with pytest.raises(sra.AccessionError, match="sra_method"):
+        sra.check_method("aspera")
+
+
+def test_cli_fetch(sra, fetch_env, capsys):
+    out, ena, use_tools = fetch_env
+    use_tools(None)
+    assert sra.main(["fetch", "--run", "SRR9", "--out-dir", str(out), "--mates", "1,2", "--method", "auto",
+                     "--ena", json.dumps(ena), "--spots", "0"]) == 0
+    assert "fetched from ena" in capsys.readouterr().err
+    assert sra.main(["fetch", "--run", "SRR9", "--out-dir", str(out), "--method", "sra-tools"]) == 1

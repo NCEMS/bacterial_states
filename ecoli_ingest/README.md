@@ -81,8 +81,15 @@ ecoli_ingest run -n               # dry run
 ecoli_ingest run --cores 12       # run; results land in ./<experiment>_results/
 ```
 
+Running again in the same directory continues where the last run stopped. A finished step is
+redone only when its output is missing or older than its input (`--rerun-triggers mtime`, set by
+the launcher), so upgrading `ecoli_ingest` does not re-download or re-align an existing run. The
+flip side: after changing a setting that alters a step's result (a QC gate, for instance), name the
+step to redo, e.g. `ecoli_ingest run -- --forcerun qc_passed_samples`; new samples and new DESeq2
+contrasts are picked up without that.
+
 Anything after `--` is passed to Snakemake, e.g. `ecoli_ingest run -- --unlock` or
-`ecoli_ingest run -- --rerun-triggers mtime`. `ecoli_ingest shell` opens a shell inside the
+`ecoli_ingest run -- --rerun-triggers mtime params` (Snakemake's stricter triggers). `ecoli_ingest shell` opens a shell inside the
 container with the run directory mounted (install path B).
 
 ### config.yaml
@@ -98,6 +105,7 @@ deseq2:
 centrifuge: true                  # false: skip Centrifuge entirely (not run, not in MultiQC)
 centrifuge_organism: "Escherichia coli"
 centrifuge_min_percentage: 30.0   # remove to disable the contamination gate
+fastp_detect_adapter_for_pe: false # true: fastp --detect_adapter_for_pe for paired reads (short-insert libraries)
 fastp_min_kept_percentage: 75.0   # remove to disable the read-filter gate
 ```
 
@@ -114,7 +122,7 @@ samples:
     r1: ["reads/WT_2_L001_R1.fastq.gz", "reads/WT_2_L002_R1.fastq.gz"]
     r2: ["reads/WT_2_L001_R2.fastq.gz", "reads/WT_2_L002_R2.fastq.gz"]
     condition: "wildtype"
-  ko_3:   # downloaded from ENA during the run; single/paired is taken from the archive
+  ko_3:   # fetched during the run (sra-tools, ENA as the backup); single/paired is taken from the archive
     accession: "GSM1646283"
     condition: "knockout"
   ko_4:   # several runs are merged into one sample
@@ -124,10 +132,25 @@ samples:
 
 `accession` takes SRR/ERR/DRR runs, SRX experiments, SRS/SAMN samples or GSM ids (strings or lists);
 study-level ids (GSE, SRP, PRJNA) are rejected because one sample cannot be a whole study. Files go
-to `sra/` in the run directory (`sra_dir:` to share one download directory between runs) and md5s
-are verified. `ecoli_ingest check` resolves the accessions (network needed once; the answer is cached
-under `sra/manifest/`) and reports how much there is to download; `ecoli_ingest run --max-downloads N`
-caps concurrent downloads (default 4).
+to `sra/<run>/<run>_1.fastq.gz` (and `_2`) in the run directory (`sra_dir:` to share one download
+directory between runs). `ecoli_ingest check` resolves the accessions (network needed once; the
+answer is cached under `sra/manifest/`), reports how much there is to download and which method
+will be used; `ecoli_ingest run --max-downloads N` caps the number of runs fetched at once
+(default 4).
+
+Each run is fetched by one job, set with `sra_method` in `config.yaml`:
+
+| `sra_method` | Source |
+|---|---|
+| `auto` (default) | sra-tools first: `prefetch` downloads the SRA archive from NCBI (it checks the archive's checksum) and `fasterq-dump --split-3` converts it; the two mates must hold the same number of reads. If the tools are not installed, or the fetch fails, the run's FASTQ files are downloaded from ENA instead (size and md5 verified, HTTP 403/408/429 retried). |
+| `sra-tools` | sra-tools only; a failure stops the run |
+| `ena` | ENA FASTQ files only (the previous behaviour) |
+
+Both sources give the same reads with the same names (`@SRR1945242.1 <instrument name>/1`), so
+results do not depend on which one served a run. sra-tools need temporary disk space in `sra_dir`
+for the uncompressed FASTQ of the runs being converted (about ten times the compressed size) and
+are part of `environment.yaml`; the published container image predates them and falls back to ENA.
+Runs for which ENA holds only the SRA archive can be fetched with sra-tools only.
 
 ### Tutorial data
 
@@ -154,6 +177,8 @@ wget -O KO_2.fastq.gz ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR254/000/SRR2547470/S
 
 ## 4. Outputs (`<experiment>_results/`)
 
+Set `results_dir: "results"` in `config.yaml` for a fixed directory name instead of `<experiment>_results/`.
+
 | File | Content |
 |---|---|
 | `multiqc_report.html` | all QC in one report (fastp, FastQC, Centrifuge, vg stats, RSeQC, feature overlap, PCA) |
@@ -169,13 +194,18 @@ The count tables feed [Ecoli_ATLAS](../ecoli_atlas/README.md): `ecoli_atlas prep
 ## 5. Notes
 
 - Nothing needs network access at run time unless samples are given by `accession`; those are
-  resolved (NCBI/ENA metadata) and downloaded from ENA by the workflow itself. Gene identifiers and
+  resolved (NCBI/ENA metadata) and fetched by the workflow itself (NCBI with sra-tools, else ENA). Gene identifiers and
   product descriptions come from the two annotation GFFs (`workflow/scripts/annotate_counts.py`).
 - Reads shorter than 50 bp automatically use the k=15 minimizer index.
 - Centrifuge runs for every sample unless the config says `centrifuge: false` (`ecoli_ingest init
   --without-centrifuge` writes that); a missing key means on. With it off, Centrifuge is not run, its
   gate is ignored and old Centrifuge reports are left out of MultiQC. The gate itself applies only
   when `centrifuge_min_percentage` is set.
+- Paired-end runs call fastp with its defaults, which is how the counts the atlas model was
+  trained on were made: adapters are trimmed only where the mates overlap. That leaves adapter in
+  libraries with very short inserts; for those set `fastp_detect_adapter_for_pe: true`, which adds
+  `--detect_adapter_for_pe`. A missing key means off. Single-end runs are not affected. In an existing run directory a
+  changed setting needs `ecoli_ingest run -- --forcerun fastp_pe`.
 - Maintainers: `ecoli_ingest manifest` regenerates `resources.manifest.tsv` (sha256 of every
   resource file, used by `check --verify` and `download`). The container is rebuilt from
   `build/Singularity.def`, which installs `environment.yaml`.

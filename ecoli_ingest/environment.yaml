@@ -18,6 +18,9 @@ dependencies:
   - pandas
   - numpy
   - snakemake-minimal>=9,<10
+  # reads given by accession: prefetch + fasterq-dump (ENA download is the backup), pigz to compress
+  - sra-tools>=3
+  - pigz
   # read QC / trimming / contamination
   - fastp
   - fastqc=0.12.1       # the Java FastQC; 0.13 is a different program with another CLI

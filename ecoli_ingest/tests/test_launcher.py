@@ -99,6 +99,13 @@ def test_snakemake_and_container_commands():
     assert limited[limited.index("--resources") + 1] == "download_slots=4"
     assert limited.index("--resources") < limited.index("--cores") < limited.index("all")
     assert inner[-2:] == ["all", "--unlock"] and "--dry-run" in inner  # targets precede pass-through args
+    # finished steps are not redone because the workflow code or a parameter changed ...
+    assert inner[inner.index("--rerun-triggers") + 1] == "mtime" and inner.index("--rerun-triggers") < inner.index("--cores")
+    # ... unless the user names the triggers
+    own = container.snakemake_command(snakefile=Path("/pkg/Snakefile"), rundir=Path("/run"),
+                                      configfile=Path("/run/config.yaml"), resources=Path("/res"),
+                                      extra=["--rerun-triggers", "mtime", "params"])
+    assert own.count("--rerun-triggers") == 1 and own[-3:] == ["--rerun-triggers", "mtime", "params"]
     outer = container.container_command("apptainer", Path("/res/container/x.sif"), ["/pkg", "/run"], Path("/run"), inner)
     assert outer[:2] == ["apptainer", "exec"]
     assert outer.count("--bind") == 2
@@ -140,6 +147,11 @@ def test_checks_multi_file_and_accession_samples(tmp_path, monkeypatch):
     assert result["sra accessions"].status == checks.OK
     assert "1 run(s), 2 file(s)" in result["sra accessions"].detail and "0.00 GB" in result["sra accessions"].detail
     assert (tmp_path / "sra" / "manifest" / "GSM1646283.json").exists()      # cache written in the run dir
+    method = result["read download method"]                                    # files still to fetch: say how
+    assert method.status in (checks.OK, checks.WARN) and ("sra-tools" in method.detail or "ENA" in method.detail)
+    cfg["sra_method"] = "aspera"
+    assert {c.name: c for c in checks.check_run_dir(cfg, tmp_path, tmp_path / "config.yaml")}["read download method"].status == checks.FAIL
+    del cfg["sra_method"]
     assert result["read layout"].status == checks.WARN                         # two=SE, acc=PE -> mixed
 
     cfg["samples"]["acc"]["accession"] = "GSE67218"

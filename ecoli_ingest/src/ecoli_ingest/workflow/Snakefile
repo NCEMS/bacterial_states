@@ -6,6 +6,8 @@ import glob, json, os, sys
 
 configfile: "config.yaml"
 experiment_name = config.get("experiment", "experiment_unknown")
+# Results directory inside the run directory: <experiment>_results unless `results_dir` is set.
+results_dir = (config.get("results_dir") or f"{experiment_name}_results").rstrip("/")
 
 # Resource files default to the standard layout under `resources_dir` (the ecoli_ingest launcher
 # passes --config resources_dir=...). An explicit per-file entry in config.yaml still wins.
@@ -27,7 +29,7 @@ scripts_dir = config.get("scripts_dir") or os.path.join(workflow.basedir, "scrip
 #Getting read length for vg minimizer
 def get_minimizer_for_sample(sample_name):
     fastq_path = None
-    cleaned_path = f"{experiment_name}_results/{sample_name}/{sample_name}_clean_R1.fastq"
+    cleaned_path = f"{results_dir}/{sample_name}/{sample_name}_clean_R1.fastq"
     
     if os.path.exists(cleaned_path):
         fastq_path = cleaned_path
@@ -67,8 +69,10 @@ def get_minimizer_for_sample(sample_name):
 
 #Where each sample's reads come from (scripts/sra_reads.py is shared with `ecoli_ingest check`).
 # A sample gives r1/r2 (a file or a list of files per mate, concatenated before fastp) or an
-# `accession` (SRR/SRX/SRS/GSM) whose FASTQ files are downloaded from ENA into `sra_dir`. Resolving
-# an accession needs the network once; the answer is cached under <sra_dir>/manifest/<ACC>.json.
+# `accession` (SRR/SRX/SRS/GSM) whose reads are fetched into `sra_dir`: with sra-tools (prefetch +
+# fasterq-dump) first and the ENA FASTQ files as the backup (`sra_method: auto`, the default), or
+# from one source only (`sra_method: sra-tools` / `ena`). Resolving an accession needs the network
+# once; the answer is cached under <sra_dir>/manifest/<ACC>.json.
 sys.path.insert(0, scripts_dir)
 import sra_reads
 
@@ -76,6 +80,8 @@ SAMPLES = config.get("samples", {})
 SRA_DIR = config.get("sra_dir", "sra")
 READS = sra_reads.resolve_samples(SAMPLES, SRA_DIR, os.path.join(SRA_DIR, "manifest"), log=sys.stderr)
 RUN_FILES = {run: files for spec in READS.values() for run, files in spec["runs"].items()}
+RUN_SPOTS = {run: n for spec in READS.values() for run, n in spec.get("spots", {}).items()}
+SRA_METHOD = sra_reads.check_method(config.get("sra_method", "auto"))
 
 # Concurrent downloads are capped by the `download_slots` resource: `--resources download_slots=N`
 # (the launcher's --max-downloads) wins, else config `max_downloads`, else 4.
@@ -86,6 +92,16 @@ if "download_slots" not in workflow.global_resources:
 num_se = sum(spec["r2"] is None for spec in READS.values())
 num_pe = len(READS) - num_se
 SE = num_se > 0
+
+# Runs to fetch, by the mates the workflow reads: both, or mate 1 only (single-end runs, and
+# paired runs when the whole run is treated as single-end).
+SRA_RUNS_PE = sorted(RUN_FILES) if not SE else []
+SRA_RUNS_SE = sorted(RUN_FILES) if SE else []
+
+def sra_fetch_params(run, mates):
+    """Arguments of `sra_reads.py fetch` for one run."""
+    ena = {m: RUN_FILES[run][m] for m in mates if m in RUN_FILES[run]}
+    return {"ena": json.dumps(ena, separators=(",", ":")), "spots": RUN_SPOTS.get(run) or 0}
 if num_se > 0 and num_pe > 0:
     print("WARNING: Mixed SE and PE samples detected. Defaulting to SE mode for all.", flush=True)
 
@@ -96,7 +112,7 @@ def raw_reads(sample, mate):
     if len(files) == 1:
         return files[0]
     ext = "fastq.gz" if sra_reads.is_gz(files[0]) else "fastq"
-    return f"{experiment_name}_results/{sample}/raw/{sample}_R{mate}.{ext}"
+    return f"{results_dir}/{sample}/raw/{sample}_R{mate}.{ext}"
 
 wildcard_constraints:
     sample="[^/]+",
@@ -115,16 +131,20 @@ fastp_qc_is_configured = config.get("fastp_min_kept_percentage") is not None
 # Centrifuge (contamination screen) runs unless `centrifuge: false`; its gate needs a threshold too
 centrifuge_enabled = bool(config.get("centrifuge", True))
 centrifuge_qc_is_configured = centrifuge_enabled and config.get("centrifuge_min_percentage") is not None
+# Paired-end adapter detection in fastp is off unless `fastp_detect_adapter_for_pe: true`. Off gives
+# plain `fastp` defaults (overlap-based adapter removal only), which is how the reads behind the
+# atlas training counts (merged_count_table.txt) were processed.
+fastp_pe_extra = "--detect_adapter_for_pe" if bool(config.get("fastp_detect_adapter_for_pe", False)) else ""
 
 
 ###Checkpoint function for QC metrics collected above (fastp and centrifuge)
 checkpoint qc_passed_samples:
     input:
         fastp_json=lambda wc: [
-            f"{experiment_name}_results/{s}/fastp/{s}_fastp.json" for s in SAMPLES.keys()
+            f"{results_dir}/{s}/fastp/{s}_fastp.json" for s in SAMPLES.keys()
         ] if fastp_qc_is_configured else [],
         centrifuge_report=lambda wc: [
-            f"{experiment_name}_results/{s}/centrifuge/{s}_report.txt" for s in SAMPLES.keys()
+            f"{results_dir}/{s}/centrifuge/{s}_report.txt" for s in SAMPLES.keys()
         ] if centrifuge_qc_is_configured else []
     output:
         directory("checkpoints/passed/"),
@@ -139,7 +159,7 @@ checkpoint qc_passed_samples:
         if fastp_qc_is_configured:
             fastp_min_kept_percentage = config.get("fastp_min_kept_percentage")
             for sample in list(passed_samples):
-                json_file = f"{experiment_name}_results/{sample}/fastp/{sample}_fastp.json"
+                json_file = f"{results_dir}/{sample}/fastp/{sample}_fastp.json"
                 try:
                     with open(json_file) as fh:
                         data = json.load(fh)
@@ -168,7 +188,7 @@ checkpoint qc_passed_samples:
             centrifuge_organism = config.get("centrifuge_organism", "")
             centrifuge_min_percentage = config.get("centrifuge_min_percentage")
             for sample in list(passed_samples):
-                report_file = f"{experiment_name}_results/{sample}/centrifuge/{sample}_report.txt"
+                report_file = f"{results_dir}/{sample}/centrifuge/{sample}_report.txt"
                 found_perc = 0.0
                 organism_found = False
                 try:
@@ -229,16 +249,16 @@ def get_rna_seq_outputs(wildcards):
     outputs = []
     for s in passed_samples:
         outputs.extend([
-            f"{experiment_name}_results/{s}/vg/{s}.gam",
-            f"{experiment_name}_results/{s}/vg/{s}_sort.bam",
-            f"{experiment_name}_results/{s}/vg/{s}_giraffe.stats.txt",
-            f"{experiment_name}_results/{s}/rseqc/{s}_infer_experiment.txt",
-            f"{experiment_name}_results/{s}/feature_overlap/{s}_feature_overlap_mqc.tsv",
+            f"{results_dir}/{s}/vg/{s}.gam",
+            f"{results_dir}/{s}/vg/{s}_sort.bam",
+            f"{results_dir}/{s}/vg/{s}_giraffe.stats.txt",
+            f"{results_dir}/{s}/rseqc/{s}_infer_experiment.txt",
+            f"{results_dir}/{s}/feature_overlap/{s}_feature_overlap_mqc.tsv",
         ])
     outputs.extend([
-        f"{experiment_name}_results/all_samples_raw_counts.txt",
-        f"{experiment_name}_results/multiqc_report.html",
-        f"{experiment_name}_results/deseq2/normalized_counts.tsv",
+        f"{results_dir}/all_samples_raw_counts.txt",
+        f"{results_dir}/multiqc_report.html",
+        f"{results_dir}/deseq2/normalized_counts.tsv",
         "checkpoints/qc_failures.json",
     ])
     return outputs
@@ -250,27 +270,50 @@ rule all:
 
 
 ####Fetching and merging raw reads (only for samples that need it)
+# One job per run. sra-tools write both mates of a run in one go, so a paired run is one job with
+# two outputs; `sra_download_se` fetches mate 1 only.
 rule sra_download:
     output:
-        os.path.join(SRA_DIR, "{run}", "{run}_{mate}.fastq.gz")
+        r1=os.path.join(SRA_DIR, "{run}", "{run}_1.fastq.gz"),
+        r2=os.path.join(SRA_DIR, "{run}", "{run}_2.fastq.gz")
+    wildcard_constraints:
+        run="|".join(SRA_RUNS_PE) or "no_paired_run"
     params:
-        url=lambda wc: RUN_FILES[wc.run][wc.mate]["url"],
-        md5=lambda wc: RUN_FILES[wc.run][wc.mate]["md5"] or "",
-        size=lambda wc: RUN_FILES[wc.run][wc.mate]["bytes"] or 0
-    threads: 1
+        fetch=lambda wc: sra_fetch_params(wc.run, ("1", "2")),
+        out_dir=lambda wc: os.path.join(SRA_DIR, wc.run)
+    threads: 4
     resources:
         download_slots=1
     retries: 2
     shell:
         """
-        python {scripts_dir}/sra_reads.py download --url {params.url} --md5 "{params.md5}" --bytes {params.size} --out {output}
+        python {scripts_dir}/sra_reads.py fetch --run {wildcards.run} --out-dir {params.out_dir} --mates 1,2 \
+            --method {SRA_METHOD} --threads {threads} --spots {params.fetch[spots]} --ena {params.fetch[ena]:q}
+        """
+
+rule sra_download_se:
+    output:
+        os.path.join(SRA_DIR, "{run}", "{run}_1.fastq.gz")
+    wildcard_constraints:
+        run="|".join(SRA_RUNS_SE) or "no_single_run"
+    params:
+        fetch=lambda wc: sra_fetch_params(wc.run, ("1",)),
+        out_dir=lambda wc: os.path.join(SRA_DIR, wc.run)
+    threads: 4
+    resources:
+        download_slots=1
+    retries: 2
+    shell:
+        """
+        python {scripts_dir}/sra_reads.py fetch --run {wildcards.run} --out-dir {params.out_dir} --mates 1 \
+            --method {SRA_METHOD} --threads {threads} --spots {params.fetch[spots]} --ena {params.fetch[ena]:q}
         """
 
 rule merge_reads:
     input:
         lambda wc: READS[wc.sample]["r1" if wc.mate == "1" else "r2"]
     output:
-        temp(f"{experiment_name}_results/{{sample}}/raw/{{sample}}_R{{mate}}.{{ext}}")
+        temp(f"{results_dir}/{{sample}}/raw/{{sample}}_R{{mate}}.{{ext}}")
     shell:
         """
         cat {input} > {output}
@@ -283,55 +326,55 @@ if SE:
         input:
             r1=lambda wildcards: raw_reads(wildcards.sample, 1)
         output:
-            temp(f"{experiment_name}_results/{{sample}}/{{sample}}_clean_R1.fastq"),
-            html=f"{experiment_name}_results/{{sample}}/fastp/{{sample}}_fastp.html",
-            json=f"{experiment_name}_results/{{sample}}/fastp/{{sample}}_fastp.json"
+            temp(f"{results_dir}/{{sample}}/{{sample}}_clean_R1.fastq"),
+            html=f"{results_dir}/{{sample}}/fastp/{{sample}}_fastp.html",
+            json=f"{results_dir}/{{sample}}/fastp/{{sample}}_fastp.json"
         threads: 12
         benchmark: f"benchmarks/{{sample}}_fastp_benchmark.txt"
         shell:
             """
-            mkdir -p {experiment_name}_results/{wildcards.sample}/fastp
+            mkdir -p {results_dir}/{wildcards.sample}/fastp
             fastp -i {input.r1} -o {output[0]} -h {output.html} -j {output.json} -w {threads}
             """
 
     rule fastqc_se:
         input:
-            r1=f"{experiment_name}_results/{{sample}}/{{sample}}_clean_R1.fastq"
+            r1=f"{results_dir}/{{sample}}/{{sample}}_clean_R1.fastq"
         output:
-            html=f"{experiment_name}_results/{{sample}}/fastqc/{{sample}}_clean_R1_fastqc.html",
-            zip=f"{experiment_name}_results/{{sample}}/fastqc/{{sample}}_clean_R1_fastqc.zip"
+            html=f"{results_dir}/{{sample}}/fastqc/{{sample}}_clean_R1_fastqc.html",
+            zip=f"{results_dir}/{{sample}}/fastqc/{{sample}}_clean_R1_fastqc.zip"
         shell:
-            "fastqc {input.r1} -o {experiment_name}_results/{wildcards.sample}/fastqc"
+            "fastqc {input.r1} -o {results_dir}/{wildcards.sample}/fastqc"
 
     rule centrifuge_se:
         input:
-            r1 = f"{experiment_name}_results/{{sample}}/{{sample}}_clean_R1.fastq",
+            r1 = f"{results_dir}/{{sample}}/{{sample}}_clean_R1.fastq",
         output:
-            temp_report = temp(f"{experiment_name}_results/{{sample}}/centrifuge/initial.tsv"),
-            temp_reads = temp(f"{experiment_name}_results/{{sample}}/centrifuge/good_read.txt"),
-            temp_fastq = temp(f"{experiment_name}_results/{{sample}}/centrifuge/_unambiguous.fastq"),
-            tsv        = temp(f"{experiment_name}_results/{{sample}}/centrifuge/{{sample}}_output.tsv"),
-            report    = f"{experiment_name}_results/{{sample}}/centrifuge/{{sample}}_report.txt",
+            temp_report = temp(f"{results_dir}/{{sample}}/centrifuge/initial.tsv"),
+            temp_reads = temp(f"{results_dir}/{{sample}}/centrifuge/good_read.txt"),
+            temp_fastq = temp(f"{results_dir}/{{sample}}/centrifuge/_unambiguous.fastq"),
+            tsv        = temp(f"{results_dir}/{{sample}}/centrifuge/{{sample}}_output.tsv"),
+            report    = f"{results_dir}/{{sample}}/centrifuge/{{sample}}_report.txt",
         params:
             db = centrifuge_index_path,
         threads: 12
         benchmark: f"benchmarks/{{sample}}_centrifuge_benchmark.txt"
         shell:
             r"""
-            mkdir -p {experiment_name}_results/{wildcards.sample}/centrifuge
-            centrifuge -x {params.db} -U {input.r1} -S {output.temp_report} -p {threads} --report-file {experiment_name}_results/{wildcards.sample}/centrifuge/{wildcards.sample}_prefilter_abundance.tsv >/dev/null 2>&1
+            mkdir -p {results_dir}/{wildcards.sample}/centrifuge
+            centrifuge -x {params.db} -U {input.r1} -S {output.temp_report} -p {threads} --report-file {results_dir}/{wildcards.sample}/centrifuge/{wildcards.sample}_prefilter_abundance.tsv >/dev/null 2>&1
             awk 'NR>1 && $3!=0 && $8==1 {{print $1}}' {output.temp_report} | sort -u > {output.temp_reads}
             awk 'BEGIN {{ while ((getline < "{output.temp_reads}")>0) keep[$1]=1 }} NR%4==1 {{ rid=substr($1,2); keep_read=(rid in keep) }} keep_read {{print}}' {input.r1} > {output.temp_fastq}
-            centrifuge -x {params.db} -U {output.temp_fastq} -S {output.tsv} -p {threads} --report-file {experiment_name}_results/{wildcards.sample}/centrifuge/{wildcards.sample}_abundance.tsv >/dev/null 2>&1
+            centrifuge -x {params.db} -U {output.temp_fastq} -S {output.tsv} -p {threads} --report-file {results_dir}/{wildcards.sample}/centrifuge/{wildcards.sample}_abundance.tsv >/dev/null 2>&1
             centrifuge-kreport -x {params.db} {output.tsv} > {output.report}
             """
 
     rule vg_giraffe_se:
         input:
-            r1=lambda wc: f"{experiment_name}_results/{wc.sample}/{wc.sample}_clean_R1.fastq",
+            r1=lambda wc: f"{results_dir}/{wc.sample}/{wc.sample}_clean_R1.fastq",
             passed_qc=lambda wc: f"checkpoints/passed/{wc.sample}.pass"
         output:
-            gam=f"{experiment_name}_results/{{sample}}/vg/{{sample}}.gam"
+            gam=f"{results_dir}/{{sample}}/vg/{{sample}}.gam"
         params:
             graph=vg_index+".d2.gbz",
             dist=vg_index+".d2.dist",
@@ -340,16 +383,16 @@ if SE:
         benchmark: f"benchmarks/{{sample}}_giraffe_benchmark.txt"
         shell:
             """
-            mkdir -p {experiment_name}_results/{wildcards.sample}/vg
+            mkdir -p {results_dir}/{wildcards.sample}/vg
             vg giraffe -Z {params.graph} -f {input.r1} -d {params.dist} -m {params.min} -t {threads} -o GAM > {output.gam}
             """
     
     rule vg_surject_se:
         input:
-            gam=f"{experiment_name}_results/{{sample}}/vg/{{sample}}.gam",
+            gam=f"{results_dir}/{{sample}}/vg/{{sample}}.gam",
             passed_qc=lambda wc: f"checkpoints/passed/{wc.sample}.pass"
         output:
-            bam=temp(f"{experiment_name}_results/{{sample}}/vg/{{sample}}.bam")
+            bam=temp(f"{results_dir}/{{sample}}/vg/{{sample}}.bam")
         params:
             graph=vg_index+".d2.gbz",
             gref=gref,
@@ -371,67 +414,73 @@ else:
             r1=lambda wildcards: raw_reads(wildcards.sample, 1),
             r2=lambda wildcards: raw_reads(wildcards.sample, 2)
         output:
-            r1=temp(f"{experiment_name}_results/{{sample}}/{{sample}}_clean_R1.fastq"),
-            r2=temp(f"{experiment_name}_results/{{sample}}/{{sample}}_clean_R2.fastq"),
-            html=f"{experiment_name}_results/{{sample}}/fastp/{{sample}}_fastp.html",
-            json=f"{experiment_name}_results/{{sample}}/fastp/{{sample}}_fastp.json"
+            r1=temp(f"{results_dir}/{{sample}}/{{sample}}_clean_R1.fastq"),
+            r2=temp(f"{results_dir}/{{sample}}/{{sample}}_clean_R2.fastq"),
+            html=f"{results_dir}/{{sample}}/fastp/{{sample}}_fastp.html",
+            json=f"{results_dir}/{{sample}}/fastp/{{sample}}_fastp.json"
         threads: 12
         benchmark: f"benchmarks/{{sample}}_fastp_benchmark.txt"
+        # --detect_adapter_for_pe (config `fastp_detect_adapter_for_pe`, default off): without it
+        # fastp removes paired-end adapters only where the two mates overlap, which misses inserts
+        # shorter than about 30 bp; those reads are then almost all adapter, are classified as
+        # vector sequence by Centrifuge and do not align.
+        params:
+            extra=fastp_pe_extra
         shell:
             """
-            mkdir -p {experiment_name}_results/{wildcards.sample}/fastp
-            fastp -i {input.r1} -I {input.r2} -o {output.r1} -O {output.r2} -h {output.html} -j {output.json} -w {threads}
+            mkdir -p {results_dir}/{wildcards.sample}/fastp
+            fastp -i {input.r1} -I {input.r2} -o {output.r1} -O {output.r2} -h {output.html} -j {output.json} -w {threads} {params.extra}
             """
 
     rule fastqc_pe:
         input:
-            r1=f"{experiment_name}_results/{{sample}}/{{sample}}_clean_R1.fastq",
-            r2=f"{experiment_name}_results/{{sample}}/{{sample}}_clean_R2.fastq"
+            r1=f"{results_dir}/{{sample}}/{{sample}}_clean_R1.fastq",
+            r2=f"{results_dir}/{{sample}}/{{sample}}_clean_R2.fastq"
         output:
-            r1_html=f"{experiment_name}_results/{{sample}}/fastqc/{{sample}}_clean_R1_fastqc.html",
-            r1_zip=f"{experiment_name}_results/{{sample}}/fastqc/{{sample}}_clean_R1_fastqc.zip",
-            r2_html=f"{experiment_name}_results/{{sample}}/fastqc/{{sample}}_clean_R2_fastqc.html",
-            r2_zip=f"{experiment_name}_results/{{sample}}/fastqc/{{sample}}_clean_R2_fastqc.zip"
+            r1_html=f"{results_dir}/{{sample}}/fastqc/{{sample}}_clean_R1_fastqc.html",
+            r1_zip=f"{results_dir}/{{sample}}/fastqc/{{sample}}_clean_R1_fastqc.zip",
+            r2_html=f"{results_dir}/{{sample}}/fastqc/{{sample}}_clean_R2_fastqc.html",
+            r2_zip=f"{results_dir}/{{sample}}/fastqc/{{sample}}_clean_R2_fastqc.zip"
         shell:
             r"""
-            mkdir -p {experiment_name}_results/{wildcards.sample}/fastqc
-            fastqc {input.r1} -o {experiment_name}_results/{wildcards.sample}/fastqc
-            fastqc {input.r2} -o {experiment_name}_results/{wildcards.sample}/fastqc
+            mkdir -p {results_dir}/{wildcards.sample}/fastqc
+            fastqc {input.r1} -o {results_dir}/{wildcards.sample}/fastqc
+            fastqc {input.r2} -o {results_dir}/{wildcards.sample}/fastqc
             """
 
     rule centrifuge_pe:
         input:
-            r1 = f"{experiment_name}_results/{{sample}}/{{sample}}_clean_R1.fastq",
-            r2 = f"{experiment_name}_results/{{sample}}/{{sample}}_clean_R2.fastq"
+            r1 = f"{results_dir}/{{sample}}/{{sample}}_clean_R1.fastq",
+            r2 = f"{results_dir}/{{sample}}/{{sample}}_clean_R2.fastq"
         output:
-            temp_report = temp(f"{experiment_name}_results/{{sample}}/centrifuge/initial.tsv"),
-            temp_reads = temp(f"{experiment_name}_results/{{sample}}/centrifuge/good_reads.txt"),
-            temp_fastq_r1 = temp(f"{experiment_name}_results/{{sample}}/centrifuge/clean_R1_unambiguous.fastq"),
-            temp_fastq_r2 = temp(f"{experiment_name}_results/{{sample}}/centrifuge/clean_R2_unambiguous.fastq"),
-            tsv = temp(f"{experiment_name}_results/{{sample}}/centrifuge/{{sample}}_output.tsv"),
-            report = f"{experiment_name}_results/{{sample}}/centrifuge/{{sample}}_report.txt"
+            temp_report = temp(f"{results_dir}/{{sample}}/centrifuge/initial.tsv"),
+            temp_reads = temp(f"{results_dir}/{{sample}}/centrifuge/good_reads.txt"),
+            temp_fastq_r1 = temp(f"{results_dir}/{{sample}}/centrifuge/clean_R1_unambiguous.fastq"),
+            temp_fastq_r2 = temp(f"{results_dir}/{{sample}}/centrifuge/clean_R2_unambiguous.fastq"),
+            tsv = temp(f"{results_dir}/{{sample}}/centrifuge/{{sample}}_output.tsv"),
+            report = f"{results_dir}/{{sample}}/centrifuge/{{sample}}_report.txt"
         params:
             db = centrifuge_index_path,
         threads: 12
         benchmark: f"benchmarks/{{sample}}_centrifuge_benchmark.txt"
         shell:
             r"""
-            mkdir -p {experiment_name}_results/{wildcards.sample}/centrifuge
-            centrifuge -x {params.db} -1 {input.r1} -2 {input.r2} -S {output.temp_report} -p {threads} --report-file {experiment_name}_results/{wildcards.sample}/centrifuge/{wildcards.sample}_prefilter_abundance.tsv >/dev/null 2>&1
+            mkdir -p {results_dir}/{wildcards.sample}/centrifuge
+            centrifuge -x {params.db} -1 {input.r1} -2 {input.r2} -S {output.temp_report} -p {threads} --report-file {results_dir}/{wildcards.sample}/centrifuge/{wildcards.sample}_prefilter_abundance.tsv >/dev/null 2>&1
             awk 'NR>1 && $3!=0 && $8==1 {{print $1}}' {output.temp_report} | sort -u > {output.temp_reads}
             awk 'BEGIN {{ while ((getline < "{output.temp_reads}")>0) keep[$1]=1 }} NR%4==1 {{ rid=substr($1,2); keep_read=(rid in keep) }} keep_read {{print}}' {input.r1} > {output.temp_fastq_r1}
             awk 'BEGIN {{ while ((getline < "{output.temp_reads}")>0) keep[$1]=1 }} NR%4==1 {{ rid=substr($1,2); keep_read=(rid in keep) }} keep_read {{print}}' {input.r2} > {output.temp_fastq_r2}
-            centrifuge -x {params.db} -1 {output.temp_fastq_r1} -2 {output.temp_fastq_r2} -S {output.tsv} -p {threads} --report-file {experiment_name}_results/{wildcards.sample}/centrifuge/{wildcards.sample}_abundance.tsv >/dev/null 2>&1
+            centrifuge -x {params.db} -1 {output.temp_fastq_r1} -2 {output.temp_fastq_r2} -S {output.tsv} -p {threads} --report-file {results_dir}/{wildcards.sample}/centrifuge/{wildcards.sample}_abundance.tsv >/dev/null 2>&1
             centrifuge-kreport -x {params.db} {output.tsv} > {output.report}
             """
             
     rule vg_giraffe_pe:
         input:
-            r1=lambda wc: f"{experiment_name}_results/{wc.sample}/{wc.sample}_clean_R1.fastq",
-            r2=lambda wc: f"{experiment_name}_results/{wc.sample}/{wc.sample}_clean_R2.fastq",
+            r1=lambda wc: f"{results_dir}/{wc.sample}/{wc.sample}_clean_R1.fastq",
+            r2=lambda wc: f"{results_dir}/{wc.sample}/{wc.sample}_clean_R2.fastq",
             passed_qc=lambda wc: f"checkpoints/passed/{wc.sample}.pass"
         output:
-            gam=f"{experiment_name}_results/{{sample}}/vg/{{sample}}.gam"
+            gam=f"{results_dir}/{{sample}}/vg/{{sample}}.gam"
         params:
             graph=vg_index+".d2.gbz",
             dist=vg_index+".d2.dist",
@@ -440,16 +489,16 @@ else:
         benchmark: f"benchmarks/{{sample}}_giraffe_benchmark.txt"
         shell:
             """
-            mkdir -p {experiment_name}_results/{wildcards.sample}/vg
+            mkdir -p {results_dir}/{wildcards.sample}/vg
             vg giraffe -Z {params.graph} -f {input.r1} -f {input.r2} -d {params.dist} -m {params.min} -t {threads} -o GAM > {output.gam}
             """
     
     rule vg_surject_pe:
         input:
-            gam=f"{experiment_name}_results/{{sample}}/vg/{{sample}}.gam",
+            gam=f"{results_dir}/{{sample}}/vg/{{sample}}.gam",
             passed_qc=lambda wc: f"checkpoints/passed/{wc.sample}.pass"
         output:
-            bam=temp(f"{experiment_name}_results/{{sample}}/vg/{{sample}}.bam")
+            bam=temp(f"{results_dir}/{{sample}}/vg/{{sample}}.bam")
         params:
             graph=vg_index + ".d2.gbz",
             gref=gref,
@@ -468,9 +517,9 @@ else:
 #Getting statistics for vg alignment
 rule vg_stats:
     input:
-        gam=f"{experiment_name}_results/{{sample}}/vg/{{sample}}.gam"
+        gam=f"{results_dir}/{{sample}}/vg/{{sample}}.gam"
     output:
-        txt=f"{experiment_name}_results/{{sample}}/vg/{{sample}}_giraffe.stats.txt"
+        txt=f"{results_dir}/{{sample}}/vg/{{sample}}_giraffe.stats.txt"
     #Add time information at end to meet multiqc requirements
     shell:
         """
@@ -482,25 +531,25 @@ rule vg_stats:
 #Getting strandedness information for sequencing library (used by multiqc)
 rule rseqc:
     input:
-        bam = f"{experiment_name}_results/{{sample}}/vg/{{sample}}.bam"
+        bam = f"{results_dir}/{{sample}}/vg/{{sample}}.bam"
     output:
-        infer_experiment = f"{experiment_name}_results/{{sample}}/rseqc/{{sample}}_infer_experiment.txt",
-        genebody_cov_txt = f"{experiment_name}_results/{{sample}}/rseqc/{{sample}}_genebody_cov.geneBodyCoverage.txt",
-        genebody_cov_r = f"{experiment_name}_results/{{sample}}/rseqc/{{sample}}_genebody_cov.geneBodyCoverage.r",
-        sorted_bam = f"{experiment_name}_results/{{sample}}/vg/{{sample}}_sort.bam",
-        bam_index = f"{experiment_name}_results/{{sample}}/vg/{{sample}}_sort.bam.bai"
+        infer_experiment = f"{results_dir}/{{sample}}/rseqc/{{sample}}_infer_experiment.txt",
+        genebody_cov_txt = f"{results_dir}/{{sample}}/rseqc/{{sample}}_genebody_cov.geneBodyCoverage.txt",
+        genebody_cov_r = f"{results_dir}/{{sample}}/rseqc/{{sample}}_genebody_cov.geneBodyCoverage.r",
+        sorted_bam = f"{results_dir}/{{sample}}/vg/{{sample}}_sort.bam",
+        bam_index = f"{results_dir}/{{sample}}/vg/{{sample}}_sort.bam.bai"
     params:
         annotation_bed = annotation_bed
     benchmark: f"benchmarks/{{sample}}_rseqc_benchmark.txt"
     shell:
         r"""
-        mkdir -p {experiment_name}_results/{wildcards.sample}/rseqc
+        mkdir -p {results_dir}/{wildcards.sample}/rseqc
         infer_experiment.py -i {input.bam} -r {params.annotation_bed} > {output.infer_experiment}
         samtools sort {input.bam} > {output.sorted_bam}
         samtools index {output.sorted_bam}
-        grep "gene" {params.annotation_bed} > {experiment_name}_results/{wildcards.sample}/rseqc/genes.bed
+        grep "gene" {params.annotation_bed} > {results_dir}/{wildcards.sample}/rseqc/genes.bed
         # run inside the rseqc directory: geneBody_coverage.py writes a log.txt into the cwd
-        (cd {experiment_name}_results/{wildcards.sample}/rseqc && geneBody_coverage.py -r genes.bed -i ../vg/{wildcards.sample}_sort.bam -o {wildcards.sample}_genebody_cov)
+        (cd {results_dir}/{wildcards.sample}/rseqc && geneBody_coverage.py -r genes.bed -i ../vg/{wildcards.sample}_sort.bam -o {wildcards.sample}_genebody_cov)
         """
 
 
@@ -508,15 +557,15 @@ rule rseqc:
 rule featurecounts_combined:
     input:
         bams=lambda wc: expand(
-            f"{experiment_name}_results/{{sample}}/vg/{{sample}}_sort.bam",
+            f"{results_dir}/{{sample}}/vg/{{sample}}_sort.bam",
             sample=get_passed_samples_from_checkpoint(wc)
         ),
         infer_experiment_for_strand=lambda wc:
-            f"{experiment_name}_results/{get_first_passed_sample(wc)}/rseqc/{get_first_passed_sample(wc)}_infer_experiment.txt"
+            f"{results_dir}/{get_first_passed_sample(wc)}/rseqc/{get_first_passed_sample(wc)}_infer_experiment.txt"
     output:
-        counts=f"{experiment_name}_results/all_samples_raw_counts.txt",
-        summary=f"{experiment_name}_results/all_samples_raw_counts.txt.summary",
-        temp_gff=f"{experiment_name}_results/featurecounts/featurecounts_annotation.gff"
+        counts=f"{results_dir}/all_samples_raw_counts.txt",
+        summary=f"{results_dir}/all_samples_raw_counts.txt.summary",
+        temp_gff=f"{results_dir}/featurecounts/featurecounts_annotation.gff"
     params:
         pe_param = "-p" if not SE else ""
     benchmark: f"benchmarks/featurecounts_benchmark.txt"
@@ -577,7 +626,7 @@ rule featurecounts_combined:
 #Sample metadata for DESeq2        
 rule generate_sample_metadata:
     output:
-        temp(f"{experiment_name}_results/sample_metadata.tsv")
+        temp(f"{results_dir}/sample_metadata.tsv")
     run:
         import pandas as pd
 
@@ -600,21 +649,21 @@ rule generate_sample_metadata:
         
 
 #Running DEseq using comparison listed in config file
-deseq_results_outputs = expand(f"{experiment_name}_results/deseq2/{{contrast}}_deseq_results.tsv", contrast=contrast_names) #Need a list of outputs from contrasts
-deseq_summary_outputs = expand(f"{experiment_name}_results/deseq2/{{contrast}}_deseq_results_summary.tsv", contrast=contrast_names)
+deseq_results_outputs = expand(f"{results_dir}/deseq2/{{contrast}}_deseq_results.tsv", contrast=contrast_names) #Need a list of outputs from contrasts
+deseq_summary_outputs = expand(f"{results_dir}/deseq2/{{contrast}}_deseq_results_summary.tsv", contrast=contrast_names)
 rule run_deseq2:
     input:
-        counts=f"{experiment_name}_results/all_samples_gene_symbols.tsv",
-        metadata=f"{experiment_name}_results/sample_metadata.tsv",
-        extended=f"{experiment_name}_results/all_samples_counts_extended.tsv"
+        counts=f"{results_dir}/all_samples_gene_symbols.tsv",
+        metadata=f"{results_dir}/sample_metadata.tsv",
+        extended=f"{results_dir}/all_samples_counts_extended.tsv"
     output:
-        pca_coords=f"{experiment_name}_results/deseq2/pca_coordinates.tsv",
-        pca_plot=f"{experiment_name}_results/deseq2/pca_plot.png",
-        pca_mqc = f"{experiment_name}_results/deseq2/pca_mqc.tsv",
-        norm_counts=f"{experiment_name}_results/deseq2/normalized_counts.tsv",
+        pca_coords=f"{results_dir}/deseq2/pca_coordinates.tsv",
+        pca_plot=f"{results_dir}/deseq2/pca_plot.png",
+        pca_mqc = f"{results_dir}/deseq2/pca_mqc.tsv",
+        norm_counts=f"{results_dir}/deseq2/normalized_counts.tsv",
         results = deseq_results_outputs
     params:
-        outdir=f"{experiment_name}_results/deseq2",
+        outdir=f"{results_dir}/deseq2",
         contrasts_json=json.dumps(deseq2_contrasts)
     benchmark: f"benchmarks/deseq_benchmark.txt"
     shell:
@@ -633,12 +682,12 @@ rule run_deseq2:
 #and product descriptions. Everything comes from the two annotation GFFs; no network access needed.
 rule annotate_counts:
     input:
-        counts=f"{experiment_name}_results/all_samples_raw_counts.txt",
-        gff=f"{experiment_name}_results/featurecounts/featurecounts_annotation.gff",
+        counts=f"{results_dir}/all_samples_raw_counts.txt",
+        gff=f"{results_dir}/featurecounts/featurecounts_annotation.gff",
         source_gff=annotation_source_gff
     output:
-        extended=f"{experiment_name}_results/all_samples_counts_extended.tsv",
-        clean=f"{experiment_name}_results/all_samples_gene_symbols.tsv"
+        extended=f"{results_dir}/all_samples_counts_extended.tsv",
+        clean=f"{results_dir}/all_samples_gene_symbols.tsv"
     shell:
         """
         python {scripts_dir}/annotate_counts.py --counts {input.counts} --gff {input.gff} \
@@ -647,12 +696,12 @@ rule annotate_counts:
 
 rule summarize_deseq_results:
     input:
-        deseq_result=f"{experiment_name}_results/deseq2/{{wildcards.contrast}}_deseq_results.tsv",
-        extended=f"{experiment_name}_results/all_samples_counts_extended.tsv"
+        deseq_result=f"{results_dir}/deseq2/{{wildcards.contrast}}_deseq_results.tsv",
+        extended=f"{results_dir}/all_samples_counts_extended.tsv"
     output:
-        summary_file=f"{experiment_name}_results/deseq2/{{wildcards.contrast}}_deseq_results_summary.tsv"
+        summary_file=f"{results_dir}/deseq2/{{wildcards.contrast}}_deseq_results_summary.tsv"
     params:
-        outdir=f"{experiment_name}_results/deseq2"
+        outdir=f"{results_dir}/deseq2"
     shell:
         """
         awk -v extended_input="{input.extended}" '
@@ -670,13 +719,13 @@ rule summarize_deseq_results:
 #Custom addition to multiqc, have to keep mqc name or it will not be parsed
 rule feature_overlap:
     input:
-        bam = f"{experiment_name}_results/{{sample}}/vg/{{sample}}_sort.bam"
+        bam = f"{results_dir}/{{sample}}/vg/{{sample}}_sort.bam"
     output:
-        feature_overlap = f"{experiment_name}_results/{{sample}}/feature_overlap/{{sample}}_feature_overlap_mqc.tsv"
+        feature_overlap = f"{results_dir}/{{sample}}/feature_overlap/{{sample}}_feature_overlap_mqc.tsv"
     benchmark: f"benchmarks/{{sample}}_overlap_benchmark.txt"
     shell:
         """
-        mkdir -p {experiment_name}_results/{wildcards.sample}/feature_overlap
+        mkdir -p {results_dir}/{wildcards.sample}/feature_overlap
         bash {scripts_dir}/gene_type.sh {annotation_bed} {input.bam} {output.feature_overlap} {scripts_dir}
         """
 
@@ -684,36 +733,36 @@ rule feature_overlap:
 rule multiqc:
     input:
         all_qc_inputs=lambda wc: [
-            f"{experiment_name}_results/{s}/fastp/{s}_fastp.json"
+            f"{results_dir}/{s}/fastp/{s}_fastp.json"
             for s in SAMPLES.keys()
         ] + ([
-            f"{experiment_name}_results/{s}/centrifuge/{s}_report.txt"
+            f"{results_dir}/{s}/centrifuge/{s}_report.txt"
             for s in SAMPLES.keys()
         ] if centrifuge_enabled else []),
         gated_inputs=lambda wc: [
-            f"{experiment_name}_results/{s}/fastqc/{s}_clean_R1_fastqc.zip"
+            f"{results_dir}/{s}/fastqc/{s}_clean_R1_fastqc.zip"
             for s in get_passed_samples_from_checkpoint(wc)
         ] + ([
-            f"{experiment_name}_results/{s}/fastqc/{s}_clean_R2_fastqc.zip"
+            f"{results_dir}/{s}/fastqc/{s}_clean_R2_fastqc.zip"
             for s in get_passed_samples_from_checkpoint(wc)
         ] if not SE else []) + [
-            f"{experiment_name}_results/{s}/vg/{s}_giraffe.stats.txt"
+            f"{results_dir}/{s}/vg/{s}_giraffe.stats.txt"
             for s in get_passed_samples_from_checkpoint(wc)
         ] + [
-            f"{experiment_name}_results/{s}/rseqc/{s}_infer_experiment.txt"
+            f"{results_dir}/{s}/rseqc/{s}_infer_experiment.txt"
             for s in get_passed_samples_from_checkpoint(wc)
         ] + [
-            f"{experiment_name}_results/{s}/feature_overlap/{s}_feature_overlap_mqc.tsv"
+            f"{results_dir}/{s}/feature_overlap/{s}_feature_overlap_mqc.tsv"
             for s in get_passed_samples_from_checkpoint(wc)
         ] + [
-            f"{experiment_name}_results/all_samples_raw_counts.txt.summary"
+            f"{results_dir}/all_samples_raw_counts.txt.summary"
         ],
         # MultiQC picks this up as custom content; declare it so MultiQC waits for DESeq2 to finish writing it
-        pca_mqc=f"{experiment_name}_results/deseq2/pca_mqc.tsv"
+        pca_mqc=f"{results_dir}/deseq2/pca_mqc.tsv"
     output:
-        html=f"{experiment_name}_results/multiqc_report.html"
+        html=f"{results_dir}/multiqc_report.html"
     params:
-        results_dir=f"{experiment_name}_results/",
+        results_dir=f"{results_dir}/",
         # with Centrifuge off, keep reports left over from an earlier run out of the report
         # (MultiQC matches --ignore against file/directory names, not whole paths)
         ignore="" if centrifuge_enabled else "--ignore centrifuge"

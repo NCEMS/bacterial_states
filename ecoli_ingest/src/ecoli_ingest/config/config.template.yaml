@@ -5,6 +5,10 @@
 
 experiment: "my_experiment"
 
+# Name of the results directory. Uncomment for a fixed name, e.g. when the run directory already
+# names the experiment.
+# results_dir: "results"
+
 # One entry per sample. Give r2 for paired-end data. If ANY sample lacks r2 the whole run is
 # treated as single-end. `condition` is the DESeq2 grouping variable; an optional `condition2`
 # is added to the model as a second factor.
@@ -13,9 +17,9 @@ experiment: "my_experiment"
 #   r1 / r2:    one file, or a list of files that are concatenated in order (e.g. several lanes);
 #               r2 must list as many files as r1
 #   accession:  an SRA/GEO id (SRR/ERR/DRR run, SRX experiment, SRS/SAMN sample or GSM) or a list
-#               of them. FASTQ files are downloaded from ENA into `sra_dir` during the run and the
-#               layout (single/paired) is taken from the archive. Study ids (GSE, SRP, PRJNA) are not
-#               accepted: list their GSM/SRR ids as separate samples.
+#               of them. The reads are fetched into `sra_dir` during the run (see `sra_method`
+#               below) and the layout (single/paired) is taken from the archive. Study ids (GSE,
+#               SRP, PRJNA) are not accepted: list their GSM/SRR ids as separate samples.
 samples:
   wt_1:
     r1: "reads/WT_1.fastq.gz"
@@ -53,6 +57,11 @@ deseq2:
 # it: Centrifuge is then not run, its gate is ignored and it is left out of the MultiQC report.
 centrifuge: true
 
+# Paired-end reads only. false = plain fastp defaults (adapters removed only where the mates
+# overlap), as used for the atlas training counts. Set true to have fastp detect and trim the
+# adapter of each mate (--detect_adapter_for_pe); libraries with very short inserts need it.
+fastp_detect_adapter_for_pe: false
+
 # Quality-control gates. A sample that fails any configured gate is excluded from alignment and
 # counting (see checkpoints/qc_failures.json). Remove a line to disable that gate.
 centrifuge_organism: "Escherichia coli"
@@ -61,9 +70,12 @@ fastp_min_kept_percentage: 75.0
 
 # Samples given by accession: where downloads and the resolution cache go (default: sra/ in this
 # directory; point several run directories at one shared directory to download each run once) and
-# how many files are fetched at the same time (`ecoli_ingest run --max-downloads N` overrides).
+# how many runs are fetched at the same time (`ecoli_ingest run --max-downloads N` overrides).
+# sra_method: auto = sra-tools (prefetch + fasterq-dump, from NCBI) first and the ENA FASTQ files as
+# the backup; "sra-tools" or "ena" = that source only.
 # sra_dir: "sra"
 # max_downloads: 4
+# sra_method: "auto"
 
 # Reference resources default to the standard files in the resources directory and normally need
 # no changes. Uncomment to override individual files.

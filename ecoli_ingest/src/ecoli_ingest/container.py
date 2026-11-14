@@ -77,6 +77,12 @@ def snakemake_command(*, snakefile: Path, rundir: Path, configfile: Path, resour
         # e.g. download_slots=N caps concurrent `sra_download` jobs (see the Snakefile)
         cmd.append("--resources")
         cmd.extend(f"{k}={v}" for k, v in resource_limits.items())
+    if not any(a == "--rerun-triggers" or a.startswith("--rerun-triggers=") for a in extra):
+        # Rerun a step only when its output is missing or older than its input. Snakemake's default
+        # also reruns steps whose rule code or parameters changed, so upgrading ecoli_ingest (or
+        # editing an unrelated config key) would re-download and re-align a finished run directory.
+        # Pass `-- --rerun-triggers ...` to choose other triggers, `-- --forcerun RULE` to redo a step.
+        cmd += ["--rerun-triggers", "mtime"]
     cmd += ["--cores", str(cores), "--rerun-incomplete"]
     if dry_run:
         cmd.append("--dry-run")

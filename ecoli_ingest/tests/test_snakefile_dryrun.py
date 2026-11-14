@@ -57,10 +57,10 @@ def rundir(tmp_path):
     return run
 
 
-def _dry_run(rundir, *extra):
+def _dry_run(rundir, *extra, quiet=True):
     cmd = ["snakemake", "--snakefile", str(paths.snakefile()), "--directory", str(rundir),
            "--configfile", str(rundir / "config.yaml"), "--config", f"resources_dir={rundir.parent / 'res'}",
-           "--cores", "4", "--dry-run", "--quiet", "rules", "all", *extra]
+           "--cores", "4", "--dry-run", *(["--quiet", "rules"] if quiet else ["--printshellcmds"]), "all", *extra]
     return subprocess.run(cmd, capture_output=True, text=True)
 
 
@@ -77,7 +77,8 @@ def test_dry_run_paired_downloads_and_merges(rundir):
     res = _dry_run(rundir)
     assert res.returncode == 0, res.stdout + res.stderr
     counts = _job_counts(res)
-    assert counts.get("sra_download") == 2          # SRR1945181_1 and _2
+    assert counts.get("sra_download") == 1          # one job per run writes SRR1945181_1 and _2
+    assert "sra_download_se" not in counts
     assert counts.get("merge_reads") == 2           # sample `two`, both mates
     assert counts.get("fastp_pe") == 3 and "fastp_se" not in counts
 
@@ -87,7 +88,8 @@ def test_dry_run_mixed_layout_fetches_mate_one_only(rundir):
     res = _dry_run(rundir)
     assert res.returncode == 0, res.stdout + res.stderr
     counts = _job_counts(res)
-    assert counts.get("sra_download") == 1          # single-end mode ignores r2, so _2 is never fetched
+    assert counts.get("sra_download_se") == 1       # single-end mode ignores r2, so _2 is never fetched
+    assert "sra_download" not in counts
     assert counts.get("merge_reads") == 1
     assert counts.get("fastp_se") == 3 and "fastp_pe" not in counts
     assert "Mixed SE and PE" in res.stdout + res.stderr
@@ -97,3 +99,25 @@ def test_dry_run_fails_on_study_accession(rundir):
     (rundir / "config.yaml").write_text(CONFIG_PAIRED.replace('accession: "GSM1646283"', 'accession: "GSE67218"'))
     res = _dry_run(rundir)
     assert res.returncode != 0 and "study-level" in res.stderr + res.stdout
+
+
+def test_dry_run_passes_sra_method_and_rejects_unknown(rundir):
+    (rundir / "config.yaml").write_text(CONFIG_PAIRED + 'sra_method: "ena"\n')
+    res = _dry_run(rundir, quiet=False)
+    assert res.returncode == 0, res.stdout + res.stderr
+    cmd = " ".join(res.stdout.split())
+    assert "sra_reads.py fetch" in cmd
+    assert "--run SRR1945181" in cmd and "--method ena" in cmd and "--mates 1,2" in cmd
+    (rundir / "config.yaml").write_text(CONFIG_PAIRED + 'sra_method: "aspera"\n')
+    res = _dry_run(rundir)
+    assert res.returncode != 0 and "sra_method" in res.stderr + res.stdout
+
+
+def test_dry_run_fastp_adapter_detection_is_optional(rundir):
+    res = _dry_run(rundir, quiet=False)                          # default off, as for the atlas training counts
+    assert res.returncode == 0, res.stdout + res.stderr
+    assert "fastp -i" in res.stdout and "--detect_adapter_for_pe" not in res.stdout
+    (rundir / "config.yaml").write_text(CONFIG_PAIRED + "fastp_detect_adapter_for_pe: true\n")
+    res = _dry_run(rundir, quiet=False)
+    assert res.returncode == 0, res.stdout + res.stderr
+    assert res.stdout.count("--detect_adapter_for_pe") == 3      # one per sample
