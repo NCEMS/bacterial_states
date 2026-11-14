@@ -1,5 +1,5 @@
-"""Data bundles for Ecoli_ATLAS. Hosting is not decided yet; the URLs below are the only place that
-needs to change once it is.
+"""Data bundles for Ecoli_ATLAS: assets of the GitHub release `v1` of NCEMS/bacterial_states. The
+URLs below are the only place that names the download location.
 
 Each bundle pins the SHA-256 of its archive. The archives are built reproducibly, so the same files
 always give the same checksum; a download that does not match is rejected before anything is
@@ -15,20 +15,22 @@ import urllib.request
 from pathlib import Path
 
 ATLAS_DATA_VERSION = "v1"
+# assets of the GitHub release whose tag is the data version
+RELEASE_URL = f"https://github.com/NCEMS/bacterial_states/releases/download/{ATLAS_DATA_VERSION}"
 ENV_DATA = "ECOLI_ATLAS_DATA"
 ENV_MODELS = "ECOLI_ATLAS_MODELS"
 ENV_DATA_ROOT = "BS_DATA_ROOT"
 
 BUNDLES = {
     "training-data": {
-        "url": f"https://TBD/ncems/bacterial_states/ecoli_atlas_training_data_{ATLAS_DATA_VERSION}.tar.gz",
+        "url": f"{RELEASE_URL}/ecoli_atlas_training_data_{ATLAS_DATA_VERSION}.tar.gz",
         "sha256": "233b11db20391c5cd9dc32c421fd43449ef3877b34b52b3d065adfe46e33bd49",
         "size": "23 MB download, 56 MB unpacked",
         "contents": ["merged_count_table.txt", "metadata_revised.csv", "GCF_000005845.2_ASM584v2_feature_table.txt"],
         "subdir": "atlas_data",
     },
     "models": {
-        "url": f"https://TBD/ncems/bacterial_states/ecoli_atlas_models_{ATLAS_DATA_VERSION}.tar.gz",
+        "url": f"{RELEASE_URL}/ecoli_atlas_models_{ATLAS_DATA_VERSION}.tar.gz",
         "sha256": "23d8efbbdc04f9e76e9e7a85c7e60e74c1cf868638d17981a3fc63efafaa0015",
         "size": "17 MB download, 20 MB unpacked",
         "contents": ["models/{growth_phase,medium_type,is_lab_strain}_encoder.pt", "models/residual_ae.pt",

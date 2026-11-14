@@ -26,12 +26,13 @@ fastq ──► Ecoli_inGEST ──► counts ──► Ecoli_ATLAS embed ──
 | What | Snakemake RNA-seq workflow: QC gates, `vg giraffe` pangenome alignment, featureCounts, DESeq2, MultiQC | PyTorch encoder–decoder: train, embed new samples, compare with the atlas |
 | Install | conda env `ecoli_ingest/environment.yaml` + `pip install -e ./ecoli_ingest` (or any Python + Apptainer image) | conda env `ecoli_atlas/environment.yaml` + `pip install -e ./ecoli_atlas` |
 | Command | `ecoli_ingest init / check / run` in your run directory | `ecoli_atlas prepare / embed / compare / train` |
-| Data (downloaded separately) | graph index + annotation (~650 MB); Centrifuge DB (6.9 GB, optional); container image (5.3 GB, optional) | trained models + atlas embeddings (~20 MB); training data (~56 MB) |
+| Data (downloaded separately) | graph index + annotation (173 MB download, 674 MB unpacked); Centrifuge DB (6.9 GB, optional); container image (5.3 GB, optional) | trained models + atlas embeddings (~20 MB); training data (~56 MB) |
 | Docs | [ecoli_ingest/README.md](ecoli_ingest/README.md) | [ecoli_atlas/README.md](ecoli_atlas/README.md) |
 
 Both can be installed and used independently. Data bundles are fetched with
-`ecoli_ingest download …` and `ecoli_atlas download …`; hosting is being finalised and the commands
-print interim instructions until the URLs are live.
+`ecoli_ingest download …` and `ecoli_atlas download …` from the
+[`v1` release](https://github.com/NCEMS/bacterial_states/releases/tag/v1) of this repository (the
+Centrifuge index comes from its authors; the optional container image is on CyVerse for now).
 
 ## Quick start
 

@@ -1,8 +1,10 @@
 """Resource bundles: manifest generation/verification and the download stub.
 
-The Centrifuge index is fetched from its authors' public bucket (the same files, checked against the
-packaged manifest). Hosting of the other bundles is not decided yet. Every URL lives in BUNDLE_URLS
-below and nowhere else; until they are filled in, `download` prints the interim CyVerse instructions.
+The core bundle is an asset of the GitHub release `v1` of NCEMS/bacterial_states; the Centrifuge
+index is fetched from its authors' public bucket. Both are checked against the packaged manifest
+after unpacking. The container image (5.3 GB) is over the 2 GB limit for release assets and has no
+download URL yet: for it `download` prints the interim CyVerse instructions. Every URL lives in
+BUNDLE_URLS below and nowhere else.
 """
 from __future__ import annotations
 
@@ -16,6 +18,8 @@ from pathlib import Path
 from . import paths
 
 RESOURCES_VERSION = "v1"
+# assets of the GitHub release whose tag is the resources version
+RELEASE_URL = f"https://github.com/NCEMS/bacterial_states/releases/download/{RESOURCES_VERSION}"
 
 # bundle name -> top-level directories (relative to the resources dir) that belong to it
 BUNDLES = {
@@ -23,9 +27,9 @@ BUNDLES = {
     "centrifuge": ("centrifuge",),
     "container": ("container",),
 }
-BUNDLE_SIZES = {"core": "~650 MB", "centrifuge": "5.4 GB download, 6.9 GB unpacked", "container": "~5.3 GB"}
+BUNDLE_SIZES = {"core": "173 MB download, 674 MB unpacked", "centrifuge": "5.4 GB download, 6.9 GB unpacked", "container": "~5.3 GB"}
 BUNDLE_URLS = {
-    "core": f"https://TBD/ncems/bacterial_states/ecoli_ingest_core_{RESOURCES_VERSION}.tar.gz",
+    "core": f"{RELEASE_URL}/ecoli_ingest_core_{RESOURCES_VERSION}.tar.gz",
     # upstream prebuilt index from the Centrifuge authors (Kim et al. 2016; built 2016). The file name
     # is not versioned, so pin the S3 object version; the manifest checksums are verified after unpacking
     "centrifuge": "https://genome-idx.s3.amazonaws.com/centrifuge/p_compressed%2Bh%2Bv.tar.gz"

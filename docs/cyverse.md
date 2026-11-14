@@ -25,7 +25,8 @@ pip install ./ecoli_ingest          # or use bin/ecoli_ingest without installing
 
 ## Download the resources
 
-Until the bundle URLs are published, use GoCommands with the shared CyVerse folder:
+The container image is not a release asset (it is over the 2 GB limit), so for the container path
+use GoCommands with the shared CyVerse folder, which holds the complete older resources tarball:
 
 ```bash
 gocmd init                           # your CyVerse credentials

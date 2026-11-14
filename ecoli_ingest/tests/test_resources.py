@@ -47,10 +47,19 @@ def test_packaged_manifest_is_consistent():
 def test_download_stub_prints_interim_instructions(tmp_path, capsys):
     import io
     buf = io.StringIO()
-    rc = resources.download("core", tmp_path / "res", dry_run=True, log=buf)
-    assert rc == 2  # URL still TBD
+    rc = resources.download("container", tmp_path / "res", dry_run=True, log=buf)
+    assert rc == 2  # the image is too large for a release asset; URL still TBD
     out = buf.getvalue()
     assert "gocmd get" in out and "TBD" in out and str(tmp_path / "res") in out
+
+
+def test_core_is_a_release_asset():
+    import io
+    url = resources.BUNDLE_URLS["core"]
+    assert url == "https://github.com/NCEMS/bacterial_states/releases/download/v1/ecoli_ingest_core_v1.tar.gz"
+    buf = io.StringIO()
+    assert resources.download("core", Path("unused"), dry_run=True, log=buf) == 0
+    assert url in buf.getvalue()
 
 
 def test_centrifuge_comes_from_upstream():

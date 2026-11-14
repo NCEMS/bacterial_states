@@ -38,8 +38,10 @@ Never `git add` any of these (all in `.gitignore`): `resources/`, `old_resources
 | `raw_data/` | original Drive dump incl. unused files and the Contreras paper data | `Contreras Paper/Paper1_all_samples_counts.tsv` is the inference test case |
 
 Download URLs live in exactly two files: `ecoli_ingest/src/ecoli_ingest/resources.py` and
-`ecoli_atlas/src/ecoli_atlas/download.py`. All are placeholders (`TBD`) except the Centrifuge index,
-which comes from the Centrifuge authors' bucket (`genome-idx.s3.amazonaws.com/centrifuge/`).
+`ecoli_atlas/src/ecoli_atlas/download.py`. The inGEST core bundle and both ATLAS bundles are
+assets of the GitHub release `v1` (`.../releases/download/v1/<name>`; built in `work/release_v1/`),
+the Centrifuge index comes from the Centrifuge authors' bucket
+(`genome-idx.s3.amazonaws.com/centrifuge/`), and the container image is still a placeholder (`TBD`).
 Bundle file names are `ecoli_ingest_*` / `ecoli_atlas_*` (other microbes may follow).
 
 ## Git

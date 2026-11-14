@@ -48,14 +48,14 @@ ecoli_ingest download core                  # or name bundles one at a time: cor
 
 | Bundle | Contents | Size | Source |
 |---|---|---|---|
-| `core` | vg graph index + annotation | ~650 MB | this project |
+| `core` | vg graph index + annotation | 173 MB download, 674 MB unpacked | this project ([release `v1`](https://github.com/NCEMS/bacterial_states/releases/tag/v1)) |
 | `centrifuge` | `p_compressed+h+v` contamination index, not needed with `centrifuge: false` | 5.4 GB download, 6.9 GB unpacked | the Centrifuge authors' prebuilt index (`genome-idx.s3.amazonaws.com/centrifuge/`, pinned S3 object version) |
-| `container` | Apptainer image `rnaseq_vg.sif` | ~5.3 GB | this project |
+| `container` | Apptainer image `rnaseq_vg.sif` | ~5.3 GB | this project (CyVerse for now, see below) |
 
-Downloads are checked against the packaged SHA-256 manifest. Hosting of `core` and `container`
-is being set up; until their URLs are published the command prints the interim CyVerse
-instructions (`gocmd get .../bacterial-states/resources.tar.gz`; after extracting, rename
-`resources/build` to `resources/container`).
+Downloads are checked against the packaged SHA-256 manifest. The `container` image is too large
+for a GitHub release asset and has no download URL yet; for it the command prints the interim
+CyVerse instructions (`gocmd get .../bacterial-states/resources.tar.gz`, the complete older
+resources tarball; after extracting, rename `resources/build` to `resources/container`).
 
 The resources directory is found in this order: `--resources DIR`, `$ECOLI_INGEST_RESOURCES`,
 `$BS_DATA_ROOT/resources`, `./resources`, `~/.local/share/ecoli_ingest/resources`.
