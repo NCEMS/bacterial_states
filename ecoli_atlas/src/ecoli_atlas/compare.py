@@ -9,6 +9,11 @@ Outputs
   summary.tsv    one row per query: nearest atlas sample, dominant study, per-factor kNN vote and
                  agreement with the encoder prediction, per-block neighbour distance, novelty score
   umap_*.csv     optional 2-D UMAP fitted on the atlas with the queries projected onto it
+  query_distances.tsv  distances between the new samples themselves (same metric / blocks)
+
+With sample metadata (``--metadata``) its columns are added to summary.tsv, and ``--group-by``
+writes group_summary.tsv (one row per group, e.g. per time point or condition) plus the figures of
+``compare_plots``.
 """
 from __future__ import annotations
 
@@ -267,15 +272,142 @@ def umap_project(atlas: Atlas, query: pd.DataFrame, seed: int = 77, blocks="all"
     return a, q
 
 
+def query_distances(query: pd.DataFrame, atlas: Atlas, metric: str = "cosine", blocks="all") -> pd.DataFrame:
+    """Square distance matrix between the query samples in the chosen blocks."""
+    cols = atlas.block_columns(blocks)
+    D = pairwise_distances(query[cols].values, metric=metric)
+    D = (D + D.T) / 2.0
+    np.fill_diagonal(D, 0.0)
+    return pd.DataFrame(D, index=pd.Index(query.index, name="sample"), columns=list(query.index))
+
+
+def _as_number(values) -> pd.Series | None:
+    """The values as numbers when every non-missing one parses, else None."""
+    s = pd.Series(values)
+    num = pd.to_numeric(s, errors="coerce")
+    return num if num.notna().sum() == s.notna().sum() and s.notna().any() else None
+
+
+def group_labels(metadata: pd.DataFrame, group_by) -> pd.Series:
+    """One group label per sample: the ``group_by`` column, or several joined with `` | ``."""
+    cols = [group_by] if isinstance(group_by, str) else list(group_by)
+    missing = [c for c in cols if c not in metadata.columns]
+    if missing:
+        raise ValueError(f"metadata lacks column(s) {missing}; available: {list(metadata.columns)}")
+    parts = []
+    for c in cols:
+        num = _as_number(metadata[c].values)
+        if num is not None:
+            v = pd.Series([f"{x:g}" if pd.notna(x) else None for x in num], index=metadata.index, dtype=object)
+        else:
+            v = metadata[c].astype(object).where(metadata[c].notna(), None).map(lambda x: None if x is None else str(x))
+        parts.append(v)
+    lab = parts[0]
+    for v in parts[1:]:
+        lab = pd.Series([None if a is None or b is None else f"{a} | {b}" for a, b in zip(lab, v)], index=metadata.index, dtype=object)
+    return lab.rename("group")
+
+
+def group_order(labels: pd.Series, metadata: pd.DataFrame, order_by: str | None = None) -> list:
+    """Groups in display order: by the group mean of ``order_by`` when it is numeric (else by its
+    first value), without ``order_by`` by the label itself (numerically when the labels are numbers)."""
+    groups = [g for g in pd.unique(labels.dropna())]
+    if order_by is not None:
+        if order_by not in metadata.columns:
+            raise ValueError(f"metadata lacks the --order-by column {order_by!r}; available: {list(metadata.columns)}")
+        num = _as_number(metadata[order_by].values)
+        if num is not None:
+            key = pd.Series(num.values, index=metadata.index).groupby(labels).mean()
+        else:
+            key = metadata[order_by].astype(str).groupby(labels).first()
+        return sorted(groups, key=lambda g: (key.get(g), str(g)))
+    num = _as_number(groups)
+    if num is not None:
+        return [g for _, g in sorted(zip(num.values, groups))]
+    return sorted(groups, key=str)
+
+
+def group_summary(query: pd.DataFrame, atlas: Atlas, neighbors: pd.DataFrame, summary: pd.DataFrame,
+                  labels: pd.Series, order: list, query_predictions: pd.DataFrame | None = None,
+                  metric: str = "cosine", blocks="all", factors=DEFAULT_FACTORS) -> pd.DataFrame:
+    """One row per group of query samples, in ``order``.
+
+    n; per factor the fraction of samples called each class (``<f>_called_<class>``), the mean class
+    probability (``<f>_prob_<class>``), the majority label among the pooled neighbours
+    (``<f>_knn_vote`` / ``_knn_frac``) and how often the encoder agrees with a sample's own vote
+    (``<f>_agree``); ``top_studies`` of the pooled neighbours; mean nearest distance and novelty
+    percentile; ``within_group_distance`` (mean distance between the group's samples, NaN for one
+    sample); ``distance_to_previous`` (between the centroids of this group and the one before)."""
+    cols = atlas.block_columns(blocks)
+    labels = labels.reindex(query.index)
+    preds = None
+    if query_predictions is not None:
+        preds = query_predictions.copy()
+        preds.index = preds.index.astype(str)
+        preds = preds.reindex(query.index)
+    src = {f: atlas.label_source(f) for f in factors}
+    rows, prev_centroid = [], None
+    for g in order:
+        members = list(labels.index[labels == g])
+        row = {"group": g, "n": len(members), "samples": ";".join(members)}
+        nb = neighbors[neighbors["query"].isin(members)]
+        for f in factors:
+            if preds is not None and f"{f}_pred" in preds.columns:
+                called = preds.loc[members, f"{f}_pred"].astype(str).value_counts(normalize=True)
+                for cls in sorted(preds[f"{f}_pred"].dropna().astype(str).unique()):
+                    row[f"{f}_called_{cls}"] = float(called.get(cls, 0.0))
+                for c in [c for c in preds.columns if c.startswith(f"{f}_prob_")]:
+                    row[c] = float(preds.loc[members, c].mean())
+            if src[f] is not None:
+                lab = nb["atlas_sample"].map(src[f].to_dict()).dropna().astype(str)
+                if len(lab):
+                    vc = lab.value_counts(normalize=True)
+                    row[f"{f}_knn_vote"], row[f"{f}_knn_frac"] = vc.idxmax(), float(vc.max())
+            if f"{f}_agree" in summary.columns:
+                row[f"{f}_agree"] = float(summary.loc[members, f"{f}_agree"].astype(float).mean())
+        if "gse" in nb.columns and nb["gse"].notna().any():
+            vc = nb["gse"].dropna().astype(str).value_counts(normalize=True)
+            row["top_study"], row["top_study_frac"] = vc.idxmax(), float(vc.max())
+            row["top_studies"] = ";".join(f"{a}:{b:.2f}" for a, b in vc.head(5).items())
+        for c in ("nearest_distance", "mean_knn_distance", "novelty_knn_dist", "novelty_percentile"):
+            if c in summary.columns:
+                row[f"mean_{c}" if not c.startswith("mean_") else c] = float(summary.loc[members, c].mean())
+        E = query.loc[members, cols].values
+        if len(members) > 1:
+            D = pairwise_distances(E, metric=metric)
+            row["within_group_distance"] = float(D[np.triu_indices(len(members), 1)].mean())
+        else:
+            row["within_group_distance"] = np.nan
+        centroid = E.mean(axis=0, keepdims=True)
+        row["distance_to_previous"] = (np.nan if prev_centroid is None
+                                       else float(pairwise_distances(centroid, prev_centroid, metric=metric)[0, 0]))
+        prev_centroid = centroid
+        rows.append(row)
+    return pd.DataFrame(rows).set_index("group")
+
+
 def compare(query: pd.DataFrame, atlas: Atlas, out_dir: str | Path, k: int = 15, metric: str = "cosine",
             blocks="all", query_predictions: pd.DataFrame | None = None, factors=DEFAULT_FACTORS,
-            do_umap: bool = False, seed: int = 77, log=None) -> pd.DataFrame:
+            do_umap: bool = False, seed: int = 77, log=None, metadata: pd.DataFrame | None = None,
+            group_by=None, order_by: str | None = None, color_by: str | None = None, plots: bool = False,
+            formats=("pdf", "png"), trajectory: bool | None = None) -> pd.DataFrame:
     log = log or (lambda *_: None)
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     query = query.copy()
     query.index = query.index.astype(str)
     _check_columns(query, atlas)
+    if metadata is not None:
+        metadata = metadata.copy()
+        metadata.index = metadata.index.astype(str)
+        missing = [s for s in query.index if s not in metadata.index]
+        if missing:
+            raise ValueError(f"metadata lacks rows for {len(missing)} sample(s), e.g. {missing[:5]}")
+        metadata = metadata.loc[query.index]
+    elif group_by or order_by or color_by:
+        raise ValueError("--group-by / --order-by / --color-by need --metadata")
+    labels = group_labels(metadata, group_by) if group_by else None
+    order = group_order(labels, metadata, order_by) if labels is not None else None
 
     nb = knn(query, atlas, k, metric, blocks)
     nb.to_csv(out / "neighbors.tsv", sep="\t", index=False)
@@ -303,9 +435,25 @@ def compare(query: pd.DataFrame, atlas: Atlas, out_dir: str | Path, k: int = 15,
 
     summary = summary.join(per_block_distances(query, atlas, nb, metric))
     summary = summary.join(novelty(query, atlas, k, metric, blocks))
+    if metadata is not None:
+        clash = [c for c in metadata.columns if c in summary.columns]
+        meta_cols = metadata.rename(columns={c: f"meta_{c}" for c in clash})
+        if labels is not None and "group" not in meta_cols.columns:
+            meta_cols = meta_cols.assign(group=labels.values)
+        summary = meta_cols.join(summary)
+        summary.index.name = "sample"
     summary.to_csv(out / "summary.tsv", sep="\t")
     log(f"compared {len(query)} samples against {len(atlas.embedding)} atlas samples (k={k}, {metric}, blocks={blocks})")
 
+    qd = query_distances(query, atlas, metric, blocks)
+    qd.to_csv(out / "query_distances.tsv", sep="\t")
+    groups = None
+    if labels is not None:
+        groups = group_summary(query, atlas, nb, summary, labels, order, query_predictions, metric, blocks, factors)
+        groups.to_csv(out / "group_summary.tsv", sep="\t")
+        log(f"{len(groups)} groups by {group_by}: wrote {out / 'group_summary.tsv'}")
+
+    a_xy = q_xy = None
     if do_umap:
         a_xy, q_xy = umap_project(atlas, query, seed, blocks)
         a_xy.to_csv(out / "umap_atlas.csv")
@@ -326,4 +474,26 @@ def compare(query: pd.DataFrame, atlas: Atlas, out_dir: str | Path, k: int = 15,
             fig.savefig(out / "umap.png", dpi=200)
         except ImportError:
             log("matplotlib not installed; wrote UMAP coordinates only")
+
+    if plots or labels is not None:
+        try:
+            from . import compare_plots
+            color = None
+            if color_by is not None:
+                if color_by not in metadata.columns:
+                    raise ValueError(f"metadata lacks the --color-by column {color_by!r}; available: {list(metadata.columns)}")
+                color = group_labels(metadata, color_by)
+                color_order = group_order(color, metadata, color_by)
+            elif labels is not None:
+                color, color_order = labels, order
+            written = compare_plots.write_all(out, atlas=atlas, neighbors=nb, summary=summary, distances=qd,
+                                              predictions=query_predictions, labels=labels, order=order,
+                                              color=color, color_order=color_order if color is not None else None,
+                                              color_name=color_by or (group_by if isinstance(group_by, str) else "group"),
+                                              group_name=group_by if isinstance(group_by, str) or group_by is None else " | ".join(group_by),
+                                              atlas_xy=a_xy, query_xy=q_xy, factors=factors, formats=formats,
+                                              trajectory=trajectory)
+            log("figures: " + ", ".join(written))
+        except ImportError:
+            log("matplotlib not installed; wrote tables only")
     return summary

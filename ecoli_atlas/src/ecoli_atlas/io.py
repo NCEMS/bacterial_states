@@ -44,8 +44,10 @@ def read_counts(path: str | Path, strip_sample_names: bool = True) -> pd.DataFra
 
 
 def read_metadata(path: str | Path) -> pd.DataFrame:
-    """Sample metadata with the sample identifier in the first column."""
-    meta = pd.read_csv(path, index_col=0)
+    """Sample metadata with the sample identifier in the first column (CSV, or TSV for
+    ``.tsv`` / ``.txt`` files such as the ``samples.tsv`` written by ``prepare``)."""
+    sep = "\t" if str(path).lower().endswith((".tsv", ".txt", ".tab")) else ","
+    meta = pd.read_csv(path, index_col=0, sep=sep)
     meta.index = meta.index.astype(str).str.strip()
     meta.index.name = "sample_id"
     return meta

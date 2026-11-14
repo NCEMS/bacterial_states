@@ -85,8 +85,21 @@ def cmd_compare(args) -> int:
     if pred_path.exists():
         preds = pd.read_csv(pred_path, index_col=0)
     blocks = "all" if args.blocks in (None, "all") else tuple(args.blocks.split(","))
-    summary = compare(query, atlas, args.out, k=args.k, metric=args.metric, blocks=blocks, query_predictions=preds,
-                      do_umap=args.umap, seed=args.seed, log=_info)
+    metadata = None
+    if args.metadata:
+        from .io import read_metadata
+        metadata = read_metadata(args.metadata)
+    group_by = None
+    if args.group_by:
+        parts = tuple(c.strip() for c in args.group_by.split(",") if c.strip())
+        group_by = parts[0] if len(parts) == 1 else parts
+    try:
+        summary = compare(query, atlas, args.out, k=args.k, metric=args.metric, blocks=blocks, query_predictions=preds,
+                          do_umap=args.umap, seed=args.seed, log=_info, metadata=metadata, group_by=group_by,
+                          order_by=args.order_by, color_by=args.color_by, plots=args.plots, trajectory=args.order_by is not None,
+                          formats=tuple(args.formats.split(",")))
+    except ValueError as e:
+        raise SystemExit(f"error: {e}")
     show = [c for c in summary.columns if c.endswith("_knn_vote") or c in ("nearest_atlas_sample", "top_study", "novelty_percentile")]
     with pd.option_context("display.width", 200, "display.max_columns", 20):
         _info(summary[show].head(20).to_string())
@@ -405,6 +418,13 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--blocks", default="all", help="all or comma-separated block names, e.g. growth_phase,residual")
     sp.add_argument("--umap", action="store_true")
     sp.add_argument("--seed", type=int, default=77)
+    sp.add_argument("--metadata", help="table of the new samples (first column = sample id; CSV, or the samples.tsv "
+                                       "of `prepare`); its columns are added to summary.tsv")
+    sp.add_argument("--group-by", help="metadata column(s), comma-separated: write group_summary.tsv and the group figures")
+    sp.add_argument("--order-by", help="metadata column that orders the groups (numeric when it parses, e.g. a time)")
+    sp.add_argument("--color-by", help="metadata column that colours the new samples in the UMAP (default: the groups)")
+    sp.add_argument("--plots", action="store_true", help="write the figures even without --group-by")
+    sp.add_argument("--formats", default="pdf,png", help="comma-separated figure formats (default pdf,png)")
     sp.set_defaults(func=cmd_compare)
 
     sp = sub.add_parser("verify-models", help="compare two model bundles (e.g. original vs. retrained)")

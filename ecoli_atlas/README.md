@@ -48,8 +48,9 @@ ecoli_atlas prepare --ingest-results my_run/tutorial_results --out prepared [--m
 ecoli_atlas embed --counts prepared/counts.tsv --models outputs/models --out embedded \
                   --feature-table atlas_data/GCF_000005845.2_ASM584v2_feature_table.txt
 
-# 3. compare with the atlas -> neighbors.tsv, summary.tsv [, umap_atlas.csv, umap_query.csv, umap.png]
-ecoli_atlas compare --embeddings embedded/final_embedding.csv --atlas outputs/atlas --out compared -k 15 [--umap]
+# 3. compare with the atlas -> neighbors.tsv, summary.tsv, query_distances.tsv [, umap_atlas.csv, umap_query.csv, umap.png]
+ecoli_atlas compare --embeddings embedded/final_embedding.csv --atlas outputs/atlas --out compared -k 15 [--umap] \
+                    [--metadata prepared/samples.tsv --group-by condition [--order-by time_h] [--color-by replicate]]
 
 # 4. (re)train the model from the training bundle
 ecoli_atlas train --counts atlas_data/merged_count_table.txt --metadata atlas_data/metadata_revised.csv \
@@ -83,6 +84,37 @@ Class calls use argmax; `--apply-thresholds growth_phase` uses the saved operati
 
 `neighbors.tsv` lists every (sample, rank) pair with the neighbour's study, strain, growth phase,
 medium and predicted labels. `--blocks growth_phase,residual` restricts distances to chosen blocks.
+
+`query_distances.tsv` is the distance matrix between the new samples themselves (same metric and
+blocks), i.e. how they relate to each other rather than to the atlas.
+
+### Groups of samples: `--metadata`, `--group-by`, `--order-by`, `--color-by`
+
+`--metadata` takes a table of the new samples with the sample id in the first column: a CSV, or the
+`samples.tsv` that `prepare --metadata` writes. Its columns are put in front of `summary.tsv`, and
+every sample must have a row. With `--group-by COL` (or `COL1,COL2`) the samples are summarised per
+group, e.g. per condition or time point:
+
+- `group_summary.tsv`, one row per group: `n`, `samples`; per factor `<f>_called_<class>` (fraction
+  of the group's samples the encoder calls that class), `<f>_prob_<class>` (mean probability),
+  `<f>_knn_vote` / `_knn_frac` (majority label among the group's pooled neighbours) and `<f>_agree`;
+  `top_study`, `top_studies`; `mean_nearest_distance`, `mean_knn_distance`,
+  `mean_novelty_percentile`; `within_group_distance` (mean distance between the group's own
+  samples: replicate agreement) and `distance_to_previous` (between the centroids of consecutive
+  groups).
+- Groups are listed in the order of `--order-by COL` (numerically when the column holds numbers,
+  such as a time), otherwise by their label.
+- Figures (`--formats`, default pdf and png; `--plots` writes the first two without groups):
+
+| Figure | Shows |
+|---|---|
+| `fig_query_distances` | heatmap of `query_distances.tsv`, samples sorted by group |
+| `fig_umap_groups` | atlas UMAP in grey, new samples coloured by `--color-by` (default: the groups); with `--order-by` a line joins the group centroids in order. Needs `--umap` |
+| `fig_factor_by_group` | per factor, the predicted probability of each sample along the ordered groups, with the group mean |
+| `fig_neighbor_labels` | per group, what its atlas neighbours are: curated growth phase, medium type, lab strain, and study |
+
+A worked example on a growth-to-starvation time course is in
+[`examples/GSE67402_growth_starvation_time_course`](../examples/GSE67402_growth_starvation_time_course/README.md).
 
 ## Training and reproduction
 
@@ -216,7 +248,7 @@ study), `projected_only` (in the table but never fitted on), `no_metadata`.
 | `models.py`, `losses.py` | `FactorEncoder`, `ResidualAE`, class weights, push / pull losses |
 | `train_factor.py`, `train_residual.py`, `tune.py`, `train.py` | training, CV objectives, Optuna, orchestration |
 | `artifacts.py` | save / load a model bundle (compatible with the original notebook files) |
-| `embed.py`, `compare.py`, `verify.py` | inference, atlas comparison, bundle comparison |
+| `embed.py`, `compare.py`, `compare_plots.py`, `verify.py` | inference, atlas comparison (+ group figures), bundle comparison |
 | `figures/` | `context.py` rebuilds the notebook state from a bundle; one module per figure; `checks.py`, `run.py` |
 | `casestudy/` | `axis.py` (LDA / leave-one-group-out / permutation), `uti.py`, `oxygen.py`, `glu_cas.py` |
 | `neighbors.py` | whole-study nearest-neighbour report on the atlas |
