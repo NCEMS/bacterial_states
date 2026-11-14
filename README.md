@@ -52,6 +52,16 @@ ecoli_atlas embed   --counts prepared/counts.tsv --models outputs/models --out e
 ecoli_atlas compare --embeddings embedded/final_embedding.csv --atlas outputs/atlas --out compared
 ```
 
+## Worked examples
+
+Complete runs from GEO accessions to atlas neighbours, each a run directory with its `config.yaml`,
+`samples.csv` and a README that walks through the commands and the results:
+
+| Example | Data |
+|---|---|
+| [`examples/GSE67402_growth_starvation_time_course`](examples/GSE67402_growth_starvation_time_course/README.md) | *E. coli* B REL606, glucose minimal medium, 3 h to 2 weeks (36 samples) |
+| [`examples/GSE271069_nutrient_stress_time_course`](examples/GSE271069_nutrient_stress_time_course/README.md) | K-12 MG1655, glucose vs casamino acids through exponential and stationary phase (16 samples) |
+
 ## Repository layout
 
 ```
@@ -62,6 +72,7 @@ bacterial_states/
 │   └── atlas_build/         # scripts used to build the atlas corpus (not user-facing)
 ├── ecoli_atlas/             # Python package (src layout), tests, SLURM template
 ├── bin/                     # run either CLI from the checkout without installing
+├── examples/                # worked examples: config.yaml, samples.csv, README.md (outputs are not committed)
 ├── docs/                    # additional guides (CyVerse)
 ├── CLAUDE.md                # conventions for working in this repo
 └── (local, not committed)   resources/ atlas_data/ outputs/ work/ notebooks/

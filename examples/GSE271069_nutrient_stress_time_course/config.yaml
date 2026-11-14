@@ -1,0 +1,118 @@
+# Ecoli_inGEST run configuration. Written by `ecoli_ingest init`; edit and then run
+# `ecoli_ingest check` followed by `ecoli_ingest run` in this directory.
+#
+# Paths are relative to this directory. Outputs go to results/ next to this file.
+
+# GEO GSE271069 (SRA SRP516837, BioProject PRJNA1129538): E. coli K-12 MG1655 grown through
+# exponential and stationary phase in minimal medium with glucose (GLU: time points L, S1, S2) or
+# casamino acids (CAS: P1, P2, P3, S1, S2) as the carbon source; two replicates each, paired-end.
+# Only the 16 RNA-seq samples of the series are listed (it also holds ChIP-seq and IPOD libraries).
+# "Multiscale regulation of nutrient stress responses in Escherichia coli from chromatin structure
+# to small regulatory RNAs". Not part of the Ecoli_ATLAS training data.
+
+experiment: "GSE271069"
+
+# Results directory (default would be GSE271069_results/; the folder already names the study).
+results_dir: "results"
+
+# One entry per sample. Give r2 for paired-end data. If ANY sample lacks r2 the whole run is
+# treated as single-end. `condition` is the DESeq2 grouping variable; an optional `condition2`
+# is added to the model as a second factor.
+#
+# Reads can be given as
+#   r1 / r2:    one file, or a list of files that are concatenated in order (e.g. several lanes);
+#               r2 must list as many files as r1
+#   accession:  an SRA/GEO id (SRR/ERR/DRR run, SRX experiment, SRS/SAMN sample or GSM) or a list
+#               of them. The reads are fetched into `sra_dir` during the run (see `sra_method`
+#               below) and the layout (single/paired) is taken from the archive. Study ids (GSE,
+#               SRP, PRJNA) are not accepted: list their GSM/SRR ids as separate samples.
+samples:
+  GLU_L_rep1:   # GLU condition, timepoint L, RNA-seq, replicate 1
+    accession: "GSM8368188"
+    condition: "GLU_L"
+  GLU_L_rep2:   # GLU condition, timepoint L, RNA-seq, replicate 2
+    accession: "GSM8368189"
+    condition: "GLU_L"
+  GLU_S1_rep1:   # GLU condition, timepoint S1, RNA-seq, replicate 1
+    accession: "GSM8368190"
+    condition: "GLU_S1"
+  GLU_S1_rep2:   # GLU condition, timepoint S1, RNA-seq, replicate 2
+    accession: "GSM8368191"
+    condition: "GLU_S1"
+  GLU_S2_rep1:   # GLU condition, timepoint S2, RNA-seq, replicate 1
+    accession: "GSM8368192"
+    condition: "GLU_S2"
+  GLU_S2_rep2:   # GLU condition, timepoint S2, RNA-seq, replicate 2
+    accession: "GSM8368193"
+    condition: "GLU_S2"
+  CAS_P1_rep1:   # CAS condition, timepoint P1, RNA-seq, replicate 1
+    accession: "GSM8368178"
+    condition: "CAS_P1"
+  CAS_P1_rep2:   # CAS condition, timepoint P1, RNA-seq, replicate 2
+    accession: "GSM8368179"
+    condition: "CAS_P1"
+  CAS_P2_rep1:   # CAS condition, timepoint P2, RNA-seq, replicate 1
+    accession: "GSM8368180"
+    condition: "CAS_P2"
+  CAS_P2_rep2:   # CAS condition, timepoint P2, RNA-seq, replicate 2
+    accession: "GSM8368181"
+    condition: "CAS_P2"
+  CAS_P3_rep1:   # CAS condition, timepoint P3, RNA-seq, replicate 1
+    accession: "GSM8368182"
+    condition: "CAS_P3"
+  CAS_P3_rep2:   # CAS condition, timepoint P3, RNA-seq, replicate 2
+    accession: "GSM8368183"
+    condition: "CAS_P3"
+  CAS_S1_rep1:   # CAS condition, timepoint S1, RNA-seq, replicate 1
+    accession: "GSM8368184"
+    condition: "CAS_S1"
+  CAS_S1_rep2:   # CAS condition, timepoint S1, RNA-seq, replicate 2
+    accession: "GSM8368185"
+    condition: "CAS_S1"
+  CAS_S2_rep1:   # CAS condition, timepoint S2, RNA-seq, replicate 1
+    accession: "GSM8368186"
+    condition: "CAS_S2"
+  CAS_S2_rep2:   # CAS condition, timepoint S2, RNA-seq, replicate 2
+    accession: "GSM8368187"
+    condition: "CAS_S2"
+
+# DESeq2 contrasts as [factor, reference_level, test_level]. The reference is listed first.
+# Here: within each medium, every later time point against the first one, then glucose
+# against casamino acids at the first and at the last time point.
+deseq2:
+  contrasts:
+    - ["condition", "GLU_L", "GLU_S1"]
+    - ["condition", "GLU_L", "GLU_S2"]
+    - ["condition", "CAS_P1", "CAS_P2"]
+    - ["condition", "CAS_P1", "CAS_P3"]
+    - ["condition", "CAS_P1", "CAS_S1"]
+    - ["condition", "CAS_P1", "CAS_S2"]
+    - ["condition", "GLU_L", "CAS_P1"]
+    - ["condition", "GLU_S2", "CAS_S2"]
+
+# Centrifuge contamination screen (needs the index from `ecoli_ingest download`). Set false to skip
+# it: Centrifuge is then not run, its gate is ignored and it is left out of the MultiQC report.
+centrifuge: true
+
+# Quality-control gates. A sample that fails any configured gate is excluded from alignment and
+# counting (see checkpoints/qc_failures.json). Remove a line to disable that gate.
+centrifuge_organism: "Escherichia coli"
+centrifuge_min_percentage: 30.0
+fastp_min_kept_percentage: 75.0
+
+# Samples given by accession: where downloads and the resolution cache go (default: sra/ in this
+# directory; point several run directories at one shared directory to download each run once) and
+# how many runs are fetched at the same time (`ecoli_ingest run --max-downloads N` overrides).
+# sra_method: auto = sra-tools (prefetch + fasterq-dump, from NCBI) first and the ENA FASTQ files as
+# the backup; "sra-tools" or "ena" = that source only.
+# sra_dir: "sra"
+# max_downloads: 4
+
+# Reference resources default to the standard files in the resources directory and normally need
+# no changes. Uncomment to override individual files.
+# ref: "GCF_000005845_2_ASM584v2_genomic#0#NC_000913.3"
+# vg_index: "/path/to/resources/vg/ecoli_graph_test"
+# annotation_gff: "/path/to/resources/annotation/GCF_000005845.2_ASM584v2_genomic_siRNA.gff"
+# annotation_source_gff: "/path/to/resources/annotation/GCF_000005845.2_ASM584v2_genomic.gff"
+# annotation_bed: "/path/to/resources/annotation/GCF_000005845.2_ASM584v2_genomic.bed"
+# centrifuge_index_path: "/path/to/resources/centrifuge/p_compressed+h+v"

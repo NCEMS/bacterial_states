@@ -32,6 +32,7 @@ Never `git add` any of these (all in `.gitignore`): `resources/`, `old_resources
 | `outputs/predictions/final_embedding.csv` | baseline atlas embeddings (3342 samples) | source of the future `outputs/atlas/` bundle |
 | `outputs/figures/`, `outputs/factor_gene_correlations.txt` | Colab reference figures / GSEA gene list | **never overwrite.** Mixed sessions: the stored notebook outputs for cells 25/31/33 and `fig_study_leakage.pdf` come from a later retrained run, not from `outputs/models`. Regenerated figures go to `outputs/figures_repro/` (`ecoli_atlas figures ... --out outputs/figures_repro`) |
 | `work/neighbors_*/` | `ecoli_atlas neighbors` runs (oxygen studies, withheld GSE224463) | scratch |
+| `examples/<GSE>_<name>/` | worked examples; only `config.yaml`, `samples.csv`, `README.md` are tracked, everything a run writes there (`sra/`, `results/`, `atlas/`, logs) is ignored | run directories with `results_dir: "results"` |
 | `work/experiment3/` | the tutorial run (4 samples) used for verification | a run directory; results in `experiment3_results/` |
 | `notebooks/` | the two original Colab notebooks | read-only reference; never edit or commit |
 | `raw_data/` | original Drive dump incl. unused files and the Contreras paper data | `Contreras Paper/Paper1_all_samples_counts.tsv` is the inference test case |
@@ -81,6 +82,20 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   New bundles store tensors only (`torch.load(weights_only=True)` works).
 - Class calls default to argmax (that is what produced `outputs/predictions*`); the saved operating
   thresholds are opt-in (`--apply-thresholds`).
+- The results directory is `<experiment>_results/` unless the config sets `results_dir`.
+- Reads given by accession: one `sra_download` job per run calls `sra_reads.py fetch`. `sra_method:
+  auto` (default) uses sra-tools (prefetch + fasterq-dump, read names rewritten to the ENA style)
+  and falls back to the ENA FASTQ files; both sources give byte-identical FASTQ.
+- The launcher runs Snakemake with `--rerun-triggers mtime` (unless the user passes their own), so
+  rule code / parameter changes never redo finished steps of an existing run directory; changed
+  settings need `-- --forcerun RULE`.
+- Paired-end fastp gets `--detect_adapter_for_pe` only when the config sets
+  `fastp_detect_adapter_for_pe: true` (missing key = off, matching how the atlas training counts
+  in `merged_count_table.txt` were made). Only `examples/GSE67402_*` sets it to true
+  (GSE271069 was re-run with the default on 2026-11-14; its earlier trimming-on run is in
+  `run_adapter_on/` there).
+- `compare --metadata/--group-by/--order-by/--color-by` adds `group_summary.tsv` and the
+  `compare_plots.py` figures; without those options `summary.tsv` / `neighbors.tsv` must not change.
 - Sample ids: inGEST count columns are BAM paths; `io.sample_id_from_column` strips them to the
   config sample name.
 - Argparse only (no click/typer); keep both packages free of each other's imports so they can be
@@ -93,6 +108,15 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   their own envs: `pytest ecoli_atlas/tests` (ecoli_atlas), `pytest ecoli_ingest/tests` (ecoli_ingest).
 
 ## Round-2 backlog
+
+Found while running the examples (2026-11-13), not fixed: (1) input functions list passed samples
+by globbing `checkpoints/passed/*.pass` instead of `checkpoints.qc_passed_samples.get()`, so when
+the QC checkpoint is re-run in a directory that already has pass files, rules planned before it
+(featureCounts, the checkpoint's own inputs) use the old sample list; a second `ecoli_ingest run
+-- --forcerun featurecounts_combined` repairs it. (2) Centrifuge takes up to 75 min for 4 GB of
+reads per mate. (3) `sra-tools` + `pigz` are in `environment.yaml` but must be installed into an
+existing `ecoli_ingest` env (`mamba install -n ecoli_ingest -c bioconda sra-tools pigz`); the
+container needs a rebuild to get them.
 
 reComBat bar of `fig_study_leakage` (opt-in `--recombat`; package not installable here), GSEA,
 `atlas_build/` cleanup (`combine_counts.sh` assumes the old column layout), container rebuild from

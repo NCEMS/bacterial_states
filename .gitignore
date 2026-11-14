@@ -30,6 +30,14 @@ config.yaml
 !ecoli_ingest/src/ecoli_ingest/config/config.template.yaml
 *.log
 
+# ---- examples: run directories kept in git as config.yaml, samples.csv, README.md ----------------
+# Run `ecoli_ingest check` / `run` inside examples/<name>/; everything a run writes there
+# (downloads in sra/, results, logs) stays untracked.
+/examples/*/*
+!/examples/*/config.yaml
+!/examples/*/README.md
+!/examples/*/samples.csv
+
 # ---- python --------------------------------------------------------------------------------
 __pycache__/
 *.pyc

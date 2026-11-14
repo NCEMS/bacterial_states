@@ -1,0 +1,223 @@
+# Ecoli_inGEST run configuration. Written by `ecoli_ingest init`; edit and then run
+# `ecoli_ingest check` followed by `ecoli_ingest run` in this directory.
+#
+# Paths are relative to this directory. Outputs go to results/ next to this file.
+
+# GEO GSE67402 (SRA SRP056663): E. coli B REL606 in glucose-limited minimal medium, sampled from
+# exponential growth (3 h) to two weeks of starvation (336 h). Three biological replicates of
+# rRNA-depleted RNA at nine time points, plus replicate 3 again without rRNA depletion.
+# Houser et al. 2015, PLoS Comput Biol 11:e1004400. Not part of the Ecoli_ATLAS training data.
+
+experiment: "GSE67402"
+
+# Results directory (default would be GSE67402_results/; the folder already names the study).
+results_dir: "results"
+
+# One entry per sample. Give r2 for paired-end data. If ANY sample lacks r2 the whole run is
+# treated as single-end. `condition` is the DESeq2 grouping variable; an optional `condition2`
+# is added to the model as a second factor.
+#
+# Reads can be given as
+#   r1 / r2:    one file, or a list of files that are concatenated in order (e.g. several lanes);
+#               r2 must list as many files as r1
+#   accession:  an SRA/GEO id (SRR/ERR/DRR run, SRX experiment, SRS/SAMN sample or GSM) or a list
+#               of them. The reads are fetched into `sra_dir` during the run (see `sra_method`
+#               below) and the layout (single/paired) is taken from the archive. Study ids (GSE,
+#               SRP, PRJNA) are not accepted: list their GSM/SRR ids as separate samples.
+samples:
+  t003h_rep1:   # Glucose time course, 3 hour time point, biological replicate 1 (AG3C-16)
+    accession: "GSM1646283"
+    condition: "t003h"
+    condition2: "rRNA_depleted"
+  t004h_rep1:   # Glucose time course, 4 hour time point, biological replicate 1 (AG3C-17)
+    accession: "GSM1646284"
+    condition: "t004h"
+    condition2: "rRNA_depleted"
+  t005h_rep1:   # Glucose time course, 5 hour time point, biological replicate 1 (AG3C-18)
+    accession: "GSM1646285"
+    condition: "t005h"
+    condition2: "rRNA_depleted"
+  t006h_rep1:   # Glucose time course, 6 hour time point, biological replicate 1 (AG3C-19)
+    accession: "GSM1646286"
+    condition: "t006h"
+    condition2: "rRNA_depleted"
+  t008h_rep1:   # Glucose time course, 8 hour time point, biological replicate 1 (AG3C-20)
+    accession: "GSM1646287"
+    condition: "t008h"
+    condition2: "rRNA_depleted"
+  t024h_rep1:   # Glucose time course, 24 hour time point, biological replicate 1 (AG3C-21)
+    accession: "GSM1646288"
+    condition: "t024h"
+    condition2: "rRNA_depleted"
+  t048h_rep1:   # Glucose time course, 48 hour time point, biological replicate 1 (AG3C-22)
+    accession: "GSM1646289"
+    condition: "t048h"
+    condition2: "rRNA_depleted"
+  t168h_rep1:   # Glucose time course, 168 hour time point, biological replicate 1 (AG3C-23)
+    accession: "GSM1646290"
+    condition: "t168h"
+    condition2: "rRNA_depleted"
+  t336h_rep1:   # Glucose time course, 336 hour time point, biological replicate 1 (AG3C-24)
+    accession: "GSM1646291"
+    condition: "t336h"
+    condition2: "rRNA_depleted"
+  t003h_rep2:   # Glucose time course, 3 hour time point, biological replicate 2 (AG3C-25)
+    accession: "GSM1646292"
+    condition: "t003h"
+    condition2: "rRNA_depleted"
+  t004h_rep2:   # Glucose time course, 4 hour time point, biological replicate 2 (AG3C-26)
+    accession: "GSM1646293"
+    condition: "t004h"
+    condition2: "rRNA_depleted"
+  t005h_rep2:   # Glucose time course, 5 hour time point, biological replicate 2 (AG3C-27)
+    accession: "GSM1646294"
+    condition: "t005h"
+    condition2: "rRNA_depleted"
+  t006h_rep2:   # Glucose time course, 6 hour time point, biological replicate 2 (AG3C-28)
+    accession: "GSM1646295"
+    condition: "t006h"
+    condition2: "rRNA_depleted"
+  t008h_rep2:   # Glucose time course, 8 hour time point, biological replicate 2 (AG3C-29)
+    accession: "GSM1646296"
+    condition: "t008h"
+    condition2: "rRNA_depleted"
+  t024h_rep2:   # Glucose time course, 24 hour time point, biological replicate 2 (AG3C-30)
+    accession: "GSM1646297"
+    condition: "t024h"
+    condition2: "rRNA_depleted"
+  t048h_rep2:   # Glucose time course, 48 hour time point, biological replicate 2 (AG3C-31)
+    accession: "GSM1646298"
+    condition: "t048h"
+    condition2: "rRNA_depleted"
+  t168h_rep2:   # Glucose time course, 168 hour time point, biological replicate 2 (AG3C-32)
+    accession: "GSM1646299"
+    condition: "t168h"
+    condition2: "rRNA_depleted"
+  t336h_rep2:   # Glucose time course, 336 hour time point, biological replicate 2 (AG3C-33)
+    accession: "GSM1646300"
+    condition: "t336h"
+    condition2: "rRNA_depleted"
+  t003h_rep3:   # Glucose time course, 3 hour time point, biological replicate 3 (AG3C-97)
+    accession: "GSM1646301"
+    condition: "t003h"
+    condition2: "rRNA_depleted"
+  t004h_rep3:   # Glucose time course, 4 hour time point, biological replicate 3 (AG3C-98)
+    accession: "GSM1646302"
+    condition: "t004h"
+    condition2: "rRNA_depleted"
+  t005h_rep3:   # Glucose time course, 5 hour time point, biological replicate 3 (AG3C-99)
+    accession: "GSM1646303"
+    condition: "t005h"
+    condition2: "rRNA_depleted"
+  t006h_rep3:   # Glucose time course, 6 hour time point, biological replicate 3 (AG3C-100)
+    accession: "GSM1646304"
+    condition: "t006h"
+    condition2: "rRNA_depleted"
+  t008h_rep3:   # Glucose time course, 8 hourt ime point, biological replicate 3 (AG3C-101)
+    accession: "GSM1646305"
+    condition: "t008h"
+    condition2: "rRNA_depleted"
+  t024h_rep3:   # Glucose time course, 24 hour time point, biological replicate 3 (AG3C-102)
+    accession: "GSM1646306"
+    condition: "t024h"
+    condition2: "rRNA_depleted"
+  t048h_rep3:   # Glucose time course, 48 hour time point, biological replicate 3 (AG3C-103)
+    accession: "GSM1646307"
+    condition: "t048h"
+    condition2: "rRNA_depleted"
+  t168h_rep3:   # Glucose time course, 168 hour time point, biological replicate 3 (AG3C-104)
+    accession: "GSM1646308"
+    condition: "t168h"
+    condition2: "rRNA_depleted"
+  t336h_rep3:   # Glucose time course, 336 hour time point, biological replicate 3 (AG3C-105)
+    accession: "GSM1646309"
+    condition: "t336h"
+    condition2: "rRNA_depleted"
+  t003h_rep3_total:   # Glucose time course, 3 hour time point, biological replicate 3, rRNA not depleted (AG3C-97-ND)
+    accession: "GSM1646310"
+    condition: "t003h"
+    condition2: "total_RNA"
+  t004h_rep3_total:   # Glucose time course, 4 hour time point, biological replicate 3, rRNA not depleted (AG3C-98-ND)
+    accession: "GSM1646311"
+    condition: "t004h"
+    condition2: "total_RNA"
+  t005h_rep3_total:   # Glucose time course, 5 hour time point, biological replicate 3, rRNA not depleted (AG3C-99-ND)
+    accession: "GSM1646312"
+    condition: "t005h"
+    condition2: "total_RNA"
+  t006h_rep3_total:   # Glucose time course, 6 hour time point, biological replicate 3, rRNA not depleted (AG3C-100-ND)
+    accession: "GSM1646313"
+    condition: "t006h"
+    condition2: "total_RNA"
+  t008h_rep3_total:   # Glucose time course, 8 hourt ime point, biological replicate 3, rRNA not depleted (AG3C-101-ND)
+    accession: "GSM1646314"
+    condition: "t008h"
+    condition2: "total_RNA"
+  t024h_rep3_total:   # Glucose time course, 24 hour time point, biological replicate 3, rRNA not depleted (AG3C-102-ND)
+    accession: "GSM1646315"
+    condition: "t024h"
+    condition2: "total_RNA"
+  t048h_rep3_total:   # Glucose time course, 48 hour time point, biological replicate 3, rRNA not depleted (AG3C-103-ND)
+    accession: "GSM1646316"
+    condition: "t048h"
+    condition2: "total_RNA"
+  t168h_rep3_total:   # Glucose time course, 168 hour time point, biological replicate 3, rRNA not depleted (AG3C-104-ND)
+    accession: "GSM1646317"
+    condition: "t168h"
+    condition2: "total_RNA"
+  t336h_rep3_total:   # Glucose time course, 336 hour time point, biological replicate 3, rRNA not depleted (AG3C-105-ND)
+    accession: "GSM1646318"
+    condition: "t336h"
+    condition2: "total_RNA"
+
+# DESeq2 contrasts as [factor, reference_level, test_level]. The reference is listed first.
+# Here: every later time point against exponential growth (3 h). Library type (condition2)
+# is a second factor in the model.
+deseq2:
+  contrasts:
+    - ["condition", "t003h", "t004h"]
+    - ["condition", "t003h", "t005h"]
+    - ["condition", "t003h", "t006h"]
+    - ["condition", "t003h", "t008h"]
+    - ["condition", "t003h", "t024h"]
+    - ["condition", "t003h", "t048h"]
+    - ["condition", "t003h", "t168h"]
+    - ["condition", "t003h", "t336h"]
+
+# Centrifuge contamination screen (needs the index from `ecoli_ingest download`). Set false to skip
+# it: Centrifuge is then not run, its gate is ignored and it is left out of the MultiQC report.
+# Switched off for this example only to fit the run into one 6-hour job: the screen takes up to
+# 75 minutes for the largest of the 36 samples. Set to true to run it.
+centrifuge: false
+
+# Paired-end reads only: fastp detects and trims the adapter of each mate
+# (--detect_adapter_for_pe). Off by default (as for the atlas training counts); this example was
+# run with it on, see the README.
+fastp_detect_adapter_for_pe: true
+
+# Quality-control gates. A sample that fails any configured gate is excluded from alignment and
+# counting (see checkpoints/qc_failures.json). Remove a line to disable that gate.
+centrifuge_organism: "Escherichia coli"
+centrifuge_min_percentage: 30.0
+# These libraries hold many very short inserts (mean read length after adapter trimming is about
+# 50 of 101 bp) and lose reads as too short: the median sample keeps 78 %, the two worst keep 25 %
+# (t005h_rep1) and 32 % (t168h_rep1). The gate is set below those so that all 36 samples are
+# analysed in this example; the default is 75.
+fastp_min_kept_percentage: 20.0
+
+# Samples given by accession: where downloads and the resolution cache go (default: sra/ in this
+# directory; point several run directories at one shared directory to download each run once) and
+# how many runs are fetched at the same time (`ecoli_ingest run --max-downloads N` overrides).
+# sra_method: auto = sra-tools (prefetch + fasterq-dump, from NCBI) first and the ENA FASTQ files as
+# the backup; "sra-tools" or "ena" = that source only.
+# sra_dir: "sra"
+# max_downloads: 4
+
+# Reference resources default to the standard files in the resources directory and normally need
+# no changes. Uncomment to override individual files.
+# ref: "GCF_000005845_2_ASM584v2_genomic#0#NC_000913.3"
+# vg_index: "/path/to/resources/vg/ecoli_graph_test"
+# annotation_gff: "/path/to/resources/annotation/GCF_000005845.2_ASM584v2_genomic_siRNA.gff"
+# annotation_source_gff: "/path/to/resources/annotation/GCF_000005845.2_ASM584v2_genomic.gff"
+# annotation_bed: "/path/to/resources/annotation/GCF_000005845.2_ASM584v2_genomic.bed"
+# centrifuge_index_path: "/path/to/resources/centrifuge/p_compressed+h+v"
