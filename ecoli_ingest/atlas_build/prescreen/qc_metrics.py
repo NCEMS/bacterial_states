@@ -164,7 +164,7 @@ RECORD_COLUMNS = [
     "assigned", "counting_unit", "pct_assigned_not_stable",
     "pct_16S", "pct_23S", "pct_5S", "pct_tRNA_family", "pct_ssrA", "pct_rnpB", "pct_ssrS", "pct_ffs", "pct_short_features",
     "off_reference_fraction", "substitution_rate", "gene_body_slope",
-    "intergenic_share", "antisense_share", "antisense_per_base", "dna_fraction_est", "dna_fraction_step",
+    "intergenic_share", "antisense_share", "antisense_per_base", "dna_fraction_est", "dna_fraction_limit",
     "minstrand_cov", "dna_fraction_fit", "floor_a", "leakage_b",
     "floor_cov_plus", "floor_cov_minus", "intergenic_cov_plus", "intergenic_cov_minus",
     "n_runs", "library_selection", "instrument_model", "pipeline_commit",
@@ -211,7 +211,7 @@ def record_columns(record: dict) -> dict:
     out.update(off_reference_fraction=align.get("off_reference_fraction"), substitution_rate=align.get("substitution_rate"),
                gene_body_slope=record.get("gene_body_slope"))
     for key in ("intergenic_share", "antisense_share", "antisense_per_base", "dna_fraction_est",
-                "dna_fraction_step", "minstrand_cov", "dna_fraction_fit", "floor_a", "leakage_b",
+                "dna_fraction_limit", "minstrand_cov", "dna_fraction_fit", "floor_a", "leakage_b",
                 "floor_cov_plus", "floor_cov_minus", "intergenic_cov_plus", "intergenic_cov_minus"):
         out[key] = dna.get(key)
     runs = record.get("runs") or []

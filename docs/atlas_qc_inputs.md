@@ -197,7 +197,7 @@ Differences from the specification above:
   The antisense fit is kept as `floor_a`, `leakage_b`, `dna_fraction_fit` (Theil-Sen line over
   genes, rRNA and tRNA left out). Also kept: `floor_cov_*` (10 % quantile of bin depth),
   `q25_cov_*`, `intergenic_cov_*` (median over bins that touch no feature), `antisense_per_base`,
-  `aligned_bases`, `dna_fraction_step` (granularity: one base of depth in a bin). Depths are mean
+  `aligned_bases`, `dna_fraction_limit` (the DNA share below which the estimate reads 0 or too low; see the calibration). Depths are mean
   depth per base. See "Calibration of the DNA estimate" below.
 - **Off-reference share (item 7)** is (`Total aligned` of `vg stats` - mapped reads in the BAM) /
   `Total aligned`. Not yet checked on a non-K-12 sample.
@@ -257,8 +257,31 @@ by the share actually added (1.00 = exact):
   as expected for reads spread over both strands and over genes and gaps alike.
 - What the estimate reads without added DNA (0.2-1.7 %) is real DNA plus transcription of both
   strands of the same region, which this test cannot separate. It is an upper bound.
-- Not tested: single-end libraries, libraries much shallower than 5 M reads (the median is 0 until
-  DNA reaches about half a read per bin and strand), and DNA from another strain.
+
+Second run (`work/se_depth_test/`, `work/dna_calibration2/`), same spikes under other conditions:
+
+| Library | Increase / added at 1, 5, 20 % | Note |
+|---|---|---|
+| K-12, single-end (mate 2 dropped), 5.9 M reads | 1.25, 1.02, 0.98 | as for paired-end |
+| K-12 subsampled to 1 M pairs | 0.75, 1.12, 0.94 | limit 2 % |
+| K-12 subsampled to 250,000 pairs | 0, 0, 0.70 | limit 8 %; reads 0 below it |
+| Nissle 1917 + simulated Nissle 1917 DNA | 0.88, 0.82, 0.79 | DNA of sequence MG1655 lacks is not seen |
+
+- **Depth.** The median is 0 until DNA reaches roughly half a base of depth per strand.
+  `dna_fraction_limit` (= genome length / aligned bases) is the DNA share at which that happens:
+  about 0.4-0.5 % at 5 M pairs, 2 % at 1 M, 8 % at 250,000. Below the limit the estimate is 0 or
+  too low, so an estimate of 0 means "below about the limit". From about twice the limit it was
+  within 25 % of the added share.
+- **Other strains.** With the strain's own DNA the estimate recovers 79-88 %: reads from sequence
+  that MG1655 lacks do not align to the reference path (`off_reference_fraction` rose from 2.5 to
+  4.8 %) and are not in the coverage track. About 13 % of the 100 bp bins have no coverage on
+  either strand in this Nissle library at any spike level, which is the part of MG1655 that Nissle
+  lacks.
+- An estimator from the share of empty bins was tried for shallow libraries and rejected: it
+  recovered only 0.3-0.45 of the added share.
+- **Gene-body slope depends on layout.** The same library gives -0.08 as paired-end and +0.54 with
+  mate 2 dropped: read 1 of a reverse-stranded library comes from the 3' end of the fragment. The
+  slope must be used together with the layout.
 
 ## Technical twins
 

@@ -241,4 +241,4 @@ def test_coverage_background_estimates_added_dna(tmp_path):
     assert spiked["minstrand_cov"] == pytest.approx(2.0, rel=0.05)
     assert spiked["dna_fraction_est"] == pytest.approx(truth, rel=0.05)
     assert spiked["floor_cov_plus"] < 2.0 < spiked["intergenic_cov_plus"] + 0.2          # low quantiles sit below the mean
-    assert spiked["n_intergenic_bins"] > 10000 and spiked["dna_fraction_step"] > 0
+    assert spiked["n_intergenic_bins"] > 10000 and spiked["dna_fraction_limit"] > 0

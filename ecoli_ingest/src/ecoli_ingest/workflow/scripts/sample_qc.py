@@ -130,6 +130,11 @@ def coverage_background(npz_path: str, bed: str) -> dict:
     0.3-0.9 times) and the antisense fit over genes overestimates (1.1-1.5 times). What the
     estimate reads in a library without added DNA (0.2-1.7 % in those three) is real DNA plus
     transcription of both strands, so it is an upper bound. Depths are mean depth per base.
+
+    Further checks (same document): a single-end library gave 0.98-1.25 times; a library of 1 M
+    pairs 0.75-1.12 times; one of 250,000 pairs read 0 up to 5 % added DNA and 0.70 times at 20 %
+    (see dna_fraction_limit); a Nissle 1917 library with Nissle DNA gave 0.79-0.88 times, because
+    DNA from sequence that MG1655 lacks is not in the track.
     """
     import numpy as np
     z = np.load(npz_path)
@@ -154,8 +159,11 @@ def coverage_background(npz_path: str, bed: str) -> dict:
         low = np.minimum(per_strand["plus"], per_strand["minus"])
         out["minstrand_cov"] = float(np.median(low))
         out["dna_fraction_est"] = 2 * out["minstrand_cov"] * genome / out["aligned_bases"]
-        # granularity of the estimate (one base of depth in a bin), not a detection limit
-        out["dna_fraction_step"] = 2 * (1.0 / step) * genome / out["aligned_bases"]
+        # DNA share at which the DNA depth is 0.5 per base and strand. Below it the median is 0 or
+        # too low; on the calibration samples the estimate was within 25 % of the added share from
+        # about twice this value and read 0.7 times it at 2.6 times this value in a 250,000-pair
+        # library. An estimate of 0 therefore means "below about dna_fraction_limit", not "none".
+        out["dna_fraction_limit"] = 2 * 0.5 * genome / out["aligned_bases"]
     return out
 
 
