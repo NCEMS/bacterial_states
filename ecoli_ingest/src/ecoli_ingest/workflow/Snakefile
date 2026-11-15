@@ -136,9 +136,18 @@ contrast_names = [f"{ref}_vs_{test}" for factor, ref, test in deseq2_contrasts]
 
 #QC checkpoint on/off
 fastp_qc_is_configured = config.get("fastp_min_kept_percentage") is not None
-# Centrifuge (contamination screen) runs unless `centrifuge: false`; its gate needs a threshold too
+# Centrifuge runs unless `centrifuge: false`. With it on, the species gate applies unless
+# `species_gate: false`: a sample that is not E. coli (another organism, a phage infection, a
+# mixture) is not counted. Samples that are clearly something else are stopped before alignment
+# (rule species_early); the full rule is applied after alignment (rule species_qc), where the reads
+# on rRNA / tRNA genes can be left out. See scripts/species_metrics.py and docs/prescreen.md.
 centrifuge_enabled = bool(config.get("centrifuge", True))
-centrifuge_qc_is_configured = centrifuge_enabled and config.get("centrifuge_min_percentage") is not None
+species_gate = centrifuge_enabled and bool(config.get("species_gate", True))
+species_thresholds = json.dumps(config.get("species_thresholds") or {}, separators=(",", ":"))
+for _old in ("centrifuge_organism", "centrifuge_min_percentage"):
+    if _old in config:
+        print(f"WARNING: config key `{_old}` is ignored; the Centrifuge gate is now the species gate "
+              "(`species_gate`, `species_thresholds`).", file=sys.stderr, flush=True)
 # Strand specificity: inGEST counts strand-specific libraries only. `strandedness: auto` (default)
 # calls each sample from RSeQC infer_experiment; `forward` / `reverse` state it for the whole run.
 strandedness_mode = str(config.get("strandedness", "auto")).lower()
@@ -156,9 +165,9 @@ checkpoint qc_passed_samples:
         fastp_json=lambda wc: [
             f"{results_dir}/{s}/fastp/{s}_fastp.json" for s in SAMPLES.keys()
         ] if fastp_qc_is_configured else [],
-        centrifuge_report=lambda wc: [
-            f"{results_dir}/{s}/centrifuge/{s}_report.txt" for s in SAMPLES.keys()
-        ] if centrifuge_qc_is_configured else []
+        species_early=lambda wc: [
+            f"{results_dir}/{s}/qc/{s}_species_early.json" for s in SAMPLES.keys()
+        ] if species_gate else []
     output:
         directory("checkpoints/passed/"),
         "checkpoints/qc_failures.json"
@@ -196,40 +205,25 @@ checkpoint qc_passed_samples:
                         "threshold": fastp_min_kept_percentage,
                     }
 
-        #Centrifuge QC
-        if centrifuge_qc_is_configured:
-            centrifuge_organism = config.get("centrifuge_organism", "")
-            centrifuge_min_percentage = config.get("centrifuge_min_percentage")
+        #Species gate, early part: samples that are clearly not E. coli are not aligned
+        if species_gate:
             for sample in list(passed_samples):
-                report_file = f"{results_dir}/{sample}/centrifuge/{sample}_report.txt"
-                found_perc = 0.0
-                organism_found = False
+                early_file = f"{results_dir}/{sample}/qc/{sample}_species_early.json"
                 try:
-                    with open(report_file) as fh:
-                        for line in fh:
-                            if centrifuge_organism and centrifuge_organism in line:
-                                try:
-                                    found_perc = float(line.split()[0])
-                                except Exception:
-                                    found_perc = 0.0
-                                if found_perc >= centrifuge_min_percentage:
-                                    organism_found = True
-                                break
+                    with open(early_file) as fh:
+                        early = json.load(fh)
                 except FileNotFoundError:
-                    #Missing centrifuge output
                     passed_samples.remove(sample)
-                    failures[sample] = {
-                        "reason": "centrifuge_missing_report",
-                        "message": report_file + " not found"
-                    }
+                    failures[sample] = {"reason": "species_missing_file", "message": early_file + " not found"}
                     continue
-
-                if centrifuge_organism and not organism_found:
+                if early.get("verdict_early") not in ("ok", "no_species"):
                     passed_samples.remove(sample)
                     failures[sample] = {
-                        "reason": "centrifuge",
-                        "found": found_perc,
-                        "threshold": centrifuge_min_percentage,
+                        "reason": "species",
+                        "verdict": early.get("verdict_early"),
+                        "pct_escherichia_shigella": early.get("pct_escherichia_shigella"),
+                        "top_other_genus": early.get("top_other_genus"),
+                        "pct_top_other_genus": early.get("pct_top_other_genus"),
                     }
 
         #Collect passed samples
@@ -592,19 +586,32 @@ def _qc_passed_strand_calls(wildcards):
     checkpoints.qc_passed_samples.get()
     return [f"{results_dir}/{s}/rseqc/{s}_strandedness.tsv" for s in get_passed_samples_from_checkpoint(wildcards)]
 
-###Strandedness gate: unstranded libraries are not counted
+def _qc_passed_species(wildcards):
+    checkpoints.qc_passed_samples.get()
+    if not species_gate:
+        return []
+    return [f"{results_dir}/{s}/qc/{s}_species.json" for s in get_passed_samples_from_checkpoint(wildcards)]
+
+###Gate after alignment: unstranded libraries and samples that are not E. coli are not counted
 checkpoint strand_passed_samples:
     input:
-        _qc_passed_strand_calls
+        strand=_qc_passed_strand_calls,
+        species=_qc_passed_species
     output:
         table=STRAND_TABLE,
         mqc=f"{results_dir}/strandedness_mqc.tsv",
         failures="checkpoints/strandedness_failures.json"
     run:
-        rows = call_strandedness.combine(list(input), output.table, output.mqc, output.failures)
+        excluded = {}
+        for path in input.species:
+            with open(path) as fh:
+                verdict = json.load(fh).get("verdict")
+            if verdict not in ("ok", "no_species"):
+                excluded[os.path.basename(path)[:-len("_species.json")]] = verdict
+        rows = call_strandedness.combine(list(input.strand), output.table, output.mqc, output.failures, excluded)
         for r in rows:
             if r["counted"] != "yes":
-                print(f"NOT COUNTED: {r['sample']} is not strand-specific (forward {r['fraction_forward']}, "
+                print(f"NOT COUNTED: {r['sample']}: {r['not_counted_reason']} (forward {r['fraction_forward']}, "
                       f"reverse {r['fraction_reverse']})", file=sys.stderr, flush=True)
 
 
@@ -708,22 +715,41 @@ rule bam_qc:
             --bed {annotation_bed} --coverage {output.coverage} --out {output.qc}
         """
 
-# Is the library E. coli? Uses the classification of every trimmed read (Centrifuge's first pass)
-# and, to leave out the reads on rRNA / tRNA genes, the alignments. Reported, not used as a gate.
-rule species_qc:
+# Is the library E. coli? Both rules use the classification of every trimmed read (Centrifuge's
+# first pass). species_early runs before alignment and only flags samples that are clearly
+# something else; species_qc runs after it, leaves out the reads on rRNA / tRNA genes and gives the
+# verdict that decides whether the sample is counted (checkpoint strand_passed_samples).
+rule species_early:
     input:
-        classifications = f"{results_dir}/{{sample}}/centrifuge/initial.tsv",
-        bam = f"{results_dir}/{{sample}}/vg/{{sample}}_sort.bam"
+        classifications = f"{results_dir}/{{sample}}/centrifuge/initial.tsv"
     output:
         report_all = f"{results_dir}/{{sample}}/centrifuge/{{sample}}_report_all.txt",
-        species = f"{results_dir}/{{sample}}/qc/{{sample}}_species.json"
+        species = f"{results_dir}/{{sample}}/qc/{{sample}}_species_early.json"
     params:
-        db = centrifuge_index_path
-    benchmark: f"benchmarks/{{sample}}_species_benchmark.txt"
+        db = centrifuge_index_path,
+        thresholds = species_thresholds
+    benchmark: f"benchmarks/{{sample}}_species_early_benchmark.txt"
     shell:
         """
         python {scripts_dir}/species_metrics.py --classifications {input.classifications} --index {params.db} \
-            --report-all {output.report_all} --bam {input.bam} --bed {annotation_bed} --out {output.species}
+            --report-all {output.report_all} --thresholds {params.thresholds:q} --out {output.species}
+        """
+
+rule species_qc:
+    input:
+        classifications = f"{results_dir}/{{sample}}/centrifuge/initial.tsv",
+        report_all = f"{results_dir}/{{sample}}/centrifuge/{{sample}}_report_all.txt",
+        bam = f"{results_dir}/{{sample}}/vg/{{sample}}_sort.bam"
+    output:
+        species = f"{results_dir}/{{sample}}/qc/{{sample}}_species.json"
+    params:
+        thresholds = species_thresholds
+    benchmark: f"benchmarks/{{sample}}_species_benchmark.txt"
+    shell:
+        """
+        python {scripts_dir}/species_metrics.py --classifications {input.classifications} \
+            --report-all {input.report_all} --bam {input.bam} --bed {annotation_bed} \
+            --thresholds {params.thresholds:q} --out {output.species}
         """
 
 rule sample_qc:
@@ -753,7 +779,8 @@ rule sample_qc:
         python {scripts_dir}/sample_qc.py collect --sample {wildcards.sample:q} --fastp {input.fastp} \
             --fastqc-r1 {input.fastqc[0]} {params.fastqc_r2} --vg-stats {input.vg_stats} --gene-body {input.gene_body} \
             --strand {input.strand} --counts {input.counts} --antisense {input.antisense} --gff {input.gff} \
-            --bam-qc {input.bam_qc} --coverage {input.coverage} {params.species} --versions {input.versions} \
+            --bam-qc {input.bam_qc} --coverage {input.coverage} --bed {annotation_bed} {params.species} \
+            --versions {input.versions} \
             --runs {params.runs:q} {params.run_metadata} --out {output}
         """
 

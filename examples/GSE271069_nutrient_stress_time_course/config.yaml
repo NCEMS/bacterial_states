@@ -96,8 +96,7 @@ centrifuge: true
 
 # Quality-control gates. A sample that fails any configured gate is excluded from alignment and
 # counting (see checkpoints/qc_failures.json). Remove a line to disable that gate.
-centrifuge_organism: "Escherichia coli"
-centrifuge_min_percentage: 30.0
+species_gate: true
 fastp_min_kept_percentage: 75.0
 
 # Samples given by accession: where downloads and the resolution cache go (default: sra/ in this

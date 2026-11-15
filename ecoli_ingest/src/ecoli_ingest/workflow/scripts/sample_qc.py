@@ -105,22 +105,57 @@ def bam_qc(bam: str, call: str, layout: str, bed: str, npz_path: str) -> dict:
     os.makedirs(os.path.dirname(os.path.abspath(npz_path)), exist_ok=True)
     np.savez_compressed(npz_path, bin_size=np.asarray(BIN), strand_call=np.asarray(call), **arrays)
 
-    in_feature = feature_bins(bed)
     out = {"bin_size": BIN, "bam_mapped": int(run(f"samtools view -c -F 4 '{bam}'").strip()),
            "genome_length": sum(int(x.split("\t")[2].split(":")[1]) for x in
                                 run(f"samtools view -H '{bam}' | grep '^@SQ'").splitlines())}
-    for strand, contigs in tracks.items():
-        depths = [d / BIN for bins in contigs.values() for d in bins]
-        between = [d / BIN for contig, bins in contigs.items() for i, d in enumerate(bins)
-                   if i not in in_feature.get(contig, ())]
-        out[f"floor_cov_{strand}"] = quantile(depths, 0.10)            # mean depth per base, 10 % quantile of bins
-        out[f"intergenic_cov_{strand}"] = quantile(between, 0.50)      # median over bins that touch no feature
-        out[f"n_intergenic_bins_{strand}"] = len(between)
     if layout == "PE":
         text = run(f"samtools view -f 66 -F 4 '{bam}' | awk -F'\\t' '{{t=($9<0)?-$9:$9; if (t>{TLEN_MAX}) t={TLEN_MAX + 1}; "
                    "h[t]++} END{for (k in h) print k \"\\t\" h[k]}'")
         hist = sorted((int(a), int(b)) for a, b in (ln.split("\t") for ln in text.splitlines()))
         out["tlen_hist"] = [list(x) for x in hist]                   # [size, pairs]; last bin is > TLEN_MAX
+    return out
+
+
+def coverage_background(npz_path: str, bed: str) -> dict:
+    """Background levels of the coverage track, and the DNA estimate made from them.
+
+    Genomic DNA covers the genome evenly on both strands, while RNA covers mostly one strand of a
+    region. For every 100 bp bin the lower of the two strands' depths is therefore an upper bound on
+    the DNA depth there, and its median over bins (`minstrand_cov`) estimates the DNA depth per
+    strand. `dna_fraction_est` = 2 x minstrand_cov x genome length / aligned bases.
+
+    Calibrated on samples with simulated genomic reads added at 1, 5 and 20 % (three libraries of
+    5-6 M read pairs, docs/atlas_qc_inputs.md): the increase of this estimate was 0.94-1.24 times
+    the added fraction (mean 1.02). Low quantiles of coverage underestimate (a 10 % quantile gave
+    0.3-0.9 times) and the antisense fit over genes overestimates (1.1-1.5 times). What the
+    estimate reads in a library without added DNA (0.2-1.7 % in those three) is real DNA plus
+    transcription of both strands, so it is an upper bound. Depths are mean depth per base.
+    """
+    import numpy as np
+    z = np.load(npz_path)
+    names = [k for k in z.files if "__" in k]
+    contigs = sorted({k.rsplit("__", 1)[0] for k in names})
+    step = float(z["bin_size"]) if "bin_size" in z.files else float(BIN)
+    in_feature = feature_bins(bed)
+    out: dict = {"aligned_bases": int(sum(int(z[k].sum()) for k in names))}
+    per_strand = {}
+    for strand in ("plus", "minus"):
+        if all(f"{c}__{strand}" in z.files for c in contigs) and contigs:
+            depth = np.concatenate([z[f"{c}__{strand}"] / step for c in contigs])
+            between = np.concatenate([np.array([i not in in_feature.get(c, ()) for i in range(len(z[f"{c}__{strand}"]))])
+                                      for c in contigs])
+            per_strand[strand] = depth
+            out[f"floor_cov_{strand}"] = float(np.quantile(depth, 0.10))
+            out[f"q25_cov_{strand}"] = float(np.quantile(depth, 0.25))
+            out[f"intergenic_cov_{strand}"] = float(np.median(depth[between])) if between.any() else None
+            out["n_intergenic_bins"] = int(between.sum())
+    genome = sum(len(z[f"{c}__plus"]) for c in contigs if f"{c}__plus" in z.files) * step
+    if len(per_strand) == 2 and out["aligned_bases"]:
+        low = np.minimum(per_strand["plus"], per_strand["minus"])
+        out["minstrand_cov"] = float(np.median(low))
+        out["dna_fraction_est"] = 2 * out["minstrand_cov"] * genome / out["aligned_bases"]
+        # granularity of the estimate (one base of depth in a bin), not a detection limit
+        out["dna_fraction_step"] = 2 * (1.0 / step) * genome / out["aligned_bases"]
     return out
 
 
@@ -349,11 +384,13 @@ def dna_estimates(sense: dict, antisense: dict, features: dict, assignment: dict
     return {
         "intergenic_share": round(nofeat / aligned, 6) if aligned else None,
         "antisense_share": round(anti_assigned / (assigned + anti_assigned), 6) if assigned + anti_assigned else None,
+        # Fit over genes of antisense on sense reads per base. Kept for reference: on the calibration
+        # samples its intercept overestimated added DNA 1.1-1.5 times and its slope rose with DNA.
         "floor_a": a, "leakage_b": b, "n_genes_fit": len(xs),
         # antisense reads per base over all genes outside rRNA / tRNA: an upper bound on the even
         # background that stays informative at low depth, where the median-based fit gives 0
         "antisense_per_base": round(anti_total / bases, 8) if bases else None,
-        "dna_fraction_est": (max(0.0, 2 * a * genome_length / aligned) if a is not None and genome_length and aligned
+        "dna_fraction_fit": (max(0.0, 2 * a * genome_length / aligned) if a is not None and genome_length and aligned
                              else None),
         "aligned_units": aligned,
     }
@@ -400,7 +437,8 @@ def collect(args) -> dict:
     aligned, mapped = vg.get("aligned"), bam.get("bam_mapped")
     profile = read_gene_body(args.gene_body) if args.gene_body else []
     dna = dna_estimates(sense, antisense, features, assignment, anti_assignment, bam.get("genome_length"))
-    dna.update({k: v for k, v in bam.items() if k.startswith(("floor_cov_", "intergenic_cov_"))})
+    if args.coverage and args.bed and os.path.exists(args.coverage):
+        dna.update(coverage_background(args.coverage, args.bed))      # includes dna_fraction_est
     versions = {}
     if args.versions and os.path.exists(args.versions):
         with open(args.versions, encoding="utf-8") as fh:
@@ -466,7 +504,7 @@ def main(argv: list[str] | None = None) -> int:
     c = sub.add_parser("collect")
     for name in ("sample", "fastp", "vg-stats", "strand", "counts", "antisense", "gff", "bam-qc", "out"):
         c.add_argument("--" + name, required=True)
-    for name in ("fastqc-r1", "fastqc-r2", "gene-body", "species", "versions", "coverage", "runs", "run-metadata"):
+    for name in ("fastqc-r1", "fastqc-r2", "gene-body", "species", "versions", "coverage", "bed", "runs", "run-metadata"):
         c.add_argument("--" + name, default=None)
     args = ap.parse_args(argv)
     if args.cmd == "bam":

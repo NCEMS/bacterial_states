@@ -101,9 +101,10 @@ def check_resources(cfg: dict, resources: Path | None, rundir: Path) -> list[Che
                              "or skip Centrifuge with `centrifuge: false` in config.yaml"))
     else:
         out.append(Check("centrifuge index", OK, "not needed (centrifuge: false)"))
-        if cfg.get("centrifuge_min_percentage") is not None:
-            out.append(Check("centrifuge gate", WARN,
-                             "centrifuge_min_percentage is ignored because centrifuge: false"))
+    old = [k for k in ("centrifuge_organism", "centrifuge_min_percentage") if k in cfg]
+    if old:
+        out.append(Check("centrifuge gate", WARN, f"{', '.join(old)} ignored: the Centrifuge gate is now the "
+                         "species gate (species_gate, species_thresholds)"))
     return out
 
 

@@ -120,6 +120,13 @@ Default thresholds (`qc_metrics.DEFAULT_THRESHOLDS`). A sample fails as:
 | `short_reads` | mean read length after trimming below 30 bp |
 | `low_alignment` | under 50 % of reads aligned |
 
+The species rows are the workflow's species gate (`species_metrics.species_verdict`,
+`SPECIES_THRESHOLDS`), so the prescreen and a full inGEST run decide in the same way. In a full
+run the gate also stops samples before alignment when they are clearly something else (a phage,
+or under 20 % *Escherichia* / *Shigella* with another genus at 5 % or more of all reads, on the
+all-reads values): on this screen that early check stops 362 of the 547 samples the full rule
+refuses and 1 of the 10,125 it accepts.
+
 With fewer than 100 genus-resolved reads there is no species decision (`incomplete`). The strand
 and trimming rules are the workflow's own gates; the others were set on the distribution of the
 2026-11 screen and can be changed with `qc_table.py decide`. Full inGEST runs have no species

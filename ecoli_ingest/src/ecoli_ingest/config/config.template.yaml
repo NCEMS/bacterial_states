@@ -64,10 +64,22 @@ centrifuge: true
 strandedness: "auto"
 strandedness_min_fraction: 0.8
 
-# Quality-control gates. A sample that fails any configured gate is excluded from alignment and
-# counting (see checkpoints/qc_failures.json). Remove a line to disable that gate.
-centrifuge_organism: "Escherichia coli"
-centrifuge_min_percentage: 30.0
+# Species gate (needs Centrifuge). A sample is not counted when it is not E. coli: another
+# organism, a phage infection, or a mixture. It is judged from the genus of the reads Centrifuge
+# places uniquely, with Escherichia and Shigella counted together. Samples that are clearly
+# something else are stopped before alignment (checkpoints/qc_failures.json, reason "species");
+# the full rule is applied after alignment (<results>/strandedness.tsv, column
+# not_counted_reason). Set false to only report the values (<sample>/qc/<sample>_species.json).
+species_gate: true
+# Thresholds, if the defaults (workflow/scripts/species_metrics.py, SPECIES_THRESHOLDS) do not fit:
+# species_thresholds:
+#   min_pct_escherichia_shigella: 50.0   # share of genus-resolved reads in Escherichia / Shigella
+#   min_pct_foreign_of_all: 2.0          # ... and the largest other genus is at least this % of all reads
+#   max_pct_foreign_of_all: 10.0         # largest other genus above this % of all reads: mixed sample
+#   min_pct_phage_of_all: 0.5            # a phage as the largest other genus at this % of all reads
+
+# Read-filter gate. A sample of which fastp keeps less than this percentage of reads is excluded
+# from alignment and counting (see checkpoints/qc_failures.json). Remove the line to disable it.
 fastp_min_kept_percentage: 75.0
 
 # Samples given by accession: where downloads and the resolution cache go (default: sra/ in this

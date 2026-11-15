@@ -129,19 +129,8 @@ def kreport_metrics(path: str, organism: str = "Escherichia coli", n_other: int 
 
 
 # Species statistics live with the workflow scripts so that full runs compute them the same way.
-from species_metrics import (ECOLI_GENERA, ENTEROBACTERIACEAE, SYNTHETIC, genus_of_taxa,  # noqa: E402,F401
-                             kreport_all_metrics, species_metrics)
-
-# Bacteriophage genera (Centrifuge names). A sample whose largest other genus is one of these is a
-# phage infection or induction experiment and is failed. Not listed on purpose: Phix174microvirus
-# (the Illumina PhiX spike-in) and viruses of plants and animals (e.g. Begomovirus, which matches
-# parts of some engineered plasmids).
-PHAGE_GENERA = frozenset({
-    "Lambdavirus", "T7virus", "T4virus", "T5virus", "T1virus", "Rb69virus", "P1virus", "P2virus", "Muvirus",
-    "Mulikevirus", "N4virus", "N15virus", "Hk97virus", "Levivirus", "Allolevivirus", "Inovirus", "Epsilon15virus",
-    "P22virus", "Phikzvirus", "Felixo1virus", "Sp6virus", "T3virus", "Phieco32virus", "Rtpvirus", "Tunavirus",
-})
-
+from species_metrics import (ECOLI_GENERA, ENTEROBACTERIACEAE, PHAGE_GENERA, SPECIES_THRESHOLDS,  # noqa: E402,F401
+                             SYNTHETIC, genus_of_taxa, kreport_all_metrics, species_metrics, species_verdict)
 
 def collect(files: dict, min_fraction: float = 0.8) -> dict:
     """Metrics from whichever of these files exist: fastp, vg_stats, infer_experiment,
@@ -175,7 +164,8 @@ RECORD_COLUMNS = [
     "assigned", "counting_unit", "pct_assigned_not_stable",
     "pct_16S", "pct_23S", "pct_5S", "pct_tRNA_family", "pct_ssrA", "pct_rnpB", "pct_ssrS", "pct_ffs", "pct_short_features",
     "off_reference_fraction", "substitution_rate", "gene_body_slope",
-    "intergenic_share", "antisense_share", "antisense_per_base", "floor_a", "leakage_b", "dna_fraction_est",
+    "intergenic_share", "antisense_share", "antisense_per_base", "dna_fraction_est", "dna_fraction_step",
+    "minstrand_cov", "dna_fraction_fit", "floor_a", "leakage_b",
     "floor_cov_plus", "floor_cov_minus", "intergenic_cov_plus", "intergenic_cov_minus",
     "n_runs", "library_selection", "instrument_model", "pipeline_commit",
 ]
@@ -220,7 +210,8 @@ def record_columns(record: dict) -> dict:
     align, dna = record.get("alignment", {}), record.get("dna", {})
     out.update(off_reference_fraction=align.get("off_reference_fraction"), substitution_rate=align.get("substitution_rate"),
                gene_body_slope=record.get("gene_body_slope"))
-    for key in ("intergenic_share", "antisense_share", "antisense_per_base", "floor_a", "leakage_b", "dna_fraction_est",
+    for key in ("intergenic_share", "antisense_share", "antisense_per_base", "dna_fraction_est",
+                "dna_fraction_step", "minstrand_cov", "dna_fraction_fit", "floor_a", "leakage_b",
                 "floor_cov_plus", "floor_cov_minus", "intergenic_cov_plus", "intergenic_cov_minus"):
         out[key] = dna.get(key)
     runs = record.get("runs") or []
@@ -235,13 +226,8 @@ def record_columns(record: dict) -> dict:
 
 DEFAULT_THRESHOLDS = {
     "min_strand_fraction": 0.8,     # dominant orientation fraction; below it the library is unstranded
-    # Species test (species_metrics; the version without rRNA/tRNA reads when it is available):
-    "min_pct_escherichia_shigella": 50.0,   # share of genus-resolved reads in Escherichia / Shigella ...
-    "min_pct_foreign_of_all": 2.0,          # ... below it the sample is not E. coli, provided the largest other
-                                            #     genus is at least this % of ALL reads given to Centrifuge
-    "max_pct_foreign_of_all": 10.0,         # largest other genus above this % of all reads: mixed sample
-    "min_species_reads": 100,               # fewer informative reads than this: no species decision
-    "min_pct_phage_of_all": 0.5,            # largest other genus is a phage at this % of all reads: phage sample
+    # species test: the workflow's gate (species_metrics.SPECIES_THRESHOLDS)
+    **{k: v for k, v in SPECIES_THRESHOLDS.items() if not k.startswith("early_")},
     "min_pct_kept": 75.0,           # the workflow's fastp_min_kept_percentage
     "min_mean_length": 30.0,        # mean read length after trimming (mate 1)
     "min_pct_aligned": 50.0,
@@ -258,22 +244,11 @@ def decide(metrics: dict, thresholds: dict | None = None) -> tuple[str, list[str
         missing.append("strandedness")
     elif max(fwd, rev) < t["min_strand_fraction"]:
         reasons.append("unstranded")
-    # Species. A low Escherichia/Shigella share alone is not enough: libraries of short reads leave
-    # few classifiable reads, spread over many genera, and are judged by the alignment rule instead.
-    # The largest other genus must also be a real part of the library (% of all classified input).
-    sfx = "_nostable" if get("species_reads_nostable") is not None else ""
-    n_species, share, top = get("species_reads" + sfx), get("pct_escherichia_shigella" + sfx), get("pct_top_other_genus" + sfx)
-    n_all = get("centrifuge_reads")
-    if n_species is None or share is None or n_species < t["min_species_reads"]:
+    verdict = species_verdict(metrics, t)        # the same rule as the workflow's species gate
+    if verdict == "no_species":
         missing.append("species")
-    else:
-        foreign = (top or 0) * n_species / n_all if n_all else (top or 0)
-        if metrics.get("top_other_genus" + sfx) in PHAGE_GENERA and foreign >= t["min_pct_phage_of_all"]:
-            reasons.append("phage")
-        elif share < t["min_pct_escherichia_shigella"] and foreign >= t["min_pct_foreign_of_all"]:
-            reasons.append("not_ecoli")
-        elif foreign >= t["max_pct_foreign_of_all"]:
-            reasons.append("mixed_organism")
+    elif verdict != "ok":
+        reasons.append(verdict)
     for key, limit, label in (("pct_kept", "min_pct_kept", "trimming"),
                               ("mean_length_r1", "min_mean_length", "short_reads"),
                               ("pct_aligned", "min_pct_aligned", "low_alignment")):

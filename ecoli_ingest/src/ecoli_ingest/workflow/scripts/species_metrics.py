@@ -29,6 +29,27 @@ import sys
 
 ENTEROBACTERIACEAE, SYNTHETIC = "543", "32630"
 ECOLI_GENERA = ("Escherichia", "Shigella")
+# Bacteriophage genera (Centrifuge names). A sample whose largest other genus is one of these is a
+# phage infection or induction experiment and is refused. Not listed on purpose: Phix174microvirus
+# (the Illumina PhiX spike-in) and viruses of plants and animals (e.g. Begomovirus, which matches
+# parts of some engineered plasmids).
+PHAGE_GENERA = frozenset({
+    "Lambdavirus", "T7virus", "T4virus", "T5virus", "T1virus", "Rb69virus", "P1virus", "P2virus", "Muvirus",
+    "Mulikevirus", "N4virus", "N15virus", "Hk97virus", "Levivirus", "Allolevivirus", "Inovirus", "Epsilon15virus",
+    "P22virus", "Phikzvirus", "Felixo1virus", "Sp6virus", "T3virus", "Phieco32virus", "Rtpvirus", "Tunavirus",
+})
+# Thresholds of the species gate, set on the prescreen of 10,829 atlas candidates (docs/prescreen.md).
+# "of all reads" = % of the reads given to Centrifuge.
+SPECIES_THRESHOLDS = {
+    "min_pct_escherichia_shigella": 50.0,   # share of genus-resolved reads in Escherichia / Shigella ...
+    "min_pct_foreign_of_all": 2.0,          # ... below it: not E. coli, if the largest other genus is >= this % of all reads
+    "max_pct_foreign_of_all": 10.0,         # largest other genus above this % of all reads: mixed sample
+    "min_pct_phage_of_all": 0.5,            # largest other genus is a phage at this % of all reads: phage sample
+    "min_species_reads": 100,               # fewer genus-resolved reads than this: no decision
+    # early stop, before alignment, on the all-reads values: only samples that are clearly not E. coli
+    "early_max_pct_escherichia_shigella": 20.0,
+    "early_min_pct_foreign_of_all": 5.0,
+}
 
 
 def _round(x, n=4):
@@ -119,6 +140,44 @@ def kreport_all_metrics(path: str) -> dict:
             "top_non_enteric": top}
 
 
+def _number(metrics: dict, key: str):
+    value = metrics.get(key)
+    return None if value in (None, "") else float(value)
+
+
+def species_verdict(metrics: dict, thresholds: dict | None = None, early: bool = False) -> str:
+    """'ok', 'no_species' (too few genus-resolved reads to decide), 'phage', 'not_ecoli' or
+    'mixed_organism', from the values of `species_metrics`.
+
+    The values without reads on rRNA / tRNA genes (`*_nostable`) are used when they are present.
+    A low Escherichia/Shigella share alone is not enough: libraries of short reads leave few
+    classifiable reads, spread over many genera, so the largest other genus must also be a real
+    part of the library (% of all reads given to Centrifuge).
+
+    `early=True` is the check made before alignment, on the all-reads values: it only reports
+    samples that are clearly something else ('phage', 'not_ecoli'), so that they are not aligned
+    (vg giraffe is very slow on reads that do not match the graph). On the prescreen it stopped 362
+    of the 547 samples the full rule refuses and 1 of the 10,125 it accepts.
+    """
+    t = {**SPECIES_THRESHOLDS, **(thresholds or {})}
+    sfx = "" if early or _number(metrics, "species_reads_nostable") is None else "_nostable"
+    n, share, top = (_number(metrics, k + sfx) for k in ("species_reads", "pct_escherichia_shigella", "pct_top_other_genus"))
+    n_all = _number(metrics, "centrifuge_reads")
+    if n is None or share is None or n < t["min_species_reads"]:
+        return "no_species"
+    foreign = (top or 0) * n / n_all if n_all else (top or 0)
+    if metrics.get("top_other_genus" + sfx) in PHAGE_GENERA and foreign >= t["min_pct_phage_of_all"]:
+        return "phage"
+    if early:
+        return "not_ecoli" if (share < t["early_max_pct_escherichia_shigella"]
+                               and foreign >= t["early_min_pct_foreign_of_all"]) else "ok"
+    if share < t["min_pct_escherichia_shigella"] and foreign >= t["min_pct_foreign_of_all"]:
+        return "not_ecoli"
+    if foreign >= t["max_pct_foreign_of_all"]:
+        return "mixed_organism"
+    return "ok"
+
+
 class HashedIds:
     """A set of read ids held as sorted 64-bit hashes, for runs with tens of millions of reads
     (about 8 bytes per id). Membership can report a false positive once in about 10^12 tests."""
@@ -164,6 +223,7 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--classifications", required=True, help="table written by `centrifuge -S` for all reads")
     ap.add_argument("--index", help="Centrifuge index prefix; needed unless --report-all already exists")
+    ap.add_argument("--thresholds", default="{}", help="JSON object overriding SPECIES_THRESHOLDS")
     ap.add_argument("--report-all", required=True, help="all-reads centrifuge-kreport; written if --index is given")
     ap.add_argument("--bam", help="sorted alignments; with --bed gives the *_nostable values")
     ap.add_argument("--bed", help="counting annotation BED")
@@ -178,14 +238,20 @@ def main(argv: list[str] | None = None) -> int:
     out = {"centrifuge_reads": n_classified_input(args.classifications)}
     out.update(kreport_all_metrics(args.report_all))
     out.update(species_metrics(args.classifications, args.report_all))
+    thresholds = json.loads(args.thresholds or "{}")
     if args.bam and args.bed:
         stable = stable_read_ids(args.bam, args.bed)
         out["stable_rna_reads"] = len(stable)
         out.update(species_metrics(args.classifications, args.report_all, stable, "_nostable"))
+        out["verdict"] = species_verdict(out, thresholds)
+    else:
+        out["verdict_early"] = species_verdict(out, thresholds, early=True)
+    out["thresholds"] = {**SPECIES_THRESHOLDS, **thresholds}
     with open(args.out, "w", encoding="utf-8") as fh:
         json.dump(out, fh, indent=1)
     print(f"species: {out['species_reads']} genus-resolved reads, {out['pct_escherichia_shigella']} % Escherichia/Shigella, "
-          f"largest other genus {out['top_other_genus'] or 'none'} {out['pct_top_other_genus']} %", file=sys.stderr)
+          f"largest other genus {out['top_other_genus'] or 'none'} {out['pct_top_other_genus']} %; "
+          f"{out.get('verdict') or out.get('verdict_early')}", file=sys.stderr)
     return 0
 
 

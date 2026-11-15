@@ -25,7 +25,7 @@ import sys
 CALLS = ("forward", "reverse", "unstranded")
 FEATURECOUNTS_S = {"forward": "1", "reverse": "2"}
 COLUMNS = ["sample", "layout", "fraction_forward", "fraction_reverse", "fraction_undetermined", "call",
-           "call_source", "counted"]
+           "call_source", "counted", "not_counted_reason"]
 
 _FRACTION = r'[^\n]*?"{}"\s*:\s*([0-9.eE+-]+)'
 _PATTERNS = {
@@ -66,6 +66,7 @@ def call_sample(sample: str, text: str, mode: str = "auto", min_fraction: float 
     else:
         row["call"], row["call_source"] = mode, "config"
     row["counted"] = "yes" if row["call"] in FEATURECOUNTS_S else "no"
+    row["not_counted_reason"] = "" if row["counted"] == "yes" else "unstranded"
     return row
 
 
@@ -101,10 +102,17 @@ MQC_HEADER = """# id: "strandedness"
 
 
 def combine(tables: list[str], out_table: str, out_mqc: str | None = None,
-            out_failures: str | None = None) -> list[dict]:
-    """Merge per-sample tables into the run table, the MultiQC table and the list of refused samples."""
+            out_failures: str | None = None, excluded: dict | None = None) -> list[dict]:
+    """Merge per-sample tables into the run table, the MultiQC table and the list of refused samples.
+    `excluded` maps samples refused for another reason (the species gate) to that reason; they are
+    not counted either."""
     rows = [r for t in tables for r in read_table(t)]
     rows.sort(key=lambda r: r["sample"])
+    for r in rows:
+        r.setdefault("not_counted_reason", "" if r["counted"] == "yes" else "unstranded")
+        if excluded and r["sample"] in excluded:
+            r["counted"] = "no"
+            r["not_counted_reason"] = ",".join(x for x in (r["not_counted_reason"], excluded[r["sample"]]) if x)
     with open(out_table, "w", encoding="utf-8", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=COLUMNS, delimiter="\t", lineterminator="\n")
         w.writeheader()
@@ -116,7 +124,7 @@ def combine(tables: list[str], out_table: str, out_mqc: str | None = None,
             w.writeheader()
             w.writerows(rows)
     if out_failures:
-        failures = {r["sample"]: {"reason": "unstranded", "fraction_forward": float(r["fraction_forward"]),
+        failures = {r["sample"]: {"reason": r["not_counted_reason"], "fraction_forward": float(r["fraction_forward"]),
                                   "fraction_reverse": float(r["fraction_reverse"])}
                     for r in rows if r["counted"] != "yes"}
         with open(out_failures, "w", encoding="utf-8") as fh:

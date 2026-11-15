@@ -147,7 +147,7 @@ def test_dna_estimates_recover_floor_and_leakage():
     assert d["n_genes_fit"] == 400
     assert d["floor_a"] == pytest.approx(floor, rel=0.25) and d["leakage_b"] == pytest.approx(leak, rel=0.15)
     assert d["intergenic_share"] == pytest.approx(0.1, abs=0.001)
-    assert d["dna_fraction_est"] == pytest.approx(2 * d["floor_a"] * 4_641_652 / d["aligned_units"])
+    assert d["dna_fraction_fit"] == pytest.approx(2 * d["floor_a"] * 4_641_652 / d["aligned_units"])
     assert 0 < d["antisense_share"] < 1
 
 
@@ -180,3 +180,65 @@ def test_sample_column_and_summary(tmp_path):
     assert sample_qc.read_summary_column(str(summary), "A_rep1") == {"Assigned": 900, "Unassigned_NoFeatures": 100}
     with pytest.raises(SystemExit):
         sample_qc.read_count_column(str(counts), "missing")
+
+
+@pytest.mark.parametrize("metrics,early,expected", [
+    # E. coli library
+    ({"species_reads": 5000, "pct_escherichia_shigella": 92.0, "pct_top_other_genus": 0.9, "top_other_genus": "Salmonella"}, False, "ok"),
+    # Salmonella: stopped before alignment and refused after it
+    ({"species_reads": 44000, "pct_escherichia_shigella": 0.7, "pct_top_other_genus": 99.2, "top_other_genus": "Salmonella"}, True, "not_ecoli"),
+    ({"species_reads": 44000, "pct_escherichia_shigella": 0.7, "pct_top_other_genus": 99.2, "top_other_genus": "Salmonella"}, False, "not_ecoli"),
+    # 44 % E. coli with 10 % of all reads in another genus: passes the early check, refused by the full rule
+    ({"species_reads": 17000, "pct_escherichia_shigella": 44.0, "pct_top_other_genus": 30.0, "top_other_genus": "Salmonella"}, True, "ok"),
+    ({"species_reads": 17000, "pct_escherichia_shigella": 44.0, "pct_top_other_genus": 30.0, "top_other_genus": "Salmonella"}, False, "not_ecoli"),
+    # rRNA-rich E. coli library: low share in the all-reads values, but the other genus is a small part of all reads
+    ({"species_reads": 3000, "pct_escherichia_shigella": 35.0, "pct_top_other_genus": 15.0, "top_other_genus": "Salmonella"}, True, "ok"),
+    # phage infection, also when E. coli is still the majority
+    ({"species_reads": 3000, "pct_escherichia_shigella": 75.0, "pct_top_other_genus": 20.0, "top_other_genus": "T4virus"}, True, "phage"),
+    ({"species_reads": 3000, "pct_escherichia_shigella": 75.0, "pct_top_other_genus": 20.0, "top_other_genus": "T4virus"}, False, "phage"),
+    ({"species_reads": 3000, "pct_escherichia_shigella": 75.0, "pct_top_other_genus": 20.0, "top_other_genus": "Phix174microvirus"}, False, "ok"),
+    # E. coli majority with another organism at 21 % of all reads
+    ({"species_reads": 30000, "pct_escherichia_shigella": 60.0, "pct_top_other_genus": 35.0, "top_other_genus": "Klebsiella"}, False, "mixed_organism"),
+    ({"species_reads": 30000, "pct_escherichia_shigella": 60.0, "pct_top_other_genus": 35.0, "top_other_genus": "Klebsiella"}, True, "ok"),
+    # too few informative reads
+    ({"species_reads": 40, "pct_escherichia_shigella": 10.0, "pct_top_other_genus": 80.0, "top_other_genus": "Homo"}, False, "no_species"),
+])
+def test_species_verdict(metrics, early, expected):
+    assert species_metrics.species_verdict({**metrics, "centrifuge_reads": 50000}, early=early) == expected
+
+
+def test_species_verdict_prefers_values_without_stable_rna():
+    m = {"centrifuge_reads": 50000, "species_reads": 9000, "pct_escherichia_shigella": 38.0, "pct_top_other_genus": 20.0,
+         "top_other_genus": "Salmonella", "species_reads_nostable": 2500, "pct_escherichia_shigella_nostable": 85.0,
+         "pct_top_other_genus_nostable": 2.0, "top_other_genus_nostable": "Salmonella"}
+    assert species_metrics.species_verdict(m) == "ok"                       # judged without the rRNA / tRNA reads
+    assert species_metrics.species_verdict(m, early=True) == "ok"           # the early check uses all reads, leniently
+    assert species_metrics.species_verdict(m, {"min_pct_escherichia_shigella": 90.0, "min_pct_foreign_of_all": 0.05}) == "not_ecoli"
+
+
+def test_coverage_background_estimates_added_dna(tmp_path):
+    import numpy as np
+    rng = np.random.default_rng(7)
+    n = 20000                                             # 2 Mb genome in 100 bp bins
+    plus = np.zeros(n)
+    minus = np.zeros(n)
+    genes = rng.integers(0, n - 10, 600)
+    for g in genes:                                       # RNA: one strand per region, strongly expressed
+        (plus if rng.random() < 0.5 else minus)[g:g + 10] += rng.gamma(2.0, 3000.0)
+    bed = tmp_path / "a.bed"
+    bed.write_text("".join(f"NC_1\t{g * 100}\t{(g + 10) * 100}\tCDS:x{i}\t0\t+\n" for i, g in enumerate(genes)))
+    results = {}
+    for label, dna_depth in (("none", 0.0), ("spiked", 2.0)):       # DNA: the same depth on both strands, everywhere
+        p = plus + rng.poisson(dna_depth * 100, n)
+        m = minus + rng.poisson(dna_depth * 100, n)
+        path = tmp_path / f"{label}.npz"
+        np.savez_compressed(path, bin_size=np.asarray(100), strand_call=np.asarray("reverse"),
+                            NC_1__plus=p.astype(np.uint32), NC_1__minus=m.astype(np.uint32))
+        results[label] = (sample_qc.coverage_background(str(path), str(bed)), 2 * dna_depth * 100 * n / (p.sum() + m.sum()))
+    none, _ = results["none"]
+    spiked, truth = results["spiked"]
+    assert none["dna_fraction_est"] == 0.0 and none["minstrand_cov"] == 0.0
+    assert spiked["minstrand_cov"] == pytest.approx(2.0, rel=0.05)
+    assert spiked["dna_fraction_est"] == pytest.approx(truth, rel=0.05)
+    assert spiked["floor_cov_plus"] < 2.0 < spiked["intergenic_cov_plus"] + 0.2          # low quantiles sit below the mean
+    assert spiked["n_intergenic_bins"] > 10000 and spiked["dna_fraction_step"] > 0

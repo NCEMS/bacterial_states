@@ -108,11 +108,18 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
 - QC record (`docs/atlas_qc_inputs.md`): rules `bam_qc`, `species_qc`, `tool_versions`, `sample_qc`
   write `<s>/qc/<s>.qc.json` and `<s>/coverage/<s>.cov100.npz`; `featurecounts_combined` also writes
   `all_samples_antisense_counts.txt`. `species_metrics.py` (workflow script) is shared with the
-  prescreen via `qc_metrics.py`; the species values are reported, not a gate. `species_qc` needs
+  prescreen via `qc_metrics.py` and is the workflow's species gate (`species_gate`, default on with
+  Centrifuge; `species_verdict`, `SPECIES_THRESHOLDS`): rule `species_early` stops clearly foreign
+  samples in the QC checkpoint before alignment, rule `species_qc` gives the verdict used by
+  checkpoint `strand_passed_samples` (`not_counted_reason` in `strandedness.tsv`). The old keys
+  `centrifuge_organism` / `centrifuge_min_percentage` are ignored with a warning. `species_qc` needs
   Centrifuge's `initial.tsv` (a temp file), so it cannot be added to a finished run without
   re-running Centrifuge. `keep_alignments: false` makes `.gam` / `_sort.bam` temporary (deleted
   after the QC steps); default is to keep them. `qc_table.py add-full` turns each record into
-  `full_*` columns (`qc_metrics.RECORD_COLUMNS`). The atlas model design is on branch `update-atlas`
+  `full_*` columns (`qc_metrics.RECORD_COLUMNS`). `dna_fraction_est` in the record is the
+  coverage-based estimate (median over bins of the lower strand's depth), calibrated with
+  DNA-spiked twins (`atlas_build/twins/make_twins.py`, `work/dna_calibration/`); the antisense fit
+  is kept as `dna_fraction_fit` only. The atlas model design is on branch `update-atlas`
   (`work/worktrees/update-atlas`); model code does not go on `ingest-update`.
 - The atlas training table uses **b-numbers** and 4,493 features counted unstranded. `ecoli_atlas`
   maps b-numbers → symbols with the feature table and reports coverage (`gene_coverage.tsv`);

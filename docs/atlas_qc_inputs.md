@@ -184,18 +184,21 @@ Differences from the specification above:
   and `strand_call`. Read with `numpy.load`.
 - **Species (item 10)** is computed from the classification of every trimmed read (Centrifuge's
   first pass, `initial.tsv`), for all reads and again without reads on rRNA / tRNA genes
-  (`*_nostable`), exactly as the prescreen does (`species_metrics.py` is shared). It is reported,
-  not used as a gate; the workflow's `centrifuge_min_percentage` gate still uses the older
-  species-level value, which fails real *E. coli* libraries (see `docs/prescreen.md`) and should be
-  left unset for prescreened samples.
-- **DNA values (item 15).** The fit is a Theil-Sen line (median slope over 200,000 random gene
-  pairs, then median intercept), genes of type rRNA and tRNA left out. `dna_fraction_est` uses
-  `Assigned + Unassigned_NoFeatures` of featureCounts as the number of aligned units, so that it
-  is in the same unit as the counts (fragments for paired-end runs). Coverage background values
-  are mean depth per base: `floor_cov_*` is the 10 % quantile over bins, `intergenic_cov_*` the
-  median over bins that touch no feature on either strand. `antisense_per_base` (antisense reads
-  per base over all genes outside rRNA / tRNA) is added because the median-based fit and the
-  coverage quantiles are 0 for shallow samples (a 200,000-pair test sample gave 0 for all of them).
+  (`*_nostable`), exactly as the prescreen does (`species_metrics.py` is shared). It is also the
+  workflow's species gate (`species_gate`, on by default with Centrifuge): `verdict` in the
+  record's `species` block is `ok`, `no_species`, `phage`, `not_ecoli` or `mixed_organism`, and
+  only `ok` and `no_species` samples are counted. Samples that are clearly not *E. coli* are
+  stopped before alignment and have no record.
+- **DNA values (item 15).** `dna_fraction_est` is no longer the antisense fit. It is made from the
+  coverage track: for every 100 bp bin the lower of the two strands' depths (DNA covers both
+  strands, RNA mostly one), then the median over bins (`minstrand_cov`), and
+  `dna_fraction_est = 2 x minstrand_cov x genome length / aligned bases`. It is computed when the
+  record is assembled, from the saved track, so the definition can change without alignments.
+  The antisense fit is kept as `floor_a`, `leakage_b`, `dna_fraction_fit` (Theil-Sen line over
+  genes, rRNA and tRNA left out). Also kept: `floor_cov_*` (10 % quantile of bin depth),
+  `q25_cov_*`, `intergenic_cov_*` (median over bins that touch no feature), `antisense_per_base`,
+  `aligned_bases`, `dna_fraction_step` (granularity: one base of depth in a bin). Depths are mean
+  depth per base. See "Calibration of the DNA estimate" below.
 - **Off-reference share (item 7)** is (`Total aligned` of `vg stats` - mapped reads in the BAM) /
   `Total aligned`. Not yet checked on a non-K-12 sample.
 - **Tool versions (item 14)** come from the tools themselves (`--version`), not from MultiQC.
@@ -229,7 +232,40 @@ Differences from the specification above:
 `first_public` into the identity columns. A technical twin run under the name `<GSM>__<variant>`
 gets its own row with `twin_of` set to the GSM.
 
+## Calibration of the DNA estimate
+
+Run of 2026-11-15, `work/dna_calibration/`. Three libraries (K-12 76 bp, K-12 150 bp, Nissle 1917
+150 bp; 5.1-6.0 M read pairs) were run as they are and with simulated MG1655 genomic reads added to
+make up 1, 5 and 20 % of the reads (`make_twins.py`, variants `g1`, `g5`, `g20`). Each estimator
+was converted to a share of the aligned library and its increase over the unspiked sample divided
+by the share actually added (1.00 = exact):
+
+| Estimator | Mean | Range over the 9 spiked samples | Unspiked samples read |
+|---|---|---|---|
+| median over bins of the lower strand's depth (**used**) | 1.02 | 0.94-1.24 | 0.2, 1.7, 1.0 % |
+| 25 % quantile of bin depth per strand | 1.05 | 0.92-1.36 | 0.1, 1.2, 0.1 % |
+| median depth between genes | 1.12 | 1.00-1.28 | 0.9, 2.2, 1.4 % |
+| 10 % quantile of bin depth per strand (the first definition's cross-check) | 0.70 | 0.31-0.86 | 0, 0, 0 % |
+| antisense fit over genes (the first definition) | 1.27 | 1.10-1.53 | 1.0, 1.7, 1.0 % |
+| `intergenic_share`, `antisense_share` | 0.45 | 0.43-0.49 | 1.1-6.2 % |
+
+- The chosen estimate follows added DNA within 6 % at 5 and 20 % and within 24 % at 1 %.
+- Low quantiles underestimate because DNA coverage itself varies from bin to bin; the fit
+  overestimates, and its slope `leakage_b` rises with DNA (0.0004 to 0.012 in one library), so the
+  two are not independent.
+- `intergenic_share` and `antisense_share` each rise by a little under half of the added share,
+  as expected for reads spread over both strands and over genes and gaps alike.
+- What the estimate reads without added DNA (0.2-1.7 %) is real DNA plus transcription of both
+  strands of the same region, which this test cannot separate. It is an upper bound.
+- Not tested: single-end libraries, libraries much shallower than 5 M reads (the median is 0 until
+  DNA reaches about half a read per bin and strand), and DNA from another strain.
+
 ## Technical twins
+
+`ecoli_ingest/atlas_build/twins/make_twins.py` makes every variant below from raw reads. Only the
+genomic-DNA variants have been run (the calibration above); the selection of about 200 samples and
+the other variants have not.
+
 
 Purpose: samples whose biology is identical by construction and whose read length, layout or
 depth differ. They test whether those properties move a sample in the embedding, and can be used
