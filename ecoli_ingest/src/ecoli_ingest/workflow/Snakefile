@@ -122,6 +122,13 @@ wildcard_constraints:
     ext="fastq(\\.gz)?"
 
 
+# Alignments (<sample>.gam, <sample>_sort.bam) are kept unless `keep_alignments: false`. They are
+# then removed as soon as every step that reads them has finished; the QC record and the coverage
+# track (rules bam_qc, sample_qc) hold what is needed from them.
+keep_alignments = bool(config.get("keep_alignments", True))
+def alignment(path):
+    return path if keep_alignments else temp(path)
+
 #Getting contrasts
 deseq2_contrasts = config.get("deseq2", {}).get("contrasts", [])
 contrast_names = [f"{ref}_vs_{test}" for factor, ref, test in deseq2_contrasts]
@@ -258,9 +265,9 @@ def get_rna_seq_outputs(wildcards):
 
     outputs = []
     for s in passed_samples:
+        if keep_alignments:
+            outputs.extend([f"{results_dir}/{s}/vg/{s}.gam", f"{results_dir}/{s}/vg/{s}_sort.bam"])
         outputs.extend([
-            f"{results_dir}/{s}/vg/{s}.gam",
-            f"{results_dir}/{s}/vg/{s}_sort.bam",
             f"{results_dir}/{s}/vg/{s}_giraffe.stats.txt",
             f"{results_dir}/{s}/rseqc/{s}_infer_experiment.txt",
             f"{results_dir}/{s}/feature_overlap/{s}_feature_overlap_mqc.tsv",
@@ -393,7 +400,7 @@ if SE:
             r1=lambda wc: f"{results_dir}/{wc.sample}/{wc.sample}_clean_R1.fastq",
             passed_qc=lambda wc: f"checkpoints/passed/{wc.sample}.pass"
         output:
-            gam=f"{results_dir}/{{sample}}/vg/{{sample}}.gam"
+            gam=alignment(f"{results_dir}/{{sample}}/vg/{{sample}}.gam")
         params:
             graph=vg_index+".d2.gbz",
             dist=vg_index+".d2.dist",
@@ -496,7 +503,7 @@ else:
             r2=lambda wc: f"{results_dir}/{wc.sample}/{wc.sample}_clean_R2.fastq",
             passed_qc=lambda wc: f"checkpoints/passed/{wc.sample}.pass"
         output:
-            gam=f"{results_dir}/{{sample}}/vg/{{sample}}.gam"
+            gam=alignment(f"{results_dir}/{{sample}}/vg/{{sample}}.gam")
         params:
             graph=vg_index+".d2.gbz",
             dist=vg_index+".d2.dist",
@@ -552,8 +559,8 @@ rule rseqc:
         infer_experiment = f"{results_dir}/{{sample}}/rseqc/{{sample}}_infer_experiment.txt",
         genebody_cov_txt = f"{results_dir}/{{sample}}/rseqc/{{sample}}_genebody_cov.geneBodyCoverage.txt",
         genebody_cov_r = f"{results_dir}/{{sample}}/rseqc/{{sample}}_genebody_cov.geneBodyCoverage.r",
-        sorted_bam = f"{results_dir}/{{sample}}/vg/{{sample}}_sort.bam",
-        bam_index = f"{results_dir}/{{sample}}/vg/{{sample}}_sort.bam.bai"
+        sorted_bam = alignment(f"{results_dir}/{{sample}}/vg/{{sample}}_sort.bam"),
+        bam_index = alignment(f"{results_dir}/{{sample}}/vg/{{sample}}_sort.bam.bai")
     params:
         annotation_bed = annotation_bed
     benchmark: f"benchmarks/{{sample}}_rseqc_benchmark.txt"

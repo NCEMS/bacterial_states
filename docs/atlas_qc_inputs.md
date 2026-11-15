@@ -203,11 +203,31 @@ Differences from the specification above:
   fields of the sample's runs are copied from it. Without it, the record lists the runs and their
   read numbers for accession samples only.
 - **Added:** `ladder` (reads in, kept, aligned, on the reference, assigned, assigned outside rRNA
-  and tRNA), `antisense_assignment`, `gene_body_slope`, `reads.length_quantiles`.
+  and tRNA), `antisense_assignment`, `gene_body_slope`, `reads.length_quantiles`,
+  `composition.short_features` (reads on features under 200 nt, rRNA and tRNA genes left out).
 - Unstranded samples are not counted and get no record.
+- **Deleting alignments.** With `keep_alignments: false` in `config.yaml`, `<s>.gam`,
+  `<s>_sort.bam` and its index are removed as soon as counting, the coverage track and the QC
+  steps have read them. A two-sample test left 7 MB of results and no alignment file.
 
-`qc_table.py add-full` takes the species values of a full run from the record. The other new
-values are not yet columns of `sample_qc.tsv`.
+### In the QC table
+
+`qc_table.py add-full` reads each sample's record and fills, next to the `full_*` metrics:
+
+- the species values of the full run;
+- `qc_metrics.RECORD_COLUMNS` as `full_<name>`: read-length quantiles (`length_q05_r1`,
+  `length_q50_r1`, `length_q95_r1`, `length_q50_r2`), `cycles_r1`, `gc_content`, fragment-size
+  quartiles, `assigned`, `counting_unit`, `pct_assigned_not_stable`, the RNA family shares
+  (`pct_16S`, `pct_23S`, `pct_5S`, `pct_tRNA_family`, `pct_ssrA`, `pct_rnpB`, `pct_ssrS`,
+  `pct_ffs`), `pct_short_features`, `off_reference_fraction`, `substitution_rate`,
+  `gene_body_slope`, the DNA-background values, and `n_runs`, `library_selection`,
+  `instrument_model`, `pipeline_commit` as recorded by the run. Family shares are % of all
+  read-feature assignments.
+
+`merge-prescreen` copies the manifest's `n_runs`, `reads`, `bases`, `library_strategy`,
+`library_source`, `library_selection`, `instrument_platform`, `instrument_model` and
+`first_public` into the identity columns. A technical twin run under the name `<GSM>__<variant>`
+gets its own row with `twin_of` set to the GSM.
 
 ## Technical twins
 

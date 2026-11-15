@@ -165,6 +165,72 @@ def collect(files: dict, min_fraction: float = 0.8) -> dict:
     return out
 
 
+# ---------------------------------------------------------------------------- full-run record
+
+# Columns of the QC table that only a full inGEST run has (full_<name>), derived from the sample's
+# QC record (<sample>.qc.json, workflow/scripts/sample_qc.py).
+RECORD_COLUMNS = [
+    "length_q05_r1", "length_q50_r1", "length_q95_r1", "length_q50_r2", "cycles_r1", "gc_content",
+    "fragment_q25", "fragment_q50", "fragment_q75",
+    "assigned", "counting_unit", "pct_assigned_not_stable",
+    "pct_16S", "pct_23S", "pct_5S", "pct_tRNA_family", "pct_ssrA", "pct_rnpB", "pct_ssrS", "pct_ffs", "pct_short_features",
+    "off_reference_fraction", "substitution_rate", "gene_body_slope",
+    "intergenic_share", "antisense_share", "antisense_per_base", "floor_a", "leakage_b", "dna_fraction_est",
+    "floor_cov_plus", "floor_cov_minus", "intergenic_cov_plus", "intergenic_cov_minus",
+    "n_runs", "library_selection", "instrument_model", "pipeline_commit",
+]
+
+
+def histogram_quantile(hist: list, q: float):
+    """Quantile of a [[value, count], ...] histogram."""
+    total = sum(n for _, n in hist)
+    acc = 0
+    for value, n in sorted(hist):
+        acc += n
+        if acc >= q * total:
+            return value
+    return None
+
+
+def record_columns(record: dict) -> dict:
+    """The RECORD_COLUMNS values of one QC record. Shares are % of all read-feature assignments
+    (a read on two features counts twice), except pct_assigned_not_stable, which is % of assigned reads."""
+    reads, comp = record.get("reads", {}), record.get("composition", {})
+    lq = reads.get("length_quantiles", {})
+    out = {
+        "length_q05_r1": lq.get("r1", {}).get("q05"), "length_q50_r1": lq.get("r1", {}).get("q50"),
+        "length_q95_r1": lq.get("r1", {}).get("q95"), "length_q50_r2": lq.get("r2", {}).get("q50"),
+        "cycles_r1": (reads.get("cycles") or [None])[0], "gc_content": reads.get("after", {}).get("gc_content"),
+    }
+    tlen = [x for x in record.get("fragment", {}).get("tlen_hist", [])]
+    for name, q in (("fragment_q25", 0.25), ("fragment_q50", 0.5), ("fragment_q75", 0.75)):
+        out[name] = histogram_quantile(tlen, q) if tlen else None
+    ladder = record.get("ladder", {})
+    assigned = ladder.get("assigned")
+    out["assigned"], out["counting_unit"] = assigned, ladder.get("counting_unit")
+    out["pct_assigned_not_stable"] = (_round(100 * ladder["assigned_not_stable_rna"] / assigned, 2)
+                                      if assigned and ladder.get("assigned_not_stable_rna") is not None else None)
+    total = sum(comp.get("by_type", {}).values())
+    family = comp.get("by_family", {})
+    for key, name in (("16S", "pct_16S"), ("23S", "pct_23S"), ("5S", "pct_5S"), ("tRNA", "pct_tRNA_family"),
+                      ("ssrA", "pct_ssrA"), ("rnpB", "pct_rnpB"), ("ssrS", "pct_ssrS"), ("ffs", "pct_ffs")):
+        out[name] = _round(100 * family[key] / total, 3) if total and key in family else None
+    short = comp.get("short_features", {}).get("reads")
+    out["pct_short_features"] = _round(100 * short / total, 3) if total and short is not None else None
+    align, dna = record.get("alignment", {}), record.get("dna", {})
+    out.update(off_reference_fraction=align.get("off_reference_fraction"), substitution_rate=align.get("substitution_rate"),
+               gene_body_slope=record.get("gene_body_slope"))
+    for key in ("intergenic_share", "antisense_share", "antisense_per_base", "floor_a", "leakage_b", "dna_fraction_est",
+                "floor_cov_plus", "floor_cov_minus", "intergenic_cov_plus", "intergenic_cov_minus"):
+        out[key] = dna.get(key)
+    runs = record.get("runs") or []
+    out["n_runs"] = len(runs) or None
+    out["library_selection"] = "/".join(sorted({r["library_selection"] for r in runs if r.get("library_selection")}))
+    out["instrument_model"] = "/".join(sorted({r["instrument_model"] for r in runs if r.get("instrument_model")}))
+    out["pipeline_commit"] = record.get("pipeline", {}).get("commit")
+    return out
+
+
 # ---------------------------------------------------------------------------- decision
 
 DEFAULT_THRESHOLDS = {

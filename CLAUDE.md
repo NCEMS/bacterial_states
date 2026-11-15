@@ -110,7 +110,9 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   `all_samples_antisense_counts.txt`. `species_metrics.py` (workflow script) is shared with the
   prescreen via `qc_metrics.py`; the species values are reported, not a gate. `species_qc` needs
   Centrifuge's `initial.tsv` (a temp file), so it cannot be added to a finished run without
-  re-running Centrifuge. The atlas model design is on branch `update-atlas`
+  re-running Centrifuge. `keep_alignments: false` makes `.gam` / `_sort.bam` temporary (deleted
+  after the QC steps); default is to keep them. `qc_table.py add-full` turns each record into
+  `full_*` columns (`qc_metrics.RECORD_COLUMNS`). The atlas model design is on branch `update-atlas`
   (`work/worktrees/update-atlas`); model code does not go on `ingest-update`.
 - The atlas training table uses **b-numbers** and 4,493 features counted unstranded. `ecoli_atlas`
   maps b-numbers → symbols with the feature table and reports coverage (`gene_coverage.tsv`);

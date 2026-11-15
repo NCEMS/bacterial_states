@@ -2,15 +2,20 @@
 """Maintain the sample QC table: prescreen metrics first, full-run metrics for samples that are processed.
 
 One row per GEO sample (GSM). Columns:
-  identity   GSM, GSE, runs, layout, scientific_name, tax_id, instrument_model, manifest_status,
-             review, in_atlas_v1, study_candidates (candidate samples in the study) and large_study
+  identity   GSM, GSE, runs, n_runs, layout, reads, bases, scientific_name, tax_id, library_strategy,
+             library_source, library_selection, instrument_platform, instrument_model, first_public,
+             manifest_status, review, in_atlas_v1, twin_of (the GSM a technical twin was made from; a
+             twin's row is keyed <GSM>__<variant>), study_candidates (candidate samples in the study) and large_study
              (yes when that is at least LARGE_STUDY_MIN: statistics over the atlas should be reported
              with and without such a study)
   pre_*      metrics of the read-subsample prescreen (prescreen.py), with pre_run, pre_spots,
              pre_source, pre_date, pre_pipeline, pre_error
   pre_decision, pre_reasons   pass / fail / incomplete from the thresholds (qc_metrics.decide)
   full_*     the same metrics from a complete inGEST run, with full_sample, full_counted,
-             full_results_dir, full_date, full_pipeline
+             full_results_dir, full_date, full_pipeline; and the values only a full run has, from
+             the sample's QC record (qc_metrics.RECORD_COLUMNS: read-length and fragment-size
+             quantiles, RNA family shares, off-reference share, substitution rate, gene-body
+             slope, DNA-background values)
   in_model   name of the atlas model the sample is part of
 
     qc_table.py merge-prescreen --manifest work/atlas_manifest --samples-dir work/prescreen/samples --table atlas_data/sample_qc.tsv
@@ -38,13 +43,17 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import qc_metrics  # noqa: E402
 
-IDENTITY = ["GSM", "GSE", "runs", "layout", "scientific_name", "tax_id", "instrument_model", "manifest_status",
-            "review", "in_atlas_v1", "study_candidates", "large_study"]
+IDENTITY = ["GSM", "GSE", "runs", "n_runs", "layout", "reads", "bases", "scientific_name", "tax_id",
+            "library_strategy", "library_source", "library_selection", "instrument_platform", "instrument_model",
+            "first_public", "manifest_status", "review", "in_atlas_v1", "study_candidates", "large_study", "twin_of"]
+RUN_FIELDS = ("library_strategy", "library_source", "instrument_platform")      # taken from the manifest's runs.tsv
 LARGE_STUDY_MIN = 500      # candidate samples; such a study can dominate statistics, so report with and without it
 PRE_INFO = ["pre_run", "pre_spots", "pre_source", "pre_date", "pre_pipeline", "pre_error"]
 FULL_INFO = ["full_sample", "full_counted", "full_results_dir", "full_date", "full_pipeline"]
 COLUMNS = (IDENTITY + PRE_INFO + [f"pre_{m}" for m in qc_metrics.METRICS] + ["pre_decision", "pre_reasons"]
-           + FULL_INFO + [f"full_{m}" for m in qc_metrics.METRICS] + ["in_model"])
+           + FULL_INFO + [f"full_{m}" for m in qc_metrics.METRICS] + [f"full_{m}" for m in qc_metrics.RECORD_COLUMNS]
+           + ["in_model"])
+TWIN_RE = re.compile(r"^(GSM\d+)__(\w+)$")      # technical twins are named <GSM>__<variant>
 
 
 def read_table(path: str) -> dict:
@@ -93,7 +102,23 @@ def merge_prescreen(table: str, manifest_dir: str | None, samples_dir: str, thre
             for s in csv.DictReader(fh, delimiter="\t", quoting=csv.QUOTE_NONE):
                 row = _row(rows, s["GSM"])
                 for c in IDENTITY:
-                    row[c] = s.get("status" if c == "manifest_status" else c, "") or ""
+                    if c in s or c == "manifest_status":
+                        row[c] = s.get("status" if c == "manifest_status" else c, "") or ""
+        runs_path = os.path.join(manifest_dir, "runs.tsv")
+        if os.path.exists(runs_path):        # fields that the per-sample table does not carry
+            per_sample: dict = {}
+            with open(runs_path, encoding="utf-8", newline="") as fh:
+                for r in csv.DictReader(fh, delimiter="\t", quoting=csv.QUOTE_NONE):
+                    if r.get("GSM") in rows:
+                        d = per_sample.setdefault(r["GSM"], {k: set() for k in RUN_FIELDS} | {"bases": 0})
+                        for k in RUN_FIELDS:
+                            if r.get(k):
+                                d[k].add(r[k])
+                        d["bases"] += int(r.get("base_count") or 0)
+            for gsm, d in per_sample.items():
+                for k in RUN_FIELDS:
+                    rows[gsm][k] = "/".join(sorted(d[k]))
+                rows[gsm]["bases"] = str(d["bases"])
         per_study = Counter(r["GSE"] for r in rows.values() if r["manifest_status"] == "candidate")
         for row in rows.values():
             row["study_candidates"] = str(per_study.get(row["GSE"], 0))
@@ -154,7 +179,8 @@ def add_full(table: str, results_dir: str, config: str | None, pipeline: str = "
     skipped = []
     for d in sorted(glob.glob(os.path.join(results_dir, "*", "fastp"))):
         sample = os.path.basename(os.path.dirname(d))
-        gsm = names.get(sample) or (sample if re.fullmatch(r"GSM\d+", sample) else None)
+        twin = TWIN_RE.match(sample)
+        gsm = names.get(sample) or (sample if re.fullmatch(r"GSM\d+", sample) else None) or (sample if twin else None)
         if not gsm:
             skipped.append(sample)
             continue
@@ -162,17 +188,25 @@ def add_full(table: str, results_dir: str, config: str | None, pipeline: str = "
         metrics = qc_metrics.collect(files)
         # species statistics of a full run are in the sample's QC record (workflow rule species_qc)
         record = os.path.join(results_dir, sample, "qc", f"{sample}.qc.json")
+        record_data = None
         if os.path.exists(record):
             with open(record, encoding="utf-8") as fh:
-                species = json.load(fh).get("species") or {}
+                record_data = json.load(fh)
+            species = record_data.get("species") or {}
             metrics.update({k: v for k, v in species.items() if k in qc_metrics.METRICS})
         row = _row(rows, gsm)
+        if twin:
+            row["twin_of"] = twin.group(1)
+            row["GSE"] = row["GSE"] or rows.get(twin.group(1), {}).get("GSE", "")
         mtime = max((os.path.getmtime(p) for p in files.values() if os.path.exists(p)), default=None)
         row.update(full_sample=sample, full_counted=counted.get(sample, ""),
                    full_results_dir=os.path.abspath(results_dir),
                    full_date=datetime.date.fromtimestamp(mtime).isoformat() if mtime else "", full_pipeline=pipeline)
         for m in qc_metrics.METRICS:
             row[f"full_{m}"] = _text(metrics.get(m))
+        extra = qc_metrics.record_columns(record_data) if record_data else {}
+        for m in qc_metrics.RECORD_COLUMNS:
+            row[f"full_{m}"] = _text(extra.get(m))
         n += 1
     write_table(rows, table)
     print(f"added full-run metrics for {n} samples from {results_dir}", file=sys.stderr)

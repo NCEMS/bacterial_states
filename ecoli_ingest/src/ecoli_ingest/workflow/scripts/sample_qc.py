@@ -29,6 +29,7 @@ TLEN_MAX = 1000
 FAMILIES = {"16S": r"^rrs", "23S": r"^rrl", "5S": r"^rrf", "ssrA": r"^ssrA$", "rnpB": r"^rnpB$", "ssrS": r"^ssrS$",
             "ffs": r"^ffs$"}
 STABLE_TYPES = ("rRNA", "tRNA")
+SHORT_FEATURE = 200        # nt; features shorter than this are lost by protocols with a size cut-off
 VERSION_COMMANDS = {
     "fastp": "fastp --version", "fastqc": "fastqc --version", "centrifuge": "centrifuge --version",
     "vg": "vg version", "samtools": "samtools --version", "bedtools": "bedtools --version",
@@ -299,7 +300,11 @@ def composition(sense: dict, features: dict) -> dict:
         for family, pattern in FAMILIES.items():
             if re.search(pattern, symbol) and group in ("rRNA", "ncRNA"):
                 by_family[family] += count
-    return {"by_type": by_type, "by_family": by_family}
+    short = sum(count for fid, (count, length) in sense.items()
+                if length < SHORT_FEATURE and features.get(fid, ("",))[0] not in STABLE_TYPES)
+    return {"by_type": by_type, "by_family": by_family,
+            # reads on features under SHORT_FEATURE nt, rRNA and tRNA genes left out
+            "short_features": {"max_length": SHORT_FEATURE, "reads": short}}
 
 
 def robust_line(x: list, y: list, max_pairs: int = 200_000, seed: int = 1) -> tuple[float | None, float | None]:

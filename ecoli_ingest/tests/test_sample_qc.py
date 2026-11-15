@@ -123,6 +123,8 @@ def test_composition_by_type_and_family(tmp_path):
     comp = sample_qc.composition(sense, features)
     assert comp["by_type"] == {"CDS": 150, "rRNA": 10030, "tRNA": 70, "ncRNA": 340, "Rfam": 9, "pseudo": 1}
     assert comp["by_family"] == {"16S": 4000, "23S": 6000, "5S": 30, "ssrA": 300, "rnpB": 40, "ssrS": 0, "ffs": 0, "tRNA": 70}
+    # features under 200 nt outside rRNA / tRNA: the Rfam leader (120 nt); the tRNA and 5S genes do not count
+    assert comp["short_features"] == {"max_length": 200, "reads": 9}
 
 
 def test_dna_estimates_recover_floor_and_leakage():

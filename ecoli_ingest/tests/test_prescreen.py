@@ -239,6 +239,12 @@ def test_qc_table_prescreen_then_full_run(tmp_path):
             w.writerow([f"GSM9{i:04d}", "GSE8", "candidate", "SRR9", "PAIRED", "Escherichia coli", "562", "NovaSeq", "", "no"])
         w.writerow(["GSM2", "GSE9", "candidate", "SRR2,SRR3", "PAIRED", "Escherichia coli", "562", "NovaSeq", "", "no"])
         w.writerow(["GSM3", "GSE9", "low_reads", "SRR4", "SINGLE", "Escherichia coli", "562", "NovaSeq", "", "no"])
+    with open(manifest / "runs.tsv", "w", newline="") as fh:
+        w = csv.writer(fh, delimiter="\t")
+        w.writerow(["run_accession", "GSM", "library_strategy", "library_source", "instrument_platform", "base_count"])
+        w.writerow(["SRR1", "GSM1", "RNA-Seq", "TRANSCRIPTOMIC", "ILLUMINA", "300"])
+        w.writerow(["SRR2", "GSM2", "RNA-Seq", "TRANSCRIPTOMIC", "ILLUMINA", "200"])
+        w.writerow(["SRR3", "GSM2", "RNA-Seq", "GENOMIC", "ILLUMINA", "300"])
     recs = tmp_path / "samples"
     recs.mkdir()
     metrics = qc_metrics.collect(write_qc_files(tmp_path / "pre"))
@@ -256,6 +262,8 @@ def test_qc_table_prescreen_then_full_run(tmp_path):
     assert (rows["GSM90000"]["study_candidates"], rows["GSM90000"]["large_study"]) == (str(qc_table.LARGE_STUDY_MIN), "yes")
     assert rows["GSM1"]["pre_decision"] == "pass" and rows["GSM1"]["pre_strand_call"] == "reverse"
     assert rows["GSM1"]["in_atlas_v1"] == "yes" and rows["GSM1"]["pre_run"] == "SRR1"
+    assert (rows["GSM1"]["library_strategy"], rows["GSM1"]["instrument_platform"], rows["GSM1"]["bases"]) == ("RNA-Seq", "ILLUMINA", "300")
+    assert rows["GSM2"]["bases"] == "500" and rows["GSM2"]["library_source"] == "GENOMIC/TRANSCRIPTOMIC"   # two runs
     assert rows["GSM2"]["pre_decision"] == "error" and rows["GSM2"]["pre_error"] == "fetch: no reads"
     assert rows["GSM3"]["manifest_status"] == "low_reads" and rows["GSM3"]["pre_decision"] == ""
 
@@ -270,6 +278,34 @@ def test_qc_table_prescreen_then_full_run(tmp_path):
     assert (r["full_sample"], r["full_counted"], r["full_pipeline"]) == ("wt_rep1", "yes", "def5678")
     assert r["full_pct_aligned"] == r["pre_pct_aligned"] == "99.0"      # same parser for both
     assert r["pre_decision"] == "pass" and rows["GSM2"]["full_date"] == ""   # other columns untouched
+
+    # values that only a full run has come from the sample's QC record
+    record = {"reads": {"length_quantiles": {"r1": {"q05": 30, "q50": 42, "q95": 43}, "r2": {"q50": 41}}, "cycles": [43, 43],
+                        "after": {"gc_content": 0.51}},
+              "fragment": {"tlen_hist": [[100, 10], [150, 20], [300, 10]]},
+              "ladder": {"assigned": 1000, "assigned_not_stable_rna": 900, "counting_unit": "fragments"},
+              "composition": {"by_type": {"CDS": 1500, "rRNA": 400, "tRNA": 100},
+                              "by_family": {"16S": 150, "23S": 240, "5S": 10, "tRNA": 100, "ssrA": 20, "rnpB": 4, "ssrS": 0, "ffs": 0},
+                              "short_features": {"max_length": 200, "reads": 40}},
+              "alignment": {"off_reference_fraction": 0.004, "substitution_rate": 0.01},
+              "gene_body_slope": -0.07, "dna": {"intergenic_share": 0.03, "antisense_per_base": 0.001},
+              "runs": [{"run": "SRR1", "library_selection": "cDNA", "instrument_model": "NovaSeq"}],
+              "pipeline": {"commit": "abc1234"},
+              "species": {"species_reads": 5000, "pct_escherichia_shigella": 91.0, "pct_escherichia_shigella_nostable": 93.0}}
+    (results / "wt_rep1" / "qc").mkdir()
+    (results / "wt_rep1" / "qc" / "wt_rep1.qc.json").write_text(json.dumps(record))
+    r = qc_table.add_full(table, str(results), str(config), "def5678")["GSM1"]
+    assert (r["full_length_q50_r1"], r["full_length_q50_r2"], r["full_fragment_q50"], r["full_fragment_q75"]) == ("42", "41", "150", "150")
+    assert (r["full_pct_16S"], r["full_pct_tRNA_family"], r["full_pct_short_features"]) == ("7.5", "5.0", "2.0")
+    assert (r["full_pct_assigned_not_stable"], r["full_off_reference_fraction"], r["full_gene_body_slope"]) == ("90.0", "0.004", "-0.07")
+    assert (r["full_library_selection"], r["full_n_runs"], r["full_pipeline_commit"]) == ("cDNA", "1", "abc1234")
+    assert (r["full_pct_escherichia_shigella_nostable"], r["full_species_reads"]) == ("93.0", "5000")   # species of the full run
+    assert r["full_fragment_q25"] == "100" and r["full_dna_fraction_est"] == ""
+
+    # a technical twin is a row of its own, linked to the sample it was made from
+    write_qc_files(results, "GSM1__t36")
+    rows = qc_table.add_full(table, str(results), str(config), "def5678")
+    assert rows["GSM1__t36"]["twin_of"] == "GSM1" and rows["GSM1__t36"]["GSE"] == "GSE9" and rows["GSM1"]["twin_of"] == ""
 
     # stricter thresholds change the decision without re-running anything
     assert qc_table.main(["decide", "--table", table, "--min-pct-aligned", "99.5"]) == 0
