@@ -160,6 +160,12 @@ def add_full(table: str, results_dir: str, config: str | None, pipeline: str = "
             continue
         files = full_run_files(results_dir, sample)
         metrics = qc_metrics.collect(files)
+        # species statistics of a full run are in the sample's QC record (workflow rule species_qc)
+        record = os.path.join(results_dir, sample, "qc", f"{sample}.qc.json")
+        if os.path.exists(record):
+            with open(record, encoding="utf-8") as fh:
+                species = json.load(fh).get("species") or {}
+            metrics.update({k: v for k, v in species.items() if k in qc_metrics.METRICS})
         row = _row(rows, gsm)
         mtime = max((os.path.getmtime(p) for p in files.values() if os.path.exists(p)), default=None)
         row.update(full_sample=sample, full_counted=counted.get(sample, ""),

@@ -186,6 +186,10 @@ Set `results_dir: "results"` in `config.yaml` for a fixed directory name instead
 | `all_samples_raw_counts.txt` | featureCounts table; `Geneid` is the feature id (`CDS_b0002_thrA`, `ncRNA_b4577_sgrS`, `ncRNA_Thr_leader`) |
 | `all_samples_counts_extended.tsv` | `Feature_ID, Symbol, Locus_Tag, Type, Source, Rfam, Dbxref, Product, Chr, Start, End, Strand, Length, counts…` |
 | `all_samples_counts.tsv` | `Feature_ID`, coordinates, counts |
+| `all_samples_antisense_counts.txt` | the same counting with every sample's strand reversed: reads antisense to each feature |
+| `<sample>/qc/<sample>.qc.json` | per-sample QC record: read-length and fragment-size histograms, alignment statistics, read ladder, reads per RNA family and type, antisense and DNA-background values, gene-body profile, species statistics, tool versions ([docs/atlas_qc_inputs.md](../docs/atlas_qc_inputs.md)) |
+| `<sample>/coverage/<sample>.cov100.npz` | read depth per strand in 100 bp bins |
+| `tool_versions.json` | versions of the tools used |
 | `strandedness.tsv` | per sample: read orientation fractions, the call (forward, reverse, unstranded) and whether it was counted |
 | `counting_method.json` | annotation, featureCounts options and the orientation used for each sample |
 | `deseq2/` | normalized counts, PCA, one `<ref>_vs_<test>_deseq_results.tsv` per contrast |

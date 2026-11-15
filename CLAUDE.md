@@ -105,6 +105,13 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   libraries such as GSE67402. Keep downloads rate-limited (`--fetch-interval`, default 2 s).
   When stopping a run, kill by exact process name (`pkill -x python`, `pkill -x vg`); `pkill -f`
   with the script path also kills the shell that issues it.
+- QC record (`docs/atlas_qc_inputs.md`): rules `bam_qc`, `species_qc`, `tool_versions`, `sample_qc`
+  write `<s>/qc/<s>.qc.json` and `<s>/coverage/<s>.cov100.npz`; `featurecounts_combined` also writes
+  `all_samples_antisense_counts.txt`. `species_metrics.py` (workflow script) is shared with the
+  prescreen via `qc_metrics.py`; the species values are reported, not a gate. `species_qc` needs
+  Centrifuge's `initial.tsv` (a temp file), so it cannot be added to a finished run without
+  re-running Centrifuge. The atlas model design is on branch `update-atlas`
+  (`work/worktrees/update-atlas`); model code does not go on `ingest-update`.
 - The atlas training table uses **b-numbers** and 4,493 features counted unstranded. `ecoli_atlas`
   maps b-numbers → symbols with the feature table and reports coverage (`gene_coverage.tsv`);
   `embed` fails below `--min-gene-coverage` (0.9).

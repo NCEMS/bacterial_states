@@ -270,11 +270,14 @@ def get_rna_seq_outputs(wildcards):
     if get_counted_samples(wildcards):
         outputs.extend([
             f"{results_dir}/all_samples_raw_counts.txt",
+            f"{results_dir}/all_samples_antisense_counts.txt",
             f"{results_dir}/all_samples_counts_extended.tsv",
             f"{results_dir}/counting_method.json",
             f"{results_dir}/multiqc_report.html",
             f"{results_dir}/deseq2/normalized_counts.tsv",
         ])
+        # per-sample QC record and coverage track (docs/atlas_qc_inputs.md)
+        outputs.extend(f"{results_dir}/{s}/qc/{s}.qc.json" for s in get_counted_samples(wildcards))
     else:
         print("No strand-specific sample: nothing is counted. See " + STRAND_TABLE, file=sys.stderr, flush=True)
     return outputs
@@ -615,15 +618,21 @@ rule featurecounts_combined:
     output:
         counts=f"{results_dir}/all_samples_raw_counts.txt",
         summary=f"{results_dir}/all_samples_raw_counts.txt.summary",
+        antisense=f"{results_dir}/all_samples_antisense_counts.txt",
+        antisense_summary=f"{results_dir}/all_samples_antisense_counts.txt.summary",
         method=f"{results_dir}/counting_method.json"
     params:
         options=FEATURECOUNTS_OPTIONS,
-        strand_flags=lambda wc, input: call_strandedness.featurecounts_strand_flags(input.strand, get_counted_samples(wc))
+        strand_flags=lambda wc, input: call_strandedness.featurecounts_strand_flags(input.strand, get_counted_samples(wc)),
+        # the same counting with every sample's strand reversed: reads antisense to each feature
+        antisense_flags=lambda wc, input: call_strandedness.featurecounts_strand_flags(
+            input.strand, get_counted_samples(wc)).translate(str.maketrans("12", "21"))
     threads: 8
     benchmark: f"benchmarks/featurecounts_benchmark.txt"
     run:
         os.makedirs(os.path.dirname(output.counts), exist_ok=True)
         shell("featureCounts -T {threads} -a {input.annotation} -o {output.counts} {params.options} -s {params.strand_flags} {input.bams}")
+        shell("featureCounts -T {threads} -a {input.annotation} -o {output.antisense} {params.options} -s {params.antisense_flags} {input.bams}")
         with open(input.annotation) as fh:
             annotation_header = [line[2:].rstrip("\n") for line in fh if line.startswith("#!")]
         calls = {r["sample"]: r["call"] for r in call_strandedness.read_table(input.strand)}
@@ -640,6 +649,106 @@ rule featurecounts_combined:
                 "strandedness": calls,
                 "not_counted": sorted(s for s, c in calls.items() if c == "unstranded"),
             }, fh, indent=2)
+
+####Per-sample QC record (docs/atlas_qc_inputs.md)
+# Alignments are not kept for the atlas, so what needs them is taken here: coverage track,
+# fragment sizes, species statistics. `<sample>.qc.json` then gathers everything about a sample.
+def _package_commit():
+    import subprocess
+    try:
+        return subprocess.run(["git", "-C", workflow.basedir, "rev-parse", "--short", "HEAD"], capture_output=True,
+                              text=True, check=True).stdout.strip()
+    except Exception:
+        return ""
+
+def _package_version():
+    try:
+        from importlib.metadata import version
+        return version("ecoli_ingest")
+    except Exception:
+        return ""
+
+def _sample_runs(sample):
+    """The sample's runs, for accession samples: [{"run": ..., "spots": ...}]."""
+    spots = READS[sample].get("spots") or {}
+    return json.dumps([{"run": run, "spots": n} for run, n in spots.items()], separators=(",", ":"))
+
+run_metadata = config.get("run_metadata") or ""    # optional table with a run_accession column (e.g. the atlas manifest's runs.tsv)
+
+rule tool_versions:
+    output:
+        f"{results_dir}/tool_versions.json"
+    params:
+        commit=_package_commit(),
+        version=_package_version(),
+        annotation=os.path.basename(annotation_gff)
+    shell:
+        """
+        python {scripts_dir}/sample_qc.py versions --commit "{params.commit}" --package-version "{params.version}" --annotation {params.annotation:q} --out {output}
+        """
+
+rule bam_qc:
+    input:
+        bam = f"{results_dir}/{{sample}}/vg/{{sample}}_sort.bam",
+        strand = f"{results_dir}/{{sample}}/rseqc/{{sample}}_strandedness.tsv"
+    output:
+        coverage = f"{results_dir}/{{sample}}/coverage/{{sample}}.cov100.npz",
+        qc = f"{results_dir}/{{sample}}/qc/{{sample}}_bam_qc.json"
+    benchmark: f"benchmarks/{{sample}}_bam_qc_benchmark.txt"
+    shell:
+        """
+        python {scripts_dir}/sample_qc.py bam --bam {input.bam} --strand {input.strand} --sample {wildcards.sample:q} \
+            --bed {annotation_bed} --coverage {output.coverage} --out {output.qc}
+        """
+
+# Is the library E. coli? Uses the classification of every trimmed read (Centrifuge's first pass)
+# and, to leave out the reads on rRNA / tRNA genes, the alignments. Reported, not used as a gate.
+rule species_qc:
+    input:
+        classifications = f"{results_dir}/{{sample}}/centrifuge/initial.tsv",
+        bam = f"{results_dir}/{{sample}}/vg/{{sample}}_sort.bam"
+    output:
+        report_all = f"{results_dir}/{{sample}}/centrifuge/{{sample}}_report_all.txt",
+        species = f"{results_dir}/{{sample}}/qc/{{sample}}_species.json"
+    params:
+        db = centrifuge_index_path
+    benchmark: f"benchmarks/{{sample}}_species_benchmark.txt"
+    shell:
+        """
+        python {scripts_dir}/species_metrics.py --classifications {input.classifications} --index {params.db} \
+            --report-all {output.report_all} --bam {input.bam} --bed {annotation_bed} --out {output.species}
+        """
+
+rule sample_qc:
+    input:
+        fastp = f"{results_dir}/{{sample}}/fastp/{{sample}}_fastp.json",
+        fastqc = lambda wc: [f"{results_dir}/{wc.sample}/fastqc/{wc.sample}_clean_R{m}_fastqc.zip"
+                             for m in ((1,) if SE else (1, 2))],
+        vg_stats = f"{results_dir}/{{sample}}/vg/{{sample}}_giraffe.stats.txt",
+        gene_body = f"{results_dir}/{{sample}}/rseqc/{{sample}}_genebody_cov.geneBodyCoverage.txt",
+        strand = STRAND_TABLE,
+        counts = f"{results_dir}/all_samples_raw_counts.txt",
+        antisense = f"{results_dir}/all_samples_antisense_counts.txt",
+        bam_qc = f"{results_dir}/{{sample}}/qc/{{sample}}_bam_qc.json",
+        coverage = f"{results_dir}/{{sample}}/coverage/{{sample}}.cov100.npz",
+        species = lambda wc: [f"{results_dir}/{wc.sample}/qc/{wc.sample}_species.json"] if centrifuge_enabled else [],
+        versions = f"{results_dir}/tool_versions.json",
+        gff = annotation_gff
+    output:
+        f"{results_dir}/{{sample}}/qc/{{sample}}.qc.json"
+    params:
+        fastqc_r2 = lambda wc, input: f"--fastqc-r2 {input.fastqc[1]}" if len(input.fastqc) > 1 else "",
+        species = lambda wc, input: f"--species {input.species[0]}" if input.species else "",
+        runs = lambda wc: _sample_runs(wc.sample),
+        run_metadata = f"--run-metadata {run_metadata}" if run_metadata else ""
+    shell:
+        """
+        python {scripts_dir}/sample_qc.py collect --sample {wildcards.sample:q} --fastp {input.fastp} \
+            --fastqc-r1 {input.fastqc[0]} {params.fastqc_r2} --vg-stats {input.vg_stats} --gene-body {input.gene_body} \
+            --strand {input.strand} --counts {input.counts} --antisense {input.antisense} --gff {input.gff} \
+            --bam-qc {input.bam_qc} --coverage {input.coverage} {params.species} --versions {input.versions} \
+            --runs {params.runs:q} {params.run_metadata} --out {output}
+        """
 
 #Sample metadata for DESeq2        
 rule generate_sample_metadata:
