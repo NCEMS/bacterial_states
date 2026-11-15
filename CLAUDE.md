@@ -100,6 +100,11 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   `qc_table.py` keeps `atlas_data/sample_qc.tsv` (`pre_*` prescreen, `full_*` full run, `in_model`).
   Both tiers are parsed by `qc_metrics.py`. Never run Centrifuge with `--mm` on an index that
   sits on the network file system (minutes per sample); the prescreen copies it to `/dev/shm`.
+  Species check: `species_metrics` (share of genus-resolved Centrifuge reads in Escherichia or
+  Shigella, largest other genus), not the workflow's `pct_ecoli` gate, which fails real E. coli
+  libraries such as GSE67402. Keep downloads rate-limited (`--fetch-interval`, default 2 s).
+  When stopping a run, kill by exact process name (`pkill -x python`, `pkill -x vg`); `pkill -f`
+  with the script path also kills the shell that issues it.
 - The atlas training table uses **b-numbers** and 4,493 features counted unstranded. `ecoli_atlas`
   maps b-numbers → symbols with the feature table and reports coverage (`gene_coverage.tsv`);
   `embed` fails below `--min-gene-coverage` (0.9).

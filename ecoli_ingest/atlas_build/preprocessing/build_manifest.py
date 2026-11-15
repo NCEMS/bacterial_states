@@ -9,7 +9,10 @@ Steps
   1. ENA read_run search: tax_tree(562) (E. coli and every strain below it), library_strategy RNA-Seq.
   2. For the GEO studies found, list all their runs (any organism, any strategy) to mark studies
      that also hold non-E. coli samples. Their E. coli samples are kept.
-  3. Apply the rules below, group runs by GSM.
+  3. Add the RNA-Seq runs of those studies that ENA lists without any organism (its copy of some
+     SRA records has an empty taxon, so the taxon search cannot find them). They are marked
+     `taxon_missing_in_ena` in `review`.
+  4. Apply the rules below, group runs by GSM.
 
 A run is a candidate unless (first rule that applies is its status; all that apply are in `flags`):
   no_geo_ids            no GSE study alias or no GSM alias (submitted directly to SRA/ENA/DDBJ)
@@ -161,10 +164,39 @@ def build(out_dir: str, min_reads: int, refresh: bool, atlas_samples: str | None
             os.remove(part)
         write_tsv(study_runs_path, parts, STUDY_RUN_FIELDS)
     other = defaultdict(Counter)
+    known = {r["run_accession"] for r in runs}
+    no_taxon = []
     for r in read_tsv(study_runs_path):
-        if not is_ecoli(r["tax_id"], r["scientific_name"], ecoli_tax_ids):
+        if not r["tax_id"] and not r["scientific_name"]:
+            if r["library_strategy"] == "RNA-Seq" and r["run_accession"] not in known:
+                no_taxon.append(r["run_accession"])
+        elif not is_ecoli(r["tax_id"], r["scientific_name"], ecoli_tax_ids):
             other[r["study_accession"]][r["scientific_name"]] += 1
     mixed = set(other)
+
+    # runs of these studies that ENA holds without an organism
+    extra_path = os.path.join(out_dir, "ena_runs_no_taxon.tsv")
+    if no_taxon and (refresh or not os.path.exists(extra_path)):
+        parts = []
+        for i in range(0, len(no_taxon), 100):
+            part = extra_path + ".part"
+            ena_search(" OR ".join(f'run_accession="{a}"' for a in no_taxon[i:i + 100]), RUN_FIELDS, part, log)
+            parts.extend(read_tsv(part))
+            os.remove(part)
+        write_tsv(extra_path, parts, RUN_FIELDS)
+    n_no_taxon = 0
+    if no_taxon and os.path.exists(extra_path):
+        for r in read_tsv(extra_path):
+            if r["run_accession"] in known:
+                continue
+            r["GSE"], r["GSM"] = geo_ids(r)
+            r["library_type_match"] = library_type_match(r)
+            study = library_type_match(r, ("study_title",))
+            r["review"] = ",".join(x for x in ("taxon_missing_in_ena",
+                                               f"study_title:{study}" if study and not r["library_type_match"] else "") if x)
+            runs.append(r)
+            known.add(r["run_accession"])
+            n_no_taxon += 1
 
     atlas = set()
     if atlas_samples:
@@ -237,6 +269,7 @@ def build(out_dir: str, min_reads: int, refresh: bool, atlas_samples: str | None
     lines = []
     add = lines.append
     add(f"ENA query: {ECOLI_QUERY}")
+    add(f"runs added although ENA lists no organism for them (same GEO studies): {n_no_taxon}")
     add(f"runs: {len(runs)}; GEO runs: {sum(bool(r['GSE'] and r['GSM']) for r in runs)}; "
         f"GEO samples: {len(samples)}; GEO studies: {len(studies)}")
     add("\nrun status (first rule that applies):")

@@ -3,7 +3,9 @@
 
 One row per GEO sample (GSM). Columns:
   identity   GSM, GSE, runs, layout, scientific_name, tax_id, instrument_model, manifest_status,
-             review, in_atlas_v1
+             review, in_atlas_v1, study_candidates (candidate samples in the study) and large_study
+             (yes when that is at least LARGE_STUDY_MIN: statistics over the atlas should be reported
+             with and without such a study)
   pre_*      metrics of the read-subsample prescreen (prescreen.py), with pre_run, pre_spots,
              pre_source, pre_date, pre_pipeline, pre_error
   pre_decision, pre_reasons   pass / fail / incomplete from the thresholds (qc_metrics.decide)
@@ -13,7 +15,7 @@ One row per GEO sample (GSM). Columns:
 
     qc_table.py merge-prescreen --manifest work/atlas_manifest --samples-dir work/prescreen/samples --table atlas_data/sample_qc.tsv
     qc_table.py add-full --results <run dir>/results --config <run dir>/config.yaml --table atlas_data/sample_qc.tsv
-    qc_table.py decide --table atlas_data/sample_qc.tsv [--min-pct-ecoli 30 ...]
+    qc_table.py decide --table atlas_data/sample_qc.tsv [--min-pct-aligned 50 ...]
     qc_table.py mark-model --samples samples.txt --model atlas_v2 --table atlas_data/sample_qc.tsv
     qc_table.py summary --table atlas_data/sample_qc.tsv
 
@@ -37,7 +39,8 @@ sys.path.insert(0, HERE)
 import qc_metrics  # noqa: E402
 
 IDENTITY = ["GSM", "GSE", "runs", "layout", "scientific_name", "tax_id", "instrument_model", "manifest_status",
-            "review", "in_atlas_v1"]
+            "review", "in_atlas_v1", "study_candidates", "large_study"]
+LARGE_STUDY_MIN = 500      # candidate samples; such a study can dominate statistics, so report with and without it
 PRE_INFO = ["pre_run", "pre_spots", "pre_source", "pre_date", "pre_pipeline", "pre_error"]
 FULL_INFO = ["full_sample", "full_counted", "full_results_dir", "full_date", "full_pipeline"]
 COLUMNS = (IDENTITY + PRE_INFO + [f"pre_{m}" for m in qc_metrics.METRICS] + ["pre_decision", "pre_reasons"]
@@ -91,6 +94,10 @@ def merge_prescreen(table: str, manifest_dir: str | None, samples_dir: str, thre
                 row = _row(rows, s["GSM"])
                 for c in IDENTITY:
                     row[c] = s.get("status" if c == "manifest_status" else c, "") or ""
+        per_study = Counter(r["GSE"] for r in rows.values() if r["manifest_status"] == "candidate")
+        for row in rows.values():
+            row["study_candidates"] = str(per_study.get(row["GSE"], 0))
+            row["large_study"] = "yes" if per_study.get(row["GSE"], 0) >= LARGE_STUDY_MIN else "no"
     n = 0
     for path in sorted(glob.glob(os.path.join(samples_dir, "*.json"))):
         with open(path, encoding="utf-8") as fh:
@@ -100,7 +107,8 @@ def merge_prescreen(table: str, manifest_dir: str | None, samples_dir: str, thre
         row.update(pre_run=_text(rec.get("run")), pre_spots=_text(rec.get("spots")), pre_source=_text(rec.get("source")),
                    pre_date=_text(rec.get("date")), pre_pipeline=_text(rec.get("pipeline")),
                    pre_error=_text(rec.get("error")))
-        metrics = rec.get("metrics", {})
+        metrics = dict(rec.get("metrics", {}))
+        metrics.setdefault("centrifuge_reads", rec.get("centrifuge_reads"))
         for m in qc_metrics.METRICS:
             row[f"pre_{m}"] = _text(metrics.get(m))
         set_decision(row, thresholds)
@@ -178,6 +186,14 @@ def summary(table: str) -> str:
              "strand call: " + str(dict(Counter(r["pre_strand_call"] or "none" for r in screened))),
              "passing samples: " + str(sum(r["pre_decision"] == "pass" for r in screened)) + " in "
              + str(len({r["GSE"] for r in screened if r["pre_decision"] == "pass"})) + " studies"]
+    large = Counter(r["GSE"] for r in screened if r["large_study"] == "yes" and r["pre_decision"] == "pass")
+    if large:
+        rest = [r for r in screened if r["large_study"] != "yes"]
+        lines.append("large studies (report statistics with and without them): "
+                     + ", ".join(f"{g} {n} passing" for g, n in large.most_common()))
+        lines.append("without them: " + str(sum(r["pre_decision"] == "pass" for r in rest)) + " passing of "
+                     + str(len(rest)) + " screened, in "
+                     + str(len({r["GSE"] for r in rest if r["pre_decision"] == "pass"})) + " studies")
     return "\n".join(lines)
 
 

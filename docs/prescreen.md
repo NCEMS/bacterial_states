@@ -13,7 +13,9 @@ python ecoli_ingest/atlas_build/preprocessing/build_manifest.py --out-dir work/a
 ```
 
 One ENA search (*E. coli* and all strains, RNA-Seq) gives `runs.tsv`, `samples.tsv` (one row per
-GSM) and `studies.tsv`, with a status and exclusion reason for every run.
+GSM) and `studies.tsv`, with a status and exclusion reason for every run. ENA holds some runs
+without an organism; those in a GEO study the search already found are added and marked
+`taxon_missing_in_ena`. A study in which every run lacks the organism is not found.
 
 ## 2. Prescreen
 
@@ -23,8 +25,9 @@ python ecoli_ingest/atlas_build/prescreen/prescreen.py --manifest work/atlas_man
     --out work/prescreen --resources resources --jobs 16 --threads 2
 ```
 
-For each candidate it takes 200,000 reads (pairs) of the sample's first run without downloading
-the run, and writes `work/prescreen/samples/<GSM>.json`:
+For each candidate it takes `--spots` reads (pairs; default 200,000, the 2026-11 screen used
+100,000) of the sample's first run without downloading the run, and writes
+`work/prescreen/samples/<GSM>.json`:
 
 | Step | Metrics |
 |---|---|
@@ -32,11 +35,14 @@ the run, and writes `work/prescreen/samples/<GSM>.json`:
 | vg giraffe + surject | % aligned, % perfect, % properly paired, mean MAPQ |
 | RSeQC `infer_experiment` | forward and reverse fractions, strand call |
 | `gene_type.sh` on the counting annotation | % of read overlaps on CDS, rRNA, tRNA, ncRNA, Rfam, pseudogene features |
-| Centrifuge on 20,000 trimmed reads | % *E. coli* (the number the workflow's gate uses), largest other species |
+| Centrifuge on 50,000 trimmed reads | species test (below); % unclassified, % Enterobacteriaceae, % synthetic constructs; % *E. coli* as the workflow's gate computes it |
 
 - **Reads** come from `fastq-dump -N/-X` when sra-tools is installed (skipping the first 50,000
   spots), otherwise from the start of the ENA FASTQ files (the connection is closed once enough
-  has arrived).
+  has arrived). `--fetch-interval` (default 2 s) is the minimum time between the starts of two
+  downloads over all jobs, to stay well inside NCBI's and ENA's request limits.
+- **Time limit**: each step is stopped after 25 minutes. `vg giraffe` can take very long on reads
+  that are not *E. coli*; such a sample gets an `error` record.
 - **Centrifuge index**: copied once to `/dev/shm/ecoli_ingest_centrifuge` (8.6 GB of memory) and
   memory-mapped from there; each sample then opens it in about a second. Do not memory-map it
   from a network file system: that took minutes per sample. `--index-cache DIR` chooses another
@@ -48,8 +54,33 @@ the run, and writes `work/prescreen/samples/<GSM>.json`:
 - A failed sample gets a JSON with `error` (step and message) and its log stays in the scratch
   directory.
 
-Measured on five samples (2 threads each, reads from ENA): 36-79 seconds per sample, of which
-14-24 s download, 10-37 s giraffe, 7-14 s surject, 1.4 s Centrifuge.
+Cost depends on read length. For 100,000 pairs of 150 bp reads with 30 samples at a time on 48
+cores: about 90 s giraffe, 30 s surject, 15 s fastp, 5 s download (sra-tools), 5 s Centrifuge per
+sample, about 800 samples per hour. `vg` uses more than one core per job even with `--threads 1`,
+so run fewer jobs than cores.
+
+### Is the sample *E. coli*?
+
+The workflow's Centrifuge gate (`pct_ecoli`: share of the species *E. coli* among reads with a
+single match) is not used for the decision. It splits *E. coli* reads between *Escherichia* and
+*Shigella* genomes and counts synthetic constructs against the sample, so real *E. coli*
+libraries can score under 20 % (all of GSE67402 does).
+
+The species test (`qc_metrics.species_metrics`) uses the same Centrifuge output: among reads with
+a single match that resolves to a genus, synthetic constructs left out, `pct_escherichia_shigella`
+is the share in *Escherichia* or *Shigella* and `top_other_genus` / `pct_top_other_genus` the
+largest other genus. On test samples, two *Salmonella enterica* libraries scored 0.7 and 1.4 %
+with *Salmonella* at 95-99 %; eight *E. coli* libraries (K-12, BL21, O157:H7, CFT073; including
+GSE67402) scored 53-99 % with no other genus above 7 %. It cannot separate *Shigella* from
+*E. coli*, and a mixed culture is caught only when the other organism dominates.
+
+The prescreen records the test twice: from all classified reads (this needs only Centrifuge
+output, so the workflow could compute it before alignment) and again without the reads on rRNA /
+tRNA genes (`*_nostable`). The decision uses the second. Ten test samples separated either way,
+but over the 10,672 samples of the 2026-11 screen the share is below 50 % in 1,473 samples with
+those reads and in 860 without: in libraries that are mostly stable RNA, rRNA reads are assigned
+to *Salmonella* and other enteric genera. A workflow version of the test therefore has to run
+after alignment.
 
 ## 3. Sample QC table
 
@@ -68,7 +99,7 @@ T=atlas_data/sample_qc.tsv
 Q=ecoli_ingest/atlas_build/prescreen/qc_table.py
 python $Q merge-prescreen --manifest work/atlas_manifest --samples-dir work/prescreen/samples --table $T
 python $Q add-full --results <run>/results --config <run>/config.yaml --table $T   # after a full inGEST run
-python $Q decide --table $T --min-pct-ecoli 30 --min-pct-aligned 50                # change thresholds, no re-run
+python $Q decide --table $T --min-pct-escherichia-shigella 50 --min-pct-aligned 50 # change thresholds, no re-run
 python $Q mark-model --samples model_samples.txt --model atlas_v2 --table $T
 python $Q summary --table $T
 ```
@@ -77,10 +108,26 @@ python $Q summary --table $T
 files, so they are directly comparable. `add-full` maps inGEST sample names to GSMs through the
 `accession:` entries of the run's `config.yaml`.
 
-Default thresholds (`qc_metrics.DEFAULT_THRESHOLDS`): a sample fails when its dominant strand
-fraction is below 0.8 (`unstranded`), % *E. coli* below 30 (`contamination`), % reads kept below
-75 (`trimming`), mean trimmed read length below 30 bp (`short_reads`), or % aligned below 50
-(`low_alignment`). The first three are the workflow's own gates; the last two are provisional.
+Default thresholds (`qc_metrics.DEFAULT_THRESHOLDS`). A sample fails as:
+
+| Reason | When |
+|---|---|
+| `unstranded` | dominant strand fraction below 0.8 |
+| `phage` | the largest other genus is a bacteriophage (`qc_metrics.PHAGE_GENERA`) and at least 0.5 % of all reads given to Centrifuge. Phage infection and induction experiments are excluded. The PhiX spike-in and plant or animal viruses do not count. |
+| `not_ecoli` | *Escherichia* + *Shigella* share below 50 % and the largest other genus at least 2 % of all reads. The second condition matters: libraries of short reads leave few classifiable reads, spread over many genera, and are judged by alignment instead. |
+| `mixed_organism` | the largest other genus is at least 10 % of all reads although *E. coli* is the majority |
+| `trimming` | under 75 % of reads kept by fastp |
+| `short_reads` | mean read length after trimming below 30 bp |
+| `low_alignment` | under 50 % of reads aligned |
+
+With fewer than 100 genus-resolved reads there is no species decision (`incomplete`). The strand
+and trimming rules are the workflow's own gates; the others were set on the distribution of the
+2026-11 screen and can be changed with `qc_table.py decide`. Full inGEST runs have no species
+test yet, so the `full_*` species columns stay empty.
+
+`study_candidates` and `large_study` mark studies with at least 500 candidate samples (GSE206047,
+1,077 samples). One such study is about an eighth of all passing samples, so statistics over the
+atlas should be reported with and without it; `qc_table.py summary` prints both.
 
 ## 4. Setting up a node
 

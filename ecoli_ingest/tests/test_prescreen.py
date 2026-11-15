@@ -94,7 +94,11 @@ def write_qc_files(d, sample=None):
 
 def test_collect_reads_every_metric(tmp_path):
     m = qc_metrics.collect(write_qc_files(tmp_path))
-    assert set(m) == set(qc_metrics.METRICS)
+    assert set(m) == set(qc_metrics.METRICS) - {
+        "pct_unclassified", "pct_enterobacteriaceae", "pct_synthetic", "top_non_enteric",     # need the all-reads report
+        "species_reads", "pct_escherichia_shigella", "top_other_genus", "pct_top_other_genus",
+        "species_reads_nostable", "pct_escherichia_shigella_nostable", "top_other_genus_nostable",
+        "pct_top_other_genus_nostable", "centrifuge_reads"}
     assert (m["reads_in"], m["reads_kept"], m["pct_kept"]) == (400000, 372000, 93.0)
     assert (m["mean_length_r1"], m["mean_length_r2"], m["pct_adapter_trimmed"], m["insert_size_peak"]) == (42, 41, 1.5, 55)
     assert (m["pct_aligned"], m["pct_perfect"], m["pct_properly_paired"], m["mapq_mean"]) == (99.0, 70.0, 98.0, 39.5)
@@ -102,6 +106,54 @@ def test_collect_reads_every_metric(tmp_path):
     assert (m["pct_CDS"], m["pct_rRNA"], m["pct_Rfam"]) == (63.59, 22.57, 1.38)
     assert m["pct_ecoli"] == 76.69         # the first report line naming E. coli, as the workflow's gate reads it
     assert m["other_taxa"] == "Salmonella enterica 1.7; Shigella flexneri 0.9"
+
+
+def test_kreport_all_metrics(tmp_path):
+    report = ("60.00\t12000\t12000\tU\t0\tunclassified\n40.00\t8000\t300\t-\t1\troot\n"
+              "37.00\t7400\t0\tD\t2\t    Bacteria\n35.00\t7000\t6500\tF\t543\t            Enterobacteriaceae\n"
+              " 0.80\t160\t160\tS\t562\t                Escherichia coli\n"
+              " 0.50\t100\t100\tS\t622\t                Shigella dysenteriae\n"
+              " 1.00\t200\t0\tF\t1903409\t            Erwiniaceae\n"
+              " 1.00\t200\t200\tS\t549\t              Pantoea agglomerans\n"
+              " 1.50\t300\t300\tS\t32630\t      synthetic construct\n")
+    p = tmp_path / "all.txt"
+    p.write_text(report)
+    m = qc_metrics.kreport_all_metrics(str(p))
+    assert m == {"pct_unclassified": 60.0, "pct_enterobacteriaceae": 87.5, "pct_synthetic": 3.75,
+                 "top_non_enteric": "Pantoea agglomerans 2.5"}      # Shigella is inside the family, not "other"
+
+
+def test_species_metrics_and_fastq_selection(tmp_path):
+    report = ("40.00\t8000\t300\t-\t1\troot\n35.00\t7000\t6500\tF\t543\t      Enterobacteriaceae\n"
+              " 2.00\t400\t0\tG\t561\t        Escherichia\n 1.00\t200\t200\tS\t562\t          Escherichia coli\n"
+              " 1.00\t200\t0\tG\t620\t        Shigella\n 1.00\t200\t200\tS\t622\t          Shigella dysenteriae\n"
+              " 1.00\t200\t0\tG\t590\t        Salmonella\n 1.00\t200\t200\tS\t28901\t          Salmonella enterica\n"
+              " 1.50\t300\t300\tS\t32630\t  synthetic construct\n")
+    (tmp_path / "all.txt").write_text(report)
+    rows = ["readID\tseqID\ttaxID\tscore\t2ndBestScore\thitLength\tqueryLength\tnumMatches"]
+    rows += [f"r{i}\ts\t562\t100\t0\t50\t50\t1" for i in range(6)]         # E. coli
+    rows += [f"s{i}\ts\t622\t100\t0\t50\t50\t1" for i in range(2)]         # Shigella counts as E. coli
+    rows += [f"t{i}\ts\t28901\t100\t0\t50\t50\t1" for i in range(2)]       # Salmonella
+    rows += ["u1\ts\t543\t100\t0\t50\t50\t1", "u2\ts\t32630\t100\t0\t50\t50\t1",   # family level, synthetic: ignored
+             "u3\ts\t562\t100\t100\t50\t50\t2", "u4\tunclassified\t0\t0\t0\t0\t50\t1"]  # two matches, unclassified
+    (tmp_path / "cf.tsv").write_text("\n".join(rows) + "\n")
+    m = qc_metrics.species_metrics(str(tmp_path / "cf.tsv"), str(tmp_path / "all.txt"))
+    assert m == {"species_reads": 10, "pct_escherichia_shigella": 80.0, "top_other_genus": "Salmonella",
+                 "pct_top_other_genus": 20.0}
+    # without the reads on rRNA / tRNA genes (here two of the Salmonella-like reads and one E. coli read)
+    m2 = qc_metrics.species_metrics(str(tmp_path / "cf.tsv"), str(tmp_path / "all.txt"), {"t0", "t1", "r0"}, "_nostable")
+    assert m2 == {"species_reads_nostable": 7, "pct_escherichia_shigella_nostable": 100.0,
+                  "top_other_genus_nostable": "", "pct_top_other_genus_nostable": 0.0}
+
+    (tmp_path / "in.fastq").write_text(fastq(10))
+    n = prescreen.head_fastq(str(tmp_path / "in.fastq"), str(tmp_path / "out.fastq"), 3, {b"r.1", b"r.3"})
+    names = [l for l in (tmp_path / "out.fastq").read_text().splitlines() if l.startswith("@")]
+    assert n == 3 and names == ["@r.2 x/1", "@r.4 x/1", "@r.5 x/1"]
+
+
+def test_step_timeout(tmp_path):
+    with pytest.raises(prescreen.StepError, match="timed out"):
+        prescreen.sh("sleep 30", "slow", str(tmp_path / "log.txt"), timeout=1)
 
 
 def test_collect_skips_missing_files(tmp_path):
@@ -114,22 +166,43 @@ def test_collect_skips_missing_files(tmp_path):
 @pytest.mark.parametrize("change,expected", [
     ({}, ("pass", [])),
     ({"fraction_reverse": 0.52, "fraction_forward": 0.47}, ("fail", ["unstranded"])),
-    ({"pct_ecoli": 16.0}, ("fail", ["contamination"])),
+    ({"pct_ecoli": 16.0}, ("pass", [])),                                   # the workflow's gate value no longer decides
+    ({"pct_escherichia_shigella": 0.2, "pct_top_other_genus": 99.5}, ("fail", ["not_ecoli"])),      # Salmonella
+    ({"pct_escherichia_shigella": 45.0, "pct_top_other_genus": 12.0}, ("pass", [])),   # low share, but the other genus is 0.4 % of all reads
+    ({"species_reads": 30000, "pct_escherichia_shigella": 60.0, "pct_top_other_genus": 35.0},
+     ("fail", ["mixed_organism"])),                                                    # another organism is 21 % of all reads
+    ({"species_reads": 500, "pct_escherichia_shigella": 60.0, "pct_top_other_genus": 35.0}, ("pass", [])),   # a trace: 0.35 %
+    # a phage as the largest other genus fails the sample even when E. coli is the majority (1.2 % of all reads)
+    ({"species_reads": 3000, "pct_escherichia_shigella": 75.0, "pct_top_other_genus": 20.0, "top_other_genus": "T4virus"},
+     ("fail", ["phage"])),
+    ({"pct_escherichia_shigella": 1.0, "pct_top_other_genus": 98.0, "top_other_genus": "T7virus"}, ("fail", ["phage"])),
+    ({"species_reads": 3000, "pct_escherichia_shigella": 75.0, "pct_top_other_genus": 20.0,
+      "top_other_genus": "Phix174microvirus"}, ("pass", [])),                           # the PhiX spike-in is not a phage sample
+    ({"species_reads": 3000, "pct_escherichia_shigella": 97.0, "pct_top_other_genus": 2.0, "top_other_genus": "Lambdavirus"},
+     ("pass", [])),                                                                    # a trace (0.12 %)
+    # the version without rRNA / tRNA reads is used when present
+    ({"pct_escherichia_shigella": 35.0, "pct_top_other_genus": 60.0, "species_reads_nostable": 1500,
+      "pct_escherichia_shigella_nostable": 85.0, "pct_top_other_genus_nostable": 2.0}, ("pass", [])),
     ({"pct_kept": 60, "mean_length_r1": 26, "pct_aligned": 17}, ("fail", ["trimming", "short_reads", "low_alignment"])),
-    ({"pct_ecoli": ""}, ("incomplete", ["no_contamination"])),
-    ({"pct_ecoli": "", "pct_aligned": 10}, ("fail", ["low_alignment"])),
+    ({"species_reads": 40}, ("incomplete", ["no_species"])),
+    ({"pct_escherichia_shigella": ""}, ("incomplete", ["no_species"])),
+    ({"species_reads": 40, "pct_aligned": 10}, ("fail", ["low_alignment"])),
 ])
 def test_decide(change, expected):
     base = {"fraction_forward": 0.01, "fraction_reverse": 0.98, "pct_ecoli": 77, "pct_kept": 93,
-            "mean_length_r1": 42, "pct_aligned": 99}
+            "mean_length_r1": 42, "pct_aligned": 99, "species_reads": 1800, "pct_escherichia_shigella": 92.0,
+            "pct_top_other_genus": 0.9, "centrifuge_reads": 50000}
     assert qc_metrics.decide({**base, **change}) == expected
 
 
 def test_decide_thresholds_can_be_changed():
-    m = {"fraction_forward": 0.75, "fraction_reverse": 0.2, "pct_ecoli": 25, "pct_kept": 93, "mean_length_r1": 42,
-         "pct_aligned": 99}
-    assert qc_metrics.decide(m)[0] == "fail"
-    assert qc_metrics.decide(m, {"min_strand_fraction": 0.7, "min_pct_ecoli": 20}) == ("pass", [])
+    m = {"fraction_forward": 0.75, "fraction_reverse": 0.2, "pct_kept": 93, "mean_length_r1": 42, "pct_aligned": 99,
+         "species_reads": 20000, "pct_escherichia_shigella": 45.0, "pct_top_other_genus": 30.0, "centrifuge_reads": 50000}
+    assert qc_metrics.decide(m) == ("fail", ["unstranded", "not_ecoli"])
+    assert qc_metrics.decide(m, {"min_strand_fraction": 0.7, "min_pct_escherichia_shigella": 40}) == (
+        "fail", ["mixed_organism"])                    # the other genus is still 12 % of all reads
+    assert qc_metrics.decide(m, {"min_strand_fraction": 0.7, "min_pct_escherichia_shigella": 40,
+                                 "max_pct_foreign_of_all": 20}) == ("pass", [])
 
 
 # ------------------------------------------------------------------ sample selection
@@ -162,11 +235,15 @@ def test_qc_table_prescreen_then_full_run(tmp_path):
         w.writerow(["GSM", "GSE", "status", "runs", "layout", "scientific_name", "tax_id", "instrument_model",
                     "review", "in_atlas_v1"])
         w.writerow(["GSM1", "GSE9", "candidate", "SRR1", "PAIRED", "Escherichia coli", "562", "NovaSeq", "", "yes"])
+        for i in range(qc_table.LARGE_STUDY_MIN):
+            w.writerow([f"GSM9{i:04d}", "GSE8", "candidate", "SRR9", "PAIRED", "Escherichia coli", "562", "NovaSeq", "", "no"])
         w.writerow(["GSM2", "GSE9", "candidate", "SRR2,SRR3", "PAIRED", "Escherichia coli", "562", "NovaSeq", "", "no"])
         w.writerow(["GSM3", "GSE9", "low_reads", "SRR4", "SINGLE", "Escherichia coli", "562", "NovaSeq", "", "no"])
     recs = tmp_path / "samples"
     recs.mkdir()
     metrics = qc_metrics.collect(write_qc_files(tmp_path / "pre"))
+    metrics.update(species_reads=1500, pct_escherichia_shigella=95.0, top_other_genus="Salmonella", pct_top_other_genus=1.0,
+                   centrifuge_reads=50000)
     (recs / "GSM1.json").write_text(json.dumps({"GSM": "GSM1", "GSE": "GSE9", "run": "SRR1", "spots": 200000,
                                                "source": "ena", "date": "2026-11-15", "pipeline": "abc1234",
                                                "metrics": metrics}))
@@ -174,7 +251,9 @@ def test_qc_table_prescreen_then_full_run(tmp_path):
                                                "error": "fetch: no reads"}))
     table = str(tmp_path / "qc.tsv")
     rows = qc_table.merge_prescreen(table, str(manifest), str(recs))
-    assert set(rows) == {"GSM1", "GSM2", "GSM3"}
+    assert len(rows) == 3 + qc_table.LARGE_STUDY_MIN
+    assert (rows["GSM1"]["study_candidates"], rows["GSM1"]["large_study"]) == ("2", "no")       # GSM3 is not a candidate
+    assert (rows["GSM90000"]["study_candidates"], rows["GSM90000"]["large_study"]) == (str(qc_table.LARGE_STUDY_MIN), "yes")
     assert rows["GSM1"]["pre_decision"] == "pass" and rows["GSM1"]["pre_strand_call"] == "reverse"
     assert rows["GSM1"]["in_atlas_v1"] == "yes" and rows["GSM1"]["pre_run"] == "SRR1"
     assert rows["GSM2"]["pre_decision"] == "error" and rows["GSM2"]["pre_error"] == "fetch: no reads"
@@ -193,8 +272,8 @@ def test_qc_table_prescreen_then_full_run(tmp_path):
     assert r["pre_decision"] == "pass" and rows["GSM2"]["full_date"] == ""   # other columns untouched
 
     # stricter thresholds change the decision without re-running anything
-    assert qc_table.main(["decide", "--table", table, "--min-pct-ecoli", "90"]) == 0
-    assert qc_table.read_table(table)["GSM1"]["pre_reasons"] == "contamination"
+    assert qc_table.main(["decide", "--table", table, "--min-pct-aligned", "99.5"]) == 0
+    assert qc_table.read_table(table)["GSM1"]["pre_reasons"] == "low_alignment"
     (tmp_path / "model.txt").write_text("GSM1_SRR1\nGSM99\n")
     assert qc_table.main(["mark-model", "--table", table, "--samples", str(tmp_path / "model.txt"), "--model", "v2"]) == 0
     back = qc_table.read_table(table)

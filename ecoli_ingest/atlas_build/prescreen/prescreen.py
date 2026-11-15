@@ -9,7 +9,11 @@ the workflow's own options, and writes `<out>/samples/<GSM>.json` with the QC me
   vg giraffe + surject          alignment rate
   RSeQC infer_experiment        strandedness (call_strandedness.py)
   gene_type.sh                  share of reads on CDS / rRNA / tRNA / ncRNA features
-  Centrifuge (--centrifuge-spots reads, one pass)         % E. coli, largest other species
+  Centrifuge (--centrifuge-spots reads, one pass)         is it E. coli: share of genus-resolved reads in
+                                                          Escherichia or Shigella and the largest other genus,
+                                                          from all reads and again without reads on rRNA / tRNA
+                                                          genes; also % unclassified, % Enterobacteriaceae,
+                                                          % synthetic constructs, the workflow gate's % E. coli
 
 The Centrifuge index (8.6 GB) is copied once to --index-cache (default /dev/shm, memory-backed)
 and memory-mapped from there, so every sample opens it in about a second. Memory-mapping it
@@ -56,23 +60,63 @@ class StepError(RuntimeError):
     pass
 
 
-def sh(cmd: str, step: str, log_path: str) -> None:
+STEP_TIMEOUT = 1500     # seconds; vg giraffe can take very long on reads that are not E. coli
+
+
+def sh(cmd: str, step: str, log_path: str, timeout: float | None = None) -> None:
+    import signal
     with open(log_path, "a", encoding="utf-8") as log:
         log.write(f"\n$ {cmd}\n")
         log.flush()
-        res = subprocess.run(["bash", "-o", "pipefail", "-c", cmd], stdout=log, stderr=subprocess.STDOUT)
+        proc = subprocess.Popen(["bash", "-o", "pipefail", "-c", cmd], stdout=log, stderr=subprocess.STDOUT,
+                                start_new_session=True)
+        try:
+            proc.wait(timeout=timeout or STEP_TIMEOUT)
+        except subprocess.TimeoutExpired:
+            os.killpg(proc.pid, signal.SIGKILL)
+            proc.wait()
+            raise StepError(f"{step}: timed out after {timeout or STEP_TIMEOUT:.0f} s")
+        res = proc
     if res.returncode != 0:
         with open(log_path, encoding="utf-8", errors="replace") as fh:
             tail = " | ".join(fh.read().strip().splitlines()[-3:])
         raise StepError(f"{step}: exit {res.returncode}: {tail[-400:]}")
 
 
-def head_fastq(src: str, dst: str, n_reads: int) -> None:
+def wait_for_fetch_slot(lock_path: str, interval: float) -> None:
+    """Space out the starts of read downloads across all worker processes: at most one new
+    request to NCBI / ENA every `interval` seconds, however many samples run at once."""
+    if interval <= 0:
+        return
+    import fcntl
+    with open(lock_path, "a+", encoding="utf-8") as fh:
+        fcntl.flock(fh, fcntl.LOCK_EX)
+        fh.seek(0)
+        text = fh.read().strip()
+        last = float(text) if text else 0.0
+        wait = last + interval - time.time()
+        if wait > 0:
+            time.sleep(wait)
+        fh.seek(0)
+        fh.truncate()
+        fh.write(repr(time.time()))
+        fh.flush()
+
+
+def head_fastq(src: str, dst: str, n_reads: int, skip_ids: set | None = None) -> int:
+    """Write the first `n_reads` records of `src` whose read id is not in `skip_ids`; return how many."""
+    n = 0
+    keep = True
     with open(src, "rb") as fh, open(dst, "wb") as out:
         for i, line in enumerate(fh):
-            if i >= 4 * n_reads:
-                break
-            out.write(line)
+            if i % 4 == 0:
+                if n >= n_reads:
+                    break
+                keep = not skip_ids or line[1:].split(None, 1)[0].split(b"/")[0] not in skip_ids
+                n += keep
+            if keep:
+                out.write(line)
+    return n
 
 
 def screen_sample(sample: dict, run_row: dict, opts: dict) -> dict:
@@ -100,6 +144,7 @@ def screen_sample(sample: dict, run_row: dict, opts: dict) -> dict:
         ena = sra_reads.ena_files_from_row(run_row, run)
         paired = ena["layout"] == "PAIRED"
         mates = ("1", "2") if paired else ("1",)
+        wait_for_fetch_slot(os.path.join(opts["scratch"], ".fetch_slot"), opts["fetch_interval"])
         with open(log, "a", encoding="utf-8") as lf:
             source, counts = timed("fetch", lambda: sra_reads.fetch_subsample(
                 run, work, mates, opts["spots"], opts["skip_spots"], opts["method"], ena["files"], log=lf))
@@ -146,18 +191,28 @@ def screen_sample(sample: dict, run_row: dict, opts: dict) -> dict:
 
         kreport = os.path.join(work, "kreport.txt")
         if opts["centrifuge_spots"] > 0:
+            # reads on rRNA / tRNA genes, to report the species measure with and without them
+            stable_bed, stable_ids = os.path.join(work, "stable.bed"), os.path.join(work, "stable_ids.txt")
+            timed("stable_reads", lambda: sh(
+                f"awk -F'\\t' '$4 ~ /^(rRNA|tRNA):/' {q(bed)} > {q(stable_bed)} && "
+                f"bedtools intersect -u -a {q(bam)} -b {q(stable_bed)} | samtools view - | cut -f1 | sort -u > {q(stable_ids)}",
+                "stable_reads", log))
             sub = {m: os.path.join(work, f"cf_{m}.fastq") for m in mates}
             for m in mates:
-                head_fastq(clean[m], sub[m], opts["centrifuge_spots"])
+                rec["centrifuge_reads"] = head_fastq(clean[m], sub[m], opts["centrifuge_spots"])
             db, mm = opts["centrifuge_db"], "--mm " if opts["centrifuge_mm"] else ""
             inputs = f"-1 {q(sub['1'])} -2 {q(sub['2'])}" if paired else f"-U {q(sub['1'])}"
             # one pass, then the workflow's filter (classified, single best match) before the report
             timed("centrifuge", lambda: sh(
                 f"centrifuge {mm}-x {q(db)} {inputs} -S {q(work)}/cf_all.tsv -p {t} --report-file /dev/null "
                 f"&& awk -F'\\t' 'NR==1 || ($3!=0 && $8==1)' {q(work)}/cf_all.tsv > {q(work)}/cf.tsv "
-                f"&& centrifuge-kreport -x {q(db)} {q(work)}/cf.tsv > {q(kreport)}", "centrifuge", log))
+                f"&& centrifuge-kreport -x {q(db)} {q(work)}/cf.tsv > {q(kreport)} "
+                f"&& centrifuge-kreport -x {q(db)} {q(work)}/cf_all.tsv > {q(work)}/kreport_all.txt", "centrifuge", log))
         rec["metrics"] = qc_metrics.collect({"fastp": fastp_json, "vg_stats": vg_stats, "infer_experiment": infer,
-                                             "feature_overlap": overlap, "kreport": kreport},
+                                             "feature_overlap": overlap, "kreport": kreport,
+                                             "kreport_all": os.path.join(work, "kreport_all.txt"),
+                                             "classifications": os.path.join(work, "cf_all.tsv"),
+                                             "stable_ids": os.path.join(work, "stable_ids.txt")},
                                             opts["min_strand_fraction"])
         if not opts["keep_scratch"]:
             shutil.rmtree(work, ignore_errors=True)
@@ -248,12 +303,15 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--threads", type=int, default=2, help="threads per sample")
     ap.add_argument("--spots", type=int, default=200_000, help="reads (pairs) taken per sample")
     ap.add_argument("--skip-spots", type=int, default=50_000, help="spots skipped first (sra-tools only)")
-    ap.add_argument("--centrifuge-spots", type=int, default=20_000, help="trimmed reads classified; 0 = skip Centrifuge")
+    ap.add_argument("--centrifuge-spots", type=int, default=50_000, help="trimmed reads classified; 0 = skip Centrifuge")
     ap.add_argument("--index-cache", default="/dev/shm/ecoli_ingest_centrifuge",
                     help="memory-backed or local directory the Centrifuge index is copied to; 'none' to read it "
                          "from the resources directory")
     ap.add_argument("--remove-index-cache", action="store_true", help="delete the cached index when done")
     ap.add_argument("--method", default="auto", help="auto | sra-tools | ena")
+    ap.add_argument("--fetch-interval", type=float, default=2.0,
+                    help="minimum seconds between the starts of two read downloads, over all jobs (rate limit "
+                         "for NCBI / ENA); 0 = no limit")
     ap.add_argument("--min-strand-fraction", type=float, default=0.8)
     ap.add_argument("--status", default="candidate", help="manifest status to screen, or 'any'")
     ap.add_argument("--gsm", nargs="*", default=[], help="only these samples")
@@ -293,6 +351,7 @@ def main(argv: list[str] | None = None) -> int:
     opts = {"scratch": args.scratch or os.path.join(args.out, "scratch"), "resources": os.path.abspath(args.resources),
             "threads": args.threads, "spots": args.spots, "skip_spots": args.skip_spots,
             "centrifuge_spots": args.centrifuge_spots, "method": args.method,
+            "fetch_interval": args.fetch_interval,
             "min_strand_fraction": args.min_strand_fraction, "keep_scratch": args.keep_scratch,
             "pipeline": git_commit()}
     os.makedirs(opts["scratch"], exist_ok=True)
