@@ -38,7 +38,7 @@ def test_packaged_manifest_is_consistent():
     rels = {r[0] for r in rows}
     for suffix in paths.VG_SUFFIXES:
         assert paths.RESOURCE_FILES["vg_index"] + suffix in rels
-    for key in ("annotation_gff", "annotation_source_gff", "annotation_bed"):
+    for key in ("annotation_gff", "annotation_bed"):
         assert paths.RESOURCE_FILES[key] in rels
     assert paths.CONTAINER_IMAGE in rels
     assert all(r[3] in resources.BUNDLES for r in rows)

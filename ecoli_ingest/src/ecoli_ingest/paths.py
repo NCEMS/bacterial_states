@@ -8,9 +8,8 @@ from pathlib import Path
 # Relative paths inside a resources directory. Mirrors the defaults in workflow/Snakefile.
 RESOURCE_FILES = {
     "vg_index": "vg/ecoli_graph_test",
-    "annotation_gff": "annotation/GCF_000005845.2_ASM584v2_genomic_siRNA.gff",
-    "annotation_source_gff": "annotation/GCF_000005845.2_ASM584v2_genomic.gff",
-    "annotation_bed": "annotation/GCF_000005845.2_ASM584v2_genomic.bed",
+    "annotation_gff": "annotation/GCF_000005845.2_ASM584v2_counting_v2.gff",
+    "annotation_bed": "annotation/GCF_000005845.2_ASM584v2_counting_v2.bed",
     "centrifuge_index_path": "centrifuge/p_compressed+h+v",
 }
 CONTAINER_IMAGE = "container/rnaseq_vg.sif"

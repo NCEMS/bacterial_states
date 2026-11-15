@@ -64,9 +64,10 @@ Expected layout:
 ```
 resources/
 ├── vg/ecoli_graph_test.d2.{gbz,dist,min,k15.min,shortread.zipcodes}
-├── annotation/GCF_000005845.2_ASM584v2_genomic.gff          # RefSeq (gene products)
-├── annotation/GCF_000005845.2_ASM584v2_genomic_siRNA.gff    # featureCounts annotation (+ Rfam ncRNAs)
-├── annotation/GCF_000005845.2_ASM584v2_genomic.bed
+├── annotation/GCF_000005845.2_ASM584v2_counting_v2.gff      # counting annotation: NCBI genes + Rfam ncRNAs
+├── annotation/GCF_000005845.2_ASM584v2_counting_v2.bed      # the same features as BED12 (RSeQC)
+├── annotation/GCF_000005845.2_ASM584v2_counting_v2.features.tsv           # feature list with overlaps
+├── annotation/GCF_000005845.2_ASM584v2_counting_v2.rfam_merge_report.tsv  # fate of every Rfam hit
 ├── centrifuge/p_compressed+h+v.{1,2,3}.cf                    # not needed with centrifuge: false
 └── container/rnaseq_vg.sif                                   # optional
 ```
@@ -105,14 +106,14 @@ deseq2:
 centrifuge: true                  # false: skip Centrifuge entirely (not run, not in MultiQC)
 centrifuge_organism: "Escherichia coli"
 centrifuge_min_percentage: 30.0   # remove to disable the contamination gate
-fastp_detect_adapter_for_pe: false # true: fastp --detect_adapter_for_pe for paired reads (short-insert libraries)
+strandedness: "auto"              # or "forward" / "reverse"; unstranded libraries are not counted
 fastp_min_kept_percentage: 75.0   # remove to disable the read-filter gate
 ```
 
 Paths are relative to the run directory. If any sample lacks `r2` the whole run is treated as
 single-end. Reference files default to the standard names in the resources directory; individual
-files can be overridden with `vg_index`, `annotation_gff`, `annotation_source_gff`,
-`annotation_bed`, `centrifuge_index_path`.
+files can be overridden with `vg_index`, `annotation_gff`, `annotation_bed`,
+`centrifuge_index_path`.
 
 Reads for a sample can also be several files per mate, or an SRA/GEO accession:
 
@@ -182,30 +183,40 @@ Set `results_dir: "results"` in `config.yaml` for a fixed directory name instead
 | File | Content |
 |---|---|
 | `multiqc_report.html` | all QC in one report (fastp, FastQC, Centrifuge, vg stats, RSeQC, feature overlap, PCA) |
-| `all_samples_raw_counts.txt` | featureCounts table; `Geneid` is the gene symbol |
-| `all_samples_counts_extended.tsv` | `Gene_Symbol, Gene_IDs_Field (locus tag + Dbxrefs), Gene_Summary (RefSeq product), Chr, Start, End, Strand, Length, counts…` |
-| `all_samples_gene_symbols.tsv` | `Gene_Symbol`, coordinates, counts |
+| `all_samples_raw_counts.txt` | featureCounts table; `Geneid` is the feature id (`CDS_b0002_thrA`, `ncRNA_b4577_sgrS`, `ncRNA_Thr_leader`) |
+| `all_samples_counts_extended.tsv` | `Feature_ID, Symbol, Locus_Tag, Type, Source, Rfam, Dbxref, Product, Chr, Start, End, Strand, Length, counts…` |
+| `all_samples_counts.tsv` | `Feature_ID`, coordinates, counts |
+| `strandedness.tsv` | per sample: read orientation fractions, the call (forward, reverse, unstranded) and whether it was counted |
+| `counting_method.json` | annotation, featureCounts options and the orientation used for each sample |
 | `deseq2/` | normalized counts, PCA, one `<ref>_vs_<test>_deseq_results.tsv` per contrast |
 | `<sample>/` | per-sample fastp, FastQC, Centrifuge, vg (`.gam`, sorted BAM), RSeQC, feature overlap |
 | `../checkpoints/qc_failures.json` | samples excluded by the QC gates and why |
+| `../checkpoints/strandedness_failures.json` | samples not counted because the library is not strand-specific |
 
-The count tables feed [Ecoli_ATLAS](../ecoli_atlas/README.md): `ecoli_atlas prepare --ingest-results <experiment>_results`.
+How reads are counted (feature set, strandedness, overlapping features) is described in
+[docs/counting.md](../docs/counting.md). Only strand-specific libraries are counted; the tutorial
+data below (GSE73673) is unstranded, so on this branch it stops after `strandedness.tsv`.
+
+**Counts from this branch do not match the published atlas model** (`ecoli_atlas_models_v1`),
+which was trained on counts made with the previous method. Use the `main` branch to make counts
+for [Ecoli_ATLAS](../ecoli_atlas/README.md) until the atlas has been recounted.
 
 ## 5. Notes
 
 - Nothing needs network access at run time unless samples are given by `accession`; those are
-  resolved (NCBI/ENA metadata) and fetched by the workflow itself (NCBI with sra-tools, else ENA). Gene identifiers and
-  product descriptions come from the two annotation GFFs (`workflow/scripts/annotate_counts.py`).
+  resolved (NCBI/ENA metadata) and fetched by the workflow itself (NCBI with sra-tools, else ENA). Feature identifiers and
+  product descriptions come from the counting annotation (`workflow/scripts/annotate_counts.py`).
 - Reads shorter than 50 bp automatically use the k=15 minimizer index.
 - Centrifuge runs for every sample unless the config says `centrifuge: false` (`ecoli_ingest init
   --without-centrifuge` writes that); a missing key means on. With it off, Centrifuge is not run, its
   gate is ignored and old Centrifuge reports are left out of MultiQC. The gate itself applies only
   when `centrifuge_min_percentage` is set.
-- Paired-end runs call fastp with its defaults, which is how the counts the atlas model was
-  trained on were made: adapters are trimmed only where the mates overlap. That leaves adapter in
-  libraries with very short inserts; for those set `fastp_detect_adapter_for_pe: true`, which adds
-  `--detect_adapter_for_pe`. A missing key means off. Single-end runs are not affected. In an existing run directory a
-  changed setting needs `ecoli_ingest run -- --forcerun fastp_pe`.
+- Paired-end runs always call fastp with `--detect_adapter_for_pe`, so adapters are trimmed from
+  each mate and not only where the mates overlap (which leaves adapter in libraries with very
+  short inserts). The old config key `fastp_detect_adapter_for_pe` is ignored. Single-end runs are
+  not affected.
+- The counting annotation is rebuilt with `build/build_annotation.py` from the unmodified NCBI
+  GFF and a `cmscan` table of Rfam hits; see [docs/counting.md](../docs/counting.md).
 - Maintainers: `ecoli_ingest manifest` regenerates `resources.manifest.tsv` (sha256 of every
   resource file, used by `check --verify` and `download`). The container is rebuilt from
   `build/Singularity.def`, which installs `environment.yaml`.

@@ -65,7 +65,7 @@ ecoli_atlas verify-models --old outputs/models --new outputs/models_new \
                   --feature-table atlas_data/GCF_000005845.2_ASM584v2_feature_table.txt --report verify.json
 ```
 
-`embed` accepts featureCounts output, the inGEST `*_gene_symbols.tsv` / `*_counts_extended.tsv`
+`embed` accepts featureCounts output, the inGEST `all_samples_counts.tsv` / `*_counts_extended.tsv`
 tables, or any genes × samples TSV whose first column holds gene symbols or K-12 locus tags
 (b-numbers). It drops rRNA/tRNA, renames locus tags to symbols with the feature table, aligns to the
 model's 4385 genes (absent genes become 0 counts) and refuses to continue if fewer than

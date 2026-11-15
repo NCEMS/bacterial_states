@@ -85,9 +85,8 @@ def check_resources(cfg: dict, resources: Path | None, rundir: Path) -> list[Che
             out.append(Check("vg short-read minimizer (k=15)", WARN,
                              "absent; samples with reads < 50 bp will fail at vg giraffe"))
 
-    for key, label in (("annotation_gff", "annotation GFF (featureCounts)"),
-                       ("annotation_source_gff", "annotation GFF (RefSeq source, for gene products)"),
-                       ("annotation_bed", "annotation BED")):
+    for key, label in (("annotation_gff", "counting annotation GFF (featureCounts)"),
+                       ("annotation_bed", "counting annotation BED (RSeQC)")):
         p = resource_path(cfg, key, resources, rundir)
         if p is not None:
             out.append(Check(label, OK if _exists(p) else FAIL, str(p)))

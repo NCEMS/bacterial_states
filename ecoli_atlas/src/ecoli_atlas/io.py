@@ -7,8 +7,9 @@ from pathlib import Path
 import pandas as pd
 
 # featureCounts / inGEST annotation columns that are not samples
-ANNOTATION_COLUMNS = ("Chr", "Start", "End", "Strand", "Length", "Gene_IDs_Field", "Gene_Summary")
-GENE_ID_COLUMNS = ("gene", "Gene_Symbol", "Geneid", "gene_id", "GeneID", "symbol")
+ANNOTATION_COLUMNS = ("Chr", "Start", "End", "Strand", "Length", "Gene_IDs_Field", "Gene_Summary",
+                      "Symbol", "Locus_Tag", "Type", "Source", "Rfam", "Dbxref", "Product")
+GENE_ID_COLUMNS = ("gene", "Gene_Symbol", "Feature_ID", "Geneid", "gene_id", "GeneID", "symbol")
 _BAM_RE = re.compile(r"(?:^|/)([^/]+?)(?:_sort)?\.bam$")
 
 
@@ -22,7 +23,7 @@ def read_counts(path: str | Path, strip_sample_names: bool = True) -> pd.DataFra
     """Read a genes x samples count table.
 
     Accepts featureCounts output (``# Program`` comment line; ``Geneid Chr Start End Strand Length``
-    then one column per BAM), the inGEST ``*_gene_symbols.tsv`` / ``*_counts_extended.tsv`` tables,
+    then one column per BAM), the inGEST ``all_samples_counts.tsv`` / ``*_counts_extended.tsv`` tables,
     or a plain TSV whose first column is the gene identifier. Returns a DataFrame indexed by gene
     (index name ``gene``) with one integer/float column per sample. Missing values become 0.
     """

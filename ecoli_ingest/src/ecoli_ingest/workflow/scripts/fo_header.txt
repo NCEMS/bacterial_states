@@ -1,6 +1,6 @@
 # id: "feature_overlap"
 # section_name: "Feature overlap: percentage overlap with genomic features"
-# description: "Proportion of reads overlapping genomic features using bedtools intersect (overlapping features permitted). Can be used to evaluate rRNA/tRNA contamination. Note: if library is not stranded, ncRNA quantification is likely inaccurate."
+# description: "Share of read-feature overlaps by feature type (bedtools intersect on the counting annotation; a read overlapping two features is counted for both). For strand-specific libraries only reads on the feature's own strand are counted. Rfam = Rfam predictions that are not NCBI genes. Can be used to evaluate rRNA/tRNA content."
 # format: "tsv"
 # plot_type: "bargraph"
 # pconfig:

@@ -1,5 +1,12 @@
 # Example: nutrient stress time course in two media (GEO GSE271069)
 
+> **`ingest-update` branch.** The text and numbers below describe the run made with the previous
+> counting method (branch `main`). On this branch inGEST counts strand-specific libraries only,
+> with stranded counting, a larger feature set and new feature ids
+> ([docs/counting.md](../../docs/counting.md)), always trims paired-end adapters, and its counts do
+> not match the published atlas model, so the Ecoli_ATLAS sections do not apply to counts made
+> here. These libraries are reverse-stranded. The example has not been re-run from the reads on this branch.
+
 A second worked example, shorter than
 [GSE67402](../GSE67402_growth_starvation_time_course/README.md), which explains each command and
 output file. Here the design has two factors (medium and time point), the strain is the one most of
@@ -13,8 +20,8 @@ regulation of nutrient stress responses in *Escherichia coli* from chromatin str
 regulatory RNAs". Not in the atlas training data. `samples.csv` gives medium, time point,
 replicate, `condition` (medium_timepoint) and `order` (GLU 1-3, CAS 4-8) per sample.
 
-The numbers are from the run of 2026-11-14, made with the default fastp settings (no
-`fastp_detect_adapter_for_pe`), which is how the atlas training counts were processed.
+The numbers are from the run of 2026-11-14 on `main`, made without paired-end adapter detection
+(`fastp_detect_adapter_for_pe` off), which is how the atlas training counts were processed.
 
 ## 1. inGEST
 

@@ -112,7 +112,6 @@ fastp_min_kept_percentage: 75.0
 # no changes. Uncomment to override individual files.
 # ref: "GCF_000005845_2_ASM584v2_genomic#0#NC_000913.3"
 # vg_index: "/path/to/resources/vg/ecoli_graph_test"
-# annotation_gff: "/path/to/resources/annotation/GCF_000005845.2_ASM584v2_genomic_siRNA.gff"
-# annotation_source_gff: "/path/to/resources/annotation/GCF_000005845.2_ASM584v2_genomic.gff"
-# annotation_bed: "/path/to/resources/annotation/GCF_000005845.2_ASM584v2_genomic.bed"
+# annotation_gff: "/path/to/resources/annotation/GCF_000005845.2_ASM584v2_counting_v2.gff"
+# annotation_bed: "/path/to/resources/annotation/GCF_000005845.2_ASM584v2_counting_v2.bed"
 # centrifuge_index_path: "/path/to/resources/centrifuge/p_compressed+h+v"

@@ -1,5 +1,12 @@
 # Example: growth to long-term starvation (GEO GSE67402)
 
+> **`ingest-update` branch.** The text and numbers below describe the run made with the previous
+> counting method (branch `main`). On this branch inGEST counts strand-specific libraries only,
+> with stranded counting, a larger feature set and new feature ids
+> ([docs/counting.md](../../docs/counting.md)), always trims paired-end adapters, and its counts do
+> not match the published atlas model, so the Ecoli_ATLAS sections do not apply to counts made
+> here. These libraries are forward-stranded. The example has not been re-run from the reads on this branch.
+
 From GEO accessions to atlas neighbours, with every command and what came out of it.
 
 **Data.** *E. coli* B REL606 in glucose-limited minimal medium, sampled at 3, 4, 5, 6, 8, 24, 48,
@@ -46,9 +53,9 @@ What happened in this run, including the parts that did not go smoothly:
   given `--detect_adapter_for_pe`, left adapter read-through in about half of the read pairs;
   Centrifuge classified those as "synthetic construct" (83-99 % of the classified reads) and every
   sample failed the 30 % *E. coli* gate. With the option, fastp trims both adapters; the median
-  sample keeps 78 % of its reads (mean length about 50 of 101 bp). The option is off by default
-  (it was not used for the atlas training counts); this config turns it on with
-  `fastp_detect_adapter_for_pe: true`.
+  sample keeps 78 % of its reads (mean length about 50 of 101 bp). On `main` the option is off by default
+  (it was not used for the atlas training counts) and this example turned it on with
+  `fastp_detect_adapter_for_pe: true`; on this branch it is always on.
 - **Two weak samples.** `t005h_rep1` and `t168h_rep1` keep only 25 % and 32 % of their reads (mean
   length 26 and 31 bp) and align worst (17 % and 40 %; the median sample aligns 69 %). They are
   included because `fastp_min_kept_percentage` is set to 20 in this config; with the default 75 they

@@ -13,7 +13,7 @@ import pandas as pd
 from .io import read_counts, read_metadata, sample_id_from_column, write_tsv
 
 RAW_COUNTS = "all_samples_raw_counts.txt"
-SYMBOL_COUNTS = "all_samples_gene_symbols.tsv"
+SYMBOL_COUNTS = "all_samples_counts.tsv"
 
 
 def find_counts_file(results_dir: Path) -> Path:

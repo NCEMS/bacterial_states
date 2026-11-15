@@ -76,11 +76,27 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   `ecoli_ingest/paths.py` (`RESOURCE_FILES`). Keep them in sync.
 - Workflow tool list has one source of truth: `ecoli_ingest/environment.yaml`
   (`build/Singularity.def` installs it). `workflow/envs/rnaseq_vg.yaml` is the legacy image env.
-- `annotate_counts` is offline (`workflow/scripts/annotate_counts.py`). `Gene_Summary` holds the
-  RefSeq `product`, not the old NCBI gene summary paragraph.
-- Gene identifiers: inGEST emits gene **symbols** (GFF `Name`); the training table uses **b-numbers**.
-  `ecoli_atlas` maps b-numbers → symbols with the feature table and reports coverage
-  (`gene_coverage.tsv`); `embed` fails below `--min-gene-coverage` (0.9).
+- **Branch `ingest-update` is a main revision of inGEST counting** (see `docs/counting.md`); it
+  stays off `main` until adopted, and there is no backward compatibility with the old counting.
+  Its counts do not match the published atlas model: make counts for `outputs/models` on `main`.
+- Counting annotation: `resources/annotation/GCF_000005845.2_ASM584v2_counting_v2.{gff,bed,
+  features.tsv,rfam_merge_report.tsv}`, built by `ecoli_ingest/build/build_annotation.py` from the
+  unmodified NCBI GFF and the Rfam hit table (both kept in `work/ingest_update/ncbi/`). Never
+  hand-edit it; the older `_genomic.gff` / `_siRNA.gff` / `.bed` there were edited by hand and are
+  used by `main` only. NCBI entries win over duplicate Rfam hits (same strand, or
+  opposite strand to an NCBI ncRNA gene); `RFAM_EXCLUDE` lists the families
+  left out (REP repeats, DnaX frameshift element, SECIS).
+- Feature ids are `<Type>_<locus_tag>_<symbol>` (`CDS_b0002_thrA`, `ncRNA_b4577_sgrS`, also `tRNA_`,
+  `rRNA_`, `pseudo_`) and `ncRNA_<Rfam id>[_n]` for Rfam hits; one row per gene, no `gene` rows.
+  `annotate_counts` is offline and reads only the counting annotation; symbol, locus tag, type,
+  source, Rfam accession, Dbxref and product are columns of the extended table.
+- Counting: `featureCounts -t gene -g ID -O -s <per BAM> [-p --countReadPairs]`. Only
+  strand-specific libraries are counted (`call_strandedness.py`, checkpoint
+  `strand_passed_samples`, `strandedness.tsv`); there is no unstranded mode. Multi-mapping reads
+  are left where the aligner put them (one alignment per read, no NH tag).
+- The atlas training table uses **b-numbers** and 4,493 features counted unstranded. `ecoli_atlas`
+  maps b-numbers → symbols with the feature table and reports coverage (`gene_coverage.tsv`);
+  `embed` fails below `--min-gene-coverage` (0.9).
 - Model bundle file layout must stay loadable for the original Colab files (`artifacts.py`).
   New bundles store tensors only (`torch.load(weights_only=True)` works).
 - Class calls default to argmax (that is what produced `outputs/predictions*`); the saved operating
@@ -92,11 +108,10 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
 - The launcher runs Snakemake with `--rerun-triggers mtime` (unless the user passes their own), so
   rule code / parameter changes never redo finished steps of an existing run directory; changed
   settings need `-- --forcerun RULE`.
-- Paired-end fastp gets `--detect_adapter_for_pe` only when the config sets
-  `fastp_detect_adapter_for_pe: true` (missing key = off, matching how the atlas training counts
-  in `merged_count_table.txt` were made). Only `examples/GSE67402_*` sets it to true
-  (GSE271069 was re-run with the default on 2026-11-14; its earlier trimming-on run is in
-  `run_adapter_on/` there).
+- Paired-end fastp always gets `--detect_adapter_for_pe`; the config key
+  `fastp_detect_adapter_for_pe` is ignored with a warning. (The atlas training counts in
+  `merged_count_table.txt` were made without it. GSE271069's `results/` on disk is a run without
+  it; its trimming-on run is in `run_adapter_on/`.)
 - `compare --metadata/--group-by/--order-by/--color-by` adds `group_summary.tsv` and the
   `compare_plots.py` figures; without those options `summary.tsv` / `neighbors.tsv` must not change.
 - Sample ids: inGEST count columns are BAM paths; `io.sample_id_from_column` strips them to the

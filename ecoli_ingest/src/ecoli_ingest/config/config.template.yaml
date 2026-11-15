@@ -57,10 +57,12 @@ deseq2:
 # it: Centrifuge is then not run, its gate is ignored and it is left out of the MultiQC report.
 centrifuge: true
 
-# Paired-end reads only. false = plain fastp defaults (adapters removed only where the mates
-# overlap), as used for the atlas training counts. Set true to have fastp detect and trim the
-# adapter of each mate (--detect_adapter_for_pe); libraries with very short inserts need it.
-fastp_detect_adapter_for_pe: false
+# Strand specificity. Only strand-specific libraries are counted: a sample whose reads are not
+# at least `strandedness_min_fraction` on one strand is left out of the count table (see
+# <results>/strandedness.tsv). "auto" calls each sample from its alignments; "forward" or
+# "reverse" states it for every sample of the run. There is no unstranded mode.
+strandedness: "auto"
+strandedness_min_fraction: 0.8
 
 # Quality-control gates. A sample that fails any configured gate is excluded from alignment and
 # counting (see checkpoints/qc_failures.json). Remove a line to disable that gate.
@@ -81,7 +83,6 @@ fastp_min_kept_percentage: 75.0
 # no changes. Uncomment to override individual files.
 # ref: "GCF_000005845_2_ASM584v2_genomic#0#NC_000913.3"
 # vg_index: "/path/to/resources/vg/ecoli_graph_test"
-# annotation_gff: "/path/to/resources/annotation/GCF_000005845.2_ASM584v2_genomic_siRNA.gff"
-# annotation_source_gff: "/path/to/resources/annotation/GCF_000005845.2_ASM584v2_genomic.gff"
-# annotation_bed: "/path/to/resources/annotation/GCF_000005845.2_ASM584v2_genomic.bed"
+# annotation_gff: "/path/to/resources/annotation/GCF_000005845.2_ASM584v2_counting_v2.gff"
+# annotation_bed: "/path/to/resources/annotation/GCF_000005845.2_ASM584v2_counting_v2.bed"
 # centrifuge_index_path: "/path/to/resources/centrifuge/p_compressed+h+v"

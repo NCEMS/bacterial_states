@@ -42,6 +42,18 @@ def test_read_counts_three_formats(tmp_path, counts_symbols):
     b = io.read_counts(tmp_path / "ext.tsv")
     np.testing.assert_array_equal(b.values, counts_symbols.values)
 
+    # inGEST extended table: Feature_ID, identifier columns, coords, counts
+    ext2 = counts_symbols.copy()
+    for c in ("Product", "Dbxref", "Rfam", "Source", "Type", "Locus_Tag", "Symbol"):
+        ext2.insert(0, c, "x")
+    ext2.index.name = "Feature_ID"
+    for c in ("Chr", "Start", "End", "Strand", "Length"):
+        ext2.insert(7, c, 1)
+    ext2.to_csv(tmp_path / "ext2.tsv", sep="\t")
+    b2 = io.read_counts(tmp_path / "ext2.tsv")
+    assert list(b2.columns) == list(counts_symbols.columns)
+    np.testing.assert_array_equal(b2.values, counts_symbols.values)
+
     # plain genes x samples table with b-numbers and GSM_SRR columns
     plain = counts_symbols.copy()
     plain.index.name = "Geneid"

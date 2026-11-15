@@ -16,9 +16,9 @@ resources_dir = config.get("resources_dir", "../resources")
 def _resource(key, relpath):
     return config.get(key) or os.path.join(resources_dir, relpath)
 
-annotation_gff = _resource("annotation_gff", "annotation/GCF_000005845.2_ASM584v2_genomic_siRNA.gff")
-annotation_source_gff = _resource("annotation_source_gff", "annotation/GCF_000005845.2_ASM584v2_genomic.gff")
-annotation_bed = _resource("annotation_bed", "annotation/GCF_000005845.2_ASM584v2_genomic.bed")
+# Counting annotation and its BED12 twin, both written by ecoli_ingest/build/build_annotation.py.
+annotation_gff = _resource("annotation_gff", "annotation/GCF_000005845.2_ASM584v2_counting_v2.gff")
+annotation_bed = _resource("annotation_bed", "annotation/GCF_000005845.2_ASM584v2_counting_v2.bed")
 vg_index = _resource("vg_index", "vg/ecoli_graph_test")
 centrifuge_index_path = _resource("centrifuge_index_path", "centrifuge/p_compressed+h+v")
 gref = config.get("ref", "GCF_000005845_2_ASM584v2_genomic#0#NC_000913.3")
@@ -75,6 +75,7 @@ def get_minimizer_for_sample(sample_name):
 # once; the answer is cached under <sra_dir>/manifest/<ACC>.json.
 sys.path.insert(0, scripts_dir)
 import sra_reads
+import call_strandedness
 
 SAMPLES = config.get("samples", {})
 SRA_DIR = config.get("sra_dir", "sra")
@@ -131,10 +132,15 @@ fastp_qc_is_configured = config.get("fastp_min_kept_percentage") is not None
 # Centrifuge (contamination screen) runs unless `centrifuge: false`; its gate needs a threshold too
 centrifuge_enabled = bool(config.get("centrifuge", True))
 centrifuge_qc_is_configured = centrifuge_enabled and config.get("centrifuge_min_percentage") is not None
-# Paired-end adapter detection in fastp is off unless `fastp_detect_adapter_for_pe: true`. Off gives
-# plain `fastp` defaults (overlap-based adapter removal only), which is how the reads behind the
-# atlas training counts (merged_count_table.txt) were processed.
-fastp_pe_extra = "--detect_adapter_for_pe" if bool(config.get("fastp_detect_adapter_for_pe", False)) else ""
+# Strand specificity: inGEST counts strand-specific libraries only. `strandedness: auto` (default)
+# calls each sample from RSeQC infer_experiment; `forward` / `reverse` state it for the whole run.
+strandedness_mode = str(config.get("strandedness", "auto")).lower()
+if strandedness_mode not in ("auto", "forward", "reverse"):
+    raise ValueError(f"config `strandedness` must be auto, forward or reverse, not {strandedness_mode!r}")
+strandedness_min_fraction = float(config.get("strandedness_min_fraction", 0.8))
+if "fastp_detect_adapter_for_pe" in config:
+    print("WARNING: config key `fastp_detect_adapter_for_pe` is ignored; paired-end adapter "
+          "detection is always on.", file=sys.stderr, flush=True)
 
 
 ###Checkpoint function for QC metrics collected above (fastp and centrifuge)
@@ -236,9 +242,13 @@ def get_passed_samples_from_checkpoint(wildcards):
     samples = [os.path.splitext(os.path.basename(p))[0] for p in files]
     return samples
 
-def get_first_passed_sample(wildcards):
-    passed = get_passed_samples_from_checkpoint(wildcards)
-    return passed[0] if passed else None
+STRAND_TABLE = f"{results_dir}/strandedness.tsv"
+
+def get_counted_samples(wildcards):
+    """QC-passed samples whose library is strand-specific; only these are counted. Waits for the
+    strandedness checkpoint, so rules using it are planned after the calls are known."""
+    table = checkpoints.strand_passed_samples.get().output.table
+    return call_strandedness.counted_samples(table)
 
 def get_rna_seq_outputs(wildcards):
     passed_samples = get_passed_samples_from_checkpoint(wildcards)
@@ -255,12 +265,18 @@ def get_rna_seq_outputs(wildcards):
             f"{results_dir}/{s}/rseqc/{s}_infer_experiment.txt",
             f"{results_dir}/{s}/feature_overlap/{s}_feature_overlap_mqc.tsv",
         ])
-    outputs.extend([
-        f"{results_dir}/all_samples_raw_counts.txt",
-        f"{results_dir}/multiqc_report.html",
-        f"{results_dir}/deseq2/normalized_counts.tsv",
-        "checkpoints/qc_failures.json",
-    ])
+    outputs.extend([STRAND_TABLE, "checkpoints/qc_failures.json"])
+    # Count tables, DESeq2 and the report need at least one strand-specific sample.
+    if get_counted_samples(wildcards):
+        outputs.extend([
+            f"{results_dir}/all_samples_raw_counts.txt",
+            f"{results_dir}/all_samples_counts_extended.tsv",
+            f"{results_dir}/counting_method.json",
+            f"{results_dir}/multiqc_report.html",
+            f"{results_dir}/deseq2/normalized_counts.tsv",
+        ])
+    else:
+        print("No strand-specific sample: nothing is counted. See " + STRAND_TABLE, file=sys.stderr, flush=True)
     return outputs
 
 ####Rule all
@@ -420,16 +436,13 @@ else:
             json=f"{results_dir}/{{sample}}/fastp/{{sample}}_fastp.json"
         threads: 12
         benchmark: f"benchmarks/{{sample}}_fastp_benchmark.txt"
-        # --detect_adapter_for_pe (config `fastp_detect_adapter_for_pe`, default off): without it
-        # fastp removes paired-end adapters only where the two mates overlap, which misses inserts
-        # shorter than about 30 bp; those reads are then almost all adapter, are classified as
-        # vector sequence by Centrifuge and do not align.
-        params:
-            extra=fastp_pe_extra
+        # --detect_adapter_for_pe: without it fastp removes paired-end adapters only where the two
+        # mates overlap, which misses inserts shorter than about 30 bp; those reads are then almost
+        # all adapter, are classified as vector sequence by Centrifuge and do not align.
         shell:
             """
             mkdir -p {results_dir}/{wildcards.sample}/fastp
-            fastp -i {input.r1} -I {input.r2} -o {output.r1} -O {output.r2} -h {output.html} -j {output.json} -w {threads} {params.extra}
+            fastp -i {input.r1} -I {input.r2} -o {output.r1} -O {output.r2} -h {output.html} -j {output.json} -w {threads} --detect_adapter_for_pe
             """
 
     rule fastqc_pe:
@@ -528,7 +541,7 @@ rule vg_stats:
         echo "Speed: 123 reads/second" >> {output.txt}
         """
 
-#Getting strandedness information for sequencing library (used by multiqc)
+#RSeQC: read orientation relative to the annotation (decides strandedness, below) and gene body coverage
 rule rseqc:
     input:
         bam = f"{results_dir}/{{sample}}/vg/{{sample}}.bam"
@@ -547,84 +560,91 @@ rule rseqc:
         infer_experiment.py -i {input.bam} -r {params.annotation_bed} > {output.infer_experiment}
         samtools sort {input.bam} > {output.sorted_bam}
         samtools index {output.sorted_bam}
-        grep "gene" {params.annotation_bed} > {results_dir}/{wildcards.sample}/rseqc/genes.bed
+        awk -F"\t" '$4 ~ /^CDS:/' {params.annotation_bed} > {results_dir}/{wildcards.sample}/rseqc/genes.bed
         # run inside the rseqc directory: geneBody_coverage.py writes a log.txt into the cwd
         (cd {results_dir}/{wildcards.sample}/rseqc && geneBody_coverage.py -r genes.bed -i ../vg/{wildcards.sample}_sort.bam -o {wildcards.sample}_genebody_cov)
         """
 
 
+#Strandedness of one sample
+rule strand_call:
+    input:
+        infer_experiment = f"{results_dir}/{{sample}}/rseqc/{{sample}}_infer_experiment.txt"
+    output:
+        f"{results_dir}/{{sample}}/rseqc/{{sample}}_strandedness.tsv"
+    shell:
+        """
+        python {scripts_dir}/call_strandedness.py call --infer {input.infer_experiment} --sample {wildcards.sample} \
+            --mode {strandedness_mode} --min-fraction {strandedness_min_fraction} --out {output}
+        """
+
+def _qc_passed_strand_calls(wildcards):
+    checkpoints.qc_passed_samples.get()
+    return [f"{results_dir}/{s}/rseqc/{s}_strandedness.tsv" for s in get_passed_samples_from_checkpoint(wildcards)]
+
+###Strandedness gate: unstranded libraries are not counted
+checkpoint strand_passed_samples:
+    input:
+        _qc_passed_strand_calls
+    output:
+        table=STRAND_TABLE,
+        mqc=f"{results_dir}/strandedness_mqc.tsv",
+        failures="checkpoints/strandedness_failures.json"
+    run:
+        rows = call_strandedness.combine(list(input), output.table, output.mqc, output.failures)
+        for r in rows:
+            if r["counted"] != "yes":
+                print(f"NOT COUNTED: {r['sample']} is not strand-specific (forward {r['fraction_forward']}, "
+                      f"reverse {r['fraction_reverse']})", file=sys.stderr, flush=True)
+
+
 ####Rules that require all samples in an experiment
+# One feature per row of the counting annotation (`-t gene -g ID`). A read is counted for every
+# feature it overlaps on its own strand (-O); paired-end runs count fragments (--countReadPairs).
+# -s is given per BAM, so forward- and reverse-stranded samples can share a run.
+FEATURECOUNTS_OPTIONS = "-t gene -g ID -O" + ("" if SE else " -p --countReadPairs")
+
 rule featurecounts_combined:
     input:
         bams=lambda wc: expand(
             f"{results_dir}/{{sample}}/vg/{{sample}}_sort.bam",
-            sample=get_passed_samples_from_checkpoint(wc)
+            sample=get_counted_samples(wc)
         ),
-        infer_experiment_for_strand=lambda wc:
-            f"{results_dir}/{get_first_passed_sample(wc)}/rseqc/{get_first_passed_sample(wc)}_infer_experiment.txt"
+        strand=STRAND_TABLE,
+        annotation=annotation_gff
     output:
         counts=f"{results_dir}/all_samples_raw_counts.txt",
         summary=f"{results_dir}/all_samples_raw_counts.txt.summary",
-        temp_gff=f"{results_dir}/featurecounts/featurecounts_annotation.gff"
+        method=f"{results_dir}/counting_method.json"
     params:
-        pe_param = "-p" if not SE else ""
+        options=FEATURECOUNTS_OPTIONS,
+        strand_flags=lambda wc, input: call_strandedness.featurecounts_strand_flags(input.strand, get_counted_samples(wc))
+    threads: 8
     benchmark: f"benchmarks/featurecounts_benchmark.txt"
-    shell:
-        r"""
-        mkdir -p $(dirname {output.counts}) $(dirname {output.temp_gff})
-    
-        strand=$(awk '
-          /1\+\+,1--/ || /\+\+,--/ {{ strand1 = $NF + 0 }}
-          /1\+-,1-\+/ || /\+\-,-\+/ {{ strand2 = $NF + 0 }}
-          END {{
-            if (strand1 > 80) print 1;
-            else if (strand2 > 80) print 2;
-            else print 0;
-          }}' {input.infer_experiment_for_strand})
-    
-        # Annotation uses generic type "feature" for every row; classify by gbkey instead.
-        #   gbkey=Gene  -> gene-level rows (protein_coding, rRNA, tRNA, pseudogene, ncRNA, ...)
-        #   gbkey=ncRNA -> RefSeq ncRNA transcripts and Rfam ncRNA predictions
-        # Unstranded: count genes only, excluding ncRNA genes.
-        # Stranded:   count non-ncRNA genes plus all gbkey=ncRNA rows (RefSeq ncRNA genes are
-        #             replaced by their ncRNA transcript rows to avoid double entries).
-        # Selected rows are retyped to "gene" so featureCounts -t gene picks them up.
-        # Features are named by gene symbol (the Name attribute), so the Geneid column of the
-        # counts table matches the gene symbols used in the previous counts tables. Rows without
-        # a Name get one: RefSeq ncRNA transcripts use their gene= attribute (same symbol as the
-        # gene row they replace); Rfam rows use their ID (e.g. Thr_leader, ES036_1), with an
-        # "_Rfam" suffix if that ID collides with a gene symbol (e.g. greA, nuoG, rimP).
-        awk -F"\t" -v strand="$strand" 'BEGIN{{OFS="\t"}}
-          /^#/ || NF != 9 {{next}}
-          NR == FNR {{
-            if ($9 ~ /(^|;)gbkey=Gene(;|$)/ && $9 ~ /(^|;)Name=/) {{
-              nm = $9; sub(/^(.*;)?Name=/, "", nm); sub(/;.*$/, "", nm); gene_names[nm] = 1
-            }}
-            next
-          }}
-          {{
-            is_gene  = ($9 ~ /(^|;)gbkey=Gene(;|$)/)
-            is_ncrna = ($9 ~ /(^|;)gbkey=ncRNA(;|$)/)
-            nc_gene  = is_gene && ($9 ~ /(^|;)gene_biotype=ncRNA(;|$)/)
-            if (strand == 0) {{ if (!is_gene || nc_gene) next }}
-            else {{ if (!(is_gene && !nc_gene) && !is_ncrna) next }}
-            if ($9 !~ /(^|;)Name=/) {{
-              if ($9 ~ /(^|;)gene=/) {{
-                nm = $9; sub(/^(.*;)?gene=/, "", nm); sub(/;.*$/, "", nm)
-              }} else {{
-                nm = $9; sub(/^(.*;)?ID=/, "", nm); sub(/;.*$/, "", nm)
-                if (nm in gene_names) nm = nm "_Rfam"
-              }}
-              $9 = $9 ";Name=" nm
-            }}
-            $3 = "gene"
-            print
-          }}' {annotation_gff} {annotation_gff} > {output.temp_gff}
-        featureCounts -a {output.temp_gff} -o {output.counts} -t gene -g Name -s "$strand" {params.pe_param} {input.bams}
-        """
-        
+    run:
+        os.makedirs(os.path.dirname(output.counts), exist_ok=True)
+        shell("featureCounts -T {threads} -a {input.annotation} -o {output.counts} {params.options} -s {params.strand_flags} {input.bams}")
+        with open(input.annotation) as fh:
+            annotation_header = [line[2:].rstrip("\n") for line in fh if line.startswith("#!")]
+        calls = {r["sample"]: r["call"] for r in call_strandedness.read_table(input.strand)}
+        with open(output.method, "w") as fh:
+            json.dump({
+                "annotation": os.path.basename(input.annotation),
+                "annotation_header": annotation_header,
+                "featurecounts_options": f"{params.options} -s {params.strand_flags}",
+                "layout": "single-end" if SE else "paired-end",
+                "counting_unit": "reads" if SE else "fragments",
+                "overlap_rule": "a read is counted for every feature it overlaps on its own strand",
+                "multi_mapping": "each read has one alignment; reads with equally good placements are "
+                                 "placed on one of them by the aligner and counted there",
+                "strandedness": calls,
+                "not_counted": sorted(s for s, c in calls.items() if c == "unstranded"),
+            }, fh, indent=2)
+
 #Sample metadata for DESeq2        
 rule generate_sample_metadata:
+    input:
+        strand=STRAND_TABLE
     output:
         temp(f"{results_dir}/sample_metadata.tsv")
     run:
@@ -632,8 +652,8 @@ rule generate_sample_metadata:
 
         samples = config["samples"]
 
-        #Use only passed samples
-        passed_samples = get_passed_samples_from_checkpoint(None)
+        #Use only the samples that are counted (passed QC and strand-specific)
+        passed_samples = call_strandedness.counted_samples(input.strand)
 
         metadata = []
         for sample_id in passed_samples:
@@ -650,10 +670,9 @@ rule generate_sample_metadata:
 
 #Running DEseq using comparison listed in config file
 deseq_results_outputs = expand(f"{results_dir}/deseq2/{{contrast}}_deseq_results.tsv", contrast=contrast_names) #Need a list of outputs from contrasts
-deseq_summary_outputs = expand(f"{results_dir}/deseq2/{{contrast}}_deseq_results_summary.tsv", contrast=contrast_names)
 rule run_deseq2:
     input:
-        counts=f"{results_dir}/all_samples_gene_symbols.tsv",
+        counts=f"{results_dir}/all_samples_counts.tsv",
         metadata=f"{results_dir}/sample_metadata.tsv",
         extended=f"{results_dir}/all_samples_counts_extended.tsv"
     output:
@@ -674,59 +693,41 @@ rule run_deseq2:
 
         cat {scripts_dir}/pca_header.txt <(
             echo -e "id\\tPC1\\tPC2\\tcondition"
-            sed '1d' {output.pca_coords} | awk 'BEGIN{{OFS="\\t"}} {{print $1, $2, $3, $NF}}'
+            # the header has no name for the row-name column, so data columns are shifted by one
+            awk 'BEGIN{{FS=OFS="\\t"}} NR==1 {{c=NF+1; for (i=1; i<=NF; i++) if ($i=="condition") c=i+1; next}} {{print $1, $2, $3, $c}}' {output.pca_coords}
         ) > {output.pca_mqc}
         """
         
-#Annotating the combined counts table with gene identifiers (locus tag, database cross-references)
-#and product descriptions. Everything comes from the two annotation GFFs; no network access needed.
+#Annotating the combined counts table with feature identifiers (symbol, locus tag, type, source,
+#Rfam family, database cross-references) and product descriptions, all from the counting annotation.
 rule annotate_counts:
     input:
         counts=f"{results_dir}/all_samples_raw_counts.txt",
-        gff=f"{results_dir}/featurecounts/featurecounts_annotation.gff",
-        source_gff=annotation_source_gff
+        gff=annotation_gff
     output:
         extended=f"{results_dir}/all_samples_counts_extended.tsv",
-        clean=f"{results_dir}/all_samples_gene_symbols.tsv"
+        clean=f"{results_dir}/all_samples_counts.tsv"
     shell:
         """
         python {scripts_dir}/annotate_counts.py --counts {input.counts} --gff {input.gff} \
-            --source-gff {input.source_gff} --extended {output.extended} --symbols {output.clean}
-        """
-
-rule summarize_deseq_results:
-    input:
-        deseq_result=f"{results_dir}/deseq2/{{wildcards.contrast}}_deseq_results.tsv",
-        extended=f"{results_dir}/all_samples_counts_extended.tsv"
-    output:
-        summary_file=f"{results_dir}/deseq2/{{wildcards.contrast}}_deseq_results_summary.tsv"
-    params:
-        outdir=f"{results_dir}/deseq2"
-    shell:
-        """
-        awk -v extended_input="{input.extended}" '
-            BEGIN{{FS=OFS="\\t"}}
-            NR==FNR && FILENAME == extended_input {{
-                id[$1]=$2;
-                summary[$1]=$3;
-                next
-            }}
-            FNR==1 {{print $0, "Gene_IDs_Field", "Gene_Summary"; next}}
-            FNR>1 {{print $0, id[$1], summary[$1]}}
-        ' "{input.extended}" "{input.deseq_result}" > "{output.summary_file}"
+            --extended {output.extended} --counts-out {output.clean}
         """
 
 #Custom addition to multiqc, have to keep mqc name or it will not be parsed
 rule feature_overlap:
     input:
-        bam = f"{results_dir}/{{sample}}/vg/{{sample}}_sort.bam"
+        bam = f"{results_dir}/{{sample}}/vg/{{sample}}_sort.bam",
+        strand = f"{results_dir}/{{sample}}/rseqc/{{sample}}_strandedness.tsv"
     output:
         feature_overlap = f"{results_dir}/{{sample}}/feature_overlap/{{sample}}_feature_overlap_mqc.tsv"
+    params:
+        call=lambda wc, input: call_strandedness.read_table(input.strand)[0]["call"],
+        layout="SE" if SE else "PE"
     benchmark: f"benchmarks/{{sample}}_overlap_benchmark.txt"
     shell:
         """
         mkdir -p {results_dir}/{wildcards.sample}/feature_overlap
-        bash {scripts_dir}/gene_type.sh {annotation_bed} {input.bam} {output.feature_overlap} {scripts_dir}
+        bash {scripts_dir}/gene_type.sh {annotation_bed} {input.bam} {output.feature_overlap} {scripts_dir} {params.call} {params.layout}
         """
 
 #Summarizing all outputs with MultiQC
@@ -755,7 +756,8 @@ rule multiqc:
             f"{results_dir}/{s}/feature_overlap/{s}_feature_overlap_mqc.tsv"
             for s in get_passed_samples_from_checkpoint(wc)
         ] + [
-            f"{results_dir}/all_samples_raw_counts.txt.summary"
+            f"{results_dir}/all_samples_raw_counts.txt.summary",
+            f"{results_dir}/strandedness_mqc.tsv"
         ],
         # MultiQC picks this up as custom content; declare it so MultiQC waits for DESeq2 to finish writing it
         pca_mqc=f"{results_dir}/deseq2/pca_mqc.tsv"
