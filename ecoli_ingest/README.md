@@ -186,7 +186,7 @@ Set `results_dir: "results"` in `config.yaml` for a fixed directory name instead
 | `all_samples_counts_extended.tsv` | `Gene_Symbol, Gene_IDs_Field (locus tag + Dbxrefs), Gene_Summary (RefSeq product), Chr, Start, End, Strand, Length, counts…` |
 | `all_samples_gene_symbols.tsv` | `Gene_Symbol`, coordinates, counts |
 | `deseq2/` | normalized counts, PCA, one `<ref>_vs_<test>_deseq_results.tsv` per contrast |
-| `<sample>/` | per-sample fastp, FastQC, Centrifuge, vg (`.gam`, sorted BAM), RSeQC, feature overlap |
+| `<sample>/` | per-sample fastp, FastQC, Centrifuge, vg (sorted BAM, `vg stats`), RSeQC, feature overlap. The trimmed reads, Centrifuge's per-read tables and the `.gam` (several GB per sample) are deleted once used |
 | `../checkpoints/qc_failures.json` | samples excluded by the QC gates and why |
 
 The count tables feed [Ecoli_ATLAS](../ecoli_atlas/README.md): `ecoli_atlas prepare --ingest-results <experiment>_results`.
