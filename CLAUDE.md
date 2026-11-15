@@ -94,6 +94,12 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   strand-specific libraries are counted (`call_strandedness.py`, checkpoint
   `strand_passed_samples`, `strandedness.tsv`); there is no unstranded mode. Multi-mapping reads
   are left where the aligner put them (one alignment per read, no NH tag).
+- Atlas candidates and QC (`docs/prescreen.md`): `atlas_build/preprocessing/build_manifest.py`
+  writes `work/atlas_manifest/{runs,samples,studies}.tsv` from ENA; `atlas_build/prescreen/
+  prescreen.py` screens a 200,000-read subsample per sample into `work/prescreen/samples/<GSM>.json`;
+  `qc_table.py` keeps `atlas_data/sample_qc.tsv` (`pre_*` prescreen, `full_*` full run, `in_model`).
+  Both tiers are parsed by `qc_metrics.py`. Never run Centrifuge with `--mm` on an index that
+  sits on the network file system (minutes per sample); the prescreen copies it to `/dev/shm`.
 - The atlas training table uses **b-numbers** and 4,493 features counted unstranded. `ecoli_atlas`
   maps b-numbers → symbols with the feature table and reports coverage (`gene_coverage.tsv`);
   `embed` fails below `--min-gene-coverage` (0.9).
