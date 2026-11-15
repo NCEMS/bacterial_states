@@ -1,0 +1,205 @@
+{
+ "gse": "GSE182100",
+ "notes": "These are the RNA-seq arm of a ribosome-profiling study (Li et al. 2018 protocol; shared extract protocol describes MNase digestion and gel size selection); per settled rule the mRNA-seq arm of a ribosome-profiling protocol is excluded -> assay_class other. Chemostat C/N/P/Leu limitation -> nutrient_limited_growth, adapted, phase not_applicable, aerobic (aeration 4.5 l/h). Batch WT in glucose MOPS minimal and defined rich MOPS are untreated -> controls; WT chemostat samples set is_control false (treated). Unsure: whether WT chemostat samples should be controls too. Batch culture phase not given (growth rate only), left out; shaking not stated.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "NCM3722"
+  },
+  "strain_name": {
+   "v": "NCM3722",
+   "b": "stated",
+   "q": "NCM3722"
+  },
+  "assay_class": {
+   "v": "other",
+   "b": "inferred",
+   "q": "The RNA was separated using hot phenol and size selected on 15% TBE-Urea PAGE gels run for 1 hour at 210V."
+  },
+  "base_medium": {
+   "v": "MOPS",
+   "b": "stated",
+   "q": "40 mM MOPS media (M2120, Teknova) was utilized with glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "40 mM MOPS media (M2120, Teknova) was utilized with glucose"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Ribosome profiling and RNA-seq of E. coli cells under 12 different conditions"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Ribosome profiling and RNA-seq of E. coli cells under 12 different conditions"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Ribosome profiling and RNA-seq of E. coli cells under 12 different conditions"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Ribosome profiling and RNA-seq of E. coli cells under 12 different conditions"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:culture method",
+   "regex": "chemostat",
+   "set": {
+    "culture_mode": {
+     "v": "chemostat",
+     "b": "stated",
+     "q": ""
+    },
+    "growth_phase": {
+     "v": "not_applicable",
+     "b": "inferred",
+     "q": ""
+    },
+    "oxygen": {
+     "v": "aerobic",
+     "b": "inferred",
+     "q": "The aeration rate was set at 4.5 l/h"
+    },
+    "treatment": {
+     "v": "nutrient_limited_growth",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "defined_minimal",
+     "b": "inferred",
+     "q": "For carbon- and nitrogen-limited media, glucose and ammonia concentrations were reduced by 5-fold"
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": "For carbon- and nitrogen-limited media, glucose and ammonia concentrations were reduced by 5-fold"
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "glucose minimal",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "defined_minimal",
+     "b": "inferred",
+     "q": "For minimal glucose media, 40 mM MOPS media (M2120, Teknova) was utilized with glucose"
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": "For minimal glucose media, 40 mM MOPS media (M2120, Teknova) was utilized with glucose"
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "defined rich",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "defined_rich",
+     "b": "stated",
+     "q": "For defined rich media, the minimal media is supplemented with 10x ACGU (M2103, Teknova) and 5X Supplement EZ (M2104, Teknova)."
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": "For defined rich media, the minimal media is supplemented with 10x ACGU (M2103, Teknova) and 5X Supplement EZ (M2104, Teknova)."
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "rplA",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rplA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "leuB",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "leuB",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

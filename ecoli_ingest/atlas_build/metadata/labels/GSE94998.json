@@ -1,0 +1,26 @@
+{
+  "gse": "GSE94998",
+  "notes": "BW25113 mazF deletion with chromosomal TetR-Ptet-mazF; aTc induction (inducer, not a treatment) at log phase OD~0.5, samples 0-8 min. t=0 (prior to induction) = control. genotype_class native_overexpression (native mazF re-expressed from an inducible promoter in a mazF- background) is a judgement. Temperature/shaking stated only for the overnight culture, so growth_temperature, oxygen and culture_mode left out. ERCC spike-ins are synthetic RNA, not another organism.",
+  "default": {
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "Total RNA was isolated using RNeasy purification kit"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "Ribo-Zero rRNA Removal Kits (Illumina) were used to remove ribosomal RNA"},
+    "base_medium": {"v": "LB", "b": "stated", "q": "was diluted to OD of 0.05 in 10mL LB."},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "was diluted to OD of 0.05 in 10mL LB."},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "was diluted to OD of 0.05 in 10mL LB."},
+    "growth_phase": {"v": "mid_exponential", "b": "stated", "q": "Cultures were induced with 5 ng/mL aTc during log phase (OD600~0.5)"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "BW25113"},
+    "strain_name": {"v": "BW25113", "b": "stated", "q": "BW25113"},
+    "genotype_class": {"v": "native_overexpression", "b": "inferred", "q": "BW25113; mazF-; safesite1::TetR-Ptet-mazF"},
+    "perturbed_genes": {"v": "mazF", "b": "stated", "q": "BW25113; mazF-; safesite1::TetR-Ptet-mazF"},
+    "global_regulator_perturbed": {"v": false, "b": "inferred", "q": "BW25113; mazF-; safesite1::TetR-Ptet-mazF"},
+    "treatment": {"v": "none", "b": "study_default", "q": "aTc (5 ng/ml) was administered following the first time point (t=0)."},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "five time points collected every 2 minutes for 8 minutes total"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "Ribosomal extracted total RNA"},
+    "inducer_added": {"v": true, "b": "stated", "q": "aTc (5 ng/ml) was administered following the first time point (t=0)."},
+    "is_control": {"v": false, "b": "stated", "q": "aTc (5 ng/ml) was administered following the first time point (t=0)."}
+  },
+  "rules": [
+    {"field": "source_name", "regex": "^t = 0, Prior MazF induction", "set": {"inducer_added": {"v": false, "b": "stated", "q": ""}, "is_control": {"v": true, "b": "stated", "q": ""}}}
+  ],
+  "samples": {}
+}

@@ -1,0 +1,177 @@
+{
+ "gse": "GSE56372",
+ "notes": "RP samples are ribosome footprints. RNA samples: 'fragments of total mRNA ... size selected via gel purification' (Oh et al. 2011 protocol, likely short fragments) - size not given, so assay_class left out for them. EP61 is an evolved ethanol-tolerant strain; its mutations and parent are not stated, so perturbed_genes/strain_group left out. Phase mid_exponential inferred from A600 0.3 in M9 glucose, kept for T1 (10 min) and T2 (70 min) per the <=2 h rule. Ethanol 40 g/L labelled envelope_solvent_biocide.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "Ethanol was added to 40 g/L once A600 of cultures reached 0.3."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "stated",
+   "q": "in vigorously shaken (225 rpm) Fernbach flasks"
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "in 1 L volumes of M9 minimal medium"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "M9 minimal medium, supplemented with MgSO4 (1 mM), CaCl2 (0.1 mM), and glucose (10 g/L)"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "M9 minimal medium, supplemented with MgSO4 (1 mM), CaCl2 (0.1 mM), and glucose (10 g/L)"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "and glucose (10 g/L)"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "Cultures were grown aerobically at 37 °C"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Cultures were grown aerobically at 37 °C"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of wild-type and mutant strains at three different time points (one pre-ethanol-stress, two post-ethanol-stress)"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of wild-type and mutant strains at three different time points (one pre-ethanol-stress, two post-ethanol-stress)"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of wild-type and mutant strains at three different time points (one pre-ethanol-stress, two post-ethanol-stress)"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of wild-type and mutant strains at three different time points (one pre-ethanol-stress, two post-ethanol-stress)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "^MG1655$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "strain_group": {
+     "v": "K-12",
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^EP61$",
+   "set": {
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "stated",
+     "q": "We used adaptive evolution to generate spontaneous ethanol-tolerant strains of Escherichia coli"
+    },
+    "strain_name": {
+     "v": "EP61",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:ethanol treatment",
+   "regex": "no ethanol exposure",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:ethanol treatment",
+   "regex": "EtOH",
+   "set": {
+    "treatment": {
+     "v": "envelope_solvent_biocide",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:ethanol treatment",
+   "regex": "10 min",
+   "set": {
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:ethanol treatment",
+   "regex": "70 min",
+   "set": {
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:ribosome-protected",
+   "regex": "Yes",
+   "set": {
+    "assay_class": {
+     "v": "ribosome_footprints",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^Wild-type \\(MG1655\\) T0",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

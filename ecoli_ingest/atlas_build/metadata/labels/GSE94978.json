@@ -1,0 +1,101 @@
+{
+ "gse": "GSE94978",
+ "notes": "Strain comparison: human reference strain ATCC 25922 vs MDR virulent poultry isolate E. coli 381 (avian pathogenic, labelled other_ExPEC). Both unmodified isolates -> genotype_class reference; ATCC 25922 is the study's reference (is_control true). strain_group of ATCC 25922 not given in text. TruSeq RNA prep named, but no rRNA removal or polyA step described, so rrna_removal left out. Temperature/aeration not given. WT re-read: ATCC 25922 and the poultry isolate are unmodified strains, genotype_class wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "Mueller-Hinton",
+   "b": "stated",
+   "q": "Strains were harvested in MH broth at log phase"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Strains were harvested in MH broth at log phase"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Strains were harvested in MH broth at log phase"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Strains were harvested in MH broth at log phase"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "No treatment"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "RNA were extracted from poultry isolate and E. coli ATCC 25922 a reference strain"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA were extracted from poultry isolate and E. coli ATCC 25922 a reference strain"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA were extracted from poultry isolate and E. coli ATCC 25922 a reference strain"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA were extracted from poultry isolate and E. coli ATCC 25922 a reference strain"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA were extracted from poultry isolate and E. coli ATCC 25922 a reference strain"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNAs were extracted from the bacterial isolates using TRIzol"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "ATCC 25922",
+   "set": {
+    "strain_name": {
+     "v": "ATCC 25922",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "E. coli ATCC 25922 a reference strain"
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "Poultry",
+   "set": {
+    "strain_name": {
+     "v": "E. coli 381",
+     "b": "stated",
+     "q": "A clinical pathogenic multidrug resistant (MDR) isolate, E. coli 381, isolated from broilers"
+    },
+    "strain_group": {
+     "v": "other_ExPEC",
+     "b": "stated",
+     "q": "differentially expressed genes between pathogenic avian E. coli and human E. coli ATCC 25922"
+    },
+    "is_control": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

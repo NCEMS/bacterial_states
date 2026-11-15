@@ -1,0 +1,91 @@
+{
+ "gse": "GSE72899",
+ "notes": "Ribosome profiling: FP samples are ribosome footprints; the 'RNA-seq' samples are total RNA fragments PAGE-purified at 20-40 nt (size-selected under 50 nt), so assay_class other, not total_rnaseq. Single wild-type condition, no control axis (is_control left out). OD 0.25 in complete MOPS -> mid_exponential inferred. Temperature, aeration not stated.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "grown until an OD600 of 0.25"
+  },
+  "base_medium": {
+   "v": "MOPS",
+   "b": "stated",
+   "q": "complete synthetic MOPS media"
+  },
+  "medium_class": {
+   "v": "defined_rich",
+   "b": "inferred",
+   "q": "complete synthetic MOPS media"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "complete synthetic MOPS media"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "stated",
+   "q": "wild type"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "wild type"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Ribosome profiling (three replicates) and RNAseq (two replicates) of E. coli MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Ribosome profiling (three replicates) and RNAseq (two replicates) of E. coli MG1655"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Ribosome profiling (three replicates) and RNAseq (two replicates) of E. coli MG1655"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Ribosome profiling (three replicates) and RNAseq (two replicates) of E. coli MG1655"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  }
+ },
+ "rules": [
+  {
+   "field": "source_name",
+   "regex": "ribosome footprints",
+   "set": {
+    "assay_class": {
+     "v": "ribosome_footprints",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "WT_RNA-seq",
+   "set": {
+    "assay_class": {
+     "v": "other",
+     "b": "stated",
+     "q": "total RNA fragments 20 - 40 nt in length (for RNAseq) were PAGE purified"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

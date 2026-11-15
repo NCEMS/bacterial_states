@@ -1,0 +1,26 @@
+{
+  "gse": "GSE39926",
+  "notes": "Clones evolved 500 generations in different stresses; growth_protocol says all clones were grown for RNA in M9 glucose + 0.3 M NaCl (osmotic stress medium), so treatment hyperosmotic/adapted for all. Phase from 'mid-log phase (OD600 approx. 0.8)' (phase word wins). G500 (evolved in plain minimal medium, the study's control environment) taken as is_control; it is still an evolved isolate grown in osmotic medium. Mutations of the clones not given: perturbed_genes and global_regulator_perturbed left out. Temperature, aeration, rRNA removal not stated.",
+  "default": {
+    "growth_phase": {"v": "mid_exponential", "b": "stated", "q": "to mid-log phase (OD600 approx. 0.8)"},
+    "base_medium": {"v": "M9", "b": "stated", "q": "Clones were grown in M9 with 0.4% (w/v) glucose as carbon source minimal medium with 0.3M NaCl (osmotic stress medium)"},
+    "medium_class": {"v": "defined_minimal", "b": "inferred", "q": "M9 with 0.4% (w/v) glucose as carbon source minimal medium"},
+    "amino_acids_supplied": {"v": false, "b": "inferred", "q": "M9 with 0.4% (w/v) glucose as carbon source minimal medium"},
+    "carbon_source": {"v": "glucose", "b": "stated", "q": "0.4% (w/v) glucose as carbon source"},
+    "treatment": {"v": "hyperosmotic", "b": "study_default", "q": "minimal medium with 0.3M NaCl (osmotic stress medium)"},
+    "exposure": {"v": "adapted", "b": "study_default", "q": "Clones were grown in M9 with 0.4% (w/v) glucose as carbon source minimal medium with 0.3M NaCl (osmotic stress medium) to mid-log phase"},
+    "genotype_class": {"v": "evolved_isolate", "b": "stated", "q": "RNA profiles were obtained for six E. coli strains evolved for 500 generations under abiotic stressors"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "MG 1655"},
+    "strain_name": {"v": "MG1655", "b": "stated", "q": "MG 1655"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "RNA profiles were obtained for six E. coli strains evolved for 500 generations under abiotic stressors"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "RNA profiles were obtained for six E. coli strains evolved for 500 generations under abiotic stressors"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "RNA profiles were obtained for six E. coli strains evolved for 500 generations under abiotic stressors"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "after 1st and 2nd strand cDNA synthesis, linker ligation and size selection subjected to shotgun sequencing"},
+    "is_control": {"v": false, "b": "study_default", "q": "four abiotic stressors: osmotic, acidic, oxidative, n-butanol, and control"}
+  },
+  "rules": [
+    {"field": "ch:stress", "regex": "^Minimal medium$",
+     "set": {"is_control": {"v": true, "b": "stated", "q": "Minimal medium"}}}
+  ],
+  "samples": {}
+}

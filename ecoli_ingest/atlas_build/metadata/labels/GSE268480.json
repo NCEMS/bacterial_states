@@ -1,0 +1,136 @@
+{
+ "gse": "GSE268480",
+ "notes": "All three are untreated WT MG1655 in plain medium -> all controls. Xylose-phase sample (OD 0.47, after glucose is used up) labelled mid_exponential by the OD rule for minimal medium; it is growth on the second sugar, not starvation. WT re-read: unmodified baseline strain relabelled wild_type.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "WT"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "WT"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "We grew and collected WT E. coli MG1655 at OD600=0.33 in Lennox LB"
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "We grew and collected WT E. coli MG1655 at OD600=0.33 in Lennox LB"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "We incubated the culture aerobically at 37°C with shaking"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "We incubated the culture aerobically at 37°C with shaking"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "We incubated the culture aerobically at 37°C with shaking"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "We drew 4.5 mL of culture at OD600=0.18 (glucose growth phase) and OD600=0.47 (xylose phase) for sequencing."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "The total RNA was ribosomally depleted and sequenced"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "The total RNA was ribosomally depleted and sequenced"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "We grew and collected WT E. coli MG1655 at OD600=0.33 in Lennox LB"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "We grew and collected WT E. coli MG1655 at OD600=0.33 in Lennox LB"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "We grew and collected WT E. coli MG1655 at OD600=0.33 in Lennox LB"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "Lennox LB",
+   "set": {
+    "base_medium": {
+     "v": "LB",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "complex",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    },
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": "We drew a 4.5 ml culture sample at an optical density (OD600) of 0.33 for bulk RNA sequencing."
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "diauxic",
+   "set": {
+    "base_medium": {
+     "v": "MOPS",
+     "b": "stated",
+     "q": "diluted the resuspended sample in glucose-xylose diauxic growth medium (0.025% w/v glucose and 0.025% w/v xylose [Sigma-Aldrich, X3877] in MOPS minimal media)"
+    },
+    "medium_class": {
+     "v": "defined_minimal",
+     "b": "inferred",
+     "q": "diluted the resuspended sample in glucose-xylose diauxic growth medium (0.025% w/v glucose and 0.025% w/v xylose [Sigma-Aldrich, X3877] in MOPS minimal media)"
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": "diluted the resuspended sample in glucose-xylose diauxic growth medium (0.025% w/v glucose and 0.025% w/v xylose [Sigma-Aldrich, X3877] in MOPS minimal media)"
+    },
+    "carbon_source": {
+     "v": "mixed",
+     "b": "stated",
+     "q": "diluted the resuspended sample in glucose-xylose diauxic growth medium (0.025% w/v glucose and 0.025% w/v xylose [Sigma-Aldrich, X3877] in MOPS minimal media)"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

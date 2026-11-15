@@ -1,0 +1,217 @@
+{
+ "gse": "GSE40313",
+ "notes": "Double deletions labelled genotype_class deletion. Harvest OD 0.9 in LB is above the inference range but the phase is stated (mid-exponential), so stated phase kept. Shaking not described: culture_mode and oxygen left out. MICROBExpress -> rrna_removal depletion.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "mid-exponential phase"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "subcultured in 100mL of Fresh LB and incubated at 37°C"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "subcultured in 100mL of Fresh LB and incubated at 37°C"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "subcultured in 100mL of Fresh LB and incubated at 37°C"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "subcultured in 100mL of Fresh LB and incubated at 37°C"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "E. Coli K-12 MG1655 wildtype and the mutant strains"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "transcriptome analysis of E. coli with single deletions of hns, stpA, hha and ydgT and double deletions of hns with each of the other three regulators"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "transcriptome analysis of E. coli with single deletions of hns, stpA, hha and ydgT and double deletions of hns with each of the other three regulators"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "transcriptome analysis of E. coli with single deletions of hns, stpA, hha and ydgT and double deletions of hns with each of the other three regulators"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "transcriptome analysis of E. coli with single deletions of hns, stpA, hha and ydgT and double deletions of hns with each of the other three regulators"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "mRNA was enriched by Ambion MICROBExpress Bacterial mRNA purification kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "mRNA was enriched by Ambion MICROBExpress Bacterial mRNA purification kit"
+  },
+  "genotype_class": {
+   "v": "deletion",
+   "b": "stated",
+   "q": "single deletions of hns, stpA, hha and ydgT and double deletions of hns with each of the other three regulators"
+  },
+  "is_control": {
+   "v": false,
+   "b": "stated",
+   "q": "transcriptome analysis of E. coli with single deletions of hns, stpA, hha and ydgT and double deletions of hns with each of the other three regulators"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^del hns$",
+   "set": {
+    "perturbed_genes": {
+     "v": "hns",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^del stpA$",
+   "set": {
+    "perturbed_genes": {
+     "v": "stpA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^del hha$",
+   "set": {
+    "perturbed_genes": {
+     "v": "hha",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^del ydgT$",
+   "set": {
+    "perturbed_genes": {
+     "v": "ydgT",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^del hns, stpA$",
+   "set": {
+    "perturbed_genes": {
+     "v": "hns;stpA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^del hns, hha$",
+   "set": {
+    "perturbed_genes": {
+     "v": "hns;hha",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^del hns, ydgT$",
+   "set": {
+    "perturbed_genes": {
+     "v": "hns;ydgT",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^wildtype$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

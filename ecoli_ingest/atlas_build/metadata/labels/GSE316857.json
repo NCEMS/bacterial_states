@@ -1,0 +1,122 @@
+{
+ "gse": "GSE316857",
+ "notes": "LPE and HPE are not defined in the text (presumably ALE-evolved strains from the paraquat evolutions); genotype_class left out for them. Paraquat present during growth to mid-exponential -> oxidative, adapted. Temperature and aeration not given. WT re-read: reference -> wild_type, WT (MG1655) baseline, no construct.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "Bacteria were grown in M9 minimal medium supplemented with 4 g/L glucose, with respective paraquat concentration, till their mid-exponential phase."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "Bacteria were grown in M9 minimal medium supplemented with 4 g/L glucose, with respective paraquat concentration, till their mid-exponential phase."
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "Bacteria were grown in M9 minimal medium supplemented with 4 g/L glucose, with respective paraquat concentration, till their mid-exponential phase."
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "Bacteria were grown in M9 minimal medium supplemented with 4 g/L glucose, with respective paraquat concentration, till their mid-exponential phase."
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Bacteria were grown in M9 minimal medium supplemented with 4 g/L glucose, with respective paraquat concentration, till their mid-exponential phase."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Adaptive laboratory evolution (ALE) of Escherichia coli was performed across multiple paraquat concentrations and genetic backgrounds"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Adaptive laboratory evolution (ALE) of Escherichia coli was performed across multiple paraquat concentrations and genetic backgrounds"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Adaptive laboratory evolution (ALE) of Escherichia coli was performed across multiple paraquat concentrations and genetic backgrounds"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "RNA sequencing libraries were prepared using the QIAseq FastSelect rRNA depletion system (5S/16S/23S)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "QIAseq FastSelect rRNA depletion system (5S/16S/23S)"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "inferred",
+   "q": "WT_Rep1"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Adaptive laboratory evolution (ALE) of Escherichia coli was performed across multiple paraquat concentrations and genetic backgrounds"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^WT",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "PQ",
+   "set": {
+    "treatment": {
+     "v": "oxidative",
+     "b": "stated",
+     "q": "Bacteria were grown in M9 minimal medium supplemented with 4 g/L glucose, with respective paraquat concentration, till their mid-exponential phase."
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "Bacteria were grown in M9 minimal medium supplemented with 4 g/L glucose, with respective paraquat concentration, till their mid-exponential phase."
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^WT_Rep",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

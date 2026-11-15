@@ -1,0 +1,70 @@
+{
+ "gse": "GSE123795",
+ "notes": "Multi-drug resistant clinical isolate T1_13 (from patient feces) vs. GT5 (64 days ground) and ST5 isolates (64 days spaceflight). Growth conditions for RNA-seq not described: medium, phase, treatment left out (spaceflight is the isolates' history, not a treatment at sampling). GT5/ST5 labelled evolved_isolate; their mutated genes not given, so global_regulator_perturbed left out for them. Parent T1_13 is the control. WT re-read: parental clinical isolate T1_13 is wild_type.",
+ "default": {
+  "strain_group": {
+   "v": "natural_isolate",
+   "b": "stated",
+   "q": "Feces of patients with severe pneumonia"
+  },
+  "genotype_class": {
+   "v": "evolved_isolate",
+   "b": "stated",
+   "q": "A spaceflight-induced mutagenesis of multi-drug resistant E.coli strain (T1_13) on the outer space for 64 days (ST5)"
+  },
+  "is_control": {
+   "v": false,
+   "b": "stated",
+   "q": "Compared to T1_13, 1242 genes were differentially expressed in more than 20 of 38 tobramycin-resistant E. coli isolates while not in GT5."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-sequencing of one GT5 isolate, and 39 ST5 isolates were performed on IlluminaHiSeq PE150."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-sequencing of one GT5 isolate, and 39 ST5 isolates were performed on IlluminaHiSeq PE150."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-sequencing of one GT5 isolate, and 39 ST5 isolates were performed on IlluminaHiSeq PE150."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "NEBNext® Ultra™ Directional RNA Library Prep Kit for Illumina®"
+  },
+  "strain_name": {
+   "v": "T1_13",
+   "b": "stated",
+   "q": "multi-drug resistant E.coli strain (T1_13)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:isolate id",
+   "regex": "^T1_13$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "inferred",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

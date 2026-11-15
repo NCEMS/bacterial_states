@@ -1,0 +1,32 @@
+{
+  "gse": "GSE133348",
+  "notes": "Compounds were added to a 14 h LB culture and cells harvested 2 h later (16 h undiluted batch): growth_phase stationary inferred from the overnight rule, at the 2 h limit for keeping the pre-shift phase. Methanol is the solvent control. Toxoflavin and tropolone (phytotoxins) classed other_chemical.",
+  "default": {
+    "base_medium": {"v": "LB", "b": "stated", "q": "incubated in 3 ml LB liquid for 14 h at 37℃ with constant shaking"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "incubated in 3 ml LB liquid"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "incubated in 3 ml LB liquid"},
+    "growth_phase": {"v": "stationary", "b": "inferred", "q": "incubated in 3 ml LB liquid for 14 h at 37℃ with constant shaking"},
+    "culture_mode": {"v": "batch_shaken", "b": "inferred", "q": "incubated in 3 ml LB liquid for 14 h at 37℃ with constant shaking"},
+    "oxygen": {"v": "aerobic", "b": "inferred", "q": "with constant shaking"},
+    "growth_temperature": {"v": 37, "b": "stated", "q": "for 14 h at 37℃"},
+    "genotype_class": {"v": "reference", "b": "stated", "q": "wild type"},
+    "global_regulator_perturbed": {"v": false, "b": "stated", "q": "wild type"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "Escherichia coli str. K-12 substr. MG1655"},
+    "strain_name": {"v": "MG1655", "b": "stated", "q": "Escherichia coli str. K-12 substr. MG1655"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "we compared phytotoxins (toxoflavin and tropolone) transcriptome to methanol transcriptome as the solvent of phytotoxins"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "we compared phytotoxins (toxoflavin and tropolone) transcriptome to methanol transcriptome as the solvent of phytotoxins"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "Each three replicates of toxoflavin, tropolone, methanol conditions in Escherichia coli K-12 MG1655"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "A MICOBExpressTM bacterial mRNA enrichment kit (Ambion, Austin, TX, USA) was used to remove bacterial rRNA from the total RNA samples."},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "was used to remove bacterial rRNA from the total RNA samples"}
+  },
+  "rules": [
+    {"field": "ch:conditions", "regex": "methanol",
+     "set": {"treatment": {"v": "none", "b": "stated", "q": "methanol transcriptome as the solvent of phytotoxins"},
+             "is_control": {"v": true, "b": "stated", "q": "methanol transcriptome as the solvent of phytotoxins"}}},
+    {"field": "ch:conditions", "regex": "toxoflavin|tropolone",
+     "set": {"treatment": {"v": "other_chemical", "b": "stated", "q": ""},
+             "exposure": {"v": "short", "b": "inferred", "q": "After 2 h of the treatment"},
+             "is_control": {"v": false, "b": "stated", "q": ""}}}
+  ],
+  "samples": {}
+}

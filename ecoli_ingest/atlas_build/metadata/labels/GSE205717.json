@@ -1,0 +1,266 @@
+{
+ "gse": "GSE205717",
+ "notes": "NCM3722 and titratable strains (Pu-ptsG with 3MBA; Plac-GOGAT with IPTG); chloramphenicol titration in MOPS; rifampicin time courses (0-11 min) for decay rates. Titratable-promoter strains: genotype_class left empty (promoter replacement, direction of change not stated), perturbed_genes ptsG / gltB;gltD (GOGAT). Media composition only in the paper supplement: base_medium only where the description says M9/MOPS. Chloramphenicol exposure duration not given. RIF t=0 samples: treatment, transcription_arrested, is_control left empty (unclear whether before or at addition). RIF_B (NQ1390) inducer level not given. WT re-read: unmodified baseline strain relabelled wild_type.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "we grew E. coli exponentially in several different growth media and extracted total RNA"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli K-12"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "stated",
+   "q": "NA"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "we grew E. coli exponentially in several different growth media and extracted total RNA"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "we grew E. coli exponentially in several different growth media and extracted total RNA"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "we grew E. coli exponentially in several different growth media and extracted total RNA"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "we grew E. coli exponentially in several different growth media and extracted total RNA"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA was removed using Ribo-Zero"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA was removed using Ribo-Zero"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "^NCM3722$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": "NCM3722 (wild type)"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": "NCM3722 (wild type)"
+    },
+    "strain_name": {
+     "v": "NCM3722",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^NQ1243$",
+   "set": {
+    "strain_name": {
+     "v": "NQ1243",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "ptsG",
+     "b": "stated",
+     "q": "Titratable glucose uptake (Pu-ptsG)"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": "Titratable glucose uptake (Pu-ptsG)"
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^NQ1390$",
+   "set": {
+    "strain_name": {
+     "v": "NQ1390",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "ptsG",
+     "b": "stated",
+     "q": "Titratable glucose uptake (Pu-ptsG)"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": "Titratable glucose uptake (Pu-ptsG)"
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^NQ393$",
+   "set": {
+    "strain_name": {
+     "v": "NQ393",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "gltB;gltD",
+     "b": "stated",
+     "q": "Titratable ammonia assimilation (Plac-GOGAT)"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": "Titratable ammonia assimilation (Plac-GOGAT)"
+    }
+   }
+  },
+  {
+   "field": "ch:supplement added",
+   "regex": "3MBA|IPTG",
+   "set": {
+    "inducer_added": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:supplement added",
+   "regex": "chloramphenicol",
+   "set": {
+    "treatment": {
+     "v": "abx_translation",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(c5|c0_1)$",
+   "set": {
+    "base_medium": {
+     "v": "M9",
+     "b": "stated",
+     "q": "NCM3722 (wild type) in M9 medium"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "NCM3722 (wild type) in M9 medium"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(r0|r0_1)$",
+   "set": {
+    "base_medium": {
+     "v": "MOPS",
+     "b": "stated",
+     "q": "NCM3722 (wild type) in MOPS medium"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "NCM3722 (wild type) in MOPS medium"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^r\\d",
+   "set": {
+    "base_medium": {
+     "v": "MOPS",
+     "b": "stated",
+     "q": "NCM3722 (wild type) in MOPS medium"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^RIF_",
+   "set": {
+    "treatment": {
+     "v": "abx_transcription",
+     "b": "stated",
+     "q": "Rifampicin was added to inhibit transcription initiation in exponentially growing E. coli"
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": "Rifampicin was added to inhibit transcription initiation in exponentially growing E. coli"
+    },
+    "transcription_arrested": {
+     "v": true,
+     "b": "stated",
+     "q": "Rifampicin was added to inhibit transcription initiation in exponentially growing E. coli"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": "Rifampicin was added to inhibit transcription initiation in exponentially growing E. coli"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^RIF_B",
+   "set": {
+    "inducer_added": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^RIF_[AB]0$",
+   "set": {
+    "treatment": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    },
+    "transcription_arrested": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

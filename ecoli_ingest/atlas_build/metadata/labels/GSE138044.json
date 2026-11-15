@@ -1,0 +1,96 @@
+{
+ "gse": "GSE138044",
+ "notes": "All samples express an unnamed recombinant protein (heterologous_expression); inducer not stated. is_control set for the CDM-only 'control' arm (submitters' word) although the strain carries the expression construct. 'growth phase (3rd hour)'/'protein production phase (7th hour)' are not scheme phases; growth_phase empty. CDM composition and carbon source not given; base_medium empty.",
+ "default": {
+  "strain_group": {
+   "v": "B",
+   "b": "stated",
+   "q": "BL21 (DE3)"
+  },
+  "strain_name": {
+   "v": "BL21(DE3)",
+   "b": "stated",
+   "q": "BL21 (DE3)"
+  },
+  "genotype_class": {
+   "v": "heterologous_expression",
+   "b": "stated",
+   "q": "E.coli BL21(DE3) expressing recombinant protein"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "E.coli BL21(DE3) expressing recombinant protein"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Control (only CDM) and Test cultivation (CDM + 5 mM of all amino acids)"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Control (only CDM) and Test cultivation (CDM + 5 mM of all amino acids)"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Control (only CDM) and Test cultivation (CDM + 5 mM of all amino acids)"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "~2.5μg of total RNA was taken for rRNA depletion using Ribo-Zero rRNA Removal Kit (Bacteria)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA depletion using Ribo-Zero rRNA Removal Kit (Bacteria)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^control$",
+   "set": {
+    "medium_class": {
+     "v": "defined_minimal",
+     "b": "inferred",
+     "q": "A chemically defined medium (CDM) is used for E. coli culture."
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": "Control (only CDM)"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "supplementation of amino acids",
+   "set": {
+    "medium_class": {
+     "v": "defined_rich",
+     "b": "inferred",
+     "q": "CDM + 5 mM of all amino acids"
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

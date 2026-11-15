@@ -1,0 +1,98 @@
+{
+ "gse": "GSE173345",
+ "notes": "Two replicates of plain MG1655 growth in M9 glucose; all controls. rRNA removal not stated.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "The fresh culture was incubated at 37 oC with agitation to the exponential phase (OD600 ≈ 0.5)."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "The fresh culture was incubated at 37 oC with agitation to the exponential phase (OD600 ≈ 0.5)."
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "E.coli strain is cultured in modified M9 minimal medium with 0.2% (w/v) glucose as the carbon source upto exponential phase."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "E.coli strain is cultured in modified M9 minimal medium with 0.2% (w/v) glucose as the carbon source upto exponential phase."
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "E.coli strain is cultured in modified M9 minimal medium with 0.2% (w/v) glucose as the carbon source upto exponential phase."
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "E.coli strain is cultured in modified M9 minimal medium with 0.2% (w/v) glucose as the carbon source upto exponential phase."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "The fresh culture was incubated at 37 oC with agitation to the exponential phase (OD600 ≈ 0.5)."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "study_default",
+   "q": "The fresh culture was incubated at 37 oC with agitation to the exponential phase (OD600 ≈ 0.5)."
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "study_default",
+   "q": "This is RNA-seq data of E.coli K-12 MG1655."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "This is RNA-seq data of E.coli K-12 MG1655."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "E.coli strain is cultured in modified M9 minimal medium with 0.2% (w/v) glucose as the carbon source upto exponential phase."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "E.coli strain is cultured in modified M9 minimal medium with 0.2% (w/v) glucose as the carbon source upto exponential phase."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "E.coli strain is cultured in modified M9 minimal medium with 0.2% (w/v) glucose as the carbon source upto exponential phase."
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "E.coli strain is cultured in modified M9 minimal medium with 0.2% (w/v) glucose as the carbon source upto exponential phase."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli K-12 substr. MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Total RNA was extracted using the RNeasy Plus Mini kit"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "E.coli strain is cultured in modified M9 minimal medium with 0.2% (w/v) glucose as the carbon source upto exponential phase."
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

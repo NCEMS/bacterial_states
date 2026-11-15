@@ -1,0 +1,158 @@
+{
+ "gse": "GSE195954",
+ "notes": "Bioreactor grown to exponential phase; batch mode inferred (no feed or dilution described). Double deletions classed deletion; 'ihf' written as given (subunit not named).",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9 + glucose"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "grown in glucose minimal media conditions"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "grown in glucose minimal media conditions"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "grown in glucose minimal media conditions"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "exponential phase of growth"
+  },
+  "culture_mode": {
+   "v": "batch_bioreactor",
+   "b": "inferred",
+   "q": "grown in a bioreactor under anaerobic fermentation conditions with M9 + glucose at 37 degree Celcius and 150 rpm till exponential phase"
+  },
+  "oxygen": {
+   "v": "anaerobic_fermentation",
+   "b": "stated",
+   "q": "under anaerobic fermentation conditions"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "at 37 degree Celcius and 150 rpm"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RNA was extracted from two biological replicates of WT, ΔfnrΔarcA (FA), ΔfnrΔihf (FI) and ΔarcAΔihf (AI) strains in the exponential phase"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA was extracted from two biological replicates of WT, ΔfnrΔarcA (FA), ΔfnrΔihf (FI) and ΔarcAΔihf (AI) strains in the exponential phase"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA was extracted from two biological replicates of WT, ΔfnrΔarcA (FA), ΔfnrΔihf (FI) and ΔarcAΔihf (AI) strains in the exponential phase"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA was extracted from two biological replicates of WT, ΔfnrΔarcA (FA), ΔfnrΔihf (FI) and ΔarcAΔihf (AI) strains in the exponential phase"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribo-depleted mRNA"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribo-depleted mRNA"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "global_regulator_perturbed": {
+   "v": true,
+   "b": "stated",
+   "q": "ΔfnrΔarcA (FA), ΔfnrΔihf (FI) and ΔarcAΔihf (AI) strains"
+  },
+  "genotype_class": {
+   "v": "deletion",
+   "b": "stated",
+   "q": "ΔfnrΔarcA (FA), ΔfnrΔihf (FI) and ΔarcAΔihf (AI) strains"
+  },
+  "is_control": {
+   "v": false,
+   "b": "stated",
+   "q": "RNA was extracted from two biological replicates of WT, ΔfnrΔarcA (FA), ΔfnrΔihf (FI) and ΔarcAΔihf (AI) strains in the exponential phase"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:sample group",
+   "regex": "^wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:sample group",
+   "regex": "\\(FA\\)",
+   "set": {
+    "perturbed_genes": {
+     "v": "fnr;arcA",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:sample group",
+   "regex": "\\(FI\\)",
+   "set": {
+    "perturbed_genes": {
+     "v": "fnr;ihf",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:sample group",
+   "regex": "\\(AI\\)",
+   "set": {
+    "perturbed_genes": {
+     "v": "arcA;ihf",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,158 @@
+{
+ "gse": "GSE135706",
+ "notes": "Evolved suppressor lines (rrnD-rrnE, rrnD-rrnC in the rnhA dnaA background) labelled evolved_isolate with perturbed_genes rnhA;dnaA (the suppressor change is a rrn-region alteration not described further).",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Single colony grown in LB media and sequenced at exponential phase"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Escherichia coli str K-12 substr MG1655 cells were grown in Luria broth media till exponential phase of growth at 37 degrees Celsius at 200 rpm."
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Escherichia coli str K-12 substr MG1655 cells were grown in Luria broth media till exponential phase of growth at 37 degrees Celsius at 200 rpm."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Escherichia coli str K-12 substr MG1655 cells were grown in Luria broth media till exponential phase of growth at 37 degrees Celsius at 200 rpm."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Escherichia coli str K-12 substr MG1655 cells were grown in Luria broth media till exponential phase of growth at 37 degrees Celsius at 200 rpm."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Escherichia coli str K-12 substr MG1655 cells were grown in Luria broth media till exponential phase of growth at 37 degrees Celsius at 200 rpm."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Escherichia coli str K-12 substr MG1655 cells were grown in Luria broth media till exponential phase of growth at 37 degrees Celsius at 200 rpm."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "The study evaluated the effect of cSDR on gene expression by comparing the gene expression states in ΔrnhA-dnaA and evolved suppressor mutants"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "The study evaluated the effect of cSDR on gene expression by comparing the gene expression states in ΔrnhA-dnaA and evolved suppressor mutants"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "The study evaluated the effect of cSDR on gene expression by comparing the gene expression states in ΔrnhA-dnaA and evolved suppressor mutants"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "The study evaluated the effect of cSDR on gene expression by comparing the gene expression states in ΔrnhA-dnaA and evolved suppressor mutants"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribosomal RNA was depleted to obtain enriched mRNA for library preparation."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA was depleted to obtain enriched mRNA for library preparation."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "The study evaluated the effect of cSDR on gene expression by comparing the gene expression states in ΔrnhA-dnaA and evolved suppressor mutants"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "The study evaluated the effect of cSDR on gene expression by comparing the gene expression states in ΔrnhA-dnaA and evolved suppressor mutants"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^Wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655 GJ13519",
+     "b": "stated",
+     "q": "Wild type GJ13519 1"
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^\\{delta\\}rnhA$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rnhA",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^\\{delta\\}rnhA\\{delta\\}dnaA$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rnhA;dnaA",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "rrnD-rrn",
+   "set": {
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rnhA;dnaA",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

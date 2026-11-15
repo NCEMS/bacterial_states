@@ -1,0 +1,121 @@
+{
+ "gse": "GSE215029",
+ "notes": "pcnB null mutant vs wild type MG1655 in LB; OD 0.5 (design) / 0.6 (protocol), both mid-log range for LB.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "grown at 37°C in nutrient rich, Luria Bertani broth until OD600 = 0.6"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "grown at 37°C in nutrient rich, Luria Bertani broth until OD600 = 0.6"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "grown at 37°C in nutrient rich, Luria Bertani broth until OD600 = 0.6"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown at 37°C in nutrient rich, Luria Bertani broth until OD600 = 0.6"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "grown at 37°C in nutrient rich, Luria Bertani broth until OD600 = 0.6"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E.coli K-12 MG 1655 cells and MG-pcnB null mutant cells"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "E.coli K-12 MG 1655 cells and MG-pcnB null mutant cells"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Genome wide RNA seq analysis between wild type MG1655 cells and mutant of bacterial poly(A) polymerase I"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Genome wide RNA seq analysis between wild type MG1655 cells and mutant of bacterial poly(A) polymerase I"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Genome wide RNA seq analysis between wild type MG1655 cells and mutant of bacterial poly(A) polymerase I"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Genome wide RNA seq analysis between wild type MG1655 cells and mutant of bacterial poly(A) polymerase I"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "ribo-depletion using RiboMinus Bacterial Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "ribo-depletion using RiboMinus Bacterial Kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^K-12 MG1655$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "pcnB null",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "pcnB",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

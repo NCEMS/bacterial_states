@@ -1,0 +1,173 @@
+{
+ "gse": "GSE313402",
+ "notes": "Medium is M9 glycerol + 1 g/L yeast extract -> minimal_plus_hydrolysate. narQXLP deletion includes narL -> global_regulator_perturbed true. No phase, OD or inducer given.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "a modified M9 minimal medium with 100 mM glycerol"
+  },
+  "medium_class": {
+   "v": "minimal_plus_hydrolysate",
+   "b": "inferred",
+   "q": "1.0 g L−1 yeast extract"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "1.0 g L−1 yeast extract"
+  },
+  "carbon_source": {
+   "v": "glycerol",
+   "b": "stated",
+   "q": "a modified M9 minimal medium with 100 mM glycerol"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "All cultures were incubated at 37 °C with 200 rpm agitation."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "All cultures were incubated at 37 °C with 200 rpm agitation."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "All cultures were incubated at 37 °C with 200 rpm agitation."
+  },
+  "strain_group": {
+   "v": "W",
+   "b": "stated",
+   "q": "E. coli W"
+  },
+  "strain_name": {
+   "v": "W",
+   "b": "stated",
+   "q": "E. coli W"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RNA-seq profiling of E. coli W_WT and ΔnarQXLP strains with or without NarQ overexpression"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiling of E. coli W_WT and ΔnarQXLP strains with or without NarQ overexpression"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiling of E. coli W_WT and ΔnarQXLP strains with or without NarQ overexpression"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Illumina Truseq stranded total RNA library prep kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "Wild type with empty vector",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "Wild type with NarQ",
+   "set": {
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "narQ",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "narQXLP deletion with empty",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "narQ;narX;narL;narP",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "narQXLP deletion with NarQ",
+   "set": {
+    "genotype_class": {
+     "v": "multiple",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "narQ;narX;narL;narP",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

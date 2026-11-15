@@ -1,0 +1,108 @@
+{
+ "gse": "GSE117737",
+ "notes": "CONFLICT resolved 2026-11-15: GSM3566396 is stationary (growth-stage field); its title says 'WT log phase' but the v1 counts show osmY, dps, otsB and gadB 16-50 fold above the three log-phase samples and ribosomal protein genes and fis lower. | CONFLICT: GSM3566396 has 'Stationary phase' in ch:growth stage but its title starts 'RNA-seq WT log phase' (then 'related to ... stationary phase'); growth_phase left out for it. Only the four standard RNA-seq (Ribo-Zero) wild-type samples are candidates; the SEnd-seq, rne(ts), knockout and bicyclomycin samples are not. Shaking is only described for the ChIP fixation, so culture_mode left out. WT re-read: wild-type MG1655 -> wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "cultured in LB media (10 g/L tryptone, 5 g/L yeast extract, 10 g/L NaCl, pH 7.4) under aerobic conditions at 37 °C"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "cultured in LB media (10 g/L tryptone, 5 g/L yeast extract, 10 g/L NaCl, pH 7.4)"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "cultured in LB media (10 g/L tryptone, 5 g/L yeast extract, 10 g/L NaCl, pH 7.4)"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "under aerobic conditions at 37 °C"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "under aerobic conditions at 37 °C"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "RNA-seq WT log phase"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "RNA-seq WT log phase"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli K-12 MG1655 were cultured in LB media"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli K-12 MG1655 were cultured in LB media"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "37°C culture"
+  },
+  "is_control": {
+   "v": true,
+   "b": "stated",
+   "q": "Wild type E. coli, pnp knoctout, rnb knoctout and rnr knoct out strains were cultured in LB media at 37 °C"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA samples and ChIP-seq samples were collected when the growth stage of indicated cells reached to log phase or stationary phase"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "stated",
+   "q": "37°C culture"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Using E. coli as a model system"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "For RNA-seq , rRNA was depleted with the Ribo-Zero rRNA Removal Kit."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "For RNA-seq , rRNA was depleted with the Ribo-Zero rRNA Removal Kit."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:growth stage",
+   "regex": "^Log phase$",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {
+  "GSM3566396": {
+   "growth_phase": {
+    "v": "stationary",
+    "b": "stated",
+    "q": "Stationary phase"
+   }
+  }
+ }
+}

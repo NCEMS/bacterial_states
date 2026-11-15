@@ -1,0 +1,122 @@
+{
+ "gse": "GSE211824",
+ "notes": "MG1655 in LB at 37 C or 45 C, early log or stationary. Conflicting phase evidence for the early-log samples: titles say early logarithmic, but the treatment protocol (written for the 3C libraries) samples at OD600 2 before and 10 min / 2.5 h after the shift to 45 C; growth_phase left out for early-log samples, stationary kept as stated. 45 C samples labelled heat (characteristics say 'untreated' for all, read as no chemical treatment); exposure left out because the protocol describes both growth at 45 C and a shift at OD 2. All 37 C samples are controls. WT re-read: Unmodified MG1655 WT -> wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "E. coli cells were grown at  37°C or 45°C in Lennox Broth (LB)"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Lennox Broth (LB)"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Lennox Broth (LB)"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "WT"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "WT"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "cultured at 45℃ and 37℃ to log phase and stable phase were extracted and cross-compared"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "cultured at 45℃ and 37℃ to log phase and stable phase were extracted and cross-compared"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "cultured at 45℃ and 37℃ to log phase and stable phase were extracted and cross-compared"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "the mRNA was enriched by removing rRNA through the kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "the mRNA was enriched by removing rRNA through the kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "stationary phase",
+   "set": {
+    "growth_phase": {
+     "v": "stationary",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "37°C",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "untreated"
+    },
+    "growth_temperature": {
+     "v": 37,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "45°C",
+   "set": {
+    "treatment": {
+     "v": "heat",
+     "b": "stated",
+     "q": ""
+    },
+    "growth_temperature": {
+     "v": 45,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

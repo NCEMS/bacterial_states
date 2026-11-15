@@ -1,0 +1,108 @@
+{
+ "gse": "GSE74121",
+ "notes": "TOP10 expressing phage endolysin (wild type or mutant) after 8-10 h arabinose induction vs uninduced WT control. Medium, temperature, phase not stated. P. aeruginosa samples of the series are not candidates.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "TOP10"
+  },
+  "strain_name": {
+   "v": "TOP10",
+   "b": "stated",
+   "q": "TOP10"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Endolysin wild type and mutant were expressed in E. coli TOP10 and P. aeruginosa PAO1, respectively"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Endolysin wild type and mutant were expressed in E. coli TOP10 and P. aeruginosa PAO1, respectively"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Endolysin wild type and mutant were expressed in E. coli TOP10 and P. aeruginosa PAO1, respectively"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Endolysin wild type and mutant were expressed in E. coli TOP10 and P. aeruginosa PAO1, respectively"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "MICROBExpress™ is designed to rapidly enrich bacterial mRNA from purified total RNA by removing the 16S and 23S ribosomal RNAs (rRNA)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "MICROBExpress™ is designed to rapidly enrich bacterial mRNA from purified total RNA by removing the 16S and 23S ribosomal RNAs (rRNA)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^wild type \\(control\\)$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^expressing",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "endolysin",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:induced with",
+   "regex": "^none",
+   "set": {
+    "inducer_added": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:induced with",
+   "regex": "^arabinose",
+   "set": {
+    "inducer_added": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

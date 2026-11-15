@@ -1,0 +1,32 @@
+{
+  "gse": "GSE114262",
+  "notes": "CONFLICT: GSM3138597 title 'dnaB-Ts ΔahpC_30°C' but ch:strain 2429 (the dnaB-Ts single mutant per growth protocol); GSM3138598 title 'dnaB-Ts_42°C' but ch:strain 3780 (the dnaB-Ts ΔahpC double mutant). Genotype labels, strain_name and is_control left out for these two; GSM3138599 (title and strain agree: double mutant at 42 °C) labelled deletion of ahpC relative to the dnaB-Ts parent. Each sample is a pool of two independent cultures. SB medium (peptone, yeast extract, NaCl) = base_medium other, complex. Growth phase at sampling not given (early-log OD 0.15, then 20-fold dilution, 60 min growth, 60 min at 30 or 42 °C); strain_group not stated. 42 °C for 60 min = heat, short.",
+  "default": {
+    "base_medium": {"v": "other", "b": "stated", "q": "fresh SB medium (3.2% peptone, 2% yeast extract and 1% NaCl)"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "fresh SB medium (3.2% peptone, 2% yeast extract and 1% NaCl)"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "fresh SB medium (3.2% peptone, 2% yeast extract and 1% NaCl)"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "rRNA was removed from total RNA by using the Ribo-Zero rRNA removal kit."},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "rRNA was removed from total RNA by using the Ribo-Zero rRNA removal kit."},
+    "inducer_added": {"v": false, "b": "study_default", "q": "Two independent early log-phase cells of a dnaB-Ts mutant or a dnaB-Ts ΔahpC mutant, incubated at 30 °C or at 42 °C for 60 min"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "Two independent early log-phase cells of a dnaB-Ts mutant or a dnaB-Ts ΔahpC mutant, incubated at 30 °C or at 42 °C for 60 min"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "Two independent early log-phase cells of a dnaB-Ts mutant or a dnaB-Ts ΔahpC mutant, incubated at 30 °C or at 42 °C for 60 min"}
+  },
+  "rules": [
+    {"field": "ch:culture temperature", "regex": "^30 °C",
+     "set": {"growth_temperature": {"v": 30, "b": "stated", "q": ""},
+             "treatment": {"v": "none", "b": "stated", "q": ""}}},
+    {"field": "ch:culture temperature", "regex": "^42 °C",
+     "set": {"growth_temperature": {"v": 42, "b": "stated", "q": ""},
+             "treatment": {"v": "heat", "b": "stated", "q": ""},
+             "exposure": {"v": "short", "b": "stated", "q": ""}}}
+  ],
+  "samples": {
+    "GSM3138599": {
+      "genotype_class": {"v": "deletion", "b": "stated", "q": "dnaB-Ts ΔahpC double mutant (strain 3780)"},
+      "perturbed_genes": {"v": "ahpC", "b": "stated", "q": "dnaB-Ts ΔahpC double mutant (strain 3780)"},
+      "global_regulator_perturbed": {"v": false, "b": "inferred", "q": "dnaB-Ts ΔahpC double mutant (strain 3780)"},
+      "strain_name": {"v": "3780 (dnaB-Ts ΔahpC)", "b": "stated", "q": "dnaB-Ts ΔahpC double mutant (strain 3780)"},
+      "is_control": {"v": false, "b": "stated", "q": "dnaB-Ts ΔahpC double mutant (strain 3780)"}
+    }
+  }
+}

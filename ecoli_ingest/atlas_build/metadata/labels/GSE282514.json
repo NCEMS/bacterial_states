@@ -1,0 +1,31 @@
+{
+  "gse": "GSE282514",
+  "notes": "Wild-type MG1655 vs Rned500 (RNase E C-terminal truncation, rne 1-499) grown 24 h stabbed in 0.35% soft-agar LB plates at 30 °C. Truncation labelled deletion (degradosome-binding domain deleted). culture_mode agar_surface is the closest class for soft-agar plate growth; phase not_applicable. ERCC synthetic spike-in RNA is not another organism.",
+  "default": {
+    "base_medium": {"v": "LB", "b": "stated", "q": "RNA samples were isolated from bacterial culture grown on 0.35% soft-agar LB plate after 24 h incubation."},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "grown on 0.35% soft-agar LB plate"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "grown on 0.35% soft-agar LB plate"},
+    "culture_mode": {"v": "agar_surface", "b": "inferred", "q": "Overnight E. coli liquid culture were stab into 0.35 % soft agar plate and incubate at 30 ℃ for 24 h."},
+    "growth_phase": {"v": "not_applicable", "b": "inferred", "q": "Overnight E. coli liquid culture were stab into 0.35 % soft agar plate and incubate at 30 ℃ for 24 h."},
+    "growth_temperature": {"v": 30, "b": "stated", "q": "incubate at 30 ℃ for 24 h"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "we compared wildtype strain MG1655 with RNase E C-terminal deletion strain Rned500"},
+    "strain_name": {"v": "MG1655", "b": "stated", "q": "we compared wildtype strain MG1655 with RNase E C-terminal deletion strain Rned500"},
+    "treatment": {"v": "none", "b": "study_default", "q": "we compared wildtype strain MG1655 with RNase E C-terminal deletion strain Rned500"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "we compared wildtype strain MG1655 with RNase E C-terminal deletion strain Rned500"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "we compared wildtype strain MG1655 with RNase E C-terminal deletion strain Rned500"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "we compared wildtype strain MG1655 with RNase E C-terminal deletion strain Rned500"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "Ribominus bacteria 2.0  Kit (ThermoFisher A47335) and Illumina TruSeq total  RNA standard Sample Prep protocol"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "Ribominus bacteria 2.0  Kit"},
+    "global_regulator_perturbed": {"v": false, "b": "inferred", "q": "RNase E C-terminal deletion strain Rned500"}
+  },
+  "rules": [
+    {"field": "ch:genotype", "regex": "^full-length RNase E$",
+     "set": {"genotype_class": {"v": "reference", "b": "stated", "q": "wildtype strain MG1655"},
+             "is_control": {"v": true, "b": "stated", "q": ""}}},
+    {"field": "ch:genotype", "regex": "Rne1-499",
+     "set": {"genotype_class": {"v": "deletion", "b": "stated", "q": "RNase E C-terminal deletion strain Rned500"},
+             "perturbed_genes": {"v": "rne", "b": "stated", "q": "RNase E C-terminal deletion strain Rned500"},
+             "is_control": {"v": false, "b": "stated", "q": ""}}}
+  ],
+  "samples": {}
+}

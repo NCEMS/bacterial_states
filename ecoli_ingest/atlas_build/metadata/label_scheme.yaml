@@ -1,0 +1,124 @@
+# Sample metadata v2: fine classes, lumped labels, inference rules. Single source of truth:
+# apply_labels.py validates against `labels` and derives every column under `lumped`.
+# Empty = not stated. basis: stated | inferred | study_default.
+labels:
+  growth_phase: [lag, early_exponential, mid_exponential, late_exponential, transition, stationary, late_stationary, not_applicable]
+  culture_mode: [batch_shaken, batch_microplate, batch_bioreactor, fed_batch, chemostat, static_liquid, agar_surface, biofilm, in_host, with_host_cells]
+  base_medium: [LB, TB_2xYT_SOB, TSB, BHI, Mueller-Hinton, M9, MOPS, M63, other_minimal, cell_culture, urine, serum_blood, gut_content, other]
+  medium_class: [complex, defined_minimal, defined_rich, minimal_plus_hydrolysate, natural_fluid]
+  amino_acids_supplied: [true, false]
+  carbon_source: [glucose, glycerol, other_sugar, organic_acid, mixed]
+  oxygen: [aerobic, microaerobic, anaerobic_fermentation, anaerobic_respiration]
+  growth_temperature: number
+  genotype_class: [wild_type, reference, deletion, knockdown, point_mutation, native_overexpression, heterologous_expression, evolved_isolate, multiple]
+  perturbed_genes: text
+  global_regulator_perturbed: [true, false]
+  inducer_added: [true, false]
+  treatment: [none, abx_cell_wall, abx_translation, abx_dna_gyrase, abx_transcription, abx_membrane, abx_folate, abx_other,
+              heat, cold, acid, alkaline, hyperosmotic, oxidative, metal_excess, metal_limitation,
+              carbon_starvation, nitrogen_starvation, phosphate_starvation, amino_acid_starvation, other_starvation,
+              nutrient_limited_growth, medium_or_oxygen_shift, coculture, conjugation,
+              dna_damage, envelope_solvent_biocide, phage, host_factor, other_chemical, other_physical]
+  exposure: [acute, short, adapted]
+  transcription_arrested: [true, false]
+  is_control: [true, false]
+  strain_group: [K-12, B, C, W, UPEC, EHEC_STEC, EPEC, ETEC, EAEC, AIEC, other_ExPEC, natural_isolate, probiotic]
+  strain_name: text
+  assay_class: [total_rnaseq, ribosome_footprints, IP_or_pulldown, end_mapping, nascent_or_labelled, small_rna, other]
+  rrna_removal: [depletion, polyA, none]
+  mixed_organism: [true, false]
+
+lumped:
+  phase2:
+    from: growth_phase
+    map: {mid_exponential: exponential, stationary: stationary, late_stationary: stationary}
+    # decided 2026-11-15: early_exponential stays empty; phase2 only for untreated, standard RNA-seq samples
+    requires: {treated: "false", standard_rnaseq: "true"}
+  planktonic_batch:
+    from: culture_mode
+    map: {batch_shaken: true, batch_microplate: true, batch_bioreactor: true, fed_batch: false, chemostat: false,
+          static_liquid: false, agar_surface: false, biofilm: false, in_host: false, with_host_cells: false}
+  in_host:
+    from: culture_mode
+    map: {in_host: true, with_host_cells: true}
+    default: false          # false whenever culture_mode is known
+  medium_type:
+    from: medium_class
+    map: {complex: complex, defined_minimal: defined, defined_rich: defined}
+    # decided 2026-11-15: minimal_plus_hydrolysate (and natural_fluid) stay empty
+  glucose:
+    from: carbon_source
+    map: {glucose: true, glycerol: false, other_sugar: false, organic_acid: false}
+  anaerobic:
+    from: oxygen
+    map: {aerobic: false, anaerobic_fermentation: true, anaerobic_respiration: true}
+  temp_class:
+    from: growth_temperature
+    bins: {below_33: [0, 33], "37": [36, 38], above_40: [40, 60]}
+  is_reference_genotype:        # the study's baseline genotype: unmodified wild type, or the modified parent/empty-vector strain it compares against
+    from: genotype_class
+    map: {reference: true, wild_type: true}
+    default: false
+  is_wild_type:                 # unmodified strain: no engineered change, plasmid or tag
+    from: genotype_class
+    map: {wild_type: true}
+    default: false
+  heterologous_expression:
+    from: genotype_class
+    map: {heterologous_expression: true}
+    default: false
+  stress_family:
+    from: treatment
+    map: {abx_cell_wall: antibiotic, abx_translation: antibiotic, abx_dna_gyrase: antibiotic, abx_transcription: antibiotic,
+          abx_membrane: antibiotic, abx_folate: antibiotic, abx_other: antibiotic, heat: temperature, cold: temperature,
+          acid: pH, alkaline: pH, hyperosmotic: osmotic, oxidative: oxidative, metal_excess: metal, metal_limitation: metal,
+          carbon_starvation: nutrient_limitation, nitrogen_starvation: nutrient_limitation,
+          phosphate_starvation: nutrient_limitation, amino_acid_starvation: nutrient_limitation, other_starvation: nutrient_limitation, dna_damage: dna_damage,
+          envelope_solvent_biocide: envelope, phage: phage, host_factor: host, other_chemical: other, other_physical: other,
+          nutrient_limited_growth: limited_growth, medium_or_oxygen_shift: shift, coculture: coculture, conjugation: conjugation,
+          none: none}
+  treated:
+    from: treatment
+    map: {none: false}
+    default: true
+  acute:
+    from: exposure
+    map: {acute: true, short: false, adapted: false}
+  k12:
+    from: strain_group
+    map: {K-12: true}
+    default: false
+  pathogenic_isolate:
+    from: strain_group
+    map: {UPEC: true, EHEC_STEC: true, EPEC: true, ETEC: true, EAEC: true, AIEC: true, other_ExPEC: true}
+    default: false
+  standard_rnaseq:
+    from: assay_class
+    map: {total_rnaseq: true}
+    default: false
+    empty: false            # decided 2026-11-15: an undetermined assay class is excluded too
+
+min_support: {studies: 10, samples: 100}   # a fine class below this takes its lumped value only
+
+inference_rules:
+  growth_phase:
+    - "A phase word in the text wins (stated). 'mid-log', 'log phase', 'exponential' with no qualifier -> mid_exponential."
+    - "'early stationary', 'entry into stationary', 'transition', 'late log/late exponential' -> transition / late_exponential as written."
+    - "Overnight culture (>= 12 h batch) harvested without dilution -> stationary (inferred). Over 24 h -> late_stationary."
+    - "OD600 0.2-0.6 in a complex medium, 0.1-0.5 in a minimal medium, no phase word -> mid_exponential (inferred)."
+    - "OD above those ranges with no phase word -> empty."
+    - "Time course after a shift/treatment starting from exponential cells keeps the pre-shift phase only for samples up to 2 h; later samples empty unless stated."
+    - "Chemostat, colony, biofilm, in-host samples -> not_applicable."
+  medium_class:
+    - "LB, TB, 2xYT, SOB/SOC, TSB, BHI, Mueller-Hinton, nutrient broth -> complex."
+    - "M9/MOPS/M63/other salts + carbon source (+ vitamins, single required amino acid or nucleoside for an auxotroph) -> defined_minimal."
+    - "Salts + complete defined amino acid mix (MOPS EZ rich, SILAC media) -> defined_rich."
+    - "Salts + casamino acids, tryptone, peptone or yeast extract -> minimal_plus_hydrolysate."
+    - "Urine, serum, milk, gut content, cell-culture medium with serum -> natural_fluid; DMEM/RPMI without serum -> defined_rich."
+  oxygen:
+    - "Aerobic only when stated or when shaking/aeration is described (inferred). Not assumed otherwise."
+  is_control:
+    - "True for the study's untreated, reference-genotype, uninduced condition at its reference time point; false for all other samples of a study that has such a condition; empty if the study has no identifiable control."
+  treatment:
+    - "Selection antibiotics for plasmid maintenance are not a treatment."
+    - "More than one treatment: values joined with ';' in the fine column; stress_family takes the first."

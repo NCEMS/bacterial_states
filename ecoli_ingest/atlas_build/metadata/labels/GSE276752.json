@@ -1,0 +1,121 @@
+{
+ "gse": "GSE276752",
+ "notes": "Saccharin added at OD600 0.3 and harvested at OD600 0.8 (~50-60 min): exposure short; OD 0.8 in LB is above the exponential range, so no growth phase. Water mock is the control.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "diluted 1/100 in 25 mL LB medium"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "diluted 1/100 in 25 mL LB medium"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "diluted 1/100 in 25 mL LB medium"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "The cultures were grown (37 ºC, 180 rpm)"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "The cultures were grown (37 ºC, 180 rpm)"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "The cultures were grown (37 ºC, 180 rpm)"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "WT"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "comparing a treatment with 1.4% saccharin to a mock treatment"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "comparing a treatment with 1.4% saccharin to a mock treatment"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "comparing a treatment with 1.4% saccharin to a mock treatment"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Illumina’s Stranded Total RNA Prep Ligation with Ribo-Zero Plus kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribo-Zero Plus kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "saccharin",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "short",
+     "b": "inferred",
+     "q": "lasted until cultures reached OD600 0.8 (approximately 50-60 minutes)"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "water control",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,111 @@
+{
+ "gse": "GSE226433",
+ "notes": "Reviewed 2026-11-15: co-culture with another bacterium is treatment coculture (user decision) | EHEC 86-24 monoculture (control) vs 1:1 co-culture with Enterococcus faecalis in DMEM low glucose, anaerobic. No treatment class fits co-culture with another bacterium, so treatment is left out for the co-culture samples (mixed_organism true). Anaerobic set as fermentation (no electron acceptor mentioned; inferred). Culture mode and temperature not given.",
+ "default": {
+  "base_medium": {
+   "v": "cell_culture",
+   "b": "stated",
+   "q": "Bacteria were grown 6h in DMEM low glucose in anaerobic conditions"
+  },
+  "medium_class": {
+   "v": "defined_rich",
+   "b": "inferred",
+   "q": "Bacteria were grown 6h in DMEM low glucose in anaerobic conditions"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Bacteria were grown 6h in DMEM low glucose in anaerobic conditions"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "inferred",
+   "q": "Bacteria were grown 6h in DMEM low glucose in anaerobic conditions"
+  },
+  "oxygen": {
+   "v": "anaerobic_fermentation",
+   "b": "inferred",
+   "q": "Bacteria were grown 6h in DMEM low glucose in anaerobic conditions"
+  },
+  "strain_group": {
+   "v": "EHEC_STEC",
+   "b": "stated",
+   "q": "EHEC 86-24"
+  },
+  "strain_name": {
+   "v": "86-24",
+   "b": "stated",
+   "q": "EHEC 86-24"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "WT"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "WT"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "6h coculture of E. feacalis with EHEC in DMEM low glucose in anaerobic condition"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "6h coculture of E. feacalis with EHEC in DMEM low glucose in anaerobic condition"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "TruSeq Stranded Total RNA LT Sample Prep Kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^control$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "mixed_organism": {
+     "v": false,
+     "b": "stated",
+     "q": "control"
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "co-culture",
+   "set": {
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "mixed_organism": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "treatment": {
+     "v": "coculture",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

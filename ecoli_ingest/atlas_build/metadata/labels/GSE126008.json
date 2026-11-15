@@ -1,0 +1,122 @@
+{
+ "gse": "GSE126008",
+ "notes": "Quantum dots present from dilution, 5 h -> adapted. CdTe under light (superoxide-generating) = oxidative;other_chemical; dark CdTe and CdSe = other_chemical (uncertain whether cadmium QDs should count as metal_excess). Temperature, aeration not given; rRNA removal not described (Shishkin et al. protocol). WT re-read: MG1655 used unmodified, so wild_type.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "exponential"
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9 minimal medium"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "1x M9 minimal media salts solution (MP Biomedicals), 2.0 mM MgSO4, 0.1 mM CaCl2, and 0.4% glucose"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "1x M9 minimal media salts solution (MP Biomedicals), 2.0 mM MgSO4, 0.1 mM CaCl2, and 0.4% glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "0.4% glucose"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "MG1655 (ATCC700926)"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "MG1655 (ATCC700926)"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of differential expression of genes between CdTe and CdSe conditions both with and without illumination, as compared to a no treatment control."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of differential expression of genes between CdTe and CdSe conditions both with and without illumination, as compared to a no treatment control."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "MG1655 (ATCC700926)"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655 (ATCC700926)"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "RNA was then extracted using Thermo Scientific GeneJET RNA Purification Kit."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of differential expression of genes between CdTe and CdSe conditions both with and without illumination, as compared to a no treatment control."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of differential expression of genes between CdTe and CdSe conditions both with and without illumination, as compared to a no treatment control."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^none$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "quantum dot",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "Cells were then diluted 1:100 into fresh M9 with respective treatment/illumination."
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "CdTe-2\\.4 quantum dot, LED illumination",
+   "set": {
+    "treatment": {
+     "v": "oxidative;other_chemical",
+     "b": "inferred",
+     "q": "Isolating the Escherichia coli transcriptomic responses to superoxide generation and stress from cadmium chalcogenide quantum dots"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

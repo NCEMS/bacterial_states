@@ -1,0 +1,106 @@
+{
+ "gse": "GSE76916",
+ "notes": "Both arms are delta dicF lacIq with plasmid, IPTG-induced; the empty-vector arm is the study's control (reference = parent strain with empty vector). Time after IPTG not given, so growth_phase left out. Temperature not stated.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "E. coli cells were grown in Luria Broth supplemented with 100ug/ml ampicillin to retain the plasmids."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "E. coli cells were grown in Luria Broth supplemented with 100ug/ml ampicillin to retain the plasmids."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "E. coli cells were grown in Luria Broth supplemented with 100ug/ml ampicillin to retain the plasmids."
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "E. coli cells were grown until mid-exponential phase and treated with 0.5mM isopropyl-β-d-thiogalactopyranoside (IPTG) to induce expression of the empty vector or the small RNA."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RNA-Seq analyses was performed on E. coli strains overexpressing either the vector control or the small RNA DicF."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-Seq analyses was performed on E. coli strains overexpressing either the vector control or the small RNA DicF."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-Seq analyses was performed on E. coli strains overexpressing either the vector control or the small RNA DicF."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "delta dicF, lacIq"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribosomal RNA was removed from 1 μg of total RNA using Ribozero rRNA Removal Meta-Bacteria Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA was removed from 1 μg of total RNA using Ribozero rRNA Removal Meta-Bacteria Kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:protocol",
+   "regex": "^vector control$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:protocol",
+   "regex": "DicF",
+   "set": {
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "dicF",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

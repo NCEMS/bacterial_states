@@ -1,0 +1,131 @@
+{
+ "gse": "GSE182184",
+ "notes": "All samples BW25113 delta-rna with an aTc-induced plasmid: active mammalian CNPase (test) vs catalytically inactive CNPase (H73L/H152L), the stated control; the inactive-variant strain is treated as the reference genotype the study compares against (it still carries the rna deletion; unsure). Medium M9 glucose + casitone -> minimal_plus_hydrolysate.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K12 BW25113 delta_rna"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "K12 BW25113 delta_rna"
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9 media (0.4% glucose, 0.2% casitone)"
+  },
+  "medium_class": {
+   "v": "minimal_plus_hydrolysate",
+   "b": "inferred",
+   "q": "M9 media (0.4% glucose, 0.2% casitone)"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "M9 media (0.4% glucose, 0.2% casitone)"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "M9 media (0.4% glucose, 0.2% casitone)"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "were grown at 37 °C with shaking"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "were grown at 37 °C with shaking"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "were grown at 37 °C with shaking"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Logarithmic"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "expression of CNPase or CNP-Inact was induced with 25 ng/mL anhydrotetracycline"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA depleted of rRNA"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Total RNA depleted of rRNA"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Global transcript levels in a 'rna' deletion strain of E. coli expressing CNPase were compared to levels in control cells with the same deletion expressing a catalytically inactive variant of CNPase"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Global transcript levels in a 'rna' deletion strain of E. coli expressing CNPase were compared to levels in control cells"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Global transcript levels in a 'rna' deletion strain of E. coli expressing CNPase were compared to levels in control cells"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "K12 BW25113 delta_rna"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:plasmid",
+   "regex": "^pKT-CNP$",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": "heterologous expression of mammalian CNPase in a strain containing a deletion of the 'rna' gene"
+    },
+    "perturbed_genes": {
+     "v": "CNPase",
+     "b": "stated",
+     "q": "pKT-CNP"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": "pKT-CNP"
+    }
+   }
+  },
+  {
+   "field": "ch:plasmid",
+   "regex": "inactive",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "inferred",
+     "q": "control cells with the same deletion expressing a catalytically inactive variant of CNPase"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "control cells with the same deletion expressing a catalytically inactive variant of CNPase"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

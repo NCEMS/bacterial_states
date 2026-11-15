@@ -1,0 +1,96 @@
+{
+ "gse": "GSE66517",
+ "notes": "MAPS: RNA eluted from MS2 affinity column, small-RNA library kit; both samples are pull-down eluates (IP_or_pulldown); untagged ITS is the stated control. Cells harvested in exponential and stationary phase (pooled or unclear) -> growth_phase left out. Arabinose-induced plasmid expression of the ITS fragment (native sequence) -> native_overexpression. Temperature not given.",
+ "default": {
+  "assay_class": {
+   "v": "IP_or_pulldown",
+   "b": "stated",
+   "q": "The soluble fraction was subjected to affinity chromatography"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "50 mL LB medium"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "50 mL LB medium"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "50 mL LB medium"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "0.1% arabinose was added to induce the expression of MS2-ITSmetZWV/ITSmetZWV during 10 min"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Identification of sRNAs co-purified with MS2-ITSmetZW and MS2-ITSmetWV"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Identification of sRNAs co-purified with MS2-ITSmetZW and MS2-ITSmetWV"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Identification of sRNAs co-purified with MS2-ITSmetZW and MS2-ITSmetWV"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli K-12"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "genotype_class": {
+   "v": "native_overexpression",
+   "b": "stated",
+   "q": "0.1% arabinose was added to induce the expression of MS2-ITSmetZWV/ITSmetZWV"
+  },
+  "perturbed_genes": {
+   "v": "metZ;metW;metV",
+   "b": "stated",
+   "q": "MS2-ITSmetZWV/ITSmetZWV"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "MS2-ITSmetZWV/ITSmetZWV"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^MS2-",
+   "set": {
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^ITSmetZWV$",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "ITSmetZW and ITSmetWV (without MS2) were used as control"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

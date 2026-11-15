@@ -1,0 +1,46 @@
+{
+  "gse": "GSE195509",
+  "notes": "DHB4 (K-12) wild type or degP deletion, carrying empty pAL-0 or a FevR plasmid (FevRCit from Citrobacter, FevREco105 from an environmental E. coli; both treated as heterologous_expression). Wild type at 42 C was grown 4 h at 42 C (adapted heat); degP mutant at 42 C was shifted from 30 C for 1 h (short heat). Only wild type + pAL-0 at 30 C is the control; degP + pAL-0 is the background of its own comparison but not the reference genotype. Inducer for pAL not described, so inducer_added left out. Shaking not stated (flask), so culture_mode/oxygen left out.",
+  "default": {
+    "base_medium": {"v": "LB", "b": "stated", "q": "Cells were grown overnight in 5ml LB media + 10µg cloramphenicol"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "Cells were grown overnight in 5ml LB media"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "Cells were grown overnight in 5ml LB media"},
+    "growth_phase": {"v": "mid_exponential", "b": "stated", "q": "These cultures were grown for 4 hours until they reached exponential phase before applying treatment"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "Escherichia coli K-12"},
+    "strain_name": {"v": "DHB4", "b": "stated", "q": "DHB4"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "compared to empty vector, in different conditions: background strain E. coli K-12 DHB4 wild type or ΔdegP"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "compared to empty vector, in different conditions: background strain E. coli K-12 DHB4 wild type or ΔdegP"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "Ribosomal RNA was removed from the total RNA with NEBNext® rRNA Depletion Kit"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "Ribosomal RNA was removed from the total RNA with NEBNext® rRNA Depletion Kit"},
+    "is_control": {"v": false, "b": "study_default", "q": "Differential expression of genes by one of the two homolog transcriptional factor, FevRCit or FevREco105, compared to empty vector"}
+  },
+  "rules": [
+    {"field": "title", "regex": "DHB4 \\+ pAL-0\\)", "set": {
+      "genotype_class": {"v": "reference", "b": "stated", "q": ""},
+      "global_regulator_perturbed": {"v": false, "b": "inferred", "q": ""}}},
+    {"field": "title", "regex": "DHB4 \\+ pAL-FevR", "set": {
+      "genotype_class": {"v": "heterologous_expression", "b": "stated", "q": ""},
+      "perturbed_genes": {"v": "fevR", "b": "stated", "q": ""},
+      "global_regulator_perturbed": {"v": false, "b": "inferred", "q": ""}}},
+    {"field": "title", "regex": "ΔdegP \\+ pAL-0\\)", "set": {
+      "genotype_class": {"v": "deletion", "b": "stated", "q": ""},
+      "perturbed_genes": {"v": "degP", "b": "stated", "q": ""},
+      "global_regulator_perturbed": {"v": false, "b": "inferred", "q": ""}}},
+    {"field": "title", "regex": "ΔdegP \\+ pAL-FevR", "set": {
+      "genotype_class": {"v": "multiple", "b": "stated", "q": ""},
+      "perturbed_genes": {"v": "degP;fevR", "b": "stated", "q": ""},
+      "global_regulator_perturbed": {"v": false, "b": "inferred", "q": ""}}},
+    {"field": "ch:treatment time and temperature", "regex": "at 30°C", "set": {
+      "treatment": {"v": "none", "b": "stated", "q": ""},
+      "growth_temperature": {"v": 30, "b": "stated", "q": ""}}},
+    {"field": "ch:treatment time and temperature", "regex": "at 42°C", "set": {
+      "treatment": {"v": "heat", "b": "stated", "q": ""},
+      "growth_temperature": {"v": 42, "b": "stated", "q": ""},
+      "exposure": {"v": "short", "b": "stated", "q": ""}}},
+    {"field": "ch:growth time and  temperature", "regex": "at 42°C", "set": {
+      "exposure": {"v": "adapted", "b": "stated", "q": ""}}},
+    {"field": "title", "regex": "DHB4 \\+ pAL-0\\) treated at 30°C", "set": {
+      "is_control": {"v": true, "b": "stated", "q": ""}}}
+  ],
+  "samples": {}
+}

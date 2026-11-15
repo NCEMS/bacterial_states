@@ -1,0 +1,143 @@
+{
+ "gse": "GSE271942",
+ "notes": "Thanatin (antimicrobial peptide, LPS-transport inhibitor) -> abx_other (no specific class for Lpt inhibitors). All untreated samples (t=0 and the 5/30/120 min controls) are controls. growth_phase mid_exponential inferred from OD 0.2 in LB and kept for samples up to 120 min. WT re-read: reference -> wild_type, MG1655 used unmodified.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "E. coli MG1655 cells were grown in 100 ml in Luria-Bertani broth"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Gene expression profile was evaluated at different time points in E. coli cells non treated and treated with thanatin."
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "E. coli MG1655 cells were grown in 100 ml in Luria-Bertani broth, to OD600 0.2+/-0.05 at 37°C shacking at 180 rpm."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "E. coli MG1655 cells were grown in 100 ml in Luria-Bertani broth, to OD600 0.2+/-0.05 at 37°C shacking at 180 rpm."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "E. coli MG1655 cells were grown in 100 ml in Luria-Bertani broth, to OD600 0.2+/-0.05 at 37°C shacking at 180 rpm."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "E. coli MG1655 cells were grown in 100 ml in Luria-Bertani broth, to OD600 0.2+/-0.05 at 37°C shacking at 180 rpm."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "E. coli MG1655 cells were grown in 100 ml in Luria-Bertani broth, to OD600 0.2+/-0.05 at 37°C shacking at 180 rpm."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "E. coli MG1655 cells were grown in 100 ml in Luria-Bertani broth, to OD600 0.2+/-0.05 at 37°C shacking at 180 rpm."
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "E. coli MG1655 cells were grown in 100 ml in Luria-Bertani broth, to OD600 0.2+/-0.05 at 37°C shacking at 180 rpm."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribosomal RNA was depleted from total RNA (1 ug) using the bacterial Ribo-Zero kit (Illumina)."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA was depleted from total RNA (1 ug) using the bacterial Ribo-Zero kit (Illumina)."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "The culture was then diluted to OD600 0.1 in prewarmed flasks containing 25 ml of prewarmed LB with or without thanatin (final concentration 5.25 μg/ml"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "The culture was then diluted to OD600 0.1 in prewarmed flasks containing 25 ml of prewarmed LB with or without thanatin (final concentration 5.25 μg/ml"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "The culture was then diluted to OD600 0.1 in prewarmed flasks containing 25 ml of prewarmed LB with or without thanatin (final concentration 5.25 μg/ml"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^control$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^thanatin$",
+   "set": {
+    "treatment": {
+     "v": "abx_other",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "(5|30) minutes after thanatin",
+   "set": {
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "120 minutes after thanatin",
+   "set": {
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

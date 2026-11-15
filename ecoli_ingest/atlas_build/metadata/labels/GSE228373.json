@@ -1,0 +1,123 @@
+{
+ "gse": "GSE228373",
+ "notes": "Resistant lines were selected and grown at increasing antibiotic concentrations; ch:treatment names the drug, so treatment set from it with exposure adapted (not stated whether drug was present at harvest). Medium, phase, temperature not given.",
+ "default": {
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparative gene expression levels evaluated by RNA-sequencing in Escherichia coli JM109 cells (control)"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparative gene expression levels evaluated by RNA-sequencing in Escherichia coli JM109 cells (control)"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparative gene expression levels evaluated by RNA-sequencing in Escherichia coli JM109 cells (control)"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "Escherichia coli JM109 cells"
+  },
+  "strain_name": {
+   "v": "JM109",
+   "b": "stated",
+   "q": "Escherichia coli JM109 cells"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "RNA libraries were prepared using Illumina's TruSeq stranded RNA protocol while rRNA removal was performed with Qiagen's FastSelect bacteria kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA removal was performed with Qiagen's FastSelect bacteria kit"
+  },
+  "genotype_class": {
+   "v": "evolved_isolate",
+   "b": "stated",
+   "q": "ampicillin-, gentamicin-, and ciprofloxain resistant cells selected at sub-MIC concentrations and subsequent growth at increasing concentrations of the three antibotics"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "ampicillin-, gentamicin-, and ciprofloxain resistant cells selected at sub-MIC concentrations and subsequent growth at increasing concentrations of the three antibotics"
+  },
+  "exposure": {
+   "v": "adapted",
+   "b": "inferred",
+   "q": "ampicillin-, gentamicin-, and ciprofloxain resistant cells selected at sub-MIC concentrations and subsequent growth at increasing concentrations of the three antibotics"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "ampicillin-, gentamicin-, and ciprofloxain resistant cells selected at sub-MIC concentrations and subsequent growth at increasing concentrations of the three antibotics"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^ampicillin$",
+   "set": {
+    "treatment": {
+     "v": "abx_cell_wall",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^ciprofloxacin$",
+   "set": {
+    "treatment": {
+     "v": "abx_dna_gyrase",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^gentamicin$",
+   "set": {
+    "treatment": {
+     "v": "abx_translation",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "control",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": null,
+     "b": "",
+     "q": ""
+    },
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": "JM109 parental strain"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

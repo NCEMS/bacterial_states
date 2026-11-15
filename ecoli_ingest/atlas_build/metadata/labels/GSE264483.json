@@ -1,0 +1,153 @@
+{
+ "gse": "GSE264483",
+ "notes": "SDT400 (delta ptsHIcrr) is the study's stated reference strain -> genotype_class reference and control at all four time points (no treatment; fed-batch is the culture mode). No growth phase given: timepoint 1 is somewhere in the batch phase, later points are fed-batch at a set growth rate (glucose-limited feeding not stated as such, so no nutrient_limited_growth).",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli K-12"
+  },
+  "base_medium": {
+   "v": "other_minimal",
+   "b": "stated",
+   "q": "batch medium containing 5 g L-1 D-(+)-glucose monohydrate, 7.6 g L-1 (NH4)2SO4, 15.7 g L-1 KH2PO4, 1.86 g L-1 citric acid monohydrate, 0.493 g L-1 MgSO4, 100 mg L-1 thiamine hydrochloride"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "batch medium containing 5 g L-1 D-(+)-glucose monohydrate, 7.6 g L-1 (NH4)2SO4, 15.7 g L-1 KH2PO4, 1.86 g L-1 citric acid monohydrate, 0.493 g L-1 MgSO4, 100 mg L-1 thiamine hydrochloride"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "batch medium containing 5 g L-1 D-(+)-glucose monohydrate, 7.6 g L-1 (NH4)2SO4, 15.7 g L-1 KH2PO4, 1.86 g L-1 citric acid monohydrate, 0.493 g L-1 MgSO4, 100 mg L-1 thiamine hydrochloride"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "batch medium containing 5 g L-1 D-(+)-glucose monohydrate, 7.6 g L-1 (NH4)2SO4, 15.7 g L-1 KH2PO4, 1.86 g L-1 citric acid monohydrate, 0.493 g L-1 MgSO4, 100 mg L-1 thiamine hydrochloride"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "dissolved O2 was controlled at 40%"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "temperature was set at 37°C"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "An E. coli strain engineered to produce high titers of tyrosine (SDT387) and a reference E. coli strain (SDT400), which only bears a PTS knockout, were grown under fedbatch conditions, after a short batch phase."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribosomal RNA was removed using QIAseq FastSelect –5S/16S/23S kit (Qiagen)."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA was removed using QIAseq FastSelect –5S/16S/23S kit (Qiagen)."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "An E. coli strain engineered to produce high titers of tyrosine (SDT387) and a reference E. coli strain (SDT400), which only bears a PTS knockout, were grown under fedbatch conditions, after a short batch phase."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "An E. coli strain engineered to produce high titers of tyrosine (SDT387) and a reference E. coli strain (SDT400), which only bears a PTS knockout, were grown under fedbatch conditions, after a short batch phase."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "An E. coli strain engineered to produce high titers of tyrosine (SDT387) and a reference E. coli strain (SDT400), which only bears a PTS knockout, were grown under fedbatch conditions, after a short batch phase."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:cultivation phase",
+   "regex": "^Batch$",
+   "set": {
+    "culture_mode": {
+     "v": "batch_bioreactor",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:cultivation phase",
+   "regex": "^Fed-batch$",
+   "set": {
+    "culture_mode": {
+     "v": "fed_batch",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^SDT400$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": "An E. coli strain engineered to produce high titers of tyrosine (SDT387) and a reference E. coli strain (SDT400), which only bears a PTS knockout, were grown under fedbatch conditions, after a short batch phase."
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": "An E. coli strain engineered to produce high titers of tyrosine (SDT387) and a reference E. coli strain (SDT400), which only bears a PTS knockout, were grown under fedbatch conditions, after a short batch phase."
+    },
+    "strain_name": {
+     "v": "SDT400",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "An E. coli strain engineered to produce high titers of tyrosine (SDT387) and a reference E. coli strain (SDT400), which only bears a PTS knockout, were grown under fedbatch conditions, after a short batch phase."
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^SDT387$",
+   "set": {
+    "genotype_class": {
+     "v": "multiple",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "aroG;tyrA;aroB;ptsH;ptsI;crr",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "SDT387",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": "An E. coli strain engineered to produce high titers of tyrosine (SDT387) and a reference E. coli strain (SDT400), which only bears a PTS knockout, were grown under fedbatch conditions, after a short batch phase."
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

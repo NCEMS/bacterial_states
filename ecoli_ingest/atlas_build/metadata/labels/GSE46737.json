@@ -1,0 +1,169 @@
+{
+ "gse": "GSE46737",
+ "notes": "5' RACE TSS libraries: assay_class end_mapping for all. Several reference conditions: stationary M9 glucose and mid-log W2 glucose+glutamine are both controls; heat shock not. W2 glutamine medium: amino_acids_supplied left out (single amino acid as nitrogen source, not for an auxotrophy). rrna_removal left out (Terminator exonuclease enrichment).",
+ "default": {
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "E. coli K12 MG1655 was grown to mid-log phase (O.D.600nm 0.5) or to stationary phase (O.D.600nm 1.5) aerobically at 37°C"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "E. coli K12 MG1655 was grown to mid-log phase (O.D.600nm 0.5) or to stationary phase (O.D.600nm 1.5) aerobically at 37°C"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "study_default",
+   "q": "E. coli K12 MG1655"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli K12 MG1655"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E. coli K12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "M9 minimal media supplemented with 0.2% glucose or W2 minimal media supplemented with 0.2% glucose and 0.2% glutamine"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "M9 minimal media supplemented with 0.2% glucose or W2 minimal media supplemented with 0.2% glucose and 0.2% glutamine"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of transcription start sites by biological duplicates from E. coli for 3 different conditions"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of transcription start sites by biological duplicates from E. coli for 3 different conditions"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of transcription start sites by biological duplicates from E. coli for 3 different conditions"
+  },
+  "assay_class": {
+   "v": "end_mapping",
+   "b": "stated",
+   "q": "By obtaining sequence from 5' RACE (rapid amplification of cDNA ends) followed by deep sequencing, we generated genome-wide TSS (transcription start site) maps"
+  }
+ },
+ "rules": [
+  {
+   "field": "source_name",
+   "regex": "M9 glucose",
+   "set": {
+    "base_medium": {
+     "v": "M9",
+     "b": "stated",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "W2 media",
+   "set": {
+    "base_medium": {
+     "v": "other_minimal",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^stationary phase$",
+   "set": {
+    "growth_phase": {
+     "v": "stationary",
+     "b": "stated",
+     "q": ""
+    },
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^glutamine$",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": "Cells at mid-log phase (OD600nm 0.5) in W2 media supplemented with 0.2% glucose and 0.2% glutamine"
+    },
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "Cells at mid-log phase (OD600nm 0.5) in W2 media supplemented with 0.2% glucose and 0.2% glutamine"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "Cells at mid-log phase (OD600nm 0.5) in W2 media supplemented with 0.2% glucose and 0.2% glutamine"
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^heat shock$",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": "For heatshock conditions, cells were grown to mid-log phase and incubated at 42oC for 10 min."
+    },
+    "treatment": {
+     "v": "heat",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": "For heatshock conditions, cells were grown to mid-log phase and incubated at 42oC for 10 min."
+    },
+    "growth_temperature": {
+     "v": 42,
+     "b": "stated",
+     "q": "For heatshock conditions, cells were grown to mid-log phase and incubated at 42oC for 10 min."
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

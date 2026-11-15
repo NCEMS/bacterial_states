@@ -1,0 +1,148 @@
+{
+ "gse": "GSE95575",
+ "notes": "Exposure began at OD595 ~0.47 during exponential growth; all samples within 60 min, so mid_exponential kept from the summary. Unexposed samples at every time point are controls. PMA (organomercurial) labelled metal_excess like HgCl2. WT re-read: unmodified MG1655, genotype_class wild_type (inferred).",
+ "default": {
+  "base_medium": {
+   "v": "MOPS",
+   "b": "stated",
+   "q": "Neidhardt MOPS Minimal Medium (NM3) (Neidhardt et al., 1974, J Bacteriol) (0.2% final glucose concentration) supplemented with 20 mg/L uracil and 500 µg/L thiamine"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "Neidhardt MOPS Minimal Medium (NM3) (Neidhardt et al., 1974, J Bacteriol) (0.2% final glucose concentration) supplemented with 20 mg/L uracil and 500 µg/L thiamine"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "Neidhardt MOPS Minimal Medium (NM3) (Neidhardt et al., 1974, J Bacteriol) (0.2% final glucose concentration) supplemented with 20 mg/L uracil and 500 µg/L thiamine"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "Neidhardt MOPS Minimal Medium (NM3) (Neidhardt et al., 1974, J Bacteriol) (0.2% final glucose concentration) supplemented with 20 mg/L uracil and 500 µg/L thiamine"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "which were incubated at 37°C with shaking at 250 rpm"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "which were incubated at 37°C with shaking at 250 rpm"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "divided into three 500 ml flasks with 100 ml NM3 in each, which were incubated at 37°C with shaking at 250 rpm"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "study_default",
+   "q": "Gene expression changes during exponential growth of E. coli MG1655 were compared by RNA-seq"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "E coli K-12 MG1655"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "E coli K-12 MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "differential gene expression was determined for each condition by performing pair-wise comparisons to unexposed E. coli culture (n=3) at corresponding time point (10, 30, and 60 min) following exposure"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "differential gene expression was determined for each condition by performing pair-wise comparisons to unexposed E. coli culture (n=3) at corresponding time point (10, 30, and 60 min) following exposure"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "differential gene expression was determined for each condition by performing pair-wise comparisons to unexposed E. coli culture (n=3) at corresponding time point (10, 30, and 60 min) following exposure"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E coli K-12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "E coli K-12 MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA-depleted total RNA"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA depletion was performed with the Ribo-Zero™ rRNA removal kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "unexposed",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "HgCl2|PMA",
+   "set": {
+    "treatment": {
+     "v": "metal_excess",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "(HgCl2|PMA) at t(10|30)$",
+   "set": {
+    "exposure": {
+     "v": "acute",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "(HgCl2|PMA) at t60$",
+   "set": {
+    "exposure": {
+     "v": "short",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,111 @@
+{
+ "gse": "GSE135946",
+ "notes": "Cells came from overnight cultures resuspended in fresh LB and incubated 2 h static: no growth phase. mixed_organism left out for the T4 samples (phage present with resistant EcN; phage RNA content unknown). rRNA removal not described. WT re-read: unmodified Nissle 1917 is wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "study_default",
+   "q": "final volume of 1 ml LB medium in a 24 well plate"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "final volume of 1 ml LB medium in a 24 well plate"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "final volume of 1 ml LB medium in a 24 well plate"
+  },
+  "culture_mode": {
+   "v": "static_liquid",
+   "b": "study_default",
+   "q": "The plates were incubated in a static manner for 2 h of time at 37 °C."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "study_default",
+   "q": "The plates were incubated in a static manner for 2 h of time at 37 °C."
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "The probiotic E. coli strain Nissle 1917 (EcN)"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total EcN bacterial RNA was isolated from 3 ml cultures after 2 h of a static incubation period with or without phages."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total EcN bacterial RNA was isolated from 3 ml cultures after 2 h of a static incubation period with or without phages."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total EcN bacterial RNA was isolated from 3 ml cultures after 2 h of a static incubation period with or without phages."
+  },
+  "strain_group": {
+   "v": "probiotic",
+   "b": "stated",
+   "q": "The probiotic E. coli strain Nissle 1917 (EcN)"
+  },
+  "strain_name": {
+   "v": "Nissle 1917",
+   "b": "stated",
+   "q": "Nissle 1917"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Total EcN bacterial RNA was isolated"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total EcN bacterial RNA was isolated from 3 ml cultures after 2 h of a static incubation period with or without phages."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^LB_medium",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "mixed_organism": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^T4_phages",
+   "set": {
+    "treatment": {
+     "v": "phage",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

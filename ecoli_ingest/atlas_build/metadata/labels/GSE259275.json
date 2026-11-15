@@ -1,0 +1,110 @@
+{
+ "gse": "GSE259275",
+ "notes": "CONFLICT: titles say Rad induced (InducRad) vs repressed (RepreRad), but ch:treatment says every sample got 0.2% arabinose and 50 ng/ml ATc; inducer_added left out for RepreRad. Which plasmids (Rad vs negative-control vector) each sample carries is not said, so perturbed_genes only names the retron for RepreRad. No untreated reference-genotype sample, so no is_control.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "The E.coliDH10B cells containing plasmid inducible retron (pBAD-Ec78) or negative control (pKLC23) and pKL83-Rad or the negative control (pKLC83) were diluted 1:100 in 10mL LB medium"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "The E.coliDH10B cells containing plasmid inducible retron (pBAD-Ec78) or negative control (pKLC23) and pKL83-Rad or the negative control (pKLC83) were diluted 1:100 in 10mL LB medium"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "The E.coliDH10B cells containing plasmid inducible retron (pBAD-Ec78) or negative control (pKLC23) and pKL83-Rad or the negative control (pKLC83) were diluted 1:100 in 10mL LB medium"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "After 30min of growth at 37 \u00b0C with shaking at 250 rpm"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "After 30min of growth at 37 \u00b0C with shaking at 250 rpm"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "After 30min of growth at 37 \u00b0C with shaking at 250 rpm"
+  },
+  "growth_phase": {
+   "v": "transition",
+   "b": "stated",
+   "q": "early stationary (OD600 = 1)"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K12"
+  },
+  "strain_name": {
+   "v": "DH10B",
+   "b": "stated",
+   "q": "DH10B"
+  },
+  "genotype_class": {
+   "v": "heterologous_expression",
+   "b": "stated",
+   "q": "PtuAB from retron Ec83 (Eco4) was cloned under an arabinose inducible promoter pBAD."
+  },
+  "perturbed_genes": {
+   "v": "ptuAB (retron Ec78)",
+   "b": "stated",
+   "q": "plasmid inducible retron (pBAD-Ec78)"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "plasmid inducible retron (pBAD-Ec78)"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "0.2% Arabinose and 0.2% Glucose were used to induce and repress the PtuAB expression, respectively."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "0.2% Arabinose and 0.2% Glucose were used to induce and repress the PtuAB expression, respectively."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "0.2% Arabinose and 0.2% Glucose were used to induce and repress the PtuAB expression, respectively."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "The TruSeq Stranded Total RNA Library kit (for bacteria) (Illumina, San Diego, USA) was utilized subsequent to the removal of rRNA from the sample."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "The TruSeq Stranded Total RNA Library kit (for bacteria) (Illumina, San Diego, USA) was utilized subsequent to the removal of rRNA from the sample."
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "InducRad",
+   "set": {
+    "inducer_added": {
+     "v": true,
+     "b": "stated",
+     "q": "treated with 0.2% arabinoese and 50 ng/ml Atc"
+    },
+    "perturbed_genes": {
+     "v": "ptuAB (retron Ec78);rad",
+     "b": "stated",
+     "q": "expression of the retron and Rad were induced with 0.2%arabinose(final concentration) and 50 ng/mL ATc"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

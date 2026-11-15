@@ -1,0 +1,91 @@
+{
+ "gse": "GSE171971",
+ "notes": "WT vs two rho point mutants; no growth conditions given. UV is used elsewhere in the series but not stated for these RNA-seq samples, so treatment none as study default.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA was removed using Ribominus"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA was removed using Ribominus"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Transcription profiles of WT and 2 Rho mutant strains (Rho-L187R and Rho-D210G)."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcription profiles of WT and 2 Rho mutant strains (Rho-L187R and Rho-D210G)."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcription profiles of WT and 2 Rho mutant strains (Rho-L187R and Rho-D210G)."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcription profiles of WT and 2 Rho mutant strains (Rho-L187R and Rho-D210G)."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcription profiles of WT and 2 Rho mutant strains (Rho-L187R and Rho-D210G)."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcription profiles of WT and 2 Rho mutant strains (Rho-L187R and Rho-D210G)."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "rho-",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rho",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

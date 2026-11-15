@@ -1,0 +1,61 @@
+{
+ "gse": "GSE349205",
+ "notes": "'CAP' is never expanded (could be chloramphenicol or cold atmospheric plasma): treatment left out for CAP samples. Strain, medium, phase not given.",
+ "default": {
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "3 biological replicates for CAP-treated E. coli group, 3 biological replicates for untreated control group."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "3 biological replicates for CAP-treated E. coli group, 3 biological replicates for untreated control group."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "3 biological replicates for CAP-treated E. coli group, 3 biological replicates for untreated control group."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "RNA library was constructed by rRNA depletion."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "RNA library was constructed by rRNA depletion."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^Untreated$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^CAP treated$",
+   "set": {
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

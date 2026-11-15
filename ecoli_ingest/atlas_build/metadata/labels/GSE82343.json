@@ -1,0 +1,32 @@
+{
+  "gse": "GSE82343",
+  "notes": "Kanamycin-resistant point mutants (single and double with fusA) vs wtfrt wild type, LB, exponential. Double mutants labelled point_mutation (two point mutations). cpxA not in the global-regulator list (cpxR is) -> false; rpoD and cyaA -> true. Culture mode, oxygen and temperature not stated.",
+  "default": {
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "Deep sequencing of rRNA depleted RNA"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "DNase treated RNA was depleted of ribosomal RNA using the Ambion Microbe Express Kit (AM1905)."},
+    "base_medium": {"v": "LB", "b": "stated", "q": "cells were grown in Luria-Bertani broth"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "cells were grown in Luria-Bertani broth"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "cells were grown in Luria-Bertani broth"},
+    "growth_phase": {"v": "mid_exponential", "b": "stated", "q": "Exponentially growing cells"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "Escherichia coli str. K-12 substr. MG1655"},
+    "strain_name": {"v": "MG1655", "b": "stated", "q": "Escherichia coli str. K-12 substr. MG1655"},
+    "treatment": {"v": "none", "b": "stated", "q": "No treatment; only the growth of strains in Luria-Bertani broth."},
+    "inducer_added": {"v": false, "b": "study_default", "q": "No treatment; only the growth of strains in Luria-Bertani broth."},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "No treatment; only the growth of strains in Luria-Bertani broth."},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "No treatment; only the growth of strains in Luria-Bertani broth."},
+    "genotype_class": {"v": "point_mutation", "b": "stated", "q": "multiple different point mutations in the translation elongation factor G (EF-G)"},
+    "is_control": {"v": false, "b": "stated", "q": "From the transcriptomes of double and single mutants we describe the epistasis between EF-G mutant and these second site mutations."}
+  },
+  "rules": [
+    {"field": "title", "regex": "^cpxA_\\d", "set": {"perturbed_genes": {"v": "cpxA", "b": "stated", "q": ""}, "global_regulator_perturbed": {"v": false, "b": "inferred", "q": ""}}},
+    {"field": "title", "regex": "^cyaA_\\d", "set": {"perturbed_genes": {"v": "cyaA", "b": "stated", "q": ""}, "global_regulator_perturbed": {"v": true, "b": "inferred", "q": ""}}},
+    {"field": "title", "regex": "^rpoD_\\d", "set": {"perturbed_genes": {"v": "rpoD", "b": "stated", "q": ""}, "global_regulator_perturbed": {"v": true, "b": "inferred", "q": ""}}},
+    {"field": "title", "regex": "^fusA_\\d", "set": {"perturbed_genes": {"v": "fusA", "b": "stated", "q": ""}, "global_regulator_perturbed": {"v": false, "b": "inferred", "q": ""}}},
+    {"field": "title", "regex": "^fusA_cpxA_", "set": {"perturbed_genes": {"v": "fusA;cpxA", "b": "stated", "q": ""}, "global_regulator_perturbed": {"v": false, "b": "inferred", "q": ""}}},
+    {"field": "title", "regex": "^fusA_cyaA_", "set": {"perturbed_genes": {"v": "fusA;cyaA", "b": "stated", "q": ""}, "global_regulator_perturbed": {"v": true, "b": "inferred", "q": ""}}},
+    {"field": "title", "regex": "^fusA_rpoD_", "set": {"perturbed_genes": {"v": "fusA;rpoD", "b": "stated", "q": ""}, "global_regulator_perturbed": {"v": true, "b": "inferred", "q": ""}}},
+    {"field": "title", "regex": "^fusA_topA_", "set": {"perturbed_genes": {"v": "fusA;topA", "b": "stated", "q": ""}, "global_regulator_perturbed": {"v": false, "b": "inferred", "q": ""}}},
+    {"field": "title", "regex": "^wtfrt_", "set": {"genotype_class": {"v": "reference", "b": "stated", "q": "none; wild type"}, "global_regulator_perturbed": {"v": false, "b": "stated", "q": "none; wild type"}, "is_control": {"v": true, "b": "stated", "q": "none; wild type"}}}
+  ],
+  "samples": {}
+}

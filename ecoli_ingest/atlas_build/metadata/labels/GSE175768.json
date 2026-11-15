@@ -1,0 +1,189 @@
+{
+ "gse": "GSE175768",
+ "notes": "AR3110 assigned K-12 (inferred; strain name only). Colonies on solid M9 glucose -> biofilm, phase not_applicable. Liquid culture medium and conditions not given (medium labels removed; phase from 'Exponential growing'). Formaldehyde-fixed / FACS-sorted samples (GSM5346112-29): fixation after harvest; treatment and is_control left out, assay kept total_rnaseq but these are technical-method samples worth excluding. Anoxic/oxic sorted subpopulations: oxic -> aerobic stated, anoxic oxygen class left out. WT re-read: AR3110 unmodified -> wild_type; FACS-sorted oxic/anoxic samples (fluorescence-based sorting suggests a reporter, not described) left reference.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "AR3110"
+  },
+  "strain_name": {
+   "v": "AR3110",
+   "b": "stated",
+   "q": "AR3110"
+  },
+  "culture_mode": {
+   "v": "biofilm",
+   "b": "stated",
+   "q": "we studied the spatiotemporal transcriptional changes in Escherichia coli biofilm colonies"
+  },
+  "growth_phase": {
+   "v": "not_applicable",
+   "b": "inferred",
+   "q": "Colonies were grown on solid M9 medium supplemented with glucose at 37 degrees."
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "Colonies were grown on solid M9 medium supplemented with glucose"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "solid M9 medium supplemented with glucose"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "solid M9 medium supplemented with glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "solid M9 medium supplemented with glucose"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "supplemented with glucose at 37 degrees"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "AR3110"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "AR3110"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Whole colony measurenments were performed on colonies grown for 12 h to 72 h in triplicate (samples 1-24)."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Whole colony measurenments were performed on colonies grown for 12 h to 72 h in triplicate (samples 1-24)."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Whole colony measurenments were performed on colonies grown for 12 h to 72 h in triplicate (samples 1-24)."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Whole colony measurenments were performed on colonies grown for 12 h to 72 h in triplicate (samples 1-24)."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Directional cDNA libraries were prepared using the NEBNext Ultra II Directional RNA Libary Prep Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Depletion of ribosomal RNA was performed using Ribo-Zero kits (Epicentre)"
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "Whole colony measurenments were performed on colonies grown for 12 h to 72 h in triplicate (samples 1-24)."
+  }
+ },
+ "rules": [
+  {
+   "field": "source_name",
+   "regex": "^Liquid culture$",
+   "set": {
+    "culture_mode": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    },
+    "base_medium": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    },
+    "carbon_source": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    },
+    "growth_temperature": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    },
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": "Exponential growing"
+    }
+   }
+  },
+  {
+   "field": "ch:condition",
+   "regex": "formaldehyde fixation",
+   "set": {
+    "treatment": {
+     "v": null,
+     "b": "stated",
+     "q": "If FACS was required, cells were fixed with formaldehyde after disrupting them in PBS."
+    },
+    "is_control": {
+     "v": null,
+     "b": "stated",
+     "q": "If FACS was required, cells were fixed with formaldehyde after disrupting them in PBS."
+    }
+   }
+  },
+  {
+   "field": "ch:condition",
+   "regex": "oxic cells collected",
+   "set": {
+    "oxygen": {
+     "v": "aerobic",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:condition",
+   "regex": "anoxic cells collected",
+   "set": {
+    "oxygen": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:condition",
+   "regex": "collected after FACS",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

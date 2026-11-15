@@ -1,0 +1,101 @@
+{
+ "gse": "GSE190571",
+ "notes": "Reviewed 2026-11-15: co-culture with another bacterium is treatment coculture (user decision) | UTI89 macrocolonies alone or mixed with S. aureus HG001. Mixed samples: mixed_organism true, is_control false; treatment left empty (co-culture with another bacterium fits no class). Medium, temperature not given. WT re-read: unmodified UTI89 stated wild type -> wild_type.",
+ "default": {
+  "culture_mode": {
+   "v": "agar_surface",
+   "b": "inferred",
+   "q": "Macrocolonies were excised and subjected to RNA extraction"
+  },
+  "growth_phase": {
+   "v": "not_applicable",
+   "b": "inferred",
+   "q": "Macrocolonies were excised and subjected to RNA extraction"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "Wild type"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "Wild type"
+  },
+  "strain_group": {
+   "v": "UPEC",
+   "b": "inferred",
+   "q": "UTI89"
+  },
+  "strain_name": {
+   "v": "UTI89",
+   "b": "stated",
+   "q": "UTI89"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "grown in single speicies or multispecies context"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "grown in single speicies or multispecies context"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "remaining RNA was depleted of ribosomal RNA"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "remaining RNA was depleted of ribosomal RNA"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:background",
+   "regex": "^Single species$",
+   "set": {
+    "mixed_organism": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:background",
+   "regex": "^Multiple species$",
+   "set": {
+    "mixed_organism": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "treatment": {
+     "v": "coculture",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,88 @@
+{
+ "gse": "GSE59760",
+ "notes": "Strain conflict: title/organism say BW25113, ch:strain and summary say MG1655 -> strain_name left out (both K-12). Both conditions are wild type in M9 glucose with one amino acid added (glycine or threonine) as a supplement: treatment none, both are controls. amino_acids_supplied false (single amino acid, minimal medium) is a judgement call: the rule names the auxotrophy case only. Shaking not described, culture_mode left out.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Cells were grown to mid-log phase aerobically at 37°C"
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9 Minimal Media 4 g/L D-Glucose"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "M9 Minimal Media 4 g/L D-Glucose with 10 mM of the corresponding amino acid supplementation"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "M9 Minimal Media 4 g/L D-Glucose with 10 mM of the corresponding amino acid supplementation"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "M9 Minimal Media 4 g/L D-Glucose"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "Cells were grown to mid-log phase aerobically at 37°C"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Cells were grown to mid-log phase aerobically at 37°C"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12 MG1655"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "WT"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "WT"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Growth of E. coli with 2 different amino acid supplementations was analyzed in biological duplicates."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Growth of E. coli with 2 different amino acid supplementations was analyzed in biological duplicates."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Growth of E. coli with 2 different amino acid supplementations was analyzed in biological duplicates."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Growth of E. coli with 2 different amino acid supplementations was analyzed in biological duplicates."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "mRNA sequencing was performed"
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "Growth of E. coli with 2 different amino acid supplementations was analyzed in biological duplicates."
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

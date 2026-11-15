@@ -1,0 +1,116 @@
+{
+ "gse": "GSE147611",
+ "notes": "Only the RNA-seq arm (total RNA, TruSeq Total RNA kit) is a candidate; RNET-seq footprint samples are not shown. 6xHis-rpoD tag strain is the reference. rRNA removal not stated explicitly. Oxygen/shaking not stated.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "mid-log phase (OD600 = 0.5)"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "OD600 = 0.5 in LB"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "OD600 = 0.5 in LB"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "OD600 = 0.5 in LB"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "study_default",
+   "q": "The overnight cell cultures were diluted in 100 ml LB medium (OD600 = 0.02) and incubated at 37 ºC to mid-log phase (OD600 = 0.5)."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RNA-seq were performed using the same strains and conditions to monitor the changes of gene transcription."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq were performed using the same strains and conditions to monitor the changes of gene transcription."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq were performed using the same strains and conditions to monitor the changes of gene transcription."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq were performed using the same strains and conditions to monitor the changes of gene transcription."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. W3110"
+  },
+  "strain_name": {
+   "v": "W3110",
+   "b": "stated",
+   "q": "W3110 6xHis-rpoD"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Libraries were generated using TruSeq Standard Total RNA Library Prep Kit (Illumina)."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "^sigma70 WT$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "greAB-",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "W3110 6xHis-rpoD greA::tet greB::amp"
+    },
+    "perturbed_genes": {
+     "v": "greA;greB",
+     "b": "stated",
+     "q": "greA::tet greB::amp"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": "greA::tet greB::amp"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

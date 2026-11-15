@@ -1,0 +1,78 @@
+{
+ "gse": "GSE143631",
+ "notes": "Only the three total RNA-seq samples are candidates (dRNA-seq/Term-seq not shown). Harvested at OD600 0.8 in MEM-HEPES: above the inferred range, no phase. Temperature, aeration, rRNA removal not stated. WT re-read: genotype_class reference -> wild_type, unmodified Sakai strain.",
+ "default": {
+  "base_medium": {
+   "v": "cell_culture",
+   "b": "study_default",
+   "q": "inoculated 1/100 from overnight LB cultures into MEM-HEPES media supplemented with 0.1% glucose and 250nM FeNO3"
+  },
+  "medium_class": {
+   "v": "defined_rich",
+   "b": "inferred",
+   "q": "MEM-HEPES media supplemented with 0.1% glucose"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "MEM-HEPES media supplemented with 0.1% glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "study_default",
+   "q": "MEM-HEPES media supplemented with 0.1% glucose"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "Escherichia coli O157:H7 str. Sakai"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Cells were not additionally treated"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "Cells were not additionally treated"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Cells were not additionally treated"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Cells were not additionally treated"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Cells were not additionally treated"
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "Cells were not additionally treated"
+  },
+  "strain_group": {
+   "v": "EHEC_STEC",
+   "b": "stated",
+   "q": "Escherichia coli O157:H7 str. Sakai"
+  },
+  "strain_name": {
+   "v": "O157:H7 Sakai",
+   "b": "stated",
+   "q": "Escherichia coli O157:H7 str. Sakai"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "EHEC total RNA-seq"
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

@@ -1,0 +1,160 @@
+{
+ "gse": "GSE166491",
+ "notes": "MAPS samples (MS2 affinity purification of MavR targets, GSM5073142-45) are IP_or_pulldown. MAPS samples carry MS2 or MS2-mavR constructs in the deltamavR background; genotype_class left out for MS2-mavR (complemented, tagged) and inducer status unknown for MAPS. Low-glucose DMEM, serum not mentioned -> defined_rich; carbon source left out. No temperature given.",
+ "default": {
+  "strain_group": {
+   "v": "EHEC_STEC",
+   "b": "stated",
+   "q": "Enterohemorrhagic Escherichia coli O157:H7 86-24"
+  },
+  "strain_name": {
+   "v": "86-24",
+   "b": "stated",
+   "q": "Enterohemorrhagic Escherichia coli O157:H7 86-24"
+  },
+  "base_medium": {
+   "v": "cell_culture",
+   "b": "stated",
+   "q": "all samples were grown in low glucose DMEM"
+  },
+  "medium_class": {
+   "v": "defined_rich",
+   "b": "inferred",
+   "q": "all samples were grown in low glucose DMEM"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "all samples were grown in low glucose DMEM"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "The first goal of the study was to identify genes differentially regulated by MavR in EHEC strain 86-24."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "The first goal of the study was to identify genes differentially regulated by MavR in EHEC strain 86-24."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "The first goal of the study was to identify genes differentially regulated by MavR in EHEC strain 86-24."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "The first goal of the study was to identify genes differentially regulated by MavR in EHEC strain 86-24."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "The first goal of the study was to identify genes differentially regulated by MavR in EHEC strain 86-24."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "RNAs were prepared for sequencing using standard Illumina protocols."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "The first goal of the study was to identify genes differentially regulated by MavR in EHEC strain 86-24."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:growth condition",
+   "regex": "^aerobic to mid-exponential",
+   "set": {
+    "oxygen": {
+     "v": "aerobic",
+     "b": "stated",
+     "q": ""
+    },
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:growth condition",
+   "regex": "^microaerobic to late-exponential",
+   "set": {
+    "oxygen": {
+     "v": "microaerobic",
+     "b": "stated",
+     "q": ""
+    },
+    "growth_phase": {
+     "v": "late_exponential",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^deltamavR$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "mavR",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^MAPS_",
+   "set": {
+    "assay_class": {
+     "v": "IP_or_pulldown",
+     "b": "stated",
+     "q": "identify direct targets of MavR through the MAPS protocol"
+    },
+    "inducer_added": {
+     "v": null,
+     "b": "study_default",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^MAPS_MS2-mavR",
+   "set": {
+    "genotype_class": {
+     "v": null,
+     "b": "study_default",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

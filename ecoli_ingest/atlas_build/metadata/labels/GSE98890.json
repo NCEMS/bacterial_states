@@ -1,0 +1,34 @@
+{
+  "gse": "GSE98890",
+  "notes": "Genetic circuit 0x58 in NEB 10-beta (mapped to K-12 as a DH10B-type strain) under 8 inducer combinations; circuit strains labelled heterologous_expression. Control pAN1201 (no inducers) taken as reference/control per summary 'wild-type cells not containing any circuit'. Phase not given (5 h tube growth, no OD).",
+  "default": {
+    "base_medium": {"v": "MOPS", "b": "stated", "q": "MOPS EZ Rich Defined Medium (Teknova, CA, M2105) with 0.2% glycerol carbon source"},
+    "medium_class": {"v": "defined_rich", "b": "inferred", "q": "MOPS EZ Rich Defined Medium"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "MOPS EZ Rich Defined Medium"},
+    "carbon_source": {"v": "glycerol", "b": "stated", "q": "with 0.2% glycerol carbon source"},
+    "oxygen": {"v": "aerobic", "b": "inferred", "q": "grown in an Innova 44 shaker (Eppendorf, CT) at 37 °C and 250 rpm for five hours"},
+    "culture_mode": {"v": "batch_shaken", "b": "inferred", "q": "grown in an Innova 44 shaker (Eppendorf, CT) at 37 °C and 250 rpm for five hours"},
+    "growth_temperature": {"v": 37, "b": "stated", "q": "at 37 °C and 250 rpm for five hours"},
+    "strain_group": {"v": "K-12", "b": "inferred", "q": "NEB 10-beta"},
+    "strain_name": {"v": "NEB 10-beta", "b": "stated", "q": "NEB 10-beta"},
+    "treatment": {"v": "none", "b": "study_default", "q": "Examination of two replicates of the 0x58 circuit and 1 modified circuit grown for different combinations of inducer in culture tubes."},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "Examination of two replicates of the 0x58 circuit and 1 modified circuit grown for different combinations of inducer in culture tubes."},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "Examination of two replicates of the 0x58 circuit and 1 modified circuit grown for different combinations of inducer in culture tubes."},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "Ribo-Zero rRNA Removal Kit for bacteria (Illumina) was used to deplete rRNA from the samples"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "Ribo-Zero rRNA Removal Kit for bacteria (Illumina) was used to deplete rRNA from the samples"},
+    "genotype_class": {"v": "heterologous_expression", "b": "stated", "q": "We report the characterization of the 0x58 circuit, a modified version and wild-type cells not containing any circuit."},
+    "perturbed_genes": {"v": "0x58 circuit", "b": "stated", "q": "the 0x58 circuit"},
+    "global_regulator_perturbed": {"v": false, "b": "stated", "q": "the 0x58 circuit"},
+    "inducer_added": {"v": false, "b": "stated", "q": "(IPTG-/aTc-/Ara-)"},
+    "is_control": {"v": false, "b": "stated", "q": "We report the characterization of the 0x58 circuit, a modified version and wild-type cells not containing any circuit."}
+  },
+  "rules": [
+    {"field": "title", "regex": "\\+",
+     "set": {"inducer_added": {"v": true, "b": "stated", "q": ""}}},
+    {"field": "title", "regex": "^Control pAN1201",
+     "set": {"genotype_class": {"v": "reference", "b": "stated", "q": "wild-type cells not containing any circuit"},
+             "perturbed_genes": {"v": null, "b": "stated", "q": ""},
+             "is_control": {"v": true, "b": "stated", "q": ""}}}
+  ],
+  "samples": {}
+}

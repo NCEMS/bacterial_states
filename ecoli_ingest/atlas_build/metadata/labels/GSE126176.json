@@ -1,0 +1,132 @@
+{
+ "gse": "GSE126176",
+ "notes": "48 h cultures in lake water + yeast extract; samples before exposure (all groups) and after 15 min of water (vehicle control), ferrate or hypochlorite. All 'before' samples and water-after are untreated controls. growth_phase late_stationary inferred from 48 h batch growth (kept for the 15-min samples). medium_class left out (lake water + 100 mg/L yeast extract fits no class); amino_acids_supplied true inferred from yeast extract. Temperature and shaking not stated. WT re-read: plain K-12 strain with no modification -> wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "other",
+   "b": "stated",
+   "q": "E. coli cultures were grown in sterilized lake water supplemented with 100 mg/L yeast extract and 1 mM sodium phosphate buffer to a final pH of approximately 8.4 for 48 hours."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "E. coli cultures were grown in sterilized lake water supplemented with 100 mg/L yeast extract and 1 mM sodium phosphate buffer to a final pH of approximately 8.4 for 48 hours."
+  },
+  "growth_phase": {
+   "v": "late_stationary",
+   "b": "inferred",
+   "q": "E. coli cultures were grown in sterilized lake water supplemented with 100 mg/L yeast extract and 1 mM sodium phosphate buffer to a final pH of approximately 8.4 for 48 hours."
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "K-12"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "The study aimed to examine E. coli genetic response to ferrate and compare and contrast it to the genetic response of E. coli to hypochlorite."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Cultures were treated with either 35 µM hypochlorite, 400 µM ferrate, or water (control) for 15 minutes."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Cultures were treated with either 35 µM hypochlorite, 400 µM ferrate, or water (control) for 15 minutes."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Cultures were treated with either 35 µM hypochlorite, 400 µM ferrate, or water (control) for 15 minutes."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Ribosomal RNA depletion was carried out to remove rRNA using Ribo-zero rRNA removal kit (Bacteria)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA depletion was carried out to remove rRNA using Ribo-zero rRNA removal kit (Bacteria)"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "RNA samples were collected before exposure"
+  },
+  "is_control": {
+   "v": true,
+   "b": "stated",
+   "q": "RNA samples were collected before exposure"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^Ferrate treatment after",
+   "set": {
+    "treatment": {
+     "v": "oxidative",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": "Cultures were treated with either 35 µM hypochlorite, 400 µM ferrate, or water (control) for 15 minutes."
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^Hypochlorite treatment after",
+   "set": {
+    "treatment": {
+     "v": "oxidative",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": "Cultures were treated with either 35 µM hypochlorite, 400 µM ferrate, or water (control) for 15 minutes."
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^Water treatment \\(control\\) after",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

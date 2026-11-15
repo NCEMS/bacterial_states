@@ -1,0 +1,143 @@
+{
+ "gse": "GSE135516",
+ "notes": "GMOS genotype is not described in the text; genotype_class left empty for GMOS samples. EC ALE-1..4 taken as evolved isolates (adaptive evolution). H2O2 exposure duration not given; exposure empty. Phase stated as mid-log for all samples incl. H2O2. WT re-read: WT MG1655 samples are unmodified, genotype_class wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9 minimal media w/ 4g/L glucose"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "M9 minimal media w/ 4g/L glucose"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "M9 minimal media w/ 4g/L glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "M9 minimal media w/ 4g/L glucose"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "incubated at 37C with agitation to the mid-log phase"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "incubated at 37C with agitation to the mid-log phase"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "incubated at 37C with agitation to the mid-log phase"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "mid-log phase bacteria culture"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Growth of E. coli with various supplements was performed with biological duplicates."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Growth of E. coli with various supplements was performed with biological duplicates."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Growth of E. coli with various supplements was performed with biological duplicates."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "KAPA Stranded RNA-Seq Kit"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "inferred",
+   "q": "Growth of E. coli with various supplements was performed with biological duplicates."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-Seq was performed to examine the underlying transcriptional rewiring."
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^WT_",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^EC ALE",
+   "set": {
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "inferred",
+     "q": "We performed evolution of Escherichia coli K12 MG1655 to study how the system adapt to iron toxicity."
+    },
+    "global_regulator_perturbed": {
+     "v": null,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "Hydrogen peroxide",
+   "set": {
+    "treatment": {
+     "v": "oxidative",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^WT_\\d",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

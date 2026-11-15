@@ -1,0 +1,78 @@
+{
+ "gse": "GSE304591",
+ "notes": "Only 3 rifampicin-treated samples; the untreated controls are not in this series. Growth phase (exponential or stationary) and treatment duration not given per sample. Rifampicin at non-lethal concentration, so transcription_arrested left out. Kanamycin/chloramphenicol in the medium taken as selection markers, not treatment. rrna_removal not stated.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "We used Luria-Bertani (LB) medium"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "We used Luria-Bertani (LB) medium"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "We used Luria-Bertani (LB) medium"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Overnight cultures were diluted into fresh medium to an optical density of 600 nm (O.D.600) of 0.03 and incubated for growth by shaking at 250 rpm at 37°C."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Overnight cultures were diluted into fresh medium to an optical density of 600 nm (O.D.600) of 0.03 and incubated for growth by shaking at 250 rpm at 37°C."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Overnight cultures were diluted into fresh medium to an optical density of 600 nm (O.D.600) of 0.03 and incubated for growth by shaking at 250 rpm at 37°C."
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "study_default",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "treatment": {
+   "v": "abx_transcription",
+   "b": "stated",
+   "q": "Rifampicin 2.5ng replicate 1"
+  },
+  "is_control": {
+   "v": false,
+   "b": "stated",
+   "q": "Rifampicin 2.5ng replicate 1"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of genome-wide responses under Antibiotics (Rifampicin)"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of genome-wide responses under Antibiotics (Rifampicin)"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was extracted using RNeasy kit (Qiagen). RNA-seq libraries were constructed according to the Illumina's protocol."
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

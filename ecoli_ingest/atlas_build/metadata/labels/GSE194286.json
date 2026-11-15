@@ -1,0 +1,111 @@
+{
+ "gse": "GSE194286",
+ "notes": "Light-activated molecular machine (membrane-drilling synthetic compound) vs 1% DMSO control, both irradiated at 405 nm. Treatment class envelope_solvent_biocide chosen because the compound targets the membrane; could also be other_chemical. Exposure: 30 min dark + 5 min light, harvest time after irradiation not given, so short is approximate. Growth phase and culture mode not stated. rRNA removal: design says Ribo-Zero Plus, extract protocol names TruSeq Stranded mRNA kit; took Ribo-Zero.",
+ "default": {
+  "base_medium": {
+   "v": "Mueller-Hinton",
+   "b": "stated",
+   "q": "Mueller-Hinton Broth, 37°C"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Mueller-Hinton Broth, 37°C"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Mueller-Hinton Broth, 37°C"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Mueller-Hinton Broth, 37°C"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E. coli BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "E. coli BW25113"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "E. coli BW25113 was treated with 1% DMSO (CT) or 0.5x MIC of MNM"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli BW25113 was treated with 1% DMSO (CT) or 0.5x MIC of MNM"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli BW25113 was treated with 1% DMSO (CT) or 0.5x MIC of MNM"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli BW25113 was treated with 1% DMSO (CT) or 0.5x MIC of MNM"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli BW25113 was treated with 1% DMSO (CT) or 0.5x MIC of MNM"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "TruSeq Stranded Total RNA with Ribo-Zero Plus rRNA Depletion Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "TruSeq Stranded Total RNA with Ribo-Zero Plus rRNA Depletion Kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^MNM_",
+   "set": {
+    "treatment": {
+     "v": "envelope_solvent_biocide",
+     "b": "stated",
+     "q": "Cells were treated with 0.5x MIC of MM 1, or 1% DMSO in the dark for 30 min. Cells were then irradiated for 5 min"
+    },
+    "exposure": {
+     "v": "short",
+     "b": "inferred",
+     "q": "in the dark for 30 min. Cells were then irradiated for 5 min"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^CT_",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "Bacterial cells_with DMSO (control)"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

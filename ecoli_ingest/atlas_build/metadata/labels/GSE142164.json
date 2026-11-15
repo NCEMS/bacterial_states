@@ -1,0 +1,116 @@
+{
+ "gse": "GSE142164",
+ "notes": "Treatment duration not given: exposure left out; growth_phase mid_exponential from 'mid-log' at treatment (sampling time after treatment not given). TAT (CysK antimetabolite antibacterial) = abx_other. DMSO vehicle samples in each medium (M9, M9 with taurine as sulfur source) are controls. Carbon source of ATCC 2511 M9 not stated.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Mid-log preparations of E. coli K12 MG1655 were treated with an antimicrobial thioacetamide-linked 1,2,3-triazole inhibitor to investigate the associated transcriptional response."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "When E. coli cultures reached mid-log, 5 mL of culture was added to each tube and allowed to incubate with shaking at 37°C and 225 RPM."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "When E. coli cultures reached mid-log, 5 mL of culture was added to each tube and allowed to incubate with shaking at 37°C and 225 RPM."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "When E. coli cultures reached mid-log, 5 mL of culture was added to each tube and allowed to incubate with shaking at 37°C and 225 RPM."
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "ATCC 2511 broth (M9)"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "ATCC 2511 broth (M9)"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "ATCC 2511 broth (M9)"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "K12 MG1655"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Mid-log preparations of E. coli K12 MG1655 were treated with an antimicrobial thioacetamide-linked 1,2,3-triazole inhibitor to investigate the associated transcriptional response."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Mid-log preparations of E. coli K12 MG1655 were treated with an antimicrobial thioacetamide-linked 1,2,3-triazole inhibitor to investigate the associated transcriptional response."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Mid-log preparations of E. coli K12 MG1655 were treated with an antimicrobial thioacetamide-linked 1,2,3-triazole inhibitor to investigate the associated transcriptional response."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Mid-log preparations of E. coli K12 MG1655 were treated with an antimicrobial thioacetamide-linked 1,2,3-triazole inhibitor to investigate the associated transcriptional response."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K12 MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "ScriptSeq™ v2 RNA-Seq Library Preparation Kit, standard protocol."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^1% DMSO$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "acetamide",
+   "set": {
+    "treatment": {
+     "v": "abx_other",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

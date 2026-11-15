@@ -1,0 +1,106 @@
+{
+ "gse": "GSE87071",
+ "notes": "Reviewed 2026-11-15: release from stationary phase into fresh medium (1 h, 2 h) is medium_or_oxygen_shift | Strain and carbon source not stated. t=0 samples stated stationary phase (controls at the reference time point); t=1 h and t=2 h after release into fresh M9 given no phase ('Growing', 'Dividing'). Release into fresh medium treated as no treatment.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "inoculate pre-warmed (37°C) M9 media"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "inoculate pre-warmed (37°C) M9 media"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "inoculate pre-warmed (37°C) M9 media"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Released cultures were grown (37°C, 200 rpm) and harvested (time = 0, 1 hr, or 2 hr)"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Released cultures were grown (37°C, 200 rpm) and harvested (time = 0, 1 hr, or 2 hr)"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Released cultures were grown (37°C, 200 rpm) and harvested (time = 0, 1 hr, or 2 hr)"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "E. coli were sampled at times = 0, 1 hour, and 2 hours following release from stationary phase."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "two biological replicates at t=0, one sample each at t=1 and t=2 hours following release"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "two biological replicates at t=0, one sample each at t=1 and t=2 hours following release"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "two biological replicates at t=0, one sample each at t=1 and t=2 hours following release"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "200 bp insert, rRNA depletion"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "200 bp insert, rRNA depletion"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "two biological replicates at t=0, one sample each at t=1 and t=2 hours following release"
+  }
+ },
+ "rules": [
+  {
+   "field": "source_name",
+   "regex": "Stationary phase",
+   "set": {
+    "growth_phase": {
+     "v": "stationary",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "t=[12] hour",
+   "set": {
+    "treatment": {
+     "v": "medium_or_oxygen_shift",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "short",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

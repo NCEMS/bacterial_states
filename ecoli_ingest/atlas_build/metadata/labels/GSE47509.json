@@ -1,0 +1,35 @@
+{
+  "gse": "GSE47509",
+  "notes": "All samples are ribosome profiling (28-42 nt monosome-protected fragments) -> assay_class ribosome_footprints; flag for exclusion. Temperature shift 32 -> 42 C at time 0 for lambda cI857 lysogen and non-lysogen MG1655; lysogen post-shift = heat + prophage induction (treatment phage;heat). Lysogen genotype_class, inducer_added and mixed_organism (phage transcripts) left out. Chloramphenicol 2 min before harvest is part of the footprinting protocol, not a treatment. Medium not stated; OD 0.4-0.5 fits mid_exponential in either medium type, kept for all samples (<= 20 min after shift).",
+  "default": {
+    "growth_phase": {"v": "mid_exponential", "b": "inferred", "q": "incubated with shaking at 32°C to an optical density at 600 nm (OD600) of 0.4 to 0.5"},
+    "culture_mode": {"v": "batch_shaken", "b": "inferred", "q": "incubated with shaking at 32°C"},
+    "oxygen": {"v": "aerobic", "b": "inferred", "q": "incubated with shaking at 32°C"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "sampling the lysogen and control non-lysogen both before and 2, 5, 10, and 20 minutes after shifting the temperature from 32° to 42°"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "MG1655"},
+    "strain_name": {"v": "MG1655", "b": "stated", "q": "MG1655"},
+    "assay_class": {"v": "ribosome_footprints", "b": "stated", "q": "Ribosome-protected mRNA"},
+    "is_control": {"v": false, "b": "study_default", "q": "sampling the lysogen and control non-lysogen both before and 2, 5, 10, and 20 minutes after shifting the temperature from 32° to 42°"}
+  },
+  "rules": [
+    {"field": "ch:time", "regex": "^0min$",
+     "set": {"growth_temperature": {"v": 32, "b": "stated", "q": "incubated with shaking at 32°C"},
+             "treatment": {"v": "none", "b": "stated", "q": "sampling the lysogen and control non-lysogen both before and 2, 5, 10, and 20 minutes after shifting"}}},
+    {"field": "ch:time", "regex": "^(2|5|10|20)min$",
+     "set": {"growth_temperature": {"v": 42, "b": "stated", "q": "Cultures were transferred to a 42 °C water bath"},
+             "treatment": {"v": "heat", "b": "stated", "q": "heat shock"},
+             "exposure": {"v": "acute", "b": "stated", "q": ""}}},
+    {"field": "ch:infection", "regex": "lambda",
+     "set": {"strain_name": {"v": "MG1655 (λcI857)", "b": "stated", "q": "MG1655 (λcI857)"}}},
+    {"field": "title", "regex": "^Induction (2|5|10|20)min",
+     "set": {"treatment": {"v": "phage;heat", "b": "stated", "q": "temperature induction of the classic cI857 repressor mutation in a lysogen of E. coli MG1655"}}},
+    {"field": "title", "regex": "^WT ",
+     "set": {"genotype_class": {"v": "reference", "b": "stated", "q": ""},
+             "global_regulator_perturbed": {"v": false, "b": "stated", "q": ""},
+             "inducer_added": {"v": false, "b": "study_default", "q": "control non-lysogen"},
+             "mixed_organism": {"v": false, "b": "study_default", "q": "control non-lysogen"}}},
+    {"field": "title", "regex": "^WT 0min",
+     "set": {"is_control": {"v": true, "b": "stated", "q": "control non-lysogen"}}}
+  ],
+  "samples": {}
+}

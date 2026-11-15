@@ -1,0 +1,120 @@
+{
+ "gse": "GSE59682",
+ "notes": "Toxins added to a 16 h LB culture and incubated 2 h more: growth phase left out (sampled hours after addition, no phase word). Acetonitrile solvent sample is the control.",
+ "default": {
+  "strain_name": {
+   "v": "DH10B",
+   "b": "stated",
+   "q": "K-12 substr. DH10B"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12 substr. DH10B"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "incubated in 5 ml LB liquid"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "incubated in 5 ml LB liquid"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "incubated in 5 ml LB liquid"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "for 16 h at 37°C with constant shaking"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "with constant shaking"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "incubated in 5 ml LB liquid for 16 h at 37°C with constant shaking"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "study_default",
+   "q": "we compared mycotoxin (DON and NIV) transcriptome to acetonitrile (ACN) transcriptome"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "we compared mycotoxin (DON and NIV) transcriptome to acetonitrile (ACN) transcriptome"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Two deoxynivalenol (0.2 ppm and 2 ppm), two nivalenol (0.2 ppm and 2 ppm) and one acetonitrile (control) RNA-seq data"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Two deoxynivalenol (0.2 ppm and 2 ppm), two nivalenol (0.2 ppm and 2 ppm) and one acetonitrile (control) RNA-seq data"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Two deoxynivalenol (0.2 ppm and 2 ppm), two nivalenol (0.2 ppm and 2 ppm) and one acetonitrile (control) RNA-seq data"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "was used to remove bacterial rRNA from the total RNA samples"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "was used to remove bacterial rRNA from the total RNA samples"
+  },
+  "treatment": {
+   "v": "other_chemical",
+   "b": "stated",
+   "q": "100 µl of each myxotoxin dissolved in acetonitrile was added to each culture to a final concentration of 0.2, and 2 ppm"
+  },
+  "exposure": {
+   "v": "short",
+   "b": "stated",
+   "q": "Additional incubation was performed for 2 h."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "we compared mycotoxin (DON and NIV) transcriptome to acetonitrile (ACN) transcriptome"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:condition",
+   "regex": "control",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "acetonitrile (control)"
+    },
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "acetonitrile (control)"
+    },
+    "exposure": {
+     "v": null,
+     "b": "stated",
+     "q": "acetonitrile (control)"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

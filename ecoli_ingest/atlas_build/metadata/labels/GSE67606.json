@@ -1,0 +1,101 @@
+{
+ "gse": "GSE67606",
+ "notes": "MAPS: MS2-affinity purified RNA -> assay_class IP_or_pulldown for both samples (exclude). growth_phase left out: both samples are listed as 'exponential and stationary phases' with no per-sample split. Both in rne131 background with arabinose added; the pNM12 empty vector sample is the design's control but carries rne131, so its genotype_class is left out (not wild type); pBAD-MS2 = rne131 + heterologous MS2 aptamer -> multiple.",
+ "default": {
+  "strain_name": {
+   "v": "MG1655 rne131",
+   "b": "stated",
+   "q": "rne131"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "100 mL LB medium"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "100 mL LB medium"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "100 mL LB medium"
+  },
+  "perturbed_genes": {
+   "v": "rne",
+   "b": "stated",
+   "q": "rne131"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "rne131"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "0.1% arabinose was added to induce the expression of MS2 aptamer"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Identification of RNAs co-purified with MS2 aptamer in a rne131 strain. pNM12 empty vector was used as control"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Identification of RNAs co-purified with MS2 aptamer in a rne131 strain"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Identification of RNAs co-purified with MS2 aptamer in a rne131 strain"
+  },
+  "assay_class": {
+   "v": "IP_or_pulldown",
+   "b": "stated",
+   "q": "Identification of RNAs co-purified with MS2 aptamer"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^pNM12$",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "pNM12 empty vector was used as control"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^pBAD-MS2$",
+   "set": {
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": "pNM12 empty vector was used as control"
+    },
+    "genotype_class": {
+     "v": "multiple",
+     "b": "stated",
+     "q": "0.1% arabinose was added to induce the expression of MS2 aptamer (fused to RyhB terminator)"
+    },
+    "perturbed_genes": {
+     "v": "rne;MS2 aptamer",
+     "b": "stated",
+     "q": "0.1% arabinose was added to induce the expression of MS2 aptamer (fused to RyhB terminator)"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

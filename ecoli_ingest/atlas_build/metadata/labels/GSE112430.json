@@ -1,0 +1,451 @@
+{
+ "gse": "GSE112430",
+ "notes": "30 clinical non-O157 STEC isolates (stx2a, eae positive), each non-induced (control) or mitomycin C 0.25 ug/ml for 1.5 h (dna_damage, short). 'Induced' means mitomycin C, so inducer_added false. Phase mid_exponential from the design ('at exponential growth'), kept for the 1.5 h samples. SILAC medium -> base_medium other, defined_rich. WT re-read: clinical STEC isolates used as isolated, no modification described.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "induced with mitomycin c or non-induced, at exponential growth in SILAC medium."
+  },
+  "base_medium": {
+   "v": "other",
+   "b": "stated",
+   "q": "fresh SILAC (stable isotope labeling with amino acids in cell culture) medium optimized for non-auxotrophic E. coli"
+  },
+  "medium_class": {
+   "v": "defined_rich",
+   "b": "inferred",
+   "q": "fresh SILAC (stable isotope labeling with amino acids in cell culture) medium optimized for non-auxotrophic E. coli"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "fresh SILAC (stable isotope labeling with amino acids in cell culture) medium optimized for non-auxotrophic E. coli"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "before incubation at 37 °C with agitation until reaching an OD600 of approximately 0.3."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "before incubation at 37 °C with agitation until reaching an OD600 of approximately 0.3."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "before incubation at 37 °C with agitation until reaching an OD600 of approximately 0.3."
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "stx2a and eae positive STEC strains of non-O157 serogroups isolated from children"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparison of 30 non-O157 STEC strains"
+  },
+  "strain_group": {
+   "v": "EHEC_STEC",
+   "b": "stated",
+   "q": "30 stx2a and eae positive STEC strains of non-O157 serogroups"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Library preparation was performed with TruSeq Stranded Total RNA HT Sample Prep Kit (Illumina)."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA was removed using Ribo-Zero rRNA Removal Kit for Gram-Negative Bacteria (Epicentre)."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "induced with mitomycin c or non-induced, at exponential growth in SILAC medium."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "induced with mitomycin c or non-induced, at exponential growth in SILAC medium."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "induced with mitomycin c or non-induced, at exponential growth in SILAC medium."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:induced/non-induced",
+   "regex": "^Non-induced$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:induced/non-induced",
+   "regex": "^Induced$",
+   "set": {
+    "treatment": {
+     "v": "dna_damage",
+     "b": "stated",
+     "q": "one part was induced with mitomycin C at a final concentration of 0.25"
+    },
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": "Both cultures were subsequently incubated at 37 °C with agitation for 1.5 hours."
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^FHI4\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "FHI4",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^FHI6\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "FHI6",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^FHI7\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "FHI7",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^FHI8\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "FHI8",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^FHI9\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "FHI9",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^FHI12\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "FHI12",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^FHI24\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "FHI24",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^FHI25\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "FHI25",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^FHI27\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "FHI27",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^FHI36\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "FHI36",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^FHI43\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "FHI43",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^FHI48\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "FHI48",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^FHI79\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "FHI79",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^FHI95\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "FHI95",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^FHI63\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "FHI63",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^FHI66\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "FHI66",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^FHI83\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "FHI83",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^St\\.\\ Olav40\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "St. Olav40",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^St\\.\\ Olav104\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "St. Olav104",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^St\\.\\ Olav157\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "St. Olav157",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^St\\.\\ Olav172\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "St. Olav172",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^St\\.\\ Olav174\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "St. Olav174",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^St\\.\\ Olav178\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "St. Olav178",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^St\\.\\ Olav179\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "St. Olav179",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^St\\.\\ Olav17\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "St. Olav17",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^St\\.\\ Olav39\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "St. Olav39",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^St\\.\\ Olav63\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "St. Olav63",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^St\\.\\ Olav164\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "St. Olav164",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^St\\.\\ Olav176\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "St. Olav176",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^St\\.\\ Olav173\\s*$",
+   "set": {
+    "strain_name": {
+     "v": "St. Olav173",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

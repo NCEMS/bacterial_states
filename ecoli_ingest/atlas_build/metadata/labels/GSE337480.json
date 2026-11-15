@@ -1,0 +1,106 @@
+{
+ "gse": "GSE337480",
+ "notes": "CONFLICT: ch:strain says MG1655, titles and design say BW25113; strain_name left out (both K-12). LBKG composition not given: base_medium left out, complex inferred from LB base. Overnight cells washed and moved to fresh LBKG for 2 h -> medium_or_oxygen_shift, short; no phase stated. All samples treated alike, no untreated condition -> is_control left out. WT re-read: genotype_class reference -> wild_type, BW25113 WT unmodified.",
+ "default": {
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "LBKG medium"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "LBKG medium"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": " were incubated at 37 °C and 220 rpm for 2 h."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "stated",
+   "q": "BW25113 WT and ΔgadAB strains were inoculated into LBK medium and cultured overnight at 37 °C with shaking at 220 rpm."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "BW25113 WT and ΔgadAB strains were inoculated into LBK medium and cultured overnight at 37 °C with shaking at 220 rpm."
+  },
+  "treatment": {
+   "v": "medium_or_oxygen_shift",
+   "b": "inferred",
+   "q": "The overnight cultures were washed once with PBS and resuspended in an equal volume of LBKG medium, followed by a 1:10 d"
+  },
+  "exposure": {
+   "v": "short",
+   "b": "stated",
+   "q": "LBKG, 2h"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "BW25113 WT and ΔgadAB strains"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "BW25113 WT and ΔgadAB strains"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "BW25113 WT and ΔgadAB strains"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "BW25113 WT and ΔgadAB strains"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "ribosomal RNA (rRNA) was depleted to enrich mRNA"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "ribosomal RNA (rRNA) was depleted to enrich mRNA"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "BW25113 WT and ΔgadAB strains"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "KO-gadA",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "gadA;gadB",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

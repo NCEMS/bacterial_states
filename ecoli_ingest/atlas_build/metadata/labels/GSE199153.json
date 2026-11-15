@@ -1,0 +1,131 @@
+{
+ "gse": "GSE199153",
+ "notes": "WT MG1655 vs pfk_ALE-1 (evolved from pfkAB-deleted MG1655). ALE: global_regulator_perturbed left empty (other mutations 'involved in ... global transcriptional regulation' not named).",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "Strains were grown aerobically at 37°C in M9 minimal media supplemented with 0.4% glucose."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "Strains were grown aerobically at 37°C in M9 minimal media supplemented with 0.4% glucose."
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "Strains were grown aerobically at 37°C in M9 minimal media supplemented with 0.4% glucose."
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "Strains were grown aerobically at 37°C in M9 minimal media supplemented with 0.4% glucose."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "Strains were grown aerobically at 37°C in M9 minimal media supplemented with 0.4% glucose."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Strains were grown aerobically at 37°C in M9 minimal media supplemented with 0.4% glucose."
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "mid-exp phase"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E. coli K-12 MG1655 WT and pfk_ALE-1 strain"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "E.coli_WT and E.coli_ALE cells were cultured in glucose minimal medium with biological duplicates"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "E.coli_WT and E.coli_ALE cells were cultured in glucose minimal medium with biological duplicates"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "E.coli_WT and E.coli_ALE cells were cultured in glucose minimal medium with biological duplicates"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "E.coli_WT and E.coli_ALE cells were cultured in glucose minimal medium with biological duplicates"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "RNA library was constructed from rRNA-depleted RNA"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "RNA library was constructed from rRNA-depleted RNA"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "^Wild-type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655",
+     "b": "stated",
+     "q": "E. coli K-12 MG1655 WT"
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "adaptive laboratory evolution",
+   "set": {
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "pfkA;pfkB",
+     "b": "stated",
+     "q": "We obtained pfkAB-deleted E. coli K-12 MG1655 strain"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "pfk_ALE-1",
+     "b": "stated",
+     "q": "pfk_ALE-1 strain"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

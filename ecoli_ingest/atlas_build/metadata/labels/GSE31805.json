@@ -1,0 +1,121 @@
+{
+ "gse": "GSE31805",
+ "notes": "Bile salts (3% w/v) labelled host_factor (bile is host-derived detergent); exposure left out because it is not stated whether bile was present from the 1:100 dilution. Three replicates pooled per sample.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "ETEC E24377A was grown in LB or LB+bile salts (3% w/v)."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "ETEC E24377A was grown in LB or LB+bile salts (3% w/v)."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "ETEC E24377A was grown in LB or LB+bile salts (3% w/v)."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Growth conditions consisted of 37C at 225 rpm until an OD600=0.5 was reached."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Culture was diluted 1:100 in 25ml LB. Growth conditions consisted of 37C at 225 rpm"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Growth conditions consisted of 37C at 225 rpm until an OD600=0.5 was reached."
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "Growth conditions consisted of 37C at 225 rpm until an OD600=0.5 was reached."
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "study_default",
+   "q": "ETEC E24377A was grown in LB or LB+bile salts (3% w/v)."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "ETEC E24377A was grown in LB or LB+bile salts (3% w/v)."
+  },
+  "strain_group": {
+   "v": "ETEC",
+   "b": "stated",
+   "q": "Global transcriptomics of enterotoxigenic E. coli strain E24377A"
+  },
+  "strain_name": {
+   "v": "E24377A",
+   "b": "stated",
+   "q": "E24377A"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "ETEC E24377A was grown in LB or LB+bile salts (3% w/v)."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "ETEC E24377A was grown in LB or LB+bile salts (3% w/v)."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "ETEC E24377A was grown in LB or LB+bile salts (3% w/v)."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA was depleted with the RiboZero kit from Ambion."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA was depleted with the RiboZero kit from Ambion."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^LB$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "bile",
+   "set": {
+    "treatment": {
+     "v": "host_factor",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

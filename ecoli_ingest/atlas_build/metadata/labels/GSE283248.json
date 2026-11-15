@@ -1,0 +1,108 @@
+{
+ "gse": "GSE283248",
+ "notes": "Cells grown 16 h in LB, then inoculated into strawberry nectar and treated; sampling medium is nectar (base_medium other, no medium_class). Growth phase, temperature and exposure (time from treatment to RNA harvest) not given. HPP and PEF -> other_physical. Strain group of ATCC 8739 not stated. WT re-read: unmodified baseline strain relabelled wild_type.",
+ "default": {
+  "strain_name": {
+   "v": "ATCC 8739",
+   "b": "stated",
+   "q": "ATCC 8739"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "E. coli ATCC 8739 culture in LB medium at 37°C for 16±1 h"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli ATCC 8739 culture in LB medium at 37°C for 16±1 h"
+  },
+  "base_medium": {
+   "v": "other",
+   "b": "stated",
+   "q": "E. coli ATCC 8739 inoculated in strawberry nectar"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiling of E. coli ATCC 8739 inoculated in strawberry nectar after exposure to six different treatments"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiling of E. coli ATCC 8739 inoculated in strawberry nectar after exposure to six different treatments"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiling of E. coli ATCC 8739 inoculated in strawberry nectar after exposure to six different treatments"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Firstly, ribosomal RNA was removed from total RNA"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Firstly, ribosomal RNA was removed from total RNA"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiling of E. coli ATCC 8739 inoculated in strawberry nectar after exposure to six different treatments"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^control$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^thermal treatment",
+   "set": {
+    "treatment": {
+     "v": "heat",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^high pressure processing",
+   "set": {
+    "treatment": {
+     "v": "other_physical",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^pulsed electric field",
+   "set": {
+    "treatment": {
+     "v": "other_physical",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

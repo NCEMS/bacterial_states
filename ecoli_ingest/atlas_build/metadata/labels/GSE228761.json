@@ -1,0 +1,359 @@
+{
+ "gse": "GSE228761",
+ "notes": "IPTG (1 mM) is the circuit inducer, not a treatment; WT with and without IPTG both taken as controls (reference genotype, same inducer as the test strains). Phase not given (diluted to OD 0.3, harvested after 5 h). Carbon source of M9 not given. Some samples have 'passed qc_mapped_reads FALSE' (GSM7135992, GSM7136017, GSM7136023). rRNA removal not stated. WT re-read: unengineered Nissle WT -> wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "Cultures were inoculated from glycerol stock and grown overnight for 15 h at 37 °C and 1000 rpm in 1 mL M9 media in a 96-well deep well plate."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "Cultures were inoculated from glycerol stock and grown overnight for 15 h at 37 °C and 1000 rpm in 1 mL M9 media in a 96-well deep well plate."
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "Cultures were inoculated from glycerol stock and grown overnight for 15 h at 37 °C and 1000 rpm in 1 mL M9 media in a 96-well deep well plate."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Cultures were inoculated from glycerol stock and grown overnight for 15 h at 37 °C and 1000 rpm in 1 mL M9 media in a 96-well deep well plate."
+  },
+  "culture_mode": {
+   "v": "batch_microplate",
+   "b": "stated",
+   "q": "in the presence or absence of 1 mM IPTG in a 96-well deep well plate"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Cultures were inoculated from glycerol stock and grown overnight for 15 h at 37 °C and 1000 rpm in 1 mL M9 media in a 96-well deep well plate."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "in the presence or absence of 1 mM IPTG"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "in the presence or absence of 1 mM IPTG"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparative gene expression profiling analysis of RNA-seq data for WT E. coli Nissle 1917 cells and engineered derivatives"
+  },
+  "strain_group": {
+   "v": "probiotic",
+   "b": "inferred",
+   "q": "Escherichia coli Nissle 1917"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA extraction was performed according to the manufacturer’s instructions"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparative gene expression profiling analysis of RNA-seq data for WT E. coli Nissle 1917 cells and engineered derivatives"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "IPTG = 0M",
+   "set": {
+    "inducer_added": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "IPTG = 0\\.001M",
+   "set": {
+    "inducer_added": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "Nissle_WT",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "Nissle 1917",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "SensorArrayOnly",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "sensor array",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "NOTgate_PsrA$",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "sensor array;PsrA NOT gate",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "NOTgate_HlyIIR$",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "sensor array;HlyIIR NOT gate",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "NOTgate_BM3R1$",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "sensor array;BM3R1 NOT gate",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "NOTgate_AmtR$",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "sensor array;AmtR NOT gate",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "NOTgate_QacR$",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "sensor array;QacR NOT gate",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "NOTgate_LitR$",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "sensor array;LitR NOT gate",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "NOTgate_AmeR$",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "sensor array;AmeR NOT gate",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "NOTgate_IcaR$",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "sensor array;IcaR NOT gate",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "NOTgate_BetI$",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "sensor array;BetI NOT gate",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "NOTgate_PhlF$",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "sensor array;PhlF NOT gate",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^AJT",
+   "set": {
+    "strain_name": {
+     "v": "Nissle 1917 derivative",
+     "b": "inferred",
+     "q": "WT E. coli Nissle 1917 cells and engineered derivatives"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,120 @@
+{
+ "gse": "GSE272617",
+ "notes": "Plain growth of wild-type UTI89; every sample is untreated reference genotype, so all are controls. Liquid-culture samples: 16 h LB starter at 37 C -> stationary (inferred); shaking not stated. Biofilm samples: YESCA agar macrocolonies at 27 C; YESCA (casamino acids + yeast extract, no salts listed) medium_class left out; base_medium other. WT re-read: plain UTI89, no modification described -> wild_type.",
+ "default": {
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "Escherichia coli UTI89"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "The objective of the study was to reveal the spatio-temporal distribution of gene expression and the evolutionary patterns of uropathogenic Escherichia coli during biofilm development."
+  },
+  "strain_group": {
+   "v": "UPEC",
+   "b": "stated",
+   "q": "The objective of the study was to reveal the spatio-temporal distribution of gene expression and the evolutionary patterns of uropathogenic Escherichia coli during biofilm development."
+  },
+  "strain_name": {
+   "v": "UTI89",
+   "b": "stated",
+   "q": "UTI89"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "NA"
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "The objective of the study was to reveal the spatio-temporal distribution of gene expression and the evolutionary patterns of uropathogenic Escherichia coli during biofilm development."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "The objective of the study was to reveal the spatio-temporal distribution of gene expression and the evolutionary patterns of uropathogenic Escherichia coli during biofilm development."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "The objective of the study was to reveal the spatio-temporal distribution of gene expression and the evolutionary patterns of uropathogenic Escherichia coli during biofilm development."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "The objective of the study was to reveal the spatio-temporal distribution of gene expression and the evolutionary patterns of uropathogenic Escherichia coli during biofilm development."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "5 uL of liquid culture was inoculated on YESCA agar medium (1% casamino acids, 0.1% yeast extract, 2.0% agar) to grow macrocolony biofilms. The agar plates were then incubated at 27 °C"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "The library was constructed using the TruSeq Stranded Total RNA with NEB rRNA depletion kit (Illumina)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "The library was constructed using the TruSeq Stranded Total RNA with NEB rRNA depletion kit (Illumina)"
+  },
+  "culture_mode": {
+   "v": "biofilm",
+   "b": "stated",
+   "q": "5 uL of liquid culture was inoculated on YESCA agar medium (1% casamino acids, 0.1% yeast extract, 2.0% agar) to grow macrocolony biofilms. The agar plates were then incubated at 27 °C"
+  },
+  "growth_phase": {
+   "v": "not_applicable",
+   "b": "inferred",
+   "q": "5 uL of liquid culture was inoculated on YESCA agar medium (1% casamino acids, 0.1% yeast extract, 2.0% agar) to grow macrocolony biofilms. The agar plates were then incubated at 27 °C"
+  },
+  "base_medium": {
+   "v": "other",
+   "b": "stated",
+   "q": "5 uL of liquid culture was inoculated on YESCA agar medium (1% casamino acids, 0.1% yeast extract, 2.0% agar) to grow macrocolony biofilms. The agar plates were then incubated at 27 °C"
+  },
+  "growth_temperature": {
+   "v": 27,
+   "b": "stated",
+   "q": "5 uL of liquid culture was inoculated on YESCA agar medium (1% casamino acids, 0.1% yeast extract, 2.0% agar) to grow macrocolony biofilms. The agar plates were then incubated at 27 °C"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:time",
+   "regex": "liquid culture",
+   "set": {
+    "culture_mode": {
+     "v": null,
+     "b": "",
+     "q": ""
+    },
+    "base_medium": {
+     "v": "LB",
+     "b": "stated",
+     "q": "The starting liquid culture of Escherichia coli UTI89 was prepared by incubating the strain in liquid LB medium (1% Bacto tryptone, 0.5% Bacto yeast extract, 0.5% NaCl) for 16 h at 37 °C."
+    },
+    "medium_class": {
+     "v": "complex",
+     "b": "inferred",
+     "q": "The starting liquid culture of Escherichia coli UTI89 was prepared by incubating the strain in liquid LB medium (1% Bacto tryptone, 0.5% Bacto yeast extract, 0.5% NaCl) for 16 h at 37 °C."
+    },
+    "growth_temperature": {
+     "v": 37,
+     "b": "stated",
+     "q": "The starting liquid culture of Escherichia coli UTI89 was prepared by incubating the strain in liquid LB medium (1% Bacto tryptone, 0.5% Bacto yeast extract, 0.5% NaCl) for 16 h at 37 °C."
+    },
+    "growth_phase": {
+     "v": "stationary",
+     "b": "inferred",
+     "q": "The starting liquid culture of Escherichia coli UTI89 was prepared by incubating the strain in liquid LB medium (1% Bacto tryptone, 0.5% Bacto yeast extract, 0.5% NaCl) for 16 h at 37 °C."
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

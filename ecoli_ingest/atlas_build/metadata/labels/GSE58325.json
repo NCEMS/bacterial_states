@@ -1,0 +1,206 @@
+{
+ "gse": "GSE58325",
+ "notes": "Two founder lineages: '1' = MG1655 (no mutations listed, reference), '2' = DlacZXY (deletion; is_control false under the reference-genotype rule although it is likely a neutral marker). growth_phase left out: 12 h / 24 h cultures, not stated whether batch without dilution, and stressed cultures may not be in stationary phase. Temperature, aeration and M9 carbon source not given. Sequential conditions (A then B) list the current stress first. 100 mM H2O2 and 0.6% n-butanol as stated.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "Bacteria grown for 12 h in M9"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "Bacteria grown for 12 h in M9"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "Bacteria grown for 12 h in M9"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "MG1655"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of the differential expression under exposure to different stresses"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of the differential expression under exposure to different stresses"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of the differential expression under exposure to different stresses"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of the differential expression under exposure to different stresses"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was extracted from frozen cultures using Rneasy. Library constructed using KAPA Kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:mutations",
+   "regex": "DlacZXY",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "lacZ;lacY;lacA",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^Bacteria grown for 12 h in M9$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^1M9 rep",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "Bacteria grown for 12 h in M9"
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "NaCl$",
+   "set": {
+    "treatment": {
+     "v": "hyperosmotic",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "n-butanol$",
+   "set": {
+    "treatment": {
+     "v": "envelope_solvent_biocide",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "H2O2$",
+   "set": {
+    "treatment": {
+     "v": "oxidative",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "pH ?5\\.5$",
+   "set": {
+    "treatment": {
+     "v": "acid",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "n-butanol and other 12 hours in M9\\+0\\.3 M NaCl",
+   "set": {
+    "treatment": {
+     "v": "hyperosmotic;envelope_solvent_biocide",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "NaCl and other 12 hours in M9\\+0\\.6%n-butanol",
+   "set": {
+    "treatment": {
+     "v": "envelope_solvent_biocide;hyperosmotic",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "pH 5\\.5 and other 12 hours in M9\\+100 mM H2O2",
+   "set": {
+    "treatment": {
+     "v": "oxidative;acid",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "H2O2 and other 12 hours in M9 pH 5\\.5",
+   "set": {
+    "treatment": {
+     "v": "acid;oxidative",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "(NaCl|n-butanol|H2O2|pH ?5\\.5)$",
+   "set": {
+    "exposure": {
+     "v": "adapted",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,33 @@
+{
+  "gse": "GSE191318",
+  "notes": "CONFLICT: GSM5743575 (title 'Dxr 2 +ATc', field '- anhydrotetracycline') and GSM5743576 (title 'Dxr 3 -ATc', field '+ anhydrotetracycline') contradict; inducer_added and is_control left out for both. GSM5743573 title 'Dxr 1 -+ATc' read as +ATc (agrees with field). Strains carry degron-tagged essential DapB or Dxr plus an ATc-inducible protease: genotype_class knockdown for all (depletion system); ATc treated as inducer (treatment none). Uninduced (0 h and -ATc) samples taken as controls although the strain is not plain wild type. Strain background, phase and temperature not given.",
+  "default": {
+    "base_medium": {"v": "LB", "b": "stated", "q": "Aerobic growth in LB Lennox"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "Aerobic growth in LB Lennox"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "Aerobic growth in LB Lennox"},
+    "oxygen": {"v": "aerobic", "b": "stated", "q": "Aerobic growth in LB Lennox"},
+    "genotype_class": {"v": "knockdown", "b": "stated", "q": "Gene expression comparison of DapB and Dxr depleted cells at two and three hours post induction of the protease"},
+    "global_regulator_perturbed": {"v": false, "b": "inferred", "q": "Degradation of the E. coli essential proteins DapB and Dxr"},
+    "treatment": {"v": "none", "b": "study_default", "q": "Gene expression comparison of DapB and Dxr depleted cells at two and three hours post induction of the protease"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "Gene expression comparison of DapB and Dxr depleted cells at two and three hours post induction of the protease"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "Gene expression comparison of DapB and Dxr depleted cells"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "rRNA was removed using 1/2 reagent of Ribozero G- bacterial kit (Illumina)"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "rRNA was removed using 1/2 reagent of Ribozero G- bacterial kit (Illumina)"}
+  },
+  "rules": [
+    {"field": "ch:strain", "regex": "DapB",
+     "set": {"perturbed_genes": {"v": "dapB", "b": "stated", "q": ""}}},
+    {"field": "ch:strain", "regex": "Dxr",
+     "set": {"perturbed_genes": {"v": "dxr", "b": "stated", "q": ""}}},
+    {"field": "ch:treatment", "regex": "^- anhydro",
+     "set": {"inducer_added": {"v": false, "b": "stated", "q": ""},
+             "is_control": {"v": true, "b": "stated", "q": ""}}},
+    {"field": "ch:treatment", "regex": "^\\+ anhydro",
+     "set": {"inducer_added": {"v": true, "b": "stated", "q": ""},
+             "is_control": {"v": false, "b": "stated", "q": ""}}}
+  ],
+  "samples": {
+    "GSM5743575": {"inducer_added": {"v": null, "b": "stated", "q": ""}, "is_control": {"v": null, "b": "stated", "q": ""}},
+    "GSM5743576": {"inducer_added": {"v": null, "b": "stated", "q": ""}, "is_control": {"v": null, "b": "stated", "q": ""}}
+  }
+}

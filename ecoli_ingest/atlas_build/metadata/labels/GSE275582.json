@@ -1,0 +1,121 @@
+{
+ "gse": "GSE275582",
+ "notes": "Void plasmid (pRM1 without MSI) = reference control; pRM1+ expresses mammalian Musashi-1. No inducer is mentioned (JS006 lacks araC and lacI), so inducer_added false by study default. Phase inferred from OD600 ~0.4 in LB. No shaking stated, so oxygen and culture_mode left out.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "grown in LB medium at 37 ºC"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "grown in LB medium at 37 ºC"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "grown in LB medium at 37 ºC"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown in LB medium at 37 ºC"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "to reach an OD600 around 0.4"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655 [delta]araC [delta]lacI KanS"
+  },
+  "strain_name": {
+   "v": "JS006",
+   "b": "stated",
+   "q": "E. coli JS006 cells"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "a vector encoding (or devoid of) MSI gene was transformed into JS006 strain"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "a vector encoding (or devoid of) MSI gene was transformed into JS006 strain"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "a vector encoding (or devoid of) MSI gene was transformed into JS006 strain"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "a vector encoding (or devoid of) MSI gene was transformed into JS006 strain"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was extracted from RNA-seq aliquots in TRIzol and ribosomal RNA (rRNA) was removed."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "ribosomal RNA (rRNA) was removed"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:plasmid",
+   "regex": "void",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:plasmid",
+   "regex": "MSI-1",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "MSI-1",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

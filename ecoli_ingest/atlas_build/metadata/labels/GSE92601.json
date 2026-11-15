@@ -1,0 +1,33 @@
+{
+  "gse": "GSE92601",
+  "notes": "All strains are DA4201 (ilvA- MG1655 derivative, the study's parent) with plasmids. Empty-vector pCA24N -gfp + IPTG is the study's stated control (is_control true, inducer true). Phage insert plasmids (pORF1, recoded Svi3-3) labelled heterologous_expression with and without IPTG. M9 glucose without stated isoleucine -> amino_acids_supplied false. Temperature and aeration not stated.",
+  "default": {
+    "base_medium": {"v": "M9", "b": "stated", "q": "20 mL M9 + 0.2% glucose with 5 μg/mL chloramphenicol"},
+    "medium_class": {"v": "defined_minimal", "b": "inferred", "q": "20 mL M9 + 0.2% glucose"},
+    "amino_acids_supplied": {"v": false, "b": "inferred", "q": "20 mL M9 + 0.2% glucose"},
+    "carbon_source": {"v": "glucose", "b": "stated", "q": "20 mL M9 + 0.2% glucose"},
+    "growth_phase": {"v": "mid_exponential", "b": "inferred", "q": "The cells were grown to OD 0.15-0.2"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "Escherichia coli str. K-12 substr. MG1655"},
+    "strain_name": {"v": "DA4201", "b": "stated", "q": "pCA24N,-gfp/DA4201"},
+    "treatment": {"v": "none", "b": "study_default", "q": "RNA-seq profiles of two plasmid constructs, inducible by IPTG, selected as providing metabolic rescue to E. coli ilvA-."},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "The experiment was performed in duplicates with and without IPTG induction for the insert-bearing plasmids."},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "The experiment was performed in duplicates with and without IPTG induction for the insert-bearing plasmids."},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "The RNA was shipped to BGI for total RNA sequencing."},
+    "global_regulator_perturbed": {"v": false, "b": "stated", "q": "RNA-seq profiles of two plasmid constructs, inducible by IPTG"},
+    "is_control": {"v": false, "b": "stated", "q": "A duplicate control experiment with empty plasmid in the same E. coli strain (with IPTG added) was also performed."},
+    "genotype_class": {"v": "heterologous_expression", "b": "stated", "q": "bacteriophage DNA that rescued an auxotrophic E. coli mutant"},
+    "inducer_added": {"v": false, "b": "stated", "q": "not induced"}
+  },
+  "rules": [
+    {"field": "ch:induction", "regex": "IPTG",
+     "set": {"inducer_added": {"v": true, "b": "stated", "q": ""}}},
+    {"field": "source_name", "regex": "pORF1",
+     "set": {"perturbed_genes": {"v": "ORF1", "b": "stated", "q": ""}}},
+    {"field": "source_name", "regex": "Svi3-3",
+     "set": {"perturbed_genes": {"v": "Svi3-3", "b": "stated", "q": ""}}},
+    {"field": "source_name", "regex": "pCA24N",
+     "set": {"genotype_class": {"v": "reference", "b": "stated", "q": "control experiment with empty plasmid in the same E. coli strain"},
+             "is_control": {"v": true, "b": "stated", "q": "A duplicate control experiment with empty plasmid in the same E. coli strain (with IPTG added) was also performed."}}}
+  ],
+  "samples": {}
+}

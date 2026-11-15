@@ -1,0 +1,68 @@
+{
+ "gse": "GSE262579",
+ "notes": "Three replicates of MG1655 expressing the Bil defense system from a plasmid with aTc; no phage infection described for these samples, no control in the candidate set. genotype_class heterologous_expression inferred (plasmid-borne defense system; source organism not named in the digest). Medium, temperature and aeration not given.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "E. coli expressing the Bil system under control of a tetracycline-inducible promoter was grown to mid-log phase with 25 ng/ml aTc as inducer."
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "E. coli expressing the Bil system under control of a tetracycline-inducible promoter was grown to mid-log phase with 25 ng/ml aTc as inducer."
+  },
+  "genotype_class": {
+   "v": "heterologous_expression",
+   "b": "inferred",
+   "q": "E. coli expressing the Bil system from a plasmid"
+  },
+  "perturbed_genes": {
+   "v": "Bil system",
+   "b": "stated",
+   "q": "E. coli expressing the Bil system from a plasmid"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "E. coli expressing the Bil system from a plasmid"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "E. coli expressing the Bil system under control of a tetracycline-inducible promoter was grown to mid-log phase with 25 ng/ml aTc as inducer."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Extracted RNA was depleted of ribosomal RNA using a commercial rRNA depletion kit for mixed bacterial samples (Lexogen, RiboCop META, #125)."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Extracted RNA was depleted of ribosomal RNA using a commercial rRNA depletion kit for mixed bacterial samples (Lexogen, RiboCop META, #125)."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli expressing the Bil system from a plasmid"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli expressing the Bil system from a plasmid"
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

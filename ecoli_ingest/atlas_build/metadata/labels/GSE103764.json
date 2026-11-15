@@ -1,0 +1,121 @@
+{
+ "gse": "GSE103764",
+ "notes": "EHEC TUV93-0 delta-cra complemented with plasmid wild-type Cra (reference/control) or Cra Y47D / Y47F point mutants. OD600 ~1 in M9 is above the inference range, so no phase. rRNA removal not stated. No inducer mentioned for the plasmids.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "diluted 1:100 in M9 with 0.4% glucose and grown aerobically at 37ºC to OD600 ~1."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "diluted 1:100 in M9 with 0.4% glucose and grown aerobically at 37ºC to OD600 ~1."
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "diluted 1:100 in M9 with 0.4% glucose and grown aerobically at 37ºC to OD600 ~1."
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "diluted 1:100 in M9 with 0.4% glucose and grown aerobically at 37ºC to OD600 ~1."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "diluted 1:100 in M9 with 0.4% glucose and grown aerobically at 37ºC to OD600 ~1."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "diluted 1:100 in M9 with 0.4% glucose and grown aerobically at 37ºC to OD600 ~1."
+  },
+  "strain_group": {
+   "v": "EHEC_STEC",
+   "b": "stated",
+   "q": "The EHEC EDL933 stx- strain TUV93-0"
+  },
+  "strain_name": {
+   "v": "TUV93-0",
+   "b": "stated",
+   "q": "The EHEC EDL933 stx- strain TUV93-0"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "RNA libraries were prepared for sequencing using standard Illumina protocols"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptomes were determined of biological duplicates of TUV93-0 ∆cra::FRT producing plasmid-encoded wild type Cra, non-phosphorylatable Cra Y47F and phosphomimetic Cra Y47D, which represent a total of six samples."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptomes were determined of biological duplicates of TUV93-0 ∆cra::FRT producing plasmid-encoded wild type Cra, non-phosphorylatable Cra Y47F and phosphomimetic Cra Y47D, which represent a total of six samples."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptomes were determined of biological duplicates of TUV93-0 ∆cra::FRT producing plasmid-encoded wild type Cra, non-phosphorylatable Cra Y47F and phosphomimetic Cra Y47D, which represent a total of six samples."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Transcriptomes were determined of biological duplicates of TUV93-0 ∆cra::FRT producing plasmid-encoded wild type Cra, non-phosphorylatable Cra Y47F and phosphomimetic Cra Y47D, which represent a total of six samples."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype/variation",
+   "regex": "wild type Cra",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "Y47",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "cra",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

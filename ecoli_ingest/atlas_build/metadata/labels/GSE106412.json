@@ -1,0 +1,111 @@
+{
+ "gse": "GSE106412",
+ "notes": "In vivo: LF82 from cecal content of mono-colonized germ-free mice (mixed_organism true, host RNA present). DSS colitis of the host labelled treatment host_factor (5 days -> adapted). Library prep used Ribo-zero and also a NEBNext poly(A) mRNA isolation step; rrna_removal set to depletion; the poly(A) step on bacterial RNA is odd but assay kept total_rnaseq.",
+ "default": {
+  "strain_group": {
+   "v": "AIEC",
+   "b": "stated",
+   "q": "GF mice were mono-colonized with AIEC LF82"
+  },
+  "strain_name": {
+   "v": "LF82",
+   "b": "stated",
+   "q": "GF mice were mono-colonized with AIEC LF82"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "study_default",
+   "q": "GF mice were mono-colonized with AIEC LF82"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "GF mice were mono-colonized with AIEC LF82"
+  },
+  "culture_mode": {
+   "v": "in_host",
+   "b": "stated",
+   "q": "Cecal content"
+  },
+  "growth_phase": {
+   "v": "not_applicable",
+   "b": "inferred",
+   "q": "Cecal content"
+  },
+  "base_medium": {
+   "v": "gut_content",
+   "b": "stated",
+   "q": "Cecal content"
+  },
+  "medium_class": {
+   "v": "natural_fluid",
+   "b": "inferred",
+   "q": "Cecal content"
+  },
+  "mixed_organism": {
+   "v": true,
+   "b": "inferred",
+   "q": "Cecal contents (100-300mg) from E. coli mono-colonized germ-free B6 mice"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was extracted"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "bacterial ribosomal RNA was depleted by Ribo-zero kit (illumina)"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "GF mice were mono-colonized with AIEC LF82 for 1 week. E. coli mono-colonized mice were then treated with 1.5% DSS for 5 days."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "GF mice were mono-colonized with AIEC LF82 for 1 week. E. coli mono-colonized mice were then treated with 1.5% DSS for 5 days."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:agent",
+   "regex": "^none$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:agent",
+   "regex": "^DSS$",
+   "set": {
+    "treatment": {
+     "v": "host_factor",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "stated",
+     "q": "treated with 1.5% DSS for 5 days"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

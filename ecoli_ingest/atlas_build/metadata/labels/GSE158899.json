@@ -1,0 +1,167 @@
+{
+ "gse": "GSE158899",
+ "notes": "O157 strain 9000 (wild type, control in each medium) and derivatives Z1615/Z1723/Z1767 with large chromosomal rearrangements isolated after bovine colonisation (evolved_isolate). OD600 0.7 -> no phase. Temperature, aeration, M9 carbon source not given. WT re-read: Strain 9000 wildtype, unmodified -> wild_type.",
+ "default": {
+  "strain_group": {
+   "v": "EHEC_STEC",
+   "b": "inferred",
+   "q": "Escherichia coli O157"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Gene expression differences between these strains was analysed when each was grown in either LB or M9 media."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Gene expression differences between these strains was analysed when each was grown in either LB or M9 media."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Gene expression differences between these strains was analysed when each was grown in either LB or M9 media."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Gene expression differences between these strains was analysed when each was grown in either LB or M9 media."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Gene expression differences between these strains was analysed when each was grown in either LB or M9 media."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribosomal RNA molecules were depleted using the Ribo-Zero rRNA Removal Kit for bacteria (Illumina)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA molecules were depleted using the Ribo-Zero rRNA Removal Kit for bacteria (Illumina)"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Gene expression differences between these strains was analysed when each was grown in either LB or M9 media."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "^9000$",
+   "set": {
+    "strain_name": {
+     "v": "9000",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^Z1615$",
+   "set": {
+    "strain_name": {
+     "v": "Z1615",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^Z1723$",
+   "set": {
+    "strain_name": {
+     "v": "Z1723",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^Z1767$",
+   "set": {
+    "strain_name": {
+     "v": "Z1767",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^Wildtype$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "relative to 9000",
+   "set": {
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:media",
+   "regex": "^LB$",
+   "set": {
+    "base_medium": {
+     "v": "LB",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "complex",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:media",
+   "regex": "^M9$",
+   "set": {
+    "base_medium": {
+     "v": "M9",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "defined_minimal",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,27 @@
+{
+  "gse": "GSE84769",
+  "notes": "E. coli ATCC 8739 labelled strain_group C (ATCC 8739 is the C strain; not stated in text). Harvest after 48 h in a 500 ml fermentation vessel -> late_stationary by the >24 h rule (inferred), although cells may still be producing. Oxygen left out: 250 rpm is given but the culture is in a fermentation vessel for succinate production, so aeration is unclear. 12% glucose = osmotic stress from transfer (48 h) -> hyperosmotic, adapted. Suc-T110 is the engineered parental strain -> reference.",
+  "default": {
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "Total RNA was isolated by the Trizol-Phenol-Chloroform method."},
+    "base_medium": {"v": "other_minimal", "b": "stated", "q": "NBS mineral salts medium"},
+    "medium_class": {"v": "defined_minimal", "b": "inferred", "q": "NBS mineral salts medium with 20 g liter-1 glucose"},
+    "amino_acids_supplied": {"v": false, "b": "inferred", "q": "NBS mineral salts medium with 20 g liter-1 glucose"},
+    "carbon_source": {"v": "glucose", "b": "stated", "q": "NBS mineral salts medium with either 5%w/v or 12%w/v glucose"},
+    "growth_temperature": {"v": 37, "b": "stated", "q": "grown at 37°C and 250 rpm for 48 h"},
+    "culture_mode": {"v": "batch_bioreactor", "b": "stated", "q": "transferred to a 500 ml fermentation vessel containing 250 ml NBS mineral salts medium"},
+    "growth_phase": {"v": "late_stationary", "b": "inferred", "q": "After 48 h, 1 ml culture was harvested by centrifugation"},
+    "strain_group": {"v": "C", "b": "inferred", "q": "Escherichia coli ATCC 8739"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "To understand how D654Y mutated RpoB affect gene expression under either normal or osmotic stress conditions in Escherichia coli"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "To understand how D654Y mutated RpoB affect gene expression under either normal or osmotic stress conditions in Escherichia coli"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "To understand how D654Y mutated RpoB affect gene expression under either normal or osmotic stress conditions in Escherichia coli"},
+    "is_control": {"v": false, "b": "stated", "q": "The parental strain Suc-T110 grown at normal condition (5%w/v glucose)"}
+  },
+  "rules": [
+    {"field": "ch:strain", "regex": "^NZ-502", "set": {"genotype_class": {"v": "point_mutation", "b": "stated", "q": ""}, "perturbed_genes": {"v": "rpoB", "b": "stated", "q": ""}, "global_regulator_perturbed": {"v": false, "b": "inferred", "q": ""}, "strain_name": {"v": "NZ-502", "b": "stated", "q": ""}}},
+    {"field": "ch:strain", "regex": "^Suc-T110", "set": {"genotype_class": {"v": "reference", "b": "stated", "q": ""}, "global_regulator_perturbed": {"v": false, "b": "stated", "q": ""}, "strain_name": {"v": "Suc-T110", "b": "stated", "q": ""}}},
+    {"field": "ch:growth condition", "regex": "^normal", "set": {"treatment": {"v": "none", "b": "stated", "q": ""}}},
+    {"field": "ch:growth condition", "regex": "^osmotic stress", "set": {"treatment": {"v": "hyperosmotic", "b": "stated", "q": ""}, "exposure": {"v": "adapted", "b": "inferred", "q": "with 12%w/v glucose, and grown at 37°C and 250 rpm for 48 h"}}},
+    {"field": "title", "regex": "^SucT110_5%Glu$", "set": {"is_control": {"v": true, "b": "stated", "q": "The parental strain Suc-T110 grown at normal condition (5%w/v glucose)"}}}
+  ],
+  "samples": {}
+}

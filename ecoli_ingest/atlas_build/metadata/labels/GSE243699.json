@@ -1,0 +1,142 @@
+{
+ "gse": "GSE243699",
+ "notes": "O104:H4 strain LB226692; strain_group EHEC_STEC chosen because the text calls the outbreak EHEC and the strain carries EHEC and EAEC factors (hybrid, could be EAEC). Vertis library: ultrasound fragmentation and gel size selection of the amplified cDNA, i.e. standard total RNA-seq. Wild type at each phase is a control.",
+ "default": {
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "cells were grown at 37oC, 180 rpm to log growth phase (OD600 of 0.4 - 0.5)"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "LB medium (10 g/L tryptone, 5 g/L yeast extract, 5 g/L NaCl)"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "LB medium (10 g/L tryptone, 5 g/L yeast extract, 5 g/L NaCl)"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "LB medium (10 g/L tryptone, 5 g/L yeast extract, 5 g/L NaCl)"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "cells were grown at 37oC, 180 rpm to log growth phase (OD600 of 0.4 - 0.5)"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "cells were grown at 37oC, 180 rpm to log growth phase (OD600 of 0.4 - 0.5)"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "total RNA isolated from E. coli O104:H4 wild type and rpoS ATG>ATA grown under standard laboratory conditions"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "total RNA isolated from E. coli O104:H4 wild type and rpoS ATG>ATA grown under standard laboratory conditions"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "total RNA isolated from E. coli O104:H4 wild type and rpoS ATG>ATA grown under standard laboratory conditions"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "total RNA isolated from E. coli O104:H4 wild type and rpoS ATG>ATA"
+  },
+  "strain_group": {
+   "v": "EHEC_STEC",
+   "b": "stated",
+   "q": "In 2011, in Germany, Escherichia coli O104:H4 caused the enterohemorrhagic E. coli (EHEC) outbreak"
+  },
+  "strain_name": {
+   "v": "O104:H4 LB226692",
+   "b": "stated",
+   "q": "strain LB226692"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "We performed strand specific RNA-seq with total RNA"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA were depleted and RNA was fragmented using ultra sound."
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "E. coli O104:H4 wild type and rpoS ATG>ATA"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "E. coli O104:H4 wild type and rpoS ATG>ATA"
+  },
+  "is_control": {
+   "v": true,
+   "b": "stated",
+   "q": "E. coli O104:H4 wild type and rpoS ATG>ATA"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "rpoS ATG>ATA",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rpoS",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:cell type",
+   "regex": "^log growth phase",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:cell type",
+   "regex": "^transition to stationary phase",
+   "set": {
+    "growth_phase": {
+     "v": "transition",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

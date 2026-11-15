@@ -1,0 +1,418 @@
+{
+ "gse": "GSE73672",
+ "notes": "25 single-gene knockouts of BW25113 vs wild type in two batches. Batch 1 (LB or M9 + 0.3% glucose, 12 h from a small inoculum) -> stationary inferred (>=12 h batch). Batch 2: protocol says harvested at late stationary phase but descriptions say grown for 8 h -> conflicting phase evidence, growth_phase left out; batch 2 temperature not stated. Glucose in LB counted as supplement; carbon_source left out for LB. Shaking/aeration not described. Wild type in each medium/batch is a control. WT re-read: parental BW25113 is wild_type.",
+ "default": {
+  "genotype_class": {
+   "v": "deletion",
+   "b": "stated",
+   "q": "Genome-wide expression profiling of 25 single-gene knockouts for BW25113"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "Genome-wide expression profiling of 25 single-gene knockouts for BW25113"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Genome-wide expression profiling of 25 single-gene knockouts for BW25113 and its wild-type"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Genome-wide expression profiling of 25 single-gene knockouts for BW25113 and its wild-type grown with either LB or M9 media supplemented with glucose"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Genome-wide expression profiling of 25 single-gene knockouts for BW25113 and its wild-type grown with either LB or M9 media supplemented with glucose"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Genome-wide expression profiling of 25 single-gene knockouts for BW25113 and its wild-type grown with either LB or M9 media supplemented with glucose"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Genome-wide expression profiling of 25 single-gene knockouts for BW25113 and its wild-type"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "BW25113"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was extracted from frozen cultures using RNeasy kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:media",
+   "regex": "^LB$",
+   "set": {
+    "base_medium": {
+     "v": "LB",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "complex",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:media",
+   "regex": "^M9$",
+   "set": {
+    "base_medium": {
+     "v": "M9",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "defined_minimal",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": "M9 media supplemented with glucose"
+    }
+   }
+  },
+  {
+   "field": "description",
+   "regex": "Batch 1",
+   "set": {
+    "growth_phase": {
+     "v": "stationary",
+     "b": "inferred",
+     "q": "grown for 12 h at 37°C. At 12 h, cells were harvested for the RNA-seq"
+    },
+    "growth_temperature": {
+     "v": 37,
+     "b": "stated",
+     "q": "grown for 12 h at 37°C"
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^cysG knockout$",
+   "set": {
+    "perturbed_genes": {
+     "v": "cysG",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^cysH knockout$",
+   "set": {
+    "perturbed_genes": {
+     "v": "cysH",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^dcd knockout$",
+   "set": {
+    "perturbed_genes": {
+     "v": "dcd",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^fadR knockout$",
+   "set": {
+    "perturbed_genes": {
+     "v": "fadR",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^ppk knockout$",
+   "set": {
+    "perturbed_genes": {
+     "v": "ppk",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^wzc knockout$",
+   "set": {
+    "perturbed_genes": {
+     "v": "wzc",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^yghD knockout$",
+   "set": {
+    "perturbed_genes": {
+     "v": "yghD",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^fepA knockout$",
+   "set": {
+    "perturbed_genes": {
+     "v": "fepA",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^lacA knockout$",
+   "set": {
+    "perturbed_genes": {
+     "v": "lacA",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^mgtA knockout$",
+   "set": {
+    "perturbed_genes": {
+     "v": "mgtA",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^gabT knockout$",
+   "set": {
+    "perturbed_genes": {
+     "v": "gabT",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^sdhC knockout$",
+   "set": {
+    "perturbed_genes": {
+     "v": "sdhC",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^putP knockout$",
+   "set": {
+    "perturbed_genes": {
+     "v": "putP",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^rfbA knockout$",
+   "set": {
+    "perturbed_genes": {
+     "v": "rfbA",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^entF knockout$",
+   "set": {
+    "perturbed_genes": {
+     "v": "entF",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^kefB knockout$",
+   "set": {
+    "perturbed_genes": {
+     "v": "kefB",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^cysA knockout$",
+   "set": {
+    "perturbed_genes": {
+     "v": "cysA",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^galE knockout$",
+   "set": {
+    "perturbed_genes": {
+     "v": "galE",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^mhpD knockout$",
+   "set": {
+    "perturbed_genes": {
+     "v": "mhpD",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^fliY knockout$",
+   "set": {
+    "perturbed_genes": {
+     "v": "fliY",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^lplA knockout$",
+   "set": {
+    "perturbed_genes": {
+     "v": "lplA",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^khc knockout$",
+   "set": {
+    "perturbed_genes": {
+     "v": "khc",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^ugpC knockout$",
+   "set": {
+    "perturbed_genes": {
+     "v": "ugpC",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^trpD knockout$",
+   "set": {
+    "perturbed_genes": {
+     "v": "trpD",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^aspC knockout$",
+   "set": {
+    "perturbed_genes": {
+     "v": "aspC",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,163 @@
+{
+ "gse": "GSE54900",
+ "notes": "Fe samples (0.1 mM FeCl2 from inoculation) treated as iron-replete medium (treatment none), WT+Fe as control; DPD (iron chelator, 2 h from early log) = metal_limitation, short. Unsure whether 0.1 mM Fe should instead be metal_excess/adapted.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "E. coli K-12 MG1655 WT and Δfur were grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "E. coli K-12 MG1655 WT and Δfur were grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose."
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "E. coli K-12 MG1655 WT and Δfur were grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose."
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "E. coli K-12 MG1655 WT and Δfur were grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "E. coli K-12 MG1655 WT and Δfur were grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose."
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "E. coli K-12 MG1655 WT and Δfur were grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "E. coli K-12 MG1655 WT and Δfur were grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E. coli K-12 MG1655 WT and Δfur were grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose."
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "E. coli K-12 MG1655 WT and Δfur were grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT and fur mutant cells were cultured in the presense and absence of iron with biological duplicates."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT and fur mutant cells were cultured in the presense and absence of iron with biological duplicates."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT and fur mutant cells were cultured in the presense and absence of iron with biological duplicates."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Total RNA was extracted using the RNeasy Plus Mini kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:agent",
+   "regex": "^Fe$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "inferred",
+     "q": "For iron treated cells, 0.1mM of FeCl2 were treated from the beginning of culture"
+    }
+   }
+  },
+  {
+   "field": "ch:agent",
+   "regex": "^DPD$",
+   "set": {
+    "treatment": {
+     "v": "metal_limitation",
+     "b": "stated",
+     "q": "DPD = iron chelator."
+    },
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": "0.2mM of DPD were added at early-log phase and continued to culture for additional 2h"
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "fur",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "fur",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {
+  "GSM1326347": {
+   "is_control": {
+    "v": true,
+    "b": "stated",
+    "q": "WT with Fe 1"
+   }
+  },
+  "GSM1326348": {
+   "is_control": {
+    "v": true,
+    "b": "stated",
+    "q": "WT with Fe 2"
+   }
+  }
+ }
+}

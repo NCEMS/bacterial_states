@@ -1,0 +1,131 @@
+{
+ "gse": "GSE271232",
+ "notes": "Plain WT vs rpoS deletion in M9 glucose; rRNA removal not stated.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "grown to mid-exponential phase (OD600 ≈ 0.6) aerobically at 37°C in 100ml of M9 minimal media supplemented with 0.2% glucose"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "grown to mid-exponential phase (OD600 ≈ 0.6) aerobically at 37°C in 100ml of M9 minimal media supplemented with 0.2% glucose"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "grown to mid-exponential phase (OD600 ≈ 0.6) aerobically at 37°C in 100ml of M9 minimal media supplemented with 0.2% glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "grown to mid-exponential phase (OD600 ≈ 0.6) aerobically at 37°C in 100ml of M9 minimal media supplemented with 0.2% glucose"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "grown to mid-exponential phase (OD600 ≈ 0.6) aerobically at 37°C in 100ml of M9 minimal media supplemented with 0.2% glucose"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "E. coli K-12 MG1655 cells and it derivates were grown to mid-exponential phage, cultured in M9 minimal 0.2% glucose with a biological replicate under 37°C with constant agitation."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown to mid-exponential phase (OD600 ≈ 0.6) aerobically at 37°C in 100ml of M9 minimal media supplemented with 0.2% glucose"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "grown to mid-exponential phase (OD600 ≈ 0.6) aerobically at 37°C in 100ml of M9 minimal media supplemented with 0.2% glucose"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "E. coli K-12 MG1655 cells and it derivates were grown to mid-exponential phage, cultured in M9 minimal 0.2% glucose with a biological replicate under 37°C with constant agitation."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli K-12 MG1655 cells and it derivates were grown to mid-exponential phage, cultured in M9 minimal 0.2% glucose with a biological replicate under 37°C with constant agitation."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli K-12 MG1655 cells and it derivates were grown to mid-exponential phage, cultured in M9 minimal 0.2% glucose with a biological replicate under 37°C with constant agitation."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli K-12 MG1655 cells and it derivates were grown to mid-exponential phage, cultured in M9 minimal 0.2% glucose with a biological replicate under 37°C with constant agitation."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was extracted using the RNeasy Plus Mini kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "Wild-type",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "rpoS deletion",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rpoS",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

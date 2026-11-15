@@ -1,0 +1,116 @@
+{
+ "gse": "GSE189154",
+ "notes": "Wild-type MG1655 only; the axis is aeration (aerobic vs microaerobic), which is an oxygen label, not a treatment, so treatment none and every sample is an untreated reference-genotype control (one per oxygen condition). Harvest density is given as OD460 0.5-0.6, not OD600, and no phase word, so growth_phase left out. Fermentor with sparging/stirring at 200 rpm -> batch_bioreactor. WT re-read: unmodified MG1655, so wild_type.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K12 MG1655"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "E. coli K-12 strain MG1655 was grown overnight"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "E. coli K-12 strain MG1655 was grown overnight"
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9 medium supplemented with 0.4% glucose and trace elements"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "M9 medium supplemented with 0.4% glucose and trace elements"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "M9 medium supplemented with 0.4% glucose and trace elements"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "M9 medium supplemented with 0.4% glucose and trace elements"
+  },
+  "culture_mode": {
+   "v": "batch_bioreactor",
+   "b": "stated",
+   "q": "in 1 L fermentation vessel chamber (Winpact Parallel Fermentation System FS-05-220)"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "All cultures were grown at 200 rpm, 37oC and maintained at pH 7.0"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "To compare the NGS-derived transcriptome profiles (RNA-seq data) of Escherichia coli under aerobic and microaerobic growth conditions"
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "To compare the NGS-derived transcriptome profiles (RNA-seq data) of Escherichia coli under aerobic and microaerobic growth conditions"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "To compare the NGS-derived transcriptome profiles (RNA-seq data) of Escherichia coli under aerobic and microaerobic growth conditions"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "To compare the NGS-derived transcriptome profiles (RNA-seq data) of Escherichia coli under aerobic and microaerobic growth conditions"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "To compare the NGS-derived transcriptome profiles (RNA-seq data) of Escherichia coli under aerobic and microaerobic growth conditions"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "followed by the Illumine total RNA stranded kit for the RNA fragmentation and cDNA library construction"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "The rRNA removal was performed in accordance with the manufacturer's Ribo-Zero™ Magnetic Kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:growth condition",
+   "regex": "^aerobic$",
+   "set": {
+    "oxygen": {
+     "v": "aerobic",
+     "b": "stated",
+     "q": "For aerobic culture condition, air is continuously pumped at 0.4 LPM (liters per min)."
+    }
+   }
+  },
+  {
+   "field": "ch:growth condition",
+   "regex": "^microaerobic$",
+   "set": {
+    "oxygen": {
+     "v": "microaerobic",
+     "b": "stated",
+     "q": "The chamber containing culture was completely sealed and the culture was grown under microaerobic conditions."
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

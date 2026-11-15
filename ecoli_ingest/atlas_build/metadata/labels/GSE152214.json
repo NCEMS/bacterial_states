@@ -1,0 +1,207 @@
+{
+ "gse": "GSE152214",
+ "notes": "Batch bioreactor (exponential) and glucose-limited chemostat arms; wild type in each is a control. Evolved Δcrp mutants: evolved_isolate with crp as the known perturbed gene. IG116-Δcrp: background strain IG116 not described; labelled as a crp deletion, strain_name IG116. Chemostat oxygen inferred from the 700 rpm bioreactor. WT re-read: wild-type MG1655 samples set to wild_type.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9+glucose+ 40mM MOPS"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "M9+glucose+ 40mM MOPS"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "M9+glucose+ 40mM MOPS"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "M9+glucose+ 40mM MOPS"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "M9+glucose+ 40mM MOPS at 37 degree"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "grown in a bioreactor under aerobic conditions"
+  },
+  "culture_mode": {
+   "v": "batch_bioreactor",
+   "b": "stated",
+   "q": "grown in a bioreactor under aerobic conditions"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "batch exponential phase"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RNA was extracted from two biological replicates of WT, Δcrp , five adaptively evolved mutants of Δcrp and IG116- Δcrp in the batch exponential phase grown in glucose minimal media conditions."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "enrichment for mRNA was done using the MicrobExpress Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "enrichment for mRNA was done using the MicrobExpress Kit"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA was extracted from two biological replicates of WT, Δcrp , five adaptively evolved mutants of Δcrp and IG116- Δcrp in the batch exponential phase grown in glucose minimal media conditions."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA was extracted from two biological replicates of WT, Δcrp , five adaptively evolved mutants of Δcrp and IG116- Δcrp in the batch exponential phase grown in glucose minimal media conditions."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA was extracted from two biological replicates of WT, Δcrp , five adaptively evolved mutants of Δcrp and IG116- Δcrp in the batch exponential phase grown in glucose minimal media conditions."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA was extracted from two biological replicates of WT, Δcrp , five adaptively evolved mutants of Δcrp and IG116- Δcrp in the batch exponential phase grown in glucose minimal media conditions."
+  },
+  "genotype_class": {
+   "v": "deletion",
+   "b": "stated",
+   "q": "Δcrp"
+  },
+  "perturbed_genes": {
+   "v": "crp",
+   "b": "stated",
+   "q": "Δcrp"
+  },
+  "global_regulator_perturbed": {
+   "v": true,
+   "b": "stated",
+   "q": "Δcrp"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^Wild type",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": null
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^EvoCrp",
+   "set": {
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "stated",
+     "q": "adaptively evolved mutants of Δcrp"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^IG116",
+   "set": {
+    "strain_name": {
+     "v": "IG116",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:culture/growth condition",
+   "regex": "^chemostat culture$",
+   "set": {
+    "culture_mode": {
+     "v": "chemostat",
+     "b": "stated",
+     "q": ""
+    },
+    "growth_phase": {
+     "v": "not_applicable",
+     "b": "inferred",
+     "q": ""
+    },
+    "treatment": {
+     "v": "nutrient_limited_growth",
+     "b": "stated",
+     "q": "glucose -limited chemostat"
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "after 3-5 residence times in steady state"
+    },
+    "oxygen": {
+     "v": "aerobic",
+     "b": "inferred",
+     "q": "grown in a bioreactor under glucose-limited chemostat condition and batch condition with M9+glucose+ 40mM MOPS at 37 degree Celcius and 700 rpm"
+    },
+    "growth_temperature": {
+     "v": 37,
+     "b": "stated",
+     "q": "M9+glucose+ 40mM MOPS at 37 degree Celcius"
+    }
+   }
+  },
+  {
+   "field": "ch:culture/growth condition",
+   "regex": "^batch exponential phase$",
+   "set": {
+    "oxygen": {
+     "v": "aerobic",
+     "b": "inferred",
+     "q": "grown in a bioreactor under glucose-limited chemostat condition and batch condition with M9+glucose+ 40mM MOPS at 37 degree Celcius and 700 rpm"
+    },
+    "culture_mode": {
+     "v": "batch_bioreactor",
+     "b": "stated",
+     "q": "grown in a bioreactor under glucose-limited chemostat condition and batch condition"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

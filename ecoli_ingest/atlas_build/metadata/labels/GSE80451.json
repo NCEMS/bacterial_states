@@ -1,0 +1,21 @@
+{
+  "gse": "GSE80451",
+  "notes": "Single strain REL4536, aerobic (9 h) vs anaerobic (16 h) in DM25; no treatment, so every sample is an untreated control of its oxygen condition. DM25 composition is not given in the text, so base_medium/medium_class/carbon_source/amino_acids left out. genotype_class and strain_group not stated (REL4536 not described), left out. Stationary phase stated for all. Anaerobic oxygen class set anaerobic_fermentation as inferred (no electron acceptor mentioned; unsure). rRNA removal not described.",
+  "default": {
+    "strain_name": {"v": "REL4536", "b": "stated", "q": "REL4536"},
+    "growth_phase": {"v": "stationary", "b": "stated", "q": "Stationary phase"},
+    "growth_temperature": {"v": 37, "b": "stated", "q": "incubated at 37°C with an orbital shaking of 150 RPM"},
+    "culture_mode": {"v": "batch_shaken", "b": "stated", "q": "incubated at 37°C with an orbital shaking of 150 RPM"},
+    "treatment": {"v": "none", "b": "study_default", "q": "Transcriptional profiling of 3 aerobically grown cultures of  E. coli REL4536 and 2 anaerobically grown cultures E. coli REL4536."},
+    "is_control": {"v": true, "b": "study_default", "q": "Transcriptional profiling of 3 aerobically grown cultures of  E. coli REL4536 and 2 anaerobically grown cultures E. coli REL4536."},
+    "inducer_added": {"v": false, "b": "study_default", "q": "Transcriptional profiling of 3 aerobically grown cultures of  E. coli REL4536 and 2 anaerobically grown cultures E. coli REL4536."},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "Transcriptional profiling of 3 aerobically grown cultures of  E. coli REL4536 and 2 anaerobically grown cultures E. coli REL4536."},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "Transcriptional profiling of 3 aerobically grown cultures of  E. coli REL4536 and 2 anaerobically grown cultures E. coli REL4536."},
+    "assay_class": {"v": "total_rnaseq", "b": "study_default", "q": "RNA libraries were prepared for sequencing using standard Illumina protocols"}
+  },
+  "rules": [
+    {"field": "ch:growth environment", "regex": "^Aerobic$", "set": {"oxygen": {"v": "aerobic", "b": "stated", "q": ""}}},
+    {"field": "ch:growth environment", "regex": "^Anaerobic$", "set": {"oxygen": {"v": "anaerobic_fermentation", "b": "inferred", "q": "Aerobic and anaerobic cultures were grown in 600 mL aliquots of DM25"}}}
+  ],
+  "samples": {}
+}

@@ -1,0 +1,25 @@
+{
+  "gse": "GSE222589",
+  "notes": "O104:H4 C227/11 phi-cu incubated in alluvial loam soil for 0, 1, 4 weeks; time 0 (sampled immediately after inoculation) is the comparison baseline -> control. Weeks 1 and 4 labelled medium_or_oxygen_shift (adapted). Strain described as EHEC/EAEC hybrid; EHEC_STEC chosen (title of summary says enterohemorrhagic), EAEC equally plausible. Soil sterility not stated, so mixed_organism left out; no culture_mode, phase, temperature or medium_class fits soil.",
+  "default": {
+    "base_medium": {"v": "other", "b": "stated", "q": "The strain was incubated in alluvial loam (AL) for up to 4 weeks"},
+    "genotype_class": {"v": "reference", "b": "study_default", "q": "The strain was incubated in alluvial loam (AL) for up to 4 weeks"},
+    "global_regulator_perturbed": {"v": false, "b": "study_default", "q": "The strain was incubated in alluvial loam (AL) for up to 4 weeks"},
+    "strain_group": {"v": "EHEC_STEC", "b": "stated", "q": "enterohemorrhagic/enteroaggregative E. coli (EHEC/EAEC) O104:H4 strain C227/11Φcu"},
+    "strain_name": {"v": "C227/11Φcu (O104:H4)", "b": "stated", "q": "O104:H4 strain C227/11Φcu"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "Comparative gene expression profiling analysis of RNA-seq data as a time series with  biological replicates"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "Comparative gene expression profiling analysis of RNA-seq data as a time series with  biological replicates"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "A total of 1 µg of total RNA was subjected to rRNA depletion using Ribo-Zero rRNA Removal Kit Bacteria (Illumina)"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "A total of 1 µg of total RNA was subjected to rRNA depletion using Ribo-Zero rRNA Removal Kit Bacteria (Illumina)"}
+  },
+  "rules": [
+    {"field": "ch:time", "regex": "^0 weeks", "set": {
+      "treatment": {"v": "none", "b": "inferred", "q": "samples taken immediately after inoculation (time point 0)"},
+      "is_control": {"v": true, "b": "stated", "q": "values obtained at weeks 1 and 4 were compared to those of time point 0"}}},
+    {"field": "ch:time", "regex": "^(1 week|4 weeks)", "set": {
+      "treatment": {"v": "medium_or_oxygen_shift", "b": "inferred", "q": "The strain was incubated in alluvial loam (AL) for up to 4 weeks"},
+      "exposure": {"v": "adapted", "b": "stated", "q": ""},
+      "is_control": {"v": false, "b": "stated", "q": "values obtained at weeks 1 and 4 were compared to those of time point 0"}}}
+  ],
+  "samples": {}
+}

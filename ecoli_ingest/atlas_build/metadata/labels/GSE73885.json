@@ -1,0 +1,155 @@
+{
+ "gse": "GSE73885",
+ "notes": "Four wild-type EPEC prototype strains in LB vs DMEM (DMEM = virulence-inducing medium, a medium property, treatment none). No control condition is named, so is_control left out. DMEM without serum -> cell_culture / defined_rich, amino acids true (inferred). OD 0.5 -> mid_exponential (inferred) in both media; DMEM is neither complex nor minimal but 0.5 is inside both ranges. Carbon source not stated.",
+ "default": {
+  "strain_group": {
+   "v": "EPEC",
+   "b": "stated",
+   "q": "The EPEC strains were grown overnight"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "inoculated 1:100 into 250 ml of fresh LB or DMEM and were incubated with shaking (225 rpm) at 37˚C to a final optical density (OD600) of approximately 0.5"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "inoculated 1:100 into 250 ml of fresh LB or DMEM and were incubated with shaking (225 rpm) at 37˚C to a final optical density (OD600) of approximately 0.5"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "inoculated 1:100 into 250 ml of fresh LB or DMEM and were incubated with shaking (225 rpm) at 37˚C to a final optical density (OD600) of approximately 0.5"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "inoculated 1:100 into 250 ml of fresh LB or DMEM and were incubated with shaking (225 rpm) at 37˚C to a final optical density (OD600) of approximately 0.5"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "RNA sequencing was performed on the four EPEC prototype strains"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA sequencing was performed on the four EPEC prototype strains"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "during growth in laboratory media and conditions that have been previously demonstrated to induce expression of EPEC virulence factors"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA sequencing was performed on the four EPEC prototype strains during growth in laboratory media"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA sequencing was performed on the four EPEC prototype strains during growth in laboratory media"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA sequencing was performed on the four EPEC prototype strains during growth in laboratory media"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "RNA libraries were prepared for sequencing using standard Illumina protocols"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "_LB_",
+   "set": {
+    "base_medium": {
+     "v": "LB",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "complex",
+     "b": "inferred",
+     "q": "fresh LB or DMEM"
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": "fresh LB or DMEM"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "_DMEM_",
+   "set": {
+    "base_medium": {
+     "v": "cell_culture",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "defined_rich",
+     "b": "inferred",
+     "q": "fresh LB or DMEM"
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": "fresh LB or DMEM"
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^E2348/69$",
+   "set": {
+    "strain_name": {
+     "v": "E2348/69",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^B171$",
+   "set": {
+    "strain_name": {
+     "v": "B171",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^C581_05$",
+   "set": {
+    "strain_name": {
+     "v": "C581_05",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^E110019$",
+   "set": {
+    "strain_name": {
+     "v": "E110019",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

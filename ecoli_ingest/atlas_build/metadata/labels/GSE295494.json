@@ -1,0 +1,161 @@
+{
+ "gse": "GSE295494",
+ "notes": "CONFLICT: GSM8951373 title 'cipro_t0_rep1' but ch:treatment 'Exposure to 1/4X MIC ampicillin'; treatment and is_control left out for it. t0 samples (taken as the drug was added) treated as the untreated baseline (treatment none, control). 'cipro_vayr' samples (GSM8951385-90, and GSM8951384) were 'Processed with testing kit different'; 'vayr' is not explained, so the vayr t0 samples get no is_control. Treatment starts at OD600 0.5 in MHB-CA -> mid_exponential inferred for the whole 0-30 min course (acute). Temperature during exposure not stated (heat block), left out. Stirred tubes taken as agitated/aerobic. WT re-read: unmodified MG1655, genotype_class wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "Mueller-Hinton",
+   "b": "stated",
+   "q": "a fresh culture in MHB-CA was prepared at an initial OD₆₀₀ of 0.05"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "a fresh culture in MHB-CA was prepared"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "a fresh culture in MHB-CA was prepared"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "cultures were aliquoted into plastic tubes (16 mL per tube) containing stir bars and placed on a 24-well magnetic heat block"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "cultures were aliquoted into plastic tubes (16 mL per tube) containing stir bars"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "Once the OD₆₀₀ reached 0.5, cultures were aliquoted"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "WT"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "WT"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K-12 substr. MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiling of E. coli MG1655 in the first 30 minutes after exposure to ampicillin and ciprofloxacin"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiling of E. coli MG1655 in the first 30 minutes after exposure to ampicillin and ciprofloxacin"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiling of E. coli MG1655 in the first 30 minutes after exposure to ampicillin and ciprofloxacin"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "the resulting rRNA-depleted RNA was used to make RNA-Seq libraries"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "One microgram of total RNA underwent ribosomal RNA removal using RiboRid"
+  },
+  "exposure": {
+   "v": "acute",
+   "b": "inferred",
+   "q": "Samples were collected in duplicate at 0, 1.5, 3.5, 7.5, 15, and 30 minutes post-exposure"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiling of E. coli MG1655 in the first 30 minutes after exposure to ampicillin and ciprofloxacin"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^amp_",
+   "set": {
+    "treatment": {
+     "v": "abx_cell_wall",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^cipro_",
+   "set": {
+    "treatment": {
+     "v": "abx_dna_gyrase",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "_t0_rep",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "inferred",
+     "q": "Samples were collected in duplicate at 0, 1.5, 3.5, 7.5, 15, and 30 minutes post-exposure"
+    },
+    "exposure": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": "Samples were collected in duplicate at 0, 1.5, 3.5, 7.5, 15, and 30 minutes post-exposure"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^cipro_vayr_t0_",
+   "set": {
+    "is_control": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {
+  "GSM8951373": {
+   "treatment": {
+    "v": null,
+    "b": "stated",
+    "q": ""
+   },
+   "is_control": {
+    "v": null,
+    "b": "stated",
+    "q": ""
+   }
+  }
+ }
+}

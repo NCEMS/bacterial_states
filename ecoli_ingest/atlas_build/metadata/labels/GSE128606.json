@@ -1,0 +1,139 @@
+{
+ "gse": "GSE128606",
+ "notes": "WT and RNAP mutant (rpoZ delta2-5, rpoC 5 point mutations) both carrying Ptac-relA', before and 15 min after IPTG induction of RelA' (ppGpp). Induction coded as inducer_added (genetic construct), treatment none; one could argue for amino_acid_starvation-like stringent response but no nutrient was removed. WT carrying the uninduced construct = reference/control. RNAP genotype coded point_mutation (rpoZ change is a 4-codon in-frame deletion). ERCC synthetic spike-in is not another organism. Temperature/shaking not stated.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9GAV + 0.2 mM nucleobases"
+  },
+  "medium_class": {
+   "v": "defined_rich",
+   "b": "inferred",
+   "q": "0.015% each of all 16 other natural amino acids"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "0.015% each of all 16 other natural amino acids"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "E. coli was grown to OD 0.2 before treatment or harvest in M9GAV + nucleobases (1x M9 salts, 0.4% glucose"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "exponential phase"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RNA sequencing experiments from wild-type and RNAP1-2- cells before and 15 minutes after induction of RelA' to produce ppGpp."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA sequencing experiments from wild-type and RNAP1-2- cells before and 15 minutes after induction of RelA' to produce ppGpp."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA sequencing experiments from wild-type and RNAP1-2- cells before and 15 minutes after induction of RelA' to produce ppGpp."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli K12 liquid culture"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "rRNAs were removed using the Ribo-Zero Kit for Gram-negative bacteria (Illumina)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNAs were removed using the Ribo-Zero Kit for Gram-negative bacteria (Illumina)"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA sequencing experiments from wild-type and RNAP1-2- cells before and 15 minutes after induction of RelA' to produce ppGpp."
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^WT_",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^RNAP_",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": "rpoZ<delta>2-5-kanR rpoC R362A R417A K615A N680A K681A-tetAR"
+    },
+    "perturbed_genes": {
+     "v": "rpoC;rpoZ",
+     "b": "stated",
+     "q": "rpoZ<delta>2-5-kanR rpoC R362A R417A K615A N680A K681A-tetAR"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": "rpoZ<delta>2-5-kanR rpoC R362A R417A K615A N680A K681A-tetAR"
+    }
+   }
+  },
+  {
+   "field": "ch:growth treatment",
+   "regex": "^--$",
+   "set": {
+    "inducer_added": {
+     "v": false,
+     "b": "stated",
+     "q": "RNA sequencing experiments from wild-type and RNAP1-2- cells before and 15 minutes after induction of RelA' to produce ppGpp."
+    }
+   }
+  },
+  {
+   "field": "ch:growth treatment",
+   "regex": "IPTG",
+   "set": {
+    "inducer_added": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^WT_0$",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "RNA sequencing experiments from wild-type and RNAP1-2- cells before and 15 minutes after induction of RelA' to produce ppGpp."
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

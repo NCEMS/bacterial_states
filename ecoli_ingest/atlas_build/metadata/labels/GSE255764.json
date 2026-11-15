@@ -1,0 +1,132 @@
+{
+ "gse": "GSE255764",
+ "notes": "All samples carry p0SD-tisB (native_overexpression of tisB); is_control left out because no reference-genotype sample exists (0 min uninduced is the baseline but carries the toxin plasmid). Recovery samples: arabinose washed out and cells resuspended in fresh LB; inducer_added kept true (they were induced), treatment left out (wash/resuspension could count as a medium shift). rec2h is 150 min after induction start, so no phase; rec1h keeps mid_exponential (90 min). rRNA removal not stated.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Cells were grown in LB medium at 37°C and shaking at 180 rpm."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Cells were grown in LB medium at 37°C"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Cells were grown in LB medium at 37°C"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Cells were grown in LB medium at 37°C"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "shaking at 180 rpm"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "shaking at 180 rpm"
+  },
+  "genotype_class": {
+   "v": "native_overexpression",
+   "b": "stated",
+   "q": "Wild type MG1655, harboring the p0SD-tisB plasmid"
+  },
+  "perturbed_genes": {
+   "v": "tisB",
+   "b": "stated",
+   "q": "Wild type MG1655, harboring the p0SD-tisB plasmid"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "p0SD-tisB plasmid"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12 F-lambda-"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "was treated with L-ara for tisB induction during exponential phase for 30 min"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "transcriptome analysis of MG1655 p0SD-tisB was performed"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "all RNA samples were first fragmented using ultrasound"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "tisB was induced with L-arabinose (0.2%) for 30 min"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:time",
+   "regex": "^0 min$",
+   "set": {
+    "inducer_added": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "RNA samples of biological triplicates were extracted before (exp)"
+    },
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": "treated with L-ara for tisB induction during exponential phase"
+    }
+   }
+  },
+  {
+   "field": "ch:time",
+   "regex": "^30 min$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "study_default",
+     "q": "was treated with L-ara for tisB induction"
+    },
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": "treated with L-ara for tisB induction during exponential phase for 30 min"
+    }
+   }
+  },
+  {
+   "field": "ch:time",
+   "regex": "^30 min \\+ 60 min$",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": "treated with L-ara for tisB induction during exponential phase for 30 min"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

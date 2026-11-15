@@ -1,0 +1,19 @@
+{
+  "gse": "GSE141018",
+  "notes": "Bulk control libraries of a single-cell (PETRI-seq) study; three are from fixed cells, one standard. Medium, temperature and aeration are not given ('fresh media'). Cells carry RFP or GFP, but the text does not say how (plasmid, induced or not), so genotype_class, inducer_added and is_control left out. Strain MG1655 is named only for the species-mixing experiment in the summary (study_default). rRNA removal not described. GSM4192510 mixes two E. coli populations (both exponential), not two species. assay_class total_rnaseq is a study_default: bulk libraries from lysed (partly fixed) cells, Nextera tagmentation of cDNA.",
+  "default": {
+    "strain_group": {"v": "K-12", "b": "study_default", "q": "species-mixing experiment with E. coli (MG1655) and S. aureus (USA300)"},
+    "strain_name": {"v": "MG1655", "b": "study_default", "q": "species-mixing experiment with E. coli (MG1655) and S. aureus (USA300)"},
+    "treatment": {"v": "none", "b": "study_default", "q": "Cells were diluted 1:100 or 1:50 into fresh media from an overnight culture and grown 2 hours (exponential) or 5 hours (stationary)"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "Cells were diluted 1:100 or 1:50 into fresh media from an overnight culture and grown 2 hours (exponential) or 5 hours (stationary)"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "Ten bulk libraries were prepared, including nine E. coli libraries and one S. aureus library."},
+    "assay_class": {"v": "total_rnaseq", "b": "study_default", "q": "Bulk libraries were prepared from fixed cells after lysis with detergent and proteinase K Double-stranded cDNA was made by second strand synthesis."}
+  },
+  "rules": [
+    {"field": "ch:growth stage", "regex": "^Expon",
+     "set": {"growth_phase": {"v": "mid_exponential", "b": "stated", "q": ""}}},
+    {"field": "ch:growth stage", "regex": "^Stationary$",
+     "set": {"growth_phase": {"v": "stationary", "b": "stated", "q": ""}}}
+  ],
+  "samples": {}
+}

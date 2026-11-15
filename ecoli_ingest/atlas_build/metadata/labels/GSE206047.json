@@ -1,0 +1,363 @@
+{
+ "gse": "GSE206047",
+ "notes": "Reviewed 2026-11-15: MG1655_WT is wild_type; the plasmid backbone strain stays reference. | Reviewed 2026-11-15: landing-pads strain is a control (user decision) | Medium, culture and construct details from the NAND-circuit preprint (doi:10.1101/2023.06.29.547078), which deposits its data as GSE206047: M9 salts + 0.2% casamino acids + 0.4% glucose, 96-well plates, 37 C, 1000 rpm, timepoints are hours post-induction. Strain names are given without the MG1655_ prefix. The landing-pads strain (four constitutively expressed heterologous genes and landing pads, per the preprint) expresses tetR, lacI, araC, luxR (heterologous_expression; is_control left open pending the user's call); pBADmin/pTACmin add a yfp reporter. | Paper: Garcia et al. 2022, Synthetic Biology 7(1):ysac012 (PMID 36035514, PMC9408027) describes 5 h / 8 h / 18 h as log phase / transition / stationary; 8 h set to transition. The paper does not name the medium. | User decision 2026-11-15: 18 h samples are stationary and 5 h samples exponential (inferred from the timepoint); 6.5 h and 8 h stay without a phase. | Reviewed 2026-11-15: labels from the submitters' GEO supplementary sheet GSE206047_metadata.csv.gz (fields sup:*; every sample matched by its sample.ginkgo id). Wild type, empty landing pads and the pJS007 backbone are reference genotype and controls (induced or not, per the control rule); the IcaR/PhlF plasmids, gates and NAND circuit are heterologous expression. pBADmin and pTACmin are left without genotype/control: the sheet does not say what they carry. Medium is not given anywhere; growth_phase left out (timepoints 5-18 h have no stated reference, no OD). | Ginkgo inducer screen, 1077 E. coli MG1655 samples. Per-sample text is only an opaque title and a timepoint (5, 6.5, 8, 18 h); which samples are induced, which inducer, the medium, culture mode and genotype are not given, so inducer_added, treatment, is_control, genotype_class and medium labels are left out. growth_phase left out: the timepoint reference (inoculation or induction) and the medium are unknown. molecule says polyA RNA but the protocol is KAPA rRNA depletion of total RNA -> total_rnaseq, depletion.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "growth_temperature": {
+   "v": 37.0,
+   "b": "stated",
+   "q": "37.0 celsius"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "KAPA RNA Hyperprep kit (Roche) was used for ribosomal RNA depletion and Illumina compatible library preparation."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "KAPA RNA Hyperprep kit (Roche) was used for ribosomal RNA depletion"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "there are non-induced controls for each organism"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptional Response to Inducers for E. coli and B. subtilis"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "1,344 samples were collected in quadruplicate, and there are non-induced controls for each organism."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "1,344 samples were collected in quadruplicate, and there are non-induced controls for each organism."
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9 salts, 0.2% casamino acids, 0.4% glucose (methods of bioRxiv doi:10.1101/2023.06.29.547078)"
+  },
+  "medium_class": {
+   "v": "minimal_plus_hydrolysate",
+   "b": "stated",
+   "q": "M9 salts, 0.2% casamino acids, 0.4% glucose (methods of bioRxiv doi:10.1101/2023.06.29.547078)"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "stated",
+   "q": "M9 salts, 0.2% casamino acids, 0.4% glucose (methods of bioRxiv doi:10.1101/2023.06.29.547078)"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "M9 salts, 0.2% casamino acids, 0.4% glucose (methods of bioRxiv doi:10.1101/2023.06.29.547078)"
+  },
+  "culture_mode": {
+   "v": "batch_microplate",
+   "b": "stated",
+   "q": "96-well plates, 37 C, 1000 rpm; timepoint_h is hours after induction, following dilution to OD 0.05 (same preprint)"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "96-well plates, 37 C, 1000 rpm; timepoint_h is hours after induction, following dilution to OD 0.05 (same preprint)"
+  }
+ },
+ "rules": [
+  {
+   "field": "sup:strain",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "sup:strain",
+   "regex": "^pJS007_LALT__backbone$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "sup:strain",
+   "regex": "^pJS007_LALT__I1__IcaRA$",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "inferred",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "icaR",
+     "b": "inferred",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "sup:strain",
+   "regex": "^IcaR_Gate$",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "inferred",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "icaR",
+     "b": "inferred",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "sup:strain",
+   "regex": "^pJS007_LALT__P3__PhlF$",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "inferred",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "phlF",
+     "b": "inferred",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "sup:strain",
+   "regex": "^PhlF_Gate$",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "inferred",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "phlF",
+     "b": "inferred",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "sup:strain",
+   "regex": "^NAND_Circuit$",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "inferred",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "icaR;phlF",
+     "b": "inferred",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "sup:arabinose",
+   "regex": "mM$",
+   "set": {
+    "inducer_added": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "sup:IPTG",
+   "regex": "mM$",
+   "set": {
+    "inducer_added": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "sup:timepoint_h",
+   "regex": "^18$",
+   "set": {
+    "growth_phase": {
+     "v": "stationary",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "sup:timepoint_h",
+   "regex": "^5$",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "sup:timepoint_h",
+   "regex": "^8$",
+   "set": {
+    "growth_phase": {
+     "v": "transition",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "sup:strain",
+   "regex": "^empty_landing_pads$",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "tetR;lacI;araC;luxR",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "sup:strain",
+   "regex": "^p(BAD|TAC)min$",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "tetR;lacI;araC;luxR;yfp",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

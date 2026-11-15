@@ -1,0 +1,211 @@
+{
+ "gse": "GSE58285",
+ "notes": "Medium not given (no medium labels, no phase from OD 0.6). Samples 3-4 (BW25113 T170V 0/10 min) are RNA incubated in vitro with RNase E -> assay_class other. rne pair (N3433/N3431) both shifted to 44 C for 45 min (heat, short); is_control left out for the rne wild-type since it is heat-treated. rng mutant genotype class not given. N3433/N3431/GM11 strain groups not stated.",
+ "default": {
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "All cultures grown up to 0.6 OD600 with shaking at 200 rpm."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "All cultures grown up to 0.6 OD600 with shaking at 200 rpm."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiles were compared between a temperature-sensitive mutant of rne and its congenic wild-type incubated at a non-permissive temperature."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiles were compared between a temperature-sensitive mutant of rne and its congenic wild-type incubated at a non-permissive temperature."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiles were compared between a temperature-sensitive mutant of rne and its congenic wild-type incubated at a non-permissive temperature."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was isolated as desribed in Kime et al., 2008"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:analysis",
+   "regex": "in vitro",
+   "set": {
+    "assay_class": {
+     "v": "other",
+     "b": "stated",
+     "q": "RNA seq profiles were also compared between samples before and after incubation with a 5'-sensing mutant of RNase E in vitro."
+    },
+    "growth_temperature": {
+     "v": 37,
+     "b": "stated",
+     "q": "samples 3 and 4 were grown at 37°C"
+    },
+    "strain_group": {
+     "v": "K-12",
+     "b": "stated",
+     "q": "BW25113"
+    },
+    "strain_name": {
+     "v": "BW25113",
+     "b": "stated",
+     "q": "BW25113"
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^N343[13]$",
+   "set": {
+    "growth_temperature": {
+     "v": 44,
+     "b": "stated",
+     "q": "Cultures for samples 1 and 2 were incubated at 44°C for 45 min after growth."
+    },
+    "treatment": {
+     "v": "heat",
+     "b": "stated",
+     "q": "Cultures for samples 1 and 2 were incubated at 44°C for 45 min after growth."
+    },
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": "Cultures for samples 1 and 2 were incubated at 44°C for 45 min after growth."
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^(MC1061|GM11)$",
+   "set": {
+    "growth_temperature": {
+     "v": 30,
+     "b": "stated",
+     "q": "Samples 1,2,5 and 6 were grown at 30°C"
+    },
+    "treatment": {
+     "v": "none",
+     "b": "study_default",
+     "q": "Cultures for samples 1 and 2 were incubated at 44°C for 45 min after growth."
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^rne wild-type$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "N3433",
+     "b": "stated",
+     "q": "N3433"
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^rne-3071",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": "rne-3071 (ts)"
+    },
+    "perturbed_genes": {
+     "v": "rne",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "N3431",
+     "b": "stated",
+     "q": "N3431"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^rng wild-type$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MC1061",
+     "b": "stated",
+     "q": "MC1061"
+    },
+    "strain_group": {
+     "v": "K-12",
+     "b": "inferred",
+     "q": "MC1061"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^rng mutant$",
+   "set": {
+    "perturbed_genes": {
+     "v": "rng",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "GM11",
+     "b": "stated",
+     "q": "GM11"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

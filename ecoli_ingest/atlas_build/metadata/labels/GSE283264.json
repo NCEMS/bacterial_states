@@ -1,0 +1,204 @@
+{
+ "gse": "GSE283264",
+ "notes": "RNA-seq arm only: WT, hns, stpA, hns stpA deletions and WT + 200 ug/mL netropsin (30 min after OD 0.4). OD ~0.6 in LB -> mid_exponential inferred; netropsin samples keep the pre-treatment phase (OD 0.4, 30 min). Netropsin (DNA minor-groove binder) as other_chemical.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "grown in Luria-Bertani broth at 37 °C and 200 rpm"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "grown in Luria-Bertani broth at 37 °C and 200 rpm"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "grown in Luria-Bertani broth at 37 °C and 200 rpm"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown in Luria-Bertani broth at 37 °C and 200 rpm"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "grown in Luria-Bertani broth at 37 °C and 200 rpm"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "grown in Luria-Bertani broth at 37 °C and 200 rpm"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "until reaching an OD600 of ~ 0.6"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E. coli K-12 MG1655 strain"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "E. coli K-12 MG1655 strain"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "different knockout strains (deltaHNS, deltaStpA, deltaHNSdeltaStpA, deltaFis, deltaMukBEF)"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "different knockout strains (deltaHNS, deltaStpA, deltaHNSdeltaStpA, deltaFis, deltaMukBEF)"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "different knockout strains (deltaHNS, deltaStpA, deltaHNSdeltaStpA, deltaFis, deltaMukBEF)"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribosomal RNA was removed from 200 ng of the starting material using the NEBNext rRNA depletion kit (bacteria)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "NEBNext rRNA depletion kit (bacteria)"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "We analyzed wild-type E. coli cells, cells subjected to heat shock, cells treated with different antibiotics and drugs"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "different knockout strains (deltaHNS, deltaStpA, deltaHNSdeltaStpA, deltaFis, deltaMukBEF)"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^WT_RNASeq",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^deltaHNS_RNASeq",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "hns",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^deltaStpAdeltaHNS_RNASeq",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "hns;stpA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^deltaStpA_RNASeq",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "stpA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^WT_Netro200",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": "netropsin"
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "inferred",
+     "q": "followed by the addition of netropsin to a final concentration of 20 or 200 µg/mL and incubation for 30 min"
+    },
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": "For netropsin treatment, cells were grown to an OD600 ~ 0.4"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

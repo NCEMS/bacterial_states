@@ -1,0 +1,242 @@
+{
+ "gse": "GSE144604",
+ "notes": "Phase given as 'mid to late exponential phase (OD600 0.6-1.0)' before the 1 h antibiotic exposure: ambiguous between mid and late, growth_phase left empty. Combined samples: treatment = antibiotic;biocide (antibiotic first), exposure refers to the 1 h antibiotic (short); the biocide was present for 7-12 h before. H2O2, sodium hypochlorite, peracetic acid -> oxidative; other biocides (benzalkonium, chlorhexidine, ethanol, glutaraldehyde, isopropanol, phenol, povidone-iodine) -> envelope_solvent_biocide. Culture mode (tubes) and aeration not stated. WT re-read: MG1655 used unmodified.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "minimal media (M9) with 0.4% w/v glucose"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "minimal media (M9) with 0.4% w/v glucose"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "minimal media (M9) with 0.4% w/v glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "minimal media (M9) with 0.4% w/v glucose"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "with 0.4% w/v glucose  at 37°C in a plate reader"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG 1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG 1655"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "Escherichia coli MG1655 was grown in minimal media (M9) with 0.4% w/v glucose"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "We have 45 samples and each one has 3 biological replicates. The 45 samples include a control sample."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "containing one of ten biocides or no biocide"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "containing one of ten biocides or no biocide"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "containing one of ten biocides or no biocide"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "mRNA was enriched by removing ribosomal RNA using the capture oligonucleotide mix (MICROBExpress, Ambion)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "mRNA was enriched by removing ribosomal RNA using the capture oligonucleotide mix (MICROBExpress, Ambion)"
+  },
+  "exposure": {
+   "v": "short",
+   "b": "stated",
+   "q": "the appropriate volume of one out of four antibiotics was added, and the tubes were incubated for an additional hour"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Tubes without any antimicrobial (antibiotic or biocide) served as controls."
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^Ampicillin_\\d$",
+   "set": {
+    "treatment": {
+     "v": "abx_cell_wall",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^Kanamycin_\\d$",
+   "set": {
+    "treatment": {
+     "v": "abx_translation",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^Norfloxacin_\\d$",
+   "set": {
+    "treatment": {
+     "v": "abx_dna_gyrase",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^Rifampicin_\\d$",
+   "set": {
+    "treatment": {
+     "v": "abx_transcription",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(H2O2|Sodium_hypochlorite|Percetic_acid)_Ampicillin_\\d$",
+   "set": {
+    "treatment": {
+     "v": "abx_cell_wall;oxidative",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(Bezalkonium_chloride|Chlorexidine|Ethanol|Glutaraldehyde|Isopropanol|Phenol|Povidone_iodine)_Ampicillin_\\d$",
+   "set": {
+    "treatment": {
+     "v": "abx_cell_wall;envelope_solvent_biocide",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(H2O2|Sodium_hypochlorite|Percetic_acid)_Kanamycin_\\d$",
+   "set": {
+    "treatment": {
+     "v": "abx_translation;oxidative",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(Bezalkonium_chloride|Chlorexidine|Ethanol|Glutaraldehyde|Isopropanol|Phenol|Povidone_iodine)_Kanamycin_\\d$",
+   "set": {
+    "treatment": {
+     "v": "abx_translation;envelope_solvent_biocide",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(H2O2|Sodium_hypochlorite|Percetic_acid)_Norfloxacin_\\d$",
+   "set": {
+    "treatment": {
+     "v": "abx_dna_gyrase;oxidative",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(Bezalkonium_chloride|Chlorexidine|Ethanol|Glutaraldehyde|Isopropanol|Phenol|Povidone_iodine)_Norfloxacin_\\d$",
+   "set": {
+    "treatment": {
+     "v": "abx_dna_gyrase;envelope_solvent_biocide",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(H2O2|Sodium_hypochlorite|Percetic_acid)_Rifampicin_\\d$",
+   "set": {
+    "treatment": {
+     "v": "abx_transcription;oxidative",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(Bezalkonium_chloride|Chlorexidine|Ethanol|Glutaraldehyde|Isopropanol|Phenol|Povidone_iodine)_Rifampicin_\\d$",
+   "set": {
+    "treatment": {
+     "v": "abx_transcription;envelope_solvent_biocide",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^Control_\\d$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "Tubes without any antimicrobial (antibiotic or biocide) served as controls."
+    },
+    "exposure": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "Tubes without any antimicrobial (antibiotic or biocide) served as controls."
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

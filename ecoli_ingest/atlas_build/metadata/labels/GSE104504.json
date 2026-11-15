@@ -1,0 +1,165 @@
+{
+ "gse": "GSE104504",
+ "notes": "ch:srain values run MG1655, MG1656 ... MG1674 (apparently auto-incremented); strain_name MG1655 taken from the first entry and applied to all. cya mutant: the design names crp/fis deletion strains only, so genotype_class is left out for cya samples (gene cyaA set). Shaking/temperature not given.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Cells were inoculated from overnight grown culture in Lysogeny Broth (LB)"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Cells were inoculated from overnight grown culture in Lysogeny Broth (LB)"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Cells were inoculated from overnight grown culture in Lysogeny Broth (LB)"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K12 MG1655"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "We have performed RNA-Sequencing experiment in the crp, fis single and double deletion strains in the exponential growth phase."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "We have performed RNA-Sequencing experiment in the crp, fis single and double deletion strains in the exponential growth phase."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "We have performed RNA-Sequencing experiment in the crp, fis single and double deletion strains in the exponential growth phase."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "We have performed RNA-Sequencing experiment in the crp, fis single and double deletion strains in the exponential growth phase."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "sample were treated with Dnase and ribocleanup was given"
+  },
+  "is_control": {
+   "v": false,
+   "b": "stated",
+   "q": "We have performed RNA-Sequencing experiment in the crp, fis single and double deletion strains in the exponential growth phase."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:growth phase",
+   "regex": "^Early exponential",
+   "set": {
+    "growth_phase": {
+     "v": "early_exponential",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:growth phase",
+   "regex": "^Mid exponential",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^crp mutant",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "crp, fis single and double deletion strains"
+    },
+    "perturbed_genes": {
+     "v": "crp",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^crpfis mutant",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "crp, fis single and double deletion strains"
+    },
+    "perturbed_genes": {
+     "v": "crp;fis",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^cya mutant",
+   "set": {
+    "perturbed_genes": {
+     "v": "cyaA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^wildtype$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

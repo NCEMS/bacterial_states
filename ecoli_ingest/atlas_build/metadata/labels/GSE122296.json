@@ -1,0 +1,196 @@
+{
+ "gse": "GSE122296",
+ "notes": "Seven wild-type strains, plain growth in M9 glucose to mid-log: all samples are controls (study of strain differences). strain_group left out for Crooks and HS (group not given in text); CFT073 set UPEC from the named strain.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9 minimal media w/ 2g/L glucose"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "M9 minimal media w/ 2g/L glucose"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "M9 minimal media w/ 2g/L glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "M9 minimal media w/ 2g/L glucose"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "The fresh culture was incubated at 37C with agitation to the mid-log phase (OD600 ≈ 0.5)."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "study_default",
+   "q": "The fresh culture was incubated at 37C with agitation to the mid-log phase (OD600 ≈ 0.5)."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "The fresh culture was incubated at 37C with agitation to the mid-log phase (OD600 ≈ 0.5)."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "The fresh culture was incubated at 37C with agitation to the mid-log phase (OD600 ≈ 0.5)."
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "RNA sequencing was performed on multiple E. coli strains grown on glucose minimal media"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "RNA sequencing was performed on multiple E. coli strains grown on glucose minimal media"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RNA sequencing was performed on multiple E. coli strains grown on glucose minimal media"
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "RNA sequencing was performed on multiple E. coli strains grown on glucose minimal media"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA sequencing was performed on multiple E. coli strains grown on glucose minimal media"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA sequencing was performed on multiple E. coli strains grown on glucose minimal media"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA sequencing was performed on multiple E. coli strains grown on glucose minimal media"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "The rRNA was removed using Illumina Ribo-Zero rRNA removal kit for Gram Negative Bacteria."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "The rRNA was removed using Illumina Ribo-Zero rRNA removal kit for Gram Negative Bacteria."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "BL21",
+   "set": {
+    "strain_group": {
+     "v": "B",
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "BL21(DE3)",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "CFT073",
+   "set": {
+    "strain_group": {
+     "v": "UPEC",
+     "b": "inferred",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "CFT073",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "Crooks",
+   "set": {
+    "strain_name": {
+     "v": "Crooks",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^HS$",
+   "set": {
+    "strain_name": {
+     "v": "HS",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "W3110",
+   "set": {
+    "strain_group": {
+     "v": "K-12",
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "W3110",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "EDL933",
+   "set": {
+    "strain_group": {
+     "v": "EHEC_STEC",
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "EDL933",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "MG1655",
+   "set": {
+    "strain_group": {
+     "v": "K-12",
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

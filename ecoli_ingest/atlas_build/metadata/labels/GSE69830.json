@@ -1,0 +1,126 @@
+{
+ "gse": "GSE69830",
+ "notes": "Reviewed 2026-11-15: nitrosative stress is not filed under oxidative (user decision); other_chemical | All samples are the same triple mutant (hmp nrfA norVW); -NO set as control (the study's untreated condition) although the genotype is not wild type. Nitrate-induced nitrosative stress labelled oxidative (adapted, nitrate present during growth); oxygen: anaerobic_fermentation without nitrate and anaerobic_respiration with nitrate, both inferred. Temperature, culture mode and phase not stated.",
+ "default": {
+  "strain_group": {
+   "v": "UPEC",
+   "b": "stated",
+   "q": "uropathogenic Escherichia coli (UPEC)"
+  },
+  "strain_name": {
+   "v": "CFT073",
+   "b": "stated",
+   "q": "CFT073"
+  },
+  "genotype_class": {
+   "v": "deletion",
+   "b": "stated",
+   "q": "Δhmp ΔnrfA ΔnorVW"
+  },
+  "perturbed_genes": {
+   "v": "hmp;nrfA;norV;norW",
+   "b": "stated",
+   "q": "Δhmp ΔnrfA ΔnorVW"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "Δhmp ΔnrfA ΔnorVW"
+  },
+  "base_medium": {
+   "v": "MOPS",
+   "b": "stated",
+   "q": "MOPS minimal media supplemented with casamino acids using glucose as the carbon source"
+  },
+  "medium_class": {
+   "v": "minimal_plus_hydrolysate",
+   "b": "inferred",
+   "q": "MOPS minimal media supplemented with casamino acids"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "MOPS minimal media supplemented with casamino acids"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "using glucose as the carbon source"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Cultures were anaerobically grown in triplicates under two conditions: Without nitrosative stress or with nitrosative stress"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Cultures were anaerobically grown in triplicates under two conditions: Without nitrosative stress or with nitrosative stress"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Cultures were anaerobically grown in triplicates under two conditions: Without nitrosative stress or with nitrosative stress"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA depleted total RNA"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA depleted total RNA"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "\\(-NO\\)",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "grown without nitrosative stress"
+    },
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": "grown without nitrosative stress"
+    },
+    "oxygen": {
+     "v": "anaerobic_fermentation",
+     "b": "inferred",
+     "q": "Samples were grown anaerobically in MOPS minimal media supplemented with casamino acids using glucose as the carbon source"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "\\(\\+NO\\)",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": "20mM nitrate was added to (+NO) cultures for inducing nitrosative stress"
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "induced by anaerobic growth on nitrate"
+    },
+    "is_control": {
+     "v": false,
+     "b": "inferred",
+     "q": "grown with nitrosative stress"
+    },
+    "oxygen": {
+     "v": "anaerobic_respiration",
+     "b": "inferred",
+     "q": "induced by anaerobic growth on nitrate"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

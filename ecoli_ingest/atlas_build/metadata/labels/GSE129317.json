@@ -1,0 +1,134 @@
+{
+ "gse": "GSE129317",
+ "notes": "3-HP exposure duration and concentration not given: exposure left out; 3-HP labelled other_chemical. 'modified M9' composition not given; amino_acids_supplied false inferred from 'minimal medium'. Phase, temperature, aeration not given; rRNA removal not described.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "E. coli W strains (wild-type and yieP deletion) were cultured in modified M9 minimal medium with 100 mM glycerol as the carbon source."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "E. coli W strains (wild-type and yieP deletion) were cultured in modified M9 minimal medium with 100 mM glycerol as the carbon source."
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "E. coli W strains (wild-type and yieP deletion) were cultured in modified M9 minimal medium with 100 mM glycerol as the carbon source."
+  },
+  "carbon_source": {
+   "v": "glycerol",
+   "b": "stated",
+   "q": "E. coli W strains (wild-type and yieP deletion) were cultured in modified M9 minimal medium with 100 mM glycerol as the carbon source."
+  },
+  "strain_group": {
+   "v": "W",
+   "b": "stated",
+   "q": "E. coli W strains (wild-type and yieP deletion) were cultured in modified M9 minimal medium with 100 mM glycerol as the carbon source."
+  },
+  "strain_name": {
+   "v": "W",
+   "b": "stated",
+   "q": "E. coli W strains (wild-type and yieP deletion) were cultured in modified M9 minimal medium with 100 mM glycerol as the carbon source."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli W strains (wild-type and yieP deletion) were cultured in modified M9 minimal medium with 100 mM glycerol as the carbon source."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli W strains (wild-type and yieP deletion) were cultured in modified M9 minimal medium with 100 mM glycerol as the carbon source."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli W strains (wild-type and yieP deletion) were cultured in modified M9 minimal medium with 100 mM glycerol as the carbon source."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA from culture cells was extracted"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Genome-wide transcription of these strains was compared in the presence and absence of 3-HP."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^Wild Type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^deletion yiep$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "yieP",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:growth condition",
+   "regex": "^without 3HP$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:growth condition",
+   "regex": "^with 3HP$",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^ecw_wt_wo3hp",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

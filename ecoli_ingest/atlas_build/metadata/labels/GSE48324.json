@@ -1,0 +1,206 @@
+{
+ "gse": "GSE48324",
+ "notes": "Adenine / L-tryptophan supplementation treated as medium supplement (treatment none); anaerobic is an oxygen condition, not a treatment. Every wild-type MG1655 sample (each medium/oxygen condition) is a control. KO strains are BW25113 derivatives while WT is MG1655. Anaerobic culture mode (serum bottles) left out. WT re-read: wild type MG1655, genotype_class wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9 + 4 g/L glc (glucose minimal media)"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "M9 + 4 g/L glc (glucose minimal media)"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "M9 + 4 g/L glc (glucose minimal media)"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "M9 + 4 g/L glc (glucose minimal media)"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "E. coli cultures were grown at 37 °C in M9 minimal media with glucose as the primary carbon source and harvested at mid exponetial phase."
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "mid exponetial phase"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli K-12"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Each dual perturbation experiment consists of four RNA-seq samples (WT, WT+nutrient supplementation, transcription factor KO, transcription factor KO+nutrient supplementation)."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Each dual perturbation experiment consists of four RNA-seq samples (WT, WT+nutrient supplementation, transcription factor KO, transcription factor KO+nutrient supplementation)."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Each dual perturbation experiment consists of four RNA-seq samples (WT, WT+nutrient supplementation, transcription factor KO, transcription factor KO+nutrient supplementation)."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "We sequenced mRNA of three dual perturbation experiments of E. coli K12 MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA was removed with Epicentre’s Ribo-Zero rRNA Removal Kit."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA was removed with Epicentre’s Ribo-Zero rRNA Removal Kit."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:oxygen condition",
+   "regex": "^aerobic$",
+   "set": {
+    "oxygen": {
+     "v": "aerobic",
+     "b": "stated",
+     "q": ""
+    },
+    "culture_mode": {
+     "v": "batch_shaken",
+     "b": "stated",
+     "q": "Aerobic E. coli conditions were grown in shake flasks"
+    }
+   }
+  },
+  {
+   "field": "ch:oxygen condition",
+   "regex": "^anaerobic$",
+   "set": {
+    "oxygen": {
+     "v": "anaerobic_fermentation",
+     "b": "inferred",
+     "q": "anaerobic conditions were grown in anoxic serum bottles"
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^wild type",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "KO",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^nac KO",
+   "set": {
+    "perturbed_genes": {
+     "v": "nac",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "BW25113 nac",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^cra KO",
+   "set": {
+    "perturbed_genes": {
+     "v": "cra",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "BW25113 cra",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^mntR KO",
+   "set": {
+    "perturbed_genes": {
+     "v": "mntR",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "BW25113 mntR",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

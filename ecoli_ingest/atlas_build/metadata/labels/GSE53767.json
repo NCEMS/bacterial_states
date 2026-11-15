@@ -1,0 +1,93 @@
+{
+ "gse": "GSE53767",
+ "notes": "Reviewed 2026-11-15: mRNA-seq arm of a ribosome-profiling protocol (fragmented, gel size-selected RNA); excluded by user decision. | Candidate is the mRNA-seq sample of a ribosome-profiling series (title 'mRNA-seq in rich defined media'); the extract protocol text describes footprints, but this library is mRNA-seq: total_rnaseq. rrna_removal not described for the mRNA library. Single sample: no control.",
+ "default": {
+  "base_medium": {
+   "v": "MOPS",
+   "b": "stated",
+   "q": "fully supplemented MOPS glucose media"
+  },
+  "medium_class": {
+   "v": "defined_rich",
+   "b": "inferred",
+   "q": "fully supplemented MOPS glucose media"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "fully supplemented MOPS glucose media"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "All cultures were based on MOPS media with 0.2% glucose (Teknova)"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "The culture was kept in a 2.8-liter flask at 37C with aeration (180 rpm) until OD600 reached 0.3."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "The culture was kept in a 2.8-liter flask at 37C with aeration (180 rpm) until OD600 reached 0.3."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "The culture was kept in a 2.8-liter flask at 37C with aeration (180 rpm) until OD600 reached 0.3."
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "The culture was kept in a 2.8-liter flask at 37C with aeration (180 rpm) until OD600 reached 0.3."
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "study_default",
+   "q": "MG1655"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "MG1655"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "mRNA-seq in rich defined media"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA-seq in rich defined media"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA-seq in rich defined media"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA-seq in rich defined media"
+  },
+  "assay_class": {
+   "v": "other",
+   "b": "inferred",
+   "q": "Ribosome protected mRNA fragments were size selected via gel purification"
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

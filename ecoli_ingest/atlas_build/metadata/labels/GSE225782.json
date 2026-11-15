@@ -1,0 +1,101 @@
+{
+ "gse": "GSE225782",
+ "notes": "Clinical isolate 'E. coli B2'; summary also calls it E. coli O157:H7, so strain_group left out (EHEC vs plain isolate unclear). Treated: overnight culture + 1% citric acid 6 h, acid removed and cells resuspended overnight before sampling; labelled acid without exposure since sampling follows removal. Harvest phase of controls and treated not given.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "E. coli B2 was cultured in Luria-Bertani (LB) liquid medium under aerobic condition at 37 ℃."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "E. coli B2 was cultured in Luria-Bertani (LB) liquid medium"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "E. coli B2 was cultured in Luria-Bertani (LB) liquid medium"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "under aerobic condition at 37 ℃"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "under aerobic condition at 37 ℃"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "citric acid was added during bacterial culture to artificially induce antibiotic tolerance of E.coli B2 bacteria"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "citric acid was added during bacterial culture to artificially induce antibiotic tolerance of E.coli B2 bacteria"
+  },
+  "strain_name": {
+   "v": "B2",
+   "b": "stated",
+   "q": "E. coli B2"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "citric acid was added during bacterial culture to artificially induce antibiotic tolerance of E.coli B2 bacteria"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "citric acid was added during bacterial culture to artificially induce antibiotic tolerance of E.coli B2 bacteria"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "citric acid was added during bacterial culture to artificially induce antibiotic tolerance of E.coli B2 bacteria"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Total RNA was extracted from the tissue using TRIzol® Reagent"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^none; control$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "citric acid",
+   "set": {
+    "treatment": {
+     "v": "acid",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

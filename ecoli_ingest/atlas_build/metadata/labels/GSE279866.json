@@ -1,0 +1,144 @@
+{
+ "gse": "GSE279866",
+ "notes": "RNA-seq aliquot was taken at OD600 0.2 before the rifampicin/formaldehyde treatment of the main culture (for IPOD/ChIP), so treatment none and transcription_arrested false. C. crescentus spike-in applies to the DNA samples only. Temperature not stated. WT re-read: wild-type MG1655 -> wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "MOPS",
+   "b": "stated",
+   "q": "MOPS Rich Defined Media (RDM) + glucose"
+  },
+  "medium_class": {
+   "v": "defined_rich",
+   "b": "inferred",
+   "q": "MOPS Rich Defined Media (RDM) + glucose"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "MOPS Rich Defined Media (RDM) + glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "MOPS Rich Defined Media (RDM) + glucose"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "logarithmic phase"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K12 MG1655"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Three biological replicates each of wild-type, Δdam, Δdcm, and ΔdamΔdcm E. coli K12 MG1655 were grown in MOPS Rich Defined Media (RDM) with glucose to an OD600 of .2, at which point an aliquot was taken for RNA-seq processing"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Three biological replicates each of wild-type, Δdam, Δdcm, and ΔdamΔdcm E. coli K12 MG1655 were grown in MOPS Rich Defined Media (RDM) with glucose to an OD600 of .2, at which point an aliquot was taken for RNA-seq processing"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Three biological replicates each of wild-type, Δdam, Δdcm, and ΔdamΔdcm E. coli K12 MG1655 were grown in MOPS Rich Defined Media (RDM) with glucose to an OD600 of .2, at which point an aliquot was taken for RNA-seq processing"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Three biological replicates each of wild-type, Δdam, Δdcm, and ΔdamΔdcm E. coli K12 MG1655 were grown in MOPS Rich Defined Media (RDM) with glucose to an OD600 of .2, at which point an aliquot was taken for RNA-seq processing"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Samples were then ribo-depleted using a NEBNext rRNA Depletion (Bacteria) Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Samples were then ribo-depleted using a NEBNext rRNA Depletion (Bacteria) Kit"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "Three biological replicates each of wild-type, Δdam, Δdcm, and ΔdamΔdcm E. coli K12 MG1655 were grown in MOPS Rich Defined Media (RDM) with glucose to an OD600 of .2, at which point an aliquot was taken for RNA-seq processing"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "delta",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^\\{delta\\}dam$",
+   "set": {
+    "perturbed_genes": {
+     "v": "dam",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^\\{delta\\}dcm$",
+   "set": {
+    "perturbed_genes": {
+     "v": "dcm",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "dam\\{delta\\}dcm",
+   "set": {
+    "perturbed_genes": {
+     "v": "dam;dcm",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

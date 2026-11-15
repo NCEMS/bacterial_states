@@ -1,0 +1,116 @@
+{
+ "gse": "GSE305452",
+ "notes": "IEFE disinfection (electric-field device generating ROS) labelled other_physical rather than oxidative. Strain not named. Growth phase kept for the 1-min treated samples (pre-shift phase).",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "E. coli cultures were grown in LB medium at 37 °C with shaking at 200 rpm until reaching mid-log phase."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "grown in LB medium"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "grown in LB medium"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "study_default",
+   "q": "grown in LB medium at 37 °C"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "with shaking at 200 rpm"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "with shaking at 200 rpm"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "until reaching mid-log phase"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "study_default",
+   "q": "Bacterial cultures were grown to mid-log phase and divided into two groups: untreated controls and samples subjected to IEFE treatment for 1 min."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "divided into two groups: untreated controls and samples subjected to IEFE treatment for 1 min"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "divided into two groups: untreated controls and samples subjected to IEFE treatment for 1 min"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "divided into two groups: untreated controls and samples subjected to IEFE treatment for 1 min"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "investigate transcriptomic changes in Escherichia coli induced by interfacial electric-field-enhanced (IEFE) disinfection"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "TruSeq Stranded Total RNA Library Prep Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA was removed prior to library preparation"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^untreated$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "IEFE",
+   "set": {
+    "treatment": {
+     "v": "other_physical",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

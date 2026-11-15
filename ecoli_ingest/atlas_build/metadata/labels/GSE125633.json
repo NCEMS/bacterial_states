@@ -1,0 +1,126 @@
+{
+ "gse": "GSE125633",
+ "notes": "Reviewed 2026-11-15: Sakai stx- is the standard lab strain; wild_type (user decision) | Methanol vehicle = control. Lambda-5b is a synthetic antimicrobial metallo-compound (flexicate), labelled abx_other; mechanism not given. Samples 40 min after treatment of mid-exponential cells keep mid_exponential.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "E. coli Sakai O157:H7 stx- grown to mid-exponential was treated with either methanol (control) or 0.5 µg/ml of Λ-5b"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "stated",
+   "q": "The bacteria were grown in cation-adjusted Mueller-Hinton broth at 37 ˚C, shaking"
+  },
+  "base_medium": {
+   "v": "Mueller-Hinton",
+   "b": "stated",
+   "q": "cation-adjusted Mueller-Hinton broth"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "cation-adjusted Mueller-Hinton broth"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "cation-adjusted Mueller-Hinton broth"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "at 37 ˚C, shaking"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "at 37 ˚C, shaking"
+  },
+  "strain_group": {
+   "v": "EHEC_STEC",
+   "b": "stated",
+   "q": "E. coli Sakai O157:H7 stx-"
+  },
+  "strain_name": {
+   "v": "Sakai stx-",
+   "b": "stated",
+   "q": "E. coli Sakai O157:H7 stx-"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "E. coli Sakai O157:H7 stx-"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "E. coli Sakai O157:H7 stx-"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "treated with either methanol (control) or 0.5 µg/ml of Λ-5b (dissolved in methanol)"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "treated with either methanol (control) or 0.5 µg/ml of Λ-5b (dissolved in methanol)"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "treated with either methanol (control) or 0.5 µg/ml of Λ-5b (dissolved in methanol)"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA depleted RNA"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA was depleted using the Ribo-Zero bacterial rRNA removal kit (Illumina)."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^methanol$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "methanol (control)"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "methanol (control)"
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "lambda-5b",
+   "set": {
+    "treatment": {
+     "v": "abx_other",
+     "b": "stated",
+     "q": "The synthetic flexicate compound Λ-5b shows potent antimicrobial activity against E. coli."
+    },
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": "The cultures were incubated for a further 40 min"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,23 @@
+{
+  "gse": "GSE284581",
+  "notes": "NOT STANDARD RNA-SEQ: Pan-Mod-seq rRNA modification profiling; total RNA chemically treated in vitro (NaBH4, CMC, bisulfite, AlkB, mock etc.), reverse transcribed with different RTases and libraries made by 3' cDNA adapter ligation; all 18 samples assay_class other (mock libraries use the same protocol). All are the same untreated WT culture (cells 'control'), so all is_control true. rRNA removal not stated.",
+  "default": {
+    "base_medium": {"v": "LB", "b": "stated", "q": "Grown in LB medium to mid-log phase (OD600  ~0.35) at  37°C"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "Grown in LB medium to mid-log phase (OD600  ~0.35) at  37°C"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "Grown in LB medium to mid-log phase (OD600  ~0.35) at  37°C"},
+    "growth_phase": {"v": "mid_exponential", "b": "stated", "q": "Grown in LB medium to mid-log phase (OD600  ~0.35) at  37°C"},
+    "growth_temperature": {"v": 37, "b": "stated", "q": "Grown in LB medium to mid-log phase (OD600  ~0.35) at  37°C"},
+    "genotype_class": {"v": "reference", "b": "stated", "q": "WT"},
+    "global_regulator_perturbed": {"v": false, "b": "inferred", "q": "WT"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "K-12 substrain MG1655"},
+    "strain_name": {"v": "MG1655", "b": "stated", "q": "K-12 substrain MG1655"},
+    "treatment": {"v": "none", "b": "stated", "q": "control"},
+    "is_control": {"v": true, "b": "stated", "q": "control"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "RNA-seq of total RNA from Escherichia coli K-12 substrain MG1655 under 18 different combinations of RTases and RNA library treatments, one replicate"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "RNA-seq of total RNA from Escherichia coli K-12 substrain MG1655 under 18 different combinations of RTases and RNA library treatments, one replicate"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "RNA-seq of total RNA from Escherichia coli K-12 substrain MG1655"},
+    "assay_class": {"v": "other", "b": "stated", "q": "under 18 different combinations of RTases and RNA library treatments"}
+  },
+  "rules": [],
+  "samples": {}
+}

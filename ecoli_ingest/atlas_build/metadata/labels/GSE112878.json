@@ -1,0 +1,116 @@
+{
+ "gse": "GSE112878",
+ "notes": "pBAD empty vector, arabinose-induced like the tosR strain -> control. Sampled between OD600 0.46-0.96 in LB, spanning beyond the exponential range -> growth_phase left out.",
+ "default": {
+  "strain_group": {
+   "v": "UPEC",
+   "b": "stated",
+   "q": "uropathogenic Escherichia coli"
+  },
+  "strain_name": {
+   "v": "CFT073",
+   "b": "stated",
+   "q": "CFT073"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Cultures were diluted 1:100 into fresh LB medium containing 10 mM L-arabinose and ampicillin and cultured at 37°C with aeration."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Cultures were diluted 1:100 into fresh LB medium containing 10 mM L-arabinose and ampicillin and cultured at 37°C with aeration."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Cultures were diluted 1:100 into fresh LB medium containing 10 mM L-arabinose and ampicillin and cultured at 37°C with aeration."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Cultures were diluted 1:100 into fresh LB medium containing 10 mM L-arabinose and ampicillin and cultured at 37°C with aeration."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Cultures were diluted 1:100 into fresh LB medium containing 10 mM L-arabinose and ampicillin and cultured at 37°C with aeration."
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "Cultures were diluted 1:100 into fresh LB medium containing 10 mM L-arabinose and ampicillin and cultured at 37°C with aeration."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "total RNA was extracted using the RNeasy Mini Kit (Qiagen)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Depletion of ribosomal RNA was accomplished with the Ribominus Transcriptome Isolation Kit"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Examination of three biological replicates of CFT073 harboring pBAD or pBAD-tosR"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of three biological replicates of CFT073 harboring pBAD or pBAD-tosR"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of three biological replicates of CFT073 harboring pBAD or pBAD-tosR"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of three biological replicates of CFT073 harboring pBAD or pBAD-tosR"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:plasmid",
+   "regex": "^pBAD$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:plasmid",
+   "regex": "^pBAD-tosR$",
+   "set": {
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "tosR",
+     "b": "stated",
+     "q": "pBAD-tosR"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

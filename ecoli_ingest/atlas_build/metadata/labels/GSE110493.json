@@ -1,0 +1,101 @@
+{
+ "gse": "GSE110493",
+ "notes": "E. coli (strain not named) in LB, log phase, 40 min with 40 mM NaHCO3 vs 40 mM NaCl ion control (control, treatment none). Bicarbonate labelled other_chemical (pH not reported). Phase kept from pre-treatment log phase (40 min < 2 h). Temperature and aeration not given.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "When cultures were in the logarithmic phase of growth, they were exposed to 40 mM NaHCO3 and the incubation was continued for 40 minutes."
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Liquid LB cultures of E. coli"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Liquid LB cultures of E. coli"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Liquid LB cultures of E. coli"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "study_default",
+   "q": "Liquid LB cultures of E. coli"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Liquid LB cultures of E. coli"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA depletion, random primed cDNA synthesis"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA depletion, random primed cDNA synthesis"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "When cultures were in the logarithmic phase of growth, they were exposed to 40 mM NaHCO3 and the incubation was continued for 40 minutes."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "When cultures were in the logarithmic phase of growth, they were exposed to 40 mM NaHCO3 and the incubation was continued for 40 minutes."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "When cultures were in the logarithmic phase of growth, they were exposed to 40 mM NaHCO3 and the incubation was continued for 40 minutes."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:culture",
+   "regex": "NaHCO3",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": "When cultures were in the logarithmic phase of growth, they were exposed to 40 mM NaHCO3 and the incubation was continued for 40 minutes."
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:culture",
+   "regex": "NaCl",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "The control cultures were treated exactly as the experimental cultures but they were exposed to 40 mM NaCl in lieu of NaHCO3."
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "The control cultures were treated exactly as the experimental cultures but they were exposed to 40 mM NaCl in lieu of NaHCO3."
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

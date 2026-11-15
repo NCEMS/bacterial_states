@@ -1,0 +1,70 @@
+{
+ "gse": "GSE279187",
+ "notes": "Two E. coli bulk RNA-seq libraries in a S. aureus/S. epidermidis method study; strain and growth details for E. coli not given beyond TSB. GSM8563784 used SPIA linear pre-amplification of 10 ng RNA, flagged assay_class other (unsure: whole-transcriptome amplification, could be considered total RNA-seq). Untreated culture -> control.",
+ "default": {
+  "base_medium": {
+   "v": "TSB",
+   "b": "stated",
+   "q": "TSB"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "TSB"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "TSB"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Ecoli RNA (100ng)"
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "bacterial culture"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "grown in TSB, TSB pH 4.8 or on reconstructed human epidermidis for bulk and targted RNA-seq with and without ribo-depletion and/or SPIA"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "grown in TSB, TSB pH 4.8 or on reconstructed human epidermidis for bulk and targted RNA-seq with and without ribo-depletion and/or SPIA"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Ecoli RNA (100ng)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "ribo-depletion"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "bulk RNA-Seq"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment spia",
+   "regex": "^SPIA$",
+   "set": {
+    "assay_class": {
+     "v": "other",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

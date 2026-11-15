@@ -1,0 +1,263 @@
+{
+ "gse": "GSE179607",
+ "notes": "Four library types: rz_5m (unfragmented, 5'-end identification -> end_mapping), rz_frg_5m (heat-fragmented rRNA-depleted, quantification -> total_rnaseq, somewhat uncertain since same template-switch protocol), rz_5m_trna (tRNA gel size selection -> other), tot_30m (no depletion, unfragmented, rRNA cleavage/maturation -> end_mapping). Cells washed and resuspended in M9 lacking glucose (glycerol + casamino acids) 30 min before arabinose; treated as part of the protocol, treatment none. Toxins are native MG1655 TA toxins -> native_overexpression; empty vector + arabinose is the control.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9 (10x stock made with 64 g/L Na2HPO4-7H2O, 15 g/L KH2PO4, 2.5 g/L NaCl, 5.0 g/L NH4Cl) medium supplemented with 0.1% casamino acids, 0.4% glycerol"
+  },
+  "medium_class": {
+   "v": "minimal_plus_hydrolysate",
+   "b": "inferred",
+   "q": "M9 (10x stock made with 64 g/L Na2HPO4-7H2O, 15 g/L KH2PO4, 2.5 g/L NaCl, 5.0 g/L NH4Cl) medium supplemented with 0.1% casamino acids, 0.4% glycerol"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "supplemented with 0.1% casamino acids"
+  },
+  "carbon_source": {
+   "v": "glycerol",
+   "b": "stated",
+   "q": "resuspended in M9 media lacking glucose"
+  },
+  "culture_mode": {
+   "v": "batch_microplate",
+   "b": "stated",
+   "q": "grown at 37°C on a Synergy H1 plate reader (BioTek) in 24-well plates"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "in 24-well plates using double orbital rotation at 307 CPM"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown at 37°C on a Synergy H1 plate reader (BioTek) in 24-well plates"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "grown to OD 0.2 – 0.35 in 24-well plates"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "The libraries were generated from E. coli cells expressing 9 different toxins or an empty vector from an arabinose inducible promoter."
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "toxin was induced by adding arabinose to 0.2%"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "The libraries were generated from E. coli cells expressing 9 different toxins or an empty vector from an arabinose inducible promoter."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "The libraries were generated from E. coli cells expressing 9 different toxins or an empty vector from an arabinose inducible promoter."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "genotype_class": {
+   "v": "native_overexpression",
+   "b": "stated",
+   "q": "9 endoribonuclease toxins from toxin-antitoxin systems in E. coli MG1655"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "9 endoribonuclease toxins from toxin-antitoxin systems in E. coli MG1655"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "The libraries were generated from E. coli cells expressing 9 different toxins or an empty vector from an arabinose inducible promoter."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA was removed by hybridization to custom biotinylated oligos"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "pBAD30-ev$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "chpb$",
+   "set": {
+    "perturbed_genes": {
+     "v": "chpB",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "hica$",
+   "set": {
+    "perturbed_genes": {
+     "v": "hicA",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "higb$",
+   "set": {
+    "perturbed_genes": {
+     "v": "higB",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "mazf$",
+   "set": {
+    "perturbed_genes": {
+     "v": "mazF",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "mqsr$",
+   "set": {
+    "perturbed_genes": {
+     "v": "mqsR",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "rele$",
+   "set": {
+    "perturbed_genes": {
+     "v": "relE",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "yafo$",
+   "set": {
+    "perturbed_genes": {
+     "v": "yafO",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "yhav$",
+   "set": {
+    "perturbed_genes": {
+     "v": "yhaV",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "yoeb$",
+   "set": {
+    "perturbed_genes": {
+     "v": "yoeB",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^rz_5m-",
+   "set": {
+    "assay_class": {
+     "v": "end_mapping",
+     "b": "stated",
+     "q": "These libraries were intended to identify RNA 5’-ends generated by endoribonuclease toxin cleavage."
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^rz_frg_5m-",
+   "set": {
+    "assay_class": {
+     "v": "total_rnaseq",
+     "b": "stated",
+     "q": "libraries were rRNA depleted and fragmented for 3 minutes prior to reverse transcription"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^rz_5m_trna-",
+   "set": {
+    "assay_class": {
+     "v": "other",
+     "b": "stated",
+     "q": "subjected to a size selection to selectively sequence cDNA arising from tRNA"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^tot_30m-",
+   "set": {
+    "assay_class": {
+     "v": "end_mapping",
+     "b": "stated",
+     "q": "libraries were not rRNA depleted and were not fragmented prior to reverse transcription"
+    },
+    "rrna_removal": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,133 @@
+{
+ "gse": "GSE310369",
+ "notes": "Corramycin labelled abx_dna_gyrase (summary: DNA gyrase poison). ATCC25922 has no pathotype in the text, strain_group left out. rRNA removal not described. Phase kept for 15/45 min samples (log-phase before treatment). WT re-read: ATCC25922 unmodified -> wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "Mueller-Hinton",
+   "b": "stated",
+   "q": "cation-adjusted Mueller-Hinton broth (MHB2)"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "cation-adjusted Mueller-Hinton broth (MHB2)"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "cation-adjusted Mueller-Hinton broth (MHB2)"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "study_default",
+   "q": "grown overnight in cation-adjusted Mueller-Hinton broth (MHB2) at 37 °C with shaking"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "at 37 °C with shaking"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "at 37 °C with shaking"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "sub-cultured 1:100 in fresh MHB2 and grown until log-phase"
+  },
+  "strain_name": {
+   "v": "ATCC25922",
+   "b": "stated",
+   "q": "E. coli ATCC25922"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "E. coli ATCC25922 was grown overnight"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptomic analyses of E. coli and M. tuberculosis treated with various concentrations of corramycin"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptomic analyses of E. coli and M. tuberculosis treated with various concentrations of corramycin"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptomic analyses of E. coli and M. tuberculosis treated with various concentrations of corramycin"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "For E. coli, bacteria were treated with 0.125x, 0.25x or 0.5x MIC of corramycin, or DMSO (control) for either 15 min or 45 min."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "NEBNext Ultra II Directional RNA Library Preparation Kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "control",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "DMSO (control)"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "DMSO (control)"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "Corramycin",
+   "set": {
+    "treatment": {
+     "v": "abx_dna_gyrase",
+     "b": "stated",
+     "q": "induces DNA double-strand breaks through a novel form of DNA gyrase poisoning"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "Corramycin.*15 min",
+   "set": {
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "Corramycin.*45 min",
+   "set": {
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

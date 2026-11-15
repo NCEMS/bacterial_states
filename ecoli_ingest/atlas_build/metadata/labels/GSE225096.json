@@ -1,0 +1,258 @@
+{
+ "gse": "GSE225096",
+ "notes": "MG1655 WT and atoC/btsR/cusR/rcsB deletions in M9, LB or 0.1x LB with effectors. Treatments: CuSO4 -> metal_excess; 5% ethanol -> envelope_solvent_biocide; LiCl and acetoacetate/LiCl -> other_chemical (LiCl is the salt; acetoacetate itself would be a nutrient); pyruvate 100 uM -> nutrient supplement, treatment none (so WT 0.1x LB + pyruvate is a control). Exposure 'adapted' from 'grown in the presence of' (no time given; somewhat uncertain). M9 carbon source not stated. There is no untreated WT in M9 or full LB; WT 0.1x LB (+/- pyruvate) are the only controls. Culture 'batch' but shaking not stated: culture_mode and oxygen left out. WT re-read: reference -> wild_type, MG1655 wt, no construct.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Total RNA was extracted from mid-log phase culture for RNA-Seq library preparation."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Cells were grown at 37C at pH 7."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "These knockouts were grown in the presence of their typical effector molecules to enable comparison to the intact response of the WT system (K-12 MG1655)."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "These knockouts were grown in the presence of their typical effector molecules to enable comparison to the intact response of the WT system (K-12 MG1655)."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "These knockouts were grown in the presence of their typical effector molecules to enable comparison to the intact response of the WT system (K-12 MG1655)."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "The ribosomal RNA was removed using an Illumina Ribo-Zero rRNA removal kit for Gram-negative bacteria."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "The ribosomal RNA was removed using an Illumina Ribo-Zero rRNA removal kit for Gram-negative bacteria."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "These knockouts were grown in the presence of their typical effector molecules to enable comparison to the intact response of the WT system (K-12 MG1655)."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:media",
+   "regex": "^M9$",
+   "set": {
+    "base_medium": {
+     "v": "M9",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "defined_minimal",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:media",
+   "regex": "LB",
+   "set": {
+    "base_medium": {
+     "v": "LB",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "complex",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^MG1655$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "del_",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "del_atoC",
+   "set": {
+    "perturbed_genes": {
+     "v": "atoC",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "del_btsR",
+   "set": {
+    "perturbed_genes": {
+     "v": "btsR",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "del_cusR",
+   "set": {
+    "perturbed_genes": {
+     "v": "cusR",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "del_rcsB",
+   "set": {
+    "perturbed_genes": {
+     "v": "rcsB",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:supplement",
+   "regex": "^--$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:supplement",
+   "regex": "Pyruvate",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:supplement",
+   "regex": "LiCl",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "study_default",
+     "q": "These knockouts were grown in the presence of their typical effector molecules to enable comparison to the intact response of the WT system (K-12 MG1655)."
+    }
+   }
+  },
+  {
+   "field": "ch:supplement",
+   "regex": "CuSO4",
+   "set": {
+    "treatment": {
+     "v": "metal_excess",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "study_default",
+     "q": "These knockouts were grown in the presence of their typical effector molecules to enable comparison to the intact response of the WT system (K-12 MG1655)."
+    }
+   }
+  },
+  {
+   "field": "ch:supplement",
+   "regex": "Ethanol",
+   "set": {
+    "treatment": {
+     "v": "envelope_solvent_biocide",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "study_default",
+     "q": "These knockouts were grown in the presence of their typical effector molecules to enable comparison to the intact response of the WT system (K-12 MG1655)."
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^wt, 0\\.1xLB",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

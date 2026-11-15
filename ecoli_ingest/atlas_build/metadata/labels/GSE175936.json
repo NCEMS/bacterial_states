@@ -1,0 +1,33 @@
+{
+  "gse": "GSE175936",
+  "notes": "Culture vessel not described ('with aeration'), so culture_mode left out.",
+  "default": {
+    "base_medium": {"v": "LB", "b": "stated", "q": "Luria-Bertani medium (LB: 10 g/l tryptone, 5 g/l yeast extract, 10 g/l NaCl)"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "Luria-Bertani medium (LB: 10 g/l tryptone, 5 g/l yeast extract, 10 g/l NaCl)"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "Luria-Bertani medium (LB: 10 g/l tryptone, 5 g/l yeast extract, 10 g/l NaCl)"},
+    "growth_phase": {"v": "mid_exponential", "b": "stated", "q": "with aeration to exponential phase"},
+    "oxygen": {"v": "aerobic", "b": "inferred", "q": "with aeration to exponential phase"},
+    "growth_temperature": {"v": 37, "b": "stated", "q": "Strains were grown at 37ºC with aeration"},
+    "treatment": {"v": "none", "b": "stated", "q": "None"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "Analysis of RNA profiles (following rRNA depletion) for  isogenic dnaN+ and dnaN-E202K E. coli strains."},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "Analysis of RNA profiles (following rRNA depletion) for  isogenic dnaN+ and dnaN-E202K E. coli strains."},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "Analysis of RNA profiles (following rRNA depletion) for  isogenic dnaN+ and dnaN-E202K E. coli strains."},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "RNA (depleted of rRNA)"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "Bacterial Ribo-Zero rRNA Removal Kit (Illumina)"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "E. coli K12"}
+  },
+  "rules": [
+    {"field": "ch:strain", "regex": "^VB001$",
+     "set": {"genotype_class": {"v": "reference", "b": "stated", "q": "wild type dnaN allele (strain VB001)"},
+             "is_control": {"v": true, "b": "stated", "q": "wild type dnaN allele (strain VB001)"},
+             "global_regulator_perturbed": {"v": false, "b": "stated", "q": ""},
+             "strain_name": {"v": "VB001", "b": "stated", "q": ""}}},
+    {"field": "ch:strain", "regex": "^VB019$",
+     "set": {"genotype_class": {"v": "point_mutation", "b": "stated", "q": "a dnaN allele with a glutamic acid-202 to lysine substitution (dnaN-E202K; strain VB019)"},
+             "perturbed_genes": {"v": "dnaN", "b": "stated", "q": "dnaN-E202K"},
+             "global_regulator_perturbed": {"v": false, "b": "stated", "q": ""},
+             "is_control": {"v": false, "b": "stated", "q": ""},
+             "strain_name": {"v": "VB019", "b": "stated", "q": ""}}}
+  ],
+  "samples": {}
+}

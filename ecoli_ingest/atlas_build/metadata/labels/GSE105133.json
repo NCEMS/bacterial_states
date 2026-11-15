@@ -1,0 +1,180 @@
+{
+ "gse": "GSE105133",
+ "notes": "EAEC 042 wild type vs hns, hns2, hns hns2 and hha hha2 mutants. Mutant type not described beyond 'mutant'/'null mutant'; labelled deletion. OD600 2.0 in LB is above the inference range, no phase. hns2 and hha are not on the global regulator list; hns is.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Bacterial cells were grown until O.D.600 of 2,0 in LB medium at 37ºC with 200rpm of agitation."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Bacterial cells were grown until O.D.600 of 2,0 in LB medium at 37ºC with 200rpm of agitation."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Bacterial cells were grown until O.D.600 of 2,0 in LB medium at 37ºC with 200rpm of agitation."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Bacterial cells were grown until O.D.600 of 2,0 in LB medium at 37ºC with 200rpm of agitation."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Bacterial cells were grown until O.D.600 of 2,0 in LB medium at 37ºC with 200rpm of agitation."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Bacterial cells were grown until O.D.600 of 2,0 in LB medium at 37ºC with 200rpm of agitation."
+  },
+  "strain_group": {
+   "v": "EAEC",
+   "b": "stated",
+   "q": "enteroaggregative E. coli strain 042"
+  },
+  "strain_name": {
+   "v": "042",
+   "b": "stated",
+   "q": "enteroaggregative E. coli strain 042"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "ribosomal RNA molecules were depleted using the Ribo-Zero rRNA Removal Kit for bacteria (Illumina)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "ribosomal RNA molecules were depleted using the Ribo-Zero rRNA Removal Kit for bacteria (Illumina)"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "We used RNA-seq to compare the transcriptome of the wt strain and its hns, hns2 and double hns hns2 derivatives, as well as of an hha null mutant (hhahha2)."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "We used RNA-seq to compare the transcriptome of the wt strain and its hns, hns2 and double hns hns2 derivatives, as well as of an hha null mutant (hhahha2)."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "We used RNA-seq to compare the transcriptome of the wt strain and its hns, hns2 and double hns hns2 derivatives, as well as of an hha null mutant (hhahha2)."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "We used RNA-seq to compare the transcriptome of the wt strain and its hns, hns2 and double hns hns2 derivatives, as well as of an hha null mutant (hhahha2)."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^mutant",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "an hha null mutant (hhahha2)"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "hhahha2$",
+   "set": {
+    "perturbed_genes": {
+     "v": "hha;hha2",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "hns$",
+   "set": {
+    "perturbed_genes": {
+     "v": "hns",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "hns2$",
+   "set": {
+    "perturbed_genes": {
+     "v": "hns2",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "hnshns2$",
+   "set": {
+    "perturbed_genes": {
+     "v": "hns;hns2",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

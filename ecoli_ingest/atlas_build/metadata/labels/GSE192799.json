@@ -1,0 +1,96 @@
+{
+ "gse": "GSE192799",
+ "notes": "Haploid MG1655 (WT, controls) vs artificial diploid (two chromosomes, CRISPR chromosome doubling). No genotype_class value fits a doubled chromosome; genotype_class, perturbed_genes and global_regulator_perturbed left out for the diploid. Shaking and temperature not stated. OD 0.5-0.8 with 'logarithmic growth phase' stated -> mid_exponential.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "LB medium, pH=7.0"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "LB medium, pH=7.0"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "LB medium, pH=7.0"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "cultured for 3~4 hours to the logarithmic growth phase (OD600= 0.5~0.8)"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Total mRNA profiles of haploid and diploid Escherichia coli"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total mRNA profiles of haploid and diploid Escherichia coli"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total mRNA profiles of haploid and diploid Escherichia coli"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total mRNA profiles of haploid and diploid Escherichia coli"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Total RNA was isolated by the Trizol-Phenol-Chloroform method."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "one chromosome",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": "WT1"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "two chromosomes",
+   "set": {
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

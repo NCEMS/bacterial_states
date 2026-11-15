@@ -1,0 +1,66 @@
+{
+ "gse": "GSE306179",
+ "notes": "Strain, medium, growth conditions and treatment duration not given. Treatment = nanozyme + H2O2 + near-infrared irradiation: labelled oxidative;other_physical. S. aureus samples are not candidates.",
+ "default": {
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Group 1: E. coli treated with AuPt@ZIF-8 + H₂O₂ + NIR; Group 2: untreated E. coli"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Group 1: E. coli treated with AuPt@ZIF-8 + H₂O₂ + NIR; Group 2: untreated E. coli"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Group 1: E. coli treated with AuPt@ZIF-8 + H₂O₂ + NIR; Group 2: untreated E. coli"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribosomal RNA was depleted. Strand-specific libraries were prepared"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA was depleted."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^untreated",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "treated with",
+   "set": {
+    "treatment": {
+     "v": "oxidative;other_physical",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

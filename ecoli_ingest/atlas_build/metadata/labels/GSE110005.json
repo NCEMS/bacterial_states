@@ -1,0 +1,153 @@
+{
+ "gse": "GSE110005",
+ "notes": "OxyS overexpression from pBRplac vs empty pBRplac in MG1655 and hfq-; IPTG in all. Control = WT + empty pBRplac (induced empty vector). OD600 1.0 in LB, no phase word -> growth_phase left out. hfq- + OxyS = multiple.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Growth in LB media to OD600=1.0"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Growth in LB media to OD600=1.0"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Growth in LB media to OD600=1.0"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "wild type (MG1655)"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "wild type (MG1655)"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "IPTG (0.1 mM) was added to OD600=0.2"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "mRNA profiles of OxyS overexpression in  wild type (WT) and hfq- were generated"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA profiles of OxyS overexpression in  wild type (WT) and hfq- were generated"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA profiles of OxyS overexpression in  wild type (WT) and hfq- were generated"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribosomal RNA depletion from total RNA was performed using Ribo-Zero rRNA Removal Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA depletion from total RNA was performed using Ribo-Zero rRNA Removal Kit"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA profiles of OxyS overexpression in  wild type (WT) and hfq- were generated"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^pBRplac; wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^pBRplac-OxyS; wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "oxyS",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^pBRplac; hfq-$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "knockout of hfq"
+    },
+    "perturbed_genes": {
+     "v": "hfq",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^pBRplac-OxyS; hfq-$",
+   "set": {
+    "genotype_class": {
+     "v": "multiple",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "oxyS;hfq",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

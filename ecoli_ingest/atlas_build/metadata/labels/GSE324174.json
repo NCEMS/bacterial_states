@@ -1,0 +1,131 @@
+{
+ "gse": "GSE324174",
+ "notes": "",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Strains were grown overnight in LB at 37°C with shaking"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "grown overnight in LB"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "grown overnight in LB"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "study_default",
+   "q": "grown overnight in LB at 37°C with shaking"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "at 37°C with shaking"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "at 37°C with shaking"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "RNA-seq data from Escherichia coli MG1655 wild-type and ∆sbmC cells in exponential phase harveted at OD600 0.5."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "No treatment"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq data from Escherichia coli MG1655 wild-type and ∆sbmC cells in exponential phase harveted at OD600 0.5."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq data from Escherichia coli MG1655 wild-type and ∆sbmC cells in exponential phase harveted at OD600 0.5."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq data from Escherichia coli MG1655 wild-type and ∆sbmC cells in exponential phase harveted at OD600 0.5."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA was depleted using Qiagen Fastselect"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA was depleted using Qiagen Fastselect"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^MG1655$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "sbmC",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "sbmC",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

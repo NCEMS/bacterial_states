@@ -1,0 +1,103 @@
+{
+ "gse": "GSE243619",
+ "notes": "Not standard RNA-seq: aggresome RNA is an anti-GFP immunoprecipitate (IP_or_pulldown); 'cytosol RNA' is the non-aggresome fraction after high-speed centrifugation (subcellular fraction, assay_class other). All samples arsenite-treated, so no control. Arsenite labelled metal_excess (metalloid). HslU-GFP fusion = tagged strain, reference. One aggresome sample without rRNA removal (rrna_removal none).",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "exponential growth phase, 2 mM NaAsO2 for 30 mins"
+  },
+  "treatment": {
+   "v": "metal_excess",
+   "b": "stated",
+   "q": "exponential growth phase, 2 mM NaAsO2 for 30 mins"
+  },
+  "exposure": {
+   "v": "acute",
+   "b": "stated",
+   "q": "2 mM NaAsO2 for 30 mins"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "stated",
+   "q": "MG1655 bacterial cultures expressing HslU-GFP"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "MG1655 bacterial cultures expressing HslU-GFP"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "MG1655 bacterial cultures expressing HslU-GFP in exponential phase were treated with 2 mM NaAsO2 for 30 mins"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "MG1655 bacterial cultures expressing HslU-GFP in exponential phase were treated with 2 mM NaAsO2 for 30 mins"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Escherichia coli MG1655"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^aggresome",
+   "set": {
+    "assay_class": {
+     "v": "IP_or_pulldown",
+     "b": "stated",
+     "q": "we used anti-GFP antibody (MBL, M048-3, Lot:065) and Protein A Dynabeads to enrich aggresome"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^cytosol",
+   "set": {
+    "assay_class": {
+     "v": "other",
+     "b": "stated",
+     "q": "Others were cytosol RNA."
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "rRNA removed",
+   "set": {
+    "rrna_removal": {
+     "v": "depletion",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^aggresome RNA, replicate",
+   "set": {
+    "rrna_removal": {
+     "v": "none",
+     "b": "inferred",
+     "q": "aggresome RNA, replicate 2, RNA-seq"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

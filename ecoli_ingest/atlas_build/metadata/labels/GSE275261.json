@@ -1,0 +1,87 @@
+{
+ "gse": "GSE275261",
+ "notes": "Strain, medium, growth phase and temperature not given. GuaB inhibitor G6 labelled abx_other (described as bactericidal / candidate antibiotic). Untreated samples at 0 h and 1 h are both controls. genotype_class reference is a study default (no genotype axis described).",
+ "default": {
+  "genotype_class": {
+   "v": "reference",
+   "b": "study_default",
+   "q": "In this study, we examined the transcriptional responses to GuaB-specific inhibitors in A. baumannii and E. coli."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "In this study, we examined the transcriptional responses to GuaB-specific inhibitors in A. baumannii and E. coli."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "In this study, we examined the transcriptional responses to GuaB-specific inhibitors in A. baumannii and E. coli."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "In this study, we examined the transcriptional responses to GuaB-specific inhibitors in A. baumannii and E. coli."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "RNA-seq library generation was continued using the Truseq RNA Library Prep Kit v2 (Illumina) starting at the “Elute, Prime, Fragment” step"
+  },
+  "is_control": {
+   "v": false,
+   "b": "stated",
+   "q": "In this study, we examined the transcriptional responses to GuaB-specific inhibitors in A. baumannii and E. coli."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^No Drug$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^GuaBi$",
+   "set": {
+    "treatment": {
+     "v": "abx_other",
+     "b": "stated",
+     "q": "these GuaB inhibitors are bactericidal"
+    },
+    "exposure": {
+     "v": "short",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^Cipro$",
+   "set": {
+    "treatment": {
+     "v": "abx_dna_gyrase",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "short",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

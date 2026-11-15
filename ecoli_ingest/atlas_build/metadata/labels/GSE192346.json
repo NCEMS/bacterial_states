@@ -1,0 +1,116 @@
+{
+ "gse": "GSE192346",
+ "notes": "ATCC 25922 is not described further in the text, so strain_group left out. DYDD is an antibacterial peptide that the summary says acts on the membrane; set treatment other_chemical (unsure: could be abx_membrane or envelope_solvent_biocide). Cultures were grown 24 h with DYDD or sterile water from inoculation -> exposure adapted; 24 h batch without dilution -> stationary (inferred, not over 24 h). Water-treated samples are the vehicle controls.",
+ "default": {
+  "strain_name": {
+   "v": "ATCC 25922",
+   "b": "stated",
+   "q": "ATCC 25922"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "ATCC 25922"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "ATCC 25922"
+  },
+  "base_medium": {
+   "v": "TSB",
+   "b": "stated",
+   "q": "Escherichia coli was incubated in TSB at 37 C for 8 h."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Escherichia coli was incubated in TSB at 37 C for 8 h."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Escherichia coli was incubated in TSB at 37 C for 8 h."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "cultured on a shaking table at 150 R/min and 37 C for 24 h"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "stated",
+   "q": "cultured on a shaking table at 150 R/min and 37 C for 24 h"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "cultured on a shaking table at 150 R/min and 37 C for 24 h"
+  },
+  "growth_phase": {
+   "v": "stationary",
+   "b": "inferred",
+   "q": "cultured on a shaking table at 150 R/min and 37 C for 24 h"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "200 μL of sterile water (control group; E_CK), or 50 mg/mL of DYDD solution (treatment group; P_DDDY)"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "200 μL of sterile water (control group; E_CK), or 50 mg/mL of DYDD solution (treatment group; P_DDDY)"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "200 μL of sterile water (control group; E_CK), or 50 mg/mL of DYDD solution (treatment group; P_DDDY)"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Illumina TruSeq RNA Sample Prep Kit (Cat#FC-122-1001) was used with 1 ug of total RNA for the construction of sequencing libraries."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^untreated$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "200 μL of sterile water (control group; E_CK)"
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^DYDD$",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": "50 mg/mL of DYDD solution (treatment group; P_DDDY)"
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "The bacteria were then cultured on a shaking table at 150 R/min and 37 C for 24 h"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

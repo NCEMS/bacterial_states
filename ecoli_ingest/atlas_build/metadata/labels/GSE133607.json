@@ -1,0 +1,745 @@
+{
+ "gse": "GSE133607",
+ "notes": "Strain Gly2 background not described (strain_group left out). Gly2-WT taken as the control (reference genotype; all samples share the 1 mM rhamnose induction). All other lines express one of the 46 heterologous genes (summary calls them all heterologous, including MBP, CC1, RFC); perturbed_genes is the construct name from the title. Phase: OD 0.3 in minimal medium, harvested 2 h after induction -> mid_exponential inferred.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "Gly2 cells transformed with heterologous gene expressing plasmid were grown in M9 with 0.2% w/v glycerol as carbon source"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "Gly2 cells transformed with heterologous gene expressing plasmid were grown in M9 with 0.2% w/v glycerol as carbon source"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "Gly2 cells transformed with heterologous gene expressing plasmid were grown in M9 with 0.2% w/v glycerol as carbon source"
+  },
+  "carbon_source": {
+   "v": "glycerol",
+   "b": "stated",
+   "q": "Gly2 cells transformed with heterologous gene expressing plasmid were grown in M9 with 0.2% w/v glycerol as carbon source"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "At A600 OD = 0.3 rhamnose was added to a final concentration of 1mM for induction of heterologous gene expression. Cells were harvested 2hrs after induction"
+  },
+  "genotype_class": {
+   "v": "heterologous_expression",
+   "b": "stated",
+   "q": "We generated a library of E. coli expressing 46 heterologous genes through an identical rhamnose inducible expression system"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNAseq of 46 lines of heterologous gene expressing lines of E. coli using the same expression system"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "1mM Rhamnose"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RNAseq of 46 lines of heterologous gene expressing lines of E. coli using the same expression system"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNAseq of 46 lines of heterologous gene expressing lines of E. coli using the same expression system"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNAseq of 46 lines of heterologous gene expressing lines of E. coli using the same expression system"
+  },
+  "strain_name": {
+   "v": "Gly2",
+   "b": "stated",
+   "q": "Gly2"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribosomal RNA was depleted using Illumina's Ribo-Zero rRNA removal kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA was depleted using Illumina's Ribo-Zero rRNA removal kit"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNAseq of 46 lines of heterologous gene expressing lines of E. coli using the same expression system"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^Gly2-WT",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {
+  "GSM3912877": {
+   "perturbed_genes": {
+    "v": "BRCA",
+    "b": "stated",
+    "q": "BRCA-1"
+   }
+  },
+  "GSM3912878": {
+   "perturbed_genes": {
+    "v": "BRCA",
+    "b": "stated",
+    "q": "BRCA-2"
+   }
+  },
+  "GSM3912879": {
+   "perturbed_genes": {
+    "v": "BRCAvar1",
+    "b": "stated",
+    "q": "BRCAvar1-1"
+   }
+  },
+  "GSM3912880": {
+   "perturbed_genes": {
+    "v": "BRCAvar1",
+    "b": "stated",
+    "q": "BRCAvar1-2"
+   }
+  },
+  "GSM3912881": {
+   "perturbed_genes": {
+    "v": "BRCAvar2",
+    "b": "stated",
+    "q": "BRCAvar2-3"
+   }
+  },
+  "GSM3912882": {
+   "perturbed_genes": {
+    "v": "BRCAvar2",
+    "b": "stated",
+    "q": "BRCAvar2-4"
+   }
+  },
+  "GSM3912883": {
+   "perturbed_genes": {
+    "v": "CC1",
+    "b": "stated",
+    "q": "CC1-2"
+   }
+  },
+  "GSM3912884": {
+   "perturbed_genes": {
+    "v": "CC1",
+    "b": "stated",
+    "q": "CC1-1"
+   }
+  },
+  "GSM3912885": {
+   "perturbed_genes": {
+    "v": "CNTF_belt",
+    "b": "stated",
+    "q": "CNTF_belt_1"
+   }
+  },
+  "GSM3912886": {
+   "perturbed_genes": {
+    "v": "CNTF_belt",
+    "b": "stated",
+    "q": "CNTF_belt_2"
+   }
+  },
+  "GSM3912889": {
+   "perturbed_genes": {
+    "v": "MBP",
+    "b": "stated",
+    "q": "MBP-2"
+   }
+  },
+  "GSM3912890": {
+   "perturbed_genes": {
+    "v": "MBP",
+    "b": "stated",
+    "q": "MBP-1"
+   }
+  },
+  "GSM3912891": {
+   "perturbed_genes": {
+    "v": "RFC",
+    "b": "stated",
+    "q": "RFC-1"
+   }
+  },
+  "GSM3912892": {
+   "perturbed_genes": {
+    "v": "RFC",
+    "b": "stated",
+    "q": "RFC-2"
+   }
+  },
+  "GSM3912893": {
+   "perturbed_genes": {
+    "v": "RFCvar1",
+    "b": "stated",
+    "q": "RFCvar1-1"
+   }
+  },
+  "GSM3912894": {
+   "perturbed_genes": {
+    "v": "RFCvar1",
+    "b": "stated",
+    "q": "RFCvar1-2"
+   }
+  },
+  "GSM3912895": {
+   "perturbed_genes": {
+    "v": "RFCvar2",
+    "b": "stated",
+    "q": "RFCvar2-1"
+   }
+  },
+  "GSM3912896": {
+   "perturbed_genes": {
+    "v": "RFCvar2",
+    "b": "stated",
+    "q": "RFCvar2-2"
+   }
+  },
+  "GSM3912897": {
+   "perturbed_genes": {
+    "v": "RFCvar3",
+    "b": "stated",
+    "q": "RFCvar3-1"
+   }
+  },
+  "GSM3912898": {
+   "perturbed_genes": {
+    "v": "RFCvar3",
+    "b": "stated",
+    "q": "RFCvar3-2"
+   }
+  },
+  "GSM3912899": {
+   "perturbed_genes": {
+    "v": "hsTPH_N174trunc",
+    "b": "stated",
+    "q": "hsTPH_N174trunc-1"
+   }
+  },
+  "GSM3912900": {
+   "perturbed_genes": {
+    "v": "hsTPH_N174trunc",
+    "b": "stated",
+    "q": "hsTPH_N174trunc-2"
+   }
+  },
+  "GSM3912901": {
+   "perturbed_genes": {
+    "v": "hsTPH_Ntermtrunc",
+    "b": "stated",
+    "q": "hsTPH_Ntermtrunc-1"
+   }
+  },
+  "GSM3912902": {
+   "perturbed_genes": {
+    "v": "hsTPH_Ntermtrunc",
+    "b": "stated",
+    "q": "hsTPH_Ntermtrunc-2"
+   }
+  },
+  "GSM3912903": {
+   "perturbed_genes": {
+    "v": "hsTPH_E2K",
+    "b": "stated",
+    "q": "hsTPH_E2K-1"
+   }
+  },
+  "GSM3912904": {
+   "perturbed_genes": {
+    "v": "hsTPH_E2K",
+    "b": "stated",
+    "q": "hsTPH_E2K-2"
+   }
+  },
+  "GSM3912905": {
+   "perturbed_genes": {
+    "v": "HsTPH",
+    "b": "stated",
+    "q": "HsTPH-1"
+   }
+  },
+  "GSM3912906": {
+   "perturbed_genes": {
+    "v": "HsTPH",
+    "b": "stated",
+    "q": "HsTPH-2"
+   }
+  },
+  "GSM3912907": {
+   "perturbed_genes": {
+    "v": "atASMT-325G",
+    "b": "stated",
+    "q": "atASMT-325G-1"
+   }
+  },
+  "GSM3912908": {
+   "perturbed_genes": {
+    "v": "atASMT-325G",
+    "b": "stated",
+    "q": "atASMT-325G-2"
+   }
+  },
+  "GSM3912909": {
+   "perturbed_genes": {
+    "v": "bpTDC",
+    "b": "stated",
+    "q": "bpTDC-1"
+   }
+  },
+  "GSM3912910": {
+   "perturbed_genes": {
+    "v": "bpTDC",
+    "b": "stated",
+    "q": "bpTDC-2"
+   }
+  },
+  "GSM3912911": {
+   "perturbed_genes": {
+    "v": "btAANAT",
+    "b": "stated",
+    "q": "btAANAT_1"
+   }
+  },
+  "GSM3912912": {
+   "perturbed_genes": {
+    "v": "btAANAT",
+    "b": "stated",
+    "q": "btAANAT_2"
+   }
+  },
+  "GSM3912913": {
+   "perturbed_genes": {
+    "v": "btASMT",
+    "b": "stated",
+    "q": "btASMT_1"
+   }
+  },
+  "GSM3912914": {
+   "perturbed_genes": {
+    "v": "btASMT",
+    "b": "stated",
+    "q": "btASMT_2"
+   }
+  },
+  "GSM3912915": {
+   "perturbed_genes": {
+    "v": "ccCOMT",
+    "b": "stated",
+    "q": "ccCOMT-1"
+   }
+  },
+  "GSM3912916": {
+   "perturbed_genes": {
+    "v": "CcCOMT",
+    "b": "stated",
+    "q": "CcCOMT-2"
+   }
+  },
+  "GSM3912917": {
+   "perturbed_genes": {
+    "v": "ckDDC",
+    "b": "stated",
+    "q": "ckDDC_1"
+   }
+  },
+  "GSM3912918": {
+   "perturbed_genes": {
+    "v": "ckDDC",
+    "b": "stated",
+    "q": "ckDDC_2"
+   }
+  },
+  "GSM3912919": {
+   "perturbed_genes": {
+    "v": "cobPNMT",
+    "b": "stated",
+    "q": "cobPNMT-1"
+   }
+  },
+  "GSM3912920": {
+   "perturbed_genes": {
+    "v": "cobPNMT",
+    "b": "stated",
+    "q": "cobPNMT-2"
+   }
+  },
+  "GSM3912921": {
+   "perturbed_genes": {
+    "v": "cvPhhB",
+    "b": "stated",
+    "q": "cvPhhB_1"
+   }
+  },
+  "GSM3912922": {
+   "perturbed_genes": {
+    "v": "cvPhhB",
+    "b": "stated",
+    "q": "cvPhhB_2"
+   }
+  },
+  "GSM3912923": {
+   "perturbed_genes": {
+    "v": "ggAANAT",
+    "b": "stated",
+    "q": "ggAANAT-1"
+   }
+  },
+  "GSM3912924": {
+   "perturbed_genes": {
+    "v": "ggAANAT",
+    "b": "stated",
+    "q": "ggAANAT-2"
+   }
+  },
+  "GSM3912925": {
+   "perturbed_genes": {
+    "v": "ggTPH",
+    "b": "stated",
+    "q": "ggTPH-1"
+   }
+  },
+  "GSM3912926": {
+   "perturbed_genes": {
+    "v": "ggTPH",
+    "b": "stated",
+    "q": "ggTPH-2"
+   }
+  },
+  "GSM3912927": {
+   "perturbed_genes": {
+    "v": "hsAANAT",
+    "b": "stated",
+    "q": "hsAANAT-2"
+   }
+  },
+  "GSM3912928": {
+   "perturbed_genes": {
+    "v": "HsAANAT",
+    "b": "stated",
+    "q": "HsAANAT-1"
+   }
+  },
+  "GSM3912929": {
+   "perturbed_genes": {
+    "v": "hsASMT",
+    "b": "stated",
+    "q": "hsASMT-1"
+   }
+  },
+  "GSM3912930": {
+   "perturbed_genes": {
+    "v": "hsASMT",
+    "b": "stated",
+    "q": "hsASMT-2"
+   }
+  },
+  "GSM3912931": {
+   "perturbed_genes": {
+    "v": "hsPNMT-mb",
+    "b": "stated",
+    "q": "hsPNMT-mb-1"
+   }
+  },
+  "GSM3912932": {
+   "perturbed_genes": {
+    "v": "hsPNMT-mb",
+    "b": "stated",
+    "q": "hsPNMT-mb-2"
+   }
+  },
+  "GSM3912933": {
+   "perturbed_genes": {
+    "v": "hsTPH-E2K-N91I-P99C",
+    "b": "stated",
+    "q": "hsTPH-E2K-N91I-P99C-1"
+   }
+  },
+  "GSM3912934": {
+   "perturbed_genes": {
+    "v": "hsTPH-E2K-N91I-P99C",
+    "b": "stated",
+    "q": "hsTPH-E2K-N91I-P99C-2"
+   }
+  },
+  "GSM3912935": {
+   "perturbed_genes": {
+    "v": "hsTPH-N158trunc",
+    "b": "stated",
+    "q": "hsTPH-N158trunc-Set4-7"
+   }
+  },
+  "GSM3912936": {
+   "perturbed_genes": {
+    "v": "hsTPH-N158trunc",
+    "b": "stated",
+    "q": "hsTPH-N158trunc-Set4-8"
+   }
+  },
+  "GSM3912937": {
+   "perturbed_genes": {
+    "v": "hsTPH1",
+    "b": "stated",
+    "q": "hsTPH1-1"
+   }
+  },
+  "GSM3912938": {
+   "perturbed_genes": {
+    "v": "hsTPH1",
+    "b": "stated",
+    "q": "hsTPH1-2"
+   }
+  },
+  "GSM3912939": {
+   "perturbed_genes": {
+    "v": "msCOMT",
+    "b": "stated",
+    "q": "msCOMT-1"
+   }
+  },
+  "GSM3912940": {
+   "perturbed_genes": {
+    "v": "msCOMT",
+    "b": "stated",
+    "q": "msCOMT-2"
+   }
+  },
+  "GSM3912941": {
+   "perturbed_genes": {
+    "v": "ocAANAT",
+    "b": "stated",
+    "q": "ocAANAT-1"
+   }
+  },
+  "GSM3912942": {
+   "perturbed_genes": {
+    "v": "ocAANAT",
+    "b": "stated",
+    "q": "ocAANAT-2"
+   }
+  },
+  "GSM3912943": {
+   "perturbed_genes": {
+    "v": "osTDC-K374H",
+    "b": "stated",
+    "q": "osTDC-K374H-1"
+   }
+  },
+  "GSM3912944": {
+   "perturbed_genes": {
+    "v": "osTDC-K374H",
+    "b": "stated",
+    "q": "osTDC-K374H-2"
+   }
+  },
+  "GSM3912945": {
+   "perturbed_genes": {
+    "v": "osTDC-K374L",
+    "b": "stated",
+    "q": "osTDC-K374L-1"
+   }
+  },
+  "GSM3912946": {
+   "perturbed_genes": {
+    "v": "osTDC-K374L",
+    "b": "stated",
+    "q": "osTDC-K374L-2"
+   }
+  },
+  "GSM3912947": {
+   "perturbed_genes": {
+    "v": "osTDC-K374Q",
+    "b": "stated",
+    "q": "osTDC-K374Q-1"
+   }
+  },
+  "GSM3912948": {
+   "perturbed_genes": {
+    "v": "osTDC-K374Q",
+    "b": "stated",
+    "q": "osTDC-K374Q-2"
+   }
+  },
+  "GSM3912949": {
+   "perturbed_genes": {
+    "v": "osTDC-L360V",
+    "b": "stated",
+    "q": "osTDC-L360V-1"
+   }
+  },
+  "GSM3912950": {
+   "perturbed_genes": {
+    "v": "osTDC-L360V",
+    "b": "stated",
+    "q": "osTDC-L360V-2"
+   }
+  },
+  "GSM3912951": {
+   "perturbed_genes": {
+    "v": "pmTPH",
+    "b": "stated",
+    "q": "pmTPH-1"
+   }
+  },
+  "GSM3912952": {
+   "perturbed_genes": {
+    "v": "pmTPH",
+    "b": "stated",
+    "q": "pmTPH-2"
+   }
+  },
+  "GSM3912953": {
+   "perturbed_genes": {
+    "v": "rnCOMT-sol",
+    "b": "stated",
+    "q": "rnCOMT-sol-1"
+   }
+  },
+  "GSM3912954": {
+   "perturbed_genes": {
+    "v": "rnCOMT-sol",
+    "b": "stated",
+    "q": "rnCOMT-sol-2"
+   }
+  },
+  "GSM3912955": {
+   "perturbed_genes": {
+    "v": "rnPNMT",
+    "b": "stated",
+    "q": "rnPNMT-1"
+   }
+  },
+  "GSM3912956": {
+   "perturbed_genes": {
+    "v": "rnPNMT",
+    "b": "stated",
+    "q": "rnPNMT-2"
+   }
+  },
+  "GSM3912957": {
+   "perturbed_genes": {
+    "v": "rnTDC",
+    "b": "stated",
+    "q": "rnTDC-1"
+   }
+  },
+  "GSM3912958": {
+   "perturbed_genes": {
+    "v": "rnTDC",
+    "b": "stated",
+    "q": "rnTDC-2"
+   }
+  },
+  "GSM3912959": {
+   "perturbed_genes": {
+    "v": "rnTDC-trunc",
+    "b": "stated",
+    "q": "rnTDC-trunc-1"
+   }
+  },
+  "GSM3912960": {
+   "perturbed_genes": {
+    "v": "rnTDC-trunc",
+    "b": "stated",
+    "q": "rnTDC-trunc-2"
+   }
+  },
+  "GSM3912961": {
+   "perturbed_genes": {
+    "v": "saCOMT-T2A",
+    "b": "stated",
+    "q": "saCOMT-T2A-1"
+   }
+  },
+  "GSM3912962": {
+   "perturbed_genes": {
+    "v": "saCOMT-T2A",
+    "b": "stated",
+    "q": "saCOMT-T2A-2"
+   }
+  },
+  "GSM3912963": {
+   "perturbed_genes": {
+    "v": "sfCOMT",
+    "b": "stated",
+    "q": "sfCOMT-1"
+   }
+  },
+  "GSM3912964": {
+   "perturbed_genes": {
+    "v": "sfCOMT",
+    "b": "stated",
+    "q": "sfCOMT-2"
+   }
+  },
+  "GSM3912965": {
+   "perturbed_genes": {
+    "v": "sgAANAT-D63G",
+    "b": "stated",
+    "q": "sgAANAT-D63G-1"
+   }
+  },
+  "GSM3912966": {
+   "perturbed_genes": {
+    "v": "sgAANAT-D63G",
+    "b": "stated",
+    "q": "sgAANAT-D63G-2"
+   }
+  },
+  "GSM3912967": {
+   "perturbed_genes": {
+    "v": "ssDDC",
+    "b": "stated",
+    "q": "ssDDC-1"
+   }
+  },
+  "GSM3912968": {
+   "perturbed_genes": {
+    "v": "ssDDC",
+    "b": "stated",
+    "q": "ssDDC-2"
+   }
+  },
+  "GSM3912969": {
+   "perturbed_genes": {
+    "v": "tp53b",
+    "b": "stated",
+    "q": "tp53b-1"
+   }
+  },
+  "GSM3912970": {
+   "perturbed_genes": {
+    "v": "tp53b",
+    "b": "stated",
+    "q": "tp53b-2"
+   }
+  }
+ }
+}

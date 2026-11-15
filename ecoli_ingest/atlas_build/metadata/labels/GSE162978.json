@@ -1,0 +1,116 @@
+{
+ "gse": "GSE162978",
+ "notes": "In vitro LB samples are the control; in vivo cecum samples labelled in_host with mixed_organism true. Treatment left out for in vivo samples (host environment, not a stated treatment). No culture details (temperature, shaking, phase) for the LB cultures. WT re-read: NRG857c used unmodified (titles say wt), so wild_type.",
+ "default": {
+  "strain_group": {
+   "v": "AIEC",
+   "b": "stated",
+   "q": "AIEC str. NRG857c"
+  },
+  "strain_name": {
+   "v": "NRG857c",
+   "b": "stated",
+   "q": "O83;H1 str. NRG857c"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "AIEC wt"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "AIEC wt"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA was extracted from AIEC populations in vitro and in the ceca of infected hosts."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA was extracted from AIEC populations in vitro and in the ceca of infected hosts."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Transcriptomes were sequenced using the Illumina HiSeq 2000 platform"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA was extracted from AIEC populations in vitro and in the ceca of infected hosts."
+  }
+ },
+ "rules": [
+  {
+   "field": "source_name",
+   "regex": "in vitro",
+   "set": {
+    "base_medium": {
+     "v": "LB",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "complex",
+     "b": "inferred",
+     "q": "AIEC wt LB1"
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": "AIEC wt LB1"
+    },
+    "treatment": {
+     "v": "none",
+     "b": "study_default",
+     "q": "RNA was extracted from AIEC populations in vitro and in the ceca of infected hosts."
+    },
+    "mixed_organism": {
+     "v": false,
+     "b": "study_default",
+     "q": "RNA was extracted from AIEC populations in vitro and in the ceca of infected hosts."
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "cecum",
+   "set": {
+    "culture_mode": {
+     "v": "in_host",
+     "b": "stated",
+     "q": ""
+    },
+    "growth_phase": {
+     "v": "not_applicable",
+     "b": "inferred",
+     "q": ""
+    },
+    "base_medium": {
+     "v": "gut_content",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "natural_fluid",
+     "b": "inferred",
+     "q": ""
+    },
+    "mixed_organism": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

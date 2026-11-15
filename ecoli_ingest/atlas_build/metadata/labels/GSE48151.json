@@ -1,0 +1,178 @@
+{
+ "gse": "GSE48151",
+ "notes": "Heat-shock medium, temperatures and pre-shift phase not given. MOPS-P read as phosphate starvation in MOPS; the 0h samples get no treatment/is_control (unclear whether reference or just shifted). LB OD 0.87 is above the inference range: no phase. Libraries made with a (TruSeq) Small RNA prep kit from rRNA-depleted total RNA: labelled total_rnaseq, but not certain there was no size selection. WT re-read: plain MG1655, genotype_class wild_type.",
+ "default": {
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "MG1655"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "MG1655"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K12"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA profiles of E.coli K12 cultured under different treaments including LB (OD=0.87), Heatshock (15min, 30min, 60min), and MOPS-P(0h,2h,4h)."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA profiles of E.coli K12 cultured under different treaments including LB (OD=0.87), Heatshock (15min, 30min, 60min), and MOPS-P(0h,2h,4h)."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA profiles of E.coli K12 cultured under different treaments including LB (OD=0.87), Heatshock (15min, 30min, 60min), and MOPS-P(0h,2h,4h)."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "To enrich mRNAs and other transcripts, majority of rRNAs were removed from the DNase-treated total RNA using a MICROBExpress kit (Ambion) following the manufacturer’s instructions."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "To enrich mRNAs and other transcripts, majority of rRNAs were removed from the DNase-treated total RNA using a MICROBExpress kit (Ambion) following the manufacturer’s instructions."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA profiles of E.coli K12 cultured under different treaments including LB (OD=0.87), Heatshock (15min, 30min, 60min), and MOPS-P(0h,2h,4h)."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:culture/growth condition",
+   "regex": "^LB",
+   "set": {
+    "base_medium": {
+     "v": "LB",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "complex",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    },
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:culture/growth condition",
+   "regex": "^Heatshock",
+   "set": {
+    "treatment": {
+     "v": "heat",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:culture/growth condition",
+   "regex": "^Heatshock (15|30)min",
+   "set": {
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:culture/growth condition",
+   "regex": "^Heatshock 60min",
+   "set": {
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:culture/growth condition",
+   "regex": "^MOPS-P",
+   "set": {
+    "base_medium": {
+     "v": "MOPS",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:culture/growth condition",
+   "regex": "^MOPS-P [24]h",
+   "set": {
+    "treatment": {
+     "v": "phosphate_starvation",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:culture/growth condition",
+   "regex": "^MOPS-P 2h",
+   "set": {
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:culture/growth condition",
+   "regex": "^MOPS-P 4h",
+   "set": {
+    "exposure": {
+     "v": "adapted",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:culture/growth condition",
+   "regex": "^MOPS-P 0h",
+   "set": {
+    "is_control": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

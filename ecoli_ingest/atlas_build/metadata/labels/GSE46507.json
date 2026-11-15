@@ -1,0 +1,93 @@
+{
+ "gse": "GSE46507",
+ "notes": "Both samples are 5'-end (dRNA-seq, -/+ TAP) libraries from one culture: assay_class end_mapping. TAP is an in vitro library treatment, so treatment none. is_control left out: a single biological condition, no comparison.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "was cultivated in 100 mL of LB broth ( Miller 1972. In: Experiments in molecular genetics. Cold Spring Harbor Laboratory, NY) in a 250 mL Erlenmeyer flask at 37°C with shaking (250 rpm) to an O.D.600nm of 0.6."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "was cultivated in 100 mL of LB broth ( Miller 1972. In: Experiments in molecular genetics. Cold Spring Harbor Laboratory, NY) in a 250 mL Erlenmeyer flask at 37°C with shaking (250 rpm) to an O.D.600nm of 0.6."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "was cultivated in 100 mL of LB broth ( Miller 1972. In: Experiments in molecular genetics. Cold Spring Harbor Laboratory, NY) in a 250 mL Erlenmeyer flask at 37°C with shaking (250 rpm) to an O.D.600nm of 0.6."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "was cultivated in 100 mL of LB broth ( Miller 1972. In: Experiments in molecular genetics. Cold Spring Harbor Laboratory, NY) in a 250 mL Erlenmeyer flask at 37°C with shaking (250 rpm) to an O.D.600nm of 0.6."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "stated",
+   "q": "was cultivated in 100 mL of LB broth ( Miller 1972. In: Experiments in molecular genetics. Cold Spring Harbor Laboratory, NY) in a 250 mL Erlenmeyer flask at 37°C with shaking (250 rpm) to an O.D.600nm of 0.6."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "was cultivated in 100 mL of LB broth ( Miller 1972. In: Experiments in molecular genetics. Cold Spring Harbor Laboratory, NY) in a 250 mL Erlenmeyer flask at 37°C with shaking (250 rpm) to an O.D.600nm of 0.6."
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "The E. coli sample was extracted during mid-exponential growth"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "stated",
+   "q": "wild-type"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "wild-type"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli K12 strain BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "BW25113"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Each of the two samples was incubated with or without TAP (tobacco acid pyrophosphatase) before library construction."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Each of the two samples was incubated with or without TAP (tobacco acid pyrophosphatase) before library construction."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Each of the two samples was incubated with or without TAP (tobacco acid pyrophosphatase) before library construction."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Escherichia coli K12 strain BW25113 Wild-type reference strain."
+  },
+  "assay_class": {
+   "v": "end_mapping",
+   "b": "stated",
+   "q": "The 5'-sequencing adaptor was ligated to transcripts prior to fragmentation, thereby allowing the 5' ends of both long and short transcripts to be detected."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Samples were enriched for mRNA using MICROBExpress-Bacteria beads"
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

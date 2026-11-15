@@ -1,0 +1,121 @@
+{
+ "gse": "GSE276976",
+ "notes": "Reviewed 2026-11-15: co-culture with another bacterium is treatment coculture (user decision) | E. coli 47-1826 (commensal poultry isolate) alone vs co-cultured with Salmonella Heidelberg, 24 h anaerobic in LB. Co-culture samples contain Salmonella RNA (mixed_organism true); co-culture has no treatment class, so treatment left out for them. Anaerobic LB with no electron acceptor named -> anaerobic_fermentation (inferred). 24 h batch -> stationary (inferred). Shaking not described, culture_mode left out. Library kit is TruSeq Stranded mRNA after MICROBExpress depletion; rrna_removal depletion.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "grown  in Luria Bertani (LB) (BD, Difco, Franklin Lakes, NJ, USA) broth"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "grown  in Luria Bertani (LB) (BD, Difco, Franklin Lakes, NJ, USA) broth"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "grown  in Luria Bertani (LB) (BD, Difco, Franklin Lakes, NJ, USA) broth"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "incubated for 24 h at 37°C under anaerobic conditions."
+  },
+  "oxygen": {
+   "v": "anaerobic_fermentation",
+   "b": "inferred",
+   "q": "incubated for 24 h at 37°C under anaerobic conditions."
+  },
+  "growth_phase": {
+   "v": "stationary",
+   "b": "inferred",
+   "q": "incubated for 24 h at 37°C under anaerobic conditions."
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "WT"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "WT"
+  },
+  "strain_group": {
+   "v": "natural_isolate",
+   "b": "stated",
+   "q": "commensal Escherichia coli of poultry origin"
+  },
+  "strain_name": {
+   "v": "47-1826",
+   "b": "stated",
+   "q": "E. coli 47-1826"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "we  co-cultured the S. Heidelberg 18-9079 with E. coli 47-1826 in anaerobic environment"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "we  co-cultured the S. Heidelberg 18-9079 with E. coli 47-1826 in anaerobic environment"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "The samples further processed for rRNA depletion to enrich bacterial mRNA using using MICROBExpress"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "processed for rRNA depletion to enrich bacterial mRNA"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^none$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "E. coli 47-1826 in media_1"
+    },
+    "mixed_organism": {
+     "v": false,
+     "b": "stated",
+     "q": "E. coli 47-1826 in media_1"
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "co-culture",
+   "set": {
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "mixed_organism": {
+     "v": true,
+     "b": "stated",
+     "q": "S. Heidelberg 18-9079+ E. coli 47-1826 in media_1"
+    },
+    "treatment": {
+     "v": "coculture",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

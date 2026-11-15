@@ -1,0 +1,158 @@
+{
+ "gse": "GSE59468",
+ "notes": "Reviewed 2026-11-15: 15 min resuspension in urine is medium_or_oxygen_shift | Both strains grown in MOPS+tryptone+glucose to OD600 0.2, then resuspended 15 min in urine or MOPS. MOPS-resuspended samples are the controls of each strain. The urine shift is not a scheme treatment (medium change to a natural fluid), so treatment/exposure, carbon source and amino_acids_supplied are left out for urine samples. Phase mid_exponential inferred from OD 0.2 kept for the 15 min after the shift. rRNA removal not stated (TruSeq RNA kit).",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "until the OD600 reached 0.2"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "both strains were grown with shaking at 37°C in 12ml MOPS media  supplemented with 0.2% tryptone and 0.2% glucose until the OD600 reached 0.2"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "The re-suspended bacteria were grown for 15 additional minutes with shaking at 37°C"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown for 15 additional minutes with shaking at 37°C"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "study_default",
+   "q": "Examination of 2 E. coli strains in 2 conditions"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of 2 E. coli strains in 2 conditions"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of 2 E. coli strains in 2 conditions"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of 2 E. coli strains in 2 conditions"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of 2 E. coli strains in 2 conditions"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "RNA-seq libraries were prepared using the TruSeq RNA Sample Prep Kits (Illumina)"
+  }
+ },
+ "rules": [
+  {
+   "field": "organism",
+   "regex": "CFT073",
+   "set": {
+    "strain_group": {
+     "v": "UPEC",
+     "b": "inferred",
+     "q": "Escherichia coli CFT073"
+    },
+    "strain_name": {
+     "v": "CFT073",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "organism",
+   "regex": "MG1655",
+   "set": {
+    "strain_group": {
+     "v": "K-12",
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:condition",
+   "regex": "^MOPS$",
+   "set": {
+    "base_medium": {
+     "v": "MOPS",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "minimal_plus_hydrolysate",
+     "b": "inferred",
+     "q": "MOPS media  supplemented with 0.2% tryptone and 0.2% glucose"
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": "MOPS media  supplemented with 0.2% tryptone"
+    },
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": "supplemented with 0.2% tryptone and 0.2% glucose"
+    },
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "re-suspended with either urine or MOPS"
+    },
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": "re-suspended with either urine or MOPS"
+    }
+   }
+  },
+  {
+   "field": "ch:condition",
+   "regex": "^urine$",
+   "set": {
+    "base_medium": {
+     "v": "urine",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "natural_fluid",
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "treatment": {
+     "v": "medium_or_oxygen_shift",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

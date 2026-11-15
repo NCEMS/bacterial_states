@@ -1,0 +1,127 @@
+{
+ "gse": "GSE330026",
+ "notes": "Every sample is heat shocked (45 °C, 2 h); no untreated condition, so is_control left out. growth_phase mid_exponential inferred from pre-shift 'exponential phase' (sampled at 2 h). GndA mutants also lack tolC -> multiple. Shaking not described -> oxygen/culture_mode left out.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Cultures were subjected to heat shock by growth in LB medium at 45 °C for 2 hours."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Cultures were subjected to heat shock by growth in LB medium at 45 °C for 2 hours."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Cultures were subjected to heat shock by growth in LB medium at 45 °C for 2 hours."
+  },
+  "growth_temperature": {
+   "v": 45,
+   "b": "stated",
+   "q": "Cultures were subjected to heat shock by growth in LB medium at 45 °C for 2 hours."
+  },
+  "treatment": {
+   "v": "heat",
+   "b": "stated",
+   "q": "heat shock (45 °C, 2 h)"
+  },
+  "exposure": {
+   "v": "short",
+   "b": "inferred",
+   "q": "heat shock (45 °C, 2 h)"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "Escherichia coli strains were grown in LB medium at 37 °C to exponential phase prior to heat shock treatment."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K-12 MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiling of wild-type Escherichia coli K-12 MG1655 (two independent batches), GndA mutant derivatives"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiling of wild-type Escherichia coli K-12 MG1655 (two independent batches), GndA mutant derivatives"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiling of wild-type Escherichia coli K-12 MG1655 (two independent batches), GndA mutant derivatives"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was extracted using the Qiagen RNeasy Protect Bacteria kit."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "ribosomal RNA depletion and library preparation were performed"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "GndA mutant derivatives (Mutant 116 and Mutant 129), and a ΔtolC control strain"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^Wildtype$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^tolC deletion$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "tolC",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^GndA",
+   "set": {
+    "genotype_class": {
+     "v": "multiple",
+     "b": "inferred",
+     "q": "all mutants used in this study lack tolC"
+    },
+    "perturbed_genes": {
+     "v": "gndA;tolC",
+     "b": "stated",
+     "q": "all mutants used in this study lack tolC"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

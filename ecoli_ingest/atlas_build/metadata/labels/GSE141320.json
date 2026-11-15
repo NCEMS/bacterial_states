@@ -1,0 +1,275 @@
+{
+ "gse": "GSE141320",
+ "notes": "Chloramphenicol and heat-shock sets have no untreated sample; the only control is mazF0 (MG1655 pBAD30-empty + arabinose). mazF1/5/10 are mixtures of pBAD30-mazF and pBAD30-empty cells: genotype_class and perturbed_genes left out. Chloramphenicol medium not named ('fresh media'), so medium labels left out there. Delta10TA genes not named individually. WT re-read: plain MG1655 samples are wild_type; mazF0 (pBAD30-empty) stays reference.",
+ "default": {
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "in an orbital shaker at 200 RPM"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "in an orbital shaker at 200 RPM"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "grown 3-4 hours to an OD600 of ~0.3"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq was performed on RNA extracted from E. coli MG1655 wildtype and a strain lacking ten toxin-antitoxin (TA)  systems (∆10TA) following 15, 30, and 60 min of chloramphenicol treatment."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq was performed on RNA extracted from E. coli MG1655 wildtype and a strain lacking ten toxin-antitoxin (TA)  systems (∆10TA) following 15, 30, and 60 min of chloramphenicol treatment."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq was performed on RNA extracted from E. coli MG1655 wildtype and a strain lacking ten toxin-antitoxin (TA)  systems (∆10TA) following 15, 30, and 60 min of chloramphenicol treatment."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq was performed on RNA extracted from E. coli MG1655 wildtype and a strain lacking ten toxin-antitoxin (TA)  systems (∆10TA) following 15, 30, and 60 min of chloramphenicol treatment."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "RNA with rRNA subtracted"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "RNA with rRNA subtracted"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "_chlor_",
+   "set": {
+    "treatment": {
+     "v": "abx_translation",
+     "b": "stated",
+     "q": ""
+    },
+    "growth_temperature": {
+     "v": 37,
+     "b": "stated",
+     "q": "grown 3-4 hours to an OD600 of ~0.3 at 37°C in an orbital shaker at 200 RPM. Chloramphenicol was added to a final concentration of 75 µg/mL."
+    },
+    "inducer_added": {
+     "v": false,
+     "b": "stated",
+     "q": "grown 3-4 hours to an OD600 of ~0.3 at 37°C in an orbital shaker at 200 RPM. Chloramphenicol was added to a final concentration of 75 µg/mL."
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "_chlor_(15|30)$",
+   "set": {
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "_chlor_60$",
+   "set": {
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "heatshock",
+   "set": {
+    "treatment": {
+     "v": "heat",
+     "b": "stated",
+     "q": ""
+    },
+    "growth_temperature": {
+     "v": 45,
+     "b": "stated",
+     "q": "Cells were shifted to a shaking incubator set to 45°C and collected for RNA extraction at indicated time point."
+    },
+    "inducer_added": {
+     "v": false,
+     "b": "stated",
+     "q": "Cells were shifted to a shaking incubator set to 45°C and collected for RNA extraction at indicated time point."
+    },
+    "base_medium": {
+     "v": "M9",
+     "b": "stated",
+     "q": "Overnight cultures were back diluted into M9-glucose media"
+    },
+    "medium_class": {
+     "v": "defined_minimal",
+     "b": "inferred",
+     "q": "Overnight cultures were back diluted into M9-glucose media"
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": "Overnight cultures were back diluted into M9-glucose media"
+    },
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": "Overnight cultures were back diluted into M9-glucose media"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "heatshock_15$",
+   "set": {
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "heatshock_60$",
+   "set": {
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^MG1655$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": "MG1655 wildtype"
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "(?i)delta\\}?10TA",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "ten type II toxin-antitoxin systems (delta10TA)",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^mazF",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "Cells were washed into M9-glycerol media and diluted to OD ~0.2. After 30 min, arabinose was added to 0.2%. After 10 min, samples were collected for RNA"
+    },
+    "inducer_added": {
+     "v": true,
+     "b": "stated",
+     "q": "Cells were washed into M9-glycerol media and diluted to OD ~0.2. After 30 min, arabinose was added to 0.2%. After 10 min, samples were collected for RNA"
+    },
+    "growth_temperature": {
+     "v": 37,
+     "b": "stated",
+     "q": "grown 3-4 hours to an OD600 of ~0.3 at 37°C"
+    },
+    "base_medium": {
+     "v": "M9",
+     "b": "stated",
+     "q": "Cells were washed into M9-glycerol media and diluted to OD ~0.2. After 30 min, arabinose was added to 0.2%. After 10 min, samples were collected for RNA"
+    },
+    "medium_class": {
+     "v": "defined_minimal",
+     "b": "inferred",
+     "q": "Cells were washed into M9-glycerol media and diluted to OD ~0.2. After 30 min, arabinose was added to 0.2%. After 10 min, samples were collected for RNA"
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": "Cells were washed into M9-glycerol media and diluted to OD ~0.2. After 30 min, arabinose was added to 0.2%. After 10 min, samples were collected for RNA"
+    },
+    "carbon_source": {
+     "v": "glycerol",
+     "b": "stated",
+     "q": "Cells were washed into M9-glycerol media and diluted to OD ~0.2. After 30 min, arabinose was added to 0.2%. After 10 min, samples were collected for RNA"
+    },
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": "Cells were washed into M9-glycerol media and diluted to OD ~0.2. After 30 min, arabinose was added to 0.2%. After 10 min, samples were collected for RNA"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^mazF100$",
+   "set": {
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "mazF",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^mazF0$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,102 @@
+{
+ "gse": "GSE48829",
+ "notes": "WT vs ydcR and yjiR mutants in unnamed minimal medium (base_medium and carbon source unknown). Mutation type not given, so genotype_class left out for mutants. Library protocol text is uninformative ('standard Illumina protocols'); assay taken as ordinary RNA-seq.",
+ "default": {
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "study_default",
+   "q": "growth in minimal medium"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "growth in minimal medium"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA profiles of Wild Type and two Mutant Strains (ydcR (b1439) MUTANT and yjiR (b4340) MUTANT)"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "mRNA profiles of Wild Type and two Mutant Strains (ydcR (b1439) MUTANT and yjiR (b4340) MUTANT)"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA profiles of Wild Type and two Mutant Strains (ydcR (b1439) MUTANT and yjiR (b4340) MUTANT)"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "mRNA profiles of Wild Type and two Mutant Strains (ydcR (b1439) MUTANT and yjiR (b4340) MUTANT)"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "RNA libraries were prepared for sequencing using standard Illumina protocols"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA profiles of Wild Type and two Mutant Strains (ydcR (b1439) MUTANT and yjiR (b4340) MUTANT)"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA profiles of Wild Type and two Mutant Strains (ydcR (b1439) MUTANT and yjiR (b4340) MUTANT)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "ydcR",
+   "set": {
+    "perturbed_genes": {
+     "v": "ydcR",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "yjiR",
+   "set": {
+    "perturbed_genes": {
+     "v": "yjiR",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

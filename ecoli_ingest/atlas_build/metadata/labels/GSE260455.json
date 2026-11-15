@@ -1,0 +1,133 @@
+{
+ "gse": "GSE260455",
+ "notes": "All samples acid-shocked (pH 5.8 for 15 min, then pH 4.4 for 15 min), so no untreated control and no is_control. Phase is the pre-shift exponential phase (OD 0.5), kept because sampling is 30 min after the shift. Temperature and shaking not stated. WT re-read: MG1655 and BW25113 wild types are unmodified, genotype_class wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "aerobically grown to exponential phase in 200 ml of unbuffered LB media (pH 7.6) in 1 liter glas flasks"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "aerobically grown to exponential phase in 200 ml of unbuffered LB media (pH 7.6) in 1 liter glas flasks"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "aerobically grown to exponential phase in 200 ml of unbuffered LB media (pH 7.6) in 1 liter glas flasks"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "aerobically grown to exponential phase in 200 ml of unbuffered LB media (pH 7.6) in 1 liter glas flasks"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "aerobically grown to exponential phase in 200 ml of unbuffered LB media (pH 7.6) in 1 liter glas flasks"
+  },
+  "treatment": {
+   "v": "acid",
+   "b": "stated",
+   "q": "pH 4.4"
+  },
+  "exposure": {
+   "v": "acute",
+   "b": "stated",
+   "q": "After 15, 5M HCl was added again to adjust the pH to 4.4 and cells were incubated for another 15 min."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Comparison of genome-wide mRNA levels in E. coli MG1655 WT and dmhpR, as well as BW25113 and BW25113 mhpR::km (Keio collection) at pH 4.4 in LB medium."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparison of genome-wide mRNA levels in E. coli MG1655 WT and dmhpR, as well as BW25113 and BW25113 mhpR::km (Keio collection) at pH 4.4 in LB medium."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparison of genome-wide mRNA levels in E. coli MG1655 WT and dmhpR, as well as BW25113 and BW25113 mhpR::km (Keio collection) at pH 4.4 in LB medium."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparison of genome-wide mRNA levels in E. coli MG1655 WT and dmhpR, as well as BW25113 and BW25113 mhpR::km (Keio collection) at pH 4.4 in LB medium."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribosomal RNA depletion was performed using the NEBNext rRNA Depletion Kit for bacteria (NEB)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA depletion was performed using the NEBNext rRNA Depletion Kit for bacteria (NEB)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "MG1655",
+   "set": {
+    "strain_name": {
+     "v": "MG1655",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "BW25113",
+   "set": {
+    "strain_name": {
+     "v": "BW25113",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "Wildtype",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "mhpR",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "mhpR",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

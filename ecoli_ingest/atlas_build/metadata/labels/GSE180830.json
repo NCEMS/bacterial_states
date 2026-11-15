@@ -1,0 +1,131 @@
+{
+ "gse": "GSE180830",
+ "notes": "WT MG1655 vs SQ53 (rrnGBAD deleted) in M9 glucose, early exponential (stated in extract protocol). rRNA removal: Zymo-Seq RiboFree named (depletion), though 'TruSeq stranded mRNA kit' is also listed. Shaking not stated.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K-12 MG1655"
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "Cells were grown at 37°C in M9 minimal medium supplemented with glucose (4 g/L)."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "Cells were grown at 37°C in M9 minimal medium supplemented with glucose (4 g/L)."
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "Cells were grown at 37°C in M9 minimal medium supplemented with glucose (4 g/L)."
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "Cells were grown at 37°C in M9 minimal medium supplemented with glucose (4 g/L)."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Cells were grown at 37°C in M9 minimal medium supplemented with glucose (4 g/L)."
+  },
+  "growth_phase": {
+   "v": "early_exponential",
+   "b": "stated",
+   "q": "Samples at early exponential growth phase"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Zymo-Seq RiboFree Total RNA Library kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "inferred",
+   "q": "Zymo-Seq RiboFree Total RNA Library kit"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "No treatment"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA of exponentially growing E. coli mutants in M9 minimal medium supplemented with glucose"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA of exponentially growing E. coli mutants in M9 minimal medium supplemented with glucose"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA of exponentially growing E. coli mutants in M9 minimal medium supplemented with glucose"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "rrnGBAD",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "MG1655 mutant with four rRNA operons deleted"
+    },
+    "perturbed_genes": {
+     "v": "rrnG;rrnB;rrnA;rrnD",
+     "b": "stated",
+     "q": "-rrnGBAD"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": "-rrnGBAD"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": "-rrnGBAD"
+    },
+    "strain_name": {
+     "v": "SQ53",
+     "b": "stated",
+     "q": "SQ53"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

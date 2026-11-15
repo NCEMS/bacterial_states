@@ -1,0 +1,29 @@
+{
+  "gse": "GSE54199",
+  "notes": "JM83 in LB in microtiter plates, untreated vs grown with 0.5 ug/ml trimethoprim from dilution (adapted). Harvest at 1/3 of maximum OD600, no OD value or phase word -> growth_phase left out. Temperature and aeration not stated.",
+  "default": {
+    "culture_mode": {"v": "batch_microplate", "b": "stated", "q": "diluted 1/100 in LB medium and grown in microtiter plates"},
+    "base_medium": {"v": "LB", "b": "stated", "q": "diluted 1/100 in LB medium"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "diluted 1/100 in LB medium"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "diluted 1/100 in LB medium"},
+    "genotype_class": {"v": "reference", "b": "stated", "q": "wild type"},
+    "global_regulator_perturbed": {"v": false, "b": "stated", "q": "wild type"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "cells grown without antibiotics were compared to cells grown with 0.5 μg/ml trimethoprim"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "cells grown without antibiotics were compared to cells grown with 0.5 μg/ml trimethoprim"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "cells grown without antibiotics were compared to cells grown with 0.5 μg/ml trimethoprim"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "JM83"},
+    "strain_name": {"v": "JM83", "b": "stated", "q": "JM83"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "total RNA, rRNA depleted"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "ribosomal RNA molecules were depleted using the Ribo-Zero rRNA Removal Kit"}
+  },
+  "rules": [
+    {"field": "ch:treated with", "regex": "^none",
+     "set": {"treatment": {"v": "none", "b": "stated", "q": ""},
+             "is_control": {"v": true, "b": "stated", "q": ""}}},
+    {"field": "ch:treated with", "regex": "trimethoprim",
+     "set": {"treatment": {"v": "abx_folate", "b": "stated", "q": ""},
+             "exposure": {"v": "adapted", "b": "stated", "q": "Overnight cultures of strain JM83 were diluted 1/100 in LB medium and grown in microtiter plates. To study the effects of trimethoprim, cells grown without antibiotics were compared to cells grown with 0.5 μg/ml trimethoprim."},
+             "is_control": {"v": false, "b": "stated", "q": ""}}}
+  ],
+  "samples": {}
+}

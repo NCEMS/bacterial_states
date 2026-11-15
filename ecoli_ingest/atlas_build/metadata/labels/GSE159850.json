@@ -1,0 +1,13 @@
+{"gse": "GSE159850",
+ "notes": "Single sample, HB101 exposed to PM2.5 in a conjugation study; no control in the candidate set. Medium, phase, temperature, exposure time not given. strain_group left empty (HB101 background not stated in text). mixed_organism left empty: conjugation experiments may include a donor strain, not described.",
+ "default": {
+  "strain_name": {"v": "HB101", "b": "stated", "q": "HB101"},
+  "genotype_class": {"v": "reference", "b": "study_default", "q": "Bacterial conjugation experiments after PM2.5 exposure."},
+  "global_regulator_perturbed": {"v": false, "b": "study_default", "q": "Bacterial conjugation experiments after PM2.5 exposure."},
+  "treatment": {"v": "other_chemical", "b": "stated", "q": "Bacterial conjugation experiments after PM2.5 exposure."},
+  "assay_class": {"v": "total_rnaseq", "b": "study_default", "q": "QIAGEN miRNeasy Mini Kit (QIAGEN, Germany) RNA libraries were prepared for sequencing using standard Illumina protocols"},
+  "inducer_added": {"v": false, "b": "study_default", "q": "Bacterial conjugation experiments after PM2.5 exposure."},
+  "transcription_arrested": {"v": false, "b": "study_default", "q": "Bacterial conjugation experiments after PM2.5 exposure."}
+ },
+ "rules": [],
+ "samples": {}}

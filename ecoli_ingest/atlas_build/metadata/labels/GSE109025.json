@@ -1,0 +1,123 @@
+{
+ "gse": "GSE109025",
+ "notes": "BW25113 wild type vs EF4 knockout, untreated or tetracycline. Medium, phase, temperature, tetracycline dose/duration not given (exposure left out). EF4 gene named only as EF4. Summary mentions average ribosome density, but these samples are fragmented mRNA (280 bp) RNA-seq; kept total_rnaseq. rRNA removal not stated.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "BW25113"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "The mRNAs were fragmented into 280 bp"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA from WT and ΔEF4 strains and the two strains treated with tetracycline were fragmented and sequenced"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA from WT and ΔEF4 strains and the two strains treated with tetracycline were fragmented and sequenced"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA from WT and ΔEF4 strains and the two strains treated with tetracycline were fragmented and sequenced"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^EF4 mutant$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "EF4 knockout Escherichia coli strain"
+    },
+    "perturbed_genes": {
+     "v": "EF4",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^none$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": "mRNA from WT and ΔEF4 strains and the two strains treated with tetracycline were fragmented and sequenced"
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^Tetracycline$",
+   "set": {
+    "treatment": {
+     "v": "abx_translation",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": "mRNA from WT and ΔEF4 strains and the two strains treated with tetracycline were fragmented and sequenced"
+    }
+   }
+  }
+ ],
+ "samples": {
+  "GSM2928241": {
+   "is_control": {
+    "v": true,
+    "b": "stated",
+    "q": "wild type"
+   }
+  },
+  "GSM2928245": {
+   "is_control": {
+    "v": true,
+    "b": "stated",
+    "q": "wild type"
+   }
+  }
+ }
+}

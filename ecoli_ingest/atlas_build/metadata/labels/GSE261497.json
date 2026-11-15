@@ -1,0 +1,83 @@
+{
+ "gse": "GSE261497",
+ "notes": "Not standard: C. crescentus cells spiked in before RNA extraction (mixed_organism true). All samples are the CRISPRi oriC strain after arabinose induction (60-240 min); no uninduced control, so no is_control. Strain name differs (SJ_XTL676 in design, CJW7357 in texts), left out. Growth phase not given. M9glyCAAT read as M9 + glycerol + casamino acids (+thiamine).",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "E. coli was grown at 37\u00b0C in M9glyCAAT media."
+  },
+  "medium_class": {
+   "v": "minimal_plus_hydrolysate",
+   "b": "inferred",
+   "q": "E. coli was grown at 37\u00b0C in M9glyCAAT media."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "E. coli was grown at 37\u00b0C in M9glyCAAT media."
+  },
+  "carbon_source": {
+   "v": "glycerol",
+   "b": "inferred",
+   "q": "E. coli was grown at 37\u00b0C in M9glyCAAT media."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "E. coli was grown at 37\u00b0C in M9glyCAAT media."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli K-12"
+  },
+  "genotype_class": {
+   "v": "knockdown",
+   "b": "stated",
+   "q": "Cells were arrested with a 1N DNA content via induction of CRISPRi against the origin of replication (oriC)"
+  },
+  "perturbed_genes": {
+   "v": "oriC (CRISPRi)",
+   "b": "stated",
+   "q": "Cells were arrested with a 1N DNA content via induction of CRISPRi against the origin of replication (oriC)"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "Cells were arrested with a 1N DNA content via induction of CRISPRi against the origin of replication (oriC)"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "CRISPRi oriC strain (SJ_XTL676) was grown in M9glyCAAT at 37\u00b0C and cells were collected 60, 120, 200, and 240 min after addition of 0.2% L-arabinose."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "CRISPRi oriC strain (SJ_XTL676) was grown in M9glyCAAT at 37\u00b0C and cells were collected 60, 120, 200, and 240 min after addition of 0.2% L-arabinose."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "CRISPRi oriC strain (SJ_XTL676) was grown in M9glyCAAT at 37\u00b0C and cells were collected 60, 120, 200, and 240 min after addition of 0.2% L-arabinose."
+  },
+  "mixed_organism": {
+   "v": true,
+   "b": "stated",
+   "q": "mixed with C. crescentus cells in approximately a 1-to-1 ratio based on OD600, with the intent of using the latter as a spike-in reference"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA was depleted using the NEBNextrRNA Depletion Kit for Bacteria (NEB, #E7850)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA was depleted using the NEBNextrRNA Depletion Kit for Bacteria (NEB, #E7850)"
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

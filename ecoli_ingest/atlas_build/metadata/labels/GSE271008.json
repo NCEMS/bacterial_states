@@ -1,0 +1,178 @@
+{
+ "gse": "GSE271008",
+ "notes": "WCS0 (itaconate-producing parent) is the reference/control at each of three phases; ALE strains are evolved_isolate (shared 31-kb deletion stated only for the study, so no perturbed_genes per sample). Medium is M9 acetate + glutamate + yeast extract -> minimal_plus_hydrolysate, carbon organic_acid. Temperature and aeration not given. No inducer mentioned.",
+ "default": {
+  "strain_group": {
+   "v": "W",
+   "b": "stated",
+   "q": "Escherichia coli W"
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "modified M9 acetate medium with 0.5 g/L MgSO4·7H2O, 2 g/L NH4Cl, 1 g/L NaCl, 2 g/L L-glutamic acid, 2 g/L yeast extract"
+  },
+  "medium_class": {
+   "v": "minimal_plus_hydrolysate",
+   "b": "inferred",
+   "q": "modified M9 acetate medium with 0.5 g/L MgSO4·7H2O, 2 g/L NH4Cl, 1 g/L NaCl, 2 g/L L-glutamic acid, 2 g/L yeast extract"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "modified M9 acetate medium with 0.5 g/L MgSO4·7H2O, 2 g/L NH4Cl, 1 g/L NaCl, 2 g/L L-glutamic acid, 2 g/L yeast extract"
+  },
+  "carbon_source": {
+   "v": "organic_acid",
+   "b": "stated",
+   "q": "modified M9 acetate medium with 0.5 g/L MgSO4·7H2O, 2 g/L NH4Cl, 1 g/L NaCl, 2 g/L L-glutamic acid, 2 g/L yeast extract"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Itaconate producing E. coli W parental (WCS0) and ALE strains (WCS6, WCS19, and WCS23) were cultured on modified M9 acetate medium and sampled at three timepoints with biological triplicates."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "One microgram of the RNA from each sample was used for rRNA depletion with riboPOOL"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "One microgram of the RNA from each sample was used for rRNA depletion with riboPOOL"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Itaconate producing E. coli W parental (WCS0) and ALE strains (WCS6, WCS19, and WCS23) were cultured on modified M9 acetate medium and sampled at three timepoints with biological triplicates."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Itaconate producing E. coli W parental (WCS0) and ALE strains (WCS6, WCS19, and WCS23) were cultured on modified M9 acetate medium and sampled at three timepoints with biological triplicates."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Itaconate producing E. coli W parental (WCS0) and ALE strains (WCS6, WCS19, and WCS23) were cultured on modified M9 acetate medium and sampled at three timepoints with biological triplicates."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:phase",
+   "regex": "^mid-exponential phase$",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:phase",
+   "regex": "^transition phase$",
+   "set": {
+    "growth_phase": {
+     "v": "transition",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:phase",
+   "regex": "^stationary phase$",
+   "set": {
+    "growth_phase": {
+     "v": "stationary",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^parental$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^ale$",
+   "set": {
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^WCS0$",
+   "set": {
+    "strain_name": {
+     "v": "E. coli W WCS0",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^WCS6$",
+   "set": {
+    "strain_name": {
+     "v": "E. coli W WCS6",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^WCS19$",
+   "set": {
+    "strain_name": {
+     "v": "E. coli W WCS19",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^WCS23$",
+   "set": {
+    "strain_name": {
+     "v": "E. coli W WCS23",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

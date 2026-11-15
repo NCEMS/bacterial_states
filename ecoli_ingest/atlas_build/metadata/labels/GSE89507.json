@@ -1,0 +1,122 @@
+{
+ "gse": "GSE89507",
+ "notes": "Clinical ST131 isolate UR40; strain_group other_ExPEC from the cited 'extraintestinal infections' paper title (no UPEC statement). Untreated sample at each time point is a control. Growth phase and aeration not stated. Exposure taken from sampling time after ciprofloxacin addition (0 and 30 min acute, 90 min short).",
+ "default": {
+  "base_medium": {
+   "v": "Mueller-Hinton",
+   "b": "stated",
+   "q": "grown in CAMHB media at 37 degrees Celsius"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "grown in CAMHB media at 37 degrees Celsius"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "grown in CAMHB media at 37 degrees Celsius"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown in CAMHB media at 37 degrees Celsius"
+  },
+  "strain_group": {
+   "v": "other_ExPEC",
+   "b": "stated",
+   "q": "Ciprofloxacin-resistant, CTX-M-15-producing Escherichia coli ST131 clone in extraintestinal infections in Italy"
+  },
+  "strain_name": {
+   "v": "ST131 UR40",
+   "b": "stated",
+   "q": "E. coli ST131 UR40"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "UR40 is the unique isolate number"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli ST131 UR40 was treated with ciprofloxacin (2µg/mL)"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli ST131 UR40 was treated with ciprofloxacin (2µg/mL) and samples were taken at time points 0 min, 30 min and 90min."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli ST131 UR40 was treated with ciprofloxacin (2µg/mL) and samples were taken at time points 0 min, 30 min and 90min."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli ST131 UR40 was treated with ciprofloxacin (2µg/mL) and samples were taken at time points 0 min, 30 min and 90min."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA depleted using an Illumina Ribo-zero rRNA removal kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA depleted using an Illumina Ribo-zero rRNA removal kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^none$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "ciprofloxacin",
+   "set": {
+    "treatment": {
+     "v": "abx_dna_gyrase",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": "samples were taken at time points 0 min, 30 min and 90min"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^90min plus",
+   "set": {
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": "90min plus ciprofloxacin"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

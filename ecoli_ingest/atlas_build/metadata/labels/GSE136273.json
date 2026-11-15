@@ -1,0 +1,159 @@
+{
+ "gse": "GSE136273",
+ "notes": "Libraries were made from TEX-treated RNA (primary transcript enrichment) -> assay_class other, rRNA removal left out. Control: wt+ctrl (wild type, empty vector, induced like the others); the submitters call delta-pdeL+ctrl the control for the complementation, but it is a deletion genotype and is set is_control false. pdeL complemented from tac plasmid -> native_overexpression; PdeL-DBD-cI fusion in the deletion -> multiple.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "study_default",
+   "q": "10 ml of LB medium supplemented with 25 µg/ml kanamycin"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "10 ml of LB medium supplemented with 25 µg/ml kanamycin"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "10 ml of LB medium supplemented with 25 µg/ml kanamycin"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "study_default",
+   "q": "Cultures were grown at 37°C whilst shaking."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Cultures were grown at 37°C whilst shaking."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "study_default",
+   "q": "Cultures were grown at 37°C whilst shaking."
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "analyzed the transcriptomes of four E. coli K12 strains during the exponential growth phase"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "study_default",
+   "q": "isopropyl-β-D-thiogalactopyranosid (IPTG) to 1 mM final concentration for induction"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RNA-sequencing analyses were performed of three biological replicates (rep1, rep2, and rep3) of four different E. coli K12 strains"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-sequencing analyses were performed of three biological replicates (rep1, rep2, and rep3) of four different E. coli K12 strains"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-sequencing analyses were performed of three biological replicates (rep1, rep2, and rep3) of four different E. coli K12 strains"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli K-12"
+  },
+  "assay_class": {
+   "v": "other",
+   "b": "study_default",
+   "q": "Enrichment of primary transcripts and depletion of ribosomal RNA was performed by TEX treatment"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "The strains are E.coli K12 wild-type strain BW30270 carrying empty vector control plasmid (wt+ctrl)"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "four different E. coli K12 strains"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^wt\\+ctrl",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": "wild-type strain BW30270 carrying empty vector control plasmid (wt+ctrl)"
+    },
+    "strain_name": {
+     "v": "BW30270",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "wild-type strain BW30270 carrying empty vector control plasmid (wt+ctrl)"
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^T2057$",
+   "set": {
+    "strain_name": {
+     "v": "T2057",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "pdeL",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^delta-pdeL\\+ctrl",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^delta-pdeL\\+PdeL rep",
+   "set": {
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "inferred",
+     "q": "a plasmid carrying pdeL under control of the IPTG-inducible tac promoter"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^delta-pdeL\\+PdeLDBD_cIc",
+   "set": {
+    "genotype_class": {
+     "v": "multiple",
+     "b": "inferred",
+     "q": "a plasmid encoding a fusion protein of the PdeL’s DNA-binding domain and the C-terminal dimerization domain of phage Lambda cI repressor"
+    },
+    "perturbed_genes": {
+     "v": "pdeL;pdeL-DBD_cI-C fusion",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

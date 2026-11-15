@@ -1,0 +1,180 @@
+{
+ "gse": "GSE54904",
+ "notes": "Alternative nitrogen sources (glutamine, cytidine, cytosine in W2) are medium properties, treatment none; each WT sample (per nitrogen source) is a control. amino_acids_supplied left out for glutamine (single amino acid as sole N source, not an auxotrophy supplement).",
+ "default": {
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose, or W2 minimal media with 0.2% glucose and 2 g/L glutamine, cytidine or cytosine."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose, or W2 minimal media with 0.2% glucose and 2 g/L glutamine, cytidine or cytosine."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose, or W2 minimal media with 0.2% glucose and 2 g/L glutamine, cytidine or cytosine."
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose, or W2 minimal media with 0.2% glucose and 2 g/L glutamine, cytidine or cytosine."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose, or W2 minimal media with 0.2% glucose and 2 g/L glutamine, cytidine or cytosine."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E. coli K-12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "E. coli K-12 MG1655"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RNA-seq and ChIP-exo experiments were performed for those two transcription factors under 4 different nitrogen sources, ammonia, glutamine, cytidine and cytosine."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq and ChIP-exo experiments were performed for those two transcription factors under 4 different nitrogen sources, ammonia, glutamine, cytidine and cytosine."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq and ChIP-exo experiments were performed for those two transcription factors under 4 different nitrogen sources, ammonia, glutamine, cytidine and cytosine."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli K-12 MG1655 WT strain was cultured in the 4 different nitrogen sources"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Total RNA was extracted using the RNeasy Plus Mini kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:nitrogen source",
+   "regex": "^ammonia$",
+   "set": {
+    "base_medium": {
+     "v": "M9",
+     "b": "stated",
+     "q": "grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose, or W2 minimal media with 0.2% glucose and 2 g/L glutamine, cytidine or cytosine."
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": "grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose, or W2 minimal media with 0.2% glucose and 2 g/L glutamine, cytidine or cytosine."
+    }
+   }
+  },
+  {
+   "field": "ch:nitrogen source",
+   "regex": "^(glutamine|cytidine|cytosine)$",
+   "set": {
+    "base_medium": {
+     "v": "other_minimal",
+     "b": "stated",
+     "q": "grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose, or W2 minimal media with 0.2% glucose and 2 g/L glutamine, cytidine or cytosine."
+    }
+   }
+  },
+  {
+   "field": "ch:nitrogen source",
+   "regex": "^(cytidine|cytosine)$",
+   "set": {
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": "grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose, or W2 minimal media with 0.2% glucose and 2 g/L glutamine, cytidine or cytosine."
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "nac",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "nac",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "ntrC",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "ntrC",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,199 @@
+{
+ "gse": "GSE159494",
+ "notes": "Untreated culture in each of the three media is a control. Mid-log cultures diluted to OD 0.05 into drug-containing or plain medium and sampled after 30 min; phase kept as mid_exponential (stated pre-treatment phase, sampled <2 h). R10LB (RPMI + 10% LB): base_medium cell_culture, medium_class left empty (RPMI plus hydrolysate fits no class cleanly). WT re-read: reference -> wild_type, MG1655 used unmodified.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "RNA sequencing was performed on E. coli K12 MG1655 on three media (M9, CA-MHB, R10LB) treated with four antibiotics"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA sequencing was performed on E. coli K12 MG1655 on three media (M9, CA-MHB, R10LB) treated with four antibiotics"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "E. coli was grown to mid-log phase and treated with antibiotics for 30 min with shaking."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Flasks were incubated for 30 min at 37C with shaking."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Flasks were incubated for 30 min at 37C with shaking."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Flasks were incubated for 30 min at 37C with shaking."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "The rRNA was removed using Illumina Ribo-Zero rRNA removal kit for Gram Negative Bacteria."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "The rRNA was removed using Illumina Ribo-Zero rRNA removal kit for Gram Negative Bacteria."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA sequencing was performed on E. coli K12 MG1655 on three media (M9, CA-MHB, R10LB) treated with four antibiotics"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA sequencing was performed on E. coli K12 MG1655 on three media (M9, CA-MHB, R10LB) treated with four antibiotics"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA sequencing was performed on E. coli K12 MG1655 on three media (M9, CA-MHB, R10LB) treated with four antibiotics"
+  },
+  "exposure": {
+   "v": "acute",
+   "b": "stated",
+   "q": "E. coli was grown to mid-log phase and treated with antibiotics for 30 min with shaking."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA sequencing was performed on E. coli K12 MG1655 on three media (M9, CA-MHB, R10LB) treated with four antibiotics"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:media",
+   "regex": "^M9$",
+   "set": {
+    "base_medium": {
+     "v": "M9",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "defined_minimal",
+     "b": "inferred",
+     "q": "M9 minimal medium (47.8 mM Na2HPO4, 22 mM KH2PO4, 8.6 mM NaCl, 18.7 mM NH4Cl, 2 mM MgSO4 and 0.1 mM CaCl2) supplemented with 0.2% (w/v) glucose (M9)"
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": "M9 minimal medium (47.8 mM Na2HPO4, 22 mM KH2PO4, 8.6 mM NaCl, 18.7 mM NH4Cl, 2 mM MgSO4 and 0.1 mM CaCl2) supplemented with 0.2% (w/v) glucose (M9)"
+    },
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": "supplemented with 0.2% (w/v) glucose (M9)"
+    }
+   }
+  },
+  {
+   "field": "ch:media",
+   "regex": "^R10LB$",
+   "set": {
+    "base_medium": {
+     "v": "cell_culture",
+     "b": "stated",
+     "q": "Roswell Park Memorial Institute 1640 (RPMI) (Thermo Fisher Scientific) supplemented with 10% LB (R10LB)"
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": "Roswell Park Memorial Institute 1640 (RPMI) (Thermo Fisher Scientific) supplemented with 10% LB (R10LB)"
+    }
+   }
+  },
+  {
+   "field": "ch:media",
+   "regex": "^CAMHB$",
+   "set": {
+    "base_medium": {
+     "v": "Mueller-Hinton",
+     "b": "stated",
+     "q": "Mueller Hinton Broth (Sigma-Aldrich) supplemented with 25 mg/L Ca2+ and 12.5 mg/L Mg2+ (CA-MHB)"
+    },
+    "medium_class": {
+     "v": "complex",
+     "b": "inferred",
+     "q": "Mueller Hinton Broth (Sigma-Aldrich) supplemented with 25 mg/L Ca2+ and 12.5 mg/L Mg2+ (CA-MHB)"
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": "Mueller Hinton Broth (Sigma-Aldrich) supplemented with 25 mg/L Ca2+ and 12.5 mg/L Mg2+ (CA-MHB)"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": " control \\d$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": null
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:antibiotic",
+   "regex": "^(meropenem|ceftriaxone)",
+   "set": {
+    "treatment": {
+     "v": "abx_cell_wall",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:antibiotic",
+   "regex": "^trimethoprim-sulfamethoxazole",
+   "set": {
+    "treatment": {
+     "v": "abx_folate",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:antibiotic",
+   "regex": "^ciprofloxacin",
+   "set": {
+    "treatment": {
+     "v": "abx_dna_gyrase",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

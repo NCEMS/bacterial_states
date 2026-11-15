@@ -1,0 +1,149 @@
+{
+ "gse": "GSE244178",
+ "notes": "Adenine (50 uM) is studied as a signal (E. faecalis-secreted virulence cue), not as a nutrient; labelled other_chemical, adapted (present for the 6 h culture). Only WT without adenine is the control. Anaerobic DMEM with no electron acceptor named -> anaerobic_fermentation (inferred). No temperature, phase or culture vessel given.",
+ "default": {
+  "strain_group": {
+   "v": "EHEC_STEC",
+   "b": "stated",
+   "q": "EHEC 86-24"
+  },
+  "strain_name": {
+   "v": "86-24",
+   "b": "stated",
+   "q": "EHEC 86-24"
+  },
+  "base_medium": {
+   "v": "cell_culture",
+   "b": "stated",
+   "q": "Bacteria were grown 6h in DMEM low glucose in anaerobic conditions"
+  },
+  "medium_class": {
+   "v": "defined_rich",
+   "b": "inferred",
+   "q": "Bacteria were grown 6h in DMEM low glucose in anaerobic conditions"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Bacteria were grown 6h in DMEM low glucose in anaerobic conditions"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "inferred",
+   "q": "Bacteria were grown 6h in DMEM low glucose in anaerobic conditions"
+  },
+  "oxygen": {
+   "v": "anaerobic_fermentation",
+   "b": "inferred",
+   "q": "Bacteria were grown 6h in DMEM low glucose in anaerobic conditions"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Illumina Ribo-Zero Plus rRNA Depletion stranded RNA library prep"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Illumina Ribo-Zero Plus rRNA Depletion stranded RNA library prep"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "6h culture of EHEC in DMEM low glucose in anaerobic condition in presence or not of Adenine 50uM"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "6h culture of EHEC in DMEM low glucose in anaerobic condition in presence or not of Adenine 50uM"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "6h culture of EHEC in DMEM low glucose in anaerobic condition in presence or not of Adenine 50uM"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "6h culture of EHEC in DMEM low glucose in anaerobic condition in presence or not of Adenine 50uM"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "hha knocked out",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "hha",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^none$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "Adenine",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "6h culture of EHEC in DMEM low glucose in anaerobic condition in presence or not of Adenine 50uM"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^control replicate",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

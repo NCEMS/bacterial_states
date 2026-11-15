@@ -1,0 +1,226 @@
+{
+ "gse": "GSE266148",
+ "notes": "Medium and temperature not given. Phase left out: 'overnight grown culture' together with OD600 0.5 (conflicting phase evidence, medium unknown). Only the BW25113 'wt KO, unevolved' samples are controls; the MG1655 crp/fur KOs have no unevolved wild type in this series. Evolved KO isolates (midpoint/endpoint) = multiple (deletion + evolution); evolved wt = evolved_isolate. WT re-read: unmodified baseline strain relabelled wild_type.",
+ "default": {
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "To investigate impact of TF KO's on the transcriptome, TF's were KO'd and evolved. Midpoint and endpoint isolates were taken."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "To investigate impact of TF KO's on the transcriptome, TF's were KO'd and evolved. Midpoint and endpoint isolates were taken."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli BW25113"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "To investigate impact of TF KO's on the transcriptome, TF's were KO'd and evolved. Midpoint and endpoint isolates were taken."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "To investigate impact of TF KO's on the transcriptome, TF's were KO'd and evolved. Midpoint and endpoint isolates were taken."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "To investigate impact of TF KO's on the transcriptome, TF's were KO'd and evolved. Midpoint and endpoint isolates were taken."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Anti-rRNA DNA Oligo mix and Hybridase Thermostable RNase H31 was used to remove ribosomal RNA."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Anti-rRNA DNA Oligo mix and Hybridase Thermostable RNase H31 was used to remove ribosomal RNA."
+  }
+ },
+ "rules": [
+  {
+   "field": "organism",
+   "regex": "BW25113",
+   "set": {
+    "strain_name": {
+     "v": "BW25113",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "organism",
+   "regex": "MG1655",
+   "set": {
+    "strain_name": {
+     "v": "MG1655",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:cell type",
+   "regex": "KO, unevolved",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:cell type",
+   "regex": "KO, (endpoint|midpoint)",
+   "set": {
+    "genotype_class": {
+     "v": "multiple",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:cell type",
+   "regex": "^basR",
+   "set": {
+    "perturbed_genes": {
+     "v": "basR",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:cell type",
+   "regex": "^crp",
+   "set": {
+    "perturbed_genes": {
+     "v": "crp",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:cell type",
+   "regex": "^fur",
+   "set": {
+    "perturbed_genes": {
+     "v": "fur",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:cell type",
+   "regex": "^lon",
+   "set": {
+    "perturbed_genes": {
+     "v": "lon",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:cell type",
+   "regex": "^lrp",
+   "set": {
+    "perturbed_genes": {
+     "v": "lrp",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:cell type",
+   "regex": "^mlrA",
+   "set": {
+    "perturbed_genes": {
+     "v": "mlrA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:cell type",
+   "regex": "^wt KO, unevolved",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:cell type",
+   "regex": "^wt KO, endpoint",
+   "set": {
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

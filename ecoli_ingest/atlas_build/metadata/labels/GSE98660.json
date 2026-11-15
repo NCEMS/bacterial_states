@@ -1,0 +1,18 @@
+{
+  "gse": "GSE98660",
+  "notes": "3' RACE end-mapping libraries (3' adapter ligation, size selection) -> end_mapping, not standard RNA-seq. No growth conditions given; two replicates of one condition, so no control.",
+  "default": {
+    "assay_class": {"v": "end_mapping", "b": "stated", "q": "Examination of E. coli 3' ends with two independent replicates"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "depleted of ribosomal RNA using the Ribo-Zero™ RNA removal kit for Gram-negative bacteria"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "K12 MG1655"},
+    "strain_name": {"v": "MG1655", "b": "stated", "q": "K12 MG1655"},
+    "genotype_class": {"v": "reference", "b": "study_default", "q": "K12 MG1655"},
+    "global_regulator_perturbed": {"v": false, "b": "study_default", "q": "K12 MG1655"},
+    "treatment": {"v": "none", "b": "study_default", "q": "Examination of E. coli 3' ends with two independent replicates sequenced on Illumina HiSeq 2000"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "Examination of E. coli 3' ends with two independent replicates sequenced on Illumina HiSeq 2000"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "Examination of E. coli 3' ends with two independent replicates sequenced on Illumina HiSeq 2000"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "Examination of E. coli 3' ends with two independent replicates sequenced on Illumina HiSeq 2000"}
+  },
+  "rules": [],
+  "samples": {}
+}

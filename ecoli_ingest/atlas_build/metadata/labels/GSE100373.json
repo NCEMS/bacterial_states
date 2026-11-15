@@ -1,0 +1,131 @@
+{
+ "gse": "GSE100373",
+ "notes": "Both candidates are the 'mRNA' arm of a ribosome-profiling protocol: total RNA fragmented to 24-35 nt and size-selected/cloned per Ingolia 2009 -> assay_class other. Thymine supplement in LB (MG1693 is a thyA auxotroph by context; not used).",
+ "default": {
+  "assay_class": {
+   "v": "other",
+   "b": "stated",
+   "q": "fragmented in alkaline solution (2 mM EDTA and 100 mM Na2CO3 pH 9.2 for 40 min at 95°C) to fragments with size of 24-35 nts"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA with MICROBExpres Bacterial mRNA Enrichment Kit (Ambion)"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Exponential"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Strains were grown in LB medium (Difco)"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Strains were grown in LB medium (Difco)"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Strains were grown in LB medium (Difco)"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "supplemented with thymine (50 µg/ml) at 37ºC"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "MG1693"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Ribosome Profiling and RNA-seq of E. coli WT and ∆hfq mutant"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Ribosome Profiling and RNA-seq of E. coli WT and ∆hfq mutant"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Ribosome Profiling and RNA-seq of E. coli WT and ∆hfq mutant"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Ribosome Profiling and RNA-seq of E. coli WT and ∆hfq mutant"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Overnight cultures of single fresh grown colonies were diluted to an initial OD600 appr. 0.03"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^WT",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1693",
+     "b": "stated",
+     "q": "MG1693"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^Hfq mut",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "CMA540(MG1693 delta_hfq::cat)"
+    },
+    "perturbed_genes": {
+     "v": "hfq",
+     "b": "stated",
+     "q": "CMA540(MG1693 delta_hfq::cat)"
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": "CMA540(MG1693 delta_hfq::cat)"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "CMA540",
+     "b": "stated",
+     "q": "CMA540(MG1693 delta_hfq::cat)"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

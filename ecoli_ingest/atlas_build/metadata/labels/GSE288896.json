@@ -1,0 +1,153 @@
+{
+ "gse": "GSE288896",
+ "notes": "Phases from the summary ('mid-exponential, early stationary phase, and late stationary phase') matched in order to 6, 24, 48 h. Chemicals present from inoculation -> exposure adapted; PFAS and the fatty acids (octanoic, dodecanoic) labelled other_chemical. DMSO-vehicle controls at each time point are controls. Library kit is TruSeq Stranded mRNA; rRNA removal method not stated, left out. WT re-read: unmodified MG1655, genotype_class wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "cultivated in 50 mL of M9 minimal medium supplemented with glucose"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "cultivated in 50 mL of M9 minimal medium supplemented with glucose"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "cultivated in 50 mL of M9 minimal medium supplemented with glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "M9 minimal medium supplemented with glucose"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "at 37 °C and shaking at 250 rpm"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "at 37 °C and shaking at 250 rpm"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "at 37 °C and shaking at 250 rpm"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "WT K12"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "WT K12"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "WT K12"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "treated with PFCAs or equivalent non-fluorinated carboxylic acids (NFCAs) to an untreated control group at three time points"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "treated with PFCAs or equivalent non-fluorinated carboxylic acids (NFCAs) to an untreated control group at three time points"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "treated with PFCAs or equivalent non-fluorinated carboxylic acids (NFCAs) to an untreated control group at three time points"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Total RNA was harvested using Qiagen RNeasy mini kit"
+  },
+  "treatment": {
+   "v": "other_chemical",
+   "b": "stated",
+   "q": "added into the growth medium prior to inoculation"
+  },
+  "exposure": {
+   "v": "adapted",
+   "b": "inferred",
+   "q": "added into the growth medium prior to inoculation"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "treated with PFCAs or equivalent non-fluorinated carboxylic acids (NFCAs) to an untreated control group at three time points"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "Untreated control",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": ", 6 hr,",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": "we performed RNA sequencing at mid-exponential, early stationary phase, and late stationary phase"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": ", 24 hr,",
+   "set": {
+    "growth_phase": {
+     "v": "transition",
+     "b": "stated",
+     "q": "we performed RNA sequencing at mid-exponential, early stationary phase, and late stationary phase"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": ", 48 hr,",
+   "set": {
+    "growth_phase": {
+     "v": "late_stationary",
+     "b": "stated",
+     "q": "we performed RNA sequencing at mid-exponential, early stationary phase, and late stationary phase"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

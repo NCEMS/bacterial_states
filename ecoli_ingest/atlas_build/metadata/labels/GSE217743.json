@@ -1,0 +1,146 @@
+{
+ "gse": "GSE217743",
+ "notes": "3 samples from mouse cecal mucus (in host), 2 in vitro MOPS glucose exponential controls. StrR wild type taken as reference genotype.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Wild type E. coli MG1655 StrR"
+  },
+  "strain_name": {
+   "v": "MG1655 StrR",
+   "b": "stated",
+   "q": "Wild type E. coli MG1655 StrR"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "stated",
+   "q": "Wild type E. coli MG1655 StrR"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "Wild type E. coli MG1655 StrR"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "gene expression changes in E. coli colonizing the mouse intestine as compared to E. coli grown in minimal medium in vitro"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "gene expression changes in E. coli colonizing the mouse intestine as compared to E. coli grown in minimal medium in vitro"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "ribo-depletion with the Illumina Ribo-Zero Plus rRNA Depletion Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "ribo-depletion with the Illumina Ribo-Zero Plus rRNA Depletion Kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "source_name",
+   "regex": "invitro",
+   "set": {
+    "base_medium": {
+     "v": "MOPS",
+     "b": "stated",
+     "q": "Wild type E. coli MG1655 StrR cultures were grown on MOPS glucose minimal medium with 0.2% glucose as sole carbon source at 37°C and agitation at 200 rpm."
+    },
+    "medium_class": {
+     "v": "defined_minimal",
+     "b": "inferred",
+     "q": "Wild type E. coli MG1655 StrR cultures were grown on MOPS glucose minimal medium with 0.2% glucose as sole carbon source at 37°C and agitation at 200 rpm."
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": "Wild type E. coli MG1655 StrR cultures were grown on MOPS glucose minimal medium with 0.2% glucose as sole carbon source at 37°C and agitation at 200 rpm."
+    },
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": "Wild type E. coli MG1655 StrR cultures were grown on MOPS glucose minimal medium with 0.2% glucose as sole carbon source at 37°C and agitation at 200 rpm."
+    },
+    "growth_temperature": {
+     "v": 37,
+     "b": "stated",
+     "q": "Wild type E. coli MG1655 StrR cultures were grown on MOPS glucose minimal medium with 0.2% glucose as sole carbon source at 37°C and agitation at 200 rpm."
+    },
+    "oxygen": {
+     "v": "aerobic",
+     "b": "inferred",
+     "q": "Wild type E. coli MG1655 StrR cultures were grown on MOPS glucose minimal medium with 0.2% glucose as sole carbon source at 37°C and agitation at 200 rpm."
+    },
+    "culture_mode": {
+     "v": "batch_shaken",
+     "b": "inferred",
+     "q": "Wild type E. coli MG1655 StrR cultures were grown on MOPS glucose minimal medium with 0.2% glucose as sole carbon source at 37°C and agitation at 200 rpm."
+    },
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": "Culture samples were harvested during logarithmic phase (OD600=0.4-0.6)."
+    },
+    "treatment": {
+     "v": "none",
+     "b": "study_default",
+     "q": "Wild type E. coli MG1655 StrR cultures were grown on MOPS glucose minimal medium with 0.2% glucose as sole carbon source at 37°C and agitation at 200 rpm."
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "mixed_organism": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "mouse mucus",
+   "set": {
+    "culture_mode": {
+     "v": "in_host",
+     "b": "stated",
+     "q": "wild type strain was fed to CD-1 male mice and allowed it to colonize for 9 days"
+    },
+    "growth_phase": {
+     "v": "not_applicable",
+     "b": "inferred",
+     "q": "wild type strain was fed to CD-1 male mice and allowed it to colonize for 9 days"
+    },
+    "base_medium": {
+     "v": "gut_content",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "natural_fluid",
+     "b": "inferred",
+     "q": ""
+    },
+    "mixed_organism": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

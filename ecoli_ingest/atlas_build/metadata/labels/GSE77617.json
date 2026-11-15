@@ -1,0 +1,131 @@
+{
+ "gse": "GSE77617",
+ "notes": "Reviewed 2026-11-15: mRNA-seq arm of a ribosome-profiling protocol (fragmented, gel size-selected RNA); excluded by user decision. | 4 mRNA-seq candidates (ribosome profiling / DMS-seq samples not candidates). GSM2055255 uses a protocol where 'mRNA fragments were size selected via gel purification' without a size; labelled total_rnaseq as mRNA-seq but uncertain. Growth phase left out: only OD420 0.4 given (no OD600); 'exponentially growing' appears only in the DMS protocol. p-CTRL (empty control plasmid + IPTG) taken as control alongside plain WT; mini-ORF plasmids labelled heterologous_expression. treatment_protocol text (DMS, kasugamycin) refers to DMS-seq samples, not these mRNA-seq samples.",
+ "default": {
+  "base_medium": {
+   "v": "MOPS",
+   "b": "stated",
+   "q": "All cultures were based on MOPS media with 0.2% glucose (Teknova), with full supplement"
+  },
+  "medium_class": {
+   "v": "defined_rich",
+   "b": "inferred",
+   "q": "MOPS media with 0.2% glucose (Teknova), with full supplement (Neidhardt et al., 1974) minus methionine"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "with full supplement (Neidhardt et al., 1974) minus methionine"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "MOPS media with 0.2% glucose"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "kept in a 1 liter flask at 37°C with aeration"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "kept in a 1 liter flask at 37°C with aeration"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "kept in a 1 liter flask at 37°C with aeration"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E. coli MG1655 (wild-type) cells"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "E. coli MG1655 (wild-type) cells"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "mRNA-seq and ribosome profiling of E. coli MG1655 (wild-type) cells at 37°C"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA-seq and ribosome profiling of E. coli MG1655 (wild-type) cells at 37°C"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA-seq and ribosome profiling of E. coli MG1655 (wild-type) cells at 37°C"
+  },
+  "assay_class": {
+   "v": "other",
+   "b": "inferred",
+   "q": "mRNA fragments were size selected via gel purification"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "stated",
+   "q": "E. coli MG1655 (wild-type) cells"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "E. coli MG1655 (wild-type) cells"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "stated",
+   "q": "NA"
+  },
+  "is_control": {
+   "v": true,
+   "b": "stated",
+   "q": "mRNA-seq 37°C in WT"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "IPTG",
+   "set": {
+    "inducer_added": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "rrna_removal": {
+     "v": "depletion",
+     "b": "stated",
+     "q": "Ribosomal RNA and small RNA were removed with MICROBExpress (Ambion) or Ribozero (Epicenter)"
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "p-CU[AG]",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": "plasmid expressing mini-ORF"
+    },
+    "perturbed_genes": {
+     "v": "mini-ORF",
+     "b": "stated",
+     "q": "plasmid expressing mini-ORF"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": "plasmid expressing mini-ORF"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,158 @@
+{
+ "gse": "GSE153906",
+ "notes": "WT vs fnr, arcA, ihf deletions, anaerobic fermentation in M9 glucose bioreactor, exponential phase. Which ihf subunit was deleted is not stated (perturbed_genes 'ihf'); both subunits are global regulators.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "Escherichia coli cells grown in a bioreactor under anaerobic fermentation conditions with M9 + glucose at 37 degree Celcius and 150 rpm till exponential phase"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "Escherichia coli cells grown in a bioreactor under anaerobic fermentation conditions with M9 + glucose at 37 degree Celcius and 150 rpm till exponential phase"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "Escherichia coli cells grown in a bioreactor under anaerobic fermentation conditions with M9 + glucose at 37 degree Celcius and 150 rpm till exponential phase"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "Escherichia coli cells grown in a bioreactor under anaerobic fermentation conditions with M9 + glucose at 37 degree Celcius and 150 rpm till exponential phase"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Escherichia coli cells grown in a bioreactor under anaerobic fermentation conditions with M9 + glucose at 37 degree Celcius and 150 rpm till exponential phase"
+  },
+  "culture_mode": {
+   "v": "batch_bioreactor",
+   "b": "stated",
+   "q": "Escherichia coli cells grown in a bioreactor under anaerobic fermentation conditions with M9 + glucose at 37 degree Celcius and 150 rpm till exponential phase"
+  },
+  "oxygen": {
+   "v": "anaerobic_fermentation",
+   "b": "stated",
+   "q": "Escherichia coli cells grown in a bioreactor under anaerobic fermentation conditions with M9 + glucose at 37 degree Celcius and 150 rpm till exponential phase"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "exponential phase of growth"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RNA was extracted from two biological replicates of WT, Δfnr, ΔarcA and Δihf in the exponential phase under anaerobic fermentation conditions"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA was extracted from two biological replicates of WT, Δfnr, ΔarcA and Δihf in the exponential phase under anaerobic fermentation conditions"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA was extracted from two biological replicates of WT, Δfnr, ΔarcA and Δihf in the exponential phase under anaerobic fermentation conditions"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA was extracted from two biological replicates of WT, Δfnr, ΔarcA and Δihf in the exponential phase under anaerobic fermentation conditions"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "enrichment for mRNA was done using the MicrobExpress Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "enrichment for mRNA was done using the MicrobExpress Kit"
+  },
+  "genotype_class": {
+   "v": "deletion",
+   "b": "stated",
+   "q": "WT, Δfnr, ΔarcA and Δihf"
+  },
+  "global_regulator_perturbed": {
+   "v": true,
+   "b": "stated",
+   "q": "WT, Δfnr, ΔarcA and Δihf"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA was extracted from two biological replicates of WT, Δfnr, ΔarcA and Δihf"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^fnr$",
+   "set": {
+    "perturbed_genes": {
+     "v": "fnr",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^arcA$",
+   "set": {
+    "perturbed_genes": {
+     "v": "arcA",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^ihf$",
+   "set": {
+    "perturbed_genes": {
+     "v": "ihf",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

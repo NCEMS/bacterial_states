@@ -1,0 +1,63 @@
+{
+ "gse": "GSE164308",
+ "notes": "CONFLICT: titles say araM/araP (the evolved lines per the design) while ch:strain gives the ancestors REL606/REL607; design says each file holds the evolved lines and the ancestor, so genotype_class and is_control left out. RNA-seq arm of a ribosome-profiling protocol with 18-50 nt size selection and linker ligation -> assay_class other. Temperature not given.",
+ "default": {
+  "base_medium": {
+   "v": "other_minimal",
+   "b": "stated",
+   "q": "Bacteria were grown in the DM25 medium supplemented with 4g/L of glucose."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "Bacteria were grown in the DM25 medium supplemented with 4g/L of glucose."
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "Bacteria were grown in the DM25 medium supplemented with 4g/L of glucose."
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "DM25 medium supplemented with 4g/L of glucose"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "No treatments were applied to the samples."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "No treatments were applied to the samples."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "No treatments were applied to the samples."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "2 biological replicates each of RNA-seq and Ribo-seq of 13 E. coli cell lines."
+  },
+  "strain_group": {
+   "v": "B",
+   "b": "inferred",
+   "q": "AraM and AraP refer to the 6 evolved lines of the ancestral REL606 and REL607 strains"
+  },
+  "assay_class": {
+   "v": "other",
+   "b": "stated",
+   "q": "Each sample produced a matched set of RNA-seq and ribo-seq fragments which were size selected to a range of 18-50nt."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA depletion was completed with the Illumina Ribo-Zero rRNA Depletion Kit for bacteria."
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

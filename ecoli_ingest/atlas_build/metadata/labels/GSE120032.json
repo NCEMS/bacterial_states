@@ -1,0 +1,106 @@
+{
+ "gse": "GSE120032",
+ "notes": "Both strains grown in LB with 0.75% butanol for 9.5 h (OD 0.6-1.1, no phase word -> growth_phase empty). No untreated sample, so is_control left out. Temperature/aeration not given. DT900 (DTrob) taken as BW25113-derived (K-12).",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "incubated in 50 mL LB containing 0.75% (v/v) butanol for 9.5 hours"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "incubated in 50 mL LB containing 0.75% (v/v) butanol for 9.5 hours"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "incubated in 50 mL LB containing 0.75% (v/v) butanol for 9.5 hours"
+  },
+  "treatment": {
+   "v": "envelope_solvent_biocide",
+   "b": "stated",
+   "q": "incubated in 50 mL LB containing 0.75% (v/v) butanol for 9.5 hours"
+  },
+  "exposure": {
+   "v": "adapted",
+   "b": "inferred",
+   "q": "incubated in 50 mL LB containing 0.75% (v/v) butanol for 9.5 hours"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of robgene point-mutated and wild-type strains"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of robgene point-mutated and wild-type strains"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "Strains BW25113 and DTrob"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "cells were used to extracted Total RNA by TRIzol reagent"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of robgene point-mutated and wild-type strains"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^Wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "BW25113",
+     "b": "stated",
+     "q": "BW25113"
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "rob gene mutated",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": "the mutant strain DTrob (AT686-687 deletion in rob gene)"
+    },
+    "perturbed_genes": {
+     "v": "rob",
+     "b": "stated",
+     "q": "the mutant strain DTrob (AT686-687 deletion in rob gene)"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "DT900",
+     "b": "stated",
+     "q": "DT900"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

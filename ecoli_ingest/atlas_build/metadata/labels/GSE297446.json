@@ -1,0 +1,155 @@
+{
+ "gse": "GSE297446",
+ "notes": "DMSO solvent control at every time point = control. LCA and CDCA (bile acids) labelled host_factor. Cells grown to mid-log (OD 0.4-0.6) then incubated in 12-well plates; pre-shift phase kept for 15/30/90 min, left out at 180 min. YCFA composition not given (medium_class left out). Anaerobic with no electron acceptor named: anaerobic_fermentation inferred (unsure). WT re-read: plasmid-cured Nissle (native plasmids removed, nothing added) taken as wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "other",
+   "b": "stated",
+   "q": "YCFA media"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown to log phase anaerobically in YCFA media at 37C"
+  },
+  "oxygen": {
+   "v": "anaerobic_fermentation",
+   "b": "inferred",
+   "q": "grown to log phase anaerobically in YCFA media at 37C"
+  },
+  "culture_mode": {
+   "v": "batch_microplate",
+   "b": "stated",
+   "q": "transferred to anaerobic 12-well non-tissue-culture-treated polystyrene plates (1 mL/well)"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "Plasmid cured wildtype"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "Plasmid cured wildtype"
+  },
+  "strain_group": {
+   "v": "probiotic",
+   "b": "stated",
+   "q": "Escherichia coli Nissle 1917"
+  },
+  "strain_name": {
+   "v": "Nissle 1917 (plasmid-cured)",
+   "b": "stated",
+   "q": "Wildtype (plasmid-cured) E. coli Nissle"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Wildtype (plasmid-cured) E. coli Nissle was grown to log phase anaerobically in YCFA media at 37C, then treated with 1% DMSO (solvent control), 100 µM lithocholic acid, or 100 µM chenodeoxycholic acid for different periods of time (15, 30, 90, 180 minutes) prior to RNA extraction."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Wildtype (plasmid-cured) E. coli Nissle was grown to log phase anaerobically in YCFA media at 37C, then treated with 1% DMSO (solvent control), 100 µM lithocholic acid, or 100 µM chenodeoxycholic acid for different periods of time (15, 30, 90, 180 minutes) prior to RNA extraction."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Wildtype (plasmid-cured) E. coli Nissle was grown to log phase anaerobically in YCFA media at 37C, then treated with 1% DMSO (solvent control), 100 µM lithocholic acid, or 100 µM chenodeoxycholic acid for different periods of time (15, 30, 90, 180 minutes) prior to RNA extraction."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "TruSeq Stranded Total RNA Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Illumina Ribo-Zero Plus rRNA Depletion Kit"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "grown to mid-log phase (OD600 = 0.4-0.6)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "DMSO",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "LCA|CDCA",
+   "set": {
+    "treatment": {
+     "v": "host_factor",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "(LCA|CDCA), (15|30) min",
+   "set": {
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "(LCA|CDCA), 90 min",
+   "set": {
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "(LCA|CDCA), 180 min",
+   "set": {
+    "exposure": {
+     "v": "adapted",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:time",
+   "regex": "^180 min$",
+   "set": {
+    "growth_phase": {
+     "v": null,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

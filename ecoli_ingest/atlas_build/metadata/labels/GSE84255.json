@@ -1,0 +1,152 @@
+{
+ "gse": "GSE84255",
+ "notes": "ATCC 8739 taken as E. coli C. Harvest after 5 h without OD: no growth phase. No inducer mentioned for the overexpression constructs; inducer_added false as study default. rRNA removal not stated.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "10 ml LB medium"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "10 ml LB medium"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "10 ml LB medium"
+  },
+  "growth_temperature": {
+   "v": 30,
+   "b": "stated",
+   "q": "grown at 30ºC and 250 rpm for 5 h"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "grown at 30ºC and 250 rpm for 5 h"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "inoculated into a 100 ml flask containing 10 ml LB medium, and grown at 30ºC and 250 rpm"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "mRNA profiles of Escherichia coli ATCC8739 genetically engineered strain CAR005,IspG1, and G4H14"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "including (I) CAR005, which used as control; (II) IspG1, which strong over-expressed ispG in CAR005; (III) G4H14, which simultaneously over-expressed ispG and ispH in CAR005"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "including (I) CAR005, which used as control; (II) IspG1, which strong over-expressed ispG in CAR005; (III) G4H14, which simultaneously over-expressed ispG and ispH in CAR005"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA profiles of Escherichia coli ATCC8739 genetically engineered strain CAR005,IspG1, and G4H14"
+  },
+  "strain_group": {
+   "v": "C",
+   "b": "inferred",
+   "q": "Escherichia coli ATCC 8739"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "RNA libraries were prepared for sequencing using standard Illumina protocols"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "including (I) CAR005, which used as control; (II) IspG1, which strong over-expressed ispG in CAR005; (III) G4H14, which simultaneously over-expressed ispG and ispH in CAR005"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "^CAR005$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": "CAR005, which used as control"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "CAR005, which used as control"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": "CAR005, which used as control"
+    },
+    "strain_name": {
+     "v": "CAR005",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IspG1$",
+   "set": {
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "stated",
+     "q": "IspG1, which strong over-expressed ispG in CAR005"
+    },
+    "perturbed_genes": {
+     "v": "ispG",
+     "b": "stated",
+     "q": "IspG1, which strong over-expressed ispG in CAR005"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": "IspG1, which strong over-expressed ispG in CAR005"
+    },
+    "strain_name": {
+     "v": "IspG1",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^G4H14$",
+   "set": {
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "stated",
+     "q": "G4H14, which simultaneously over-expressed ispG and ispH in CAR005"
+    },
+    "perturbed_genes": {
+     "v": "ispG;ispH",
+     "b": "stated",
+     "q": "G4H14, which simultaneously over-expressed ispG and ispH in CAR005"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": "G4H14, which simultaneously over-expressed ispG and ispH in CAR005"
+    },
+    "strain_name": {
+     "v": "G4H14",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

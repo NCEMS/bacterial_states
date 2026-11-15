@@ -1,0 +1,86 @@
+{
+ "gse": "GSE203540",
+ "notes": "Chemostat steady states, iron-limited vs iron-excess at 6.3/21/63% dissolved oxygen. Iron-limited: metal_limitation;nutrient_limited_growth. Iron-excess treatment left empty (excess relative to limiting, not described as toxic stress) and no is_control set (no condition named as reference). oxygen aerobic only for 21% and 63% DO; 6.3% left empty. Medium, temperature, strain name not given. WT re-read: strain given only as wt, nothing modified: wild_type.",
+ "default": {
+  "culture_mode": {
+   "v": "chemostat",
+   "b": "stated",
+   "q": "E. coli chemostat cultures grown in iron limiting and iron excess conditions"
+  },
+  "growth_phase": {
+   "v": "not_applicable",
+   "b": "inferred",
+   "q": "E. coli chemostat cultures grown in iron limiting and iron excess conditions"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "study_default",
+   "q": "lower ATP yield per glucose"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "wt"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "wt"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli chemostat cultures grown in iron limiting and iron excess conditions"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli chemostat cultures grown in iron limiting and iron excess conditions"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli chemostat cultures grown in iron limiting and iron excess conditions"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "The ribosomal RNA was depleted from the purified total RNA"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "The ribosomal RNA was depleted from the purified total RNA"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^Limited Iron",
+   "set": {
+    "treatment": {
+     "v": "metal_limitation;nutrient_limited_growth",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "stated",
+     "q": "The samples were collected from the steady state cultures"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "oxygen .* (21|63)%",
+   "set": {
+    "oxygen": {
+     "v": "aerobic",
+     "b": "stated",
+     "q": "aerobic cultures growing at limiting iron conditions"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,152 @@
+{
+ "gse": "GSE123554",
+ "notes": "WT vs delta-fis vs delta-hns in M9 glucose, mid-exponential, aerobic. Culture vessel/shaking not stated so culture_mode left out.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "E. coli cultures were grown to mid-exponential growth phase aerobically at 37°C in M9 minimal media supplemented with 40% (w/v) glucose."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "E. coli cultures were grown to mid-exponential growth phase aerobically at 37°C in M9 minimal media supplemented with 40% (w/v) glucose."
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "E. coli cultures were grown to mid-exponential growth phase aerobically at 37°C in M9 minimal media supplemented with 40% (w/v) glucose."
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "E. coli cultures were grown to mid-exponential growth phase aerobically at 37°C in M9 minimal media supplemented with 40% (w/v) glucose."
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "mid-exponential growth phase"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "E. coli cultures were grown to mid-exponential growth phase aerobically at 37°C in M9 minimal media supplemented with 40% (w/v) glucose."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "E. coli cultures were grown to mid-exponential growth phase aerobically at 37°C in M9 minimal media supplemented with 40% (w/v) glucose."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Wild-type, fis mutant and hns mutant E. coli K-12 MG1655 strains were cultured in M9 minimal media at mid-exponential growth phase with biological duplicates."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Wild-type, fis mutant and hns mutant E. coli K-12 MG1655 strains were cultured in M9 minimal media at mid-exponential growth phase with biological duplicates."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Wild-type, fis mutant and hns mutant E. coli K-12 MG1655 strains were cultured in M9 minimal media at mid-exponential growth phase with biological duplicates."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Wild-type, fis mutant and hns mutant E. coli K-12 MG1655 strains were cultured in M9 minimal media at mid-exponential growth phase with biological duplicates."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "str. K-12 substr. MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Total RNA was extracted using the Analytik Jena RNA Mini kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^wild-type$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "delta-fis",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "fis",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "delta-hns",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "hns",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

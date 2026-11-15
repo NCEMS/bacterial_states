@@ -1,0 +1,139 @@
+{
+ "gse": "GSE233657",
+ "notes": "Empty vector pSEVA (wild type) vs pSEVA:olsFC (ornithine lipid synthesis genes, taken as heterologous expression; origin not stated, unsure) at pH 7.4 and acidic pH (fields say 5.8, design says 5.4). Base medium ambiguous (MOPS / M9 / 'MES/glucose medium'), left out. Inducer use and culture temperature not stated. Library kit is NEBNext Ultra; rRNA removal not stated.",
+ "default": {
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "mRNA of exponentially growing (11h) E. coli mutants in MOPS pH 7.4  and M9 pH 5.4 minimal medium supplemented with glucose"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "mRNA of exponentially growing (11h) E. coli mutants in MOPS pH 7.4  and M9 pH 5.4 minimal medium supplemented with glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "mRNA of exponentially growing (11h) E. coli mutants in MOPS pH 7.4  and M9 pH 5.4 minimal medium supplemented with glucose"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "exponentially growing (11h)"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E. coli K12pSEVA, and K12pOlsFC cells"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA of exponentially growing (11h) E. coli mutants in MOPS pH 7.4  and M9 pH 5.4 minimal medium supplemented with glucose"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA of exponentially growing (11h) E. coli mutants in MOPS pH 7.4  and M9 pH 5.4 minimal medium supplemented with glucose"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "inferred",
+   "q": "Sequencing libraries were generated using NEBNext® UltraTM RNA Library Prep Kit for Illumina®"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "olsFC",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "inferred",
+     "q": "pSEVA:olsFC"
+    },
+    "perturbed_genes": {
+     "v": "olsF;olsC",
+     "b": "stated",
+     "q": "pSEVA:olsFC"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": "pSEVA:olsFC"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": "pSEVA:olsFC"
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "pH 7\\.4",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "base_medium": {
+     "v": "MOPS",
+     "b": "stated",
+     "q": "MOPS pH 7.4"
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "pH 5\\.8",
+   "set": {
+    "treatment": {
+     "v": "acid",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "The cells were washed three-time and cultured in MES/glucose medium and during exponential growth (11h)"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^pSEVA7\\.4",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

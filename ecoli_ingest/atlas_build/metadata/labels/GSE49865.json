@@ -1,0 +1,78 @@
+{
+ "gse": "GSE49865",
+ "notes": "Small RNA (13-30 nt) co-purified with His-tagged R. sphaeroides Argonaute from E. coli BL21(DE3): assay_class IP_or_pulldown (also size-selected small RNA). Single sample, no control.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "E. coli cells were grown in LB medium at 37C"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "E. coli cells were grown in LB medium at 37C"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "E. coli cells were grown in LB medium at 37C"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "E. coli cells were grown in LB medium at 37C"
+  },
+  "genotype_class": {
+   "v": "heterologous_expression",
+   "b": "stated",
+   "q": "6xHis-tag RsAgo protein expressed in E. coli"
+  },
+  "perturbed_genes": {
+   "v": "RsAgo",
+   "b": "stated",
+   "q": "6xHis-tag RsAgo"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "6xHis-tag RsAgo"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "induction of protein was done with 1mM IPTG for 5-10 hours"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "small RNA associated with RsAgo expressed in E. coli BL21(DE3)"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "small RNA associated with RsAgo expressed in E. coli BL21(DE3)"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "small RNA associated with RsAgo expressed in E. coli BL21(DE3)"
+  },
+  "strain_group": {
+   "v": "B",
+   "b": "stated",
+   "q": "BL21(DE3)"
+  },
+  "strain_name": {
+   "v": "BL21(DE3)",
+   "b": "stated",
+   "q": "BL21(DE3)"
+  },
+  "assay_class": {
+   "v": "IP_or_pulldown",
+   "b": "stated",
+   "q": "Protein was isolated from cells induced for ~5 hours with 1mM IPTG. Talon beads (Clontech) were used for affinity purification."
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

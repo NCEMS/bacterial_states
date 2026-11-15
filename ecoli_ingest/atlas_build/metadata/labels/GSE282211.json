@@ -1,0 +1,106 @@
+{
+ "gse": "GSE282211",
+ "notes": "EAEC 042 WT vs 042 delta-lpp in DMEM high glucose (no serum mentioned -> defined_rich). Growth temperature, phase/OD and aeration for the DMEM culture are not given (37 °C is stated only for overnight LB propagation).",
+ "default": {
+  "base_medium": {
+   "v": "cell_culture",
+   "b": "stated",
+   "q": "For RNAseq, bacterial strains were cultured in Dulbecco’s modified Eagle’s medium with 0.4% glucose (DMEM high glucose)"
+  },
+  "medium_class": {
+   "v": "defined_rich",
+   "b": "inferred",
+   "q": "For RNAseq, bacterial strains were cultured in Dulbecco’s modified Eagle’s medium with 0.4% glucose (DMEM high glucose)"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Dulbecco’s modified Eagle’s medium with 0.4% glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "Dulbecco’s modified Eagle’s medium with 0.4% glucose"
+  },
+  "strain_group": {
+   "v": "EAEC",
+   "b": "stated",
+   "q": "RNA was extracted from EAEC 042 derivatives"
+  },
+  "strain_name": {
+   "v": "042",
+   "b": "stated",
+   "q": "RNA was extracted from EAEC 042 derivatives"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RNA was extracted from EAEC 042 derivatives in duplicates (042-1, 042-3, lpp-1, and lpp-2) grown in DMEM-HG"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA was extracted from EAEC 042 derivatives in duplicates (042-1, 042-3, lpp-1, and lpp-2) grown in DMEM-HG"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA was extracted from EAEC 042 derivatives in duplicates (042-1, 042-3, lpp-1, and lpp-2) grown in DMEM-HG"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA was extracted from EAEC 042 derivatives in duplicates (042-1, 042-3, lpp-1, and lpp-2) grown in DMEM-HG"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "1.3 ug of total RNA was used for the construction of sequencing libraries."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "deletion lpp in EAEC"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^mutant$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "deletion lpp in EAEC"
+    },
+    "perturbed_genes": {
+     "v": "lpp",
+     "b": "stated",
+     "q": "deletion lpp in EAEC"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

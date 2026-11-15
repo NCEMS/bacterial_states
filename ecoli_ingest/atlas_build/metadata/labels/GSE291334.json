@@ -1,0 +1,150 @@
+{
+ "gse": "GSE291334",
+ "notes": "Reviewed 2026-11-15: Sakai Stx- is the standard lab strain; wild_type (user decision) | CONFLICT: GSM8833594 has title 'Wild type ... biological replicate 3' and library name RNA-seq_WT_3 but ch:genotype 'rhsF rhsFI'; genotype labels and is_control left out for it. Complement = deletion plus plasmid-borne rhsFint rhsFI (genotype_class multiple). Harvest at OD600 0.8 in MEM-HEPES: no phase. MEM without serum -> defined_rich (inferred). No shaking or temperature stated.",
+ "default": {
+  "base_medium": {
+   "v": "cell_culture",
+   "b": "stated",
+   "q": "MEM-HEPES media supplemented with 0.1% glucose and 250nM FeNO3"
+  },
+  "medium_class": {
+   "v": "defined_rich",
+   "b": "inferred",
+   "q": "MEM-HEPES media supplemented with 0.1% glucose and 250nM FeNO3"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "MEM-HEPES media supplemented with 0.1% glucose and 250nM FeNO3"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "MEM-HEPES media supplemented with 0.1% glucose and 250nM FeNO3"
+  },
+  "strain_group": {
+   "v": "EHEC_STEC",
+   "b": "stated",
+   "q": "Wild type E. coli O157:H7 str Sakai (EHEC, Stx-)"
+  },
+  "strain_name": {
+   "v": "Sakai (stx-)",
+   "b": "stated",
+   "q": "E. coli O157:H7 str. Sakai (stx-)"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "No treatment No treatment"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA seq was performed on biological triplicate cultures of E. coli O157:H7 str. Sakai (stx-) and an isogenic rhsF rhsFI (ECs0605 ECs0604) double deltion strain, and mutant complemented with rhsFint rhsFI (pZE12::rhsFint rhsFI)"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA seq was performed on biological triplicate cultures of E. coli O157:H7 str. Sakai (stx-) and an isogenic rhsF rhsFI (ECs0605 ECs0604) double deltion strain, and mutant complemented with rhsFint rhsFI (pZE12::rhsFint rhsFI)"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA seq was performed on biological triplicate cultures of E. coli O157:H7 str. Sakai (stx-) and an isogenic rhsF rhsFI (ECs0605 ECs0604) double deltion strain, and mutant complemented with rhsFint rhsFI (pZE12::rhsFint rhsFI)"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA sequence sampels were processed at the Ramaciotti Centre for Genomics"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "RNA seq was performed on biological triplicate cultures of E. coli O157:H7 str. Sakai (stx-) and an isogenic rhsF rhsFI (ECs0605 ECs0604) double deltion strain, and mutant complemented with rhsFint rhsFI (pZE12::rhsFint rhsFI)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^WT",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^rhsF rhsFI$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rhsF;rhsFI",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "pZE12",
+   "set": {
+    "genotype_class": {
+     "v": "multiple",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rhsF;rhsFI",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {
+  "GSM8833594": {
+   "genotype_class": {
+    "v": null,
+    "b": "stated",
+    "q": ""
+   },
+   "perturbed_genes": {
+    "v": null,
+    "b": "stated",
+    "q": ""
+   },
+   "is_control": {
+    "v": null,
+    "b": "stated",
+    "q": ""
+   },
+   "global_regulator_perturbed": {
+    "v": null,
+    "b": "stated",
+    "q": ""
+   }
+  }
+ }
+}

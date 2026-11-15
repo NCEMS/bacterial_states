@@ -1,0 +1,83 @@
+{
+ "gse": "GSE34449",
+ "notes": "Two technical replicates of one MG1655 transcriptome; no control condition. Internal standards are synthetic spike-ins, not another organism's cells.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "grown at 30 °C for 3.5 hours such that O.D. at 600 nm became 0.30-0.35"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "diluted 500-fold in fresh LB medium"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "diluted 500-fold in fresh LB medium"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "diluted 500-fold in fresh LB medium"
+  },
+  "growth_temperature": {
+   "v": 30,
+   "b": "stated",
+   "q": "grown at 30 °C for 3.5 hours"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "stated",
+   "q": "E. coli [K-12 MG1655 strain (U00096.2)]"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "E. coli [K-12 MG1655 strain (U00096.2)]"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "We analyzed two replicates of the same bulk E. coli transcriptome sample."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "We analyzed two replicates of the same bulk E. coli transcriptome sample."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "We analyzed two replicates of the same bulk E. coli transcriptome sample."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "E. coli [K-12 MG1655 strain (U00096.2)]"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribosomal RNA was removed using Ribo-Zero rRNA Removal Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA was removed using Ribo-Zero rRNA Removal Kit (Gram-Negative Bacteria)"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "We analyzed two replicates of the same bulk E. coli transcriptome sample."
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

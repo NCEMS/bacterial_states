@@ -1,0 +1,154 @@
+{
+ "gse": "GSE175465",
+ "notes": "Harvest OD 0.4-0.6 in M63 + casamino acids, no phase word: outside the minimal range, growth_phase left out. Temperature and aeration not given. Replicate 3 of each strain gives background 'MG1656' (likely typo), strain_name left out there. hupAmVenus dhupB treated as deletion (tag on hupA); P63A variant as multiple. WT re-read: unmodified baseline strain relabelled wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "M63",
+   "b": "stated",
+   "q": "cells were grown in M63 minimal media supplemented with 0.1% glycerol (v/v), 10 µg ml-1 thiamine, and 0.5 mg ml-1 casamino acids"
+  },
+  "medium_class": {
+   "v": "minimal_plus_hydrolysate",
+   "b": "inferred",
+   "q": "cells were grown in M63 minimal media supplemented with 0.1% glycerol (v/v), 10 µg ml-1 thiamine, and 0.5 mg ml-1 casamino acids"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "0.5 mg ml-1 casamino acids"
+  },
+  "carbon_source": {
+   "v": "glycerol",
+   "b": "stated",
+   "q": "M63 minimal media supplemented with 0.1% glycerol (v/v)"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "Growth in M63 minimal media pH 7.0"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Three biological replicates were analyzed for each strain"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Three biological replicates were analyzed for each strain"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Three biological replicates were analyzed for each strain"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli K12"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Illumina® TruSeq® Stranded Total RNA library prep workflow with Ribo-Zero"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Illumina® TruSeq® Stranded Total RNA library prep workflow with Ribo-Zero"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Three biological replicates were analyzed for each strain"
+  },
+  "global_regulator_perturbed": {
+   "v": true,
+   "b": "inferred",
+   "q": "∆hupA ∆hupB"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:background strain",
+   "regex": "MG1655",
+   "set": {
+    "strain_name": {
+     "v": "MG1655",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^wild-type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^\\{delta\\}hupA \\{delta\\}hupB$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "hupA;hupB",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^hupAmVenus \\{delta\\}hupB$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "hupB",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "P63A",
+   "set": {
+    "genotype_class": {
+     "v": "multiple",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "hupA;hupB",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

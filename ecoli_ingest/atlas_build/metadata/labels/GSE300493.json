@@ -1,0 +1,116 @@
+{
+ "gse": "GSE300493",
+ "notes": "Phase left out for the N-rich samples: design says 'early exponential phase culture', growth protocol says 'mid-exponential phase (OD600nm = 0.2)'. Carbon source of the M9 not given. N-minus samples: 5 h after resuspension in M9 with 10x lower NH4Cl (nitrogen starvation as stated), no phase.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "E. coli MG1655  was cultured in 50 mL of M9 minimal medium N (NH4Cl 9.35 mM) at 37°C with shaking at 220 rpm"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "E. coli MG1655  was cultured in 50 mL of M9 minimal medium N (NH4Cl 9.35 mM) at 37°C with shaking at 220 rpm"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "E. coli MG1655  was cultured in 50 mL of M9 minimal medium N (NH4Cl 9.35 mM) at 37°C with shaking at 220 rpm"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "E. coli MG1655  was cultured in 50 mL of M9 minimal medium N (NH4Cl 9.35 mM) at 37°C with shaking at 220 rpm"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "E. coli MG1655  was cultured in 50 mL of M9 minimal medium N (NH4Cl 9.35 mM) at 37°C with shaking at 220 rpm"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "E. coli MG1655  was cultured in 50 mL of M9 minimal medium N (NH4Cl 9.35 mM) at 37°C with shaking at 220 rpm"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "Transcriptomic profiling of MG1655 in minimal media containing high or low concentration of ammonia"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "E. coli MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptomic profiling of MG1655 in minimal media containing high or low concentration of ammonia"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptomic profiling of MG1655 in minimal media containing high or low concentration of ammonia"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptomic profiling of MG1655 in minimal media containing high or low concentration of ammonia"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Stranded Total RNA Prep Ligation with Ribo-Zero Plus kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Stranded Total RNA Prep Ligation with Ribo-Zero Plus kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "N_plus_expo",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "a early exponential phase culture (nitrogen rich)"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "a early exponential phase culture (nitrogen rich)"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "N_minus_5h",
+   "set": {
+    "treatment": {
+     "v": "nitrogen_starvation",
+     "b": "stated",
+     "q": "To induce nitrogen starvation"
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "Cultures were then incubated at 37°C with shaking for 5h."
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": "a culture experiencing nitrogen starvation foor after 5 h"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

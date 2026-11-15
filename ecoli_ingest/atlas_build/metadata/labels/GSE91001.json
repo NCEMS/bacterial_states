@@ -1,0 +1,136 @@
+{
+ "gse": "GSE91001",
+ "notes": "Low-glucose DMEM without serum: cell_culture / defined_rich. Carbon source set to glucose from 'low-glucose DMEM'. WT re-read: unmodified baseline strain relabelled wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "cell_culture",
+   "b": "stated",
+   "q": "Flasks containing low-glucose DMEM were inoculated 1:100 with the overnight culture and incubated at 37°C with 225 rpm shaking to mid-exponential phase (OD600 0.3-0.5)."
+  },
+  "medium_class": {
+   "v": "defined_rich",
+   "b": "inferred",
+   "q": "Flasks containing low-glucose DMEM were inoculated 1:100 with the overnight culture and incubated at 37°C with 225 rpm shaking to mid-exponential phase (OD600 0.3-0.5)."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Flasks containing low-glucose DMEM were inoculated 1:100 with the overnight culture and incubated at 37°C with 225 rpm shaking to mid-exponential phase (OD600 0.3-0.5)."
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "inferred",
+   "q": "Flasks containing low-glucose DMEM were inoculated 1:100 with the overnight culture and incubated at 37°C with 225 rpm shaking to mid-exponential phase (OD600 0.3-0.5)."
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Flasks containing low-glucose DMEM were inoculated 1:100 with the overnight culture and incubated at 37°C with 225 rpm shaking to mid-exponential phase (OD600 0.3-0.5)."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Flasks containing low-glucose DMEM were inoculated 1:100 with the overnight culture and incubated at 37°C with 225 rpm shaking to mid-exponential phase (OD600 0.3-0.5)."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Flasks containing low-glucose DMEM were inoculated 1:100 with the overnight culture and incubated at 37°C with 225 rpm shaking to mid-exponential phase (OD600 0.3-0.5)."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Flasks containing low-glucose DMEM were inoculated 1:100 with the overnight culture and incubated at 37°C with 225 rpm shaking to mid-exponential phase (OD600 0.3-0.5)."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Whole mRNA profiles of WT and coisogenic perC mutant EPEC strains"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Whole mRNA profiles of WT and coisogenic perC mutant EPEC strains"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Whole mRNA profiles of WT and coisogenic perC mutant EPEC strains"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Whole mRNA profiles of WT and coisogenic perC mutant EPEC strains"
+  },
+  "strain_group": {
+   "v": "EPEC",
+   "b": "stated",
+   "q": "WT typical enteropathogenic E. coli (tEPEC) strains E2348/69"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribosomal RNA was depleted using the RiboZero rRNA removal kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA was depleted using the RiboZero rRNA removal kit"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "Whole mRNA profiles of WT and coisogenic perC mutant EPEC strains"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^WT",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "E2348/69",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "perC",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "perC",
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "JPEP22",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

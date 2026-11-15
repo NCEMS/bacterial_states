@@ -1,0 +1,78 @@
+{
+ "gse": "GSE236554",
+ "notes": "Wild-type BW25113 in LB + G6P (supplement, not a treatment), harvested at OD600 1.9 (above the exponential range, no phase word) so growth_phase left out. Shaking, temperature and vessel not stated.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "diluted in LB medium supplemented with 25 µg/ml of G6P"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "diluted in LB medium supplemented with 25 µg/ml of G6P"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "diluted in LB medium supplemented with 25 µg/ml of G6P"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "three biological replicates of E.coli BW25113"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "three biological replicates of E.coli BW25113"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "BW25113"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "No specific treatment"
+  },
+  "is_control": {
+   "v": true,
+   "b": "stated",
+   "q": "No specific treatment"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "No specific treatment"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "No specific treatment"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "No specific treatment"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Illumina Stranded Total RNA Prep Ligation with Ribo-Zero Plus was used"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Illumina Stranded Total RNA Prep Ligation with Ribo-Zero Plus was used"
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

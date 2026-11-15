@@ -1,0 +1,166 @@
+{
+ "gse": "GSE108442",
+ "notes": "BW25113 and elaA/cysW knockouts, all carrying pMAL-p2x with L-asparaginase; sampled before (0h) and 6h after 1 mM IPTG. Control = BW25113 0h (uninduced). Induction at OD 0.8-1.5 in TB (above inferable range) so no growth phase. Library used magnetic-bead mRNA purification; rrna_removal left out (method not specified). Plasmid-borne asparaginase not counted as genotype change (all strains carry it). Double KO set as deletion with two genes.",
+ "default": {
+  "base_medium": {
+   "v": "TB_2xYT_SOB",
+   "b": "stated",
+   "q": "were grown in 50 ml flask containing TB media(10mM MgsO4 & 0.4% glycerol)"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "were grown in 50 ml flask containing TB media(10mM MgsO4 & 0.4% glycerol)"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "were grown in 50 ml flask containing TB media(10mM MgsO4 & 0.4% glycerol)"
+  },
+  "carbon_source": {
+   "v": "glycerol",
+   "b": "stated",
+   "q": "were grown in 50 ml flask containing TB media(10mM MgsO4 & 0.4% glycerol)"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "BW25113"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "No treatment"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Samples were collected at two time-points i.e. pre-induction(0h) & post-induction(6h)."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Samples were collected at two time-points i.e. pre-induction(0h) & post-induction(6h)."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "mRNA was fragmented into small pieces using divalent cations under elevated temperature"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptomic profiling of  the top performing  double knock out (∆(elaA+cysW)  having significantly higher  protein expression levels was compared with the control"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:time",
+   "regex": "pre-induction",
+   "set": {
+    "inducer_added": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:time",
+   "regex": "post-induction",
+   "set": {
+    "inducer_added": {
+     "v": true,
+     "b": "stated",
+     "q": "cultures were induced by adding 1mM IPTG"
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^control$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "elaA",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "elaA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "cysW",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "cysW",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "elaA\\+cysW",
+   "set": {
+    "perturbed_genes": {
+     "v": "elaA;cysW",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^BW_ANS_0HR",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

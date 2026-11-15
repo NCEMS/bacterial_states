@@ -1,0 +1,124 @@
+{
+ "gse": "GSE172467",
+ "notes": "Strain: summary says TOP10F', ch:strain and growth protocol say MG1655; both K-12, strain_name left out. Medium and temperature not given. 0 min samples taken at phage addition: treated as uninfected (treatment none), vector 0 min = control; 5 and 10 min = T4 infection, acute, mixed_organism true (T4 transcripts in the library). All samples arabinose-induced (vector included). Phase early_exponential kept (<= 30 min after OD 0.3).",
+ "default": {
+  "growth_phase": {
+   "v": "early_exponential",
+   "b": "stated",
+   "q": "E. coli str. K-12 substr. MG1655 containing either pNW129 or pNW129-MotB were grown to early log phase (OD600 ~ 0.3)  then induced with 0.2% arabinose for 20 minutes. Phage T4 was added to the culture at MOI 10."
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "E. coli str. K-12 substr. MG1655 containing either pNW129 or pNW129-MotB were grown to early log phase (OD600 ~ 0.3)  then induced with 0.2% arabinose for 20 minutes. Phage T4 was added to the culture at MOI 10."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "To determine the effect of the T4 MotB protein on E. coli  gene expression, RNAseq was performed for TOP10F' E. coli infected by T4 after producing T4 MotB for 20 minutes ."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12 substr. MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Optimum fragmentation of the total RNA samples in this library was determined to be 3 min at 94C in FastAP buffer"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "To determine the effect of the T4 MotB protein on E. coli  gene expression, RNAseq was performed for TOP10F' E. coli infected by T4 after producing T4 MotB for 20 minutes ."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:plasmid",
+   "regex": "^pNW129$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:plasmid",
+   "regex": "^pNW129-MotB$",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "motB",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^0 min post infection",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "mixed_organism": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(5|10) min post infection",
+   "set": {
+    "treatment": {
+     "v": "phage",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "inferred",
+     "q": ""
+    },
+    "mixed_organism": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^0 min post infection, Vector",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

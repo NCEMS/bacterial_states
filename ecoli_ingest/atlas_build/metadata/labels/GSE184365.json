@@ -1,0 +1,100 @@
+{
+ "gse": "GSE184365",
+ "notes": "Library-method benchmark (miniBac-seq, input gradient down to 100 fg, RT barcodes) on one culture condition; all labelled untreated controls. Carbon source of M63B1 not given. rrna_removal set only for the two Fig2bc samples that name an rRNA depletion method; TruSeq and other miniBac-seq samples left empty. WT re-read: plain BW25113 -> wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "M63",
+   "b": "stated",
+   "q": "cultivating the seed culture into fresh M63B1 medium"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "cultivating the seed culture into fresh M63B1 medium"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "cultivating the seed culture into fresh M63B1 medium"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "grown for 10 hours with shaking at 220 rpm to reach exponential stage (OD600 ~ 0.6)"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "stated",
+   "q": "grown for 10 hours with shaking at 220 rpm to reach exponential stage (OD600 ~ 0.6)"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "grown for 10 hours with shaking at 220 rpm to reach exponential stage (OD600 ~ 0.6)"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "We used E. coli K12 BW25113"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "We used E. coli K12 BW25113"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E. coli K12 BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "E. coli K12 BW25113"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "typically cultivated in M63B1 broth and extracted total RNA at the Log phase"
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "typically cultivated in M63B1 broth and extracted total RNA at the Log phase"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "typically cultivated in M63B1 broth and extracted total RNA at the Log phase"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "typically cultivated in M63B1 broth and extracted total RNA at the Log phase"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "We used E. coli K12 BW25113"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "strand-specific method for high-quality bacterial RNA-seq library construction from sub-nanogram of total RNA"
+  }
+ },
+ "rules": [
+  {
+   "field": "source_name",
+   "regex": "rRNA depletion method",
+   "set": {
+    "rrna_removal": {
+     "v": "depletion",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

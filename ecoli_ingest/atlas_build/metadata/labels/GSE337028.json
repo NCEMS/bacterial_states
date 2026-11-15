@@ -1,0 +1,137 @@
+{
+ "gse": "GSE337028",
+ "notes": "UTI89 described as an ExPEC isolate in a urinary-tract study; labelled UPEC. Grown 3 h 15 min after dilution with no OD or phase word: growth_phase left out. IPTG given to all cultures; induced empty-vector WT is the control. Library kit (Nugen Ovation Prokaryotic) rRNA handling not stated.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "back diluted 1:100 into 5 mL LB and grown for 3 hours 15 min at 37°C, shaking 225 rpm."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "back diluted 1:100 into 5 mL LB"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "back diluted 1:100 into 5 mL LB"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "study_default",
+   "q": "grown for 3 hours 15 min at 37°C, shaking 225 rpm."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "shaking 225 rpm"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "shaking 225 rpm"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "At the two-hour growth mark IPTG was added to each culture to a final concentration of 0.1 mM."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Overnight cultures of UTI89/pRRK1, UTI89ΔmicC/pRRK1, and UTI89ΔmicC/pMicC were back diluted 1:100 into 5 mL LB"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Overnight cultures of UTI89/pRRK1, UTI89ΔmicC/pRRK1, and UTI89ΔmicC/pMicC were back diluted 1:100 into 5 mL LB"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Overnight cultures of UTI89/pRRK1, UTI89ΔmicC/pRRK1, and UTI89ΔmicC/pMicC were back diluted 1:100 into 5 mL LB"
+  },
+  "strain_group": {
+   "v": "UPEC",
+   "b": "inferred",
+   "q": "Extraintestinal Pathogenic Escherichia coli (ExPEC) isolate UTI89"
+  },
+  "strain_name": {
+   "v": "UTI89",
+   "b": "stated",
+   "q": "UTI89"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Libraries constructed using the Nugen Ovation Prokaryotic RNA-seq kit as per manufacturer instructions"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "Overnight cultures of UTI89/pRRK1, UTI89ΔmicC/pRRK1, and UTI89ΔmicC/pMicC were back diluted 1:100 into 5 mL LB"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^WT with empty vector$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^micC knockout$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "micC",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^micC overexpressor$",
+   "set": {
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "micC",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

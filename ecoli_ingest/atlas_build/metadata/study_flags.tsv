@@ -1,0 +1,2 @@
+GSE	flag	reason
+GSE206047	large_study	1,077 candidate samples of one circuit-characterisation experiment; supplies over half of the usable stationary, heterologous-expression and inducer-added samples (user decision: keep, but flag so it can be left out of modelling steps)

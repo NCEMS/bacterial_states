@@ -1,0 +1,34 @@
+{
+  "gse": "GSE202144",
+  "notes": "MG1655 electron-transport knockouts (ndh/cydB/appC, nuoB/cydB/appC, ndh/cyoB, nuoB/cyoB) and ALE endpoint clones of each, M9 + 4 g/l glucose, mid-log (A600 ~0.6; phase word stated in the design). No wild-type sample among candidates, so is_control left out. ALE clones labelled evolved_isolate (on top of the parental deletions, listed in perturbed_genes). Temperature and aeration not stated.",
+  "default": {
+    "base_medium": {"v": "M9", "b": "stated", "q": "The strains were grown in an M9 minimal medium supplemented with 4g/l glucose"},
+    "medium_class": {"v": "defined_minimal", "b": "inferred", "q": "M9 minimal medium supplemented with 4g/l glucose"},
+    "amino_acids_supplied": {"v": false, "b": "inferred", "q": "M9 minimal medium supplemented with 4g/l glucose"},
+    "carbon_source": {"v": "glucose", "b": "stated", "q": "M9 minimal medium supplemented with 4g/l glucose"},
+    "growth_phase": {"v": "mid_exponential", "b": "stated", "q": "Total RNA was extracted from mid-log phase culture"},
+    "genotype_class": {"v": "deletion", "b": "stated", "q": "We generated four strains of Escherichia coli K12 MG1655 with distinct proton motive force generation potential"},
+    "global_regulator_perturbed": {"v": false, "b": "inferred", "q": "study how the system adapts to the loss of alternate electron transfer pathways"},
+    "treatment": {"v": "none", "b": "study_default", "q": "performed the adaptive laboratory evolution of these strains"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "Escherichia coli str. K-12 substr. MG1655"},
+    "strain_name": {"v": "MG1655", "b": "stated", "q": "Escherichia coli str. K-12 substr. MG1655"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "performed the adaptive laboratory evolution of these strains"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "performed the adaptive laboratory evolution of these strains"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "performed the adaptive laboratory evolution of these strains"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "A KAPA Stranded RNA-Seq Kit (Kapa Biosystems KK8401) was used"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "The ribosomal RNA was removed using an Illumina Ribo-Zero rRNA removal kit"}
+  },
+  "rules": [
+    {"field": "ch:genotype", "regex": "^ndh/cydB/appC KO",
+     "set": {"perturbed_genes": {"v": "ndh;cydB;appC", "b": "stated", "q": ""}}},
+    {"field": "ch:genotype", "regex": "^nuoB/cydB/appC KO",
+     "set": {"perturbed_genes": {"v": "nuoB;cydB;appC", "b": "stated", "q": ""}}},
+    {"field": "ch:genotype", "regex": "^ndh/cyoB KO",
+     "set": {"perturbed_genes": {"v": "ndh;cyoB", "b": "stated", "q": ""}}},
+    {"field": "ch:genotype", "regex": "^nuoB/cyoB KO",
+     "set": {"perturbed_genes": {"v": "nuoB;cyoB", "b": "stated", "q": ""}}},
+    {"field": "ch:genotype", "regex": "ALE \\d",
+     "set": {"genotype_class": {"v": "evolved_isolate", "b": "stated", "q": "A clone from the endpoints of evolved strains was picked"}}}
+  ],
+  "samples": {}
+}

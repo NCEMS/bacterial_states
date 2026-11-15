@@ -1,0 +1,126 @@
+{
+ "gse": "GSE295972",
+ "notes": "Silver nitrate added before inoculation, cells grown 10 h in it: metal_excess, adapted. Concentration given as 7 µM in summary/design but 39 µM in treatment_protocol. No phase word or OD at 10 h harvest: growth_phase left out. WT re-read: Unmodified BW25113 wild type -> wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9-glucose minimal media"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "M9-glucose minimal media"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "M9-glucose minimal media"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "M9-glucose minimal media"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "incubated at 37 ºC 150 rpm for 10 hours in a shaker incubator"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "incubated at 37 ºC 150 rpm for 10 hours in a shaker incubator"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "incubated at 37 ºC 150 rpm for 10 hours in a shaker incubator"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "Wild type"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "Wild type"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K12 BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "K12 BW25113"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Two treatment groups were set up: a non-metal control with M9-glucose minimal media, and a metal challenge using the same culture media but spiked with a sublethal concentration of silver nitrate (7 µM, 1.18 µg/mL)."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Two treatment groups were set up: a non-metal control with M9-glucose minimal media, and a metal challenge using the same culture media but spiked with a sublethal concentration of silver nitrate (7 µM, 1.18 µg/mL)."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Two treatment groups were set up: a non-metal control with M9-glucose minimal media, and a metal challenge using the same culture media but spiked with a sublethal concentration of silver nitrate (7 µM, 1.18 µg/mL)."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribosomal RNA depletion was performed using the NEB rRNA Depletion Bacterial Module"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA depletion was performed using the NEB rRNA Depletion Bacterial Module"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^Control",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^Silver nitrate",
+   "set": {
+    "treatment": {
+     "v": "metal_excess",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "stated",
+     "q": "spiked with a sublethal concentration of silver nitrate (39 µM, 6.22 µg/mL) prior to inoculation"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,117 @@
+{
+ "gse": "GSE197880",
+ "notes": "LP-600 (siderophore conjugate, mode of action not given in the text) -> abx_other at a low (0.0625 ug/ml) and a high (128 ug/ml) dose; DMSO vehicle = control at each OD. Treatment duration not given, so exposure left out. growth_phase mid_exponential inferred from OD 0.5 in MHB for all OD 0.5 samples (including treated, harvested at that OD); OD 1.0 left empty. Iron-limited MHB is the medium of all samples, not a treatment. Temperature 37 C given for the overnight cultures (study_default). Aeration not stated. WT re-read: genotype_class reference -> wild_type, BW25113 WT unmodified.",
+ "default": {
+  "base_medium": {
+   "v": "Mueller-Hinton",
+   "b": "stated",
+   "q": "Overnight cultures were grown in iron-limited MHB medium at 37 °C."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Overnight cultures were grown in iron-limited MHB medium at 37 °C."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Overnight cultures were grown in iron-limited MHB medium at 37 °C."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "study_default",
+   "q": "Overnight cultures were grown in iron-limited MHB medium at 37 °C."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "BW25113 WT"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "BW25113 WT"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "BW25113 WT"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "BW25113 WT"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "E.coli mRNA profiles of siderophore-conjugate treatments at different concentrations and growth phases"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "E.coli mRNA profiles of siderophore-conjugate treatments at different concentrations and growth phases"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "E.coli mRNA profiles of siderophore-conjugate treatments at different concentrations and growth phases"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "total RNA library was generated from   1 mg total RNA after rRNA depletion through Ribo-off rRNA Depletion Kit (Bacteria)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "total RNA library was generated from   1 mg total RNA after rRNA depletion through Ribo-off rRNA Depletion Kit (Bacteria)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^Control$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "DMSO as vehicle control"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "DMSO as vehicle control"
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^(Low|High)-dose$",
+   "set": {
+    "treatment": {
+     "v": "abx_other",
+     "b": "inferred",
+     "q": "Bacterial pellets were treated with LP-600 at the concentration of 0.0625, 128 µg/ml"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": "Bacterial pellets were treated with LP-600 at the concentration of 0.0625, 128 µg/ml"
+    }
+   }
+  },
+  {
+   "field": "ch:time-point",
+   "regex": "^OD 600= 0\\.5$",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

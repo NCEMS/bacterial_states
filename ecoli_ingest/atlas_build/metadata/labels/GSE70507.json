@@ -1,0 +1,106 @@
+{
+ "gse": "GSE70507",
+ "notes": "Engineered 3-HP producer SH0012 vs its control strain SH0003 in fed-batch jar fermenter. SH0012 modifications not described -> genotype_class left out for SH0012; SH0003 = control strain (reference). All samples IPTG-induced; vitamin B12 omitted in one sample (cofactor supplement, treatment none). Agitation 1200 vs 600 rpm; summary mentions micro-aerobic fermentation but does not say which samples -> oxygen left out. Phase not stated for 20-40 h fermentation samples. TruSeq RNA kit -> rrna_removal left out.",
+ "default": {
+  "culture_mode": {
+   "v": "fed_batch",
+   "b": "stated",
+   "q": "feeding medium of glycerol (700g/L) was throughout fermentation"
+  },
+  "base_medium": {
+   "v": "other_minimal",
+   "b": "stated",
+   "q": "modified R medium (20g/L glucose, 80 g/L glycerol"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "modified R medium (20g/L glucose, 80 g/L glycerol, 1.4g/L MgSDo4, 13.5 g/L KH2PO4, 4.0 g/L (NH4)2HPO4 and 1.7g/L citric acid"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "modified R medium (20g/L glucose, 80 g/L glycerol, 1.4g/L MgSDo4, 13.5 g/L KH2PO4, 4.0 g/L (NH4)2HPO4 and 1.7g/L citric acid"
+  },
+  "carbon_source": {
+   "v": "mixed",
+   "b": "stated",
+   "q": "20g/L glucose, 80 g/L glycerol"
+  },
+  "growth_temperature": {
+   "v": 35,
+   "b": "stated",
+   "q": "1.7g/L citric acid at 35°C"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "induced by 0.05mM IPTG and 50 µM vitamin B12"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RNA-Seq analysis was conducted at different growth phases of the cell cycle as well as various fermentation conditions"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-Seq analysis was conducted at different growth phases of the cell cycle as well as various fermentation conditions"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-Seq analysis was conducted at different growth phases of the cell cycle as well as various fermentation conditions"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "SH0003 (30h, control strain)"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNAs were isolated using RNeasy mini kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "^SH0012$",
+   "set": {
+    "strain_name": {
+     "v": "SH0012",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^SH0003$",
+   "set": {
+    "strain_name": {
+     "v": "SH0003",
+     "b": "stated",
+     "q": ""
+    },
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": "SH0003 (30h, control strain)"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": "SH0003 (30h, control strain)"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "SH0003 (30h, control strain)"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

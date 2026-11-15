@@ -1,0 +1,164 @@
+{
+ "gse": "GSE65711",
+ "notes": "Every sample is paraquat-treated; no untreated condition, so is_control left out. Phase: treated at mid-log for 20 min (kept, inferred). 'with agitation' read as shaken batch.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "250 uM of paraquat at mid-log pahse for 20 min"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "E. coli K-12 MG1655 WT, ΔoxyR, ΔsoxR, and ΔsoxS were grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "for 20 min with agitation"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "E. coli K-12 MG1655 WT, ΔoxyR, ΔsoxR, and ΔsoxS were grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose."
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "E. coli K-12 MG1655 WT, ΔoxyR, ΔsoxR, and ΔsoxS were grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "E. coli K-12 MG1655 WT, ΔoxyR, ΔsoxR, and ΔsoxS were grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose."
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "E. coli K-12 MG1655 WT, ΔoxyR, ΔsoxR, and ΔsoxS were grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose."
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "E. coli K-12 MG1655 WT, ΔoxyR, ΔsoxR, and ΔsoxS were grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose."
+  },
+  "treatment": {
+   "v": "oxidative",
+   "b": "stated",
+   "q": "250 uM of paraquat at mid-log pahse for 20 min"
+  },
+  "exposure": {
+   "v": "acute",
+   "b": "stated",
+   "q": "250 uM of paraquat at mid-log pahse for 20 min"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT, ΔoxyR, ΔsoxR, and ΔsoxS mutant cells were cultured in M9 minimal media with 0.2% glucose."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT, ΔoxyR, ΔsoxR, and ΔsoxS mutant cells were cultured in M9 minimal media with 0.2% glucose."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT, ΔoxyR, ΔsoxR, and ΔsoxS mutant cells were cultured in M9 minimal media with 0.2% glucose."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K-12 MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Total RNA was extracted using the RNeasy Plus Mini kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^delta-",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "oxyR",
+   "set": {
+    "perturbed_genes": {
+     "v": "oxyR",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "soxR",
+   "set": {
+    "perturbed_genes": {
+     "v": "soxR",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "soxS",
+   "set": {
+    "perturbed_genes": {
+     "v": "soxS",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

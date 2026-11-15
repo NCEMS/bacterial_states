@@ -1,0 +1,143 @@
+{
+ "gse": "GSE211418",
+ "notes": "E. coli Nissle 1917 in LB or M9 to OD 0.5 at 37 C, then 30 min calprotectin (S100A8/A9; 'SA1008/9' in the titles is the protein, not a strain) vs untreated. Calprotectin classed host_factor. M9 carbon source not stated. Culture mode / aeration not stated.",
+ "default": {
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown in LB or M9 media until OD 0.5 in 37C"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "grown in LB or M9 media until OD 0.5 in 37C"
+  },
+  "strain_group": {
+   "v": "probiotic",
+   "b": "stated",
+   "q": "probiotic E. coli Nissle 1917(EcN)"
+  },
+  "strain_name": {
+   "v": "Nissle 1917",
+   "b": "stated",
+   "q": "Nissle 1917"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "LB WT 1"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli Nissle 1917 treated with 200 ug/g of calprotectin"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli Nissle 1917 treated with 200 ug/g of calprotectin in log phase in both rich (LB) and minimal (M9) media conditions"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli Nissle 1917 treated with 200 ug/g of calprotectin in log phase in both rich (LB) and minimal (M9) media conditions"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli Nissle 1917 treated with 200 ug/g of calprotectin in log phase in both rich (LB) and minimal (M9) media conditions"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "RNA libraries for RNA-seq were prepared using Illumina RNA-seq library prep using ribominus protocol"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "using ribominus protocol"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:growth medium",
+   "regex": "^LB",
+   "set": {
+    "base_medium": {
+     "v": "LB",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "complex",
+     "b": "stated",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:growth medium",
+   "regex": "^M9",
+   "set": {
+    "base_medium": {
+     "v": "M9",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "defined_minimal",
+     "b": "stated",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^none$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^Calprotectin$",
+   "set": {
+    "treatment": {
+     "v": "host_factor",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": "treated with 200 ug/g of calprotectin for 30 mins prior to sequencing"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,116 @@
+{
+ "gse": "GSE160082",
+ "notes": "MG1655 in CA-MHB at A600 0.8-1.0 (above complex-medium range), then 1 h untreated or with colistin, CSA13, CSA131, LL37: no growth_phase (design says 'log phase' but the OD is above the range and samples are 1 h later; left out). LL37 and the ceragenins labelled abx_membrane (cationic membrane-targeting agents, called antibiotics in the design); LL37 is also a host peptide. rRNA removal not described. WT re-read: plain MG1655, genotype_class wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "Mueller-Hinton",
+   "b": "stated",
+   "q": "cation-adjusted Mueller-Hinton broth"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "cation-adjusted Mueller-Hinton broth"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "cation-adjusted Mueller-Hinton broth"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Antibiotics were added to each cultures, which were further incubated for 1 h at 37oC with shaking."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Antibiotics were added to each cultures, which were further incubated for 1 h at 37oC with shaking."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Antibiotics were added to each cultures, which were further incubated for 1 h at 37oC with shaking."
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "A single colony of E. coli MG1655"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli bacteria were grown to log phase and treated with supra-MIC concentrations of antibiotics for one hour"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli bacteria were grown to log phase and treated with supra-MIC concentrations of antibiotics for one hour"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli bacteria were grown to log phase and treated with supra-MIC concentrations of antibiotics for one hour"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli bacteria were grown to log phase and treated with supra-MIC concentrations of antibiotics for one hour"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "A single colony of E. coli MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "A single colony of E. coli MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Dual-barcode indexed RNA-seq libraries were generated from 50 ng total RNA each, using the Kapa Hyper Stranded RNA-seq kit"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "treated with supra-MIC concentrations of antibiotics for one hour before being harvested"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^Untreated$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "colistin|CSA13|LL37",
+   "set": {
+    "treatment": {
+     "v": "abx_membrane",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": "treated with supra-MIC concentrations of antibiotics for one hour"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

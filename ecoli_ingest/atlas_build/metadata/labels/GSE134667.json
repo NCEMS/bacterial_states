@@ -1,0 +1,234 @@
+{
+ "gse": "GSE134667",
+ "notes": "LB pH 7.0 vs pH 5.0 from 1:100 dilution: pH 5 samples get treatment acid, exposure adapted. Phase mid_exponential inferred from OD600 0.2-0.3 or 0.4-0.5 in LB. Every wild-type pH 7.0 sample (both OD ranges, SCV96_ and SCV96_PH7_) is a control. hupA/hupB double deletion -> deletion; hupAE34K with hupB+ -> point_mutation; hupAE34K delta-hupB -> multiple. Temperature and aeration not stated. WT re-read: wild-type samples of the plain standard strain set to wild_type.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli K12  MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli K12  MG1655"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Overnight culture grown in LB was diluted 1:100 in fresh LB of pH 7.0 or pH 5.0"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Overnight culture grown in LB was diluted 1:100 in fresh LB of pH 7.0 or pH 5.0"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Overnight culture grown in LB was diluted 1:100 in fresh LB of pH 7.0 or pH 5.0"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Strains were grown in LB of pH 7.0 or pH 5.0"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Strains were grown in LB of pH 7.0 or pH 5.0"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Strains were grown in LB of pH 7.0 or pH 5.0"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Illumina® TruSeq® Stranded Total RNA library prep workflow with Ribo-Zero"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Illumina® TruSeq® Stranded Total RNA library prep workflow with Ribo-Zero"
+  },
+  "is_control": {
+   "v": false,
+   "b": "stated",
+   "q": "Strains were grown in LB of pH 7.0 or pH 5.0"
+  }
+ },
+ "rules": [
+  {
+   "field": "source_name",
+   "regex": "OD 600 between 0\\.(2-0\\.3|4-0\\.5)",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "pH 7\\.0",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "pH 5\\.0",
+   "set": {
+    "treatment": {
+     "v": "acid",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "Overnight culture grown in LB was diluted 1:100 in fresh LB of pH 7.0 or pH 5.0"
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^wild-type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^SCV96_(PH7_0)?[123]$",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^delta-hupA$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "hupA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^delta-hupB$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "hupB",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^delta-hupA delta-hupB$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "hupA;hupB",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^hupAE34K hupB\\+$",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "hupA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^hupAE34K delta-hupB$",
+   "set": {
+    "genotype_class": {
+     "v": "multiple",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "hupA;hupB",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

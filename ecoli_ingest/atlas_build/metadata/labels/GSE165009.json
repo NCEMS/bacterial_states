@@ -1,0 +1,140 @@
+{
+ "gse": "GSE165009",
+ "notes": "Medium not given. 'hpi' read as hours after inoculation; 24 h samples -> stationary (inferred), 8 h left empty. Rtc inhibitor not named, timing of its addition not given (exposure left out); classed other_chemical. Untreated WT at 8 h and 24 h are both controls.",
+ "default": {
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "37oC under shaking."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "37oC under shaking."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "37oC under shaking."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli K12 MG1655 HPX versus wild-type; active versus inactive Rtc RNA repair system; 8 and 24 hpi."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli K12 MG1655 HPX versus wild-type; active versus inactive Rtc RNA repair system; 8 and 24 hpi."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli K12 MG1655 HPX versus wild-type; active versus inactive Rtc RNA repair system; 8 and 24 hpi."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribosomal RNA molecules were depleted using the Ribo-Zero rRNA Removal Kit for bacteria (Illumina)."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA molecules were depleted using the Ribo-Zero rRNA Removal Kit for bacteria (Illumina)."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "cells lacking hydroperoxidase (Hpx-)"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli K12 MG1655 HPX versus wild-type; active versus inactive Rtc RNA repair system; 8 and 24 hpi."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "wild-type",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "katE",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "katE;katG;ahpC",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^Untreated$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "Rtc inhibitor",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:age",
+   "regex": "^24 h$",
+   "set": {
+    "growth_phase": {
+     "v": "stationary",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^WT-minus",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

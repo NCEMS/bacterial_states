@@ -1,0 +1,216 @@
+{
+ "gse": "GSE263906",
+ "notes": "growth_phase mid_exponential inferred for all (log phase at OD 0.3 in LB, sampled 1 h later, within the 2 h rule; untreated cultures may be past mid-log by then). lexA3 strains also carry the linked malG::Tn10 marker; labelled point_mutation in lexA. AZT (replication chain terminator) -> dna_damage, 1 h -> short. WT re-read: the rph+ MG1655 derivative STL18703 is called wild-type and carries no stated marker -> wild_type.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "wild-type (an rph+ derivative of MG1655)"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Cultures were prepared in LB growth medium, Lennox formulation."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Cultures were prepared in LB growth medium, Lennox formulation."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Cultures were prepared in LB growth medium, Lennox formulation."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Cultures were grown with aeration at 37° after 1:100 dilution until they reached an OD of 0.3. Cultures were split at this time and treated with AZT or not. After 1 hr of continued growth, cells were harvested"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Cultures were grown with aeration at 37° after 1:100 dilution until they reached an OD of 0.3. Cultures were split at this time and treated with AZT or not. After 1 hr of continued growth, cells were harvested"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Cultures were grown with aeration at 37° after 1:100 dilution until they reached an OD of 0.3. Cultures were split at this time and treated with AZT or not. After 1 hr of continued growth, cells were harvested"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "Cultures were grown with aeration at 37° after 1:100 dilution until they reached an OD of 0.3. Cultures were split at this time and treated with AZT or not. After 1 hr of continued growth, cells were harvested"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was extracted using the Split RNA Extraction Kit (Lexogen) followed by RiboCop rRNA Depletion for Gram - Bacteria (Lexogen)."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Total RNA was extracted using the Split RNA Extraction Kit (Lexogen) followed by RiboCop rRNA Depletion for Gram - Bacteria (Lexogen)."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "We performed RNA seq analysis in 4 different strains backgrounds, wild-type (an rph+ derivative of MG1655), lexA3, sspA∆ mutants and the lexA3 sspA∆ double mutant."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "We performed RNA seq analysis in 4 different strains backgrounds, wild-type (an rph+ derivative of MG1655), lexA3, sspA∆ mutants and the lexA3 sspA∆ double mutant."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "We performed RNA seq analysis in 4 different strains backgrounds, wild-type (an rph+ derivative of MG1655), lexA3, sspA∆ mutants and the lexA3 sspA∆ double mutant."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "We performed RNA seq analysis in 4 different strains backgrounds, wild-type (an rph+ derivative of MG1655), lexA3, sspA∆ mutants and the lexA3 sspA∆ double mutant."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:tissue",
+   "regex": "STL18703",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "STL18703 (MG1655 rph+)",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:tissue",
+   "regex": "STL22918",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "lexA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "STL22918",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:tissue",
+   "regex": "STL23195",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "sspA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "STL23195",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:tissue",
+   "regex": "STL23196",
+   "set": {
+    "genotype_class": {
+     "v": "multiple",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "lexA;sspA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "STL23196",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^untreated$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "AZT",
+   "set": {
+    "treatment": {
+     "v": "dna_damage",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:cell line",
+   "regex": "^wt_un_",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

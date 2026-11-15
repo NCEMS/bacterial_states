@@ -1,0 +1,96 @@
+{
+ "gse": "GSE286114",
+ "notes": "E. coli PLB1K (strain background not given, strain_group left out) control vs PLB1K expressing Klebsiella rmpA. Growth protocol lists aTc 'for selection when application' ambiguously, so inducer_added left out. No phase/OD given. 'SMARTER mRNA-Seq' kit named; rRNA removal method unclear, left out.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "routinely cultured in lysogeny broth (LB)"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "routinely cultured in lysogeny broth (LB)"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "routinely cultured in lysogeny broth (LB)"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Strain was cultured at 37°C condition"
+  },
+  "strain_name": {
+   "v": "PLB1K",
+   "b": "stated",
+   "q": "PLB1K"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "No application."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq of Klebsiella dCas9-sgRNA and dCas9-rmpA Escherichia PLB1K and PLB1K-rmpA strains."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq of Klebsiella dCas9-sgRNA and dCas9-rmpA Escherichia PLB1K and PLB1K-rmpA strains."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "RNA libraries for RNA-seq were prepared using SMARTER mRNA-Seq Library Prep Kit"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "RNA-seq of Klebsiella dCas9-sgRNA and dCas9-rmpA Escherichia PLB1K and PLB1K-rmpA strains."
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^Control",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^rmpA overexpression",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rmpA",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

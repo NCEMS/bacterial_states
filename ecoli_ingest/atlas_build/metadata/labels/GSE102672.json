@@ -1,0 +1,103 @@
+{
+ "gse": "GSE102672",
+ "notes": "DH1 (K-12) with empty vectors (WT) or isoprenol pathway plasmids (3A, 3Amk). All WT empty-vector samples are controls (induced empty vector allowed); t=0 is before induction (inducer_added false), t=1 and t=12 after. Medium, temperature, growth phase not given. Pathway genes not named, so perturbed_genes left out. 3A and 3Amk share the same genotype field text; distinguished by title.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "DH1"
+  },
+  "strain_name": {
+   "v": "DH1",
+   "b": "stated",
+   "q": "DH1"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "where rRNA was depleted using RiboZero"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "where rRNA was depleted using RiboZero"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "we used RNAseq to identify differentially expressed genes between engineered strains and the wild-type control at time points corresponding with IPP accumulation and reduction in strain 3Amk"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "we used RNAseq to identify differentially expressed genes between engineered strains and the wild-type control at time points corresponding with IPP accumulation and reduction in strain 3Amk"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "we used RNAseq to identify differentially expressed genes between engineered strains and the wild-type control at time points corresponding with IPP accumulation and reduction in strain 3Amk"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "we used RNAseq to identify differentially expressed genes between engineered strains and the wild-type control at time points corresponding with IPP accumulation and reduction in strain 3Amk"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^WT-",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": "DH1 harboring pBbA5c and pTrc99A"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "the wild-type control"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^3A",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": "E. coli engineered to produce isoprenol"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": "we used RNAseq to identify differentially expressed genes between engineered strains and the wild-type control at time points corresponding with IPP accumulation and reduction in strain 3Amk"
+    }
+   }
+  },
+  {
+   "field": "ch:hour",
+   "regex": "^0 hour",
+   "set": {
+    "inducer_added": {
+     "v": false,
+     "b": "stated",
+     "q": "We sampled each strain prior to pathway induction (t=0)"
+    }
+   }
+  },
+  {
+   "field": "ch:hour",
+   "regex": "^(1|12) hour",
+   "set": {
+    "inducer_added": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

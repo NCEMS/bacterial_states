@@ -1,0 +1,175 @@
+{
+ "gse": "GSE67402",
+ "notes": "Reviewed 2026-11-15: growth phase of 27 samples taken from the submitters own growth-phase field in the duplicate deposit GSE94117 (3-8 h exponential, 24 and 48 h stationary, 168 and 336 h late stationary) | Time course in glucose-limited DM500 without OD or phase words. growth_phase only from the overnight rule: 24 h stationary, 48/168/336 h late_stationary (inferred); 3-8 h left empty. treatment carbon_starvation only for 24 h and later (glucose exhaustion in glucose-limited medium, the study's 'starvation'); 3-8 h left empty because the text does not say when glucose ran out; exposure not given. No control condition identified (pure time course), is_control left out. Libraries: fragmented total RNA in a small-RNA kit with >100 bp inserts gel-selected, treated as total_rnaseq; the -ND samples were not rRNA depleted. WT re-read: unmodified REL606, so wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "other_minimal",
+   "b": "stated",
+   "q": "Davis Minimal medium supplemented with limiting glucose at 0.5 g/l (DM500)"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "Davis Minimal medium supplemented with limiting glucose at 0.5 g/l (DM500)"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "Davis Minimal medium supplemented with limiting glucose at 0.5 g/l (DM500)"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "Davis Minimal medium supplemented with limiting glucose at 0.5 g/l (DM500)"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "orbital shaking at 120 r.p.m. over a one-inch diameter"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "orbital shaking at 120 r.p.m. over a one-inch diameter"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "All growth steps were conducted with incubation at 37°C"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "Escherichia coli B strain REL606"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Escherichia coli B strain REL606"
+  },
+  "strain_group": {
+   "v": "B",
+   "b": "stated",
+   "q": "Escherichia coli B strain REL606"
+  },
+  "strain_name": {
+   "v": "REL606",
+   "b": "stated",
+   "q": "Escherichia coli B strain REL606"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Time course of E. coli growth and starvation in glucose-limited minimal medium"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Time course of E. coli growth and starvation in glucose-limited minimal medium"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Time course of E. coli growth and starvation in glucose-limited minimal medium"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA-depleted total RNA"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "RNAsnap followed by RiboZero rRNA removal kit for gram-negative bacteria (Epicentre)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:molecule subtype",
+   "regex": "^total RNA$",
+   "set": {
+    "rrna_removal": {
+     "v": "none",
+     "b": "stated",
+     "q": "rRNA not depleted"
+    },
+    "assay_class": {
+     "v": "total_rnaseq",
+     "b": "stated",
+     "q": "total RNA"
+    }
+   }
+  },
+  {
+   "field": "ch:time point",
+   "regex": "^24 hours$",
+   "set": {
+    "growth_phase": {
+     "v": "stationary",
+     "b": "inferred",
+     "q": ""
+    },
+    "treatment": {
+     "v": "carbon_starvation",
+     "b": "inferred",
+     "q": "Time course of E. coli growth and starvation in glucose-limited minimal medium"
+    }
+   }
+  },
+  {
+   "field": "ch:time point",
+   "regex": "^(48|168|336) hours$",
+   "set": {
+    "growth_phase": {
+     "v": "late_stationary",
+     "b": "inferred",
+     "q": ""
+    },
+    "treatment": {
+     "v": "carbon_starvation",
+     "b": "inferred",
+     "q": "Time course of E. coli growth and starvation in glucose-limited minimal medium"
+    }
+   }
+  },
+  {
+   "field": "sup:growth_phase_stated",
+   "regex": "^exponential",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": ""
+    },
+    "treatment": {
+     "v": "none",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "sup:growth_phase_stated",
+   "regex": "^stationary",
+   "set": {
+    "growth_phase": {
+     "v": "stationary",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "sup:growth_phase_stated",
+   "regex": "^late_stationary",
+   "set": {
+    "growth_phase": {
+     "v": "late_stationary",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

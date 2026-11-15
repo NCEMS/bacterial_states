@@ -1,0 +1,137 @@
+{
+ "gse": "GSE252194",
+ "notes": "E. coli K1 E11, neonatal meningitis/sepsis strain; strain_group other_ExPEC from the K1 neonatal-infection context (pathotype not named literally). DMEM serum not mentioned -> defined_rich. Shaking not stated. Wild type in each medium is a control.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Two culture conditions (1) bacterial culture in LB medium until exponential phase - OD=0.600; (2) bacterial culture in DMEM medium until exponential phase - OD=0.600."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "were grown in LB and DMEM broth at 37°C overnight"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Investigation and comparison of vurilence genes present in E. coli K1 E11 WT vs delta aorA strains by RNAseq analysis."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Investigation and comparison of vurilence genes present in E. coli K1 E11 WT vs delta aorA strains by RNAseq analysis."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Investigation and comparison of vurilence genes present in E. coli K1 E11 WT vs delta aorA strains by RNAseq analysis."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Investigation and comparison of vurilence genes present in E. coli K1 E11 WT vs delta aorA strains by RNAseq analysis."
+  },
+  "strain_group": {
+   "v": "other_ExPEC",
+   "b": "inferred",
+   "q": "Preterm infants have a higher risk of severe bacterial neonatal infections, most of which are caused by Escherichia coli an in particular E. coli K1strains."
+  },
+  "strain_name": {
+   "v": "E11",
+   "b": "stated",
+   "q": "E11"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Stranded Total RNA Prep with Ribo-Zero Plus Kit from ILLUMINA"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Stranded Total RNA Prep with Ribo-Zero Plus Kit from ILLUMINA"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "strains WT and ∆aroA"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "strains WT and ∆aroA"
+  },
+  "is_control": {
+   "v": true,
+   "b": "stated",
+   "q": "strains WT and ∆aroA"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "delta aorA",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "aroA",
+     "b": "stated",
+     "q": "strains WT and ∆aroA"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:cell culture",
+   "regex": "^LB medium",
+   "set": {
+    "base_medium": {
+     "v": "LB",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "complex",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:cell culture",
+   "regex": "^DMEM medium",
+   "set": {
+    "base_medium": {
+     "v": "cell_culture",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "defined_rich",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

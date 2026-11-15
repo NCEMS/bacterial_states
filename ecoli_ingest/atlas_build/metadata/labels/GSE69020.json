@@ -1,0 +1,133 @@
+{
+ "gse": "GSE69020",
+ "notes": "Comparison of two unmodified strains (AIEC LF82, NIEC HS); no control condition identified, is_control left out. Both strains given genotype_class reference (no genetic modification). HS pathotype not given beyond non-invasive -> strain_group left out for HS. Stationary cultures grown 24 h without shaking -> static_liquid, oxygen left out.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Triplicate Luria broth cultures (37o C)"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Luria broth cultures"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Luria broth cultures"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Triplicate Luria broth cultures (37o C)"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "comparative RNA-Sequence (RNASeq) analysis using AIEC strain LF82 and NIEC strain HS"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "comparative RNA-Sequence (RNASeq) analysis using AIEC strain LF82 and NIEC strain HS"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "comparative RNA-Sequence (RNASeq) analysis using AIEC strain LF82 and NIEC strain HS during exponential and stationary growth"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "comparative RNA-Sequence (RNASeq) analysis using AIEC strain LF82 and NIEC strain HS during exponential and stationary growth"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "comparative RNA-Sequence (RNASeq) analysis using AIEC strain LF82 and NIEC strain HS during exponential and stationary growth"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "comparative RNA-Sequence (RNASeq) analysis using AIEC strain LF82 and NIEC strain HS"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Two micrograms of RNA was depleted of ribosomal RNA using the RiboMinus Transcriptome Isolation Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Two micrograms of RNA was depleted of ribosomal RNA using the RiboMinus Transcriptome Isolation Kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:growth phase",
+   "regex": "^exponential$",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": ""
+    },
+    "culture_mode": {
+     "v": "batch_shaken",
+     "b": "inferred",
+     "q": "grown with continuous shaking for 2 hours (exponential phase)"
+    },
+    "oxygen": {
+     "v": "aerobic",
+     "b": "inferred",
+     "q": "grown with continuous shaking for 2 hours (exponential phase)"
+    }
+   }
+  },
+  {
+   "field": "ch:growth phase",
+   "regex": "^stationary$",
+   "set": {
+    "growth_phase": {
+     "v": "stationary",
+     "b": "stated",
+     "q": ""
+    },
+    "culture_mode": {
+     "v": "static_liquid",
+     "b": "stated",
+     "q": "24 h without shaking (stationary phase)"
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^HS$",
+   "set": {
+    "strain_name": {
+     "v": "HS",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^LF82$",
+   "set": {
+    "strain_name": {
+     "v": "LF82",
+     "b": "stated",
+     "q": ""
+    },
+    "strain_group": {
+     "v": "AIEC",
+     "b": "stated",
+     "q": "AIEC strain LF82"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

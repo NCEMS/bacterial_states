@@ -1,0 +1,267 @@
+{
+ "gse": "GSE221155",
+ "notes": "DGF-298 is described as an evolved version of a genome-reduced strain; set genotype_class multiple (genome reduction plus evolution; aldA knock-in samples also multiple with perturbed_genes aldA); global_regulator_perturbed and strain_group left out for DGF-298 because the deleted genes are not listed. Base medium is not stated except for the LB samples; carbon source taken from the condition name (fructose, sorbitol -> other_sugar; pyruvate -> organic_acid); cytidine/uridine conditions are nutrient supplements (treatment none), their carbon source left out. Stress conditions (iron starvation, nitrogen starvation, osmotic stress, pH 5) have no duration, so exposure left out. Growth phase mid-log stated for all samples, including stress conditions. aldA samples' medium unknown. Each unstressed W3110 sample and the MG1655 glucose samples are controls (several reference media). Temperature and aeration not given. WT re-read: W3110 (called wild type) and MG1655 are unmodified -> wild_type.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Total RNA was extracted from mid-log phase culture for RNA-Seq library preparation."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was extracted from mid-log phase culture for RNA-Seq library preparation."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "The ribosomal RNA was removed using an Illumina Ribo-Zero rRNA removal kit for Gram-negative bacteria."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "We profiled growth of an evolved version of the genome reduced E. coli strain DGF-298 in various growth conditions."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "We profiled growth of an evolved version of the genome reduced E. coli strain DGF-298 in various growth conditions."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "We profiled growth of an evolved version of the genome reduced E. coli strain DGF-298 in various growth conditions."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "We profiled growth of an evolved version of the genome reduced E. coli strain DGF-298 in various growth conditions."
+  },
+  "is_control": {
+   "v": false,
+   "b": "stated",
+   "q": "We used RNA-seq to compare this strain's growth to the parent wild-type strain."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "^DGF-298$",
+   "set": {
+    "strain_name": {
+     "v": "DGF-298",
+     "b": "stated",
+     "q": ""
+    },
+    "genotype_class": {
+     "v": "multiple",
+     "b": "stated",
+     "q": "We profiled growth of an evolved version of the genome reduced E. coli strain DGF-298 in various growth conditions."
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "aldA complementation",
+   "set": {
+    "perturbed_genes": {
+     "v": "aldA",
+     "b": "stated",
+     "q": "We also profiled the transcriptional effect of adding in a removed gene predicted by models to have a positive impact on growth (aldA)."
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "W3110",
+   "set": {
+    "strain_name": {
+     "v": "W3110",
+     "b": "stated",
+     "q": ""
+    },
+    "strain_group": {
+     "v": "K-12",
+     "b": "stated",
+     "q": ""
+    },
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": "We used RNA-seq to compare this strain's growth to the parent wild-type strain."
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": "We used RNA-seq to compare this strain's growth to the parent wild-type strain."
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "MG1655",
+   "set": {
+    "strain_name": {
+     "v": "MG1655",
+     "b": "stated",
+     "q": ""
+    },
+    "strain_group": {
+     "v": "K-12",
+     "b": "stated",
+     "q": ""
+    },
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "inferred",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "glucose$",
+   "set": {
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "glycerol$",
+   "set": {
+    "carbon_source": {
+     "v": "glycerol",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "(fructose|sorbitol)$",
+   "set": {
+    "carbon_source": {
+     "v": "other_sugar",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "pyruvate$",
+   "set": {
+    "carbon_source": {
+     "v": "organic_acid",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": " - LB$",
+   "set": {
+    "base_medium": {
+     "v": "LB",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "complex",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "iron starvation",
+   "set": {
+    "treatment": {
+     "v": "metal_limitation",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "nitrogen starvation",
+   "set": {
+    "treatment": {
+     "v": "nitrogen_starvation",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "osmotic stress",
+   "set": {
+    "treatment": {
+     "v": "hyperosmotic",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "pH 5",
+   "set": {
+    "treatment": {
+     "v": "acid",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

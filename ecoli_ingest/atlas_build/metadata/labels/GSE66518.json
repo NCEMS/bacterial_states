@@ -1,0 +1,95 @@
+{
+ "gse": "GSE66518",
+ "notes": "MAPS: RNA co-purified with MS2-RybB by MS2-MBP affinity chromatography -> assay_class IP_or_pulldown for both samples (exclude). Both in rne131 delta-rybB with arabinose-induced RybB or MS2-RybB (genotype multiple). RybB without MS2 is the design's control.",
+ "default": {
+  "strain_name": {
+   "v": "MG1655 rne131 delta-rybB",
+   "b": "stated",
+   "q": "MG1655 rne131 delta-rybB"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli K-12"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "grown in 100mL of LB medium to an OD600nm of 0.5"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "grown in 100mL of LB medium"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "grown in 100mL of LB medium"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "exponential phase (OD600nm=0.5)"
+  },
+  "genotype_class": {
+   "v": "multiple",
+   "b": "stated",
+   "q": "Identification of RNAs co-purified with MS2-RybB in a rne131 ΔrybB strain"
+  },
+  "perturbed_genes": {
+   "v": "rne;rybB",
+   "b": "stated",
+   "q": "MG1655 rne131 delta-rybB"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "MG1655 rne131 delta-rybB"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "0.1% arabinose was added to induce the expression of MS2-RybB/RybB during 10 min"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Identification of RNAs co-purified with MS2-RybB in a rne131 ΔrybB strain. RybB (without MS2) was used as control"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Identification of RNAs co-purified with MS2-RybB in a rne131 ΔrybB strain"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Identification of RNAs co-purified with MS2-RybB in a rne131 ΔrybB strain"
+  },
+  "assay_class": {
+   "v": "IP_or_pulldown",
+   "b": "stated",
+   "q": "Identification of RNAs co-purified with MS2-RybB"
+  },
+  "is_control": {
+   "v": false,
+   "b": "stated",
+   "q": "Identification of RNAs co-purified with MS2-RybB in a rne131 ΔrybB strain"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^RybB$",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "RybB (without MS2) was used as control"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

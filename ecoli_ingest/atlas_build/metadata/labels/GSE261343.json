@@ -1,0 +1,112 @@
+{
+ "gse": "GSE261343",
+ "notes": "All three samples are BL21 expressing Clostridium IStrons from plasmids with IPTG; no control sample. Assay set total_rnaseq: E. coli RNA was Ribo-Zero depleted 'for downstream library preparation'; the fragmentation/RppH/NEBNext Small RNA kit text is written for the C. senegalense samples, and may or may not apply to E. coli (either way, ordinary fragmentation then a kit). Temperature and aeration not given.",
+ "default": {
+  "strain_group": {
+   "v": "B",
+   "b": "stated",
+   "q": "E. coli str. BL21 (sSL0026)"
+  },
+  "strain_name": {
+   "v": "BL21",
+   "b": "stated",
+   "q": "E. coli str. BL21 (sSL0026)"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "inoculated 50 mL of liquid LB with spectinomycin (100 µg mL−1) and IPTG (0.1 mM) at 100× dilution and grown until OD600 reached 0.5"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "inoculated 50 mL of liquid LB with spectinomycin (100 µg mL−1) and IPTG (0.1 mM) at 100× dilution and grown until OD600 reached 0.5"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "inoculated 50 mL of liquid LB with spectinomycin (100 µg mL−1) and IPTG (0.1 mM) at 100× dilution and grown until OD600 reached 0.5"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "inoculated 50 mL of liquid LB with spectinomycin (100 µg mL−1) and IPTG (0.1 mM) at 100× dilution and grown until OD600 reached 0.5"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "inoculated 50 mL of liquid LB with spectinomycin (100 µg mL−1) and IPTG (0.1 mM) at 100× dilution and grown until OD600 reached 0.5"
+  },
+  "genotype_class": {
+   "v": "heterologous_expression",
+   "b": "stated",
+   "q": "transformed with plasmids encoding CboIStron with mutant tnpAS (pSL5878), CseIStron-1 (pSL6566) or CseIStron-2 with frameshifted tnpAS (pSL6630)"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "transformed with plasmids encoding CboIStron with mutant tnpAS (pSL5878), CseIStron-1 (pSL6566) or CseIStron-2 with frameshifted tnpAS (pSL6630)"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "E. coli total RNA-seq profiles for CboIStron and CseIStrons"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "For total RNA-seq library preparation of samples from E. coli, 200 ng of purified total RNA was depleted for ribosomal RNA with Ribo-Zero Plus rRNA Depletion kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "For total RNA-seq library preparation of samples from E. coli, 200 ng of purified total RNA was depleted for ribosomal RNA with Ribo-Zero Plus rRNA Depletion kit"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli total RNA-seq profiles for CboIStron and CseIStrons"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli total RNA-seq profiles for CboIStron and CseIStrons"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "C. botulinum IStron",
+   "set": {
+    "perturbed_genes": {
+     "v": "CboIStron (tnpAS mutant)",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "IStron-1",
+   "set": {
+    "perturbed_genes": {
+     "v": "CseIStron-1",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "IStron-2",
+   "set": {
+    "perturbed_genes": {
+     "v": "CseIStron-2 (tnpAS frameshift)",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

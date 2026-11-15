@@ -1,0 +1,113 @@
+{
+ "gse": "GSE285442",
+ "notes": "CONFLICT: ch:genotype is 'WT' for all samples, but titles HU_A_1 / HU_A_22_1 (and the design) indicate HU mutants (HU-ΔA, HU-K22Q); genotype labels and is_control left out for GSM8702582 and GSM8702584. GSM8702581 = BL21(DE3) empty pET-28a with IPTG (control). GSM8702583 HU_WT = HU knockout complemented with wild-type HU on pET-28a, treated as reference/control (unsure). Medium, temperature and phase not stated (16 h IPTG induction). PolyA bead selection stated.",
+ "default": {
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "0.5 mM IPTG, 16h"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "The samples included E. coli strains overexpressing HDAH, control strains transformed with the empty pET-28a vector, and pET-28a-HU knockout complemented MG1655 strains."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "The samples included E. coli strains overexpressing HDAH, control strains transformed with the empty pET-28a vector, and pET-28a-HU knockout complemented MG1655 strains."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "The samples included E. coli strains overexpressing HDAH, control strains transformed with the empty pET-28a vector, and pET-28a-HU knockout complemented MG1655 strains."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was used as input material for the RNA sample preparations."
+  },
+  "rrna_removal": {
+   "v": "polyA",
+   "b": "stated",
+   "q": "mRNA was purified from total RNA by using poly-T oligo-attached magnetic beads"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:cell line",
+   "regex": "^BL21 \\(DE3\\)$",
+   "set": {
+    "strain_group": {
+     "v": "B",
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "BL21(DE3)",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:cell line",
+   "regex": "^MG1655$",
+   "set": {
+    "strain_group": {
+     "v": "K-12",
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^pET_28a_",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": "control strains transformed with the empty pET-28a vector"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": "control strains transformed with the empty pET-28a vector"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "control strains transformed with the empty pET-28a vector"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^HU_WT_",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "inferred",
+     "q": "pET-28a-HU knockout complemented MG1655 strains"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": "pET-28a-HU knockout complemented MG1655 strains"
+    },
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": "pET-28a-HU knockout complemented MG1655 strains"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

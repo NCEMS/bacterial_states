@@ -1,0 +1,132 @@
+{
+ "gse": "GSE249682",
+ "notes": "Growth temperature not stated. '1 min pre-treatment' samples of the ciprofloxacin cultures were taken before drug addition: labelled untreated and as controls, like all untreated-control samples at every time point. Exposure: 1-25 min acute, 50-120 min short. Phase from 'All samples were taken during exponential growth phase'. WT re-read: ch:genotype WT, MG1655 unmodified.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "All samples were taken during exponential growth phase."
+  },
+  "culture_mode": {
+   "v": "batch_bioreactor",
+   "b": "stated",
+   "q": "E. coli was grown in cation-adjusted Mueller-Hinton broth in 1 1L Applikon bioreactors as batch culitvation."
+  },
+  "base_medium": {
+   "v": "Mueller-Hinton",
+   "b": "stated",
+   "q": "E. coli was grown in cation-adjusted Mueller-Hinton broth in 1 1L Applikon bioreactors as batch culitvation."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "E. coli was grown in cation-adjusted Mueller-Hinton broth in 1 1L Applikon bioreactors as batch culitvation."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "E. coli was grown in cation-adjusted Mueller-Hinton broth in 1 1L Applikon bioreactors as batch culitvation."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Stirring was adjusted between 200 and 600 rpm to maintain a dissolved oxygen concentration above 40%."
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "WT"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "WT"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "we used a sub-lethal dose of ciprofloxacin to induce DNA damage in E. coli grown in batch culitvation in biorectors"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "we used a sub-lethal dose of ciprofloxacin to induce DNA damage in E. coli grown in batch culitvation in biorectors"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "we used a sub-lethal dose of ciprofloxacin to induce DNA damage in E. coli grown in batch culitvation in biorectors"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K12 MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "QIAseq stranded RNA Lib kit (Qiagen) for library construction"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "QIAseq FastSelect 5S/16S/23S kit (Qiagen) for rRNA removal"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "Samples for RNA-sequencing were collected 1 min before treatment"
+  },
+  "is_control": {
+   "v": true,
+   "b": "stated",
+   "q": "Comparative gene expression profiling analysis between the ciprofloxacin treated and untreated control was conducted."
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^Ciprofloxacin.* min post-treatment",
+   "set": {
+    "treatment": {
+     "v": "abx_dna_gyrase",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^Ciprofloxacin.* (1|10|25) min post-treatment",
+   "set": {
+    "exposure": {
+     "v": "acute",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^Ciprofloxacin.* (50|75|120) min post-treatment",
+   "set": {
+    "exposure": {
+     "v": "short",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

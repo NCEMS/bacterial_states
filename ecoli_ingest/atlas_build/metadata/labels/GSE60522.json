@@ -1,0 +1,164 @@
+{
+ "gse": "GSE60522",
+ "notes": "Reviewed 2026-11-15: nitrosative stress is not filed under oxidative (user decision); other_chemical | DPTA (NO donor) treatment labelled oxidative (nitrosative stress; no separate class). Samples taken 10 min after inoculation into a stirred aerobic batch bioreactor; phase from the design sentence 'aerobic exponential-phase'. Solvent (NaOH) controls are treatment none. WT re-read: unmodified baseline strain relabelled wild_type.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "study_default",
+   "q": "aerobic exponential-phase E. coli"
+  },
+  "culture_mode": {
+   "v": "batch_bioreactor",
+   "b": "stated",
+   "q": "stirred, aerobic batch bioreactor"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "stirred, aerobic batch bioreactor"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "pre-warmed (37°C) MOPS + glucose"
+  },
+  "base_medium": {
+   "v": "MOPS",
+   "b": "stated",
+   "q": "MOPS minimal media (Teknova) + 10 mM glucose"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "MOPS minimal media (Teknova) + 10 mM glucose"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "MOPS minimal media (Teknova) + 10 mM glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "MOPS minimal media (Teknova) + 10 mM glucose"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "the culture was either treated with 250 μM DPTA, or an equal volume of only the DPTA solvent (20 μM NaOH) as an untreated control."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "the culture was either treated with 250 μM DPTA, or an equal volume of only the DPTA solvent (20 μM NaOH) as an untreated control."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "the culture was either treated with 250 μM DPTA, or an equal volume of only the DPTA solvent (20 μM NaOH) as an untreated control."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E. coli WT MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "E. coli WT MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "ribosomal RNA depletion using RiboZero Bacteria kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "ribosomal RNA depletion using RiboZero Bacteria kit"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT MG1655 and a ΔclpP mutant, untreated and treated with 250 μM DPTA"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^wild-type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "lpP",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "ΔclpP_untreated"
+    },
+    "perturbed_genes": {
+     "v": "clpP",
+     "b": "stated",
+     "q": "ΔclpP_untreated"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": "ΔclpP_untreated"
+    }
+   }
+  },
+  {
+   "field": "ch:treated with",
+   "regex": "DPTA solvent",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treated with",
+   "regex": "^250",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": "treated with 250 μM DPTA (an NO•-releasing compound) for 10 min"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^WT untr",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

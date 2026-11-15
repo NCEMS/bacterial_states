@@ -1,0 +1,30 @@
+{
+  "gse": "GSE125368",
+  "notes": "Only the 4 total RNA samples are candidates (Hfq IP samples not shown). rph+ strain KR10000 is the parent; delta-pnp compared against it. OD600 1.0 in LB is above the exponential range: no phase.",
+  "default": {
+    "culture_mode": {"v": "batch_shaken", "b": "inferred", "q": "Strains were grown with aeration in LB broth at 37°C to an OD600 of 1.0"},
+    "base_medium": {"v": "LB", "b": "stated", "q": "grown with aeration in LB broth"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "grown with aeration in LB broth"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "grown with aeration in LB broth"},
+    "oxygen": {"v": "aerobic", "b": "inferred", "q": "grown with aeration in LB broth"},
+    "growth_temperature": {"v": 37, "b": "stated", "q": "LB broth at 37°C"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "MG1655"},
+    "strain_name": {"v": "MG1655", "b": "stated", "q": "MG1655"},
+    "genotype_class": {"v": "reference", "b": "stated", "q": "rph+"},
+    "global_regulator_perturbed": {"v": false, "b": "stated", "q": "rph+"},
+    "is_control": {"v": true, "b": "stated", "q": "rph+"},
+    "treatment": {"v": "none", "b": "study_default", "q": "Examination of mRNA expression in four samples of strains carrying wild type or mutant genes of rph and/or pnp."},
+    "inducer_added": {"v": false, "b": "study_default", "q": "Examination of mRNA expression in four samples of strains carrying wild type or mutant genes of rph and/or pnp."},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "Examination of mRNA expression in four samples of strains carrying wild type or mutant genes of rph and/or pnp."},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "Examination of mRNA expression in four samples of strains carrying wild type or mutant genes of rph and/or pnp."},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "TruSeq Stranded Total RNA Library Kit (Illumina)"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "total RNA (rRNA-depleted)"}
+  },
+  "rules": [
+    {"field": "ch:genotype", "regex": "delta-pnp",
+     "set": {"genotype_class": {"v": "deletion", "b": "stated", "q": ""},
+             "perturbed_genes": {"v": "pnp", "b": "stated", "q": ""},
+             "is_control": {"v": false, "b": "stated", "q": ""}}}
+  ],
+  "samples": {}
+}

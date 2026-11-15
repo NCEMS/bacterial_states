@@ -1,0 +1,28 @@
+{
+  "gse": "GSE114358",
+  "notes": "All samples are evolved MG1655 populations (early/innovation vs endpoint/optimization) on non-native carbon sources; no wild-type or reference-genotype sample, so is_control left out. Mutated genes not given: perturbed_genes and global_regulator_perturbed left out. Non-native carbon sources are medium properties (treatment none). D-lyxose, D-2-deoxyribose, D-arabinose = other_sugar; m-tartrate = organic_acid.",
+  "default": {
+    "base_medium": {"v": "M9", "b": "study_default", "q": "M9 minimal media supplemented with either 0.2% D-lyxose, D-2-deoxyribose, D-arabinose, or m-tartrate"},
+    "medium_class": {"v": "defined_minimal", "b": "inferred", "q": "M9 minimal media supplemented with either 0.2% D-lyxose, D-2-deoxyribose, D-arabinose, or m-tartrate"},
+    "amino_acids_supplied": {"v": false, "b": "inferred", "q": "M9 minimal media supplemented with either 0.2% D-lyxose, D-2-deoxyribose, D-arabinose, or m-tartrate"},
+    "growth_phase": {"v": "mid_exponential", "b": "stated", "q": "All evolved populations were grown to mid-log phase aerobically at 37°C"},
+    "oxygen": {"v": "aerobic", "b": "stated", "q": "All evolved populations were grown to mid-log phase aerobically at 37°C"},
+    "growth_temperature": {"v": 37, "b": "stated", "q": "All evolved populations were grown to mid-log phase aerobically at 37°C"},
+    "genotype_class": {"v": "evolved_isolate", "b": "stated", "q": "RNAseq was performed on various evolved populations grown on four different carbon sources"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "Escherichia coli str. K-12 substr. MG1655"},
+    "strain_name": {"v": "MG1655", "b": "stated", "q": "Escherichia coli str. K-12 substr. MG1655"},
+    "treatment": {"v": "none", "b": "study_default", "q": "RNAseq was performed on various evolved populations grown on four different carbon sources"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "RNAseq was performed on various evolved populations grown on four different carbon sources"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "RNAseq was performed on various evolved populations grown on four different carbon sources"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "RNAseq was performed on various evolved populations grown on four different carbon sources"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "Ribosomal RNA (rRNA) was removed utilizing Ribo-Zero rRNA removal kit (Epicentre) for Gram-negative bacteria."},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "The KAPA Stranded RNA-seq kit (Kapa Biosystems) was used for generation of paired-end, strand-specific RNA sequencing libraries."}
+  },
+  "rules": [
+    {"field": "ch:carbon source", "regex": "^(D-lyxose|D-2-deoxyribose|D-arabinose)$",
+     "set": {"carbon_source": {"v": "other_sugar", "b": "stated", "q": ""}}},
+    {"field": "ch:carbon source", "regex": "^m-tartrate$",
+     "set": {"carbon_source": {"v": "organic_acid", "b": "stated", "q": ""}}}
+  ],
+  "samples": {}
+}

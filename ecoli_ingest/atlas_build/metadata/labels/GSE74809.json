@@ -1,0 +1,244 @@
+{
+ "gse": "GSE74809",
+ "notes": "M9 glucose + '0.1% amino acids' (mix not specified: medium_class left out, amino_acids_supplied true). Phase from ch:growth phase (stated); WT in each phase = control.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9 defined medium (0.6% Na2HPO4, 0.3% KH2PO4, 0.05% NaCl, 0.01% NH4Cl, 0.1 mM CaCl2, 1 mM MgSO4, 5 x 10−4% Thiamin) supplemented with 0.5% glucose and 0.1% amino acids was used for RNA-seq experiments."
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "M9 defined medium (0.6% Na2HPO4, 0.3% KH2PO4, 0.05% NaCl, 0.01% NH4Cl, 0.1 mM CaCl2, 1 mM MgSO4, 5 x 10−4% Thiamin) supplemented with 0.5% glucose and 0.1% amino acids was used for RNA-seq experiments."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "stated",
+   "q": "M9 defined medium (0.6% Na2HPO4, 0.3% KH2PO4, 0.05% NaCl, 0.01% NH4Cl, 0.1 mM CaCl2, 1 mM MgSO4, 5 x 10−4% Thiamin) supplemented with 0.5% glucose and 0.1% amino acids was used for RNA-seq experiments."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "The flasks were incubated at 37 °C with shaking at 200 rpm."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "stated",
+   "q": "The flasks were incubated at 37 °C with shaking at 200 rpm."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "The flasks were incubated at 37 °C with shaking at 200 rpm."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "25 samples (5 strains in 5 growth phases) with 2 replicates each."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "25 samples (5 strains in 5 growth phases) with 2 replicates each."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "25 samples (5 strains in 5 growth phases) with 2 replicates each."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "25 samples (5 strains in 5 growth phases) with 2 replicates each."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E. coli K-12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "E. coli K-12 MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "ribosomal RNA cleanup was achieved by Ambion MICROBExpress bacterial mRNA purification Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "ribosomal RNA cleanup was achieved by Ambion MICROBExpress bacterial mRNA purification Kit"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "single deletions of rsd, ssrS, and rpoS, as well as a double deletion of rsd and ssrS, in five growth phases."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:growth phase",
+   "regex": "^Early Exponential$",
+   "set": {
+    "growth_phase": {
+     "v": "early_exponential",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:growth phase",
+   "regex": "^Mid-Exponential$",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:growth phase",
+   "regex": "^Transition to Stationary$",
+   "set": {
+    "growth_phase": {
+     "v": "transition",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:growth phase",
+   "regex": "^Stationary$",
+   "set": {
+    "growth_phase": {
+     "v": "stationary",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:growth phase",
+   "regex": "^Late Stationary$",
+   "set": {
+    "growth_phase": {
+     "v": "late_stationary",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^Wild-type$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^del rsd$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rsd",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^del ssrS$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "ssrS",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^del rsd; del ssrS$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rsd;ssrS",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^del rpoS$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rpoS",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

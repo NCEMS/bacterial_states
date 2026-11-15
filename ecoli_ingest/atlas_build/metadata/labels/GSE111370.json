@@ -1,0 +1,20 @@
+{
+  "gse": "GSE111370",
+  "notes": "Two strains, AS19-RrmA- and ARM9; the summary says one carries an ompR-envZ promoter mutation but does not say which, nor which is the parent, so genotype_class, perturbed_genes, global_regulator_perturbed and is_control are left out. strain_group not given. Temperature and aeration not stated.",
+  "default": {
+    "base_medium": {"v": "LB", "b": "study_default", "q": "E. coli cells were routinely grown on LB liquid media until an O.D.600 of 0.5"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "E. coli cells were routinely grown on LB liquid media until an O.D.600 of 0.5"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "E. coli cells were routinely grown on LB liquid media until an O.D.600 of 0.5"},
+    "growth_phase": {"v": "mid_exponential", "b": "stated", "q": "RNA from E. coli extracted during mid exponential phase"},
+    "treatment": {"v": "none", "b": "study_default", "q": "The goals of this study are to compare the transcriptomic response of a E. coli strain with a mutation in the promotor region of the outer membrane porins regulator ompR-envZ"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "The goals of this study are to compare the transcriptomic response of a E. coli strain with a mutation in the promotor region of the outer membrane porins regulator ompR-envZ"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "The goals of this study are to compare the transcriptomic response of a E. coli strain with a mutation in the promotor region of the outer membrane porins regulator ompR-envZ"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "The goals of this study are to compare the transcriptomic response of a E. coli strain with a mutation in the promotor region of the outer membrane porins regulator ompR-envZ"},
+    "assay_class": {"v": "total_rnaseq", "b": "study_default", "q": "RNA was extracted by a standard method of hot phenol/chloroform/isoamyl alcohol RNA libraries were prepared for sequencing using standard Illumina protocols"}
+  },
+  "rules": [
+    {"field": "ch:strain", "regex": "^AS19-RrmA-$", "set": {"strain_name": {"v": "AS19-RrmA-", "b": "stated", "q": ""}}},
+    {"field": "ch:strain", "regex": "^ARM9$", "set": {"strain_name": {"v": "ARM9", "b": "stated", "q": ""}}}
+  ],
+  "samples": {}
+}

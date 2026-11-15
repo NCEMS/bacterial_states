@@ -1,0 +1,126 @@
+{
+ "gse": "GSE88980",
+ "notes": "WT and delta-ompR in M9 glucose, all four samples treated with 0.3 M NaCl for 30 min at mid-log; no untreated sample, so is_control left out. Phase kept as mid_exponential (sampled 30 min after the shift from mid-log cells). rRNA removal not stated. WT re-read: genotype_class reference -> wild_type, MG1655 WT unmodified.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9 minimal media supplemented with 0.2% glucose"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "M9 minimal media supplemented with 0.2% glucose"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "M9 minimal media supplemented with 0.2% glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "M9 minimal media supplemented with 0.2% glucose"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown to mid-log phase aerobically at 37°C"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "grown to mid-log phase aerobically at 37°C"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Then cells were treated with 0.3 M of NaCl at mid-log pahse for 30 min with agitation."
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "Then cells were treated with 0.3 M of NaCl at mid-log pahse for 30 min with agitation."
+  },
+  "treatment": {
+   "v": "hyperosmotic",
+   "b": "stated",
+   "q": "Then cells were treated with 0.3 M of NaCl at mid-log pahse for 30 min with agitation."
+  },
+  "exposure": {
+   "v": "acute",
+   "b": "inferred",
+   "q": "Then cells were treated with 0.3 M of NaCl at mid-log pahse for 30 min with agitation."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K-12 MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT and ΔompR  mutant cells were cultured in M9 minimal media with 0.2% glucose."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT and ΔompR  mutant cells were cultured in M9 minimal media with 0.2% glucose."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT and ΔompR  mutant cells were cultured in M9 minimal media with 0.2% glucose."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was extracted using the RNeasy Plus Mini kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "ompR deletion",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "ompR",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

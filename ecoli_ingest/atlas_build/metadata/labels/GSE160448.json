@@ -1,0 +1,116 @@
+{
+ "gse": "GSE160448",
+ "notes": "OD600 2.0 in LB -> no growth phase. aggR3UTRFRT is an FRT insertion in the aggR 3'UTR; no genotype class fits (not deletion/point mutation), genotype_class left out for it. WT re-read: 042 wt is unmodified, genotype_class wild_type.",
+ "default": {
+  "strain_group": {
+   "v": "EAEC",
+   "b": "stated",
+   "q": "in strain EAEC 042"
+  },
+  "strain_name": {
+   "v": "042",
+   "b": "stated",
+   "q": "Escherichia coli 042"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "LB medium at 37ºC with 200rpm agitation."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "LB medium at 37ºC with 200rpm agitation."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "LB medium at 37ºC with 200rpm agitation."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "LB medium at 37ºC with 200rpm agitation."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "LB medium at 37ºC with 200rpm agitation."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "LB medium at 37ºC with 200rpm agitation."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "We used RNA-seq to compare the transcriptome of the wt strain and its aggR3UTRFRT variant grown at 37ºC in LB medium."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "We used RNA-seq to compare the transcriptome of the wt strain and its aggR3UTRFRT variant grown at 37ºC in LB medium."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "We used RNA-seq to compare the transcriptome of the wt strain and its aggR3UTRFRT variant grown at 37ºC in LB medium."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "We used RNA-seq to compare the transcriptome of the wt strain and its aggR3UTRFRT variant grown at 37ºC in LB medium."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "We used RNA-seq to compare the transcriptome of the wt strain and its aggR3UTRFRT variant grown at 37ºC in LB medium."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "ribosomal RNA molecules were depleted using the in-house developed depletion probes"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "ribosomal RNA molecules were depleted using the in-house developed depletion probes"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "FRT",
+   "set": {
+    "perturbed_genes": {
+     "v": "aggR",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

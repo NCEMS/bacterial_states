@@ -1,0 +1,131 @@
+{
+ "gse": "GSE119454",
+ "notes": "RNA-seq arm of a ribosome-profiling protocol: RNA fragmented and library made from 20-45 nt fragments -> assay_class other (excluded). Ribo-T strain: tethered-ribosome plasmid in SQ171 plus evolved ybeX/rpsA mutations -> multiple. LB + 0.2% glucose: carbon_source left out. strain_group not given for SQ171.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "When the culture density reached A600 of ∼0.5 cells were harvested"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Cultures were grown at 37 °C with vigorous shaking."
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "100 mL of LB supplemented with the same antibiotics and with 0.2% glucose"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "100 mL of LB supplemented with the same antibiotics and with 0.2% glucose"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "100 mL of LB supplemented with the same antibiotics and with 0.2% glucose"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Cultures were grown at 37 °C with vigorous shaking."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Cultures were grown at 37 °C with vigorous shaking."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "compared to a SQ171 control cells carrying WT ribosomes"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "compared to a SQ171 control cells carrying WT ribosomes"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "compared to a SQ171 control cells carrying WT ribosomes"
+  },
+  "strain_name": {
+   "v": "SQ171",
+   "b": "stated",
+   "q": "SQ171"
+  },
+  "assay_class": {
+   "v": "other",
+   "b": "stated",
+   "q": "The library for next-generation sequencing was prepared using RNA fragments ranging in size from 20 to 45 nt."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "short RNA and rRNA were subtracted using Ambion MEGAclear kit and MICROBexpress bacterial mRNA enrichment kit"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Ribosome profiling and RNA-seq was performed on Escherichia coli Ribo-T"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^WT_rna",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": "Wild-type strain"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": "Wild-type strain"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "compared to a SQ171 control cells carrying WT ribosomes"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^RIBOT_rna",
+   "set": {
+    "genotype_class": {
+     "v": "multiple",
+     "b": "stated",
+     "q": "The Ribo-T strain carries two mutations: a nonsense mutation in the Leu22 codon of the ybeX gene and a missense mutation in codon 549 of the rpsA gene"
+    },
+    "perturbed_genes": {
+     "v": "rrn (Ribo-T);ybeX;rpsA",
+     "b": "stated",
+     "q": "The Ribo-T strain carries two mutations: a nonsense mutation in the Leu22 codon of the ybeX gene and a missense mutation in codon 549 of the rpsA gene"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "SQ171 Ribo-T",
+     "b": "stated",
+     "q": "SQ171 (+pRibo-T)"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

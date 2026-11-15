@@ -1,0 +1,111 @@
+{
+ "gse": "GSE136101",
+ "notes": "Medium comparison of wild-type BW25113: LB and M63 samples are both untreated reference conditions, so all are controls. M63 carbon source not stated. Library kit TruSeq Stranded mRNA; rRNA removal method not stated, left out. Shaking not described.",
+ "default": {
+  "growth_phase": {
+   "v": "late_exponential",
+   "b": "stated",
+   "q": "late exponential phase"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "37°C"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli K-12 BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "Escherichia coli K-12 BW25113"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "Whole mRNA sequencing of E.coli strain BW25113 growing under the LB and M63 media, respectively."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Whole mRNA sequencing of E.coli strain BW25113 growing under the LB and M63 media, respectively."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Whole mRNA sequencing of E.coli strain BW25113 growing under the LB and M63 media, respectively."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Whole mRNA sequencing of E.coli strain BW25113 growing under the LB and M63 media, respectively."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Whole mRNA sequencing of E.coli strain BW25113 growing under the LB and M63 media, respectively."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Whole mRNA sequencing of E.coli strain BW25113 growing under the LB and M63 media, respectively."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Whole mRNA sequencing of E.coli strain BW25113 growing under the LB and M63 media, respectively."
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "Whole mRNA sequencing of E.coli strain BW25113 growing under the LB and M63 media, respectively."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:growth medium",
+   "regex": "^LB$",
+   "set": {
+    "base_medium": {
+     "v": "LB",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "complex",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:growth medium",
+   "regex": "^M63$",
+   "set": {
+    "base_medium": {
+     "v": "M63",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "defined_minimal",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

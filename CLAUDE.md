@@ -100,6 +100,11 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   `qc_table.py` keeps `atlas_data/sample_qc.tsv` (`pre_*` prescreen, `full_*` full run, `in_model`).
   Both tiers are parsed by `qc_metrics.py`. Never run Centrifuge with `--mm` on an index that
   sits on the network file system (minutes per sample); the prescreen copies it to `/dev/shm`.
+- Sample metadata v2 (`docs/metadata_v2.md`): `atlas_build/metadata/` holds the label scheme, one
+  curated `labels/<GSE>.json` per study and the scripts; `apply_labels.py` writes
+  `atlas_data/metadata_v2.tsv` and must report `0 problems`. Change labels in the JSON files or
+  `label_scheme.yaml`, never in the table. `usable` = standard RNA-seq by the text, prescreen pass,
+  not a later copy of a duplicated sample. `atlas_data/metadata_revised.csv` (v1) is never overwritten.
 - The atlas training table uses **b-numbers** and 4,493 features counted unstranded. `ecoli_atlas`
   maps b-numbers → symbols with the feature table and reports coverage (`gene_coverage.tsv`);
   `embed` fails below `--min-gene-coverage` (0.9).

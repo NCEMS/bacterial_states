@@ -1,0 +1,153 @@
+{
+ "gse": "GSE107327",
+ "notes": "MazF vs empty vector (pBAD30) in MG1655 delta_mazF, arabinose-induced 5/30/60 min after shift to glucose-free M9+casamino acids+glycerol. Empty-vector samples (induced) are controls at 5 and 30 min. Carbon source set to mixed (glycerol + casamino acids + arabinose inducer after glucose removal). Phase mid_exponential inferred from OD ~0.35 before the shift (all samples <=2 h). Ribo-Zero samples depletion, total RNA samples none.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9 media supplemented with 0.1% casamino acids, 0.4% glycerol, 0.4% glucose, 2 mM MgSO4, and 0.1 mM CaCl2"
+  },
+  "medium_class": {
+   "v": "minimal_plus_hydrolysate",
+   "b": "inferred",
+   "q": "M9 media supplemented with 0.1% casamino acids, 0.4% glycerol, 0.4% glucose, 2 mM MgSO4, and 0.1 mM CaCl2"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "M9 media supplemented with 0.1% casamino acids, 0.4% glycerol, 0.4% glucose, 2 mM MgSO4, and 0.1 mM CaCl2"
+  },
+  "carbon_source": {
+   "v": "mixed",
+   "b": "inferred",
+   "q": "back diluted into media lacking glucose"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Overnight cultures were back diluted into fresh media and grown 3-4 hours to an OD600 of ~0.35 at 37°C in an orbital shaker at 200 RPM."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Overnight cultures were back diluted into fresh media and grown 3-4 hours to an OD600 of ~0.35 at 37°C in an orbital shaker at 200 RPM."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Overnight cultures were back diluted into fresh media and grown 3-4 hours to an OD600 of ~0.35 at 37°C in an orbital shaker at 200 RPM."
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "Overnight cultures were back diluted into fresh media and grown 3-4 hours to an OD600 of ~0.35 at 37°C in an orbital shaker at 200 RPM."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655 delta_mazF"
+  },
+  "strain_name": {
+   "v": "MG1655 delta_mazF",
+   "b": "stated",
+   "q": "MG1655 delta_mazF"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "Para was induced by adding arabinose to 0.2%"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "MazF was expressed in a ΔmazF background and compared to an empty vector"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "MazF was expressed in a ΔmazF background and compared to an empty vector"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "MazF was expressed in a ΔmazF background and compared to an empty vector"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA-subtracted samples were used to assess cleavage in the mRNA, and total RNA samples were used to assess changes in the rRNA"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:plasmid",
+   "regex": "pBAD30-empty",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:plasmid",
+   "regex": "pBAD30-MazF",
+   "set": {
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "mazF",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:ribozero",
+   "regex": "^Yes$",
+   "set": {
+    "rrna_removal": {
+     "v": "depletion",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:ribozero",
+   "regex": "^No$",
+   "set": {
+    "rrna_removal": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

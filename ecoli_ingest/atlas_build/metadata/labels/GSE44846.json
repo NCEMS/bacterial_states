@@ -1,0 +1,136 @@
+{
+ "gse": "GSE44846",
+ "notes": "Plasmid-cured strain (loss of pO157_Sal) labelled genotype_class deletion with perturbed_genes pO157_Sal; no closer class in the scheme.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "50 µl of the above culture was inoculated in 5 ml fresh LB broth"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "50 µl of the above culture was inoculated in 5 ml fresh LB broth"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "50 µl of the above culture was inoculated in 5 ml fresh LB broth"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "the culture was shaken at 37°C for about 2.5 h until the OD600 reached 0.6"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "the culture was shaken at 37°C for about 2.5 h until the OD600 reached 0.6"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "the culture was shaken at 37°C for about 2.5 h until the OD600 reached 0.6"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "the culture was shaken at 37°C for about 2.5 h until the OD600 reached 0.6"
+  },
+  "strain_group": {
+   "v": "EHEC_STEC",
+   "b": "stated",
+   "q": "Escherichia coli O157:H7"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "The total mRNA extracted from Escherichia coli O157:H7 Xuzhou21 and its plasmid cured strain Xuzhou21m were sequenced using Illumina."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "The total mRNA extracted from Escherichia coli O157:H7 Xuzhou21 and its plasmid cured strain Xuzhou21m were sequenced using Illumina."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "The total mRNA extracted from Escherichia coli O157:H7 Xuzhou21 and its plasmid cured strain Xuzhou21m were sequenced using Illumina."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "The total mRNA extracted from Escherichia coli O157:H7 Xuzhou21 and its plasmid cured strain Xuzhou21m were sequenced using Illumina."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "The total RNA extracted from Xuzhou21 and Xuzhou21m were first treated with Ribo-Zero™ rRNA Removal kit to remove rRNA."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "The total RNA extracted from Xuzhou21 and Xuzhou21m were first treated with Ribo-Zero™ rRNA Removal kit to remove rRNA."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "Xuzhou21",
+     "b": "stated",
+     "q": "Xuzhou21"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "plasmid cured",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "pO157_Sal",
+     "b": "stated",
+     "q": "Xuzhou21 cured of the pO157_Sal plasmid"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": "Xuzhou21 cured of the pO157_Sal plasmid"
+    },
+    "strain_name": {
+     "v": "Xuzhou21m",
+     "b": "stated",
+     "q": "Xuzhou21m"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

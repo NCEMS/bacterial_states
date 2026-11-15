@@ -1,0 +1,144 @@
+{
+ "gse": "GSE279505",
+ "notes": "Only the total RNA-seq samples are candidates (RIL-seq not shown). FLAG-tagged Hfq counts as reference genotype; uninfected tagged and untagged cells are both controls. Lambda infection: 30 min acute, 60 min short. mixed_organism left out for infected samples (phage RNA present); no OD/phase given. RNAtag-Seq library: rRNA removal not described. WT re-read: untagged WT MG1655 samples are wild_type; FLAG-Hfq samples stay reference.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "grown at 37˚C in LB medium with 10 mM MgSO4"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "grown at 37˚C in LB medium with 10 mM MgSO4"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "grown at 37˚C in LB medium with 10 mM MgSO4"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown at 37˚C in LB medium"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "shaking at 250 rpm"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "shaking at 250 rpm"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "stated",
+   "q": "E. coli MG1655 WT carrying a chromosomal FLAG-tagged Hfq"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "E. coli MG1655 WT carrying a chromosomal FLAG-tagged Hfq"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "E. coli MG1655 WT"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "infected and non-infected with phage lambda, at 30 and 60 minutes after infection"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "infected and non-infected with phage lambda, at 30 and 60 minutes after infection"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "RIL-seq and Total RNA-seq of E. coli MG1655"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^uninfected",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "mixed_organism": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "infected with lambda",
+   "set": {
+    "treatment": {
+     "v": "phage",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "infected with lambda, 30 min",
+   "set": {
+    "exposure": {
+     "v": "acute",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "infected with lambda, 60 min",
+   "set": {
+    "exposure": {
+     "v": "short",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:cell type",
+   "regex": "untagged Hfq",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": "As a control, libraries were similarly generated for WT cells not encoding tagged proteins."
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

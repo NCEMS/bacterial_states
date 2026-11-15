@@ -1,0 +1,177 @@
+{
+ "gse": "GSE130799",
+ "notes": "Rhamnose-induced archaeal histone (HMfA/HMfB, wild-type or non-binding) expression vs induced empty vector (controls). 2 h = late exponential, 17 h = stationary as stated. Strain not named (from DSMZ).",
+ "default": {
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "grown at 37C in LB medium under constant agitation (180rpm)."
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "grown at 37C in LB medium under constant agitation (180rpm)."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "grown at 37C in LB medium under constant agitation (180rpm)."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "grown at 37C in LB medium under constant agitation (180rpm)."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "grown at 37C in LB medium under constant agitation (180rpm)."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown at 37C in LB medium under constant agitation (180rpm)."
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "Expression of HMf histones was triggered by Rhamnose induction to a final working concentration of 15mM."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "we induced expression of the two histones from the archaeon Methanothermus fervidus in a naive bacterial system (E. coli)"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "we induced expression of the two histones from the archaeon Methanothermus fervidus in a naive bacterial system (E. coli)"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA depleted for ribosomal RNA"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Total RNA depleted for ribosomal RNA"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "we induced expression of the two histones from the archaeon Methanothermus fervidus in a naive bacterial system (E. coli)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:timepoint",
+   "regex": "^2 hours",
+   "set": {
+    "growth_phase": {
+     "v": "late_exponential",
+     "b": "stated",
+     "q": "The cells were harvested in late exponential and stationary phase, which means 2 hours and 17 hours after induction, respectively."
+    }
+   }
+  },
+  {
+   "field": "ch:timepoint",
+   "regex": "^17 hours",
+   "set": {
+    "growth_phase": {
+     "v": "stationary",
+     "b": "stated",
+     "q": "The cells were harvested in late exponential and stationary phase, which means 2 hours and 17 hours after induction, respectively."
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "Empty Vector",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^Expressing",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^Expressing HMfA$",
+   "set": {
+    "perturbed_genes": {
+     "v": "hmfA",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^Expressing HMfB$",
+   "set": {
+    "perturbed_genes": {
+     "v": "hmfB",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "non binding HMfA",
+   "set": {
+    "perturbed_genes": {
+     "v": "hmfA (non-binding)",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "non binding HMfB",
+   "set": {
+    "perturbed_genes": {
+     "v": "hmfB (non-binding)",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

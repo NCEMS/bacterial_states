@@ -1,0 +1,88 @@
+{
+ "gse": "GSE107301",
+ "notes": "Only the two wild-type RNA-seq samples of a 3C-seq series are candidates. Title says 'stationary phase 30°C (30h)'; the phase word is used (stationary, stated) although 30 h would by itself give late_stationary. GSM2870441's extract protocol field only describes 3C-seq, but its title, library_strategy RNA-Seq and molecule total RNA mark it as the RNA-seq replicate, so it is labelled total_rnaseq like GSM2870440. Culture mode/aeration not described. WT re-read: unmodified MG1655 wt -> wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "other_minimal",
+   "b": "stated",
+   "q": "liquid minimal medium A supplemented with 0.12% casamino acids and 0.4% glucose"
+  },
+  "medium_class": {
+   "v": "minimal_plus_hydrolysate",
+   "b": "inferred",
+   "q": "MM + 0.12% casaminoacids +0.4% glucose at 30°C"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "MM + 0.12% casaminoacids +0.4% glucose at 30°C"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "MM + 0.12% casaminoacids +0.4% glucose at 30°C"
+  },
+  "growth_temperature": {
+   "v": 30,
+   "b": "stated",
+   "q": "RNA-seq of E. coli wt cells in stationary phase 30°C (30h)"
+  },
+  "growth_phase": {
+   "v": "stationary",
+   "b": "stated",
+   "q": "RNA-seq of E. coli wt cells in stationary phase 30°C (30h)"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "RNA-seq of E. coli wt cells in stationary phase 30°C (30h)"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "RNA-seq of E. coli wt cells in stationary phase 30°C (30h)"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RNA-seq of E. coli wt cells in stationary phase 30°C (30h)"
+  },
+  "is_control": {
+   "v": true,
+   "b": "stated",
+   "q": "RNA-seq of E. coli wt cells in stationary phase 30°C (30h)"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Chromosome conformation capture of E. coli wt cells and several deletion mutants (fis. hns. matP. mukB. hupAB. mukBmatP) in different growth conditions"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Chromosome conformation capture of E. coli wt cells and several deletion mutants (fis. hns. matP. mukB. hupAB. mukBmatP) in different growth conditions"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Chromosome conformation capture of E. coli wt cells and several deletion mutants (fis. hns. matP. mukB. hupAB. mukBmatP) in different growth conditions"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "For RNA-seq: total RNA was extracted using RNeasy Protect Bacteria according to manufacturer instructions"
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

@@ -1,0 +1,93 @@
+{
+ "gse": "GSE313173",
+ "notes": "Only the LF82 rpoB E1263A mutant samples are candidates; the WT comparison is in GSE253924, so is_control is false here. No aeration described.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "grown to a cell density of OD600 ~04-0.5 in LB broth at 37o C"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "LB broth"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "LB broth"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "in LB broth at 37o C"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "grown to a cell density of OD600 ~04-0.5 in LB broth"
+  },
+  "genotype_class": {
+   "v": "point_mutation",
+   "b": "stated",
+   "q": "LF82 RpoB E1263A mutant"
+  },
+  "perturbed_genes": {
+   "v": "rpoB",
+   "b": "stated",
+   "q": "LF82 RpoB E1263A mutant"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "LF82 RpoB E1263A mutant"
+  },
+  "is_control": {
+   "v": false,
+   "b": "stated",
+   "q": "isogenic LF82 WT and rpoB E1263A mutant were created"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "isogenic LF82 WT and rpoB E1263A mutant were created"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "isogenic LF82 WT and rpoB E1263A mutant were created"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "isogenic LF82 WT and rpoB E1263A mutant were created"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "isogenic LF82 WT and rpoB E1263A mutant were created"
+  },
+  "strain_group": {
+   "v": "AIEC",
+   "b": "stated",
+   "q": "The E. coli pathobiont LF82, isolated from ileum of a patient with CD, has been a well-studied, prototypic AIEC."
+  },
+  "strain_name": {
+   "v": "LF82",
+   "b": "stated",
+   "q": "Escherichia coli LF82"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA subtraction was performed with the bacterial RiboMinus Kit (Ambion)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA subtraction was performed with the bacterial RiboMinus Kit (Ambion)"
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

@@ -1,0 +1,179 @@
+{
+ "gse": "GSE81584",
+ "notes": "Reviewed 2026-11-15: induced empty-vector samples are controls (user decision). | MG1655 WT and mfd- (summary: 'knockout', design: 'knockdown'; labelled deletion), plus pCA24N empty vector and pCA24N-Mfd (Mfd++) induced with 100 uM IPTG for 1 h. Plain WT samples are controls; is_control left out for the vector+IPTG samples (reference genotype but induced, comparator of the overexpression arm only). Phase mid_exponential from the study-wide growth protocol (OD560 ~0.5); overexpression arm was induced at OD 0.25 for 1 h. Temperature, aeration and rRNA removal not given.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Cells were grown to approximately mid-log phase (OD560 = approximately 0.5) in LB."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Cells were grown to approximately mid-log phase (OD560 = approximately 0.5) in LB."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Cells were grown to approximately mid-log phase (OD560 = approximately 0.5) in LB."
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "study_default",
+   "q": "Cells were grown to approximately mid-log phase (OD560 = approximately 0.5) in LB."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Examination of E coli mfd knockdown and Mfd-overexpressing cells compared to wildtype E. coli controls"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of E coli mfd knockdown and Mfd-overexpressing cells compared to wildtype E. coli controls"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of E coli mfd knockdown and Mfd-overexpressing cells compared to wildtype E. coli controls"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "RNA libraries were prepared for sequencing using standard Illumina protocols"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^Wildtype$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "inducer_added": {
+     "v": false,
+     "b": "inferred",
+     "q": "MG1655 pCA24N and MG1655 pCA24N-Mfd cells were grown to an OD560 of approximately 0.25 and treated with 100 μM IPTG for 1 hour."
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "compared to wildtype E. coli controls"
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^mfd-$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "In mfd knockout cells"
+    },
+    "perturbed_genes": {
+     "v": "mfd",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "inducer_added": {
+     "v": false,
+     "b": "inferred",
+     "q": "MG1655 pCA24N and MG1655 pCA24N-Mfd cells were grown to an OD560 of approximately 0.25 and treated with 100 μM IPTG for 1 hour."
+    },
+    "is_control": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^Wildtype with vector$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "inducer_added": {
+     "v": true,
+     "b": "stated",
+     "q": "MG1655 pCA24N and MG1655 pCA24N-Mfd cells were grown to an OD560 of approximately 0.25 and treated with 100 μM IPTG for 1 hour."
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^Mfd\\+\\+$",
+   "set": {
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "stated",
+     "q": "RNA-seq analysis in cells overexpressing Mfd"
+    },
+    "perturbed_genes": {
+     "v": "mfd",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "inducer_added": {
+     "v": true,
+     "b": "stated",
+     "q": "MG1655 pCA24N and MG1655 pCA24N-Mfd cells were grown to an OD560 of approximately 0.25 and treated with 100 μM IPTG for 1 hour."
+    },
+    "is_control": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^Wildtype with vector$",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

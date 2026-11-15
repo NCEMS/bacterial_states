@@ -1,0 +1,85 @@
+{
+ "gse": "GSE216032",
+ "notes": "CRISPRi strain LC-E18 (chromosomal ptet-dCas9) with a control guide or one of two guides that cause off-target dCas9 silencing; all induced with 1 nM aTc for 3 h in LB. Control guide = control (reference, induced, like an induced empty vector). The two toxic guides labelled knockdown; silenced genes not named in the text, so perturbed_genes and global_regulator_perturbed left out for them. Strain group not stated (LC-E18 only). No phase (3 h after induction, no OD).",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "LB +  1 nM aTc + 50ug/ml Kanamycin"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "LB +  1 nM aTc + 50ug/ml Kanamycin"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "LB +  1 nM aTc + 50ug/ml Kanamycin"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "Samples were harvested 3 hours after aTc induction."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Samples were prepared from E. coli LC-E18 harbouring psgRNAcos plasmids with 3 different guides (control guide, AGGAA_non1 and ACCCA_non1)."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Samples were prepared from E. coli LC-E18 harbouring psgRNAcos plasmids with 3 different guides (control guide, AGGAA_non1 and ACCCA_non1)."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Samples were prepared from E. coli LC-E18 harbouring psgRNAcos plasmids with 3 different guides (control guide, AGGAA_non1 and ACCCA_non1)."
+  },
+  "strain_name": {
+   "v": "LC-E18",
+   "b": "stated",
+   "q": "LC-E18"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Trizol TruSeq Stranded mRNA"
+  },
+  "genotype_class": {
+   "v": "knockdown",
+   "b": "inferred",
+   "q": "Cas9 off-target binding to the promoter of bacterial genes leads to silencing and toxicity"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Samples were prepared from E. coli LC-E18 harbouring psgRNAcos plasmids with 3 different guides (control guide, AGGAA_non1 and ACCCA_non1)."
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^Control",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": "control guide"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": "control guide"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

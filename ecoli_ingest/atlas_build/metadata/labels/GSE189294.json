@@ -1,0 +1,106 @@
+{
+ "gse": "GSE189294",
+ "notes": "Reviewed 2026-11-15: intracellular sample carries culture_mode with_host_cells and no treatment (in-host rule). | WT UPEC CFT073 in LB (control) vs inside bladder epithelial cells for 8 h (with_host_cells, host_factor, adapted). mixed_organism true for the in-cell sample because bacteria were collected from infected epithelial cells (host RNA likely present); not stated explicitly. LB sample: no phase, OD, temperature or shaking given. TruSeq RNA kit, rRNA removal not stated.",
+ "default": {
+  "strain_group": {
+   "v": "UPEC",
+   "b": "stated",
+   "q": "Uropathogenic Escherichia coli CFT073"
+  },
+  "strain_name": {
+   "v": "CFT073",
+   "b": "stated",
+   "q": "Escherichia coli CFT073"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "mRNA profiles of WT CFT073 in cells and LB medium"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "mRNA profiles of WT CFT073 in cells and LB medium"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Illumina TruSeq RNA Sample Prep Kit (Cat#FC-122-1001) was used with was used with 4 ug of total RNA"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA profiles of WT CFT073 in cells and LB medium"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA profiles of WT CFT073 in cells and LB medium"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:protocol",
+   "regex": "^LB$",
+   "set": {
+    "base_medium": {
+     "v": "LB",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "complex",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    },
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "mixed_organism": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:protocol",
+   "regex": "^Cell$",
+   "set": {
+    "culture_mode": {
+     "v": "with_host_cells",
+     "b": "stated",
+     "q": "gene expression profiles of UPEC at the stage of bacterial survival in bladder epithelial cells"
+    },
+    "growth_phase": {
+     "v": "not_applicable",
+     "b": "inferred",
+     "q": "survival in bladder epithelial cells"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "mixed_organism": {
+     "v": true,
+     "b": "inferred",
+     "q": "mRNA profiles of WT CFT073 in cells"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

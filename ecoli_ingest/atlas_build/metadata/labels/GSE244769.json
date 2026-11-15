@@ -1,0 +1,126 @@
+{
+ "gse": "GSE244769",
+ "notes": "Doxo and Doxo+QVD samples grow in cell-free supernatant of doxorubicin-treated CT26 cells: treatment host_factor (host-cell products added to the culture; residual doxorubicin may also be present but is not stated). Media controls are plain DMEM+10% FBS. HS labelled natural_isolate (human commensal strain).",
+ "default": {
+  "strain_group": {
+   "v": "natural_isolate",
+   "b": "stated",
+   "q": "a human commensal strain of E. coli"
+  },
+  "strain_name": {
+   "v": "HS",
+   "b": "stated",
+   "q": "HS"
+  },
+  "base_medium": {
+   "v": "cell_culture",
+   "b": "stated",
+   "q": "DMEM + 10% FBS background"
+  },
+  "medium_class": {
+   "v": "natural_fluid",
+   "b": "inferred",
+   "q": "DMEM + 10% FBS background"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "DMEM + 10% FBS background"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "E. coli was grown aerobically at 37 degrees with 200rpm agitation"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "E. coli was grown aerobically at 37 degrees with 200rpm agitation"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "E. coli was grown aerobically at 37 degrees with 200rpm agitation"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Cell free supernatants were collected and filtered before being used as growth medium for E. coli. E. coli was grown in these cell free supernatants until mid log growth phase."
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "a human commensal strain of E. coli"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptional profiles were compared to media controls and cell free supernatants where mammalian cell death had been inhibited using the pan caspase inhibitor QVD."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "An mRNA library was constructed following rRNA depletion"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "An mRNA library was constructed following rRNA depletion"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Cell free supernatants were collected and filtered before being used as growth medium for E. coli. E. coli was grown in these cell free supernatants until mid log growth phase."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptional profiles were compared to media controls and cell free supernatants where mammalian cell death had been inhibited using the pan caspase inhibitor QVD."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptional profiles were compared to media controls and cell free supernatants where mammalian cell death had been inhibited using the pan caspase inhibitor QVD."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptional profiles were compared to media controls and cell free supernatants where mammalian cell death had been inhibited using the pan caspase inhibitor QVD."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^control$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "doxorubicin",
+   "set": {
+    "treatment": {
+     "v": "host_factor",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "Cell free supernatants were collected and filtered before being used as growth medium for E. coli. E. coli was grown in these cell free supernatants until mid log growth phase."
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

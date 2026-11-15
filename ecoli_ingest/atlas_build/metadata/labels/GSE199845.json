@@ -1,0 +1,35 @@
+{
+  "gse": "GSE199845",
+  "notes": "MAPS (MS2 affinity purification): the 4 eluates are IP_or_pulldown; the 2 lysates are total RNA before pulldown (RNAtag-Seq adapted to capture sRNAs, no size selection stated) -> total_rnaseq. MS2-GlnZ plasmid = native_overexpression of glnZ (native 3' UTR sRNA); MS2-only vector = reference/control. IPTG induction not stated, inducer_added left out. Gutnick medium with HoLE, glucose and ammonium.",
+  "default": {
+    "base_medium": {"v": "other_minimal", "b": "stated", "q": "Gutnick medium supplemented with HoLE, 0.4% glucose, 15 mM ammonium"},
+    "medium_class": {"v": "defined_minimal", "b": "inferred", "q": "Gutnick medium supplemented with HoLE, 0.4% glucose, 15 mM ammonium"},
+    "amino_acids_supplied": {"v": false, "b": "inferred", "q": "Gutnick medium supplemented with HoLE, 0.4% glucose, 15 mM ammonium"},
+    "carbon_source": {"v": "glucose", "b": "stated", "q": "0.4% glucose"},
+    "culture_mode": {"v": "batch_shaken", "b": "stated", "q": "Bacterial strains were grown shaking at 250 rpm at 37˚C"},
+    "oxygen": {"v": "aerobic", "b": "inferred", "q": "grown shaking at 250 rpm"},
+    "growth_temperature": {"v": 37, "b": "stated", "q": "shaking at 250 rpm at 37˚C"},
+    "growth_phase": {"v": "stationary", "b": "stated", "q": "samples were collected at stationary phase (9 hours of growth)"},
+    "treatment": {"v": "none", "b": "study_default", "q": "Application of MS2 affinity purification followed by RNA-seq (MAPS) to strains expressing MS2-GlnZ or MS2 control"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "Escherichia coli K-12"},
+    "strain_name": {"v": "MG1655", "b": "stated", "q": "MG1655"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "Application of MS2 affinity purification followed by RNA-seq (MAPS) to strains expressing MS2-GlnZ or MS2 control"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "Application of MS2 affinity purification followed by RNA-seq (MAPS) to strains expressing MS2-GlnZ or MS2 control"}
+  },
+  "rules": [
+    {"field": "ch:pulldown sample type", "regex": "^Eluate$",
+     "set": {"assay_class": {"v": "IP_or_pulldown", "b": "stated", "q": "RNA sequencing library after MAPS pulldown"}}},
+    {"field": "ch:pulldown sample type", "regex": "^Lysate$",
+     "set": {"assay_class": {"v": "total_rnaseq", "b": "stated", "q": "RNA sequencing library of total RNA from samples expressing MS2-GlnZ194 prior to performing the MAPS pulldown"}}},
+    {"field": "ch:plasmid", "regex": "MS2-GlnZ",
+     "set": {"genotype_class": {"v": "native_overexpression", "b": "stated", "q": "strains expressing MS2-GlnZ"},
+             "perturbed_genes": {"v": "glnZ", "b": "stated", "q": "strains expressing MS2-GlnZ"},
+             "global_regulator_perturbed": {"v": false, "b": "inferred", "q": "strains expressing MS2-GlnZ"},
+             "is_control": {"v": false, "b": "stated", "q": ""}}},
+    {"field": "ch:plasmid", "regex": "^pBR-lacI-MS2$",
+     "set": {"genotype_class": {"v": "reference", "b": "stated", "q": "control MS2 vector"},
+             "global_regulator_perturbed": {"v": false, "b": "stated", "q": "control MS2 vector"},
+             "is_control": {"v": true, "b": "stated", "q": "control MS2 vector"}}}
+  ],
+  "samples": {}
+}

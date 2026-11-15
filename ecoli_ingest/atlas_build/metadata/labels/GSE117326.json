@@ -1,0 +1,88 @@
+{
+ "gse": "GSE117326",
+ "notes": "Optogenetic EnvZ system: all samples carry pPCB plus pLCenvZ (wild-type envZ) or pLCenvZM (mutant envZ) in strain JW3367, IPTG in all cultures, red-light ON/OFF frequency is the varied treatment (other_physical, 10 h from OD 0.01 = adapted). genotype_class left out: the digest does not say what JW3367 or the plasmids change, and both arms carry engineered envZ. No untreated/dark control, so is_control absent. Growth phase not given (10 h in LB from OD 0.01).",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "study_default",
+   "q": "diluted to 2ml in fresh LB medium"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "diluted to 2ml in fresh LB medium"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "diluted to 2ml in fresh LB medium"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "study_default",
+   "q": "the 15 ml centrifuge tube with LED tube was put into the Thermomixer comfort (Eppendorf) and shaken at 650 rpm and 37°C for 10 hours"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "the 15 ml centrifuge tube with LED tube was put into the Thermomixer comfort (Eppendorf) and shaken at 650 rpm and 37°C for 10 hours"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "the 15 ml centrifuge tube with LED tube was put into the Thermomixer comfort (Eppendorf) and shaken at 650 rpm and 37°C for 10 hours"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "study_default",
+   "q": "IPTG (0.5mM) to reach OD600 = 0.01"
+  },
+  "treatment": {
+   "v": "other_physical",
+   "b": "study_default",
+   "q": "After exposed under the red light with a specific ON/OFF frequency for 10 hours"
+  },
+  "exposure": {
+   "v": "adapted",
+   "b": "inferred",
+   "q": "After exposed under the red light with a specific ON/OFF frequency for 10 hours"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "transcriptome sequencing under different input LED frequencies"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "transcriptome sequencing under different input LED frequencies"
+  },
+  "perturbed_genes": {
+   "v": "envZ",
+   "b": "study_default",
+   "q": "Plasmid pLCenvZ or pLCenvZM was co-transformed with pPCB into the competent cells of E. coli JW3367"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "Plasmid pLCenvZ or pLCenvZM was co-transformed with pPCB into the competent cells of E. coli JW3367"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "study_default",
+   "q": "BW25113"
+  },
+  "strain_name": {
+   "v": "JW3367",
+   "b": "study_default",
+   "q": "JW3367"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "The total RNA of E. coli was extracted using RNAprep pure Cell/Bacteria Kit"
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

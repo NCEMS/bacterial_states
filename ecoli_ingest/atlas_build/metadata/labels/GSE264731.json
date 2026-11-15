@@ -1,0 +1,118 @@
+{
+ "gse": "GSE264731",
+ "notes": "TO114 strain group not given. Salt-stress exposure duration not given (ch:time 4 h for controls, 6 h for the NaCl sample), so no exposure or phase. Control-0M (TO114, no NhaC) is the control.",
+ "default": {
+  "strain_name": {
+   "v": "TO114",
+   "b": "stated",
+   "q": "TO114 strain"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "E. coli cells were cultured at 37ºC in LBK media with 50 μg/ml of ampicillin and 25 μg/ml of kanamycin."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "E. coli cells were cultured at 37ºC in LBK media with 50 μg/ml of ampicillin and 25 μg/ml of kanamycin."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "E. coli cells were cultured at 37ºC in LBK media with 50 μg/ml of ampicillin and 25 μg/ml of kanamycin."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "E. coli cells were cultured at 37ºC in LBK media with 50 μg/ml of ampicillin and 25 μg/ml of kanamycin."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Total RNA was extracted utilizing TRIzol LS Reagent"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "we treated Escherichia coli strain TO114 expressing a halotolerant cyanobacterium Halothece sp. PCC7418-derived NhaC Na+/H+ antiporter (H2569) with salt stress (0.4 M NaCl)"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "we treated Escherichia coli strain TO114 expressing a halotolerant cyanobacterium Halothece sp. PCC7418-derived NhaC Na+/H+ antiporter (H2569) with salt stress (0.4 M NaCl)"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "we treated Escherichia coli strain TO114 expressing a halotolerant cyanobacterium Halothece sp. PCC7418-derived NhaC Na+/H+ antiporter (H2569) with salt stress (0.4 M NaCl)"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "we treated Escherichia coli strain TO114 expressing a halotolerant cyanobacterium Halothece sp. PCC7418-derived NhaC Na+/H+ antiporter (H2569) with salt stress (0.4 M NaCl)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "^TO114 strain$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "NhaC",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "nhaC (Halothece H2569)",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^control$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "NaCl",
+   "set": {
+    "treatment": {
+     "v": "hyperosmotic",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

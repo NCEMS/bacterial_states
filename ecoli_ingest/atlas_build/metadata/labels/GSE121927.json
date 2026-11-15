@@ -1,0 +1,102 @@
+{
+ "gse": "GSE121927",
+ "notes": "m7G-MaP-seq. NaBH4 is applied to purified RNA, not to cells, so treatment is none for all; NaBH4-reduced libraries are a modification-mapping chemistry (assay_class other), mock-treated libraries kept as total_rnaseq. 'total RNA' libraries are not rRNA-depleted (mostly rRNA); 'mRNA' libraries: enrichment method not stated, rrna_removal left out. Medium, phase, temperature not given. WT re-read: Unmodified BW25113 WT -> wild_type.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "RNA from E. coli (strain BW25113 and RsmG KO)"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "BW25113"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "E. coli-WT-untreated-total RNA"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "E. coli-WT-untreated-total RNA"
+  },
+  "is_control": {
+   "v": true,
+   "b": "stated",
+   "q": "E. coli-WT-untreated-total RNA"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "The RNA was treated with NaBH4 or mock-treated, then reverse transcribed."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "The RNA was treated with NaBH4 or mock-treated, then reverse transcribed."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "The RNA was treated with NaBH4 or mock-treated, then reverse transcribed."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA from E. coli (strain BW25113 and RsmG KO)"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Libraries were prepared from total RNA."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "RsmG KO",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rsmG",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:nabh4 treatment",
+   "regex": "NaBH4",
+   "set": {
+    "assay_class": {
+     "v": "other",
+     "b": "stated",
+     "q": "m7G modified positions are converted to abasic sites by mild reduction, recorded as cDNA mutations through reverse transcription"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "total RNA$",
+   "set": {
+    "rrna_removal": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

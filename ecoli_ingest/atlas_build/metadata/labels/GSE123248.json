@@ -1,0 +1,126 @@
+{
+ "gse": "GSE123248",
+ "notes": "Static DMEM, 5% CO2, 6 h; no phase word or OD -> growth_phase left out; oxygen not stated. Serum not mentioned -> defined_rich.",
+ "default": {
+  "culture_mode": {
+   "v": "static_liquid",
+   "b": "stated",
+   "q": "Strains were grown in DMEM tissue culture medium, statically at 37 degrees under a 5% CO2 atmosphere for 6 h."
+  },
+  "base_medium": {
+   "v": "cell_culture",
+   "b": "stated",
+   "q": "Strains were grown in DMEM tissue culture medium, statically at 37 degrees under a 5% CO2 atmosphere for 6 h."
+  },
+  "medium_class": {
+   "v": "defined_rich",
+   "b": "inferred",
+   "q": "Strains were grown in DMEM tissue culture medium, statically at 37 degrees under a 5% CO2 atmosphere for 6 h."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Strains were grown in DMEM tissue culture medium, statically at 37 degrees under a 5% CO2 atmosphere for 6 h."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Strains were grown in DMEM tissue culture medium, statically at 37 degrees under a 5% CO2 atmosphere for 6 h."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "we used RNA-seq to compare gene expression in a WT strain and a dicF1-4 deletion strain."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "we used RNA-seq to compare gene expression in a WT strain and a dicF1-4 deletion strain."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "we used RNA-seq to compare gene expression in a WT strain and a dicF1-4 deletion strain."
+  },
+  "strain_group": {
+   "v": "EHEC_STEC",
+   "b": "stated",
+   "q": "enterohemorrhagic Escherichia coli O157:H7"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA depletion using Ribo-Zero rRNA Removal Kit for Gram-Negative Bacteria"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA depletion using Ribo-Zero rRNA Removal Kit for Gram-Negative Bacteria"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "EHEC strains were grown planktonically in tissue culture medium"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^wild-type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "86-24",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "dicF1-4 deletion",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "dicF",
+     "b": "stated",
+     "q": "dicF1-4 deletion"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "BM04",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

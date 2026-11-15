@@ -1,0 +1,88 @@
+{
+ "gse": "GSE178531",
+ "notes": "Single sample: SuCasΩ + crRNA expressed from plasmids (IPTG + L-arabinose) to map crRNA processing. Library made with the NEBNext Small RNA kit after PNK 3'-end repair (adapter ligation to RNA ends, mapped to the crRNA locus) -> assay_class small_rna; unsure between small_rna and end_mapping, either way not standard RNA-seq. Host strain not named. The control-plasmid culture is not among the candidates, so is_control left out.",
+ "default": {
+  "assay_class": {
+   "v": "small_rna",
+   "b": "inferred",
+   "q": "cDNA synthesis and library preparation was performed with NEBNext Multiplex Small RNA Library Prep Set for Illumina"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA was removed from the samples using RiboMinus Transcriptome Isolation Kit, bacteria"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "were grown in LB with antibiotic selection and IPTG as well as L-arabinose"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "were grown in LB with antibiotic selection and IPTG as well as L-arabinose"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "were grown in LB with antibiotic selection and IPTG as well as L-arabinose"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "The cultures was grown at 37C with constant shaking and harvested once it reached the stationary phase."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "The cultures was grown at 37C with constant shaking and harvested once it reached the stationary phase."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "The cultures was grown at 37C with constant shaking and harvested once it reached the stationary phase."
+  },
+  "growth_phase": {
+   "v": "stationary",
+   "b": "stated",
+   "q": "The cultures was grown at 37C with constant shaking and harvested once it reached the stationary phase."
+  },
+  "genotype_class": {
+   "v": "heterologous_expression",
+   "b": "stated",
+   "q": "SuCasΩ was expressed with crRNA in E. coli."
+  },
+  "perturbed_genes": {
+   "v": "SuCasΩ;crRNA",
+   "b": "stated",
+   "q": "SuCasΩ was expressed with crRNA in E. coli."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "SuCasΩ was expressed with crRNA in E. coli."
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "IPTG as well as L-arabinose to induce nuclease and crRNA expression"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "SuCasΩ was expressed with crRNA in E. coli."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "SuCasΩ was expressed with crRNA in E. coli."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "SuCasΩ was expressed with crRNA in E. coli."
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

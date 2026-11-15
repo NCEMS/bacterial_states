@@ -1,0 +1,210 @@
+{
+ "gse": "GSE144816",
+ "notes": "Reviewed 2026-11-15: 5 min shift from LB to low-phosphate MOPS is medium_or_oxygen_shift, not amino_acid_starvation | Stress = shift from LB to MOPS glucose minimal medium with low phosphate (nutrient downshift, 5 min): labelled amino_acid_starvation (removal of the amino acids of LB; also low phosphate), acute; medium labels of stressed samples describe the MOPS medium. Phase mid_exponential inferred from A600 0.2-0.4 in LB, kept for the 5 min samples. WT re-read: Unmodified MG1655 wild-type -> wild_type.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "E. coli strains were grown in 10 ml LB at 37°C with shaking (200 rpm) to A600=0.2-0.4."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "E. coli strains were grown in 10 ml LB at 37°C with shaking (200 rpm) to A600=0.2-0.4."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "E. coli strains were grown in 10 ml LB at 37°C with shaking (200 rpm) to A600=0.2-0.4."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "E. coli strains were grown in 10 ml LB at 37°C with shaking (200 rpm) to A600=0.2-0.4."
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "E. coli strains were grown in 10 ml LB at 37°C with shaking (200 rpm) to A600=0.2-0.4."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "E. coli strains were grown in 10 ml LB at 37°C with shaking (200 rpm) to A600=0.2-0.4."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "E. coli strains were grown in 10 ml LB at 37°C with shaking (200 rpm) to A600=0.2-0.4."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "we used RNA sequencing to compare transcription in wild-type, dksA, and dksA greA strains of E. coli before and after nutrient limitation"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "we used RNA sequencing to compare transcription in wild-type, dksA, and dksA greA strains of E. coli before and after nutrient limitation"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "we used RNA sequencing to compare transcription in wild-type, dksA, and dksA greA strains of E. coli before and after nutrient limitation"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Library construction began with ribosome reduction with the RiboMinus protocol"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Library construction began with ribosome reduction with the RiboMinus protocol"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "we used RNA sequencing to compare transcription in wild-type, dksA, and dksA greA strains of E. coli before and after nutrient limitation"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "^MG1655$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "dksA1000::cat\\+$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "dksA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655 dksA1000::cat+",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "greA788",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "dksA;greA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655 dksA1000::cat+ greA788::kan+",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^rich media \\(0 min\\)$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "nutrient limitation stress",
+   "set": {
+    "treatment": {
+     "v": "medium_or_oxygen_shift",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    },
+    "base_medium": {
+     "v": "MOPS",
+     "b": "stated",
+     "q": "resuspended in 5 ml MOPS minimal medium containing 4 g l-1 glucose, 0.1 mM K2HPO4, and 0.1 mM uracil."
+    },
+    "medium_class": {
+     "v": "defined_minimal",
+     "b": "inferred",
+     "q": "resuspended in 5 ml MOPS minimal medium containing 4 g l-1 glucose, 0.1 mM K2HPO4, and 0.1 mM uracil."
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": "resuspended in 5 ml MOPS minimal medium containing 4 g l-1 glucose, 0.1 mM K2HPO4, and 0.1 mM uracil."
+    },
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": "resuspended in 5 ml MOPS minimal medium containing 4 g l-1 glucose, 0.1 mM K2HPO4, and 0.1 mM uracil."
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^wild-type before stress$",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

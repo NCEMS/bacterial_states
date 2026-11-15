@@ -1,0 +1,357 @@
+{
+ "gse": "GSE305476",
+ "notes": "Harvest at OD600 = 2 in M9 glycerol: no phase. Hosts SDT507 (gly2 rhaBADM KO) and SDT492 (gly2) both treated as the reference genotype of their arms; their 'Control' plasmid samples are controls. 'Control, delayed sampling' is_control left out (different sampling time, not specified). 'T7 control' (pSD78 + pSD208) set is_control true, genotype_class left out (pSD78 presumably carries the T7 system, not stated). MBP expression: genotype_class left out (MBP may be native malE or fused). Inducer not stated anywhere -> inducer_added left out. Choline 5 mM labelled other_chemical (adapted). Plasmid antibiotics not treatments.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "Cells were grown in minimal M9 growth medium with 0.2% glycerol in 250 mL shake flasks at 40 mL working volume, shaking at 37C and at 225 RPM."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "Cells were grown in minimal M9 growth medium with 0.2% glycerol in 250 mL shake flasks at 40 mL working volume, shaking at 37C and at 225 RPM."
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "Cells were grown in minimal M9 growth medium with 0.2% glycerol in 250 mL shake flasks at 40 mL working volume, shaking at 37C and at 225 RPM."
+  },
+  "carbon_source": {
+   "v": "glycerol",
+   "b": "stated",
+   "q": "Cells were grown in minimal M9 growth medium with 0.2% glycerol in 250 mL shake flasks at 40 mL working volume, shaking at 37C and at 225 RPM."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Cells were grown in minimal M9 growth medium with 0.2% glycerol in 250 mL shake flasks at 40 mL working volume, shaking at 37C and at 225 RPM."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "stated",
+   "q": "Cells were grown in minimal M9 growth medium with 0.2% glycerol in 250 mL shake flasks at 40 mL working volume, shaking at 37C and at 225 RPM."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Cells were grown in minimal M9 growth medium with 0.2% glycerol in 250 mL shake flasks at 40 mL working volume, shaking at 37C and at 225 RPM."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12 MG1655"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RNA-Seq profiling of Escherichia coli hosts containing expression plasmids for different heterologous genes"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-Seq profiling of Escherichia coli hosts containing expression plasmids for different heterologous genes"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-Seq profiling of Escherichia coli hosts containing expression plasmids for different heterologous genes"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was extracted from cultures"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-Seq profiling of Escherichia coli hosts containing expression plasmids for different heterologous genes"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-Seq profiling of Escherichia coli hosts containing expression plasmids for different heterologous genes"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^SDT507",
+   "set": {
+    "strain_name": {
+     "v": "SDT507",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^SDT492",
+   "set": {
+    "strain_name": {
+     "v": "SDT492",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^SDT1108",
+   "set": {
+    "strain_name": {
+     "v": "SDT1108",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^Expression of (MNEI|Brazzein|ALA|BLG|Ovalbumin|MFP5|eGFP|Thaumatin|MT1)",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^T7 expression",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(T7 )?[Ee]xpression of MBP,",
+   "set": {
+    "perturbed_genes": {
+     "v": "MBP",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(T7 )?[Ee]xpression of MNEI,",
+   "set": {
+    "perturbed_genes": {
+     "v": "MNEI",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(T7 )?[Ee]xpression of Brazzein,",
+   "set": {
+    "perturbed_genes": {
+     "v": "Brazzein",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(T7 )?[Ee]xpression of ALA,",
+   "set": {
+    "perturbed_genes": {
+     "v": "ALA",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(T7 )?[Ee]xpression of BLG,",
+   "set": {
+    "perturbed_genes": {
+     "v": "BLG",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(T7 )?[Ee]xpression of Ovalbumin,",
+   "set": {
+    "perturbed_genes": {
+     "v": "Ovalbumin",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(T7 )?[Ee]xpression of MFP5,",
+   "set": {
+    "perturbed_genes": {
+     "v": "MFP5",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(T7 )?[Ee]xpression of eGFP,",
+   "set": {
+    "perturbed_genes": {
+     "v": "eGFP",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(T7 )?[Ee]xpression of eGFP-BLG,",
+   "set": {
+    "perturbed_genes": {
+     "v": "eGFP-BLG",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(T7 )?[Ee]xpression of eGFP-ALA,",
+   "set": {
+    "perturbed_genes": {
+     "v": "eGFP-ALA",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(T7 )?[Ee]xpression of Thaumatin,",
+   "set": {
+    "perturbed_genes": {
+     "v": "Thaumatin",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(T7 )?[Ee]xpression of MT1,",
+   "set": {
+    "perturbed_genes": {
+     "v": "MT1",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^Control, (replicate|intact)",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^Control, delayed",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^T7 control",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "rspAB co-expression",
+   "set": {
+    "genotype_class": {
+     "v": "multiple",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "eGFP;rspAB",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "rspAB KO",
+   "set": {
+    "genotype_class": {
+     "v": "multiple",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "eGFP;rspAB",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "5 mM choline",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

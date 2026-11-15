@@ -1,0 +1,33 @@
+{
+  "gse": "GSE278616",
+  "notes": "All groups induced with 0.2 mM IPTG and shifted to 30 C, harvested at OD600 0.5-0.6 in LB (mid_exponential inferred). 'Negative control' read as the empty-vector reference (control). The AcK group is described both as 'transformed with ... AcK' and 'supplied with 5 mM AcK' (N-acetyl-lysine added); its plasmid/genotype is unclear, so genotype labels are left out and the AcK addition is labelled other_chemical with no exposure (duration not given). NmGNAT is a heterologous enzyme. Shaking not described: no culture_mode/oxygen.",
+  "default": {
+    "base_medium": {"v": "LB", "b": "stated", "q": "diluted 1:100 into LB media containing 50 μg/mL kanamycin"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "diluted 1:100 into LB media containing 50 μg/mL kanamycin"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "diluted 1:100 into LB media containing 50 μg/mL kanamycin"},
+    "growth_temperature": {"v": 30, "b": "stated", "q": "the cells were moved to 30 ˚C and harvested when the OD600 reached 0.5-0.6"},
+    "growth_phase": {"v": "mid_exponential", "b": "inferred", "q": "harvested when the OD600 reached 0.5-0.6"},
+    "strain_group": {"v": "B", "b": "stated", "q": "BL21 (DE3)"},
+    "strain_name": {"v": "BL21(DE3)", "b": "stated", "q": "BL21 (DE3)"},
+    "inducer_added": {"v": true, "b": "stated", "q": "the cells were induced with 0.2 mM IPTG"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "BL21 (DE3) cells were transformed with either NmGNAT or AcK or negative control."},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "BL21 (DE3) cells were transformed with either NmGNAT or AcK or negative control."},
+    "assay_class": {"v": "total_rnaseq", "b": "study_default", "q": "We performed RNA-Seq to accurately assess the impact of AcK addition or biosynthesis on gene expression"},
+    "is_control": {"v": false, "b": "study_default", "q": "BL21 (DE3) cells were transformed with either NmGNAT or AcK or negative control."}
+  },
+  "rules": [
+    {"field": "ch:transformed with", "regex": "negative control",
+     "set": {"genotype_class": {"v": "reference", "b": "stated", "q": ""},
+             "global_regulator_perturbed": {"v": false, "b": "inferred", "q": ""},
+             "treatment": {"v": "none", "b": "stated", "q": ""},
+             "is_control": {"v": true, "b": "stated", "q": ""}}},
+    {"field": "ch:transformed with", "regex": "AcK",
+     "set": {"treatment": {"v": "other_chemical", "b": "stated", "q": "the AcK group was supplied with 5 mM AcK"}}},
+    {"field": "ch:transformed with", "regex": "NmGNAT",
+     "set": {"genotype_class": {"v": "heterologous_expression", "b": "stated", "q": ""},
+             "perturbed_genes": {"v": "NmGNAT", "b": "stated", "q": ""},
+             "global_regulator_perturbed": {"v": false, "b": "inferred", "q": ""},
+             "treatment": {"v": "none", "b": "study_default", "q": "the AcK group was supplied with 5 mM AcK"}}}
+  ],
+  "samples": {}
+}

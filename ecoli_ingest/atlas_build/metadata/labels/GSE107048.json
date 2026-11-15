@@ -1,0 +1,33 @@
+{
+  "gse": "GSE107048",
+  "notes": "Wild type untreated (agent none) vs triclosan-selected resistant mutants (AMX/CHL/Tet resistant) and a triclosan-treated wild type, all in LB with 0.2 mg/L triclosan for 8 h. Mutants labelled evolved_isolate; their mutated genes are not given, so perturbed_genes and global_regulator_perturbed are left out for them. Growth phase not given (8 h culture, no OD). rrna_removal not stated.",
+  "default": {
+    "base_medium": {"v": "LB", "b": "study_default", "q": "liquid LB culture at 37 °C"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "liquid LB culture at 37 °C"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "liquid LB culture at 37 °C"},
+    "growth_temperature": {"v": 37, "b": "study_default", "q": "liquid LB culture at 37 °C"},
+    "culture_mode": {"v": "batch_shaken", "b": "inferred", "q": "cultured in  triplicate in 10 mL liquid LB with 0.2 mg/L TCS at 37 °C for 8 h, shaken at 150 rpm"},
+    "oxygen": {"v": "aerobic", "b": "inferred", "q": "shaken at 150 rpm"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "Escherichia coli str. K-12 substr. MG1655"},
+    "strain_name": {"v": "MG1655", "b": "stated", "q": "Escherichia coli str. K-12 substr. MG1655"},
+    "assay_class": {"v": "total_rnaseq", "b": "study_default", "q": "Total RNA was extracted from the mutants using the QIAGEN miRNeasy Mini Kit"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "Bacterial mRNA profiles of wild-type E. coli K-12 MG1655 and triclosan induced E. coli mutants in response to 0.2 mg/L triclosan for 8 h"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "Bacterial mRNA profiles of wild-type E. coli K-12 MG1655 and triclosan induced E. coli mutants in response to 0.2 mg/L triclosan for 8 h"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "Bacterial mRNA profiles of wild-type E. coli K-12 MG1655 and triclosan induced E. coli mutants in response to 0.2 mg/L triclosan for 8 h"},
+    "is_control": {"v": false, "b": "study_default", "q": "Bacterial mRNA profiles of wild-type E. coli K-12 MG1655 and triclosan induced E. coli mutants in response to 0.2 mg/L triclosan for 8 h"}
+  },
+  "rules": [
+    {"field": "ch:genotype", "regex": "^Wild-type$",
+     "set": {"genotype_class": {"v": "reference", "b": "stated", "q": ""},
+             "global_regulator_perturbed": {"v": false, "b": "stated", "q": ""}}},
+    {"field": "ch:genotype", "regex": "resistant mutant",
+     "set": {"genotype_class": {"v": "evolved_isolate", "b": "stated", "q": ""}}},
+    {"field": "ch:agent", "regex": "^none$",
+     "set": {"treatment": {"v": "none", "b": "stated", "q": ""},
+             "is_control": {"v": true, "b": "stated", "q": ""}}},
+    {"field": "ch:agent", "regex": "^TCS$",
+     "set": {"treatment": {"v": "envelope_solvent_biocide", "b": "stated", "q": ""},
+             "exposure": {"v": "adapted", "b": "inferred", "q": "cultured in  triplicate in 10 mL liquid LB with 0.2 mg/L TCS at 37 °C for 8 h"}}}
+  ],
+  "samples": {}
+}

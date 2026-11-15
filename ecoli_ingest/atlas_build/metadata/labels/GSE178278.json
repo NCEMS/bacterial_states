@@ -1,0 +1,93 @@
+{
+ "gse": "GSE178278",
+ "notes": "MG1655 grown from dilution in LB of 1.0x, 0.75x, 0.5x, 0.25x richness (tryptone/yeast extract scaled); medium richness is a medium property, so treatment none and every sample is an untreated wild-type control. 'Appropriate antibiotics' mentioned but no plasmid described; genotype taken as reference. rRNA removal not stated.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "incubated at 37 ºC with aeration and allowed to grow until reaching the mid-log phase (with optical density at 600 nm (OD600) ≈ 0.4)."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "incubated at 37 ºC with aeration and allowed to grow until reaching the mid-log phase (with optical density at 600 nm (OD600) ≈ 0.4)."
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "we used tailored various media differing in richness, denoted as ‘LB1.0x', ‘LB0.75x, ‘LB0.5x’, ‘LB0.25x’ specifically."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "we used tailored various media differing in richness, denoted as ‘LB1.0x', ‘LB0.75x, ‘LB0.5x’, ‘LB0.25x’ specifically."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "we used tailored various media differing in richness, denoted as ‘LB1.0x', ‘LB0.75x, ‘LB0.5x’, ‘LB0.25x’ specifically."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "incubated at 37 ºC with aeration and allowed to grow until reaching the mid-log phase (with optical density at 600 nm (OD600) ≈ 0.4)."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "incubated at 37 ºC with aeration and allowed to grow until reaching the mid-log phase (with optical density at 600 nm (OD600) ≈ 0.4)."
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "study_default",
+   "q": "Cells from 3 independent biological replicates of MG1655 in each modified LB medium richness"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "Cells from 3 independent biological replicates of MG1655 in each modified LB medium richness"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of genome-wide responses under various media dilution."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of genome-wide responses under various media dilution."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Examination of genome-wide responses under various media dilution."
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "Cells from 3 independent biological replicates of MG1655 in each modified LB medium richness"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Total RNA was extracted using RNeasy kit (Qiagen). RNA-seq libraries were constructed according to the Illumina's protocol."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of genome-wide responses under various media dilution."
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

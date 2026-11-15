@@ -1,0 +1,86 @@
+{
+ "gse": "GSE224989",
+ "notes": "Medium, temperature and aeration are not given. All samples are evolved pgi-replacement strains; no reference strain, so is_control left out. Phase from 'mid-log phase culture' in the design (A600 ~0.6).",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "study_default",
+   "q": "Total RNA was extracted from mid-log phase culture"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "We used RNA-seq to profile E. coli K-12 MG1655 strains subjected to adaptive laboratory evolution"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "We used RNA-seq to profile E. coli K-12 MG1655 strains subjected to adaptive laboratory evolution"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "We used RNA-seq to profile E. coli K-12 MG1655 strains subjected to adaptive laboratory evolution"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "We used RNA-seq to profile E. coli K-12 MG1655 strains subjected to adaptive laboratory evolution"
+  },
+  "genotype_class": {
+   "v": "multiple",
+   "b": "stated",
+   "q": "subjected to adaptive laboratory evolution after knockout of endogenous glucose-6-phosphate isomerase (pgi) and subsequent expression of heterologous version of the pgi gene from Pseudomonas aeruginosa and Bacillus megaterium"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "subjected to adaptive laboratory evolution after knockout of endogenous glucose-6-phosphate isomerase (pgi) and subsequent expression of heterologous version of the pgi gene from Pseudomonas aeruginosa and Bacillus megaterium"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E. coli K-12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655, adapted"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "The ribosomal RNA was removed using an Illumina Ribo-Zero rRNA removal kit for Gram-negative bacteria."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "The ribosomal RNA was removed using an Illumina Ribo-Zero rRNA removal kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^Bme",
+   "set": {
+    "perturbed_genes": {
+     "v": "pgi;B. megaterium pgi",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^P aerug",
+   "set": {
+    "perturbed_genes": {
+     "v": "pgi;P. aeruginosa pgi",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

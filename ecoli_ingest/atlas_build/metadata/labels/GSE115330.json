@@ -1,0 +1,144 @@
+{
+ "gse": "GSE115330",
+ "notes": "BW25113 under standard, urban polluted, or diesel exhaust atmosphere (grown in it: other_chemical, adapted); T56-1 ALE isolate under diesel exhaust. Standard-atmosphere wild type = control. Temperature/aeration not stated.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9-glucose"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "M9-glucose"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "M9-glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "M9-glucose"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "mid-log"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli BW25113"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Illumina RNA-seq of total RNA extracted from E. coli BW25113 grown in M9-glucose medium under standard laboratory atmosphere, under urban polluted atmosphere or under diesel exhaust atmosphere."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Illumina RNA-seq of total RNA extracted from E. coli BW25113 grown in M9-glucose medium under standard laboratory atmosphere, under urban polluted atmosphere or under diesel exhaust atmosphere."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Illumina RNA-seq of total RNA extracted from E. coli BW25113 grown in M9-glucose medium under standard laboratory atmosphere, under urban polluted atmosphere or under diesel exhaust atmosphere."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA was depleted with the Ribo-Zero- rRNA Removal Kits from Epicentre"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA was depleted with the Ribo-Zero- rRNA Removal Kits from Epicentre"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Illumina RNA-seq of total RNA extracted from E. coli BW25113 grown in M9-glucose medium under standard laboratory atmosphere, under urban polluted atmosphere or under diesel exhaust atmosphere."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "^wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "BW25113",
+     "b": "stated",
+     "q": "E. coli BW25113"
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "adapted",
+   "set": {
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "T56-1",
+     "b": "stated",
+     "q": "adapted E. coli strain T56-1"
+    }
+   }
+  },
+  {
+   "field": "ch:growth atmosphere",
+   "regex": "^Standard laboratory",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:growth atmosphere",
+   "regex": "^(Urban polluted|Diesel exhaust)",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "stated",
+     "q": "grown in M9-glucose medium under standard laboratory atmosphere, under urban polluted atmosphere or under diesel exhaust atmosphere"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^wild type standard laboratory",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

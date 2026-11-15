@@ -1,0 +1,121 @@
+{
+ "gse": "GSE62394",
+ "notes": "HPCD (5 MPa CO2, 25 C, 40 min) labelled other_physical, exposure short; the treated sample keeps mid_exponential (pre-shift phase, <2 h) by rule although the cells are described as VBNC; growth_temperature 25 for the treated sample (temperature during HPCD). Oxygen and culture mode of the exponential subculture not stated.",
+ "default": {
+  "strain_group": {
+   "v": "EHEC_STEC",
+   "b": "stated",
+   "q": "O157:H7 NCTC 12900"
+  },
+  "strain_name": {
+   "v": "NCTC 12900",
+   "b": "stated",
+   "q": "O157:H7 NCTC 12900"
+  },
+  "base_medium": {
+   "v": "TSB",
+   "b": "stated",
+   "q": "This overnight culture was transferred to TSB at a dilution of 1:100"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "This overnight culture was transferred to TSB"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "This overnight culture was transferred to TSB"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "grew to the exponential phase (OD550=0.93)"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "study_default",
+   "q": "Whole mRNA profiles of Escherichia coli O157:H7 in the VBNC state and the exponential phase"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Whole mRNA profiles of Escherichia coli O157:H7 in the VBNC state and the exponential phase"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Whole mRNA profiles of Escherichia coli O157:H7 in the VBNC state and the exponential phase"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Whole mRNA profiles of Escherichia coli O157:H7 in the VBNC state and the exponential phase"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Whole mRNA profiles of Escherichia coli O157:H7 in the VBNC state and the exponential phase"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "10 μg of total RNA sample was subjected to puriﬁcation for discarding rRNA via the MICROBExpress kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "subjected to puriﬁcation for discarding rRNA via the MICROBExpress kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^None$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "exponential-phase cells (the control)"
+    },
+    "growth_temperature": {
+     "v": 37,
+     "b": "inferred",
+     "q": "incubated at 37℃ for 12 h with shaking at 200 rpm"
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "HPCD",
+   "set": {
+    "treatment": {
+     "v": "other_physical",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "growth_temperature": {
+     "v": 25,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

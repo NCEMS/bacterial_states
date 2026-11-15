@@ -1,0 +1,158 @@
+{
+ "gse": "GSE36248",
+ "notes": "All samples are DH5alpha carrying the natural IncA/C MDR plasmid pAR060302; labelled reference genotype since every sample carries it. Replicates pooled before sequencing. Antibiotics added for 30 min at OD 0.5 (log phase).",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "grown in 10 mL DifcoTM Luria-Bertani (LB) broth aliquots at 37º C with shaking until an OD600 of 0.5"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "grown in 10 mL DifcoTM Luria-Bertani (LB) broth aliquots at 37º C with shaking until an OD600 of 0.5"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "grown in 10 mL DifcoTM Luria-Bertani (LB) broth aliquots at 37º C with shaking until an OD600 of 0.5"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown in 10 mL DifcoTM Luria-Bertani (LB) broth aliquots at 37º C with shaking until an OD600 of 0.5"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "grown in 10 mL DifcoTM Luria-Bertani (LB) broth aliquots at 37º C with shaking until an OD600 of 0.5"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "grown in 10 mL DifcoTM Luria-Bertani (LB) broth aliquots at 37º C with shaking until an OD600 of 0.5"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "bacteria grown at 37° C with shaking until log phase"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "study_default",
+   "q": "Using E. coli strain DH5α harboring the prototype IncA/C plasmid pAR060302"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Using E. coli strain DH5α harboring the prototype IncA/C plasmid pAR060302"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "DH5α(pAR060302)"
+  },
+  "strain_name": {
+   "v": "DH5alpha(pAR060302)",
+   "b": "stated",
+   "q": "DH5α(pAR060302)"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "The effects of ampicillin, florfenicol or streptomycin exposure were compared to cells left untreated at logarithmic phase"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "The effects of ampicillin, florfenicol or streptomycin exposure were compared to cells left untreated at logarithmic phase"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli strain DH5α harboring pAR060302 was grown in 10 mL DifcoTM Luria-Bertani (LB) broth"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "A treatment was also included to deplete ribosomal RNA using a commercially available kit (MicrobExpress, Ambion)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "A treatment was also included to deplete ribosomal RNA using a commercially available kit (MicrobExpress, Ambion)"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "The effects of ampicillin, florfenicol or streptomycin exposure were compared to cells left untreated at logarithmic phase"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^none$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "(?i)florfenicol",
+   "set": {
+    "treatment": {
+     "v": "abx_translation",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "inferred",
+     "q": "allowed to incubate at 37º C with shaking for an additional 30 min"
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "(?i)streptomycin",
+   "set": {
+    "treatment": {
+     "v": "abx_translation",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "inferred",
+     "q": "allowed to incubate at 37º C with shaking for an additional 30 min"
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "(?i)ampicillin",
+   "set": {
+    "treatment": {
+     "v": "abx_cell_wall",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "inferred",
+     "q": "allowed to incubate at 37º C with shaking for an additional 30 min"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,176 @@
+{
+ "gse": "GSE342672",
+ "notes": "Each sRNA deletion strain with empty pBAD+1 is the parent the study compares against (deseq comparisons sRNA vs control), so labelled reference and is_control true (induced empty vector); its chromosomal sRNA deletion is not recorded in perturbed_genes. Complemented strains: sRNA expressed from pBAD with arabinose -> native_overexpression. Arabinose induction for all samples: inducer_added true, treatment none.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Cultures were grown to mid-exponential phase (OD600 = 0.6)"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Strains were cultured in LB medium supplemented with ampicillin 100 µg.mL-1 at 37˚C with shaking at 220 RPM."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Strains were cultured in LB medium supplemented with ampicillin 100 µg.mL-1 at 37˚C with shaking at 220 RPM."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Strains were cultured in LB medium supplemented with ampicillin 100 µg.mL-1 at 37˚C with shaking at 220 RPM."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Strains were cultured in LB medium supplemented with ampicillin 100 µg.mL-1 at 37˚C with shaking at 220 RPM."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Strains were cultured in LB medium supplemented with ampicillin 100 µg.mL-1 at 37˚C with shaking at 220 RPM."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Strains were cultured in LB medium supplemented with ampicillin 100 µg.mL-1 at 37˚C with shaking at 220 RPM."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "sRNA (and control plasmid) expression was induced with 0.2% (w/v) L-arabinose for 30 min."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "sRNA (and control plasmid) expression was induced with 0.2% (w/v) L-arabinose for 30 min."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli MG1655 strains carrying individual deletions of chiX, gadY, ryhB, sdsR, or spf were transformed with either an empty pBAD+1 or the corresponding sRNA complementation plasmid."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli MG1655 strains carrying individual deletions of chiX, gadY, ryhB, sdsR, or spf were transformed with either an empty pBAD+1 or the corresponding sRNA complementation plasmid."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA sequencing with rRNA removal."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Total RNA sequencing with rRNA removal."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "E. coli MG1655 strains carrying individual deletions of chiX, gadY, ryhB, sdsR, or spf were transformed with either an empty pBAD+1 or the corresponding sRNA complementation plasmid."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": " pBAD$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "pBAD::",
+   "set": {
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "pBAD::chiX",
+   "set": {
+    "perturbed_genes": {
+     "v": "chiX",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "pBAD::gadY",
+   "set": {
+    "perturbed_genes": {
+     "v": "gadY",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "pBAD::ryhB",
+   "set": {
+    "perturbed_genes": {
+     "v": "ryhB",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "pBAD::sdsR",
+   "set": {
+    "perturbed_genes": {
+     "v": "sdsR",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "pBAD::spot42",
+   "set": {
+    "perturbed_genes": {
+     "v": "spf",
+     "b": "stated",
+     "q": "E. coli MG1655 strains carrying individual deletions of chiX, gadY, ryhB, sdsR, or spf were transformed with either an empty pBAD+1 or the corresponding sRNA complementation plasmid."
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

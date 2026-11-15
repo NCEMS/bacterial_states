@@ -1,0 +1,176 @@
+{
+ "gse": "GSE90056",
+ "notes": "RNA-seq libraries are alkaline-fragmented total RNA gel-purified to 20-40 nt (ribosome profiling companion): assay_class other, flag for exclusion. Empty-vector pBAD + arabinose samples taken as the controls of the overexpression set, 30C 0 min samples as the controls of the heat-shock set. rpoH I54N overexpression labelled native_overexpression. Medium named only 'defined rich media'. No phase or aeration stated.",
+ "default": {
+  "medium_class": {
+   "v": "defined_rich",
+   "b": "stated",
+   "q": "E. coli were grown in defined rich media at 30C."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "E. coli were grown in defined rich media at 30C."
+  },
+  "growth_temperature": {
+   "v": 30,
+   "b": "stated",
+   "q": "E. coli were grown in defined rich media at 30C."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "The effect of heat shock was measured under 3 conditions (n=3); overexpression of wildtype (n=3) or constitutively active mutant (n=2) heat shock transcription factor rpoH was compared to cells expressing empty vector (n=4)."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "The effect of heat shock was measured under 3 conditions (n=3); overexpression of wildtype (n=3) or constitutively active mutant (n=2) heat shock transcription factor rpoH was compared to cells expressing empty vector (n=4)."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "assay_class": {
+   "v": "other",
+   "b": "stated",
+   "q": "Total RNA was extracted with phenol chloroform and alkaline fragmented, then fragments (20-40 nt) were gel-purified."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "The effect of heat shock was measured under 3 conditions (n=3); overexpression of wildtype (n=3) or constitutively active mutant (n=2) heat shock transcription factor rpoH was compared to cells expressing empty vector (n=4)."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:plasmid",
+   "regex": "^None$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "inducer_added": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:heat shock time",
+   "regex": "^0min$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment temperature",
+   "regex": "42C",
+   "set": {
+    "treatment": {
+     "v": "heat",
+     "b": "stated",
+     "q": ""
+    },
+    "growth_temperature": {
+     "v": 42,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:heat shock time",
+   "regex": "^(10|20)min$",
+   "set": {
+    "exposure": {
+     "v": "acute",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:induction",
+   "regex": "arabinose",
+   "set": {
+    "inducer_added": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:plasmid",
+   "regex": "^pBAD$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:plasmid",
+   "regex": "sigma32",
+   "set": {
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rpoH",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

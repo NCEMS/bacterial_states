@@ -1,0 +1,78 @@
+{
+ "gse": "GSE148719",
+ "notes": "All samples are the reference construct of an HGT study (chromosomal CFP/Venus marker + induced mCherry plasmid, i.e. induced 'empty' reporter vector), labeled reference/control with inducer_added true. OD 0.12 in M9+1% CAA: medium is neither plain minimal nor complex, so growth_phase left out. Strain background not named.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "rich M9 (1x M9 salts, 1% CAA, 0.4% glucose, 2mM MgSO4, 0.1mM CaCl2)"
+  },
+  "medium_class": {
+   "v": "minimal_plus_hydrolysate",
+   "b": "inferred",
+   "q": "rich M9 (1x M9 salts, 1% CAA, 0.4% glucose, 2mM MgSO4, 0.1mM CaCl2)"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "1x M9 salts, 1% CAA, 0.4% glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "1x M9 salts, 1% CAA, 0.4% glucose"
+  },
+  "culture_mode": {
+   "v": "batch_microplate",
+   "b": "stated",
+   "q": "until OD0.12, in 96 deep-well plates"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "inferred",
+   "q": "contain pZS*plasmid, with mCherry (RFP) under pLtet0-1 promoter"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "contain pZS*plasmid, with mCherry (RFP) under pLtet0-1 promoter"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "with inducer ATC (5ng.mL) until OD0.12"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Gene expression of E.coli carrying the plasmid with an mCherry gene under the control of the pLtet0-1 promoter, after 1 hour of induction with 5ng/mL Anhydrotetracycline"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Gene expression of E.coli carrying the plasmid with an mCherry gene under the control of the pLtet0-1 promoter, after 1 hour of induction with 5ng/mL Anhydrotetracycline"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Gene expression of E.coli carrying the plasmid with an mCherry gene under the control of the pLtet0-1 promoter, after 1 hour of induction with 5ng/mL Anhydrotetracycline"
+  },
+  "is_control": {
+   "v": true,
+   "b": "inferred",
+   "q": "Gene expression of E.coli carrying the plasmid with an mCherry gene under the control of the pLtet0-1 promoter, after 1 hour of induction with 5ng/mL Anhydrotetracycline"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "RNA libraries were prepared for sequencing using RiboZero, NEB protocol."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "RNA libraries were prepared for sequencing using RiboZero, NEB protocol."
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

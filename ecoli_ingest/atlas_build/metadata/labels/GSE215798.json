@@ -1,0 +1,148 @@
+{
+ "gse": "GSE215798",
+ "notes": "2x2 design: water vs SAPYR photosensitizer, dark vs irradiated. Control = water, not irradiated. Irradiation alone -> other_physical; SAPYR in the dark -> other_chemical; SAPYR + light (aPDT) -> other_chemical;other_physical (oxidative stress is a result, not the stated treatment). Exposure acute (5 + 10 min). Stationary phase from the summary; overnight culture resuspended in TSB at OD 2.0. Strain ATCC 25922 (DSM 1103); text calls it only a reference strain, so strain_group left out. Shaking not described, culture_mode left out. WT re-read: ATCC 25922 unmodified -> wild_type.",
+ "default": {
+  "growth_phase": {
+   "v": "stationary",
+   "b": "stated",
+   "q": "Planktonic cultures of stationary phase E. coli were treated with aPDT"
+  },
+  "base_medium": {
+   "v": "TSB",
+   "b": "stated",
+   "q": "resuspended in TSB yielding an optical density (OD) of 2.0"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "resuspended in TSB yielding an optical density (OD) of 2.0"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "resuspended in TSB yielding an optical density (OD) of 2.0"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "Planktonic cultures (5 mL) were grown aerobically overnight at 37 °C."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Planktonic cultures (5 mL) were grown aerobically overnight at 37 °C."
+  },
+  "strain_name": {
+   "v": "ATCC 25922",
+   "b": "stated",
+   "q": "Escherichia coli (DSM 1103; ATCC 25922)"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "Escherichia coli (DSM 1103; ATCC 25922)"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Escherichia coli treated with aPDT using a sublethal dose of the photosensitizer SAPYR."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Samples were either incubated with 200 μL distilled water or 200 μL SAPYR (0.5 μM) in the dark for 5 min and then either illuminated for 10 min or kept in the dark for 10 min."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Samples were either incubated with 200 μL distilled water or 200 μL SAPYR (0.5 μM) in the dark for 5 min and then either illuminated for 10 min or kept in the dark for 10 min."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Samples were either incubated with 200 μL distilled water or 200 μL SAPYR (0.5 μM) in the dark for 5 min and then either illuminated for 10 min or kept in the dark for 10 min."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Illumina Stranded Total RNA Prep Ligation with Ribo-Zero Plus Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Illumina Stranded Total RNA Prep Ligation with Ribo-Zero Plus Kit"
+  },
+  "is_control": {
+   "v": false,
+   "b": "stated",
+   "q": "Samples were either incubated with 200 μL distilled water or 200 μL SAPYR (0.5 μM) in the dark for 5 min and then either illuminated for 10 min or kept in the dark for 10 min."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:sample_label",
+   "regex": "^UC L-$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "Samples were either incubated with 200 μL distilled water or 200 μL SAPYR (0.5 μM) in the dark for 5 min and then either illuminated for 10 min or kept in the dark for 10 min."
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:sample_label",
+   "regex": "^UC L\\+$",
+   "set": {
+    "treatment": {
+     "v": "other_physical",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "inferred",
+     "q": "Samples were either incubated with 200 μL distilled water or 200 μL SAPYR (0.5 μM) in the dark for 5 min and then either illuminated for 10 min or kept in the dark for 10 min."
+    }
+   }
+  },
+  {
+   "field": "ch:sample_label",
+   "regex": "^L-$",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "inferred",
+     "q": "Samples were either incubated with 200 μL distilled water or 200 μL SAPYR (0.5 μM) in the dark for 5 min and then either illuminated for 10 min or kept in the dark for 10 min."
+    }
+   }
+  },
+  {
+   "field": "ch:sample_label",
+   "regex": "^L\\+$",
+   "set": {
+    "treatment": {
+     "v": "other_chemical;other_physical",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "inferred",
+     "q": "Samples were either incubated with 200 μL distilled water or 200 μL SAPYR (0.5 μM) in the dark for 5 min and then either illuminated for 10 min or kept in the dark for 10 min."
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

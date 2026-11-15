@@ -1,0 +1,23 @@
+{
+  "gse": "GSE129281",
+  "notes": "rG4-seq: libraries made after a reverse-transcription-stalling (RTS) reaction on extracted RNA in K+ or Li+ buffer to map G-quadruplex stall sites; not a standard expression library, assay_class other for all. Cells are wild-type MG1655 in LB, untreated, so all are controls.",
+  "default": {
+    "growth_phase": {"v": "mid_exponential", "b": "stated", "q": "2 ml of mid-log-phase (OD600= 0.6) bacterial LB (Luria-Bertani) cultures"},
+    "base_medium": {"v": "LB", "b": "stated", "q": "grow until mid-log phase in LB"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "grow until mid-log phase in LB"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "grow until mid-log phase in LB"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "Escherichia coli str. K-12 substr. MG1655"},
+    "strain_name": {"v": "MG1655", "b": "stated", "q": "Escherichia coli str. K-12 substr. MG1655"},
+    "genotype_class": {"v": "reference", "b": "stated", "q": "Wild-type"},
+    "global_regulator_perturbed": {"v": false, "b": "stated", "q": "Wild-type"},
+    "treatment": {"v": "none", "b": "study_default", "q": "RNA-Seq libraries from bacterial cell extracts after performing RTS reaction in different buffers (Li and K rich buffer)"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "RNA-Seq libraries from bacterial cell extracts after performing RTS reaction in different buffers (Li and K rich buffer)"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "RNA-Seq libraries from bacterial cell extracts after performing RTS reaction in different buffers (Li and K rich buffer)"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "RNA-Seq libraries from bacterial cell extracts after performing RTS reaction in different buffers (Li and K rich buffer)"},
+    "is_control": {"v": true, "b": "study_default", "q": "Wild-type"},
+    "assay_class": {"v": "other", "b": "stated", "q": "RNA-Seq libraries from bacterial cell extracts after performing RTS reaction in different buffers (Li and K rich buffer)"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "After removing rRNA by using the Ribo-ZeroTM rRNA Removal Kit (Bacteria) (Epicentre)"}
+  },
+  "rules": [],
+  "samples": {}
+}

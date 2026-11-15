@@ -1,0 +1,9 @@
+{
+  "gse": "GSE31982",
+  "notes": "Not E. coli RNA: these candidates are Tag-Seq PCR libraries of MPRA reporter plasmid DNA pools (human HEK293 enhancer study; plasmid DNA presumably from E. coli). assay_class other; all physiology labels left out (no E. coli culture described). The 0uM/100uM/SeV in titles refers to stimulation of the human cells, not these plasmid pools.",
+  "default": {
+    "assay_class": {"v": "other", "b": "stated", "q": "The same tags were also sequenced from each ransfected plasmid pool to facilitate normalization to plasmid copy numbers."}
+  },
+  "rules": [],
+  "samples": {}
+}

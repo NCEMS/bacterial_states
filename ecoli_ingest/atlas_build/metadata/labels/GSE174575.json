@@ -1,0 +1,180 @@
+{
+ "gse": "GSE174575",
+ "notes": "Cisplatin samples treated 15 min -> dna_damage, acute. 'cisplatin paired' untreated samples (time 0) and basal samples are untreated; WT ones are controls. No temperature/aeration given. WT re-read: wild-type samples of the plain standard strain set to wild_type.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K12 MG1655"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "logarithmic phase"
+  },
+  "base_medium": {
+   "v": "MOPS",
+   "b": "stated",
+   "q": "MOPs minimal media + glucose"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "MOPs minimal media + glucose"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "MOPs minimal media + glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "MOPs minimal media + glucose"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "comparing the behavior of WT and ppk E. coli cells, either under basal growth or in the presence of cisplatin treatment"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "comparing the behavior of WT and ppk E. coli cells, either under basal growth or in the presence of cisplatin treatment"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "comparing the behavior of WT and ppk E. coli cells, either under basal growth or in the presence of cisplatin treatment"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "comparing the behavior of WT and ppk E. coli cells, either under basal growth or in the presence of cisplatin treatment"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA substracted RNA"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA depletion was performed according to the Illumina Ribo-Zero rRNA Removal Kit for Bacteria"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "comparing the behavior of WT and ppk E. coli cells, either under basal growth or in the presence of cisplatin treatment"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "delta_ppk",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "ppk",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "delta_hfq",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "hfq",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "delta_ppk delta_hfq",
+   "set": {
+    "perturbed_genes": {
+     "v": "ppk;hfq",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^WT logarithmic rep \\d(- RNA|; cisplatin paired)",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "cisplatin treated 15 min",
+   "set": {
+    "treatment": {
+     "v": "dna_damage",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

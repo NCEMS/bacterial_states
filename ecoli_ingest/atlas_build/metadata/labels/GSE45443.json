@@ -1,0 +1,289 @@
+{
+ "gse": "GSE45443",
+ "notes": "Plasmid samples (CV104 with pHDB3 or pLCV1, plain and Galaxy _5/_10/_20) are the SgrS overexpression set, but the text does not say which plasmid carries sgrS, what the 5/10/20 mean, or what inducer was used: genotype, treatment, inducer, is_control left out for them. CV108 genotype not described: genotype labels and is_control (minus aMG) left out. SgrR and sgrS 'mutant' type (deletion vs point) not given: genotype_class left out, perturbed_genes set. aMG (alpha-methylglucoside) and 2-DG treated as other_chemical (summary calls them 'aMG and 2-DG-induced stress'); duration not given, exposure left out. growth_phase mid_exponential from 'Cells treated during mid-exponential growth phase' for all samples.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "study_default",
+   "q": "Cells treated during mid-exponential growth phase"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "Aerobic growth at 37°C in specified media"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Aerobic growth at 37°C in specified media"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "study_default",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Expression profiles of wild-type and SgrR mutant E. coli strains under aMG and 2-DG-induced stress."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Illumina RNA-Seq of total RNA extracted from wild-type, SgrR/SgrS mutant and SgrS overexpressing E. coli strains grown in different conditions."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribosomal RNA was first removed using the Ribozero rRNA Removal Meta-Bacteria kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA was first removed using the Ribozero rRNA Removal Meta-Bacteria kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:media",
+   "regex": "MOPS Rich",
+   "set": {
+    "base_medium": {
+     "v": "MOPS",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "defined_rich",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:media",
+   "regex": "MOPS Minimal",
+   "set": {
+    "base_medium": {
+     "v": "MOPS",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "defined_minimal",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:media",
+   "regex": "^LB",
+   "set": {
+    "base_medium": {
+     "v": "LB",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "complex",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:media",
+   "regex": "Glucose",
+   "set": {
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:media",
+   "regex": "Glycerol",
+   "set": {
+    "carbon_source": {
+     "v": "glycerol",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^(MG1655|WT)$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "inducer_added": {
+     "v": false,
+     "b": "study_default",
+     "q": "Expression profiles of wild-type and SgrR mutant E. coli strains under aMG and 2-DG-induced stress."
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^SgrR$",
+   "set": {
+    "perturbed_genes": {
+     "v": "sgrR",
+     "b": "stated",
+     "q": "SgrR mutant"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "inducer_added": {
+     "v": false,
+     "b": "study_default",
+     "q": "Expression profiles of wild-type and SgrR mutant E. coli strains under aMG and 2-DG-induced stress."
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^sgrS$",
+   "set": {
+    "perturbed_genes": {
+     "v": "sgrS",
+     "b": "stated",
+     "q": "SgrR/SgrS mutant"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "inducer_added": {
+     "v": false,
+     "b": "study_default",
+     "q": "Illumina RNA-Seq of total RNA extracted from wild-type, SgrR/SgrS mutant and SgrS overexpressing E. coli strains grown in different conditions."
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "CV104",
+   "set": {
+    "strain_name": {
+     "v": "CV104",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^CV108$",
+   "set": {
+    "strain_name": {
+     "v": "CV108",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^(MG1655|WT|SgrR|sgrS|CV108)$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:media",
+   "regex": "aMG",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:media",
+   "regex": "2-DG",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^(MG1655|WT)$",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:media",
+   "regex": "aMG|2-DG",
+   "set": {
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

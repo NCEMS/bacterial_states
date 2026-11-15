@@ -1,0 +1,126 @@
+{
+ "gse": "GSE62102",
+ "notes": "RNET-seq: RNAP-protected nascent RNA (6-30 nt) purified on Ni-NTA via His-tagged rpoC; assay nascent_or_labelled, not standard RNA-seq. rpoC-His tag counted as reference. Kanamycin is selection.",
+ "default": {
+  "assay_class": {
+   "v": "nascent_or_labelled",
+   "b": "stated",
+   "q": "Elution with imidazole generated ECs carrying ~6-30 nt long transcripts"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "grown in ~300 ml LB broth +25 mg/ml kanamycin with shaking at 37˚C"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "grown in ~300 ml LB broth"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "grown in ~300 ml LB broth"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "until OD600 of ~0.5"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "with shaking at 37˚C until OD600 of ~0.5"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "with shaking at 37˚C"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "with shaking at 37˚C"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "W3110 rpoC-6xHis::kan"
+  },
+  "strain_name": {
+   "v": "W3110",
+   "b": "stated",
+   "q": "W3110 rpoC-6xHis::kan"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "We employed RNET-seq to the wild-type (WT) E. coli strain and to an isogenic strain deficient in genes for GreA and GreB"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "We employed RNET-seq to the wild-type (WT) E. coli strain and to an isogenic strain deficient in genes for GreA and GreB"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "We employed RNET-seq to the wild-type (WT) E. coli strain and to an isogenic strain deficient in genes for GreA and GreB"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "We employed RNET-seq to the wild-type (WT) E. coli strain and to an isogenic strain deficient in genes for GreA and GreB"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "wild-type",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "greAB",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "greA;greB",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

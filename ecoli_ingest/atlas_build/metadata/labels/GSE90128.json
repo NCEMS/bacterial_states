@@ -1,0 +1,24 @@
+{
+  "gse": "GSE90128",
+  "notes": "MAPS: RNA eluted from MS2 affinity column -> IP_or_pulldown (not standard RNA-seq). Growth phase left out: each sample is given as 'exponential and stationary phases' (OD 0.5 and OD 1 harvests), apparently pooled. MS2-CyaR vs untagged CyaR control, both in rne131 delta-cyaR, arabinose induced.",
+  "default": {
+    "assay_class": {"v": "IP_or_pulldown", "b": "stated", "q": "The soluble fraction was subjected to affinity chromatography."},
+    "base_medium": {"v": "LB", "b": "stated", "q": "100 mL LB medium"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "100 mL LB medium"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "100 mL LB medium"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "MG1655 rne131 delta-cyaR"},
+    "strain_name": {"v": "MG1655 rne131 delta-cyaR", "b": "stated", "q": "MG1655 rne131 delta-cyaR"},
+    "genotype_class": {"v": "multiple", "b": "stated", "q": "MG1655 rne131 delta-cyaR"},
+    "perturbed_genes": {"v": "rne;cyaR", "b": "stated", "q": "MG1655 rne131 delta-cyaR"},
+    "global_regulator_perturbed": {"v": false, "b": "stated", "q": "MG1655 rne131 delta-cyaR"},
+    "inducer_added": {"v": true, "b": "stated", "q": "0.1% arabinose was added to induce the expression of MS2-CyaR/CyaR during 10 min"},
+    "treatment": {"v": "none", "b": "study_default", "q": "Identification of RNAs co-purified with MS2-CyaR in a rne131 ΔcyaR strain. CyaR (without MS2) was used as control."},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "Identification of RNAs co-purified with MS2-CyaR in a rne131 ΔcyaR strain."},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "Identification of RNAs co-purified with MS2-CyaR in a rne131 ΔcyaR strain."}
+  },
+  "rules": [],
+  "samples": {
+    "GSM2398978": {"is_control": {"v": false, "b": "stated", "q": "MS2-CyaR"}},
+    "GSM2398979": {"is_control": {"v": true, "b": "stated", "q": "CyaR (without MS2) was used as control."}}
+  }
+}

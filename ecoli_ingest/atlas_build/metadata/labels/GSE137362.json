@@ -1,0 +1,126 @@
+{
+ "gse": "GSE137362",
+ "notes": "TEM-1 beta-lactamase (plasmid pSkunk1) is heterologous; mutant alleles labelled heterologous_expression with perturbed_genes bla(TEM-1). Controls per submitters: WT TEM-1 without IPTG, and induced Delta-TEM-1 (empty vector, reference). Medium name not given (only spectinomycin + glucose), base_medium/carbon_source left empty.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "NEB 5-alpha LacIq"
+  },
+  "strain_name": {
+   "v": "NEB 5-alpha LacIq",
+   "b": "stated",
+   "q": "NEB 5-alpha LacIq"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "incubated at 37°C with shaking until 330 minutes had passed since first inducing the cultures"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "incubated at 37°C with shaking until 330 minutes had passed since first inducing the cultures"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "in 100 ml of media in a shake flask"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "to ensure the cells were still in exponential growth phase based on OD measurements"
+  },
+  "genotype_class": {
+   "v": "heterologous_expression",
+   "b": "stated",
+   "q": "E. coli cells harboring single-codon substitutions to the TEM-1 gene were grown in monoculture growth assays."
+  },
+  "perturbed_genes": {
+   "v": "bla(TEM-1)",
+   "b": "stated",
+   "q": "E. coli cells harboring single-codon substitutions to the TEM-1 gene were grown in monoculture growth assays."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "E. coli cells harboring single-codon substitutions to the TEM-1 gene were grown in monoculture growth assays."
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "At time zero, IPTG was added to a concentration of 1 mM"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "E. coli cells harboring single-codon substitutions to the TEM-1 gene were grown in monoculture growth assays."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli cells harboring single-codon substitutions to the TEM-1 gene were grown in monoculture growth assays."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli cells harboring single-codon substitutions to the TEM-1 gene were grown in monoculture growth assays."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was extracted from pelleted cell cultures. mRNA was enriched"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "mRNA enrichment was completed using the MICROBExpress Bacterial mRNA Enrichment Kit"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Controls consisted of cells with the wildtype TEM-1 allele that were not induced with IPTG as well as cells containing a ΔTEM-1 gene deletion that were induced with IPTG."
+  }
+ },
+ "rules": [
+  {
+   "field": "source_name",
+   "regex": "no IPTG",
+   "set": {
+    "inducer_added": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "Controls consisted of cells with the wildtype TEM-1 allele that were not induced with IPTG"
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "ΔTEM-1 gene deletion",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "inferred",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": null,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "as well as cells containing a ΔTEM-1 gene deletion that were induced with IPTG"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

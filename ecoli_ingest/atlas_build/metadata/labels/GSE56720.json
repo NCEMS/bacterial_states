@@ -1,0 +1,93 @@
+{
+ "gse": "GSE56720",
+ "notes": "Single candidate sample (the mRNA-seq of a NET-seq series). Library from fragmented total RNA of the clarified lysate (30-100 nt fragments, Churchman protocol), no IP described for it; labelled total_rnaseq but the shared extract protocol is the NET-seq one, so check. rRNA removal not stated. is_control left out (no comparison among candidates).",
+ "default": {
+  "base_medium": {
+   "v": "MOPS",
+   "b": "stated",
+   "q": "MOPS EZ rich defined medium with 0.2% glucose (Teknova)"
+  },
+  "medium_class": {
+   "v": "defined_rich",
+   "b": "inferred",
+   "q": "MOPS EZ rich defined medium with 0.2% glucose (Teknova)"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "MOPS EZ rich defined medium with 0.2% glucose (Teknova)"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "MOPS EZ rich defined medium with 0.2% glucose (Teknova)"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "500 mL liquid cultures were grown in 2.8 L flasks with shaking (180 rpm) at 37 °C from an OD (600 nm) 0.05 to OD 0.45 ± 0.05"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "500 mL liquid cultures were grown in 2.8 L flasks with shaking (180 rpm) at 37 °C from an OD (600 nm) 0.05 to OD 0.45 ± 0.05"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "500 mL liquid cultures were grown in 2.8 L flasks with shaking (180 rpm) at 37 °C from an OD (600 nm) 0.05 to OD 0.45 ± 0.05"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "500 mL liquid cultures were grown in 2.8 L flasks with shaking (180 rpm) at 37 °C from an OD (600 nm) 0.05 to OD 0.45 ± 0.05"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "stated",
+   "q": "wild type"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "wild type"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "6 samples of E. coli NET-seq, 1 sample of E. coli mRNA-seq"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "6 samples of E. coli NET-seq, 1 sample of E. coli mRNA-seq"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "6 samples of E. coli NET-seq, 1 sample of E. coli mRNA-seq"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "6 samples of E. coli NET-seq, 1 sample of E. coli mRNA-seq"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "inferred",
+   "q": "Total RNA was purified from the clarified lysate using the miRNeasy kit (Qiagen)."
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

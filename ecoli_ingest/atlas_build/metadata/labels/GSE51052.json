@@ -1,0 +1,39 @@
+{
+  "gse": "GSE51052",
+  "notes": "GSM1399608 is ribosome profiling (monosome-protected mRNA) -> ribosome_footprints; the other four are total mRNA. Auxotroph backgrounds leuB::kan (MG1655) and serA::kan (BW25113) are the study's 'wt' reference strains (titles wt_*), so genotype_class reference; the footprint sample additionally lacks ssrA (deletion). Starvation = 30 min after removal of leucine or serine (amino_acid_starvation, acute). Base medium not named ('amino acid rich medium'); OD 0.6 without medium type -> growth_phase left out.",
+  "default": {
+    "culture_mode": {"v": "batch_shaken", "b": "inferred", "q": "30C, 200rpm shaking"},
+    "oxygen": {"v": "aerobic", "b": "inferred", "q": "30C, 200rpm shaking"},
+    "growth_temperature": {"v": 30, "b": "stated", "q": "30C, 200rpm shaking"},
+    "amino_acids_supplied": {"v": true, "b": "stated", "q": "Either amino acid rich medium (control) or 30 minutes of starvation for leucine or serine"},
+    "genotype_class": {"v": "reference", "b": "stated", "q": "wt_"},
+    "global_regulator_perturbed": {"v": false, "b": "stated", "q": "wt_"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "Escherichia coli str. K-12 substr. MG1655"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "Either amino acid rich medium (control) or 30 minutes of starvation for leucine or serine"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "Either amino acid rich medium (control) or 30 minutes of starvation for leucine or serine"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "Either amino acid rich medium (control) or 30 minutes of starvation for leucine or serine"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "Total mRNA was purified from the cell lysate by phenol-chloroform method, rRNA-subtracted (MicrobeExpress, Ambion)"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "rRNA-subtracted (MicrobeExpress, Ambion)"}
+  },
+  "rules": [
+    {"field": "organism", "regex": "MG1655",
+     "set": {"strain_name": {"v": "MG1655", "b": "stated", "q": ""}}},
+    {"field": "organism", "regex": "BW25113",
+     "set": {"strain_name": {"v": "BW25113", "b": "stated", "q": ""},
+             "strain_group": {"v": "K-12", "b": "stated", "q": ""}}},
+    {"field": "ch:stress condition", "regex": "starvation",
+     "set": {"treatment": {"v": "amino_acid_starvation", "b": "stated", "q": ""},
+             "exposure": {"v": "acute", "b": "stated", "q": "30 minutes of starvation for leucine or serine"},
+             "is_control": {"v": false, "b": "stated", "q": ""}}},
+    {"field": "ch:stress condition", "regex": "^none \\(rich medium control\\)$",
+     "set": {"treatment": {"v": "none", "b": "stated", "q": ""},
+             "is_control": {"v": true, "b": "stated", "q": ""}}},
+    {"field": "ch:molecule subtype", "regex": "Monosome protected",
+     "set": {"assay_class": {"v": "ribosome_footprints", "b": "stated", "q": ""},
+             "rrna_removal": {"v": null, "b": "", "q": ""},
+             "genotype_class": {"v": "deletion", "b": "stated", "q": "leuB::kan, tmRNA/ssrA::cat"},
+             "perturbed_genes": {"v": "ssrA", "b": "stated", "q": "leuB::kan, tmRNA/ssrA::cat"},
+             "global_regulator_perturbed": {"v": false, "b": "stated", "q": "leuB::kan, tmRNA/ssrA::cat"}}}
+  ],
+  "samples": {}
+}

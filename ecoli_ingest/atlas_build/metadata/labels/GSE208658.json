@@ -1,0 +1,143 @@
+{
+ "gse": "GSE208658",
+ "notes": "Overnight preculture at 28 C with shaking, but the 1- and 15-day exposures ran 'at room temperature' (no number), so growth_temperature left out. Shaking during the 15-day exposure is not restated; culture_mode/oxygen inferred from the growth protocol. Day 1 stationary (study says stationary-phase cells), day 15 late_stationary (inferred, >24 h). Low-dose ionizing radiation from internal radionuclide sources added before inoculation: other_physical, exposure adapted. Both plain and FeCl3 non-irradiated controls are controls at each day. carbon_source glucose although 1% casamino acids are also present. WT re-read: WT DH10B, no plasmid -> wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9 minimal medium supplemented with 0.5% glucose (Sigma-Aldrich), 1% thiamine hydrochloride (Spectrum), and 1% (w/v) casamino acids (Bacto)"
+  },
+  "medium_class": {
+   "v": "minimal_plus_hydrolysate",
+   "b": "inferred",
+   "q": "M9 minimal medium supplemented with 0.5% glucose (Sigma-Aldrich), 1% thiamine hydrochloride (Spectrum), and 1% (w/v) casamino acids (Bacto)"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "1% (w/v) casamino acids (Bacto)"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "supplemented with 0.5% glucose"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "at 28°C and shaking at 215 rpm overnight"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "at 28°C and shaking at 215 rpm overnight"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "WT"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "WT"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "E. coli DH10β (New England Biolabs)"
+  },
+  "strain_name": {
+   "v": "DH10B",
+   "b": "stated",
+   "q": "E. coli DH10β (New England Biolabs)"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "subjected to an absorbed dose of 10 mGy d-1 of in situ Pu-239, H-3, or Fe-55 radionuclide source or non-irradiated chemical equivalent control"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "subjected to an absorbed dose of 10 mGy d-1 of in situ Pu-239, H-3, or Fe-55 radionuclide source or non-irradiated chemical equivalent control"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparative gene expression profiling analysis of RNA-seq data for E. coli DH10β cells"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribosomal RNA was removed from total RNA samples"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA was removed from total RNA samples using either Ribo-Zero rRNA Removal Kit Bacteria (Illumina) or RiboMinus Bacteria 2.0 Transcriptome Isolation Kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:time point",
+   "regex": "^Day 1$",
+   "set": {
+    "growth_phase": {
+     "v": "stationary",
+     "b": "stated",
+     "q": "characterize the global transcriptional response of stationary-phase E. coli"
+    }
+   }
+  },
+  {
+   "field": "ch:time point",
+   "regex": "^Day 15$",
+   "set": {
+    "growth_phase": {
+     "v": "late_stationary",
+     "b": "inferred",
+     "q": "samples for RNA extration taken at one and 15-days after inoculation/spike addition"
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^(Control|Growth with FeCl3)$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "Non-irradiated controls either contained no additional chemical addition or an equimolar amount of stable FeCl3 (2.47uM)"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "exposure$",
+   "set": {
+    "treatment": {
+     "v": "other_physical",
+     "b": "inferred",
+     "q": "subjected to an absorbed dose of 10 mGy d-1 of in situ Pu-239, H-3, or Fe-55 radionuclide source"
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "Radionuclide sources were added to growth flasks prior to inoculation."
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

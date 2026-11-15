@@ -1,0 +1,136 @@
+{
+ "gse": "GSE56407",
+ "notes": "WT vs rho L270M point mutant, no replicates. Gas-sparged Roux bottles: culture_mode left out (sparged batch, not clearly any class).",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "in gas-sparged Roux bottles to mid-log phase"
+  },
+  "base_medium": {
+   "v": "MOPS",
+   "b": "stated",
+   "q": "MOPS minimal medium with 0.2% glucose"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "MOPS minimal medium with 0.2% glucose"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "MOPS minimal medium with 0.2% glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "MOPS minimal medium with 0.2% glucose"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "Aerobic culture"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "with 0.2% glucose at 37 degrees C"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq comparison of wild-type and mutant strains to assess readthrough of Rho-dependent transcriptional terminators"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RNA-seq comparison of wild-type and mutant strains to assess readthrough of Rho-dependent transcriptional terminators"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq comparison of wild-type and mutant strains to assess readthrough of Rho-dependent transcriptional terminators"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "Wild-type (MG1655) RNA-seq"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "ribosome-depleted RNA was fragmented and used as template for cDNA synhtesis"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "ribosome-depleted RNA was fragmented"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq comparison of wild-type and mutant strains to assess readthrough of Rho-dependent transcriptional terminators"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "^MG1655$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^RL2325$",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": "rho[L270M] derivative of wild-type strain"
+    },
+    "perturbed_genes": {
+     "v": "rho",
+     "b": "stated",
+     "q": "rho[L270M] derivative of wild-type strain"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": "rho[L270M] derivative of wild-type strain"
+    },
+    "is_control": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "RL2325",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,200 @@
+{
+ "gse": "GSE131520",
+ "notes": "Only the total RNA libraries of the RIL-seq series are candidates (RNAtag-Seq total RNA). Harvest at OD~1 (exp1; exp3 per text) or after 150/210 min subculture: no phase word, OD above range, growth_phase left out (exp3 field says 150 min but growth text says OD~1; neither gives a phase). FLAG-tagged strains = reference. Exp4: pBAD33 empty vector + arabinose = control; pBAD-ProQ = overexpression. M63 carbon source not stated; rRNA removal not stated. WT re-read: untagged plain MG1655 samples set to wild_type by a new last rule; FLAG-tagged strains and the pBAD33 empty-vector controls stay reference.",
+ "default": {
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "stated",
+   "q": "Bacterial strains were grown at 37˚C , shaking at 250 rpm"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "shaking at 250 rpm"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Bacterial strains were grown at 37˚C"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "in LB"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "in LB"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "in LB"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "is_control": {
+   "v": true,
+   "b": "stated",
+   "q": "Control library of untagged Hfq and ProQ total RNA"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Applying RIL-seq to strains carrying chromosomly Hfq-FLAG or ProQ-3XFLAG in the presence or in the absence of the other RNA chaperon."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Applying RIL-seq to strains carrying chromosomly Hfq-FLAG or ProQ-3XFLAG in the presence or in the absence of the other RNA chaperon."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Applying RIL-seq to strains carrying chromosomly Hfq-FLAG or ProQ-3XFLAG in the presence or in the absence of the other RNA chaperon."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Applying RIL-seq to strains carrying chromosomly Hfq-FLAG or ProQ-3XFLAG in the presence or in the absence of the other RNA chaperon."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Standard TRIzol protocol was used for total RNA extraction"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:growth",
+   "regex": "in M63",
+   "set": {
+    "base_medium": {
+     "v": "M63",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "defined_minimal",
+     "b": "inferred",
+     "q": "M63 minimal medium"
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": "M63 minimal medium"
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "proQ::kan",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "proQ",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "hfq::cat",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "hfq",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:growth",
+   "regex": "arabinose was added",
+   "set": {
+    "inducer_added": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "pBAD-ProQ",
+   "set": {
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "stated",
+     "q": "Wild type strain + ProQ overexpression"
+    },
+    "perturbed_genes": {
+     "v": "proQ",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "^MG1655$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": "Wild type strain"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

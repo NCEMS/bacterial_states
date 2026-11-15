@@ -1,0 +1,78 @@
+{
+ "gse": "GSE131514",
+ "notes": "Single TR1 sample is the RNA-seq arm of a ribosome-profiling study, made with a 'Dual adaptor ligation sRNA protocol' (ligation of fragments): assay_class other per the excluded-library-types rule.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "LB broth log phase"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "LB broth log phase"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "LB broth log phase"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "LB broth log phase"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "stated",
+   "q": "ch:genotype/variation**: wildtype"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "ch:genotype/variation**: wildtype"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Ribosome profiling analysis of the E. coli translatome paired with transcriptome sequencing during log phase growth in LB."
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "Ribosome profiling analysis of the E. coli translatome paired with transcriptome sequencing during log phase growth in LB."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Ribosome profiling analysis of the E. coli translatome paired with transcriptome sequencing during log phase growth in LB."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Ribosome profiling analysis of the E. coli translatome paired with transcriptome sequencing during log phase growth in LB."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Ribosome profiling analysis of the E. coli translatome paired with transcriptome sequencing during log phase growth in LB."
+  },
+  "assay_class": {
+   "v": "other",
+   "b": "stated",
+   "q": "hot phenol Dual adaptor ligation sRNA protocol"
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

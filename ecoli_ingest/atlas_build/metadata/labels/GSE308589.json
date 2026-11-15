@@ -1,0 +1,174 @@
+{
+ "gse": "GSE308589",
+ "notes": "All samples carry pALA3047 (Plac-cfp-ParB) as a labelling tool and IPTG is in the medium: genotype_class reference, inducer_added true. Lysogens (prophage lambda) are not reference: genotype_class, growth_phase left out. ch:strain MG1656..MG1662 are typos for MG1655 (organism field). mixed_organism left out for infected samples (phage RNA). Infected samples: phage, acute <=20 min (0+ included), short at 45/60 min; growth_phase mid_exponential inferred from OD 0.4 pre-infection (all <2 h). Uninfected hosts are the controls; no mock-infected samples in the table.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Bacterial cells were grown at 30°C in LB medium supplemented with 10 mM MgSO₄, 0.2% maltose, and 10 μM IPTG, with shaking at 220 rpm."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Bacterial cells were grown at 30°C in LB medium supplemented with 10 mM MgSO₄, 0.2% maltose, and 10 μM IPTG, with shaking at 220 rpm."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Bacterial cells were grown at 30°C in LB medium supplemented with 10 mM MgSO₄, 0.2% maltose, and 10 μM IPTG, with shaking at 220 rpm."
+  },
+  "growth_temperature": {
+   "v": 30,
+   "b": "stated",
+   "q": "Bacterial cells were grown at 30°C in LB medium supplemented with 10 mM MgSO₄, 0.2% maltose, and 10 μM IPTG, with shaking at 220 rpm."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "stated",
+   "q": "Bacterial cells were grown at 30°C in LB medium supplemented with 10 mM MgSO₄, 0.2% maltose, and 10 μM IPTG, with shaking at 220 rpm."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Bacterial cells were grown at 30°C in LB medium supplemented with 10 mM MgSO₄, 0.2% maltose, and 10 μM IPTG, with shaking at 220 rpm."
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "Bacterial cells were grown at 30°C in LB medium supplemented with 10 mM MgSO₄, 0.2% maltose, and 10 μM IPTG, with shaking at 220 rpm."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli MG1655 wild-type cells infected with phage lambda at high or low multiplicity of infection (MOI)"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA-seq was performed on E. coli MG1655 wild-type cells"
+  },
+  "rrna_removal": {
+   "v": "none",
+   "b": "stated",
+   "q": "without rRNA depletion"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli MG1655 wild-type cells infected with phage lambda"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "As controls, libraries were similarly generated from uninfected MG1655 host cells and lambda lysogens."
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "infected by",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "treatment": {
+     "v": "phage",
+     "b": "stated",
+     "q": ""
+    },
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": "When cultures reached OD₆₀₀ ≈ 0.4, cells were harvested"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "(0\\+|2\\.5|5|10|20)min",
+   "set": {
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "(45|60)min",
+   "set": {
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^Uninfected",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "mixed_organism": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": "When cultures reached OD₆₀₀ ≈ 0.4, cells were harvested"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "lysogen",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "prophage lambda cI857 Pam80 parS",
+     "b": "stated",
+     "q": ""
+    },
+    "mixed_organism": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

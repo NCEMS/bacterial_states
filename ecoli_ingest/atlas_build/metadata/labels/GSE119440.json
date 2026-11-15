@@ -1,0 +1,144 @@
+{
+ "gse": "GSE119440",
+ "notes": "Indole (500 uM, added to medium before start) vs methanol vehicle; WT methanol is the control. Temperature, oxygen and culture mode not given. DMEM serum not mentioned -> defined_rich.",
+ "default": {
+  "growth_phase": {
+   "v": "late_exponential",
+   "b": "stated",
+   "q": "grown until late log phase in low gluocse DMEM"
+  },
+  "base_medium": {
+   "v": "cell_culture",
+   "b": "stated",
+   "q": "grown until late log phase in low gluocse DMEM"
+  },
+  "medium_class": {
+   "v": "defined_rich",
+   "b": "inferred",
+   "q": "grown until late log phase in low gluocse DMEM"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "grown until late log phase in low gluocse DMEM"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "inferred",
+   "q": "grown until late log phase in low gluocse DMEM"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT and △tnaA EHEC were grown until late log phase in low gluocse DMEM in the presence and absence of 500µM indole."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT and △tnaA EHEC were grown until late log phase in low gluocse DMEM in the presence and absence of 500µM indole."
+  },
+  "strain_group": {
+   "v": "EHEC_STEC",
+   "b": "stated",
+   "q": "EHEC strain 86 24 was used for this study."
+  },
+  "strain_name": {
+   "v": "86-24",
+   "b": "stated",
+   "q": "EHEC strain 86 24 was used for this study."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Illumina’s ScriptSeq Complete Kit (Bacteria)"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "EHEC strain 86 24 was used for this study."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT and △tnaA EHEC were grown until late log phase in low gluocse DMEM in the presence and absence of 500µM indole."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "tnaA deletion",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "tnaA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^methanol$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^indole$",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "500µM of indole or only methanol in a dilution ratio of 1:1000 was added to the low gluocse DMEM before starting the experiment"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^WM: WT EHEC$",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

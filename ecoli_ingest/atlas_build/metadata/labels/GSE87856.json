@@ -1,0 +1,32 @@
+{
+  "gse": "GSE87856",
+  "notes": "RpoS at 0%, 26%, 100%. genotype_class left out for 0% (an unspecified rpoS 'mutation', deletion vs point mutation not stated) and 26% (arabinose-inducible rpoS construct; class unclear). Arabinose concentration per strain not given, so inducer_added set only for the 26% construct. Temperature and aeration not stated. Phase stationary inferred from 20 h LB culture.",
+  "default": {
+    "base_medium": {"v": "LB", "b": "stated", "q": "diluted into 5 mL of LB with the appropriate concentration of arabinose, and grown for 20h"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "diluted into 5 mL of LB"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "diluted into 5 mL of LB"},
+    "growth_phase": {"v": "stationary", "b": "inferred", "q": "diluted into 5 mL of LB with the appropriate concentration of arabinose, and grown for 20h"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "(K-12 derivative)"},
+    "treatment": {"v": "none", "b": "study_default", "q": "We varied RpoS levels using a mutation or an arabinose-inducible RpoS construct"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "We varied RpoS levels using a mutation or an arabinose-inducible RpoS construct"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "We varied RpoS levels using a mutation or an arabinose-inducible RpoS construct"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "RNA libraries were prepared for sequencing using standard Illumina protocols"},
+    "perturbed_genes": {"v": "rpoS", "b": "stated", "q": "We varied RpoS levels using a mutation or an arabinose-inducible RpoS construct"},
+    "global_regulator_perturbed": {"v": true, "b": "stated", "q": "We varied RpoS levels using a mutation or an arabinose-inducible RpoS construct"},
+    "is_control": {"v": false, "b": "stated", "q": "three separate RpoS levels, corresponding to 0%, 26% and 100% of wild-type levels"}
+  },
+  "rules": [
+    {"field": "ch:strain", "regex": "^BW27786",
+     "set": {"genotype_class": {"v": "reference", "b": "stated", "q": "100% of wild-type levels"},
+             "perturbed_genes": {"v": null, "b": "stated", "q": ""},
+             "global_regulator_perturbed": {"v": false, "b": "stated", "q": ""},
+             "is_control": {"v": true, "b": "stated", "q": ""},
+             "strain_name": {"v": "BW27786", "b": "stated", "q": ""}}},
+    {"field": "ch:strain", "regex": "^DMS2545",
+     "set": {"strain_name": {"v": "DMS2545", "b": "stated", "q": ""}}},
+    {"field": "ch:strain", "regex": "^DMS2564",
+     "set": {"strain_name": {"v": "DMS2564", "b": "stated", "q": ""},
+             "inducer_added": {"v": true, "b": "inferred", "q": "an arabinose-inducible RpoS construct"}}}
+  ],
+  "samples": {}
+}

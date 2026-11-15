@@ -1,0 +1,175 @@
+{
+ "gse": "GSE143807",
+ "notes": "Strain M1/5 is not described further (strain_group left out). GSM4274837 is the TEX-treated reference RNA for TSS mapping (dRNA-seq): assay_class end_mapping. rRNA removal not described (left out). Constitutive clbQ/clbR expression from tetA promoter on pBAD24: native_overexpression, no inducer.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "Bacteria where grown in Greiner 96-well Flat Bottom white polystyrol plates in 150µl M9-medium with 1g L‑1 casein hydrolysate, using a Tecan Infinite 200 Reader (Tecan Group), 37°C"
+  },
+  "medium_class": {
+   "v": "minimal_plus_hydrolysate",
+   "b": "inferred",
+   "q": "Bacteria where grown in Greiner 96-well Flat Bottom white polystyrol plates in 150µl M9-medium with 1g L‑1 casein hydrolysate, using a Tecan Infinite 200 Reader (Tecan Group), 37°C"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Bacteria where grown in Greiner 96-well Flat Bottom white polystyrol plates in 150µl M9-medium with 1g L‑1 casein hydrolysate, using a Tecan Infinite 200 Reader (Tecan Group), 37°C"
+  },
+  "culture_mode": {
+   "v": "batch_microplate",
+   "b": "stated",
+   "q": "Bacteria where grown in Greiner 96-well Flat Bottom white polystyrol plates in 150µl M9-medium with 1g L‑1 casein hydrolysate, using a Tecan Infinite 200 Reader (Tecan Group), 37°C"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "shaking for 10min with amplitude 2 in 15min intervals"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Bacteria where grown in Greiner 96-well Flat Bottom white polystyrol plates in 150µl M9-medium with 1g L‑1 casein hydrolysate, using a Tecan Infinite 200 Reader (Tecan Group), 37°C"
+  },
+  "growth_phase": {
+   "v": "late_exponential",
+   "b": "stated",
+   "q": "harvested in late exponential growth phase by centrifugation"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "The pools of five different samples (wildtype reference strain, and four different mutants) were included into RNA-seq analysis."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "The pools of five different samples (wildtype reference strain, and four different mutants) were included into RNA-seq analysis."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "The pools of five different samples (wildtype reference strain, and four different mutants) were included into RNA-seq analysis."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "The pools of five different samples (wildtype reference strain, and four different mutants) were included into RNA-seq analysis."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "The pools of five different samples (wildtype reference strain, and four different mutants) were included into RNA-seq analysis."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "The pools of five different samples (wildtype reference strain, and four different mutants) were included into RNA-seq analysis."
+  },
+  "strain_name": {
+   "v": "M1/5",
+   "b": "stated",
+   "q": "M1/5"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "The RNA samples were first fragmented using ultrasound"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^(Reference strain|Same as sample 3)",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^clbQ deletion",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "clbQ",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^clbR deletion",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "clbR",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "clbQ expressing",
+   "set": {
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "clbQ",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "clbR expressing",
+   "set": {
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "clbR",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "TEX treated",
+   "set": {
+    "assay_class": {
+     "v": "end_mapping",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

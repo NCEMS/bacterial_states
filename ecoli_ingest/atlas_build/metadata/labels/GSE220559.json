@@ -1,0 +1,170 @@
+{
+ "gse": "GSE220559",
+ "notes": "Antibiotics present from inoculation of the MHB culture at IC50 (exposure adapted). Water and ethanol vehicle controls are controls. Growth temperature stated only for the LB preculture (37 C), used as study default. molecule says polyA RNA but rRNA removal method not described, so rrna_removal left out. WT re-read: unmodified MG1655, so wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "Mueller-Hinton",
+   "b": "stated",
+   "q": "Escherichia coli K-12 MG1655 was grown in MHB medium supplemented with antibiotics"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Escherichia coli K-12 MG1655 was grown in MHB medium supplemented with antibiotics"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Escherichia coli K-12 MG1655 was grown in MHB medium supplemented with antibiotics"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "grown to mid-logarithmic phase with shaking"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "grown to mid-logarithmic phase with shaking"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "grown to mid-logarithmic phase with shaking"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "study_default",
+   "q": "E. coli K12 strain MG1655 was cultivated in LB broth at 37 °C"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "E. coli K12 strain MG1655"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli K12 strain MG1655"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12 MG-1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K-12 MG-1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "the bacterium was exposed to nine antibiotics"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "the bacterium was exposed to nine antibiotics"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "the bacterium was exposed to nine antibiotics"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "inferred",
+   "q": "NEBNext® Ultra™ Directional RNA Library Prep Kit for Illumina®"
+  },
+  "exposure": {
+   "v": "adapted",
+   "b": "inferred",
+   "q": "the culture was inoculated in MHB medium (1% inoculant) containing IC50 concentrations of antibiotics"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Controls were performed (ethanol for erythromycin and chrloamphenicol as they are dissolved in ethanol, and water for every other antibiotic)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^(ceftazidime|imipenem)$",
+   "set": {
+    "treatment": {
+     "v": "abx_cell_wall",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^(chloramphenicol|erythromycin|kanamycin|tetracycline)$",
+   "set": {
+    "treatment": {
+     "v": "abx_translation",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^ciprofloxacin$",
+   "set": {
+    "treatment": {
+     "v": "abx_dna_gyrase",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^polymyxin E$",
+   "set": {
+    "treatment": {
+     "v": "abx_membrane",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^mitomycin C$",
+   "set": {
+    "treatment": {
+     "v": "dna_damage",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^(water|ethanol)$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

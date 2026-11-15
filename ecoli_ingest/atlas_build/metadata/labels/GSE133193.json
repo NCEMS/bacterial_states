@@ -1,0 +1,168 @@
+{
+ "gse": "GSE133193",
+ "notes": "Summary says LB-cultured, growth_protocol says DMEM; per-sample fields are used. DMEM serum status not given, medium_class left empty for DMEM. In-host (mouse colon) sample: no treatment label, is_control false. Temperature, phase, oxygen not given.",
+ "default": {
+  "strain_group": {
+   "v": "EHEC_STEC",
+   "b": "stated",
+   "q": "Escherichia coli O157:H7"
+  },
+  "strain_name": {
+   "v": "O157:H7",
+   "b": "stated",
+   "q": "Escherichia coli O157:H7"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "we want to see genes being regulated by s77 by comparison mRNA expression levels between o157 and △s77 strains"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "we want to see genes being regulated by s77 by comparison mRNA expression levels between o157 and △s77 strains"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "bacterial rRNAs were depleted using the Ribo-Zero rRNA Removal Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "bacterial rRNAs were depleted using the Ribo-Zero rRNA Removal Kit"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "LB cultured free living cells"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "wild type"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "wild type"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:culture condition",
+   "regex": "LB cultured",
+   "set": {
+    "base_medium": {
+     "v": "LB",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "complex",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    },
+    "treatment": {
+     "v": "none",
+     "b": "study_default",
+     "q": "o157 strain cultured in LB medium"
+    },
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:culture condition",
+   "regex": "DMEM cultured",
+   "set": {
+    "base_medium": {
+     "v": "cell_culture",
+     "b": "stated",
+     "q": ""
+    },
+    "treatment": {
+     "v": "none",
+     "b": "study_default",
+     "q": "o157 strain cultured in DMEM medium"
+    },
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:culture condition",
+   "regex": "mice colon",
+   "set": {
+    "culture_mode": {
+     "v": "in_host",
+     "b": "stated",
+     "q": ""
+    },
+    "base_medium": {
+     "v": "gut_content",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "natural_fluid",
+     "b": "inferred",
+     "q": ""
+    },
+    "growth_phase": {
+     "v": "not_applicable",
+     "b": "inferred",
+     "q": ""
+    },
+    "mixed_organism": {
+     "v": true,
+     "b": "inferred",
+     "q": "obtaining RNA from mice colon"
+    },
+    "is_control": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "s77",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "s77",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

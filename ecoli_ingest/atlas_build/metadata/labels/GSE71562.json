@@ -1,0 +1,131 @@
+{
+ "gse": "GSE71562",
+ "notes": "Reviewed 2026-11-15: anaerobic-to-aerobic shift (0.5-10 min) is medium_or_oxygen_shift | Anaerobic glucose bioreactor culture at OD 3 (no phase word, above range: phase empty). 0 min = anaerobic control; 0.5-10 min after aeration start: oxygen aerobic, is_control false, treatment left out (an anaerobic-to-aerobic shift has no scheme treatment value).",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K12 W3110"
+  },
+  "strain_name": {
+   "v": "W3110",
+   "b": "stated",
+   "q": "K12 W3110"
+  },
+  "culture_mode": {
+   "v": "batch_bioreactor",
+   "b": "stated",
+   "q": "Cell were grown in 3-liter stirred tank bioreactor anaerobically"
+  },
+  "base_medium": {
+   "v": "other_minimal",
+   "b": "inferred",
+   "q": "The growth medium contained Na2H2PO4 (1.1 g/l), K2HPO4 (2.5 g/l), (NH4)2SO4 (9.0 g/l), Glucose (15.0 g/l)"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "The growth medium contained Na2H2PO4 (1.1 g/l), K2HPO4 (2.5 g/l), (NH4)2SO4 (9.0 g/l), Glucose (15.0 g/l)"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "The growth medium contained Na2H2PO4 (1.1 g/l), K2HPO4 (2.5 g/l), (NH4)2SO4 (9.0 g/l), Glucose (15.0 g/l)"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "Glucose (15.0 g/l)"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown anaerobically in defined medium at pH7 and 37°C"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "study_default",
+   "q": "3 replicates of anaerobic culture and 0.5, 1, 2, 5, and 10 min after aeration"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "3 replicates of anaerobic culture and 0.5, 1, 2, 5, and 10 min after aeration"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "3 replicates of anaerobic culture and 0.5, 1, 2, 5, and 10 min after aeration"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "3 replicates of anaerobic culture and 0.5, 1, 2, 5, and 10 min after aeration"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "3 replicates of anaerobic culture and 0.5, 1, 2, 5, and 10 min after aeration"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "rRNA was removed using RiboZero rRNA Removal Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA was removed using RiboZero rRNA Removal Kit"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "3 replicates of anaerobic culture and 0.5, 1, 2, 5, and 10 min after aeration"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "aeration was started subsequently at 1l/min"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:time",
+   "regex": "^0 min$",
+   "set": {
+    "oxygen": {
+     "v": "anaerobic_fermentation",
+     "b": "inferred",
+     "q": "Cells were grown anaerobically in defined medium at pH7 and 37°C"
+    },
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "At that point the first sample was drawn and aeration was started subsequently"
+    },
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": "At that point the first sample was drawn and aeration was started subsequently"
+    }
+   }
+  },
+  {
+   "field": "ch:time",
+   "regex": "^(?!0 min$).+ min$",
+   "set": {
+    "treatment": {
+     "v": "medium_or_oxygen_shift",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

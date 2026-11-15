@@ -1,0 +1,85 @@
+{
+ "gse": "GSE46479",
+ "notes": "Not standard RNA-seq: 4 samples are in vitro transcripts, the in vivo sample is PCR amplicons of one plasmid transcript (rpoBC fragment from lambda PR on pPR9) for error-rate measurement; all assay_class other. In vivo sample: thermal induction 2 h at 42 C labelled heat/short; OD 2.3 -> no phase; overexpression of native rpoBC fragment from plasmid.",
+ "default": {
+  "assay_class": {
+   "v": "other",
+   "b": "stated",
+   "q": "The 5’ fragment of the 5.7 kb RNA transcripts was reverse transcribed to make the cDNA. The cDNA was subjected to PCR reactions that generated six 200 bp segments."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:mrna synthesis",
+   "regex": "^in vivo$",
+   "set": {
+    "strain_group": {
+     "v": "K-12",
+     "b": "stated",
+     "q": "MG1655"
+    },
+    "strain_name": {
+     "v": "MG1655",
+     "b": "stated",
+     "q": "MG1655"
+    },
+    "base_medium": {
+     "v": "LB",
+     "b": "stated",
+     "q": "Cells were cultured in LB medium containing ampicillin at 28˚C"
+    },
+    "medium_class": {
+     "v": "complex",
+     "b": "inferred",
+     "q": "Cells were cultured in LB medium containing ampicillin at 28˚C"
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": "Cells were cultured in LB medium containing ampicillin at 28˚C"
+    },
+    "growth_temperature": {
+     "v": 42,
+     "b": "stated",
+     "q": "incubated for 2 hr at 28˚C (OD600 reached 0.35) and then for 2 hr at 42˚C (OD600 reached 2.3) to induce the PR promoter"
+    },
+    "treatment": {
+     "v": "heat",
+     "b": "stated",
+     "q": "incubated for 2 hr at 28˚C (OD600 reached 0.35) and then for 2 hr at 42˚C (OD600 reached 2.3) to induce the PR promoter"
+    },
+    "exposure": {
+     "v": "short",
+     "b": "inferred",
+     "q": "incubated for 2 hr at 28˚C (OD600 reached 0.35) and then for 2 hr at 42˚C (OD600 reached 2.3) to induce the PR promoter"
+    },
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "stated",
+     "q": "pPR9 plasmid that contains a 5.7 kb fragment of E. coli rpoBC operon transcribed from a strong lambda phage PR promoter"
+    },
+    "perturbed_genes": {
+     "v": "rpoB;rpoC",
+     "b": "stated",
+     "q": "pPR9 plasmid that contains a 5.7 kb fragment of E. coli rpoBC operon transcribed from a strong lambda phage PR promoter"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": "pPR9 plasmid that contains a 5.7 kb fragment of E. coli rpoBC operon transcribed from a strong lambda phage PR promoter"
+    },
+    "mixed_organism": {
+     "v": false,
+     "b": "stated",
+     "q": "The same transcrit was purified from E. coli cells (barcode 5)."
+    },
+    "transcription_arrested": {
+     "v": false,
+     "b": "study_default",
+     "q": "The same transcrit was purified from E. coli cells (barcode 5)."
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

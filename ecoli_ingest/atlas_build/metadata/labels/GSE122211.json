@@ -1,0 +1,227 @@
+{
+ "gse": "GSE122211",
+ "notes": "MG1655 in M9 glucose (MG_glc) and with glutamate (supplement, control) are controls; no-trace-element MG1655 = metal_limitation. BW25113 KOs have no BW25113 WT in the series. Design says glutamine, protocol says 10 mM glutamate; amino_acids_supplied left out for those two. WT re-read: unmodified MG1655 samples are wild_type.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "The fresh culture was incubated at 37 ℃ with agitation to the mid-log phase (OD600 ≈ 0.5)."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "The fresh culture was incubated at 37 ℃ with agitation to the mid-log phase (OD600 ≈ 0.5)."
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "glycerol stocks of E. coli strains were inoculated into 0.2%(w/v) glucose M9 minimal media."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "glycerol stocks of E. coli strains were inoculated into 0.2%(w/v) glucose M9 minimal media."
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "glycerol stocks of E. coli strains were inoculated into 0.2%(w/v) glucose M9 minimal media."
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "glycerol stocks of E. coli strains were inoculated into 0.2%(w/v) glucose M9 minimal media."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "The fresh culture was incubated at 37 ℃ with agitation to the mid-log phase (OD600 ≈ 0.5)."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "The fresh culture was incubated at 37 ℃ with agitation to the mid-log phase (OD600 ≈ 0.5)."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Includes gene knockouts of cbl, cra, fabR and fadR. Also includes WT strain grown without the presence of trace elements, and WT supplemented with glutamine."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Includes gene knockouts of cbl, cra, fabR and fadR. Also includes WT strain grown without the presence of trace elements, and WT supplemented with glutamine."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Mostly duplicate samples of MG1655 or BW25113 grown in M9 glucose minimal media."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Expression profiling of E. coli K-12 MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "The rRNA was removed using Illumina Ribo-Zero rRNA removal kit for Gram Negative Bacteria."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "The rRNA was removed using Illumina Ribo-Zero rRNA removal kit for Gram Negative Bacteria."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Mostly duplicate samples of MG1655 or BW25113 grown in M9 glucose minimal media."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Includes gene knockouts of cbl, cra, fabR and fadR. Also includes WT strain grown without the presence of trace elements, and WT supplemented with glutamine."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "^MG1655$",
+   "set": {
+    "strain_name": {
+     "v": "MG1655",
+     "b": "stated",
+     "q": ""
+    },
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "inferred",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^BW25113$",
+   "set": {
+    "strain_name": {
+     "v": "BW25113",
+     "b": "stated",
+     "q": ""
+    },
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "Includes gene knockouts of cbl, cra, fabR and fadR."
+    }
+   }
+  },
+  {
+   "field": "ch:knock-out",
+   "regex": "^cbl$",
+   "set": {
+    "perturbed_genes": {
+     "v": "cbl",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:knock-out",
+   "regex": "^FabR$",
+   "set": {
+    "perturbed_genes": {
+     "v": "fabR",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:knock-out",
+   "regex": "^FadR$",
+   "set": {
+    "perturbed_genes": {
+     "v": "fadR",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:knock-out",
+   "regex": "^cra$",
+   "set": {
+    "perturbed_genes": {
+     "v": "cra",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:media",
+   "regex": "w/o trace elements",
+   "set": {
+    "treatment": {
+     "v": "metal_limitation",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "M9 minimal media was also supplemented with 1 ml trace element solution (100X), excluding MG_no_te_1 and MG_no_te_2."
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:media",
+   "regex": "glutamate",
+   "set": {
+    "amino_acids_supplied": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

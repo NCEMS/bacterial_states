@@ -1,0 +1,116 @@
+{
+ "gse": "GSE76167",
+ "notes": "Temperature and aeration not stated.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "W3110"
+  },
+  "strain_name": {
+   "v": "W3110",
+   "b": "stated",
+   "q": "W3110"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "wild type"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "wild type"
+  },
+  "base_medium": {
+   "v": "M63",
+   "b": "stated",
+   "q": "growth in M63 minimal media plus 0.4% glucose"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "growth in M63 minimal media plus 0.4% glucose"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "growth in M63 minimal media plus 0.4% glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "growth in M63 minimal media plus 0.4% glucose"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "log phase"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparison between wild type E. coli grown in miminal media in the presence or not of 50 µM NiCl2 during 10 min"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparison between wild type E. coli grown in miminal media in the presence or not of 50 µM NiCl2 during 10 min"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparison between wild type E. coli grown in miminal media in the presence or not of 50 µM NiCl2 during 10 min"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Library preparation were performed with Epicentre ScriptseqTM v2 RNA-Seq Library preparation kit with 50 ng of depleted RNA"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "with 50 ng of depleted RNA"
+  }
+ },
+ "rules": [
+  {
+   "field": "source_name",
+   "regex": "control condition",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "nickel condition",
+   "set": {
+    "treatment": {
+     "v": "metal_excess",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": "were treated with 50 µM NiCl2 for 10 min"
+    },
+    "is_control": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,29 @@
+{"gse": "GSE151688",
+ "notes": "RNA-seq arm of a ribosome-profiling protocol (linker ligation with RNA ligase, circularization), so assay_class other. RRF knock-down by shifting from LB+arabinose to LB+glucose; wild type got the same medium changes, so no treatment axis: treatment none for all (medium changes treated as part of the depletion protocol, not a medium shift; could alternatively be medium_or_oxygen_shift). Phase mid_exponential inferred from OD 0.2 in LB before the 15-70 min after the first change. Gene for RRF given only as 'RRF'.",
+ "default": {
+  "strain_group": {"v": "K-12", "b": "stated", "q": "Escherichia coli str. K-12 substr. MG1655"},
+  "strain_name": {"v": "MG1655", "b": "stated", "q": "Escherichia coli str. K-12 substr. MG1655"},
+  "base_medium": {"v": "LB", "b": "stated", "q": "The media was changed one more time to fresh LB+0.2% glucose"},
+  "medium_class": {"v": "complex", "b": "inferred", "q": "The media was changed one more time to fresh LB+0.2% glucose"},
+  "amino_acids_supplied": {"v": true, "b": "inferred", "q": "The media was changed one more time to fresh LB+0.2% glucose"},
+  "carbon_source": {"v": "glucose", "b": "stated", "q": "The media was changed one more time to fresh LB+0.2% glucose"},
+  "growth_temperature": {"v": 37, "b": "stated", "q": "the cells were cultured at 37 C and harvested after 5 min, 15 min, or 60 min by filtration"},
+  "growth_phase": {"v": "mid_exponential", "b": "inferred", "q": "Cells were cultured in LB+0.2% arabinose @ 37 C to OD = 0.2."},
+  "treatment": {"v": "none", "b": "study_default", "q": "Ribosome profiling of RRF knock-down condition derived from E. coli MG1655"},
+  "inducer_added": {"v": false, "b": "inferred", "q": "The media was changed to LB+0.2% glucose and the cells were cultured at 37 C for 10 min."},
+  "transcription_arrested": {"v": false, "b": "study_default", "q": "Ribosome profiling of RRF knock-down condition derived from E. coli MG1655"},
+  "mixed_organism": {"v": false, "b": "study_default", "q": "Ribosome profiling of RRF knock-down condition derived from E. coli MG1655"},
+  "assay_class": {"v": "other", "b": "stated", "q": "for all library types, RNA was ligated to a linker using RNA ligase T2, converted to DNA using RT, circularized, and PCR amplified"}
+ },
+ "rules": [
+  {"field": "ch:genotype/variation", "regex": "^wild type$", "set": {
+    "genotype_class": {"v": "reference", "b": "stated", "q": ""},
+    "global_regulator_perturbed": {"v": false, "b": "stated", "q": ""},
+    "is_control": {"v": true, "b": "stated", "q": ""}}},
+  {"field": "ch:genotype/variation", "regex": "^RRFKD$", "set": {
+    "genotype_class": {"v": "knockdown", "b": "stated", "q": ""},
+    "perturbed_genes": {"v": "RRF", "b": "stated", "q": "RRF knock-down"},
+    "global_regulator_perturbed": {"v": false, "b": "stated", "q": "RRF knock-down"},
+    "is_control": {"v": false, "b": "stated", "q": ""}}}
+ ],
+ "samples": {}}

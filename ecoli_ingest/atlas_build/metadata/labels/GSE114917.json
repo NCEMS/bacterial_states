@@ -1,0 +1,121 @@
+{
+ "gse": "GSE114917",
+ "notes": "1 MPa pressure 15 min (other_physical, acute) vs control. OD600 0.7 in LB, above inferable range -> no growth phase. Technical replicates present; LP4 excluded by authors after PCA. Ribo-Zero (Gram-positive protocol) depletion.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "E. coli K-12 MG 1655 was grown  in LB-Miller broth at 37°C ,160rpm to  an O.D.600 nm of 0. 7"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "E. coli K-12 MG 1655 was grown  in LB-Miller broth at 37°C ,160rpm to  an O.D.600 nm of 0. 7"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "E. coli K-12 MG 1655 was grown  in LB-Miller broth at 37°C ,160rpm to  an O.D.600 nm of 0. 7"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "E. coli K-12 MG 1655 was grown  in LB-Miller broth at 37°C ,160rpm to  an O.D.600 nm of 0. 7"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "E. coli K-12 MG 1655 was grown  in LB-Miller broth at 37°C ,160rpm to  an O.D.600 nm of 0. 7"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "E. coli K-12 MG 1655 was grown  in LB-Miller broth at 37°C ,160rpm to  an O.D.600 nm of 0. 7"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K-12 substr. MG1655"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "study_default",
+   "q": "The genetic response of E.coli K-12 MG 1655 to 1MPa pressure was examined"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "The genetic response of E.coli K-12 MG 1655 to 1MPa pressure was examined"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Four 1MPa treated samples (HPs) contained 2 biological replicates with 2 techinical replicates. Four control samples (LPs) also contained 2 biological replicates with 2 techinical replicates."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Four 1MPa treated samples (HPs) contained 2 biological replicates with 2 techinical replicates. Four control samples (LPs) also contained 2 biological replicates with 2 techinical replicates."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Four 1MPa treated samples (HPs) contained 2 biological replicates with 2 techinical replicates. Four control samples (LPs) also contained 2 biological replicates with 2 techinical replicates."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA was removed from total RNA using a Ribo-Zero rRNA removal kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA was removed from total RNA using a Ribo-Zero rRNA removal kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:stimulus",
+   "regex": "1 MPa",
+   "set": {
+    "treatment": {
+     "v": "other_physical",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:stimulus",
+   "regex": "^Control$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

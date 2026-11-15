@@ -1,0 +1,107 @@
+{
+ "gse": "GSE146162",
+ "notes": "Engineered strains LihfA, HfadR, OfadR: prefixes L/H/O not explained (CRISPRi study; likely knockdown / different expression levels), so genotype_class and inducer_added left out; perturbed genes taken from the names. Medium not given. Control strain may itself be an engineered FFA producer.",
+ "default": {
+  "strain_group": {
+   "v": "B",
+   "b": "stated",
+   "q": "Escherichia coli BL21(DE3)"
+  },
+  "strain_name": {
+   "v": "BL21(DE3)",
+   "b": "stated",
+   "q": "Escherichia coli BL21(DE3)"
+  },
+  "growth_phase": {
+   "v": "transition",
+   "b": "stated",
+   "q": "the early stationary phase"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Transcriptome analyses of three engineered strains LihfA, HfadR and OfadR and the strain Control"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptome analyses of three engineered strains LihfA, HfadR and OfadR and the strain Control"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptome analyses of three engineered strains LihfA, HfadR and OfadR and the strain Control"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Sequencing libraries were generated using a NEBNext®UltraTM RNA Library Prep Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA is removed using a Ribo-zero kit that leaves the mRNA"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptome analyses of three engineered strains LihfA, HfadR and OfadR and the strain Control"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "^control",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^LihfA$",
+   "set": {
+    "perturbed_genes": {
+     "v": "ihfA",
+     "b": "inferred",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "fadR$",
+   "set": {
+    "perturbed_genes": {
+     "v": "fadR",
+     "b": "inferred",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

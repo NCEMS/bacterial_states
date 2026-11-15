@@ -1,0 +1,137 @@
+{
+ "gse": "GSE102381",
+ "notes": "Rifampicin RNA-stability time course (0-15 min). All samples labelled rifampicin-treated/transcription-arrested except T0 (0 min post-addition), where treatment and transcription_arrested are left out; WT T0 taken as the control (reference time point). Phase mid_exponential carried over from pre-treatment OD 0.5 (samples <=15 min). No temperature/aeration stated. rRNA removal not stated (ERCC synthetic spike-in, not another organism).",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Strains were grown in LB media"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Strains were grown in LB media"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Strains were grown in LB media"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Strains were grown in LB media to mid-exponential phase (OD600 = 0.5)"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K12 MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Standard Illumina protocols"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "2 replicate time courses with 5 time points from wild type and csrA::kan mutant strains were analyzed"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "2 replicate time courses with 5 time points from wild type and csrA::kan mutant strains were analyzed"
+  },
+  "treatment": {
+   "v": "abx_transcription",
+   "b": "stated",
+   "q": "Samples were treated with 200ug/ml rifampicin"
+  },
+  "exposure": {
+   "v": "acute",
+   "b": "stated",
+   "q": "15 min post-rifampicin addition"
+  },
+  "transcription_arrested": {
+   "v": true,
+   "b": "stated",
+   "q": "Samples were treated with 200ug/ml rifampicin"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "wild type"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "wild type"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "2 replicate time courses with 5 time points from wild type and csrA::kan mutant strains were analyzed"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "csrA::kan",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "csrA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:time point",
+   "regex": "^0 min",
+   "set": {
+    "treatment": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    },
+    "transcription_arrested": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^MG1655 \\d T0$",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

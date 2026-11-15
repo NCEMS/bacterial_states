@@ -1,0 +1,216 @@
+{
+ "gse": "GSE107833",
+ "notes": "All strains carry a pgaC mutation as background; 'WT pgaC pBR322-empty' is the reference (control). Mutants are called 'mutant' in the design; genotype_class deletion assumed for csr loss-of-function alleles. Complemented strains (mutant + pBR322-csrA/csrD/CsrB) labelled multiple. Kornberg medium = phosphate salts + yeast extract + glucose -> base other, minimal_plus_hydrolysate. Temperature/aeration not given.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli K-12"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "growth_phase": {
+   "v": "stationary",
+   "b": "stated",
+   "q": "to stationary phase (OD600 = 2.0)"
+  },
+  "base_medium": {
+   "v": "other",
+   "b": "stated",
+   "q": "Kornberg medium (1.1% K2HPO4, 0.85% KH2PO4, 0.6% yeast extract, 0.5% glucose)"
+  },
+  "medium_class": {
+   "v": "minimal_plus_hydrolysate",
+   "b": "inferred",
+   "q": "Kornberg medium (1.1% K2HPO4, 0.85% KH2PO4, 0.6% yeast extract, 0.5% glucose)"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Kornberg medium (1.1% K2HPO4, 0.85% KH2PO4, 0.6% yeast extract, 0.5% glucose)"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "Kornberg medium (1.1% K2HPO4, 0.85% KH2PO4, 0.6% yeast extract, 0.5% glucose)"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "RNA samples were depleted or rRNA with Ribozero"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "RNA samples were depleted or rRNA with Ribozero"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Epistatis differential expression analysis of 3 biological replicates from wild type, csrA, csrBC, and csrD mutant and complimented strains during stationary phase"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Epistatis differential expression analysis of 3 biological replicates from wild type, csrA, csrBC, and csrD mutant and complimented strains during stationary phase"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Epistatis differential expression analysis of 3 biological replicates from wild type, csrA, csrBC, and csrD mutant and complimented strains during stationary phase"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Epistatis differential expression analysis of 3 biological replicates from wild type, csrA, csrBC, and csrD mutant and complimented strains during stationary phase"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Epistatis differential expression analysis of 3 biological replicates from wild type, csrA, csrBC, and csrD mutant and complimented strains during stationary phase"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^WT pgaC$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^csrA pgaC$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "csrA",
+     "b": "stated",
+     "q": "csrA pgaC"
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": "csrA pgaC"
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^csrD pgaC$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "csrD",
+     "b": "stated",
+     "q": "csrD pgaC"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": "csrD pgaC"
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^csrB csrC pgaC$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "csrB;csrC",
+     "b": "stated",
+     "q": "csrB csrC pgaC"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": "csrB csrC pgaC"
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^csrA csrD pgaC$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "csrA;csrD",
+     "b": "stated",
+     "q": "csrA csrD pgaC"
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": "csrA csrD pgaC"
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^csrB csrC csrD pgaC$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "csrB;csrC;csrD",
+     "b": "stated",
+     "q": "csrB csrC csrD pgaC"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": "csrB csrC csrD pgaC"
+    }
+   }
+  },
+  {
+   "field": "ch:plasmid",
+   "regex": "^pBR322-(?!empty)",
+   "set": {
+    "genotype_class": {
+     "v": "multiple",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

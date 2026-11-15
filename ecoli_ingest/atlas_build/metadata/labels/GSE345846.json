@@ -1,0 +1,170 @@
+{
+ "gse": "GSE345846",
+ "notes": "PNA 992 (anti-clbR antisense) labelled genotype knockdown of clbR plus treatment other_chemical; scrambled and mismatch PNAs are other_chemical, not controls. Only CCR20+ H2O samples are controls. Strain group UPEC from the series title (summary calls it a colorectal cancer isolate). Sampled 4 h after 1:10 dilution: no growth phase. WT re-read: CCR20+ wild-type isolate samples set to wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "Overnight cultures of E. coli CCR20+ and CCR20+ dclbR were grown in M9+maltose medium."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "M9+maltose medium"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "M9+maltose medium"
+  },
+  "carbon_source": {
+   "v": "other_sugar",
+   "b": "stated",
+   "q": "M9+maltose medium"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "incubated in a ThermoMixer (Eppendorf) at 37°C with 400 rpm shaking for 4 h"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "incubated in a ThermoMixer (Eppendorf) at 37°C with 400 rpm shaking for 4 h"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "incubated at 37°C with shaking at 220 rpm"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "4 h after treatment with H2O, PNA 992, PNA 22, or PNA 2107"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "4 h after treatment with H2O, PNA 992, PNA 22, or PNA 2107"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA was extracted from E. coli CCR20+ and CCR20 dclbR cultures"
+  },
+  "strain_group": {
+   "v": "UPEC",
+   "b": "stated",
+   "q": "uropathogenic Escherichia coli CCR20"
+  },
+  "strain_name": {
+   "v": "CCR20",
+   "b": "stated",
+   "q": "E. coli CCR20"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Prokaryotic directional mRNA library preparation, including rRNA removal"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Prokaryotic directional mRNA library preparation, including rRNA removal"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "RNA was extracted from E. coli CCR20+ and CCR20 dclbR cultures"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "4 h after treatment with H2O, PNA 992, PNA 22, or PNA 2107"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "wild type",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "dclbR",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "clbR",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^untreated \\(H2O\\)",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^PNA",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^PNA 992",
+   "set": {
+    "genotype_class": {
+     "v": "knockdown",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "clbR",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^CCR20\\+ .*untreated \\(H2O\\)",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

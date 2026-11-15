@@ -1,0 +1,95 @@
+{
+ "gse": "GSE63817",
+ "notes": "Reviewed 2026-11-15: mRNA-seq arm of a ribosome-profiling protocol (fragmented, gel size-selected RNA); excluded by user decision. | Structure probing: V1- and A/T1-digested RNA samples are in vitro nuclease-digested RNA -> assay_class other. 'LB mRNA' samples labelled total_rnaseq (rRNA/small-RNA depleted mRNA), but library prep follows Ingolia 2009 with RNA size selection; fragment size not given (unsure). ch:strain lists MC4100..MC4107 per sample, apparently auto-incremented; growth protocol says MC4100 for all, so strain_name MC4100 used. No control condition (single condition), is_control left out. Oxygen/culture mode not stated.",
+ "default": {
+  "strain_name": {
+   "v": "MC4100",
+   "b": "stated",
+   "q": "E. coli MC4100 strain was cultured at 37°C"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "E. coli MC4100 strain was cultured at 37°C"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "in LB media"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "in LB media"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "in LB media"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "cultured at 37°C to mid-log phase"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "mid-log phase (OD600 ~ 0.4)"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "study_default",
+   "q": "Structural probing of the total RNA of E.coli under normal conditions"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Structural probing of the total RNA of E.coli under normal conditions"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Structural probing of the total RNA of E.coli under normal conditions"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Structural probing of the total RNA of E.coli under normal conditions"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Structural probing of the total RNA of E.coli under normal conditions"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Structural probing of the total RNA of E.coli under normal conditions"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "ribosomal RNA with two cycle of MICROBExpress™Bacterial mRNA Enrichment Kit (Ambion)"
+  },
+  "assay_class": {
+   "v": "other",
+   "b": "inferred",
+   "q": "RNA-size selection and generation of the cDNA libraries was performed as described {Ingolia, 2009}"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^(V1|AT1)",
+   "set": {
+    "assay_class": {
+     "v": "other",
+     "b": "stated",
+     "q": "digested for 1 min at 37 °C with either 0.05 U RNase V1 (Life Technologies) or a combination of 2 µg RNase A and 5 U RNase T1"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,93 @@
+{
+ "gse": "GSE72020",
+ "notes": "Reviewed 2026-11-15: glucose-limited chemostat is nutrient_limited_growth, not starvation (user decision) | Two glucose-limited M9 chemostats of wild-type MG1655 at 0.3 and 0.44 h^-1 (the N-limited samples are not candidates). Glucose limitation labelled carbon_starvation/adapted (steady-state limitation). No control condition among candidates. Temperature and aeration not stated.",
+ "default": {
+  "culture_mode": {
+   "v": "chemostat",
+   "b": "stated",
+   "q": "Chemostat"
+  },
+  "growth_phase": {
+   "v": "not_applicable",
+   "b": "inferred",
+   "q": "samples from chemostat were taken once the steady state was achieved"
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9 minimal"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "M9 minimal"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "M9 minimal"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "**ch:growth limitation**: Glucose"
+  },
+  "treatment": {
+   "v": "nutrient_limited_growth",
+   "b": "stated",
+   "q": "**ch:growth limitation**: Glucose"
+  },
+  "exposure": {
+   "v": "adapted",
+   "b": "inferred",
+   "q": "samples from chemostat were taken once the steady state was achieved"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "stated",
+   "q": "WT strain"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "WT strain"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "nitrogen-limited and carbon-limited chemostats both at 2 different growth rates"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "nitrogen-limited and carbon-limited chemostats both at 2 different growth rates"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "nitrogen-limited and carbon-limited chemostats both at 2 different growth rates"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "The rRNA was isolated using Epicentre's Ribo-Zero rRNA removal kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "The rRNA was isolated using Epicentre's Ribo-Zero rRNA removal kit"
+  }
+ },
+ "rules": [],
+ "samples": {}
+}
