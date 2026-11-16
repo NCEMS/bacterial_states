@@ -100,6 +100,28 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   `qc_table.py` keeps `atlas_data/sample_qc.tsv` (`pre_*` prescreen, `full_*` full run, `in_model`).
   Both tiers are parsed by `qc_metrics.py`. Never run Centrifuge with `--mm` on an index that
   sits on the network file system (minutes per sample); the prescreen copies it to `/dev/shm`.
+  Species check: `species_metrics` (share of genus-resolved Centrifuge reads in Escherichia or
+  Shigella, largest other genus), not the workflow's `pct_ecoli` gate, which fails real E. coli
+  libraries such as GSE67402. Keep downloads rate-limited (`--fetch-interval`, default 2 s).
+  When stopping a run, kill by exact process name (`pkill -x python`, `pkill -x vg`); `pkill -f`
+  with the script path also kills the shell that issues it.
+- QC record (`docs/atlas_qc_inputs.md`): rules `bam_qc`, `species_qc`, `tool_versions`, `sample_qc`
+  write `<s>/qc/<s>.qc.json` and `<s>/coverage/<s>.cov100.npz`; `featurecounts_combined` also writes
+  `all_samples_antisense_counts.txt`. `species_metrics.py` (workflow script) is shared with the
+  prescreen via `qc_metrics.py` and is the workflow's species gate (`species_gate`, default on with
+  Centrifuge; `species_verdict`, `SPECIES_THRESHOLDS`): rule `species_early` stops clearly foreign
+  samples in the QC checkpoint before alignment, rule `species_qc` gives the verdict used by
+  checkpoint `strand_passed_samples` (`not_counted_reason` in `strandedness.tsv`). The old keys
+  `centrifuge_organism` / `centrifuge_min_percentage` are ignored with a warning. `species_qc` needs
+  Centrifuge's `initial.tsv` (a temp file), so it cannot be added to a finished run without
+  re-running Centrifuge. `keep_alignments: false` makes `_sort.bam` temporary (deleted
+  after the QC steps); default is to keep it. The `.gam`, the gzipped trimmed reads and Centrifuge's
+  other intermediates (`centrifuge/tmp/`) are always deleted once used. `qc_table.py add-full` turns each record into
+  `full_*` columns (`qc_metrics.RECORD_COLUMNS`). `dna_fraction_est` in the record is the
+  coverage-based estimate (median over bins of the lower strand's depth), calibrated with
+  DNA-spiked twins (`atlas_build/twins/make_twins.py`, `work/dna_calibration/`); the antisense fit
+  is kept as `dna_fraction_fit` only. The atlas model design is on branch `update-atlas`
+  (`work/worktrees/update-atlas`); model code does not go on `ingest-update`.
 - Sample metadata v2 (`docs/metadata_v2.md`): `atlas_build/metadata/` holds the label scheme, one
   curated `labels/<GSE>.json` per study and the scripts; `apply_labels.py` writes
   `atlas_data/metadata_v2.tsv` and must report `0 problems`. Change labels in the JSON files or

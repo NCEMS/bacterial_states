@@ -1,8 +1,10 @@
 # QC to save during the atlas recount
 
-Status: specification (2026-11-15), not implemented. It lists what a full inGEST run has to keep
-per sample so that the atlas model (`docs/atlas_model_v2.md`) can use library and sequencing
-properties as inputs. Alignments (`.gam`, `_sort.bam`) are deleted after the recount, so anything
+Status: implemented in the inGEST workflow on `ingest-update` (2026-11-15), except the technical
+twins at the end. It lists what a full inGEST run keeps per sample so that the atlas model
+(`docs/atlas_model_v2.md`, on the `update-atlas` branch) can use library and sequencing properties
+as inputs. "Today" in the table below describes the workflow before this change; the section
+"What the workflow writes" describes it now. Alignments (`.gam`, `_sort.bam`) are deleted after the recount, so anything
 that needs them has to be computed during the run.
 
 Principle: save distributions, not only summary values. Quantiles and ratios can then be redefined
@@ -163,19 +165,130 @@ Files that must not be deleted because the JSON is built from them and they are 
 JSON, `fastqc_data.txt` (or the FastQC zip), `infer_experiment.txt`, `strandedness.tsv`, the
 feature-overlap table, the gene-body coverage text, `giraffe.stats.txt`.
 
-## Where this connects to the code
+## What the workflow writes
 
-Not edited on this branch; the work is on `ingest-update`.
+Rules in `ecoli_ingest/src/ecoli_ingest/workflow/Snakefile`, scripts in `workflow/scripts/`:
 
-- `ecoli_ingest/atlas_build/prescreen/qc_metrics.py`: `METRICS` and the parsers. New scalar
-  columns for `sample_qc.tsv` would be derived from the JSON (length quantiles, fragment-size
-  quantiles, family ratios, off-reference share, substitution rate, gene-body slope).
-- `ecoli_ingest/atlas_build/prescreen/qc_table.py`: `full_run_files` passes five files today; the
-  identity columns copy `layout` and `instrument_model` from the manifest only.
-- `ecoli_ingest/src/ecoli_ingest/workflow/Snakefile`: the Centrifuge per-read tables are `temp()`;
-  items 2, 4, 6 and 7 need rules that run before `_sort.bam` and `.gam` are removed.
+| Rule | Script | Output |
+|---|---|---|
+| `featurecounts_combined` | second `featureCounts` call with every sample's strand reversed | `all_samples_antisense_counts.txt` and `.summary` (item 4) |
+| `bam_qc` | `sample_qc.py bam` | `<s>/coverage/<s>.cov100.npz` (item 6), `<s>/qc/<s>_bam_qc.json` (fragment sizes, mapped reads, coverage background) |
+| `species_qc` | `species_metrics.py` | `<s>/qc/<s>_species.json`, `<s>/centrifuge/<s>_report_all.txt` (item 10); only with Centrifuge on |
+| `tool_versions` | `sample_qc.py versions` | `tool_versions.json` (item 14) |
+| `sample_qc` | `sample_qc.py collect` | `<s>/qc/<s>.qc.json`, everything about the sample |
+
+Differences from the specification above:
+
+- **Coverage file.** Arrays are named `<contig>__plus` and `<contig>__minus` (transcript strand
+  after applying the strand call), `uint32`, summed per-base depth per 100 bp bin, with `bin_size`
+  and `strand_call`. Read with `numpy.load`.
+- **Species (item 10)** is computed from the classification of every trimmed read (Centrifuge's
+  first pass, `initial.tsv`), for all reads and again without reads on rRNA / tRNA genes
+  (`*_nostable`), exactly as the prescreen does (`species_metrics.py` is shared). It is also the
+  workflow's species gate (`species_gate`, on by default with Centrifuge): `verdict` in the
+  record's `species` block is `ok`, `no_species`, `phage`, `not_ecoli` or `mixed_organism`, and
+  only `ok` and `no_species` samples are counted. Samples that are clearly not *E. coli* are
+  stopped before alignment and have no record.
+- **DNA values (item 15).** `dna_fraction_est` is no longer the antisense fit. It is made from the
+  coverage track: for every 100 bp bin the lower of the two strands' depths (DNA covers both
+  strands, RNA mostly one), then the median over bins (`minstrand_cov`), and
+  `dna_fraction_est = 2 x minstrand_cov x genome length / aligned bases`. It is computed when the
+  record is assembled, from the saved track, so the definition can change without alignments.
+  The antisense fit is kept as `floor_a`, `leakage_b`, `dna_fraction_fit` (Theil-Sen line over
+  genes, rRNA and tRNA left out). Also kept: `floor_cov_*` (10 % quantile of bin depth),
+  `q25_cov_*`, `intergenic_cov_*` (median over bins that touch no feature), `antisense_per_base`,
+  `aligned_bases`, `dna_fraction_limit` (the DNA share below which the estimate reads 0 or too low; see the calibration). Depths are mean
+  depth per base. See "Calibration of the DNA estimate" below.
+- **Off-reference share (item 7)** is (`Total aligned` of `vg stats` - mapped reads in the BAM) /
+  `Total aligned`. Not yet checked on a non-K-12 sample.
+- **Tool versions (item 14)** come from the tools themselves (`--version`), not from MultiQC.
+- **Manifest (item 12).** Set `run_metadata: <runs.tsv>` in `config.yaml`; library and instrument
+  fields of the sample's runs are copied from it. Without it, the record lists the runs and their
+  read numbers for accession samples only.
+- **Added:** `ladder` (reads in, kept, aligned, on the reference, assigned, assigned outside rRNA
+  and tRNA), `antisense_assignment`, `gene_body_slope`, `reads.length_quantiles`,
+  `composition.short_features` (reads on features under 200 nt, rRNA and tRNA genes left out).
+- Unstranded samples are not counted and get no record.
+- **Deleting alignments.** `<s>.gam` is always removed once `vg surject` and `vg stats` have
+  read it. With `keep_alignments: false` in `config.yaml`, `<s>_sort.bam` and its index are
+  removed too, as soon as counting, the coverage track and the QC steps have read them. A two-sample test left 7 MB of results and no alignment file.
+
+### In the QC table
+
+`qc_table.py add-full` reads each sample's record and fills, next to the `full_*` metrics:
+
+- the species values of the full run;
+- `qc_metrics.RECORD_COLUMNS` as `full_<name>`: read-length quantiles (`length_q05_r1`,
+  `length_q50_r1`, `length_q95_r1`, `length_q50_r2`), `cycles_r1`, `gc_content`, fragment-size
+  quartiles, `assigned`, `counting_unit`, `pct_assigned_not_stable`, the RNA family shares
+  (`pct_16S`, `pct_23S`, `pct_5S`, `pct_tRNA_family`, `pct_ssrA`, `pct_rnpB`, `pct_ssrS`,
+  `pct_ffs`), `pct_short_features`, `off_reference_fraction`, `substitution_rate`,
+  `gene_body_slope`, the DNA-background values, and `n_runs`, `library_selection`,
+  `instrument_model`, `pipeline_commit` as recorded by the run. Family shares are % of all
+  read-feature assignments.
+
+`merge-prescreen` copies the manifest's `n_runs`, `reads`, `bases`, `library_strategy`,
+`library_source`, `library_selection`, `instrument_platform`, `instrument_model` and
+`first_public` into the identity columns. A technical twin run under the name `<GSM>__<variant>`
+gets its own row with `twin_of` set to the GSM.
+
+## Calibration of the DNA estimate
+
+Run of 2026-11-15, `work/dna_calibration/`. Three libraries (K-12 76 bp, K-12 150 bp, Nissle 1917
+150 bp; 5.1-6.0 M read pairs) were run as they are and with simulated MG1655 genomic reads added to
+make up 1, 5 and 20 % of the reads (`make_twins.py`, variants `g1`, `g5`, `g20`). Each estimator
+was converted to a share of the aligned library and its increase over the unspiked sample divided
+by the share actually added (1.00 = exact):
+
+| Estimator | Mean | Range over the 9 spiked samples | Unspiked samples read |
+|---|---|---|---|
+| median over bins of the lower strand's depth (**used**) | 1.02 | 0.94-1.24 | 0.2, 1.7, 1.0 % |
+| 25 % quantile of bin depth per strand | 1.05 | 0.92-1.36 | 0.1, 1.2, 0.1 % |
+| median depth between genes | 1.12 | 1.00-1.28 | 0.9, 2.2, 1.4 % |
+| 10 % quantile of bin depth per strand (the first definition's cross-check) | 0.70 | 0.31-0.86 | 0, 0, 0 % |
+| antisense fit over genes (the first definition) | 1.27 | 1.10-1.53 | 1.0, 1.7, 1.0 % |
+| `intergenic_share`, `antisense_share` | 0.45 | 0.43-0.49 | 1.1-6.2 % |
+
+- The chosen estimate follows added DNA within 6 % at 5 and 20 % and within 24 % at 1 %.
+- Low quantiles underestimate because DNA coverage itself varies from bin to bin; the fit
+  overestimates, and its slope `leakage_b` rises with DNA (0.0004 to 0.012 in one library), so the
+  two are not independent.
+- `intergenic_share` and `antisense_share` each rise by a little under half of the added share,
+  as expected for reads spread over both strands and over genes and gaps alike.
+- What the estimate reads without added DNA (0.2-1.7 %) is real DNA plus transcription of both
+  strands of the same region, which this test cannot separate. It is an upper bound.
+
+Second run (`work/se_depth_test/`, `work/dna_calibration2/`), same spikes under other conditions:
+
+| Library | Increase / added at 1, 5, 20 % | Note |
+|---|---|---|
+| K-12, single-end (mate 2 dropped), 5.9 M reads | 1.25, 1.02, 0.98 | as for paired-end |
+| K-12 subsampled to 1 M pairs | 0.75, 1.12, 0.94 | limit 2 % |
+| K-12 subsampled to 250,000 pairs | 0, 0, 0.70 | limit 8 %; reads 0 below it |
+| Nissle 1917 + simulated Nissle 1917 DNA | 0.88, 0.82, 0.79 | DNA of sequence MG1655 lacks is not seen |
+
+- **Depth.** The median is 0 until DNA reaches roughly half a base of depth per strand.
+  `dna_fraction_limit` (= genome length / aligned bases) is the DNA share at which that happens:
+  about 0.4-0.5 % at 5 M pairs, 2 % at 1 M, 8 % at 250,000. Below the limit the estimate is 0 or
+  too low, so an estimate of 0 means "below about the limit". From about twice the limit it was
+  within 25 % of the added share.
+- **Other strains.** With the strain's own DNA the estimate recovers 79-88 %: reads from sequence
+  that MG1655 lacks do not align to the reference path (`off_reference_fraction` rose from 2.5 to
+  4.8 %) and are not in the coverage track. About 13 % of the 100 bp bins have no coverage on
+  either strand in this Nissle library at any spike level, which is the part of MG1655 that Nissle
+  lacks.
+- An estimator from the share of empty bins was tried for shallow libraries and rejected: it
+  recovered only 0.3-0.45 of the added share.
+- **Gene-body slope depends on layout.** The same library gives -0.08 as paired-end and +0.54 with
+  mate 2 dropped: read 1 of a reverse-stranded library comes from the 3' end of the fragment. The
+  slope must be used together with the layout.
 
 ## Technical twins
+
+`ecoli_ingest/atlas_build/twins/make_twins.py` makes every variant below from raw reads. Only the
+genomic-DNA variants have been run (the calibration above); the selection of about 200 samples and
+the other variants have not.
+
 
 Purpose: samples whose biology is identical by construction and whose read length, layout or
 depth differ. They test whether those properties move a sample in the embedding, and can be used

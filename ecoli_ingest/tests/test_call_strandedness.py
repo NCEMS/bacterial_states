@@ -71,3 +71,9 @@ def test_cli_combine_and_flags(cs, tmp_path):
     assert mqc.read_text().startswith('# id: "strandedness"')
     with pytest.raises(KeyError):
         cs.featurecounts_strand_flags(str(table), ["c"])                        # unstranded samples have no -s value
+    # samples refused by the species gate are not counted either
+    rows = cs.combine([str(tmp_path / f"{n}.tsv") for n in "bac"], str(table), str(mqc), str(fail), {"b": "not_ecoli"})
+    assert {r["sample"]: (r["counted"], r["not_counted_reason"]) for r in rows} == {
+        "a": ("yes", ""), "b": ("no", "not_ecoli"), "c": ("no", "unstranded")}
+    assert cs.counted_samples(str(table)) == ["a"]
+    assert {k: v["reason"] for k, v in json.loads(fail.read_text()).items()} == {"b": "not_ecoli", "c": "unstranded"}

@@ -27,7 +27,10 @@ METRICS = (
      "pct_aligned", "pct_perfect", "pct_properly_paired", "mapq_mean",
      "layout", "fraction_forward", "fraction_reverse", "fraction_undetermined", "strand_call"]
     + [f"pct_{g}" for g in FEATURE_GROUPS]
-    + ["pct_ecoli", "other_taxa"]
+    + ["pct_ecoli", "other_taxa", "pct_unclassified", "pct_enterobacteriaceae", "pct_synthetic", "top_non_enteric",
+       "species_reads", "pct_escherichia_shigella", "top_other_genus", "pct_top_other_genus",
+       "species_reads_nostable", "pct_escherichia_shigella_nostable", "top_other_genus_nostable",
+       "pct_top_other_genus_nostable", "centrifuge_reads"]
 )
 
 
@@ -125,17 +128,97 @@ def kreport_metrics(path: str, organism: str = "Escherichia coli", n_other: int 
             "other_taxa": "; ".join(f"{name} {p:.1f}" for p, name in species[:n_other] if p > 0)}
 
 
+# Species statistics live with the workflow scripts so that full runs compute them the same way.
+from species_metrics import (ECOLI_GENERA, ENTEROBACTERIACEAE, PHAGE_GENERA, SPECIES_THRESHOLDS,  # noqa: E402,F401
+                             SYNTHETIC, genus_of_taxa, kreport_all_metrics, species_metrics, species_verdict)
+
 def collect(files: dict, min_fraction: float = 0.8) -> dict:
     """Metrics from whichever of these files exist: fastp, vg_stats, infer_experiment,
-    feature_overlap, kreport. Missing files leave their metrics unset."""
+    feature_overlap, kreport, kreport_all. Missing files leave their metrics unset."""
     readers = (("fastp", fastp_metrics), ("vg_stats", vg_stats_metrics),
                ("infer_experiment", lambda p: strand_metrics(p, min_fraction)),
-               ("feature_overlap", feature_overlap_metrics), ("kreport", kreport_metrics))
+               ("feature_overlap", feature_overlap_metrics), ("kreport", kreport_metrics),
+               ("kreport_all", kreport_all_metrics))
     out = {}
     for key, reader in readers:
         path = files.get(key)
         if path and os.path.exists(path):
             out.update(reader(path))
+    cls, rep = files.get("classifications"), files.get("kreport_all")
+    if cls and rep and os.path.exists(cls) and os.path.exists(rep):
+        out.update(species_metrics(cls, rep))
+        stable = files.get("stable_ids")
+        if stable and os.path.exists(stable):
+            with open(stable, encoding="utf-8") as fh:
+                out.update(species_metrics(cls, rep, set(fh.read().split()), "_nostable"))
+    return out
+
+
+# ---------------------------------------------------------------------------- full-run record
+
+# Columns of the QC table that only a full inGEST run has (full_<name>), derived from the sample's
+# QC record (<sample>.qc.json, workflow/scripts/sample_qc.py).
+RECORD_COLUMNS = [
+    "length_q05_r1", "length_q50_r1", "length_q95_r1", "length_q50_r2", "cycles_r1", "gc_content",
+    "fragment_q25", "fragment_q50", "fragment_q75",
+    "assigned", "counting_unit", "pct_assigned_not_stable",
+    "pct_16S", "pct_23S", "pct_5S", "pct_tRNA_family", "pct_ssrA", "pct_rnpB", "pct_ssrS", "pct_ffs", "pct_short_features",
+    "off_reference_fraction", "substitution_rate", "gene_body_slope",
+    "intergenic_share", "antisense_share", "antisense_per_base", "dna_fraction_est", "dna_fraction_limit",
+    "minstrand_cov", "dna_fraction_fit", "floor_a", "leakage_b",
+    "floor_cov_plus", "floor_cov_minus", "intergenic_cov_plus", "intergenic_cov_minus",
+    "n_runs", "library_selection", "instrument_model", "pipeline_commit",
+]
+
+
+def histogram_quantile(hist: list, q: float):
+    """Quantile of a [[value, count], ...] histogram."""
+    total = sum(n for _, n in hist)
+    acc = 0
+    for value, n in sorted(hist):
+        acc += n
+        if acc >= q * total:
+            return value
+    return None
+
+
+def record_columns(record: dict) -> dict:
+    """The RECORD_COLUMNS values of one QC record. Shares are % of all read-feature assignments
+    (a read on two features counts twice), except pct_assigned_not_stable, which is % of assigned reads."""
+    reads, comp = record.get("reads", {}), record.get("composition", {})
+    lq = reads.get("length_quantiles", {})
+    out = {
+        "length_q05_r1": lq.get("r1", {}).get("q05"), "length_q50_r1": lq.get("r1", {}).get("q50"),
+        "length_q95_r1": lq.get("r1", {}).get("q95"), "length_q50_r2": lq.get("r2", {}).get("q50"),
+        "cycles_r1": (reads.get("cycles") or [None])[0], "gc_content": reads.get("after", {}).get("gc_content"),
+    }
+    tlen = [x for x in record.get("fragment", {}).get("tlen_hist", [])]
+    for name, q in (("fragment_q25", 0.25), ("fragment_q50", 0.5), ("fragment_q75", 0.75)):
+        out[name] = histogram_quantile(tlen, q) if tlen else None
+    ladder = record.get("ladder", {})
+    assigned = ladder.get("assigned")
+    out["assigned"], out["counting_unit"] = assigned, ladder.get("counting_unit")
+    out["pct_assigned_not_stable"] = (_round(100 * ladder["assigned_not_stable_rna"] / assigned, 2)
+                                      if assigned and ladder.get("assigned_not_stable_rna") is not None else None)
+    total = sum(comp.get("by_type", {}).values())
+    family = comp.get("by_family", {})
+    for key, name in (("16S", "pct_16S"), ("23S", "pct_23S"), ("5S", "pct_5S"), ("tRNA", "pct_tRNA_family"),
+                      ("ssrA", "pct_ssrA"), ("rnpB", "pct_rnpB"), ("ssrS", "pct_ssrS"), ("ffs", "pct_ffs")):
+        out[name] = _round(100 * family[key] / total, 3) if total and key in family else None
+    short = comp.get("short_features", {}).get("reads")
+    out["pct_short_features"] = _round(100 * short / total, 3) if total and short is not None else None
+    align, dna = record.get("alignment", {}), record.get("dna", {})
+    out.update(off_reference_fraction=align.get("off_reference_fraction"), substitution_rate=align.get("substitution_rate"),
+               gene_body_slope=record.get("gene_body_slope"))
+    for key in ("intergenic_share", "antisense_share", "antisense_per_base", "dna_fraction_est",
+                "dna_fraction_limit", "minstrand_cov", "dna_fraction_fit", "floor_a", "leakage_b",
+                "floor_cov_plus", "floor_cov_minus", "intergenic_cov_plus", "intergenic_cov_minus"):
+        out[key] = dna.get(key)
+    runs = record.get("runs") or []
+    out["n_runs"] = len(runs) or None
+    out["library_selection"] = "/".join(sorted({r["library_selection"] for r in runs if r.get("library_selection")}))
+    out["instrument_model"] = "/".join(sorted({r["instrument_model"] for r in runs if r.get("instrument_model")}))
+    out["pipeline_commit"] = record.get("pipeline", {}).get("commit")
     return out
 
 
@@ -143,7 +226,8 @@ def collect(files: dict, min_fraction: float = 0.8) -> dict:
 
 DEFAULT_THRESHOLDS = {
     "min_strand_fraction": 0.8,     # dominant orientation fraction; below it the library is unstranded
-    "min_pct_ecoli": 30.0,          # the workflow's centrifuge_min_percentage
+    # species test: the workflow's gate (species_metrics.SPECIES_THRESHOLDS)
+    **{k: v for k, v in SPECIES_THRESHOLDS.items() if not k.startswith("early_")},
     "min_pct_kept": 75.0,           # the workflow's fastp_min_kept_percentage
     "min_mean_length": 30.0,        # mean read length after trimming (mate 1)
     "min_pct_aligned": 50.0,
@@ -160,7 +244,12 @@ def decide(metrics: dict, thresholds: dict | None = None) -> tuple[str, list[str
         missing.append("strandedness")
     elif max(fwd, rev) < t["min_strand_fraction"]:
         reasons.append("unstranded")
-    for key, limit, label in (("pct_ecoli", "min_pct_ecoli", "contamination"), ("pct_kept", "min_pct_kept", "trimming"),
+    verdict = species_verdict(metrics, t)        # the same rule as the workflow's species gate
+    if verdict == "no_species":
+        missing.append("species")
+    elif verdict != "ok":
+        reasons.append(verdict)
+    for key, limit, label in (("pct_kept", "min_pct_kept", "trimming"),
                               ("mean_length_r1", "min_mean_length", "short_reads"),
                               ("pct_aligned", "min_pct_aligned", "low_alignment")):
         value = get(key)

@@ -104,8 +104,7 @@ deseq2:
   contrasts:
     - ["condition", "wildtype", "knockout"]   # [factor, reference, test]
 centrifuge: true                  # false: skip Centrifuge entirely (not run, not in MultiQC)
-centrifuge_organism: "Escherichia coli"
-centrifuge_min_percentage: 30.0   # remove to disable the contamination gate
+species_gate: true                # with Centrifuge on: samples that are not E. coli are not counted
 strandedness: "auto"              # or "forward" / "reverse"; unstranded libraries are not counted
 fastp_min_kept_percentage: 75.0   # remove to disable the read-filter gate
 ```
@@ -186,12 +185,17 @@ Set `results_dir: "results"` in `config.yaml` for a fixed directory name instead
 | `all_samples_raw_counts.txt` | featureCounts table; `Geneid` is the feature id (`CDS_b0002_thrA`, `ncRNA_b4577_sgrS`, `ncRNA_Thr_leader`) |
 | `all_samples_counts_extended.tsv` | `Feature_ID, Symbol, Locus_Tag, Type, Source, Rfam, Dbxref, Product, Chr, Start, End, Strand, Length, counts…` |
 | `all_samples_counts.tsv` | `Feature_ID`, coordinates, counts |
+| `all_samples_antisense_counts.txt` | the same counting with every sample's strand reversed: reads antisense to each feature |
+| `<sample>/qc/<sample>.qc.json` | per-sample QC record: read-length and fragment-size histograms, alignment statistics, read ladder, reads per RNA family and type, antisense and DNA-background values, gene-body profile, species statistics, tool versions ([docs/atlas_qc_inputs.md](../docs/atlas_qc_inputs.md)) |
+| `<sample>/coverage/<sample>.cov100.npz` | read depth per strand in 100 bp bins |
+| `tool_versions.json` | versions of the tools used |
 | `strandedness.tsv` | per sample: read orientation fractions, the call (forward, reverse, unstranded) and whether it was counted |
 | `counting_method.json` | annotation, featureCounts options and the orientation used for each sample |
 | `deseq2/` | normalized counts, PCA, one `<ref>_vs_<test>_deseq_results.tsv` per contrast |
-| `<sample>/` | per-sample fastp, FastQC, Centrifuge, vg (sorted BAM, `vg stats`), RSeQC, feature overlap. The trimmed reads, Centrifuge's per-read tables and the `.gam` (several GB per sample) are deleted once used |
+| `<sample>/` | per-sample fastp, FastQC, Centrifuge, vg (sorted BAM, `vg stats`), RSeQC, feature overlap. The trimmed reads, Centrifuge's per-read tables and the `.gam` (several GB per sample) are deleted once used; the sorted BAM too with `keep_alignments: false` |
 | `../checkpoints/qc_failures.json` | samples excluded by the QC gates and why |
-| `../checkpoints/strandedness_failures.json` | samples not counted because the library is not strand-specific |
+| `../checkpoints/strandedness_failures.json` | samples not counted after alignment: library not strand-specific, or refused by the species gate |
+| `<sample>/qc/<sample>_species.json` | species statistics and the gate's verdict (`ok`, `not_ecoli`, `phage`, `mixed_organism`, `no_species`) |
 
 How reads are counted (feature set, strandedness, overlapping features) is described in
 [docs/counting.md](../docs/counting.md). Only strand-specific libraries are counted; the tutorial
@@ -208,9 +212,25 @@ for [Ecoli_ATLAS](../ecoli_atlas/README.md) until the atlas has been recounted.
   product descriptions come from the counting annotation (`workflow/scripts/annotate_counts.py`).
 - Reads shorter than 50 bp automatically use the k=15 minimizer index.
 - Centrifuge runs for every sample unless the config says `centrifuge: false` (`ecoli_ingest init
-  --without-centrifuge` writes that); a missing key means on. With it off, Centrifuge is not run, its
-  gate is ignored and old Centrifuge reports are left out of MultiQC. The gate itself applies only
-  when `centrifuge_min_percentage` is set.
+  --without-centrifuge` writes that); a missing key means on. With it off, Centrifuge is not run,
+  there is no species gate and old Centrifuge reports are left out of MultiQC.
+- **Species gate** (on with Centrifuge unless `species_gate: false`). A sample is not counted when
+  it is not *E. coli*. The test uses the genus of the reads Centrifuge places uniquely, with
+  *Escherichia* and *Shigella* counted together (they cannot be told apart):
+  - `phage`: the largest other genus is a bacteriophage at 0.5 % or more of all reads;
+  - `not_ecoli`: under 50 % of genus-resolved reads are *Escherichia* / *Shigella* and the largest
+    other genus is at least 2 % of all reads;
+  - `mixed_organism`: the largest other genus is 10 % or more of all reads.
+
+  Samples that are clearly something else (phage, or under 20 % *Escherichia* / *Shigella* with
+  another genus at 5 % or more of all reads) are stopped before alignment and listed in
+  `checkpoints/qc_failures.json`; the aligner is very slow on reads that do not match the graph.
+  The full rule is applied after alignment, leaving out reads on rRNA / tRNA genes, and its result
+  is the `not_counted_reason` column of `strandedness.tsv`. Thresholds: `species_thresholds` in
+  the config. The rule and its thresholds come from a screen of 10,829 GEO samples
+  ([docs/prescreen.md](../docs/prescreen.md)). The former keys `centrifuge_organism` and
+  `centrifuge_min_percentage` are ignored with a warning: that gate asked for the species
+  *E. coli* among uniquely placed reads and failed real *E. coli* libraries.
 - Paired-end runs always call fastp with `--detect_adapter_for_pe`, so adapters are trimmed from
   each mate and not only where the mates overlap (which leaves adapter in libraries with very
   short inserts). The old config key `fastp_detect_adapter_for_pe` is ignored. Single-end runs are

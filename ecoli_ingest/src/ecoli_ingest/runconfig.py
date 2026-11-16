@@ -87,4 +87,5 @@ def centrifuge_enabled(cfg: dict) -> bool:
 
 
 def centrifuge_gate_enabled(cfg: dict) -> bool:
-    return centrifuge_enabled(cfg) and cfg.get("centrifuge_min_percentage") is not None
+    """The species gate: on whenever Centrifuge runs, unless ``species_gate: false``."""
+    return centrifuge_enabled(cfg) and bool(cfg.get("species_gate", True))

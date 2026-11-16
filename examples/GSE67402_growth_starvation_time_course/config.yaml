@@ -192,8 +192,7 @@ centrifuge: false
 
 # Quality-control gates. A sample that fails any configured gate is excluded from alignment and
 # counting (see checkpoints/qc_failures.json). Remove a line to disable that gate.
-centrifuge_organism: "Escherichia coli"
-centrifuge_min_percentage: 30.0
+species_gate: true
 # These libraries hold many very short inserts (mean read length after adapter trimming is about
 # 50 of 101 bp) and lose reads as too short: the median sample keeps 78 %, the two worst keep 25 %
 # (t005h_rep1) and 32 % (t168h_rep1). The gate is set below those so that all 36 samples are

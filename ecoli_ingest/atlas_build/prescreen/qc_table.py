@@ -2,18 +2,25 @@
 """Maintain the sample QC table: prescreen metrics first, full-run metrics for samples that are processed.
 
 One row per GEO sample (GSM). Columns:
-  identity   GSM, GSE, runs, layout, scientific_name, tax_id, instrument_model, manifest_status,
-             review, in_atlas_v1
+  identity   GSM, GSE, runs, n_runs, layout, reads, bases, scientific_name, tax_id, library_strategy,
+             library_source, library_selection, instrument_platform, instrument_model, first_public,
+             manifest_status, review, in_atlas_v1, twin_of (the GSM a technical twin was made from; a
+             twin's row is keyed <GSM>__<variant>), study_candidates (candidate samples in the study) and large_study
+             (yes when that is at least LARGE_STUDY_MIN: statistics over the atlas should be reported
+             with and without such a study)
   pre_*      metrics of the read-subsample prescreen (prescreen.py), with pre_run, pre_spots,
              pre_source, pre_date, pre_pipeline, pre_error
   pre_decision, pre_reasons   pass / fail / incomplete from the thresholds (qc_metrics.decide)
   full_*     the same metrics from a complete inGEST run, with full_sample, full_counted,
-             full_results_dir, full_date, full_pipeline
+             full_results_dir, full_date, full_pipeline; and the values only a full run has, from
+             the sample's QC record (qc_metrics.RECORD_COLUMNS: read-length and fragment-size
+             quantiles, RNA family shares, off-reference share, substitution rate, gene-body
+             slope, DNA-background values)
   in_model   name of the atlas model the sample is part of
 
     qc_table.py merge-prescreen --manifest work/atlas_manifest --samples-dir work/prescreen/samples --table atlas_data/sample_qc.tsv
     qc_table.py add-full --results <run dir>/results --config <run dir>/config.yaml --table atlas_data/sample_qc.tsv
-    qc_table.py decide --table atlas_data/sample_qc.tsv [--min-pct-ecoli 30 ...]
+    qc_table.py decide --table atlas_data/sample_qc.tsv [--min-pct-aligned 50 ...]
     qc_table.py mark-model --samples samples.txt --model atlas_v2 --table atlas_data/sample_qc.tsv
     qc_table.py summary --table atlas_data/sample_qc.tsv
 
@@ -36,12 +43,17 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import qc_metrics  # noqa: E402
 
-IDENTITY = ["GSM", "GSE", "runs", "layout", "scientific_name", "tax_id", "instrument_model", "manifest_status",
-            "review", "in_atlas_v1"]
+IDENTITY = ["GSM", "GSE", "runs", "n_runs", "layout", "reads", "bases", "scientific_name", "tax_id",
+            "library_strategy", "library_source", "library_selection", "instrument_platform", "instrument_model",
+            "first_public", "manifest_status", "review", "in_atlas_v1", "study_candidates", "large_study", "twin_of"]
+RUN_FIELDS = ("library_strategy", "library_source", "instrument_platform")      # taken from the manifest's runs.tsv
+LARGE_STUDY_MIN = 500      # candidate samples; such a study can dominate statistics, so report with and without it
 PRE_INFO = ["pre_run", "pre_spots", "pre_source", "pre_date", "pre_pipeline", "pre_error"]
 FULL_INFO = ["full_sample", "full_counted", "full_results_dir", "full_date", "full_pipeline"]
 COLUMNS = (IDENTITY + PRE_INFO + [f"pre_{m}" for m in qc_metrics.METRICS] + ["pre_decision", "pre_reasons"]
-           + FULL_INFO + [f"full_{m}" for m in qc_metrics.METRICS] + ["in_model"])
+           + FULL_INFO + [f"full_{m}" for m in qc_metrics.METRICS] + [f"full_{m}" for m in qc_metrics.RECORD_COLUMNS]
+           + ["in_model"])
+TWIN_RE = re.compile(r"^(GSM\d+)__(\w+)$")      # technical twins are named <GSM>__<variant>
 
 
 def read_table(path: str) -> dict:
@@ -90,7 +102,27 @@ def merge_prescreen(table: str, manifest_dir: str | None, samples_dir: str, thre
             for s in csv.DictReader(fh, delimiter="\t", quoting=csv.QUOTE_NONE):
                 row = _row(rows, s["GSM"])
                 for c in IDENTITY:
-                    row[c] = s.get("status" if c == "manifest_status" else c, "") or ""
+                    if c in s or c == "manifest_status":
+                        row[c] = s.get("status" if c == "manifest_status" else c, "") or ""
+        runs_path = os.path.join(manifest_dir, "runs.tsv")
+        if os.path.exists(runs_path):        # fields that the per-sample table does not carry
+            per_sample: dict = {}
+            with open(runs_path, encoding="utf-8", newline="") as fh:
+                for r in csv.DictReader(fh, delimiter="\t", quoting=csv.QUOTE_NONE):
+                    if r.get("GSM") in rows:
+                        d = per_sample.setdefault(r["GSM"], {k: set() for k in RUN_FIELDS} | {"bases": 0})
+                        for k in RUN_FIELDS:
+                            if r.get(k):
+                                d[k].add(r[k])
+                        d["bases"] += int(r.get("base_count") or 0)
+            for gsm, d in per_sample.items():
+                for k in RUN_FIELDS:
+                    rows[gsm][k] = "/".join(sorted(d[k]))
+                rows[gsm]["bases"] = str(d["bases"])
+        per_study = Counter(r["GSE"] for r in rows.values() if r["manifest_status"] == "candidate")
+        for row in rows.values():
+            row["study_candidates"] = str(per_study.get(row["GSE"], 0))
+            row["large_study"] = "yes" if per_study.get(row["GSE"], 0) >= LARGE_STUDY_MIN else "no"
     n = 0
     for path in sorted(glob.glob(os.path.join(samples_dir, "*.json"))):
         with open(path, encoding="utf-8") as fh:
@@ -100,7 +132,8 @@ def merge_prescreen(table: str, manifest_dir: str | None, samples_dir: str, thre
         row.update(pre_run=_text(rec.get("run")), pre_spots=_text(rec.get("spots")), pre_source=_text(rec.get("source")),
                    pre_date=_text(rec.get("date")), pre_pipeline=_text(rec.get("pipeline")),
                    pre_error=_text(rec.get("error")))
-        metrics = rec.get("metrics", {})
+        metrics = dict(rec.get("metrics", {}))
+        metrics.setdefault("centrifuge_reads", rec.get("centrifuge_reads"))
         for m in qc_metrics.METRICS:
             row[f"pre_{m}"] = _text(metrics.get(m))
         set_decision(row, thresholds)
@@ -146,19 +179,34 @@ def add_full(table: str, results_dir: str, config: str | None, pipeline: str = "
     skipped = []
     for d in sorted(glob.glob(os.path.join(results_dir, "*", "fastp"))):
         sample = os.path.basename(os.path.dirname(d))
-        gsm = names.get(sample) or (sample if re.fullmatch(r"GSM\d+", sample) else None)
+        twin = TWIN_RE.match(sample)
+        gsm = names.get(sample) or (sample if re.fullmatch(r"GSM\d+", sample) else None) or (sample if twin else None)
         if not gsm:
             skipped.append(sample)
             continue
         files = full_run_files(results_dir, sample)
         metrics = qc_metrics.collect(files)
+        # species statistics of a full run are in the sample's QC record (workflow rule species_qc)
+        record = os.path.join(results_dir, sample, "qc", f"{sample}.qc.json")
+        record_data = None
+        if os.path.exists(record):
+            with open(record, encoding="utf-8") as fh:
+                record_data = json.load(fh)
+            species = record_data.get("species") or {}
+            metrics.update({k: v for k, v in species.items() if k in qc_metrics.METRICS})
         row = _row(rows, gsm)
+        if twin:
+            row["twin_of"] = twin.group(1)
+            row["GSE"] = row["GSE"] or rows.get(twin.group(1), {}).get("GSE", "")
         mtime = max((os.path.getmtime(p) for p in files.values() if os.path.exists(p)), default=None)
         row.update(full_sample=sample, full_counted=counted.get(sample, ""),
                    full_results_dir=os.path.abspath(results_dir),
                    full_date=datetime.date.fromtimestamp(mtime).isoformat() if mtime else "", full_pipeline=pipeline)
         for m in qc_metrics.METRICS:
             row[f"full_{m}"] = _text(metrics.get(m))
+        extra = qc_metrics.record_columns(record_data) if record_data else {}
+        for m in qc_metrics.RECORD_COLUMNS:
+            row[f"full_{m}"] = _text(extra.get(m))
         n += 1
     write_table(rows, table)
     print(f"added full-run metrics for {n} samples from {results_dir}", file=sys.stderr)
@@ -178,6 +226,14 @@ def summary(table: str) -> str:
              "strand call: " + str(dict(Counter(r["pre_strand_call"] or "none" for r in screened))),
              "passing samples: " + str(sum(r["pre_decision"] == "pass" for r in screened)) + " in "
              + str(len({r["GSE"] for r in screened if r["pre_decision"] == "pass"})) + " studies"]
+    large = Counter(r["GSE"] for r in screened if r["large_study"] == "yes" and r["pre_decision"] == "pass")
+    if large:
+        rest = [r for r in screened if r["large_study"] != "yes"]
+        lines.append("large studies (report statistics with and without them): "
+                     + ", ".join(f"{g} {n} passing" for g, n in large.most_common()))
+        lines.append("without them: " + str(sum(r["pre_decision"] == "pass" for r in rest)) + " passing of "
+                     + str(len(rest)) + " screened, in "
+                     + str(len({r["GSE"] for r in rest if r["pre_decision"] == "pass"})) + " studies")
     return "\n".join(lines)
 
 
