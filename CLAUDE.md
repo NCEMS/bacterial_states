@@ -56,7 +56,6 @@ Bundle file names are `ecoli_ingest_*` / `ecoli_atlas_*` (other microbes may fol
 # host (login node has no GPU; training goes through SLURM)
 conda activate ecoli_ingest        # snakemake + all workflow tools
 conda activate ecoli_atlas         # torch (CPU), sklearn, pandas, optuna, umap
-export ECOLI_INGEST_APPTAINER=/mnt/gs21/scratch/jbarrick/ncems/build/apptainer_local/bin/apptainer  # unprivileged apptainer
 
 pytest ecoli_atlas/tests                # in ecoli_atlas;  pytest ecoli_ingest/tests in ecoli_ingest
 cd work/experiment3 && ecoli_ingest check && ecoli_ingest run -n        # tutorial run dir
