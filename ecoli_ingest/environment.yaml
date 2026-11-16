@@ -7,8 +7,13 @@
 # This list is the single source of truth for the workflow's tool dependencies; the container
 # definition in build/Singularity.def is rebuilt from the same list. Only tools the Snakefile and
 # its scripts actually call are included.
+#
+# macOS: bioconda builds vg and centrifuge for Linux only; the barricklab channel provides macOS
+# builds of the same versions (Apple Silicon, and Intel with macOS 10.15 or later). It has no Linux
+# packages of either, so Linux installs still get them from bioconda.
 name: ecoli_ingest
 channels:
+  - https://barricklab.github.io/conda/
   - conda-forge
   - bioconda
 dependencies:

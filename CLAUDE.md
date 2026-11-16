@@ -114,8 +114,9 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   checkpoint `strand_passed_samples` (`not_counted_reason` in `strandedness.tsv`). The old keys
   `centrifuge_organism` / `centrifuge_min_percentage` are ignored with a warning. `species_qc` needs
   Centrifuge's `initial.tsv` (a temp file), so it cannot be added to a finished run without
-  re-running Centrifuge. `keep_alignments: false` makes `.gam` / `_sort.bam` temporary (deleted
-  after the QC steps); default is to keep them. `qc_table.py add-full` turns each record into
+  re-running Centrifuge. `keep_alignments: false` makes `_sort.bam` temporary (deleted
+  after the QC steps); default is to keep it. The `.gam`, the gzipped trimmed reads and Centrifuge's
+  other intermediates (`centrifuge/tmp/`) are always deleted once used. `qc_table.py add-full` turns each record into
   `full_*` columns (`qc_metrics.RECORD_COLUMNS`). `dna_fraction_est` in the record is the
   coverage-based estimate (median over bins of the lower strand's depth), calibrated with
   DNA-spiked twins (`atlas_build/twins/make_twins.py`, `work/dna_calibration/`); the antisense fit

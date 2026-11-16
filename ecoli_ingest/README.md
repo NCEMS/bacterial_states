@@ -192,7 +192,7 @@ Set `results_dir: "results"` in `config.yaml` for a fixed directory name instead
 | `strandedness.tsv` | per sample: read orientation fractions, the call (forward, reverse, unstranded) and whether it was counted |
 | `counting_method.json` | annotation, featureCounts options and the orientation used for each sample |
 | `deseq2/` | normalized counts, PCA, one `<ref>_vs_<test>_deseq_results.tsv` per contrast |
-| `<sample>/` | per-sample fastp, FastQC, Centrifuge, vg (`.gam`, sorted BAM; deleted after the run with `keep_alignments: false`), RSeQC, feature overlap |
+| `<sample>/` | per-sample fastp, FastQC, Centrifuge, vg (sorted BAM, `vg stats`), RSeQC, feature overlap. The trimmed reads, Centrifuge's per-read tables and the `.gam` (several GB per sample) are deleted once used; the sorted BAM too with `keep_alignments: false` |
 | `../checkpoints/qc_failures.json` | samples excluded by the QC gates and why |
 | `../checkpoints/strandedness_failures.json` | samples not counted after alignment: library not strand-specific, or refused by the species gate |
 | `<sample>/qc/<sample>_species.json` | species statistics and the gate's verdict (`ok`, `not_ecoli`, `phage`, `mixed_organism`, `no_species`) |

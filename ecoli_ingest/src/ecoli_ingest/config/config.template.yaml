@@ -87,9 +87,9 @@ fastp_min_kept_percentage: 75.0
 # how many runs are fetched at the same time (`ecoli_ingest run --max-downloads N` overrides).
 # sra_method: auto = sra-tools (prefetch + fasterq-dump, from NCBI) first and the ENA FASTQ files as
 # the backup; "sra-tools" or "ena" = that source only.
-# Alignments (<sample>/vg/<sample>.gam and <sample>_sort.bam) are the largest outputs. Set false to
-# have them deleted once counting and the QC record are done; the per-sample QC record and the
-# coverage track keep what is needed from them.
+# The sorted BAM (<sample>/vg/<sample>_sort.bam) is the largest output. Set false to have it
+# deleted once counting and the QC record are done; the per-sample QC record and the coverage
+# track keep what is needed from it. (The .gam is always deleted once used.)
 keep_alignments: true
 
 # Optional table with a `run_accession` column (for example the atlas manifest's runs.tsv). Library

@@ -133,7 +133,7 @@ def test_dry_run_rejects_unstranded_mode(rundir):
 
 def test_alignments_are_temporary_only_on_request(rundir):
     text = paths.snakefile().read_text()
-    assert 'alignment(f"{results_dir}/{{sample}}/vg/{{sample}}.gam")' in text
+    assert 'temp(f"{results_dir}/{{sample}}/vg/{{sample}}.gam")' in text      # always removed once used
     assert 'alignment(f"{results_dir}/{{sample}}/vg/{{sample}}_sort.bam")' in text
     for extra in ("", "keep_alignments: false\n"):
         (rundir / "config.yaml").write_text(CONFIG_PAIRED + extra)

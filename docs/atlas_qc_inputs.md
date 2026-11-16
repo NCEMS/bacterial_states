@@ -209,9 +209,9 @@ Differences from the specification above:
   and tRNA), `antisense_assignment`, `gene_body_slope`, `reads.length_quantiles`,
   `composition.short_features` (reads on features under 200 nt, rRNA and tRNA genes left out).
 - Unstranded samples are not counted and get no record.
-- **Deleting alignments.** With `keep_alignments: false` in `config.yaml`, `<s>.gam`,
-  `<s>_sort.bam` and its index are removed as soon as counting, the coverage track and the QC
-  steps have read them. A two-sample test left 7 MB of results and no alignment file.
+- **Deleting alignments.** `<s>.gam` is always removed once `vg surject` and `vg stats` have
+  read it. With `keep_alignments: false` in `config.yaml`, `<s>_sort.bam` and its index are
+  removed too, as soon as counting, the coverage track and the QC steps have read them. A two-sample test left 7 MB of results and no alignment file.
 
 ### In the QC table
 
