@@ -23,7 +23,15 @@ conda activate ecoli_ingest
 pip install -e ./ecoli_ingest
 ```
 
-**B. Apptainer image** — for hosts without conda. Any Python ≥ 3.9 plus
+This works on Linux and on macOS, both Apple Silicon and Intel (macOS 10.15 or later), with the
+same commands. bioconda builds vg and Centrifuge for Linux only, so `environment.yaml` also lists
+the [barricklab channel](https://github.com/barricklab/conda), which has macOS builds of the same
+versions (vg 1.63.1 and Centrifuge 1.0.4.2); on Linux both still come from bioconda. The
+[GSE271069 example](../examples/GSE271069_nutrient_stress_time_course/README.md) was run on both
+platforms. If mamba reports that `vg=1.63.1` does not exist on a Mac, clear its cached channel
+index (`mamba clean --index-cache`) and try again.
+
+**B. Apptainer image** — for Linux hosts without conda (Apptainer does not run on macOS). Any Python ≥ 3.9 plus
 [Apptainer](https://apptainer.org/docs/admin/main/installation.html) or Singularity
 (an unprivileged install is fine, see `docs/cyverse.md`):
 

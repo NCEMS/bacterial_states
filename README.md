@@ -29,7 +29,7 @@ fastq ──► Ecoli_inGEST ──► counts ──► Ecoli_ATLAS embed ──
 | Data (downloaded separately) | graph index + annotation (173 MB download, 674 MB unpacked); Centrifuge DB (6.9 GB, optional); container image (5.3 GB, optional) | trained models + atlas embeddings (~20 MB); training data (~56 MB) |
 | Docs | [ecoli_ingest/README.md](ecoli_ingest/README.md) | [ecoli_atlas/README.md](ecoli_atlas/README.md) |
 
-Both can be installed and used independently. Data bundles are fetched with
+Both can be installed and used independently, on Linux or macOS (Apple Silicon or Intel). Data bundles are fetched with
 `ecoli_ingest download …` and `ecoli_atlas download …` from the
 [`resources-v1` release](https://github.com/NCEMS/bacterial_states/releases/tag/resources-v1) of this repository (the
 Centrifuge index comes from its authors; the optional container image is on CyVerse for now).
