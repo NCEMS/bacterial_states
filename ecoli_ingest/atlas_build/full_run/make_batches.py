@@ -79,7 +79,9 @@ def main(argv=None) -> int:
     ap.add_argument("--max-gb", type=float, default=200.0)
     ap.add_argument("--max-samples", type=int, default=150)
     ap.add_argument("--cpus", type=int, default=48)
-    ap.add_argument("--fastp-min-kept", type=float, default=75.0)
+    ap.add_argument("--fastp-min-kept", type=float, default=50.0,
+                    help="fastp gate of the recount; kept low so that every sample is counted and the "
+                         "trimming rule is applied afterwards from full_pct_kept in sample_qc.tsv")
     args = ap.parse_args(argv)
 
     qc = [r for r in read_tsv(args.qc) if r["pre_decision"] == "pass"]
@@ -126,7 +128,7 @@ def main(argv=None) -> int:
                          f'experiment: "{name}"\nresults_dir: "results"\nsamples:\n')
                 for s in sorted(b, key=lambda s: s["GSM"]):
                     fh.write(f'  {s["GSM"]}:\n    accession: "{s["GSM"]}"\n')
-                fh.write(f"centrifuge: true\nfastp_min_kept_percentage: {args.fastp_min_kept}\n"
+                fh.write(f"centrifuge: true\nvg_index_local: true\nfeaturecounts_tmp_local: true\nfastp_min_kept_percentage: {args.fastp_min_kept}\n"
                          f'keep_alignments: false\nrun_metadata: "{runs_tsv}"\n')
             for s in b:
                 with open(os.path.join(d, "manifest", s["GSM"] + ".json"), "w", encoding="utf-8") as fh:

@@ -38,11 +38,21 @@ fi
 set +u; conda activate ecoli_ingest; set -u
 export ECOLI_INGEST_RESOURCES=${ECOLI_INGEST_RESOURCES:-$REPO/resources}
 INGEST="$REPO/bin/ecoli_ingest"
+# vg giraffe maps a writable distance index as a shared writable file. On a network file system
+# that stalls every alignment as soon as several nodes align at once; a read-only file is mapped
+# read-only.
+chmod a-w "$ECOLI_INGEST_RESOURCES"/vg/*.dist 2>/dev/null || true
 RUN="$RUN_ROOT/$BATCH"
 mkdir -p "$RUN/sra/manifest" "$OUT/results" "$OUT/done" "$OUT/failed"
 cp "$OUT/batches/$BATCH/config.yaml" "$RUN/config.yaml"
 cp "$OUT/batches/$BATCH"/manifest/*.json "$RUN/sra/manifest/"
 cd "$RUN"
+
+# A killed job (scancel, time limit, node failure) leaves partly written outputs, which Snakemake
+# took for finished files on resume in spite of --rerun-incomplete. Remove them and what was made
+# from them before continuing.
+python "$REPO/ecoli_ingest/atlas_build/full_run/clear_incomplete.py" .
+rm -f results/temp-core-*.tmp   # paired-read temporary files of a killed featureCounts
 
 # array tasks start together: spread the first requests to the SRA
 if [[ -n "${SLURM_ARRAY_TASK_ID:-}" ]]; then sleep $(( RANDOM % 120 )); fi
@@ -62,7 +72,13 @@ fi
 
 DEST="$OUT/results/$BATCH"
 mkdir -p "$DEST"
-rsync -a --delete results/ "$DEST/results/"
+# Reads, alignments and Centrifuge's per-read table are intermediates. A run that was continued
+# after a failure can still hold them (Snakemake does not always remove temp() files then); they
+# are not results and are left behind.
+rsync -a --delete --delete-excluded \
+    --exclude='/*/raw/' --exclude='/*/*.fastq.gz' --exclude='/*/centrifuge/initial.tsv' \
+    --exclude='/*/centrifuge/tmp/' --exclude='/*/vg/*.gam' --exclude='/*/vg/*.bam' \
+    --exclude='/temp-core-*' results/ "$DEST/results/"
 rsync -a checkpoints/qc_failures.json config.yaml run.log "$DEST/"
 [[ -d benchmarks ]] && rsync -a benchmarks/ "$DEST/benchmarks/"
 rm -f "$OUT/failed/$BATCH.log"
