@@ -582,12 +582,13 @@ rule rseqc:
         bam_index = alignment(f"{results_dir}/{{sample}}/vg/{{sample}}_sort.bam.bai")
     params:
         annotation_bed = annotation_bed
+    threads: 8   # used by samtools sort only; the RSeQC scripts run on one core
     benchmark: f"benchmarks/{{sample}}_rseqc_benchmark.txt"
     shell:
         r"""
         mkdir -p {results_dir}/{wildcards.sample}/rseqc
         infer_experiment.py -i {input.bam} -r {params.annotation_bed} > {output.infer_experiment}
-        samtools sort {input.bam} > {output.sorted_bam}
+        samtools sort -@ {threads} -o {output.sorted_bam} {input.bam}
         samtools index {output.sorted_bam}
         awk -F"\t" '$4 ~ /^CDS:/' {params.annotation_bed} > {results_dir}/{wildcards.sample}/rseqc/genes.bed
         # run inside the rseqc directory: geneBody_coverage.py writes a log.txt into the cwd
