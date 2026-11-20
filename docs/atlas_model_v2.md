@@ -1,8 +1,21 @@
 # Atlas model v2: design
 
-Status: design only (2026-11-15). No code exists for this model yet. It will be trained on counts
-from the revised inGEST (`docs/counting.md`) once the atlas has been recounted. The QC that the
-recount has to save for this model is listed in `docs/atlas_qc_inputs.md`.
+Status: design of 2026-11-15. A first stage is implemented in `ecoli_atlas` (2026-11-19, see
+`ecoli_atlas/README.md`): feature groups (section 1), normalization (2), the rRNA / tRNA and QC
+covariates (3, 5), the jointly trained model with its two heads and alignment terms (6) and part of
+the evaluation (8). Not implemented yet: missing-gene inference (4), the DNA term (5a), the
+corrected and denoised counts (7), the deletion and twin checks of section 8. The model is trained
+on counts from the revised inGEST (`docs/counting.md`); the QC the recount saves for it is listed
+in `docs/atlas_qc_inputs.md`.
+
+
+> **As implemented (2026-11-20).** To keep the embedding comparable with the first atlas model, the
+> implementation keeps that model's block layout and two-stage fit instead of the single jointly
+> trained embedding described below: supervised blocks for growth phase (6), medium type (12) and
+> lab strain (4), each fitted on its labelled samples, then a residual block (24) fitted with the
+> count decoder on all training samples while the blocks are frozen. This brings back a lab-strain
+> call (decisions 3 and 4 below are superseded on that point). TEST and the folds hold reference
+> samples only, as before. The count likelihood, feature groups and covariates are as described here.
 
 ## Goals
 
@@ -179,8 +192,9 @@ One model, trained jointly.
 - **Heads on `z`:** two linear classifiers with class-weighted cross-entropy; samples without a
   label do not contribute.
   - Growth phase: `exponential` (1,742 in v1) against `stationary` (234). `lag`,
-    `early_exponential`, `early_stationary` and `late_stationary` (289 together) carry no label in
-    training and serve as a check: they should fall between the two classes.
+    `early_exponential` and `transition` (which includes late exponential) carry no label in training and serve
+    as a check: they should fall between the two classes. `late_stationary` carries no label
+    either and is not a check: it is left out of every phase evaluation (decided 2026-11-19).
   - Medium type: complex against defined (`medium_type`, 1,117 and 1,080 in v1).
 - **Alignment terms**, as in v1 (`losses.py`, `train_residual.py`): samples of matching control
   conditions from different studies are pulled together, samples of different conditions within a

@@ -1,187 +1,130 @@
-"""Metadata harmonisation into training labels, condition identities and control masks."""
-from __future__ import annotations
+"""Labels from the sample metadata (``metadata_v2.tsv`` of the inGEST atlas build).
 
-from dataclasses import dataclass
+Two things are read from it: the classes the heads are trained on, and which samples are known
+to be the same or different conditions (for the within-study push and the cross-study control pull).
+"""
+from __future__ import annotations
 
 import numpy as np
 import pandas as pd
 
-from .config import PHASE_ORDER
+from .config import HEADS
 
-CORE_META_COLS = ["gse", "strain_background", "strain", "medium_type", "base_medium", "growth_phase",
-                  "stress", "carbon_source", "is_lab_strain"]
-EXTRA_META_COLS = ["substrain", "OD600", "temperature(C)", "oxygen", "culture_vessel",
-                   "culture_volume(mL)", "stress_type", "stress_subtype", "title"]
-RARE_COLLAPSED = ["growth_phase", "medium_type", "strain_background", "carbon_source", "is_lab_strain"]
-PHASE_COLLAPSE = {"lag": "exponential", "early_exponential": "exponential", "mid_exponential": "exponential",
-                  "early_stationary": "stationary", "late_stationary": "stationary"}
-
-# Condition identity = the full metadata record except sample id and study (cell 39 of the notebook)
-IDENTITY_FIELDS = ["strain", "strain_background", "is_lab_strain", "medium_type", "base_medium",
-                   "growth_phase", "OD600", "carbon_source", "temperature(C)", "oxygen",
-                   "culture_vessel", "culture_volume(mL)", "stress", "stress_type", "stress_subtype"]
-CONTROL_FIELDS = ["growth_phase", "medium_type", "carbon_source", "base_medium"]
-K12_PATTERN = r"mg\s*1655|w3110|bw\s*25113|mc4100|dh5|dh10b|jm10[19]|top\s*10|ncm3722|k[\s_-]?12"
-
-# Sample ids are "<GSM accession>_<SRR run>"; one GSM may span several runs.
-GSM_RE = r"(GSM\d+)"
-MULTIRUN_POLICY = "mean"   # how runs of one GSM are collapsed before case-study analyses
-
-# Oxygen is never supervised; these spellings are the ones the notebook recognised. Anything else
-# (including the frequent "aeorbic" typo in the metadata) maps to None and is reported, not fixed.
-OX_LOW = {"anaerobic", "microaerobic", "micro-aerobic", "microaerophilic", "anoxic", "hypoxic",
-          "low oxygen", "low_oxygen", "oxygen limited", "oxygen-limited"}
-OX_AIR = {"aerobic", "oxic", "air", "aerated", "normoxic"}
+# growth_phase value -> phase class. `late_stationary` is deliberately absent: those samples carry
+# no phase label and are not part of any phase evaluation.
+PHASE_CLASS = {"mid_exponential": "exponential", "stationary": "stationary"}
+# growth_phase value -> level of the ordinal phase head (config.PHASE_LEVELS). Here a culture of 24 to
+# 72 h counts as stationary; `long_term_stationary`, `early_exponential` and `lag` have no level
+PHASE_LEVEL = {"mid_exponential": 0, "transition": 1, "stationary": 2, "late_stationary": 2}
+# phases between the two classes: unlabelled, and the head's output on them is reported as a check
+PHASE_CHECK = ("lag", "early_exponential", "transition")
+MEDIUM_CLASSES = HEADS["medium"]
+# media between the two classes (`medium_class` values): unlabelled, the head's output on them is reported as a check
+MEDIUM_CHECK = ("minimal_plus_hydrolysate", "defined_rich", "natural_fluid")
+# strain_group value -> lab strain class (the first model's `is_lab_strain`); an empty group has no label
+LAB_GROUPS = ("K-12", "B", "C", "W")
+# a sample's condition within its study
+CONDITION_FIELDS = ("growth_phase", "culture_mode", "base_medium", "medium_class", "amino_acids_supplied", "carbon_source",
+                    "oxygen", "growth_temperature", "genotype_class", "perturbed_genes", "inducer_added", "treatment", "exposure")
+# what must agree for two control samples of different studies to count as the same condition
+CONTROL_FIELDS = ("growth_phase", "base_medium", "medium_class", "carbon_source", "oxygen", "growth_temperature")
+REQUIRED = tuple(dict.fromkeys(("GSE", "phase2", "medium_type", "treated", "standard_rnaseq", "is_control", "is_wild_type",
+                                "is_reference_genotype", "planktonic_batch", "strain_group", "growth_phase_basis") + CONDITION_FIELDS))
 
 
-def oxygen_class(v):
-    """Map a raw oxygen annotation to 'low', 'aerobic', or None."""
-    try:
-        if v is None or pd.isna(v):
-            return None
-    except (TypeError, ValueError):
-        pass
-    t = str(v).strip().lower()
-    return "low" if t in OX_LOW else ("aerobic" if t in OX_AIR else None)
+def _true(s: pd.Series) -> np.ndarray:
+    return s.astype(str).str.strip().str.lower().isin(("true", "yes", "1")).to_numpy()
 
 
-def gsm_accession(index) -> pd.Series:
-    """GSM accession of every sample id (``GSM123_SRR456`` -> ``GSM123``); NaN when there is none."""
-    idx = pd.Index(index).astype(str)
-    return idx.to_series(index=idx).str.extract(GSM_RE)[0]
+def check_columns(meta: pd.DataFrame) -> None:
+    missing = sorted(set(REQUIRED) - set(meta.columns))
+    if missing:
+        raise ValueError(f"metadata lacks columns {missing}")
 
 
-def rows_of_gsm(index) -> dict:
-    """GSM accession -> list of row positions (one per sequencing run)."""
-    out: dict = {}
-    for i, acc in enumerate(gsm_accession(index).values):
-        if pd.notna(acc):
-            out.setdefault(acc, []).append(i)
+def is_reference(meta: pd.DataFrame) -> np.ndarray:
+    """Reference samples: untreated, and of the wild type or of the baseline genotype a study
+    compares against. TEST and the cross-validation folds are made of these samples only, and the
+    preprocessing statistics come from them; all other samples only add to the training pool."""
+    check_columns(meta)
+    return _true(meta["is_reference_genotype"]) & (meta["treated"].astype(str).str.strip().str.lower() == "false").to_numpy()
+
+
+def head_labels(meta: pd.DataFrame) -> pd.DataFrame:
+    """Columns ``phase``, ``medium`` and ``lab_strain`` (class name or NaN). ``phase`` is set only
+    where ``phase2`` is (untreated, standard RNA-seq samples) and the growth phase is one of the two
+    clean classes. ``medium`` is `rich` for complex broths and `minimal` for salts with a carbon
+    source; every medium in between has no label. ``lab_strain`` is `lab` for the laboratory
+    lineages (LAB_GROUPS) and `non_lab` for every other known strain group (pathogens, natural
+    isolates, probiotic strains)."""
+    check_columns(meta)
+    out = pd.DataFrame(index=meta.index)
+    out["phase"] = meta["growth_phase"].map(PHASE_CLASS).where(meta["phase2"].astype(str).str.strip() != "")
+    out["medium"] = meta["medium_type"].where(meta["medium_type"].isin(MEDIUM_CLASSES))
+    group = meta["strain_group"].astype(str).str.strip()
+    out["lab_strain"] = pd.Series(np.where(group.isin(LAB_GROUPS), "lab", "non_lab"), index=meta.index).where(group != "")
+    return out.astype("object")
+
+
+def scored_labels(meta: pd.DataFrame, labels: pd.DataFrame) -> pd.DataFrame:
+    """The labels a call is scored on. As ``labels``, but a phase label counts only where the
+    growth phase is stated in the study's text; a phase inferred from an OD or a culture time is
+    used for fitting and left out of every score."""
+    out = labels.copy()
+    out["phase"] = out["phase"].where(meta["growth_phase_basis"].astype(str).str.strip() == "stated")
     return out
 
 
-def agg_rows(mat, row_lists, how: str = MULTIRUN_POLICY) -> np.ndarray:
-    """Collapse each sample's sequencing runs (lists of row positions) into one vector."""
-    M = np.asarray(mat)
-    if how == "mean":
-        return np.vstack([M[r].mean(0) for r in row_lists])
-    return np.vstack([M[r[0]] for r in row_lists])
+def label_codes(labels: pd.DataFrame) -> dict:
+    """head -> int array (0 / 1, -1 = no label)."""
+    return {h: labels[h].map({c: i for i, c in enumerate(classes)}).fillna(-1).astype(int).to_numpy()
+            for h, classes in HEADS.items()}
 
 
-def collapse_runs(df: pd.DataFrame, how: str = MULTIRUN_POLICY) -> pd.DataFrame:
-    """Collapse the rows of one GSM into one row indexed by the accession. Numeric columns are
-    averaged (``how="mean"``) or taken from the first run; other columns take the first run's value.
-    Rows whose id carries no GSM accession are kept unchanged under their own id."""
-    acc = gsm_accession(df.index)
-    key = acc.where(acc.notna(), pd.Series(df.index.astype(str), index=acc.index)).values
-    if how == "mean":
-        num = df.select_dtypes(include="number").columns
-        other = [c for c in df.columns if c not in set(num)]
-        parts = []
-        if len(num):
-            parts.append(df[num].groupby(key, sort=False).mean())
-        if other:
-            parts.append(df[other].groupby(key, sort=False).first())
-        out = pd.concat(parts, axis=1)[list(df.columns)] if parts else df.iloc[:0]
-    else:
-        out = df.groupby(key, sort=False).first()
-    out.index = out.index.astype(str)
-    out.index.name = df.index.name
+def _untreated_standard(meta: pd.DataFrame) -> np.ndarray:
+    return (~_true(meta["treated"])) & (meta["treated"].astype(str).str.strip() != "").to_numpy() & _true(meta["standard_rnaseq"])
+
+
+def phase_levels(meta: pd.DataFrame) -> np.ndarray:
+    """Level of every sample on the ordered phase scale (PHASE_LEVEL; -1 = none). Only untreated,
+    standard RNA-seq samples have one, as for the phase classes."""
+    check_columns(meta)
+    return meta["growth_phase"].map(PHASE_LEVEL).where(_untreated_standard(meta)).fillna(-1).astype(int).to_numpy()
+
+
+def fit_codes(meta: pd.DataFrame, labels: pd.DataFrame, phase_head: str = "binary") -> dict:
+    """head -> the codes the head is fitted on: ``label_codes``, with the phase levels in place of
+    the two phase classes for the ordinal phase head."""
+    out = label_codes(labels)
+    if phase_head == "ordinal":
+        out["phase"] = phase_levels(meta)
     return out
 
 
-def canonical_stress(x) -> str:
-    return ";".join(sorted(s.strip() for s in str(x).split(";") if s.strip()))
+def phase_check_group(meta: pd.DataFrame) -> pd.Series:
+    """The in-between phase of untreated standard samples ('' for all others)."""
+    ok = _untreated_standard(meta)
+    return meta["growth_phase"].where(meta["growth_phase"].isin(PHASE_CHECK) & ok, "")
 
 
-def drop_rare(s: pd.Series, min_n: int) -> pd.Series:
-    s = s.copy()
-    vc = s.value_counts()
-    s[s.isin(vc[vc < min_n].index)] = np.nan
-    return s
+def medium_check_group(meta: pd.DataFrame) -> pd.Series:
+    """The in-between medium class of a sample ('' for all others)."""
+    return meta["medium_class"].where(meta["medium_class"].isin(MEDIUM_CHECK), "")
 
 
-def build_labels(meta: pd.DataFrame, min_class_n: int = 10) -> pd.DataFrame:
-    """Harmonise the raw metadata table (metadata_revised.csv layout) into modelling labels."""
-    meta = meta.copy()
-    meta["strain_background"] = meta["strain"]  # the notebook uses the strain field as background
-    extra = [c for c in EXTRA_META_COLS if c in meta.columns]
-    missing_core = [c for c in CORE_META_COLS if c not in meta.columns]
-    if missing_core:
-        raise ValueError(f"metadata lacks required columns: {missing_core}")
-    meta = meta[CORE_META_COLS + extra].copy()
+def condition_identity(meta: pd.DataFrame) -> dict:
+    """Arrays for the alignment terms.
 
-    meta["growth_phase"] = meta["growth_phase"].replace(PHASE_COLLAPSE)
-    meta["growth_phase"] = meta["growth_phase"].where(meta["growth_phase"].isin(PHASE_ORDER), np.nan)
-    meta["is_lab_strain"] = meta["is_lab_strain"].astype("boolean")
-    complex_medium = meta["medium_type"] == "complex"
-    meta.loc[complex_medium, "carbon_source"] = np.nan
-    meta["stress"] = meta["stress"].fillna("").apply(canonical_stress)
-
-    for v in RARE_COLLAPSED:
-        meta[v + "_c"] = drop_rare(meta[v], min_class_n)
-
-    meta["is_stressed"] = meta["stress"].str.len() > 0
-    annotated = meta["growth_phase_c"].notna()
-    for sc in ("strain", "strain_background", "strain_background_c"):
-        annotated = annotated | meta[sc].notna()
-    meta["is_wildtype"] = (~meta["is_stressed"] & annotated).values
-    return meta
-
-
-def rowkey(df: pd.DataFrame, cols, sep: str = "|") -> pd.Series:
-    """Join columns into one identity string; missing values render as 'nan' and therefore match."""
-    return df[cols].astype("object").apply(lambda s: s.map(str)).agg(sep.join, axis=1)
-
-
-def with_collapsed(meta: pd.DataFrame, cols) -> list:
-    """Prefer the rare-class-collapsed ``<col>_c`` version of each column when it exists."""
-    return [(c + "_c") if (c + "_c") in meta.columns else c
-            for c in cols if ((c + "_c") in meta.columns or c in meta.columns)]
-
-
-@dataclass
-class FactorCodes:
-    name: str
-    classes: list          # sorted category labels as strings
-    codes: np.ndarray      # int, -1 = unlabelled
-    pos_idx: int = 1       # categories are sorted; index 1 is the positive class
-
-    @property
-    def n_classes(self) -> int:
-        return len(self.classes)
-
-    @property
-    def positive_class(self) -> str:
-        return self.classes[self.pos_idx]
-
-
-def factor_codes(meta: pd.DataFrame, factor: str) -> FactorCodes:
-    cat = pd.Categorical(meta[factor + "_c"])
-    fc = FactorCodes(factor, [str(c) for c in cat.categories], np.asarray(cat.codes, dtype=np.int64))
-    if fc.n_classes != 2:
-        raise ValueError(f"{factor}: expected a binary factor, found classes {fc.classes}")
-    return fc
-
-
-def condition_ids(meta: pd.DataFrame) -> np.ndarray:
-    return np.asarray(pd.Categorical(rowkey(meta, with_collapsed(meta, IDENTITY_FIELDS))).codes, dtype=np.int64)
-
-
-def is_annotated(meta: pd.DataFrame) -> np.ndarray:
-    return meta["growth_phase_c"].notna().values
-
-
-def is_k12(meta: pd.DataFrame) -> np.ndarray:
-    bg = meta["strain_background"].astype(str).str.lower()
-    return bg.str.contains(K12_PATTERN, regex=True, na=False).values
-
-
-def control_condition_ids(meta: pd.DataFrame) -> np.ndarray:
-    return np.asarray(pd.Categorical(rowkey(meta, with_collapsed(meta, CONTROL_FIELDS))).codes, dtype=np.int64)
-
-
-def is_control(meta: pd.DataFrame) -> np.ndarray:
-    """Wild-type K-12 samples with known growth phase and medium type: cross-study anchors."""
-    return (meta["is_wildtype"].fillna(False).astype(bool).values & is_k12(meta)
-            & meta["growth_phase_c"].notna().values & meta["medium_type_c"].notna().values)
+    cond_id     code of the sample's condition (all CONDITION_FIELDS together)
+    is_annot    treatment and genotype are both known, so the condition can be compared
+    ctrl_cond   code of the control condition (CONTROL_FIELDS)
+    is_ctrl     untreated wild-type control in planktonic batch culture with known phase and medium
+    """
+    check_columns(meta)
+    text = meta[list(REQUIRED)].astype(str).apply(lambda s: s.str.strip())
+    cond = text[list(CONDITION_FIELDS)].agg("|".join, axis=1)
+    ctrl = text[list(CONTROL_FIELDS)].agg("|".join, axis=1)
+    is_annot = ((text["treatment"] != "") & (text["genotype_class"] != "")).to_numpy()
+    is_ctrl = (_true(text["is_control"]) & _true(text["is_wild_type"]) & (text["treated"].str.lower() == "false").to_numpy()
+               & _true(text["planktonic_batch"]) & (text["growth_phase"] != "").to_numpy() & (text["medium_class"] != "").to_numpy())
+    return {"cond_id": pd.factorize(cond)[0], "is_annot": is_annot, "ctrl_cond": pd.factorize(ctrl)[0], "is_ctrl": is_ctrl}

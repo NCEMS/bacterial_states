@@ -1,160 +1,91 @@
-"""Synthetic fixtures: a tiny feature table, count tables in the three inGEST flavours, and a
-randomly initialised model bundle with the real file layout."""
+"""Synthetic atlas tables: a small counting annotation, counts with a phase and a medium signal,
+metadata in the metadata_v2 layout and a QC table in the sample_qc layout."""
 from __future__ import annotations
 
 import numpy as np
 import pandas as pd
 import pytest
-import torch
 
-from ecoli_atlas.artifacts import FactorArtifact, ModelBundle
-from ecoli_atlas.models import FactorEncoder, ResidualAE
-
-N_GENES = 60
-N_SAMPLES = 40
+N_CDS, N_STUDIES, PER_STUDY = 80, 12, 10
 
 
 @pytest.fixture(scope="session")
-def rng():
-    return np.random.RandomState(0)
+def feature_table(tmp_path_factory):
+    rows = [dict(Feature_ID=f"CDS_b{i:04d}_g{i:03d}", Symbol=f"g{i:03d}", Locus_Tag=f"b{i:04d}", Type="CDS", Source="NCBI",
+                 Length=900 + i) for i in range(N_CDS)]
+    rows += [dict(Feature_ID="pseudo_b9000_yzzZ", Symbol="yzzZ", Locus_Tag="b9000", Type="pseudo", Source="NCBI", Length=500),
+             dict(Feature_ID="ncRNA_b9100_ssrA", Symbol="ssrA", Locus_Tag="b9100", Type="ncRNA", Source="NCBI", Length=363),
+             dict(Feature_ID="ncRNA_RF00001", Symbol="RF00001", Locus_Tag="", Type="ncRNA", Source="Rfam", Length=120),
+             dict(Feature_ID="rRNA_b9201_rrsA", Symbol="rrsA", Locus_Tag="b9201", Type="rRNA", Source="NCBI", Length=1542),
+             dict(Feature_ID="rRNA_b9202_rrlA", Symbol="rrlA", Locus_Tag="b9202", Type="rRNA", Source="NCBI", Length=2904),
+             dict(Feature_ID="rRNA_b9203_rrfA", Symbol="rrfA", Locus_Tag="b9203", Type="rRNA", Source="NCBI", Length=120),
+             dict(Feature_ID="tRNA_b9301_ileV", Symbol="ileV", Locus_Tag="b9301", Type="tRNA", Source="NCBI", Length=77)]
+    path = tmp_path_factory.mktemp("annotation") / "features.tsv"
+    pd.DataFrame(rows).to_csv(path, sep="\t", index=False)
+    return path
 
 
 @pytest.fixture(scope="session")
-def feature_table():
-    rows = []
-    for i in range(N_GENES):
-        rows.append(dict(feature="gene", **{"class": "protein_coding"}, symbol=f"g{i:03d}", locus_tag=f"b{i:04d}"))
-    # two rRNA and one tRNA, one symbol shared by two loci (ambiguous), one locus without symbol
-    rows += [dict(feature="gene", **{"class": "rRNA"}, symbol="rrsA", locus_tag="b9001"),
-             dict(feature="gene", **{"class": "rRNA"}, symbol="rrsB", locus_tag="b9002"),
-             dict(feature="gene", **{"class": "tRNA"}, symbol="ileV", locus_tag="b9003"),
-             dict(feature="gene", **{"class": "protein_coding"}, symbol="dupX", locus_tag="b9101"),
-             dict(feature="gene", **{"class": "protein_coding"}, symbol="dupX", locus_tag="b9102"),
-             dict(feature="gene", **{"class": "protein_coding"}, symbol=np.nan, locus_tag="b9201")]
-    return pd.DataFrame(rows)
-
-
-@pytest.fixture(scope="session")
-def model_genes():
-    return [f"g{i:03d}" for i in range(N_GENES)]
-
-
-@pytest.fixture(scope="session")
-def counts_symbols(rng, model_genes):
-    """genes x samples, symbol-keyed, plus a gene the model does not know."""
-    data = rng.negative_binomial(5, 0.05, size=(N_GENES + 1, N_SAMPLES)).astype(float)
-    df = pd.DataFrame(data, index=model_genes + ["novelGene"], columns=[f"S{j}" for j in range(N_SAMPLES)])
-    df.index.name = "gene"
-    return df
-
-
-@pytest.fixture(scope="session")
-def bundle(model_genes, rng, tmp_path_factory):
-    torch.manual_seed(0)
-    factors = {}
-    layout, cursor = [], 0
-    specs = {"growth_phase": (3, ["exponential", "stationary"], 0.3, "stationary"),
-             "medium_type": (4, ["complex", "defined"], 0.9, "defined"),
-             "is_lab_strain": (2, ["False", "True"], 0.5, "True")}
-    for f, (dim, classes, thr, pos) in specs.items():
-        m = FactorEncoder(N_GENES, dim, 2, width=16, depth=2, dropout=0.1)
-        factors[f] = FactorArtifact(f, m, classes, thr, pos)
-        layout.append({"block": f, "kind": "factor", "start": cursor, "end": cursor + dim})
-        cursor += dim
-    res_dim = 5
-    layout.append({"block": "residual", "kind": "residual", "start": cursor, "end": cursor + res_dim})
-    residual = ResidualAE(N_GENES, cursor, res_dim, width=16, depth=1, dropout=0.0)
-    prep = {
-        "encoder_norm": "zscore_cpm",
-        "genes": list(model_genes),
-        "zscore_mu": rng.uniform(100, 1000, N_GENES).astype(np.float32),
-        "zscore_sd": rng.uniform(10, 100, N_GENES).astype(np.float32),
-        "tb_mu": rng.normal(size=cursor).astype(np.float32),
-        "tb_sd": rng.uniform(0.5, 2, cursor).astype(np.float32),
-        "factor_order": list(specs),
-        "factor_emb_dims": {f: specs[f][0] for f in specs},
-        "res_dim": res_dim,
-        "top_emb_dim": cursor + res_dim,
-        "block_layout": layout,
-        "factor_classes": {f: specs[f][1] for f in specs},
-        "factor_class_dtype": {f: "str" for f in specs},
-        "factor_thresholds": {f: specs[f][2] for f in specs},
-        "positive_class_index": {f: specs[f][1].index(specs[f][3]) for f in specs},
-        "seed": 0,
-    }
-    b = ModelBundle(factors, residual, prep, manifest={"seed": 0, "factor_order": list(specs)})
-    return b.to("cpu")
-
-
-N_STUDIES, PER_STUDY, N_GENES = 14, 12, 60
-OXYGEN_STUDIES = ("GSE1009", "GSE1012")
-UTI_STUDY = "GSE1012"
-
-
-@pytest.fixture(scope="session")
-def synthetic(tmp_path_factory, feature_table):
-    """A 14-study corpus with phase / medium / lab-strain signal. Two studies (GSE1009, GSE1012) vary
-    oxygen (odd samples low oxygen) so they can serve as oxygen case studies; study GSE1012 doubles as a
-    paired "patient" design through ``uti_titles``."""
-    d = tmp_path_factory.mktemp("synthetic")
-    rng = np.random.RandomState(1)
-    samples, rows = [], []
+def atlas_files(tmp_path_factory, feature_table):
+    """Paths of counts, metadata and QC tables for N_STUDIES studies. Phase raises the first ten
+    genes, a defined medium the next ten; every study has its own depth."""
+    rng = np.random.RandomState(0)
+    feat = pd.read_csv(feature_table, sep="\t", keep_default_na=False)
+    base = rng.gamma(2.0, 200.0, size=len(feat))
+    counts, meta, qc = {}, [], []
     for s in range(N_STUDIES):
-        gse = f"GSE{1000 + s}"
-        lab = s % 3 != 0
         for j in range(PER_STUDY):
-            sid = f"GSM{s * 100 + j}_SRR{s * 100 + j}"
-            phase = "exponential" if j % 2 == 0 else "late_stationary"
-            medium = "complex" if s % 2 == 0 else "defined"
-            samples.append(sid)
-            rows.append({"sample_id": sid, "gse": gse, "strain": "MG1655" if lab else f"clinical{s}",
-                         "strain_background": "K-12" if lab else "clinical isolate", "is_lab_strain": lab,
-                         "medium_type": medium, "base_medium": "LB" if medium == "complex" else "M9",
-                         "growth_phase": phase, "OD600": 0.5 if phase == "exponential" else 2.0,
-                         "carbon_source": np.nan if medium == "complex" else "glucose", "temperature(C)": 37,
-                         "oxygen": ("anaerobic" if (gse in OXYGEN_STUDIES and j % 2 == 1) else "aerobic"), "culture_vessel": "flask", "culture_volume(mL)": 50,
-                         "stress": np.nan if j < 10 else "heat", "stress_type": np.nan, "stress_subtype": np.nan})
-    meta = pd.DataFrame(rows).set_index("sample_id")
-    # counts: b-number keyed genes x samples, with a signal that depends on phase and medium
-    base = rng.gamma(2.0, 200, size=N_GENES)
-    X = np.zeros((N_GENES, len(samples)))
-    for i, sid in enumerate(samples):
-        m = meta.loc[sid]
-        eff = np.ones(N_GENES)
-        eff[:15] *= 3.0 if m["growth_phase"] == "exponential" else 0.4
-        eff[15:30] *= 2.5 if m["medium_type"] == "defined" else 0.5
-        eff[30:40] *= 2.0 if m["is_lab_strain"] else 0.6
-        eff[40:48] *= 0.3 if m["oxygen"] == "anaerobic" else 1.0
-        X[:, i] = rng.poisson(base * eff * rng.uniform(0.7, 1.3))
-    genes = [f"b{i:04d}" for i in range(N_GENES)] + ["b9001", "b9003"]  # rRNA, tRNA
-    X = np.vstack([X, rng.poisson(5000, size=(2, len(samples)))])
-    counts = pd.DataFrame(X, index=pd.Index(genes, name="Geneid"), columns=samples)
-    counts.to_csv(d / "merged_count_table.txt", sep="\t")
-    meta.to_csv(d / "metadata_revised.csv")
-    feature_table.to_csv(d / "feature_table.txt", sep="\t", index=False)
-    return d
-
-
-
-
-def uti_titles():
-    """GSMs of UTI_STUDY paired as <patient>_<UTI|UR> for the paired case-study test (6 patients)."""
-    s = 12  # GSE1012 -> study index 12
-    gsms = [f"GSM{s * 100 + j}" for j in range(PER_STUDY)]
-    titles = [f"P{j // 2:02d}_{'UTI' if j % 2 == 0 else 'UR'}" for j in range(PER_STUDY)]
-    return gsms, titles
+            gsm = f"GSM{s:02d}{j:02d}"
+            stationary = j >= PER_STUDY // 2 if s % 3 == 0 else s % 3 == 2
+            defined = s % 2 == 1
+            mu = base * (0.5 + s / N_STUDIES)
+            mu[:10] *= 6.0 if stationary else 1.0
+            mu[10:20] *= 5.0 if defined else 1.0
+            counts[gsm] = rng.negative_binomial(5, 5 / (5 + mu))
+            phase = "stationary" if stationary else "mid_exponential"
+            if s == 6:
+                phase = "late_stationary" if stationary else "transition"
+            treated = "true" if (s == 7 and j % 2) else "false"
+            meta.append(dict(GSM=gsm, GSE=f"GSE{s:02d}", growth_phase=phase, growth_phase_basis="inferred" if s == 9 else "stated", culture_mode="batch_shaken",
+                             base_medium="M9" if defined else "LB", medium_class=("minimal_plus_hydrolysate" if s == 10 else "defined_minimal" if defined else "complex"),
+                             amino_acids_supplied="false" if defined else "true", carbon_source="glucose", oxygen="aerobic",
+                             growth_temperature="37", genotype_class="wild_type" if j % 2 == 0 else "deletion",
+                             perturbed_genes="" if j % 2 == 0 else "g001", inducer_added="false",
+                             treatment="heat" if treated == "true" else "none", exposure="", is_control="true" if j % 2 == 0 else "false",
+                             is_wild_type="true" if j % 2 == 0 else "false",
+                             is_reference_genotype="true" if j % 2 == 0 else "false", phase2="" if (treated == "true" or s == 6 and not stationary)
+                             else ("stationary" if stationary else "exponential"), planktonic_batch="true",
+                             medium_type=("" if s == 10 else "minimal" if defined else "rich"), treated=treated, standard_rnaseq="true",
+                             stress_family="temperature" if treated == "true" else "none", strain_group=("UPEC" if s % 4 == 3 else "" if s == 8 else "K-12"), usable="true"))
+            paired = s % 2 == 0
+            qc.append(dict(GSM=gsm, GSE=f"GSE{s:02d}", layout="PAIRED" if paired else "SINGLE", instrument_model="Illumina NovaSeq 6000",
+                           in_model="" if s == N_STUDIES - 1 and j == 0 else "atlas_test", full_layout="PE" if paired else "SE",
+                           full_length_q05_r1=40, full_length_q50_r1=75, full_length_q95_r1=75, full_cycles_r1=75, full_pct_kept=95.0,
+                           full_pct_adapter_trimmed=10.0 + s, full_duplication_rate=0.3, full_gc_content=0.51,
+                           full_fraction_forward=0.02, full_fraction_reverse=0.97, full_length_q50_r2=75 if paired else "",
+                           full_fragment_q25=150 if paired else "", full_fragment_q50=200 if paired else "",
+                           full_fragment_q75=260 if paired else "", full_dna_fraction_est=0.0 if j == 1 else 0.004,
+                           full_leakage_b=0.004, full_intergenic_share=0.05, full_gene_body_slope=-0.1 * (s % 4),
+                           full_pct_short_features=2.0, full_pct_top_other_genus_nostable=0.5))
+    d = tmp_path_factory.mktemp("atlas")
+    table = pd.DataFrame(counts, index=feat["Feature_ID"])
+    table.index.name = "Feature_ID"
+    table.to_csv(d / "counts.tsv", sep="\t")
+    pd.DataFrame(meta).to_csv(d / "metadata.tsv", sep="\t", index=False)
+    pd.DataFrame(qc).to_csv(d / "qc.tsv", sep="\t", index=False)
+    return {"counts": d / "counts.tsv", "metadata": d / "metadata.tsv", "qc": d / "qc.tsv", "features": feature_table}
 
 
 @pytest.fixture(scope="session")
-def trained_models(synthetic, tmp_path_factory):
-    """A one-epoch bundle (+ atlas) trained on the synthetic corpus with the oxygen studies forced into TEST."""
+def train_args(atlas_files):
+    return ["--counts", str(atlas_files["counts"]), "--metadata", str(atlas_files["metadata"]), "--qc", str(atlas_files["qc"]),
+            "--features", str(atlas_files["features"])]
+
+
+@pytest.fixture(scope="session")
+def trained(tmp_path_factory, train_args):
+    """A bundle trained for a few epochs through the CLI."""
     from ecoli_atlas.cli import main
-    out = tmp_path_factory.mktemp("trained") / "models"
-    rc = main(["train", "--counts", str(synthetic / "merged_count_table.txt"),
-               "--metadata", str(synthetic / "metadata_revised.csv"),
-               "--feature-table", str(synthetic / "feature_table.txt"),
-               "--out", str(out), "--no-tune", "--factor-epochs", "1", "--top-epochs", "1",
-               "--min-class-n", "5", "--withheld-study", "GSE1013", "--case-studies", ",".join(OXYGEN_STUDIES),
-               "--test-frac", "0.15", "--device", "cpu", "--write-atlas", "--threads", "2"])
-    assert rc == 0
+    out = tmp_path_factory.mktemp("bundle")
+    assert main(["train", *train_args, "--out", str(out), "--epochs", "25", "--device", "cpu", "--test-frac", "0.2"]) == 0
     return out

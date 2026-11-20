@@ -2,111 +2,93 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from ecoli_atlas import io, prepare
-from ecoli_atlas.preprocess import GeneMap, ZScore, align_to_genes, clean_counts, cpm, cpm_array
-
-
-def _write_featurecounts(path, counts_df):
-    cols = ["Geneid", "Chr", "Start", "End", "Strand", "Length"] + \
-           [f"exp_results/{s}/vg/{s}_sort.bam" for s in counts_df.columns]
-    with open(path, "w") as fh:
-        fh.write('# Program:featureCounts v2.0.6; Command:"featureCounts" "-a" "x.gff"\n')
-        fh.write("\t".join(cols) + "\n")
-        for g, row in counts_df.iterrows():
-            fh.write("\t".join([g, "NC_1", "1", "100", "+", "100"] + [str(int(v)) for v in row]) + "\n")
+from ecoli_atlas.features import FeatureSet, read_feature_table
+from ecoli_atlas.io import read_counts, sample_id_from_column
+from ecoli_atlas.prepare import prepare
+from ecoli_atlas.preprocess import (ZScore, align_counts, composition_covariates, log_expression, reference_profile,
+                                    size_factors)
 
 
 def test_sample_id_from_column():
-    assert io.sample_id_from_column("experiment3_results/KO_1/vg/KO_1_sort.bam") == "KO_1"
-    assert io.sample_id_from_column("Paper1st_results/SRR29642643/vg/SRR29642643_sort.bam") == "SRR29642643"
-    assert io.sample_id_from_column("GSM2679698_SRR5742252") == "GSM2679698_SRR5742252"
-    assert io.sample_id_from_column("x/y.bam") == "y"
+    assert sample_id_from_column("experiment3_results/KO_1/vg/KO_1_sort.bam") == "KO_1"
+    assert sample_id_from_column("results/GSM1/vg/GSM1.bam") == "GSM1"
+    assert sample_id_from_column("GSM123") == "GSM123"
 
 
-def test_read_counts_three_formats(tmp_path, counts_symbols):
+def test_read_counts_ingest_layouts(tmp_path):
+    ids = ["CDS_b0001_thrL", "rRNA_b0201_rrsH"]
     fc = tmp_path / "all_samples_raw_counts.txt"
-    _write_featurecounts(fc, counts_symbols)
-    a = io.read_counts(fc)
-    assert list(a.columns) == list(counts_symbols.columns)
-    assert a.index.name == "gene" and a.shape == counts_symbols.shape
-    np.testing.assert_array_equal(a.values, counts_symbols.values)
-
-    # extended table: Gene_Symbol, Gene_IDs_Field, Gene_Summary, coords, counts
-    ext = counts_symbols.copy()
-    ext.insert(0, "Gene_Summary", "some product")
-    ext.insert(0, "Gene_IDs_Field", "b0001,GeneID:1")
-    ext.index.name = "Gene_Symbol"
-    for c in ("Chr", "Start", "End", "Strand", "Length"):
-        ext.insert(2, c, 1)
-    ext.to_csv(tmp_path / "ext.tsv", sep="\t")
-    b = io.read_counts(tmp_path / "ext.tsv")
-    np.testing.assert_array_equal(b.values, counts_symbols.values)
-
-    # inGEST extended table: Feature_ID, identifier columns, coords, counts
-    ext2 = counts_symbols.copy()
-    for c in ("Product", "Dbxref", "Rfam", "Source", "Type", "Locus_Tag", "Symbol"):
-        ext2.insert(0, c, "x")
-    ext2.index.name = "Feature_ID"
-    for c in ("Chr", "Start", "End", "Strand", "Length"):
-        ext2.insert(7, c, 1)
-    ext2.to_csv(tmp_path / "ext2.tsv", sep="\t")
-    b2 = io.read_counts(tmp_path / "ext2.tsv")
-    assert list(b2.columns) == list(counts_symbols.columns)
-    np.testing.assert_array_equal(b2.values, counts_symbols.values)
-
-    # plain genes x samples table with b-numbers and GSM_SRR columns
-    plain = counts_symbols.copy()
-    plain.index.name = "Geneid"
-    plain.to_csv(tmp_path / "plain.txt", sep="\t")
-    c = io.read_counts(tmp_path / "plain.txt")
-    assert c.index.name == "gene"
-    np.testing.assert_array_equal(c.values, counts_symbols.values)
+    fc.write_text('# Program:featureCounts v2.1.1\nGeneid\tChr\tStart\tEnd\tStrand\tLength\tresults/A/vg/A_sort.bam\tresults/B/vg/B_sort.bam\n'
+                  + "".join(f"{g}\tNC\t1\t9\t+\t9\t{i}\t{i + 1}\n" for i, g in enumerate(ids)))
+    ext = tmp_path / "all_samples_counts_extended.tsv"
+    ext.write_text("Feature_ID\tSymbol\tLocus_Tag\tType\tSource\tRfam\tDbxref\tProduct\tChr\tStart\tEnd\tStrand\tLength\tresults/A/vg/A_sort.bam\n"
+                   + "".join(f"{g}\ts\tb\tCDS\tNCBI\t\t\tp\tNC\t1\t9\t+\t9\t{i}\n" for i, g in enumerate(ids)))
+    a, b = read_counts(fc), read_counts(ext)
+    assert list(a.columns) == ["A", "B"] and list(b.columns) == ["A"] and list(a.index) == ids == list(b.index)
+    assert a.loc["rRNA_b0201_rrsH", "B"] == 2
+    dup = tmp_path / "dup.tsv"
+    dup.write_text("gene\tx/A_sort.bam\ty/A_sort.bam\ng\t1\t2\n")
+    with pytest.raises(ValueError, match="duplicate sample names"):
+        read_counts(dup)
 
 
-def test_genemap_and_clean(feature_table, model_genes):
-    gm = GeneMap.from_feature_table(feature_table)
-    assert {"rrsA", "rrsB", "ileV", "b9001", "b9002", "b9003"} <= gm.rna_ids
-    assert gm.locus_to_symbol["b0003"] == "g003"
-    assert "b9101" not in gm.locus_to_symbol and gm.n_ambiguous == 1
-    counts = pd.DataFrame(np.ones((5, 2)), index=["b0000", "b0001", "b9001", "ileV", "b9101"], columns=["s1", "s2"])
-    X = clean_counts(counts, gm)
-    assert list(X.columns) == ["g000", "g001", "b9101"]  # rRNA/tRNA dropped, ambiguous locus kept as-is
-    assert X.shape == (2, 3)
+def test_feature_groups(feature_table):
+    fs = FeatureSet.from_table(read_feature_table(feature_table))
+    assert fs.n == 83 and int(fs.is_mrna.sum()) == 81            # 80 CDS + 1 pseudo, then 2 other RNAs
+    assert fs.ids[-2:] == ["ncRNA_b9100_ssrA", "ncRNA_RF00001"] and not any(i.startswith(("rRNA", "tRNA")) for i in fs.ids)
+    assert fs.families == {"16S": ["rRNA_b9201_rrsA"], "23S": ["rRNA_b9202_rrlA"], "5S": ["rRNA_b9203_rrfA"], "tRNA": ["tRNA_b9301_ileV"]}
+    back = FeatureSet.from_dict(fs.to_dict())
+    assert back.ids == fs.ids and (back.is_mrna == fs.is_mrna).all() and (back.lengths == fs.lengths).all()
+    bad = read_feature_table(feature_table)
+    bad.loc[bad.index[0], "Type"] = "misc"
+    with pytest.raises(ValueError, match="does not know"):
+        FeatureSet.from_table(bad)
 
 
-def test_cpm_and_zscore():
-    X = pd.DataFrame([[1.0, 3.0], [0.0, 0.0], [2.0, 2.0]], columns=["a", "b"])
-    c = cpm(X)
-    assert np.allclose(c.iloc[0].values, [250000, 750000])
-    assert np.allclose(c.iloc[1].values, [0, 0])  # empty library handled
-    assert np.allclose(c.values, cpm_array(X.values))
-    z = ZScore.fit(c.values, rows=np.array([0, 2]))
-    assert z.sd.dtype == np.float32 and np.all(z.sd > 0)
-    const = ZScore.fit(np.array([[5.0, 1.0], [5.0, 2.0]]))
-    assert const.sd[0] == 1.0  # zero variance -> sd 1
+def test_size_factors_recover_depth():
+    rng = np.random.RandomState(1)
+    base = rng.gamma(2.0, 300.0, size=200)
+    depth = np.array([0.5, 1.0, 2.0, 4.0])
+    Y = rng.poisson(base[None, :] * depth[:, None]).astype(float)
+    is_mrna = np.array([True] * 190 + [False] * 10)
+    Y[:, 0] = 0                                    # never seen: not a reference gene
+    Y[0, 1] = 0                                    # a zero in one sample only: skipped for that sample
+    ref = reference_profile(Y, is_mrna, min_presence=0.5)
+    assert np.isnan(ref[0]) and np.isnan(ref[190:]).all() and not np.isnan(ref[1])
+    s = size_factors(Y, ref)
+    assert np.allclose(s / s[1], depth, rtol=0.05)
+    logx = log_expression(Y, s)
+    assert np.abs(logx[0, 5:190] - logx[3, 5:190]).mean() < 0.3      # depth is removed
+    with pytest.raises(ValueError, match="no size factor"):
+        size_factors(np.zeros((1, 200)), ref)
 
 
-def test_align_to_genes(counts_symbols, model_genes):
-    X = counts_symbols.T
-    X = X.drop(columns=["g000", "g001"])
-    aligned, cov = align_to_genes(X, model_genes)
-    assert list(aligned.columns) == model_genes
-    assert cov.n_present == len(model_genes) - 2 and cov.missing == ["g000", "g001"]
-    assert aligned["g000"].sum() == 0 and "novelGene" not in aligned.columns
-    assert 0.9 < cov.fraction < 1
+def test_zscore_weights_and_floor():
+    X = np.array([[0.0, 1.0, 5.0], [2.0, 1.0, 5.2], [4.0, 1.0, 4.8]])
+    z = ZScore.fit(X, sd_floor=0.5)
+    assert np.allclose(z.mu, [2.0, 1.0, 5.0]) and z.sd[1] == 1.0 and z.sd[2] == 0.5     # constant -> 1, small -> floor
+    zw = ZScore.fit(X, w=np.array([1.0, 1.0, 0.0]))
+    assert np.allclose(zw.mu, [1.0, 1.0, 5.1]) and np.allclose(zw.apply(X)[:, 0], [-1.0, 1.0, 3.0])
 
 
-def test_prepare_from_ingest_results(tmp_path, counts_symbols):
-    res = tmp_path / "exp_results"
+def test_align_and_composition(feature_table):
+    fs = FeatureSet.from_table(read_feature_table(feature_table))
+    counts = pd.DataFrame({"A": 10.0, "B": 20.0}, index=fs.ids[1:] + ["rRNA_b9201_rrsA", "tRNA_b9301_ileV", "unknown_x"])
+    Y, fam, cov = align_counts(counts, fs)
+    assert Y.shape == (2, fs.n) and (Y[:, 0] == 0).all() and cov.missing == [fs.ids[0]] and cov.n_present == fs.n - 1
+    assert fam.tolist() == [[10.0, 0.0, 0.0, 10.0], [20.0, 0.0, 0.0, 20.0]]
+    comp = composition_covariates(Y, fam, fs.is_mrna)
+    assert comp.shape == (2, 5) and np.isclose(comp[0, 0], np.log10(800.5)) and np.isclose(comp[0, 1], np.log10(10.5 / 800.5))
+    assert comp[0, 2] < -3                                             # no 23S reads
+
+
+def test_prepare_from_ingest_results(tmp_path):
+    res = tmp_path / "x_results"
     res.mkdir()
-    _write_featurecounts(res / "all_samples_raw_counts.txt", counts_symbols)
-    meta = pd.DataFrame({"sample_id": counts_symbols.columns, "condition": "wt"}).set_index("sample_id")
-    meta.to_csv(tmp_path / "meta.csv")
-    counts, samples = prepare.prepare(res, None, tmp_path / "meta.csv", tmp_path / "out")
-    assert (tmp_path / "out" / "counts.tsv").exists() and (tmp_path / "out" / "samples.tsv").exists()
-    back = io.read_counts(tmp_path / "out" / "counts.tsv")
-    np.testing.assert_array_equal(back.values, counts_symbols.values)
-    assert samples.loc["S0", "source_column"] == "exp_results/S0/vg/S0_sort.bam"
-    assert samples.loc["S0", "condition"] == "wt"
-    with pytest.raises(ValueError):
-        prepare.prepare(None, None, None, tmp_path / "out2")
+    (res / "all_samples_raw_counts.txt").write_text(
+        "# Program:featureCounts\nGeneid\tChr\tStart\tEnd\tStrand\tLength\tx_results/S1/vg/S1_sort.bam\n"
+        "CDS_b0001_thrL\tNC\t1\t9\t+\t9\t7\n")
+    (tmp_path / "meta.tsv").write_text("sample\tcondition\nS1\twt\n")
+    counts, samples = prepare(res, None, tmp_path / "meta.tsv", tmp_path / "out")
+    assert counts.loc["CDS_b0001_thrL", "S1"] == 7 and samples.loc["S1", "condition"] == "wt"
+    assert (tmp_path / "out" / "counts.tsv").exists() and samples.loc["S1", "source_column"].endswith("S1_sort.bam")

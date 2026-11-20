@@ -10,11 +10,13 @@ Two independently installable packages in one repo (GitHub `NCEMS/bacterial_stat
   directory**: `init` writes `config.yaml`, `check` validates tools/resources/reads, `run` executes.
   Two execution paths: the `ecoli_ingest` conda env (`environment.yaml`, primary) or the Apptainer
   image (`--container always`); `auto` picks based on whether `snakemake` and `vg` are on PATH.
-- **`ecoli_atlas/`** — Ecoli_ATLAS. Pure-Python (torch, sklearn, pandas) encoder–decoder that
-  embeds samples and compares them with the atlas. CLI: `prepare`, `train`, `embed`, `compare`,
-  `verify-models`, `download`, `figures` (paper figures from a bundle, no retraining except the
-  out-of-fold threshold refits), `casestudy` (`uti`, `oxygen`, `glu-cas`, `all`), `neighbors`
-  (where whole GSE studies sit in the atlas).
+- **`ecoli_atlas/`** — Ecoli_ATLAS. Pure-Python (torch, sklearn, pandas) encoder–decoder with a
+  count likelihood, trained on the recounted atlas (`docs/atlas_model_v2.md`, first stage). CLI:
+  `prepare`, `train`, `embed`, `evaluate`, `figures` (composition of the training and test data), `axes`
+  (ordered categories as dimensions of the embedding).
+  **On this branch it replaces the published model in place**: the v1 package (factor encoders,
+  `compare`, `neighbors`, `casestudy`, `verify-models`, `download`, the paper figures) is on `main`
+  only; port from there (`git show main:<path>`), do not keep v1 copies here.
 - `bin/ecoli_ingest`, `bin/ecoli_atlas` run either CLI from the checkout without `pip install`.
 
 ## Data lives outside git — hard rules
@@ -26,8 +28,10 @@ Never `git add` any of these (all in `.gitignore`): `resources/`, `old_resources
 | Local path | What | Status |
 |---|---|---|
 | `resources/{vg,annotation,centrifuge,container}` | inGEST reference bundle (13 GB) | downloaded; `resources/container/rnaseq_vg.sif` is the image |
-| `atlas_data/` | `merged_count_table.txt`, `metadata_revised.csv`, feature table | atlas training inputs |
-| `outputs/models/`, `outputs/atlas/` | the Colab-trained bundle (+ `manifest.json`, `splits.csv`) and the atlas built from it | **the originals: never overwrite or commit.** They are published as `ecoli_atlas_models_v1.tar.gz` in the `resources-v1` release. Refits go to `outputs/models_repro*/` via `ecoli_atlas train --seeds ...` (see `ecoli_atlas/scripts/slurm_train_repro.sh`); accept a refit when the original's TEST metrics lie within the sweep's spread (`verify-models` → `old_within_new_seed_spread`) |
+| `atlas_data/` | `atlas_v2_counts.tsv`, `atlas_v2_antisense_counts.tsv`, `atlas_v2_samples.tsv` (from `collect_results.py`), `metadata_v2.tsv`, `sample_qc.tsv` | training inputs of the model on this branch. `merged_count_table.txt`, `metadata_revised.csv` and the NCBI feature table there are the v1 inputs (used by `main`) |
+| `work/atlas_full/results/<batch>/` | the atlas recount: 102 batches plus re-runs (`PE_R01`) | source of the three `atlas_v2_*` tables and of the `full_*` columns |
+| `outputs/models_v2/`, `outputs/figures_v2/` | bundle and composition figures of the model on this branch | written by `ecoli_atlas train` / `figures` |
+| `outputs/models/`, `outputs/atlas/` | the v1 Colab-trained bundle (+ `manifest.json`, `splits.csv`) and the atlas built from it; not readable by this branch's code | **the originals: never overwrite or commit.** They are published as `ecoli_atlas_models_v1.tar.gz` in the `resources-v1` release. Refits go to `outputs/models_repro*/` via `ecoli_atlas train --seeds ...` (on `main`); accept a refit when the original's TEST metrics lie within the sweep's spread (`verify-models` → `old_within_new_seed_spread`) |
 | `outputs/models_repro/`, `outputs/atlas_repro/` | first GPU refit (seed 77) and its atlas | kept for comparison |
 | `outputs/predictions/final_embedding.csv` | baseline atlas embeddings (3342 samples) | source of the future `outputs/atlas/` bundle |
 | `outputs/figures/`, `outputs/factor_gene_correlations.txt` | Colab reference figures / GSEA gene list | **never overwrite.** Mixed sessions: the stored notebook outputs for cells 25/31/33 and `fig_study_leakage.pdf` come from a later retrained run, not from `outputs/models`. Regenerated figures go to `outputs/figures_repro/` (`ecoli_atlas figures ... --out outputs/figures_repro`) |
@@ -37,9 +41,9 @@ Never `git add` any of these (all in `.gitignore`): `resources/`, `old_resources
 | `notebooks/` | the two original Colab notebooks | read-only reference; never edit or commit |
 | `raw_data/` | original Drive dump incl. unused files and the Contreras paper data | `Contreras Paper/Paper1_all_samples_counts.tsv` is the inference test case |
 
-Download URLs live in exactly two files: `ecoli_ingest/src/ecoli_ingest/resources.py` and
-`ecoli_atlas/src/ecoli_atlas/download.py`. The inGEST core bundle and both ATLAS bundles are
-assets of the GitHub release `resources-v1` (`.../releases/download/resources-v1/<name>`; built in
+Download URLs live in `ecoli_ingest/src/ecoli_ingest/resources.py` (and, on `main`,
+`ecoli_atlas/src/ecoli_atlas/download.py`; this branch has no atlas bundle to download yet). The
+inGEST core bundle and both v1 ATLAS bundles are assets of the GitHub release `resources-v1` (`.../releases/download/resources-v1/<name>`; built in
 `work/release_v1/`; data releases are tagged `resources-vN`, code releases `X.X.X`),
 the Centrifuge index comes from the Centrifuge authors' bucket
 (`genome-idx.s3.amazonaws.com/centrifuge/`), and the container image is still a placeholder (`TBD`).
@@ -55,15 +59,15 @@ Bundle file names are `ecoli_ingest_*` / `ecoli_atlas_*` (other microbes may fol
 ```bash
 # host (login node has no GPU; training goes through SLURM)
 conda activate ecoli_ingest        # snakemake + all workflow tools
-conda activate ecoli_atlas         # torch (CPU), sklearn, pandas, optuna, umap
+conda activate ecoli_atlas         # torch, sklearn, pandas, matplotlib
 
 pytest ecoli_atlas/tests                # in ecoli_atlas;  pytest ecoli_ingest/tests in ecoli_ingest
 cd work/experiment3 && ecoli_ingest check && ecoli_ingest run -n        # tutorial run dir
-ecoli_atlas figures --counts atlas_data/merged_count_table.txt --metadata atlas_data/metadata_revised.csv \
-    --feature-table atlas_data/GCF_000005845.2_ASM584v2_feature_table.txt --models outputs/models --atlas outputs/atlas \
-    --reference-sweep outputs/models_repro_sweep/manifest.json --out outputs/figures_repro --device cpu --threads 8 --strict
-ecoli_atlas embed --counts "raw_data/Contreras Paper/Paper1_all_samples_counts.tsv" --models outputs/models \
-    --feature-table atlas_data/GCF_000005845.2_ASM584v2_feature_table.txt --out /tmp/x   # parity check vs outputs/predictions_paper1
+T="--counts atlas_data/atlas_v2_counts.tsv --metadata atlas_data/metadata_v2.tsv --qc atlas_data/sample_qc.tsv \
+   --features resources/annotation/GCF_000005845.2_ASM584v2_counting_v2.features.tsv"
+ecoli_atlas train $T --out outputs/models_v2 --split-only                      # splits.csv only
+ecoli_atlas figures --metadata atlas_data/metadata_v2.tsv --splits outputs/models_v2 --out outputs/figures_v2
+ecoli_atlas train $T --out outputs/models_v2 --splits outputs/models_v2/splits.csv --device cpu --threads 8
 ```
 
 Temporary files go in the session scratchpad or under `work/`, never in the package directories.
@@ -126,13 +130,41 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   `atlas_data/metadata_v2.tsv` and must report `0 problems`. Change labels in the JSON files or
   `label_scheme.yaml`, never in the table. `usable` = standard RNA-seq by the text, prescreen pass,
   not a later copy of a duplicated sample. `atlas_data/metadata_revised.csv` (v1) is never overwritten.
-- The atlas training table uses **b-numbers** and 4,493 features counted unstranded. `ecoli_atlas`
-  maps b-numbers → symbols with the feature table and reports coverage (`gene_coverage.tsv`);
-  `embed` fails below `--min-gene-coverage` (0.9).
-- Model bundle file layout must stay loadable for the original Colab files (`artifacts.py`).
-  New bundles store tensors only (`torch.load(weights_only=True)` works).
-- Class calls default to argmax (that is what produced `outputs/predictions*`); the saved operating
-  thresholds are opt-in (`--apply-thresholds`).
+- After the recount: `atlas_build/full_run/collect_results.py` joins the batches' count tables
+  (a re-run sample is taken from the batch that counted it), `qc_table.py add-full --batches`
+  fills `full_*` (never replacing a counted result by a not-counted one), and `qc_table.py
+  mark-model --metadata atlas_data/metadata_v2.tsv --min-cds-reads 200000 --model atlas_v2` sets
+  `in_model` (usable, counted, at least 200,000 reads on CDS features). `ecoli_atlas` uses the
+  samples with `in_model` set.
+- Atlas model (`ecoli_atlas/README.md`): features are the inGEST ids; mRNA and other RNAs are
+  inputs and outputs, rRNA and tRNA only covariates; size factors from mRNA. Phase head: `mid_exponential` against `stationary` where `phase2` is set;
+  **`late_stationary` has no label and is in no phase evaluation, not even as a check.** The embedding
+  has v1's blocks (phase 6, medium 12, lab strain 4, residual 24) and v1's two stages: block encoders
+  on their labelled samples, then the residual encoder and count decoder on all training samples with
+  the blocks frozen. Lab strain = `strain_group` K-12/B/C/W against the other known groups.
+  `ecoli_atlas axes` places samples on ordered axes of an embedding (ordinal and anchor scores, always
+  scored without the sample's study; `--holdout` for extrapolation tests); its example inputs and runs
+  are in `work/axes_example/`.
+  `train --fit` also offers `one-pass` (same blocks, one loss) and `unstructured` (no blocks) for
+  comparison on the same `splits.csv`; `two-stage` is the default. `train --phase-head ordinal` fits
+  the phase head on exponential < transition < stationary (proportional odds) instead of the two
+  classes; `binary` is the default and the call (`p_stationary`) is scored the same way for both.
+  `ecoli_atlas drivers` (`drivers.py`) ranks the genes that move a head's score between two of its
+  classes by integrated gradients; attribution sign = effect on the score, `direction` = up or down in the data.
+  It averages over the `seed_<n>` bundles of a sweep and adds the attributions up over expression
+  units (neighbouring same-strand genes correlated within studies); the unit table is the one to read. The medium call is rich (complex
+  broth) against minimal (salts and a carbon source); every medium in between has no label. A study gives at most `study_cap` samples per epoch (default: the size
+  of the second-largest study; only GSE206047 is cut), and within one class of a call it counts for at
+  most `label_cap` samples (default: the second-largest study of that class; `data.label_weights`). Splits are by whole study and, as in v1, TEST and
+  the folds hold reference samples only (untreated, reference genotype: `labels.is_reference`); the
+  other samples of training studies are fitted but never scored, those of TEST studies are
+  projected only. Cross-validation is study-blind (unlike v1): holding out a fold removes every
+  sample of its studies from the fit. The phase call is scored only where `growth_phase_basis` is
+  `stated`; inferred phases are fitted on but not scored, and the statistics come from the reference training samples. `GSE224463` is
+  withheld and the four case studies are TEST. `embed` fails below `--min-feature-coverage` (0.9).
+- Bundles (`artifacts.py`, `schema_version` 2) store tensors only (`torch.load(weights_only=True)`
+  works). Seeds are ranked on out-of-fold scores (`--cv`), never on TEST.
+- Class calls are at probability 0.5.
 - The results directory is `<experiment>_results/` unless the config sets `results_dir`.
 - Reads given by accession: one `sra_download` job per run calls `sra_reads.py fetch`. `sra_method:
   auto` (default) uses sra-tools (prefetch + fasterq-dump, read names rewritten to the ENA style)
@@ -144,18 +176,14 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   `fastp_detect_adapter_for_pe` is ignored with a warning. (The atlas training counts in
   `merged_count_table.txt` were made without it. GSE271069's `results/` on disk is a run without
   it; its trimming-on run is in `run_adapter_on/`.)
-- `compare --metadata/--group-by/--order-by/--color-by` adds `group_summary.tsv` and the
-  `compare_plots.py` figures; without those options `summary.tsv` / `neighbors.tsv` must not change.
 - Sample ids: inGEST count columns are BAM paths; `io.sample_id_from_column` strips them to the
   config sample name.
 - Argparse only (no click/typer); keep both packages free of each other's imports so they can be
   split into separate repos / bioconda recipes later.
-- Figures and case studies run from `outputs/models` + `atlas_data/` only (`figures/context.py`
-  rebuilds the notebook state from the bundle and `splits.csv`). `ecoli_atlas figures --strict
-  --atlas outputs/atlas --reference-sweep outputs/models_repro_sweep/manifest.json` must pass; TEST
-  metrics agree with the manifest to all digits, the out-of-fold refits only within the seed sweep's
-  CV spread. Constant genes get Spearman rho 0 (notebook convention). Run the two test suites in
-  their own envs: `pytest ecoli_atlas/tests` (ecoli_atlas), `pytest ecoli_ingest/tests` (ecoli_ingest).
+- `ecoli_atlas figures` draws only the data composition (`fig_split_balance`,
+  `fig_corpus_composition`) from the metadata and a `splits.csv`, into `outputs/figures_v2/`; never
+  into `outputs/figures` or `outputs/figures_repro` (v1). Run the two test suites in their own envs:
+  `pytest ecoli_atlas/tests` (ecoli_atlas), `pytest ecoli_ingest/tests` (ecoli_ingest).
 
 ## Round-2 backlog
 
@@ -168,7 +196,9 @@ reads per mate. (3) `sra-tools` + `pigz` are in `environment.yaml` but must be i
 existing `ecoli_ingest` env (`mamba install -n ecoli_ingest -c bioconda sra-tools pigz`); the
 container needs a rebuild to get them.
 
-reComBat bar of `fig_study_leakage` (opt-in `--recombat`; package not installable here), GSEA,
+Atlas model, second stage: missing-gene inference, DNA term, corrected counts, `compare` /
+`neighbors` on the single embedding, hyper-parameter search; the root `README.md` and the two
+`examples/*/README.md` still describe the v1 atlas commands. GSEA,
 `atlas_build/` cleanup (`combine_counts.sh` assumes the old column layout), container rebuild from
 `environment.yaml` (drop entrez-direct/pytorch), LICENSE file, tutorial-data bundle, real hosting
 URLs, a Snakefile rule that emits an atlas-ready counts TSV.

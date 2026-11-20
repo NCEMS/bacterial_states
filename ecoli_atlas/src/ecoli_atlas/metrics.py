@@ -1,4 +1,4 @@
-"""Evaluation metrics: thresholded classification on TEST, and the study-leakage rate."""
+"""Evaluation metrics: classification on held-out studies, study mixing and neighbour agreement."""
 from __future__ import annotations
 
 import numpy as np
@@ -6,14 +6,6 @@ from sklearn.metrics import balanced_accuracy_score, confusion_matrix, roc_auc_s
 from sklearn.neighbors import NearestNeighbors
 
 from .utils import l2norm
-
-
-def tune_threshold(y_bin: np.ndarray, p_pos: np.ndarray, grid) -> tuple[float, float, bool]:
-    """Threshold on P(positive) maximising balanced accuracy. Returns (thr, balanced_acc, at_boundary)."""
-    grid = np.asarray(grid, dtype=float)
-    ba = np.array([balanced_accuracy_score(y_bin, (p_pos >= t).astype(int)) for t in grid])
-    i = int(np.argmax(ba))
-    return float(grid[i]), float(ba[i]), i in (0, len(grid) - 1)
 
 
 def classification_metrics(y_true: np.ndarray, p_pos: np.ndarray, threshold: float, n_boot: int = 2000,
@@ -57,3 +49,23 @@ def knn_label_agreement(E_fit: np.ndarray, y_fit: np.ndarray, gse_fit: np.ndarra
     nbr = np.argpartition(-sims, kk - 1, axis=1)[:, :kk]
     same = y_fit[nbr] == y_val[:, None]
     return float(np.mean([same[y_val == c].mean() for c in np.unique(y_val)]))
+
+
+def within_study_order(score: np.ndarray, level: np.ndarray, gse: np.ndarray, rows: np.ndarray) -> dict:
+    """Among pairs of samples of one study at different levels of an ordered scale (``level`` >= 0),
+    the share whose scores are in the order of the levels (ties count half). Reported as the mean
+    over studies, so that one large study does not decide it, and over all pairs."""
+    rows = np.asarray(rows)
+    rows = rows[level[rows] >= 0]
+    per_study, total, right = [], 0, 0.0
+    for g in np.unique(gse[rows]):
+        r = rows[gse[rows] == g]
+        i, j = np.where(level[r][:, None] < level[r][None, :])
+        if not len(i):
+            continue
+        ok = (score[r][i] < score[r][j]) + 0.5 * (score[r][i] == score[r][j])
+        per_study.append(float(ok.mean()))
+        total, right = total + len(i), right + float(ok.sum())
+    return {"n_studies": len(per_study), "n_pairs": int(total),
+            "share_in_order_mean_over_studies": float(np.mean(per_study)) if per_study else None,
+            "share_in_order": right / total if total else None}

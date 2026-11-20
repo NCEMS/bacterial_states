@@ -1,8 +1,8 @@
 """`ecoli_atlas prepare`: turn Ecoli_inGEST results into the atlas input format.
 
 Output
-  counts.tsv   genes x samples, first column ``gene`` (symbol), sample columns named by sample id
-  samples.tsv  one row per sample: sample_id, source_column, plus any metadata columns supplied
+  counts.tsv   features x samples, first column ``gene`` (the inGEST feature id), sample columns named by sample id
+  samples.tsv  one row per sample: sample_id, source_column, plus any columns of a tab-separated metadata table
 """
 from __future__ import annotations
 
@@ -10,7 +10,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from .io import read_counts, read_metadata, sample_id_from_column, write_tsv
+from .data import read_table
+from .io import read_counts, sample_id_from_column, write_tsv
 
 RAW_COUNTS = "all_samples_raw_counts.txt"
 SYMBOL_COUNTS = "all_samples_counts.tsv"
@@ -36,7 +37,7 @@ def prepare(results_dir: str | Path | None, counts_file: str | Path | None, meta
     samples = pd.DataFrame({"sample_id": list(counts.columns),
                             "source_column": [source.get(s, s) for s in counts.columns]}).set_index("sample_id")
     if metadata is not None:
-        meta = read_metadata(metadata)
+        meta = read_table(metadata)
         missing = [s for s in samples.index if s not in meta.index]
         if missing:
             raise ValueError(f"metadata lacks rows for samples: {missing[:5]}")
