@@ -12,16 +12,19 @@ One row per GEO sample (GSM). Columns:
              pre_source, pre_date, pre_pipeline, pre_error
   pre_decision, pre_reasons   pass / fail / incomplete from the thresholds (qc_metrics.decide)
   full_*     the same metrics from a complete inGEST run, with full_sample, full_counted,
+             full_not_counted_reason (the QC gate or species verdict that stopped the sample),
              full_results_dir, full_date, full_pipeline; and the values only a full run has, from
              the sample's QC record (qc_metrics.RECORD_COLUMNS: read-length and fragment-size
-             quantiles, RNA family shares, off-reference share, substitution rate, gene-body
-             slope, DNA-background values)
+             quantiles, RNA family shares, reads on CDS features, off-reference share, substitution
+             rate, gene-body slope, DNA-background values, species verdict)
   in_model   name of the atlas model the sample is part of
 
     qc_table.py merge-prescreen --manifest work/atlas_manifest --samples-dir work/prescreen/samples --table atlas_data/sample_qc.tsv
     qc_table.py add-full --results <run dir>/results --config <run dir>/config.yaml --table atlas_data/sample_qc.tsv
+    qc_table.py add-full --batches work/atlas_full/results --table atlas_data/sample_qc.tsv     # every <batch>/results
     qc_table.py decide --table atlas_data/sample_qc.tsv [--min-pct-aligned 50 ...]
     qc_table.py mark-model --samples samples.txt --model atlas_v2 --table atlas_data/sample_qc.tsv
+    qc_table.py mark-model --metadata atlas_data/metadata_v2.tsv --min-cds-reads 200000 --model atlas_v2 --table atlas_data/sample_qc.tsv
     qc_table.py summary --table atlas_data/sample_qc.tsv
 
 Existing values are kept: each command only rewrites the columns it owns, for the samples it is given.
@@ -49,7 +52,7 @@ IDENTITY = ["GSM", "GSE", "runs", "n_runs", "layout", "reads", "bases", "scienti
 RUN_FIELDS = ("library_strategy", "library_source", "instrument_platform")      # taken from the manifest's runs.tsv
 LARGE_STUDY_MIN = 500      # candidate samples; such a study can dominate statistics, so report with and without it
 PRE_INFO = ["pre_run", "pre_spots", "pre_source", "pre_date", "pre_pipeline", "pre_error"]
-FULL_INFO = ["full_sample", "full_counted", "full_results_dir", "full_date", "full_pipeline"]
+FULL_INFO = ["full_sample", "full_counted", "full_not_counted_reason", "full_results_dir", "full_date", "full_pipeline"]
 COLUMNS = (IDENTITY + PRE_INFO + [f"pre_{m}" for m in qc_metrics.METRICS] + ["pre_decision", "pre_reasons"]
            + FULL_INFO + [f"full_{m}" for m in qc_metrics.METRICS] + [f"full_{m}" for m in qc_metrics.RECORD_COLUMNS]
            + ["in_model"])
@@ -167,16 +170,34 @@ def full_run_files(results_dir: str, sample: str) -> dict:
             "kreport": os.path.join(d, "centrifuge", f"{sample}_report.txt")}
 
 
-def add_full(table: str, results_dir: str, config: str | None, pipeline: str = "") -> dict:
-    rows = read_table(table)
+def not_counted_reasons(results_dir: str) -> dict:
+    """sample -> why it was not counted: the QC gate that stopped it before alignment
+    (`qc_failures.json`, written next to the results directory by the atlas recount) or the reason
+    in strandedness.tsv."""
+    reasons = {}
+    failures = os.path.join(os.path.dirname(os.path.abspath(results_dir)), "qc_failures.json")
+    if os.path.exists(failures):
+        with open(failures, encoding="utf-8") as fh:
+            for sample, info in (json.load(fh) or {}).items():
+                reasons[sample] = str(info.get("verdict") or info.get("reason") or "qc_failed")
+    return reasons
+
+
+def add_full_rows(rows: dict, results_dir: str, config: str | None, pipeline: str = "") -> tuple[int, list]:
+    """Fill the full_* columns of `rows` from one results directory. A sample that an earlier
+    directory counted is not replaced by a result in which it was not counted (a sample re-run in
+    a later batch keeps its counted result whatever the order). Returns (samples added, those kept)."""
     names = sample_accessions(config) if config else {}
-    counted = {}
+    counted, reasons = {}, not_counted_reasons(results_dir)
     strand_table = os.path.join(results_dir, "strandedness.tsv")
     if os.path.exists(strand_table):
         with open(strand_table, encoding="utf-8", newline="") as fh:
-            counted = {r["sample"]: r["counted"] for r in csv.DictReader(fh, delimiter="\t")}
+            for r in csv.DictReader(fh, delimiter="\t"):
+                counted[r["sample"]] = r["counted"]
+                if r.get("not_counted_reason"):
+                    reasons[r["sample"]] = r["not_counted_reason"]
     n = 0
-    skipped = []
+    skipped, kept = [], []
     for d in sorted(glob.glob(os.path.join(results_dir, "*", "fastp"))):
         sample = os.path.basename(os.path.dirname(d))
         twin = TWIN_RE.match(sample)
@@ -195,12 +216,17 @@ def add_full(table: str, results_dir: str, config: str | None, pipeline: str = "
             species = record_data.get("species") or {}
             metrics.update({k: v for k, v in species.items() if k in qc_metrics.METRICS})
         row = _row(rows, gsm)
+        here = os.path.abspath(results_dir)
+        if row["full_counted"] == "yes" and counted.get(sample) != "yes" and row["full_results_dir"] != here:
+            kept.append(gsm)
+            continue
         if twin:
             row["twin_of"] = twin.group(1)
             row["GSE"] = row["GSE"] or rows.get(twin.group(1), {}).get("GSE", "")
         mtime = max((os.path.getmtime(p) for p in files.values() if os.path.exists(p)), default=None)
-        row.update(full_sample=sample, full_counted=counted.get(sample, ""),
-                   full_results_dir=os.path.abspath(results_dir),
+        row.update(full_sample=sample, full_counted=counted.get(sample, "") or ("no" if sample in reasons else ""),
+                   full_not_counted_reason="" if counted.get(sample) == "yes" else reasons.get(sample, ""),
+                   full_results_dir=here,
                    full_date=datetime.date.fromtimestamp(mtime).isoformat() if mtime else "", full_pipeline=pipeline)
         for m in qc_metrics.METRICS:
             row[f"full_{m}"] = _text(metrics.get(m))
@@ -208,10 +234,79 @@ def add_full(table: str, results_dir: str, config: str | None, pipeline: str = "
         for m in qc_metrics.RECORD_COLUMNS:
             row[f"full_{m}"] = _text(extra.get(m))
         n += 1
-    write_table(rows, table)
-    print(f"added full-run metrics for {n} samples from {results_dir}", file=sys.stderr)
     if skipped:
         print(f"no GSM known for {len(skipped)} samples (give --config): {', '.join(skipped[:5])}", file=sys.stderr)
+    return n, kept
+
+
+def add_full(table: str, results_dir: str, config: str | None, pipeline: str = "") -> dict:
+    rows = read_table(table)
+    n, kept = add_full_rows(rows, results_dir, config, pipeline)
+    write_table(rows, table)
+    print(f"added full-run metrics for {n} samples from {results_dir}"
+          + (f"; {len(kept)} kept their counted result from another run" if kept else ""), file=sys.stderr)
+    return rows
+
+
+def add_full_batches(table: str, batches_dir: str, pipeline: str = "") -> dict:
+    """add-full for every <batches_dir>/<batch>/results (with <batch>/config.yaml), in one pass."""
+    rows = read_table(table)
+    total, kept, n_batches = 0, [], 0
+    for results_dir in sorted(glob.glob(os.path.join(batches_dir, "*", "results"))):
+        config = os.path.join(os.path.dirname(results_dir), "config.yaml")
+        n, k = add_full_rows(rows, results_dir, config if os.path.exists(config) else None, pipeline)
+        total, kept, n_batches = total + n, kept + k, n_batches + 1
+    write_table(rows, table)
+    print(f"added full-run metrics for {total} samples from {n_batches} batches in {batches_dir}"
+          + (f"; kept the counted result of {len(kept)}: {', '.join(sorted(kept))}" if kept else ""), file=sys.stderr)
+    return rows
+
+
+TRUE = {"true", "yes", "1"}
+
+
+def model_gate(row: dict, usable: bool, min_cds_reads: int) -> str:
+    """Why a sample is not part of the model ('' = it is): the rule of the atlas recount."""
+    if not usable:
+        return "not_usable"
+    if not row["full_date"]:
+        return "no_full_run"
+    if row["full_counted"] != "yes":
+        return "not_counted:" + (row["full_not_counted_reason"] or "unknown")
+    try:
+        cds = float(row["full_reads_CDS"])
+    except ValueError:
+        return "no_qc_record"
+    return "" if cds >= min_cds_reads else "low_mrna"
+
+
+def mark_model_by_rule(table: str, metadata: str, model: str, min_cds_reads: int) -> dict:
+    """in_model = `model` for the samples that are usable in the metadata table, were counted by the
+    full run and have at least `min_cds_reads` reads on CDS features; cleared for the others that
+    carried this model's name."""
+    rows = read_table(table)
+    with open(metadata, encoding="utf-8", newline="") as fh:
+        usable = {r["GSM"] for r in csv.DictReader(fh, delimiter="\t") if r.get("usable", "").strip().lower() in TRUE}
+    why = Counter()
+    for gsm, row in rows.items():
+        if row["twin_of"]:
+            continue
+        reason = model_gate(row, gsm in usable, min_cds_reads)
+        if not reason:
+            row["in_model"] = model
+        elif row["in_model"] == model:
+            row["in_model"] = ""
+        if gsm in usable:
+            why[reason or "in_model"] += 1
+    missing = sorted(usable - set(rows))
+    write_table(rows, table)
+    print(f"{model}: {why['in_model']} of {len(usable)} usable samples are in the model "
+          f"(at least {min_cds_reads} reads on CDS features)", file=sys.stderr)
+    for reason, n in sorted(why.items(), key=lambda kv: -kv[1]):
+        if reason != "in_model":
+            print(f"  left out, {reason}: {n}", file=sys.stderr)
+    if missing:
+        print(f"  usable in the metadata but not in the table: {len(missing)} ({', '.join(missing[:5])})", file=sys.stderr)
     return rows
 
 
@@ -262,12 +357,19 @@ def main(argv: list[str] | None = None) -> int:
     m.add_argument("--manifest", default=None, help="manifest directory; adds a row for every sample in samples.tsv")
     _threshold_args(m)
     f = sub.add_parser("add-full", help="add metrics of a finished inGEST run")
-    f.add_argument("--results", required=True, help="inGEST results directory")
+    f.add_argument("--results", default=None, help="inGEST results directory")
+    f.add_argument("--batches", default=None,
+                   help="directory of batches: every <batch>/results is added, with <batch>/config.yaml")
     f.add_argument("--config", default=None, help="the run's config.yaml (maps sample names to GSM accessions)")
     d = sub.add_parser("decide", help="recompute pre_decision with (new) thresholds")
     _threshold_args(d)
     k = sub.add_parser("mark-model", help="record which samples are in a trained atlas model")
-    k.add_argument("--samples", required=True, help="file with one GSM (or GSM_SRR) per line")
+    k.add_argument("--samples", default=None, help="file with one GSM (or GSM_SRR) per line")
+    k.add_argument("--metadata", default=None,
+                   help="metadata table with a `usable` column: mark by rule (usable, counted by the full run, "
+                        "--min-cds-reads) instead of a sample list")
+    k.add_argument("--min-cds-reads", type=int, default=200000,
+                   help="with --metadata: fewest reads on CDS features (full_reads_CDS) of a sample in the model")
     k.add_argument("--model", required=True)
     sub.add_parser("summary")
     for p in sub.choices.values():
@@ -276,13 +378,22 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "merge-prescreen":
         merge_prescreen(args.table, args.manifest, args.samples_dir, _thresholds(args))
     elif args.cmd == "add-full":
-        add_full(args.table, args.results, args.config, git_commit())
+        if bool(args.results) == bool(args.batches):
+            ap.error("add-full needs --results or --batches")
+        if args.batches:
+            add_full_batches(args.table, args.batches, git_commit())
+        else:
+            add_full(args.table, args.results, args.config, git_commit())
     elif args.cmd == "decide":
         rows = read_table(args.table)
         for row in rows.values():
             set_decision(row, _thresholds(args))
         write_table(rows, args.table)
+    elif args.cmd == "mark-model" and args.metadata:
+        mark_model_by_rule(args.table, args.metadata, args.model, args.min_cds_reads)
     elif args.cmd == "mark-model":
+        if not args.samples:
+            ap.error("mark-model needs --samples or --metadata")
         rows = read_table(args.table)
         with open(args.samples, encoding="utf-8") as fh:
             wanted = {line.split()[0].split("_")[0] for line in fh if line.strip()}

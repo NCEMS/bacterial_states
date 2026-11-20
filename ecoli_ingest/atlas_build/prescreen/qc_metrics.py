@@ -161,13 +161,13 @@ def collect(files: dict, min_fraction: float = 0.8) -> dict:
 RECORD_COLUMNS = [
     "length_q05_r1", "length_q50_r1", "length_q95_r1", "length_q50_r2", "cycles_r1", "gc_content",
     "fragment_q25", "fragment_q50", "fragment_q75",
-    "assigned", "counting_unit", "pct_assigned_not_stable",
+    "assigned", "counting_unit", "pct_assigned_not_stable", "reads_CDS",
     "pct_16S", "pct_23S", "pct_5S", "pct_tRNA_family", "pct_ssrA", "pct_rnpB", "pct_ssrS", "pct_ffs", "pct_short_features",
     "off_reference_fraction", "substitution_rate", "gene_body_slope",
     "intergenic_share", "antisense_share", "antisense_per_base", "dna_fraction_est", "dna_fraction_limit",
     "minstrand_cov", "dna_fraction_fit", "floor_a", "leakage_b",
     "floor_cov_plus", "floor_cov_minus", "intergenic_cov_plus", "intergenic_cov_minus",
-    "n_runs", "library_selection", "instrument_model", "pipeline_commit",
+    "n_runs", "library_selection", "instrument_model", "pipeline_commit", "species_verdict",
 ]
 
 
@@ -200,6 +200,7 @@ def record_columns(record: dict) -> dict:
     out["assigned"], out["counting_unit"] = assigned, ladder.get("counting_unit")
     out["pct_assigned_not_stable"] = (_round(100 * ladder["assigned_not_stable_rna"] / assigned, 2)
                                       if assigned and ladder.get("assigned_not_stable_rna") is not None else None)
+    out["reads_CDS"] = comp.get("by_type", {}).get("CDS")      # assignments to CDS features: the mRNA depth of the sample
     total = sum(comp.get("by_type", {}).values())
     family = comp.get("by_family", {})
     for key, name in (("16S", "pct_16S"), ("23S", "pct_23S"), ("5S", "pct_5S"), ("tRNA", "pct_tRNA_family"),
@@ -219,6 +220,7 @@ def record_columns(record: dict) -> dict:
     out["library_selection"] = "/".join(sorted({r["library_selection"] for r in runs if r.get("library_selection")}))
     out["instrument_model"] = "/".join(sorted({r["instrument_model"] for r in runs if r.get("instrument_model")}))
     out["pipeline_commit"] = record.get("pipeline", {}).get("commit")
+    out["species_verdict"] = (record.get("species") or {}).get("verdict")
     return out
 
 

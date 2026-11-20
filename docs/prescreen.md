@@ -99,8 +99,10 @@ T=atlas_data/sample_qc.tsv
 Q=ecoli_ingest/atlas_build/prescreen/qc_table.py
 python $Q merge-prescreen --manifest work/atlas_manifest --samples-dir work/prescreen/samples --table $T
 python $Q add-full --results <run>/results --config <run>/config.yaml --table $T   # after a full inGEST run
+python $Q add-full --batches work/atlas_full/results --table $T                    # every batch of the atlas recount
 python $Q decide --table $T --min-pct-escherichia-shigella 50 --min-pct-aligned 50 # change thresholds, no re-run
 python $Q mark-model --samples model_samples.txt --model atlas_v2 --table $T
+python $Q mark-model --metadata atlas_data/metadata_v2.tsv --min-cds-reads 200000 --model atlas_v2 --table $T   # by rule
 python $Q summary --table $T
 ```
 
