@@ -12,10 +12,10 @@ Two independently installable packages in one repo (GitHub `NCEMS/bacterial_stat
   image (`--container always`); `auto` picks based on whether `snakemake` and `vg` are on PATH.
 - **`ecoli_atlas/`** — Ecoli_ATLAS. Pure-Python (torch, sklearn, pandas) encoder–decoder with a
   count likelihood, trained on the recounted atlas (`docs/atlas_model_v2.md`, first stage). CLI:
-  `prepare`, `train`, `embed`, `evaluate`, `figures` (composition of the training and test data), `axes`
-  (ordered categories as dimensions of the embedding).
+  `prepare`, `train`, `embed`, `evaluate`, `figures` (data composition and the model figures), `casestudy`,
+  `axes` (ordered categories as dimensions of the embedding), `drivers`.
   **On this branch it replaces the published model in place**: the v1 package (factor encoders,
-  `compare`, `neighbors`, `casestudy`, `verify-models`, `download`, the paper figures) is on `main`
+  `compare`, `neighbors`, `verify-models`, `download`) is on `main`
   only; port from there (`git show main:<path>`), do not keep v1 copies here.
 - `bin/ecoli_ingest`, `bin/ecoli_atlas` run either CLI from the checkout without `pip install`.
 
@@ -180,9 +180,15 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   config sample name.
 - Argparse only (no click/typer); keep both packages free of each other's imports so they can be
   split into separate repos / bioconda recipes later.
-- `ecoli_atlas figures` draws only the data composition (`fig_split_balance`,
-  `fig_corpus_composition`) from the metadata and a `splits.csv`, into `outputs/figures_v2/`; never
-  into `outputs/figures` or `outputs/figures_repro` (v1). Run the two test suites in their own envs:
+- `ecoli_atlas figures` draws the data composition (`fig_split_balance`, `fig_corpus_composition`)
+  from the metadata and a `splits.csv`, and with `--models` and the tables the paper figures of v1
+  for this model (`figures/context.py` puts the tables through the bundle as `evaluate` does;
+  `figure_metrics.json` checks the embedding and the TEST metrics against the bundle; `--strict`).
+  `ecoli_atlas casestudy` has `uti`, `oxygen` (GSE189154 only: GSE78756 and GSE80451 failed the
+  prescreen) and `glu-cas` (GSE271069, now in the training pool, so no longer an outside test).
+  Both write into `outputs/figures_v2/`; never into `outputs/figures` or `outputs/figures_repro`
+  (v1), and never into a bundle (out-of-fold scores made for `threshold_curves` stay beside the
+  figures). Run the two test suites in their own envs:
   `pytest ecoli_atlas/tests` (ecoli_atlas), `pytest ecoli_ingest/tests` (ecoli_ingest).
 
 ## Round-2 backlog

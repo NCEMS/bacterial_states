@@ -22,8 +22,8 @@ same two stages (count model and covariates: [`docs/atlas_model_v2.md`](../docs/
   differ are kept apart; matching control conditions of different studies are drawn together.
 
 This is the first stage of the design. Not yet in the model: inference of genes a strain lacks, the
-genomic-DNA term, batch-corrected counts, and the `compare` / `neighbors` / case-study commands of
-the earlier model (that model and its commands are on branch `main`).
+genomic-DNA term, batch-corrected counts, and the `compare` / `neighbors` commands of the earlier
+model (that model and its commands are on branch `main`).
 
 ## Install
 
@@ -225,10 +225,57 @@ covariates are set to the training means.
 
 ### `figures`
 
-`fig_split_balance` (class proportions of the three labels per fold and TEST, by samples and by studies,
-with `split_balance.tsv`) and `fig_corpus_composition` (pies of phase, medium, carbon source,
-genotype class, stress family and strain group of the samples in the split). Both need only the
-metadata and a `splits.csv`.
+Without a bundle, two figures of the data, from the metadata and a `splits.csv`:
+`fig_split_balance` (class proportions of the three labels per fold and TEST, by samples and by
+studies, with `split_balance.tsv`) and `fig_corpus_composition` (pies of phase, medium, carbon
+source, genotype class, stress family and strain group of the samples in the split).
+
+With `--models` and the three tables, also the figures of the earlier model's paper, made for this
+model (`--only` selects by the names below):
+
+```bash
+ecoli_atlas figures $T --models outputs/models_v2 --out outputs/figures_v2 [--only NAMES] [--strict]
+```
+
+| Name | Files | What it shows |
+|---|---|---|
+| `pca_batch` | `fig_pca_mg1655_batch`, `fig_pca_bw_batch`, `fig_pca_strain_all_complex`, `pca_log_expression_coords.tsv` | PCA of the log2 normalised expression (no model): MG1655 and BW25113 in one condition (exponential, untreated wild type, rich medium) coloured by study, and the rich-medium samples by strain |
+| `batch_genes` | `fig_batch_genes`, `batch_genes.tsv` | the genes that differ most between studies within those two subsets |
+| `factor_test_eval` | `fig_factor_test_eval`, `phase_misclassified.tsv` | confusion matrix of each call on TEST; the samples whose phase call is wrong |
+| `factor_umaps` | `fig_factor_umaps`, `fig_factor_umaps_overlay`, `umap_factor_coords.tsv` | UMAP of each head's block, by label and by training pool / TEST |
+| `factor_gene_correlates` | `fig_factor_gene_correlates`, `factor_gene_correlations.{txt,tsv}` | Spearman rho of every gene's expression with each head's probability (the `.txt` lists the top 50 each way, for gene-set enrichment) |
+| `study_leakage` | `fig_study_leakage` | share of a TEST sample's 25 nearest neighbours from its own study, in the z-scored expression and in the embedding |
+| `threshold_curves` | `fig_threshold_curves`, `cv_predictions.tsv` | balanced accuracy against the threshold on the out-of-fold probabilities |
+
+`figure_metrics.json` holds the numbers of every figure and two checks against the bundle: the
+embedding made from the tables against `embedding.tsv`, and the TEST metrics against the manifest
+(`--strict` exits 1 when one of them differs or a figure fails). `threshold_curves` reads
+`cv_predictions.tsv` from the bundle (`train --cv`); for a bundle without it the study folds are
+fitted once and the file is kept in the output directory. Those out-of-fold metrics are compared
+with the manifest's `cv_metrics` but are not expected to be identical on another device.
+
+### `casestudy`
+
+```bash
+ecoli_atlas casestudy {uti,oxygen,glu-cas,all} $T --models outputs/models_v2 --out outputs/figures_v2
+```
+
+The case studies of the earlier model, on this model's embedding. Each writes its figures, its
+sample and gene tables and `<name>_metrics.json`; `casestudy_metrics.json` collects them.
+
+- `uti` (GSE128997): infection against urine culture, paired by patient isolate. The isolates'
+  samples are centred per patient, and each patient is scored on a discriminant fitted without it
+  (sign test, Wilcoxon, permutation of the labels within pairs). `fig_uti_axis` shows the genes
+  along that axis.
+- `oxygen` (default GSE189154; `--oxygen-studies`): aerobic against anaerobic or microaerobic,
+  untreated samples of studies outside the training pool. One discriminant
+  (`fig_oxygen_lda_projection`, `fig_oxygen_axis_genes`); the AUROC is given in sample and with
+  every sample scored by an axis fitted without it. GSE78756, the second study of the earlier
+  model's figure, did not pass the prescreen and is not in this atlas.
+- `glu-cas` (GSE271069): glucose against casamino acids, paired by growth phase
+  (`fig_glu_cas_axis`, `fig_glu_cas_lda_projection`, `fig_glu_cas_axis_genes`). For the earlier
+  model this study was an outside test. It is now in the training pool, and the metrics say so
+  (`fitted_by_the_model`).
 
 ### `axes`: ordered categories as dimensions of the embedding
 

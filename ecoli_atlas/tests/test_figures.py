@@ -26,3 +26,76 @@ def test_split_only_then_figures(train_args, atlas_files, tmp_path):
     assert comp["n_samples"] == 119 and set(comp["composition"]["phase"]["wedges"]) == {"exponential", "stationary"}
     assert "none" not in comp["composition"]["stress_family"]["wedges"]
     assert main(["figures", "--metadata", str(atlas_files["metadata"]), "--splits", str(out), "--out", str(figs), "--only", "nope"]) == 2
+
+
+def test_model_figures(trained, train_args, tmp_path):
+    figs = tmp_path / "figs"
+    args = ["figures", *train_args, "--models", str(trained), "--out", str(figs), "--formats", "png", "--device", "cpu", "--strict"]
+    assert main(args) == 0
+    for name in ("split_balance", "corpus_composition", "pca_mg1655_batch", "pca_bw_batch", "pca_strain_all_complex", "batch_genes",
+                 "factor_test_eval", "factor_umaps", "factor_umaps_overlay", "factor_gene_correlates", "study_leakage", "threshold_curves"):
+        assert (figs / f"fig_{name}.png").stat().st_size > 3000, name
+    m = json.loads((figs / "figure_metrics.json").read_text())
+    assert m["embedding_check"]["max_abs_diff"] < 1e-4                      # the bundle's embedding.tsv is made again
+    assert m["test_metrics_vs_manifest"] and all(v["agree"] for v in m["test_metrics_vs_manifest"].values())
+    assert set(m["study_leakage"]["rates"]) == {"input", "blocks", "embedding"}
+    assert m["factor_umaps"]["phase"]["block_dim"] == 6
+    # phase raises the first ten genes of the synthetic atlas: they lead the correlates of the phase call
+    corr = pd.read_csv(figs / "factor_gene_correlations.tsv", sep="\t")
+    top = corr[corr["factor"] == "phase"].sort_values("spearman_rho", ascending=False).head(10)
+    assert set(top["gene"]) <= {f"g{i:03d}" for i in range(10)} and "Top 50 Positive" in (figs / "factor_gene_correlations.txt").read_text()
+    # the bundle has no cv_predictions.tsv: the folds were fitted once and kept beside the figures
+    cv = pd.read_csv(figs / "cv_predictions.tsv", sep="\t", index_col=0)
+    assert m["cv_predictions"] == str(figs / "cv_predictions.tsv") and set(cv["cv_fold"]) == {1, 2, 3}
+    assert 0.02 <= m["threshold_curves"]["medium"]["best_threshold"] <= 0.98
+    stamp = (figs / "cv_predictions.tsv").stat().st_mtime_ns
+    assert main(args + ["--only", "threshold_curves"]) == 0 and (figs / "cv_predictions.tsv").stat().st_mtime_ns == stamp
+    assert main(["figures", "--metadata", train_args[3], "--out", str(figs), "--only", "study_leakage"]) == 2      # no bundle given
+
+
+def test_case_studies(trained, train_args, atlas_files, tmp_path):
+    import argparse
+
+    import numpy as np
+
+    from ecoli_atlas.casestudy.glu_cas import run_glu_cas
+    from ecoli_atlas.casestudy.oxygen import run_oxygen
+    from ecoli_atlas.casestudy.uti import run_uti
+    from ecoli_atlas.cli import _figure_context
+    from ecoli_atlas.figures.plotting import apply_style
+    out = tmp_path / "case"
+    # the synthetic atlas has none of the studies of the case studies
+    assert main(["casestudy", "uti", *train_args, "--models", str(trained), "--out", str(out), "--device", "cpu"]) == 1
+    assert "error" in json.loads((out / "casestudy_metrics.json").read_text())["uti"]
+    ctx, _, _ = _figure_context(argparse.Namespace(models=str(trained), device="cpu", counts=str(atlas_files["counts"]),
+                                                   metadata=str(atlas_files["metadata"]), qc=str(atlas_files["qc"]),
+                                                   features=str(atlas_files["features"])))
+    apply_style()
+    test_studies = sorted(set(ctx.gse[ctx.split == 3]) - {"GSE07"})          # GSE07 has treated samples
+    train_study = ctx.gse[ctx.split == 1][0]
+    meta = ctx.data.meta
+    rows = np.where(ctx.gse == test_studies[0])[0]
+    # oxygen: half of a TEST study made anaerobic
+    meta.loc[meta.index[rows[::2]], "oxygen"] = "anaerobic"
+    res = run_oxygen(ctx, out, ("png",), studies=[test_studies[0]])
+    assert res["n_samples"] == len(rows) and res["per_study"][test_studies[0]]["n_low"] == len(rows[::2])
+    assert 0 <= res["auroc_leave_one_out"] <= 1 and (out / "fig_oxygen_lda_projection.png").exists()
+    try:
+        run_oxygen(ctx, out, ("png",), studies=[train_study])
+        raise AssertionError("a training study must be refused")
+    except ValueError:
+        pass
+    # uti: five isolates with one sample in the host and one in urine each
+    meta["strain_name"], meta["in_host"] = "", "false"
+    for k in range(5):
+        meta.loc[meta.index[rows[2 * k:2 * k + 2]], "strain_name"] = f"HM{k}"
+        meta.loc[meta.index[rows[2 * k]], "in_host"] = "true"
+    res = run_uti(ctx, out, ("png",), study=test_studies[0], n_perm=20)
+    assert res["n_patients"] == 5 and res["conditions"] == {"UTI": 5, "UR": 5} and 0 <= res["correct"] <= 5
+    # glu-cas: the two media of a training study, paired by growth phase; the metrics say it was fitted
+    tr = np.where(ctx.gse == "GSE00")[0]                                      # exponential and stationary samples
+    meta.loc[meta.index[tr[::2]], "amino_acids_supplied"] = "true"
+    meta.loc[meta.index[tr[1::2]], "amino_acids_supplied"] = "false"
+    res = run_glu_cas(ctx, out, ("png",), study="GSE00", n_perm=20)
+    assert res["fitted_by_the_model"] == (ctx.split[tr] == 1).any() and res["lda"]["treatments"] == {"CAS": 5, "GLU": 5}
+    assert res["paired"]["n_pairs"] == 2 and (out / "fig_glu_cas_axis.png").exists() and (out / "fig_glu_cas_lda_projection.png").exists()

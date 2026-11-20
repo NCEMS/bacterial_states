@@ -274,18 +274,94 @@ def cmd_embed(args) -> int:
     return 0
 
 
+def _figure_context(args):
+    """The training tables put through the bundle in --models: (context, tables, splits)."""
+    from .artifacts import SPLITS_FILE, ModelBundle
+    from .data import build_training
+    from .features import read_feature_table
+    from .figures.context import FigureContext
+    if getattr(args, "threads", None):
+        import torch
+        torch.set_num_threads(args.threads)
+    device = pick_device(args.device)
+    bundle = ModelBundle.load(args.models, device)
+    cfg = bundle.config
+    args.splits = str(Path(args.models) / SPLITS_FILE)
+    tables, _, splits = _training_inputs(args, cfg)
+    data = build_training(tables, bundle.fs, cfg, splits)
+    return FigureContext.build(bundle, data, device, read_feature_table(args.features)["Symbol"], log=_info), tables, splits
+
+
+def _model_figures(args, names: list, out: Path, formats: tuple) -> tuple[dict, bool]:
+    """Draw the figures that need the model. Returns (metrics, all checks passed)."""
+    from .figures.checks import all_agree, compare_metrics
+    from .figures.gene_correlates import fig_factor_gene_correlates
+    from .figures.leakage import fig_study_leakage
+    from .figures.pca import fig_batch_genes, fig_pca_batch
+    from .figures.test_eval import fig_factor_test_eval, misclassified_table
+    from .figures.thresholds import CV_FILE, cv_metrics, fig_threshold_curves, load_cv_predictions
+    from .figures.umaps import fig_factor_umaps
+    ctx, tables, splits = _figure_context(args)
+    manifest = ctx.bundle.manifest
+    metrics = {"models": str(args.models), "embedding_check": ctx.embedding_check(args.models)}
+    ok = metrics["embedding_check"].get("max_abs_diff", 0.0) <= 1e-4
+    _info(f"model figures for {len(ctx.ids)} samples; embedding against the bundle's: {metrics['embedding_check']}")
+
+    def test_eval():
+        res = fig_factor_test_eval(ctx, out, formats)
+        metrics["test_metrics_vs_manifest"] = compare_metrics(res, manifest.get("test_metrics"))
+        metrics["phase_misclassified"] = misclassified_table(ctx, out)
+        return res
+
+    def thresholds():
+        cv, src = load_cv_predictions(out, args.models)
+        if cv is None:
+            from .train import cross_validate
+            _info("no cv_predictions.tsv in the bundle or the output directory: fitting the study folds once")
+            cv = cross_validate(tables, ctx.bundle.fs, ctx.cfg, splits, ctx.device, seed=manifest["seed"], log=_info)["predictions"]
+            src = out / CV_FILE
+            cv.to_csv(src, sep="\t", float_format="%.6g")
+            cv, _ = load_cv_predictions(out)
+        metrics["cv_predictions"] = str(src)
+        metrics["cv_metrics_vs_manifest"] = compare_metrics(cv_metrics(cv), manifest.get("cv_metrics"))
+        return fig_threshold_curves(cv, out, formats)
+
+    draw = {"pca_batch": lambda: fig_pca_batch(ctx, out, formats), "batch_genes": lambda: fig_batch_genes(ctx, out, formats),
+            "factor_test_eval": test_eval, "factor_umaps": lambda: fig_factor_umaps(ctx, out, formats),
+            "factor_gene_correlates": lambda: fig_factor_gene_correlates(ctx, out, formats),
+            "study_leakage": lambda: fig_study_leakage(ctx, out, formats), "threshold_curves": thresholds}
+    for name in names:
+        try:
+            metrics[name] = draw[name]()
+            _info(f"  {name}: done")
+        except ValueError as e:
+            metrics[name], ok = {"error": str(e)}, False
+            _info(f"  {name}: error: {e}")
+    if "test_metrics_vs_manifest" in metrics and not all_agree(metrics["test_metrics_vs_manifest"]):
+        ok = False
+        _info(f"TEST metrics differ from the manifest: {metrics['test_metrics_vs_manifest']}")
+    return metrics, ok
+
+
 def cmd_figures(args) -> int:
     from .data import read_table
-    from .figures import FIGURES
+    from .figures import DATA_FIGURES, MODEL_FIGURES
     from .figures.plotting import apply_style
     from .labels import head_labels
     from .splits import load_splits
-    names = args.only.split(",") if args.only else list(FIGURES)
-    unknown = sorted(set(names) - set(FIGURES))
+    names = args.only.split(",") if args.only else list(DATA_FIGURES) + (list(MODEL_FIGURES) if args.models else [])
+    unknown = sorted(set(names) - set(DATA_FIGURES) - set(MODEL_FIGURES))
     if unknown:
-        _info(f"error: unknown figure(s) {unknown}; available: {sorted(FIGURES)}")
+        _info(f"error: unknown figure(s) {unknown}; available: {sorted(DATA_FIGURES) + list(MODEL_FIGURES)}")
         return 2
-    splits_path = Path(args.splits)
+    model_names = [n for n in names if n in MODEL_FIGURES]
+    if model_names and not (args.models and args.counts and args.qc and args.features):
+        _info(f"error: {model_names} need --models, --counts, --qc and --features")
+        return 2
+    if not (args.splits or args.models):
+        _info("error: give --splits (a splits.csv or a bundle directory) or --models")
+        return 2
+    splits_path = Path(args.splits or args.models)
     splits = load_splits(splits_path / "splits.csv" if splits_path.is_dir() else splits_path)
     meta = read_table(args.metadata)
     missing = sorted(set(splits.index) - set(meta.index))
@@ -298,12 +374,45 @@ def cmd_figures(args) -> int:
     out, formats = Path(args.out), tuple(args.formats.split(","))
     out.mkdir(parents=True, exist_ok=True)
     if "split_balance" in names:
-        FIGURES["split_balance"](labels, splits, out, formats).to_csv(out / "split_balance.tsv", sep="\t", index=False,
-                                                                     float_format="%.4f")
+        DATA_FIGURES["split_balance"](labels, splits, out, formats).to_csv(out / "split_balance.tsv", sep="\t", index=False,
+                                                                          float_format="%.4f")
     if "corpus_composition" in names:
-        _write_json(FIGURES["corpus_composition"](meta.join(labels), out, formats), out / "corpus_composition.json")
-    _info(f"wrote {', '.join('fig_' + n for n in names)} to {out}")
-    return 0
+        _write_json(DATA_FIGURES["corpus_composition"](meta.join(labels), out, formats), out / "corpus_composition.json")
+    ok = True
+    if model_names:
+        metrics, ok = _model_figures(args, model_names, out, formats)
+        path = out / "figure_metrics.json"          # a run of some figures (--only) keeps the entries of the others
+        earlier = json.loads(path.read_text()) if path.exists() else {}
+        _write_json((earlier if earlier.get("models") == metrics["models"] else {}) | metrics, path)
+    _info(f"wrote {', '.join(names)} to {out}" + ("" if ok else "; a figure failed or a check against the bundle did not pass (figure_metrics.json)"))
+    return 0 if ok or not args.strict else 1
+
+
+def cmd_casestudy(args) -> int:
+    from .casestudy import CASE_STUDIES
+    from .casestudy.glu_cas import run_glu_cas
+    from .casestudy.oxygen import run_oxygen
+    from .casestudy.uti import run_uti
+    from .figures.plotting import apply_style
+    ctx, _, _ = _figure_context(args)
+    apply_style()
+    out, formats = Path(args.out), tuple(args.formats.split(","))
+    out.mkdir(parents=True, exist_ok=True)
+    run = {"uti": lambda: run_uti(ctx, out, formats, n_perm=args.n_perm),
+           "oxygen": lambda: run_oxygen(ctx, out, formats, studies=args.oxygen_studies.split(",")),
+           "glu-cas": lambda: run_glu_cas(ctx, out, formats, n_perm=args.n_perm)}
+    path = out / "casestudy_metrics.json"
+    metrics = json.loads(path.read_text()) if path.exists() else {}
+    failed = False
+    for name in (CASE_STUDIES if args.study == "all" else (args.study,)):
+        try:
+            metrics[name] = run[name]() | {"models": str(args.models)}
+        except ValueError as e:
+            metrics[name], failed = {"error": str(e), "models": str(args.models)}, True
+            _info(f"[{name}] error: {e}")
+    _write_json(metrics, path)
+    _info(f"wrote the case-study figures and tables to {out}")
+    return 1 if failed else 0
 
 
 def cmd_axes(args) -> int:
@@ -369,6 +478,9 @@ def cmd_axes(args) -> int:
 
 # ---------------------------------------------------------------------------------------------
 def build_parser() -> argparse.ArgumentParser:
+    from .casestudy import CASE_STUDIES
+    from .casestudy.oxygen import OXYGEN_CASE_STUDIES
+    from .figures import MODEL_FIGURES
     p = argparse.ArgumentParser(prog="ecoli_atlas",
                                 description="Ecoli_ATLAS: embed E. coli RNA-seq samples with the atlas model.")
     p.add_argument("-v", "--verbose", action="count", default=0)
@@ -468,13 +580,35 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--formats", default="pdf,png")
     sp.set_defaults(func=cmd_axes)
 
-    sp = sub.add_parser("figures", help="composition of the training and test data: split_balance, corpus_composition")
+    sp = sub.add_parser("figures", help="figures of the training data (split_balance, corpus_composition) and, with --models, "
+                                        "of the model: " + ", ".join(MODEL_FIGURES))
     sp.add_argument("--metadata", required=True, help="sample metadata (metadata_v2.tsv)")
-    sp.add_argument("--splits", required=True, help="splits.csv, or a bundle directory that holds one")
+    sp.add_argument("--splits", help="splits.csv, or a bundle directory that holds one (default: --models)")
+    sp.add_argument("--models", help="model bundle; with it and the three tables below the model figures are drawn too")
+    sp.add_argument("--counts", help="joined count table of the atlas")
+    sp.add_argument("--qc", help="QC table (sample_qc.tsv)")
+    sp.add_argument("--features", help="feature table of the counting annotation")
+    sp.add_argument("--model-name", help="use only the samples whose in_model has this value (default: any)")
     sp.add_argument("--out", required=True)
     sp.add_argument("--only", help="comma-separated figure names")
     sp.add_argument("--formats", default="pdf,png", help="comma-separated figure formats (default pdf,png)")
+    sp.add_argument("--strict", action="store_true", help="exit 1 when a figure fails or the embedding or the TEST metrics "
+                                                          "differ from those stored in the bundle")
+    sp.add_argument("--threads", type=int, help="torch CPU threads")
+    add_device(sp)
     sp.set_defaults(func=cmd_figures)
+
+    sp = sub.add_parser("casestudy", help="case studies on the embedding: uti, oxygen, glu-cas")
+    sp.add_argument("study", choices=list(CASE_STUDIES) + ["all"])
+    add_tables(sp)
+    sp.add_argument("--models", required=True, help="model bundle")
+    sp.add_argument("--oxygen-studies", default=",".join(OXYGEN_CASE_STUDIES), help="comma-separated studies of the oxygen case study")
+    sp.add_argument("--n-perm", type=int, default=1000, help="permutations of the paired tests")
+    sp.add_argument("--out", required=True)
+    sp.add_argument("--formats", default="pdf,png")
+    sp.add_argument("--threads", type=int, help="torch CPU threads")
+    add_device(sp)
+    sp.set_defaults(func=cmd_casestudy)
     return p
 
 
