@@ -21,9 +21,9 @@ same two stages (count model and covariates: [`docs/atlas_model_v2.md`](../docs/
 - **Alignment terms** (residual stage, on the whole embedding): samples of one study known to
   differ are kept apart; matching control conditions of different studies are drawn together.
 
-This is the first stage of the design. Not yet in the model: inference of genes a strain lacks, the
-genomic-DNA term, batch-corrected counts, and the `compare` / `neighbors` commands of the earlier
-model (that model and its commands are on branch `main`).
+This is the first stage of the design. Not yet in the model: the genomic-DNA term and
+batch-corrected counts. The earlier model and its `verify-models` / `download` commands are on
+branch `main`.
 
 ## Install
 
@@ -104,6 +104,11 @@ ecoli_atlas train $T --out outputs/models_v2 --splits outputs/models_v2/splits.c
 ecoli_atlas evaluate $T --models outputs/models_v2 --out outputs/models_v2_eval
 ecoli_atlas prepare --ingest-results my_run/results --out prepared [--models outputs/models_v2]
 ecoli_atlas embed --counts prepared/counts.tsv --models outputs/models_v2 --out embedded [--qc my_qc.tsv]
+
+# new samples against the atlas; studies of the atlas against the rest of it
+ecoli_atlas compare --embeddings embedded --models outputs/models_v2 --out compared \
+    [--atlas-metadata atlas_data/metadata_v2.tsv] [--metadata prepared/samples.tsv --group-by time_h --order-by time_h] [--umap]
+ecoli_atlas neighbors GSE224463 --models outputs/models_v2 --out neighbors [--metadata atlas_data/metadata_v2.tsv] [--umap]
 ```
 
 ### Ways of fitting (`train --fit`)
@@ -219,9 +224,50 @@ out-of-fold AUROC with `--cv`, otherwise the first. Seeds are never ranked on TE
 
 Takes an inGEST count table (feature ids must be those of the counting annotation; fails below
 `--min-feature-coverage`, default 0.9) and writes `embedding.tsv`, `predictions.tsv`, `samples.tsv`
-(size factor, reads on mRNA features) and `feature_coverage.tsv`. `--qc` gives a table with the QC
+(size factor, reads on mRNA features, number of genes called missing), `missing_genes.tsv` (the genes
+called missing from a sample's strain, see below) and `feature_coverage.tsv`. `--qc` gives a table with the QC
 columns of `sample_qc.tsv` (as `full_<name>` or `<name>`), indexed by sample; without it the QC
 covariates are set to the training means.
+
+### Genes missing from a strain
+
+Counts are against MG1655, so a gene a strain lacks has no reads. Such genes are called from the
+counts (`preprocess.missing_genes`: runs of neighbouring genes far below the low end of their
+expression, `docs/atlas_model_v2.md` section 4) and left out of the size factor, the gene statistics
+and the count likelihood; the encoders see the gene's mean. In training, half of the samples of a
+batch also get the missing genes of another sample as input. `train --no-mask-missing` treats the
+zeros as measured, as before. A bundle trained without the calls is embedded without them.
+
+### `compare`: new samples against the atlas
+
+The atlas is the embedding of the samples a bundle was trained on (`embedding.tsv`, `predictions.tsv`
+of the bundle), so the new samples must have been embedded with the same bundle. `--embeddings` is
+the output directory of `embed`.
+
+| File | Content |
+|---|---|
+| `neighbors.tsv` | per new sample its `-k` (15) nearest atlas samples: distance, study, curated labels, the model's calls; with `--atlas-metadata` also strain, medium, growth phase, carbon source, oxygen, treatment, genotype |
+| `summary.tsv` | per new sample: nearest atlas sample, most frequent study among the neighbours, the neighbours' vote on every call (`<call>_knn_vote`, `_knn_frac`, `_knn_n_labelled`) and whether the model's own call agrees (`<call>_agree`), mean neighbour distance within every block (`<block>_knn_dist`), novelty |
+| `query_distances.tsv` | distances between the new samples |
+| `group_summary.tsv`, `fig_*` | with `--metadata` and `--group-by`: one row per group (calls, votes, top studies, distance within the group and to the previous group) and the figures `fig_query_distances`, `fig_factor_by_group`, `fig_neighbor_labels`, with `--umap` also `fig_umap_groups` |
+| `umap_atlas.tsv`, `umap_query.tsv`, `umap.png` | with `--umap`: a UMAP fitted on the atlas with the new samples projected onto it |
+
+The votes use the curated labels of the atlas samples (the labels the calls were trained on);
+neighbours without a label do not vote. `novelty_percentile` places a sample's distance to its
+k-th neighbour within the same distance of every atlas sample to the samples of other studies: near
+1, the sample is farther from the atlas than almost any atlas sample is from the rest of it.
+`--blocks phase,residual` restricts the distances to those blocks; `--metric` is cosine (default) or
+euclidean. Without `--metadata` / `--group-by` / `--plots` only the tables are written.
+
+### `neighbors`: studies of the atlas against the rest of it
+
+For every sample of the named studies: its nearest atlas samples outside its own study
+(`--within-study` allows them; the sample itself is always left out), the neighbours' votes against
+the sample's curated label (`<call>_agree_meta`) and the model's call (`<call>_agree_pred`), and the
+novelty. `summary.tsv` has one row per sample, `study_summary.tsv` one per study,
+`neighbors_manifest.json` the settings. `query_split_bucket` / `atlas_split_bucket` say where a
+sample was in training: `test`, `fold<k>`, `train_only`, `withheld`, `projected` (in no split, e.g.
+the treated samples of a TEST study).
 
 ### `figures`
 

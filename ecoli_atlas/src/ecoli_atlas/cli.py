@@ -272,10 +272,61 @@ def cmd_embed(args) -> int:
     res["embedding"].to_csv(out / "embedding.tsv", sep="\t", float_format="%.6g")
     res["predictions"].to_csv(out / "predictions.tsv", sep="\t", float_format="%.6g")
     res["samples"].to_csv(out / "samples.tsv", sep="\t", float_format="%.6g")
+    res["missing"].to_csv(out / "missing_genes.tsv", sep="\t", index=False)
     res["coverage"].to_frame(bundle.fs.ids).to_csv(out / "feature_coverage.tsv", sep="\t")
     _info(f"embedded {len(res['embedding'])} samples ({res['coverage'].fraction:.1%} of the model features present); "
-          f"wrote embedding.tsv, predictions.tsv, samples.tsv and feature_coverage.tsv to {out}"
+          f"wrote embedding.tsv, predictions.tsv, samples.tsv, missing_genes.tsv and feature_coverage.tsv to {out}"
           + ("" if args.qc else "; no --qc table: the QC covariates were set to the training means"))
+    return 0
+
+
+def _blocks_arg(value):
+    return "all" if value in (None, "all") else tuple(value.split(","))
+
+
+def cmd_compare(args) -> int:
+    from .compare import Atlas, calls_frame, compare, read_embedding, read_sample_table
+    atlas = Atlas.load(args.models, args.atlas_metadata)
+    query = read_embedding(args.embeddings)
+    emb_dir = Path(args.embeddings) if Path(args.embeddings).is_dir() else Path(args.embeddings).parent
+    pred_path = Path(args.predictions) if args.predictions else emb_dir / "predictions.tsv"
+    preds = calls_frame(pd.read_csv(pred_path, sep="\t", index_col=0)) if pred_path.exists() else None
+    metadata = read_sample_table(args.metadata) if args.metadata else None
+    group_by = None
+    if args.group_by:
+        parts = tuple(c.strip() for c in args.group_by.split(",") if c.strip())
+        group_by = parts[0] if len(parts) == 1 else parts
+    try:
+        summary = compare(query, atlas, args.out, k=args.k, metric=args.metric, blocks=_blocks_arg(args.blocks), query_predictions=preds,
+                          do_umap=args.umap, seed=args.seed, log=_info, metadata=metadata, group_by=group_by,
+                          order_by=args.order_by, color_by=args.color_by, plots=args.plots, trajectory=args.order_by is not None,
+                          formats=tuple(args.formats.split(",")))
+    except ValueError as e:
+        raise SystemExit(f"error: {e}")
+    show = [c for c in summary.columns if c.endswith("_knn_vote") or c in ("nearest_atlas_sample", "top_study", "novelty_percentile")]
+    with pd.option_context("display.width", 200, "display.max_columns", 20):
+        _info(summary[show].head(20).to_string())
+    _info(f"wrote {Path(args.out) / 'summary.tsv'} and neighbors.tsv")
+    return 0
+
+
+def cmd_neighbors(args) -> int:
+    from .neighbors import run_neighbors
+    gses = list(args.gse or [])
+    if args.gse_file:
+        gses += [ln.strip().split()[0] for ln in Path(args.gse_file).read_text().splitlines() if ln.strip() and not ln.startswith("#")]
+    if not gses:
+        _info("error: give at least one GSE accession (positional or --gse-file)")
+        return 2
+    try:
+        report = run_neighbors(gses, args.models, args.out, metadata=args.metadata, k=args.k, metric=args.metric,
+                               blocks=_blocks_arg(args.blocks), exclude_same_study=not args.within_study, do_umap=args.umap,
+                               seed=args.seed, allow_missing=args.allow_missing, log=_info)
+    except ValueError as exc:
+        _info(f"error: {exc}")
+        return 1
+    _info(f"wrote neighbors.tsv, summary.tsv ({report['n_query']} query samples) and study_summary.tsv "
+          f"({len(report['found'])} studies) to {args.out}")
     return 0
 
 
@@ -568,6 +619,40 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--out", required=True)
     add_device(sp)
     sp.set_defaults(func=cmd_embed)
+
+    sp = sub.add_parser("compare", help="new samples against the atlas: nearest atlas samples, their labels, novelty, optional UMAP")
+    sp.add_argument("--embeddings", required=True, help="output directory of `embed` for the new samples (or its embedding.tsv)")
+    sp.add_argument("--models", required=True, help="model bundle the samples were embedded with; its embedding is the atlas")
+    sp.add_argument("--atlas-metadata", help="sample metadata of the atlas (metadata_v2.tsv); adds strain, medium, ... of the neighbours")
+    sp.add_argument("--predictions", help="predictions.tsv of the new samples (default: next to --embeddings)")
+    sp.add_argument("--out", required=True)
+    sp.add_argument("-k", type=int, default=15)
+    sp.add_argument("--metric", default="cosine", choices=["cosine", "euclidean"])
+    sp.add_argument("--blocks", default="all", help="all or comma-separated block names, e.g. phase,residual")
+    sp.add_argument("--umap", action="store_true")
+    sp.add_argument("--seed", type=int, default=77)
+    sp.add_argument("--metadata", help="table of the new samples (first column = sample id; CSV or TSV, e.g. the samples.tsv of `prepare`)")
+    sp.add_argument("--group-by", help="metadata column(s), comma-separated: write group_summary.tsv and the group figures")
+    sp.add_argument("--order-by", help="metadata column that orders the groups (numeric when it parses, e.g. a time)")
+    sp.add_argument("--color-by", help="metadata column that colours the new samples in the UMAP (default: the groups)")
+    sp.add_argument("--plots", action="store_true", help="write the figures even without --group-by")
+    sp.add_argument("--formats", default="pdf,png", help="comma-separated figure formats (default pdf,png)")
+    sp.set_defaults(func=cmd_compare)
+
+    sp = sub.add_parser("neighbors", help="nearest atlas neighbours of whole GEO studies already in the atlas")
+    sp.add_argument("gse", nargs="*", help="GSE accessions")
+    sp.add_argument("--gse-file", help="text file with one GSE per line")
+    sp.add_argument("--models", required=True, help="model bundle; its embedding is the atlas, its splits.csv gives each sample's split bucket")
+    sp.add_argument("--metadata", help="sample metadata of the atlas (metadata_v2.tsv); adds strain, medium, ... of the samples")
+    sp.add_argument("--out", required=True)
+    sp.add_argument("-k", type=int, default=15)
+    sp.add_argument("--metric", default="cosine", choices=["cosine", "euclidean"])
+    sp.add_argument("--blocks", default="all", help="all or comma-separated block names, e.g. phase,residual")
+    sp.add_argument("--within-study", action="store_true", help="allow neighbours from the query's own study")
+    sp.add_argument("--umap", action="store_true", help="also fit a UMAP of the whole atlas and plot the query studies")
+    sp.add_argument("--seed", type=int, default=77)
+    sp.add_argument("--allow-missing", action="store_true", help="continue when some GSEs are not in the atlas")
+    sp.set_defaults(func=cmd_neighbors)
 
     sp = sub.add_parser("axes", help="place the samples on ordered axes of the embedding (growth phase, medium, ...)")
     sp.add_argument("--models", required=True, help="bundle directory (embedding.tsv, manifest.json, splits.csv)")

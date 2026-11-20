@@ -13,9 +13,10 @@ Two independently installable packages in one repo (GitHub `NCEMS/bacterial_stat
 - **`ecoli_atlas/`** — Ecoli_ATLAS. Pure-Python (torch, sklearn, pandas) encoder–decoder with a
   count likelihood, trained on the recounted atlas (`docs/atlas_model_v2.md`, first stage). CLI:
   `prepare`, `train`, `embed`, `evaluate`, `figures` (data composition and the model figures), `casestudy`,
-  `axes` (ordered categories as dimensions of the embedding), `drivers`.
+  `axes` (ordered categories as dimensions of the embedding), `drivers`, `compare` (new samples against the
+  atlas of a bundle) and `neighbors` (atlas studies against the rest of it), both ported from `main`.
   **On this branch it replaces the published model in place**: the v1 package (factor encoders,
-  `compare`, `neighbors`, `verify-models`, `download`) is on `main`
+  `verify-models`, `download`) is on `main`
   only; port from there (`git show main:<path>`), do not keep v1 copies here.
 - `bin/ecoli_ingest`, `bin/ecoli_atlas` run either CLI from the checkout without `pip install`.
 
@@ -205,8 +206,8 @@ reads per mate. (3) `sra-tools` + `pigz` are in `environment.yaml` but must be i
 existing `ecoli_ingest` env (`mamba install -n ecoli_ingest -c bioconda sra-tools pigz`); the
 container needs a rebuild to get them.
 
-Atlas model, second stage: missing-gene inference, DNA term, corrected counts, `compare` /
-`neighbors` on the single embedding, hyper-parameter search; the root `README.md` and the two
+Atlas model, second stage: refinement of the missing-gene calls (decoder mean, coverage), DNA term, corrected counts,
+hyper-parameter search; the root `README.md` and the two
 `examples/*/README.md` still describe the v1 atlas commands. GSEA,
 `atlas_build/` cleanup (`combine_counts.sh` assumes the old column layout), container rebuild from
 `environment.yaml` (drop entrez-direct/pytorch), LICENSE file, tutorial-data bundle, real hosting
