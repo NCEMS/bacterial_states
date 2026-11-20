@@ -21,8 +21,8 @@ colnames(counts) <- basename(colnames(counts))
 colnames(counts) <- sub("_sort.bam$", "", colnames(counts))
 sample_table <- read.delim(sample_metadata_path)
 rownames(sample_table) <- sample_table$sample_id
-counts <- counts[, rownames(sample_table)]
-counts <- counts[rowSums(counts) > 0, ]
+counts <- counts[, rownames(sample_table), drop = FALSE]   # drop = FALSE: a run with one sample
+counts <- counts[rowSums(counts) > 0, , drop = FALSE]
 
 sample_table$condition <- factor(sample_table$condition)
 if ("condition2" %in% colnames(sample_table)) {

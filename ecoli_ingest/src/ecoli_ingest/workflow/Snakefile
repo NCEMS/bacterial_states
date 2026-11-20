@@ -21,6 +21,29 @@ annotation_gff = _resource("annotation_gff", "annotation/GCF_000005845.2_ASM584v
 annotation_bed = _resource("annotation_bed", "annotation/GCF_000005845.2_ASM584v2_counting_v2.bed")
 vg_index = _resource("vg_index", "vg/ecoli_graph_test")
 centrifuge_index_path = _resource("centrifuge_index_path", "centrifuge/p_compressed+h+v")
+
+# `vg_index_local: true` copies the vg index (0.7 GB) to this node's temporary directory and uses
+# the copy. vg giraffe memory-maps the distance index; from a network file system that can stall
+# completely when several nodes align at the same time (seen on GPFS with 20 nodes). A directory
+# can be given instead of `true`.
+def _local_vg_index(index, where):
+    import shutil, tempfile
+    if where is True:
+        where = os.path.join(os.environ.get("TMPDIR") or tempfile.gettempdir(), "ecoli_ingest_vg")
+    os.makedirs(where, exist_ok=True)
+    for suffix in (".d2.gbz", ".d2.dist", ".d2.min", ".d2.k15.min", ".d2.shortread.zipcodes"):
+        src, dst = index + suffix, os.path.join(where, os.path.basename(index) + suffix)
+        if not os.path.exists(src):
+            continue
+        if not (os.path.exists(dst) and os.path.getsize(dst) == os.path.getsize(src)):
+            tmp = f"{dst}.{os.getpid()}.tmp"
+            shutil.copy2(src, tmp)
+            os.replace(tmp, dst)
+    print(f"vg index copied to {where}", file=sys.stderr, flush=True)
+    return os.path.join(where, os.path.basename(index))
+
+if config.get("vg_index_local"):
+    vg_index = _local_vg_index(vg_index, config["vg_index_local"])
 gref = config.get("ref", "GCF_000005845_2_ASM584v2_genomic#0#NC_000913.3")
 linear_index = config.get("linear", None)
 # Workflow scripts live next to this Snakefile; override only for development.
@@ -559,12 +582,13 @@ rule rseqc:
         bam_index = alignment(f"{results_dir}/{{sample}}/vg/{{sample}}_sort.bam.bai")
     params:
         annotation_bed = annotation_bed
+    threads: 8   # used by samtools sort only; the RSeQC scripts run on one core
     benchmark: f"benchmarks/{{sample}}_rseqc_benchmark.txt"
     shell:
         r"""
         mkdir -p {results_dir}/{wildcards.sample}/rseqc
         infer_experiment.py -i {input.bam} -r {params.annotation_bed} > {output.infer_experiment}
-        samtools sort {input.bam} > {output.sorted_bam}
+        samtools sort -@ {threads} -o {output.sorted_bam} {input.bam}
         samtools index {output.sorted_bam}
         awk -F"\t" '$4 ~ /^CDS:/' {params.annotation_bed} > {results_dir}/{wildcards.sample}/rseqc/genes.bed
         # run inside the rseqc directory: geneBody_coverage.py writes a log.txt into the cwd
@@ -647,8 +671,25 @@ rule featurecounts_combined:
     benchmark: f"benchmarks/featurecounts_benchmark.txt"
     run:
         os.makedirs(os.path.dirname(output.counts), exist_ok=True)
-        shell("featureCounts -T {threads} -a {input.annotation} -o {output.counts} {params.options} -s {params.strand_flags} {input.bams}")
-        shell("featureCounts -T {threads} -a {input.annotation} -o {output.antisense} {params.options} -s {params.antisense_flags} {input.bams}")
+        # `featurecounts_tmp_local: true` puts featureCounts' temporary files in this node's
+        # temporary directory instead of the results directory. For paired-end BAMs it writes the
+        # reads out again in hundreds of files (about 100 GB for a 9 GB BAM) and merges them; on a
+        # network file system that merge can take most of a day per BAM. A directory can be given
+        # instead of `true`.
+        import shutil, tempfile
+        where = config.get("featurecounts_tmp_local")
+        if where is True or str(where).lower() == "true":
+            where = resources.tmpdir
+        if where:
+            os.makedirs(where, exist_ok=True)
+        tmp = tempfile.mkdtemp(prefix="featurecounts_", dir=where) if where else None
+        tmp_opt = f"--tmpDir {tmp}" if tmp else ""
+        try:
+            shell("featureCounts -T {threads} {tmp_opt} -a {input.annotation} -o {output.counts} {params.options} -s {params.strand_flags} {input.bams}")
+            shell("featureCounts -T {threads} {tmp_opt} -a {input.annotation} -o {output.antisense} {params.options} -s {params.antisense_flags} {input.bams}")
+        finally:
+            if tmp:
+                shutil.rmtree(tmp, ignore_errors=True)
         with open(input.annotation) as fh:
             annotation_header = [line[2:].rstrip("\n") for line in fh if line.startswith("#!")]
         calls = {r["sample"]: r["call"] for r in call_strandedness.read_table(input.strand)}

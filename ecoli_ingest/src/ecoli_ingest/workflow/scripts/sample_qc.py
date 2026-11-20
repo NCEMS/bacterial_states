@@ -101,7 +101,7 @@ def bam_qc(bam: str, call: str, layout: str, bed: str, npz_path: str) -> dict:
     arrays = {}
     for strand, contigs in tracks.items():
         for contig, bins in contigs.items():
-            arrays[f"{contig}__{strand}"] = np.asarray(bins, dtype=np.uint32)
+            arrays[f"{contig}__{strand}"] = np.asarray(bins, dtype=np.uint64)
     os.makedirs(os.path.dirname(os.path.abspath(npz_path)), exist_ok=True)
     np.savez_compressed(npz_path, bin_size=np.asarray(BIN), strand_call=np.asarray(call), **arrays)
 
