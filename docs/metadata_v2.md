@@ -76,7 +76,7 @@ Lumped labels on the usable samples (samples / studies):
 | Label | Classes | Rule |
 |---|---|---|
 | `phase2` | exponential 2,636 / 227, stationary 549 / 39 | `mid_exponential`; `stationary` + `late_stationary`. Only untreated, standard RNA-seq samples. Early exponential, transition and late exponential stay empty |
-| `medium_type` | complex 2,496 / 195, defined 2,874 / 159 | `defined_minimal` + `defined_rich`. Minimal medium with casamino acids or another hydrolysate stays empty |
+| `medium_type` | rich 2,526 / 196, minimal 2,645 / 133 | the two extremes only: `rich` = `complex` (LB, Mueller-Hinton, TSB, BHI), `minimal` = `defined_minimal` (salts and a carbon source, like M9). `defined_rich` (complete amino acid mix: MOPS EZ rich, SILAC media, DMEM), minimal medium with casamino acids or another hydrolysate, and natural fluids stay empty |
 | `amino_acids_supplied` | true 4,243 / 257, false 2,631 / 133 | second medium label, used in place of a third medium class |
 | `glucose` | true 3,272 / 131, false 587 / 35 | from `carbon_source` |
 | `anaerobic` | true 115 / 13, false 4,454 / 221 | microaerobic stays empty |
@@ -89,6 +89,14 @@ Lumped labels on the usable samples (samples / studies):
 | `phage_infected` | true 119 / 10 | phage RNA does not make a sample `mixed_organism` |
 | `is_control` | true 2,277 / 364 | baseline growth in a medium; an empty vector, also induced, counts |
 | `standard_rnaseq` | | `assay_class` is `total_rnaseq`; an undetermined assay class is excluded |
+
+The phase head of the atlas model uses `phase2` without `late_stationary`: `mid_exponential` against
+`stationary` (2,636 and 482 usable samples). `late_stationary` samples keep their `phase2` value here but
+carry no phase label in training and are in no phase evaluation (`ecoli_atlas/src/ecoli_atlas/labels.py`).
+
+`long_term_stationary` (added 2026-11-20) is a batch culture left for more than 72 h without fresh
+medium (three studies); `late_stationary` is 24 to 72 h. `long_term_stationary` has no `phase2` value.
+The sample counts in the table above predate this change.
 
 Further columns: `pre_decision`, `pre_reasons`, `pre_pct_CDS` (from `sample_qc.tsv`),
 `low_mrna_prescreen` (under 20% of prescreen reads on CDS; 713 usable samples), `usable`,
@@ -118,8 +126,10 @@ A fine class is meant for training only if at least 10 studies and 100 samples c
 
 ## Open
 
-- Libraries dominated by rRNA or tRNA pass the prescreen. A minimum mRNA read count is to be
-  applied in the full inGEST run; `low_mrna_prescreen` marks the candidates.
+- Libraries dominated by rRNA or tRNA pass the prescreen. The minimum is applied after the full
+  inGEST run: a sample is in the model with at least 200,000 reads on CDS features
+  (`qc_table.py mark-model --metadata ... --min-cds-reads 200000`; 44 of the 7,803 counted samples
+  are below it). `low_mrna_prescreen` marked the candidates before the recount.
 - About a dozen studies have a few samples whose labels were left out because the title and a
   field contradict each other; `notes` in their label files starts with `CONFLICT`. They can be
   settled from the new counts.

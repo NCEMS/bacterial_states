@@ -1,6 +1,6 @@
 {
  "gse": "GSE296573",
- "notes": "EHEC 86-24 in low-glucose DMEM to late log, aerobic; methanol vehicle = control. Serotonin and indole -> other_chemical (serotonin is a host hormone but not a host_factor class item per scheme; unsure). Temperature not stated. DMEM without serum stated -> defined_rich.",
+ "notes": "EHEC 86-24 in low-glucose DMEM to late log, aerobic; methanol vehicle = control. Serotonin and indole -> other_chemical (serotonin is a host hormone but not a host_factor class item per scheme; unsure). Temperature not stated. DMEM without serum stated -> defined_rich. | 2026-11-20: late_exponential merged into transition (the value was dropped from the scheme: submitters' 'late log' and 'early stationary' cannot be ordered against each other).",
  "default": {
   "strain_group": {
    "v": "EHEC_STEC",
@@ -43,7 +43,7 @@
    "q": "low-glucose DMEM"
   },
   "growth_phase": {
-   "v": "late_exponential",
+   "v": "transition",
    "b": "stated",
    "q": "until late log phase under aerobic conditions"
   },

@@ -2,7 +2,7 @@
 # apply_labels.py validates against `labels` and derives every column under `lumped`.
 # Empty = not stated. basis: stated | inferred | study_default.
 labels:
-  growth_phase: [lag, early_exponential, mid_exponential, late_exponential, transition, stationary, late_stationary, not_applicable]
+  growth_phase: [lag, early_exponential, mid_exponential, transition, stationary, late_stationary, long_term_stationary, not_applicable]
   culture_mode: [batch_shaken, batch_microplate, batch_bioreactor, fed_batch, chemostat, static_liquid, agar_surface, biofilm, in_host, with_host_cells]
   base_medium: [LB, TB_2xYT_SOB, TSB, BHI, Mueller-Hinton, M9, MOPS, M63, other_minimal, cell_culture, urine, serum_blood, gut_content, other]
   medium_class: [complex, defined_minimal, defined_rich, minimal_plus_hydrolysate, natural_fluid]
@@ -44,8 +44,10 @@ lumped:
     default: false          # false whenever culture_mode is known
   medium_type:
     from: medium_class
-    map: {complex: complex, defined_minimal: defined, defined_rich: defined}
-    # decided 2026-11-15: minimal_plus_hydrolysate (and natural_fluid) stay empty
+    map: {complex: rich, defined_minimal: minimal}
+    # decided 2026-11-20: the two extremes only. rich = complex broths (LB, Mueller-Hinton, TSB, BHI);
+    # minimal = salts + a carbon source (M9, MOPS, M63). defined_rich (complete amino acid mix: MOPS EZ rich,
+    # SILAC media, DMEM), minimal_plus_hydrolysate and natural_fluid stay empty
   glucose:
     from: carbon_source
     map: {glucose: true, glycerol: false, other_sugar: false, organic_acid: false}
@@ -103,12 +105,12 @@ min_support: {studies: 10, samples: 100}   # a fine class below this takes its l
 inference_rules:
   growth_phase:
     - "A phase word in the text wins (stated). 'mid-log', 'log phase', 'exponential' with no qualifier -> mid_exponential."
-    - "'early stationary', 'entry into stationary', 'transition', 'late log/late exponential' -> transition / late_exponential as written."
-    - "Overnight culture (>= 12 h batch) harvested without dilution -> stationary (inferred). Over 24 h -> late_stationary."
+    - "'early stationary', 'entry into stationary', 'transition', 'late log/late exponential' -> transition (one value for everything between exponential growth and stationary phase; late_exponential was merged into it 2026-11-20)."
+    - "Overnight culture (>= 12 h batch) harvested without dilution -> stationary (inferred). Over 24 h and up to 72 h -> late_stationary. Over 72 h (several days without fresh medium) -> long_term_stationary (decided 2026-11-20; it has no phase2 value)."
     - "OD600 0.2-0.6 in a complex medium, 0.1-0.5 in a minimal medium, no phase word -> mid_exponential (inferred)."
     - "OD above those ranges with no phase word -> empty."
     - "Time course after a shift/treatment starting from exponential cells keeps the pre-shift phase only for samples up to 2 h; later samples empty unless stated."
-    - "Chemostat, colony, biofilm, in-host samples -> not_applicable."
+    - "Chemostat, colony, biofilm, in-host samples -> not_applicable; also the planktonic fraction harvested from a biofilm culture."
   medium_class:
     - "LB, TB, 2xYT, SOB/SOC, TSB, BHI, Mueller-Hinton, nutrient broth -> complex."
     - "M9/MOPS/M63/other salts + carbon source (+ vitamins, single required amino acid or nucleoside for an auxotroph) -> defined_minimal."

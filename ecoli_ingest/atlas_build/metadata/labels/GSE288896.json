@@ -1,6 +1,6 @@
 {
  "gse": "GSE288896",
- "notes": "Phases from the summary ('mid-exponential, early stationary phase, and late stationary phase') matched in order to 6, 24, 48 h. Chemicals present from inoculation -> exposure adapted; PFAS and the fatty acids (octanoic, dodecanoic) labelled other_chemical. DMSO-vehicle controls at each time point are controls. Library kit is TruSeq Stranded mRNA; rRNA removal method not stated, left out. WT re-read: unmodified MG1655, genotype_class wild_type.",
+ "notes": "Phases from the summary ('mid-exponential, early stationary phase, and late stationary phase') matched in order to 6, 24, 48 h. Chemicals present from inoculation -> exposure adapted; PFAS and the fatty acids (octanoic, dodecanoic) labelled other_chemical. DMSO-vehicle controls at each time point are controls. Library kit is TruSeq Stranded mRNA; rRNA removal method not stated, left out. WT re-read: unmodified MG1655, genotype_class wild_type. | 2026-11-20: growth_phase removed from all samples. The phases were only matched by order to 6, 24 and 48 h from the summary; no OD or growth curve is given, and the counts do not follow a growth curve (dps and rmf are already at stationary level at 6 h, ribosomal protein genes are highest at 24 h).",
  "default": {
   "base_medium": {
    "v": "M9",
@@ -112,39 +112,6 @@
      "v": true,
      "b": "stated",
      "q": ""
-    }
-   }
-  },
-  {
-   "field": "title",
-   "regex": ", 6 hr,",
-   "set": {
-    "growth_phase": {
-     "v": "mid_exponential",
-     "b": "stated",
-     "q": "we performed RNA sequencing at mid-exponential, early stationary phase, and late stationary phase"
-    }
-   }
-  },
-  {
-   "field": "title",
-   "regex": ", 24 hr,",
-   "set": {
-    "growth_phase": {
-     "v": "transition",
-     "b": "stated",
-     "q": "we performed RNA sequencing at mid-exponential, early stationary phase, and late stationary phase"
-    }
-   }
-  },
-  {
-   "field": "title",
-   "regex": ", 48 hr,",
-   "set": {
-    "growth_phase": {
-     "v": "late_stationary",
-     "b": "stated",
-     "q": "we performed RNA sequencing at mid-exponential, early stationary phase, and late stationary phase"
     }
    }
   }

@@ -1,6 +1,6 @@
 {
  "gse": "GSE130799",
- "notes": "Rhamnose-induced archaeal histone (HMfA/HMfB, wild-type or non-binding) expression vs induced empty vector (controls). 2 h = late exponential, 17 h = stationary as stated. Strain not named (from DSMZ).",
+ "notes": "Rhamnose-induced archaeal histone (HMfA/HMfB, wild-type or non-binding) expression vs induced empty vector (controls). 2 h = late exponential, 17 h = stationary as stated. Strain not named (from DSMZ). | 2026-11-20: late_exponential merged into transition (the value was dropped from the scheme: submitters' 'late log' and 'early stationary' cannot be ordered against each other).",
  "default": {
   "culture_mode": {
    "v": "batch_shaken",
@@ -69,7 +69,7 @@
    "regex": "^2 hours",
    "set": {
     "growth_phase": {
-     "v": "late_exponential",
+     "v": "transition",
      "b": "stated",
      "q": "The cells were harvested in late exponential and stationary phase, which means 2 hours and 17 hours after induction, respectively."
     }

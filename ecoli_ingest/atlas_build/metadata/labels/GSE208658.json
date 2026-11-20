@@ -1,6 +1,6 @@
 {
  "gse": "GSE208658",
- "notes": "Overnight preculture at 28 C with shaking, but the 1- and 15-day exposures ran 'at room temperature' (no number), so growth_temperature left out. Shaking during the 15-day exposure is not restated; culture_mode/oxygen inferred from the growth protocol. Day 1 stationary (study says stationary-phase cells), day 15 late_stationary (inferred, >24 h). Low-dose ionizing radiation from internal radionuclide sources added before inoculation: other_physical, exposure adapted. Both plain and FeCl3 non-irradiated controls are controls at each day. carbon_source glucose although 1% casamino acids are also present. WT re-read: WT DH10B, no plasmid -> wild_type.",
+ "notes": "Overnight preculture at 28 C with shaking, but the 1- and 15-day exposures ran 'at room temperature' (no number), so growth_temperature left out. Shaking during the 15-day exposure is not restated; culture_mode/oxygen inferred from the growth protocol. Day 1 stationary (study says stationary-phase cells), day 15 late_stationary (inferred, >24 h). Low-dose ionizing radiation from internal radionuclide sources added before inoculation: other_physical, exposure adapted. Both plain and FeCl3 non-irradiated controls are controls at each day. carbon_source glucose although 1% casamino acids are also present. WT re-read: WT DH10B, no plasmid -> wild_type. | 2026-11-20: day 15 moved from late_stationary to long_term_stationary (more than 72 h).",
  "default": {
   "base_medium": {
    "v": "M9",
@@ -95,7 +95,7 @@
    "regex": "^Day 15$",
    "set": {
     "growth_phase": {
-     "v": "late_stationary",
+     "v": "long_term_stationary",
      "b": "inferred",
      "q": "samples for RNA extration taken at one and 15-days after inoculation/spike addition"
     }

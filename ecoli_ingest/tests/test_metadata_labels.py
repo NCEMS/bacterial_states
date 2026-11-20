@@ -79,7 +79,7 @@ def test_labels_and_lumped_columns(tmp_path):
     assert set(rows) == {"GSM1", "GSM2", "GSM3"}                      # non-candidates are left out
     a, b, c = rows["GSM1"], rows["GSM2"], rows["GSM3"]
     assert (a["phase2"], b["phase2"]) == ("exponential", "stationary")
-    assert a["medium_type"] == "complex" and a["treated"] == "false"
+    assert a["medium_type"] == "rich" and a["treated"] == "false"
     assert (a["is_wild_type"], a["is_reference_genotype"]) == ("true", "true")
     assert (b["is_wild_type"], b["is_reference_genotype"]) == ("false", "false")
     # phage-infected: own class, phase label withheld from treated samples, phage RNA is not a second organism

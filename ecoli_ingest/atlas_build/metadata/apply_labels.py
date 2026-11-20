@@ -137,7 +137,7 @@ def main():
         for r in csv.DictReader(open(v1)): old.setdefault(r["sample_id"].split("_")[0], r)
         ph = {"exponential": "exponential", "stationary": "stationary", "late_stationary": "stationary"}
         cmp = [("growth_phase", "phase2", lambda x: ph.get(x, "(other:" + x + ")")),
-               ("medium_type", "medium_type", lambda x: x),
+               ("medium_type", "medium_type", lambda x: {"complex": "rich", "defined": "minimal"}.get(x, "(other:" + x + ")")),
                ("oxygen", "anaerobic", lambda x: {"aerobic": "false", "aeorbic": "false", "anaerobic": "true"}.get(x, "(other:" + x + ")")),
                ("carbon_source", "glucose", lambda x: "true" if x == "glucose" else "false")]
         with open(prefix + "_vs_v1.tsv", "w", newline="") as fh:

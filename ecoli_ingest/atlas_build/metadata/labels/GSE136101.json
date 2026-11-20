@@ -1,9 +1,9 @@
 {
  "gse": "GSE136101",
- "notes": "Medium comparison of wild-type BW25113: LB and M63 samples are both untreated reference conditions, so all are controls. M63 carbon source not stated. Library kit TruSeq Stranded mRNA; rRNA removal method not stated, left out. Shaking not described.",
+ "notes": "Medium comparison of wild-type BW25113: LB and M63 samples are both untreated reference conditions, so all are controls. M63 carbon source not stated. Library kit TruSeq Stranded mRNA; rRNA removal method not stated, left out. Shaking not described. | 2026-11-20: late_exponential merged into transition (the value was dropped from the scheme: submitters' 'late log' and 'early stationary' cannot be ordered against each other).",
  "default": {
   "growth_phase": {
-   "v": "late_exponential",
+   "v": "transition",
    "b": "stated",
    "q": "late exponential phase"
   },

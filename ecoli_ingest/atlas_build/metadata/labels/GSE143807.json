@@ -1,6 +1,6 @@
 {
  "gse": "GSE143807",
- "notes": "Strain M1/5 is not described further (strain_group left out). GSM4274837 is the TEX-treated reference RNA for TSS mapping (dRNA-seq): assay_class end_mapping. rRNA removal not described (left out). Constitutive clbQ/clbR expression from tetA promoter on pBAD24: native_overexpression, no inducer.",
+ "notes": "Strain M1/5 is not described further (strain_group left out). GSM4274837 is the TEX-treated reference RNA for TSS mapping (dRNA-seq): assay_class end_mapping. rRNA removal not described (left out). Constitutive clbQ/clbR expression from tetA promoter on pBAD24: native_overexpression, no inducer. | 2026-11-20: late_exponential merged into transition (the value was dropped from the scheme: submitters' 'late log' and 'early stationary' cannot be ordered against each other).",
  "default": {
   "base_medium": {
    "v": "M9",
@@ -33,7 +33,7 @@
    "q": "Bacteria where grown in Greiner 96-well Flat Bottom white polystyrol plates in 150µl M9-medium with 1g L‑1 casein hydrolysate, using a Tecan Infinite 200 Reader (Tecan Group), 37°C"
   },
   "growth_phase": {
-   "v": "late_exponential",
+   "v": "transition",
    "b": "stated",
    "q": "harvested in late exponential growth phase by centrifugation"
   },

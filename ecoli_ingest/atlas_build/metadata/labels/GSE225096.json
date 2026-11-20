@@ -1,6 +1,6 @@
 {
  "gse": "GSE225096",
- "notes": "MG1655 WT and atoC/btsR/cusR/rcsB deletions in M9, LB or 0.1x LB with effectors. Treatments: CuSO4 -> metal_excess; 5% ethanol -> envelope_solvent_biocide; LiCl and acetoacetate/LiCl -> other_chemical (LiCl is the salt; acetoacetate itself would be a nutrient); pyruvate 100 uM -> nutrient supplement, treatment none (so WT 0.1x LB + pyruvate is a control). Exposure 'adapted' from 'grown in the presence of' (no time given; somewhat uncertain). M9 carbon source not stated. There is no untreated WT in M9 or full LB; WT 0.1x LB (+/- pyruvate) are the only controls. Culture 'batch' but shaking not stated: culture_mode and oxygen left out. WT re-read: reference -> wild_type, MG1655 wt, no construct.",
+ "notes": "MG1655 WT and atoC/btsR/cusR/rcsB deletions in M9, LB or 0.1x LB with effectors. Treatments: CuSO4 -> metal_excess; 5% ethanol -> envelope_solvent_biocide; LiCl and acetoacetate/LiCl -> other_chemical (LiCl is the salt; acetoacetate itself would be a nutrient); pyruvate 100 uM -> nutrient supplement, treatment none (so WT 0.1x LB + pyruvate is a control). Exposure 'adapted' from 'grown in the presence of' (no time given; somewhat uncertain). M9 carbon source not stated. There is no untreated WT in M9 or full LB; WT 0.1x LB (+/- pyruvate) are the only controls. Culture 'batch' but shaking not stated: culture_mode and oxygen left out. WT re-read: reference -> wild_type, MG1655 wt, no construct. | 2026-11-20: a broth below full strength is neither rich nor minimal, so medium_class is left empty for it (base_medium kept). Applies to the 0.1x LB samples.",
  "default": {
   "growth_phase": {
    "v": "mid_exponential",
@@ -92,6 +92,17 @@
     "amino_acids_supplied": {
      "v": true,
      "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:media",
+   "regex": "^01xLB$",
+   "set": {
+    "medium_class": {
+     "v": null,
+     "b": "",
      "q": ""
     }
    }

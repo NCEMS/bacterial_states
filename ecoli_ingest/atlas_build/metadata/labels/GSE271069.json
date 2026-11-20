@@ -1,6 +1,6 @@
 {
  "gse": "GSE271069",
- "notes": "Reviewed 2026-11-15: the RNA-seq samples were not treated; the rifampicin/crosslinking protocol in GEO belongs to the RNAP ChIP and IPOD-HR samples (stated by the user). Untreated wild type in each medium and timepoint: controls | The shared treatment_protocol (rifampicin 10 min + formaldehyde crosslinking) is the IPOD/ChIP protocol but is attached to these RNA-seq samples too; unclear whether RNA-seq cells got rifampicin, so treatment, transcription_arrested and is_control left out. Time-point codes mapped to the growth_protocol list by order (Glu: L, S1, S2 = mid-log, stationary, late stationary; Cas: P1-P3, S1, S2 = 2.5 h, 4.5 h, 6.33 h, 10 h, 18 h). Cas P1 left without phase: described as 'early stationary' at OD 0.1 after 2.5 h (contradictory). Minimal medium base not named; rRNA removal not stated. WT re-read: MG1655 WT -> wild_type.",
+ "notes": "Reviewed 2026-11-15: the RNA-seq samples were not treated; the rifampicin/crosslinking protocol in GEO belongs to the RNAP ChIP and IPOD-HR samples (stated by the user). Untreated wild type in each medium and timepoint: controls | The shared treatment_protocol (rifampicin 10 min + formaldehyde crosslinking) is the IPOD/ChIP protocol but is attached to these RNA-seq samples too; unclear whether RNA-seq cells got rifampicin, so treatment, transcription_arrested and is_control left out. Time-point codes mapped to the growth_protocol list by order (Glu: L, S1, S2 = mid-log, stationary, late stationary; Cas: P1-P3, S1, S2 = 2.5 h, 4.5 h, 6.33 h, 10 h, 18 h). Cas P1 left without phase: described as 'early stationary' at OD 0.1 after 2.5 h (contradictory). Minimal medium base not named; rRNA removal not stated. WT re-read: MG1655 WT -> wild_type. | 2026-11-20: late_exponential merged into transition (the value was dropped from the scheme: submitters' 'late log' and 'early stationary' cannot be ordered against each other).",
  "default": {
   "culture_mode": {
    "v": "batch_shaken",
@@ -155,7 +155,7 @@
    "regex": "CAS condition, timepoint P3,",
    "set": {
     "growth_phase": {
-     "v": "late_exponential",
+     "v": "transition",
      "b": "inferred",
      "q": "6.33 hours for late logarithmic (OD600 ~1.4)"
     }

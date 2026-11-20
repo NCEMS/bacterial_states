@@ -1,6 +1,6 @@
 {
  "gse": "GSE107833",
- "notes": "All strains carry a pgaC mutation as background; 'WT pgaC pBR322-empty' is the reference (control). Mutants are called 'mutant' in the design; genotype_class deletion assumed for csr loss-of-function alleles. Complemented strains (mutant + pBR322-csrA/csrD/CsrB) labelled multiple. Kornberg medium = phosphate salts + yeast extract + glucose -> base other, minimal_plus_hydrolysate. Temperature/aeration not given.",
+ "notes": "All strains carry a pgaC mutation as background; 'WT pgaC pBR322-empty' is the reference (control). Mutants are called 'mutant' in the design; genotype_class deletion assumed for csr loss-of-function alleles. Complemented strains (mutant + pBR322-csrA/csrD/CsrB) labelled multiple. Kornberg medium = phosphate salts + 0.6% yeast extract + glucose -> base other; medium_class complex, an exception to the hydrolysate rule decided 2026-11-20 (the yeast extract dominates). growth_phase: the text says 'to stationary phase (OD600 = 2.0)', but OD 2.0 in this medium is short of saturation, so transition (inferred), decided 2026-11-20. Temperature/aeration not given. | 2026-11-20: growth_phase removed. The text says 'to stationary phase (OD600 = 2.0)', but in the counts every sample is growing (rmf, dps and rpoS low, fis and ribosomal protein genes high), so neither stationary nor transition holds, and exponential would contradict the submitters.",
  "default": {
   "strain_group": {
    "v": "K-12",
@@ -12,18 +12,13 @@
    "b": "stated",
    "q": "MG1655"
   },
-  "growth_phase": {
-   "v": "stationary",
-   "b": "stated",
-   "q": "to stationary phase (OD600 = 2.0)"
-  },
   "base_medium": {
    "v": "other",
    "b": "stated",
    "q": "Kornberg medium (1.1% K2HPO4, 0.85% KH2PO4, 0.6% yeast extract, 0.5% glucose)"
   },
   "medium_class": {
-   "v": "minimal_plus_hydrolysate",
+   "v": "complex",
    "b": "inferred",
    "q": "Kornberg medium (1.1% K2HPO4, 0.85% KH2PO4, 0.6% yeast extract, 0.5% glucose)"
   },

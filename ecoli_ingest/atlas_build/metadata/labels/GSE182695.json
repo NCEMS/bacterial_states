@@ -1,6 +1,6 @@
 {
  "gse": "GSE182695",
- "notes": "CONFLICT: GSM5534797/98 title and ch:genotype say yiaU mutant but source_name says Lexp_ycaN; genotype labels left out for them. GSM5534795/96 (ygfI): title has 'LL' (late log?) but source_name says Exp_ and protocol lists ygfI among the OD 0.9 samples; growth_phase left out. Exp_ = OD 0.9 'exponential' -> mid_exponential; Lexp_ = OD 2.2 'late-exponential'. Glucose only stated in titles of GSM5534783-88 (M9_Glc); carbon source left out for others. Single amino acid (L-Thr) supplement -> amino_acids_supplied false. Temperature and culture vessel not given. WT re-read: unmodified baseline strain relabelled wild_type.",
+ "notes": "CONFLICT: GSM5534797/98 title and ch:genotype say yiaU mutant but source_name says Lexp_ycaN; genotype labels left out for them. GSM5534795/96 (ygfI): title has 'LL' (late log?) but source_name says Exp_ and protocol lists ygfI among the OD 0.9 samples; growth_phase left out. Exp_ = OD 0.9 'exponential' -> mid_exponential; Lexp_ = OD 2.2 'late-exponential'. Glucose only stated in titles of GSM5534783-88 (M9_Glc); carbon source left out for others. Single amino acid (L-Thr) supplement -> amino_acids_supplied false. Temperature and culture vessel not given. WT re-read: unmodified baseline strain relabelled wild_type. | 2026-11-20: late_exponential merged into transition (the value was dropped from the scheme: submitters' 'late log' and 'early stationary' cannot be ordered against each other).",
  "default": {
   "base_medium": {
    "v": "M9",
@@ -85,7 +85,7 @@
    "regex": "^Lexp_",
    "set": {
     "growth_phase": {
-     "v": "late_exponential",
+     "v": "transition",
      "b": "stated",
      "q": ""
     }

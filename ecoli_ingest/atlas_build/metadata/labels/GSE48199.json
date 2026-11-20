@@ -1,6 +1,6 @@
 {
  "gse": "GSE48199",
- "notes": "EHEC EDL933, two candidates: tenfold diluted LB (reference medium) and bacteria washed off living radish sprouts. Phase 'late logarthmic, early stationary phase' -> transition for both (radish text also says transition from exponential to stationary). Radish: culture_mode in_host (plant surface), treatment left out (biotic condition, no fitting class certain), base_medium left out, mixed_organism left out (bacteria washed off plant; plant RNA carry-over possible). Temperature and aeration of LB culture not stated. Library made with TruSeq smallRNA kit on rRNA-depleted total RNA; no size selection of short RNA described -> total_rnaseq. WT re-read: unmodified isolate EDL933 is wild_type.",
+ "notes": "EHEC EDL933, two candidates: tenfold diluted LB (reference medium) and bacteria washed off living radish sprouts. Phase 'late logarthmic, early stationary phase' -> transition for both (radish text also says transition from exponential to stationary). Radish: culture_mode in_host (plant surface), treatment left out (biotic condition, no fitting class certain), base_medium left out, mixed_organism left out (bacteria washed off plant; plant RNA carry-over possible). Temperature and aeration of LB culture not stated. Library made with TruSeq smallRNA kit on rRNA-depleted total RNA; no size selection of short RNA described -> total_rnaseq. WT re-read: unmodified isolate EDL933 is wild_type. | 2026-11-20: a broth below full strength is neither rich nor minimal, so medium_class is left empty for it (base_medium kept). The LB sample is tenfold diluted LB.",
  "default": {
   "growth_phase": {
    "v": "transition",
@@ -62,11 +62,6 @@
      "v": "LB",
      "b": "stated",
      "q": "Tenfold diluted lysogeny broth was used as reference medium."
-    },
-    "medium_class": {
-     "v": "complex",
-     "b": "inferred",
-     "q": "Tenfold diluted lysogeny broth"
     },
     "amino_acids_supplied": {
      "v": true,

@@ -1,6 +1,6 @@
 {
  "gse": "GSE67402",
- "notes": "Reviewed 2026-11-15: growth phase of 27 samples taken from the submitters own growth-phase field in the duplicate deposit GSE94117 (3-8 h exponential, 24 and 48 h stationary, 168 and 336 h late stationary) | Time course in glucose-limited DM500 without OD or phase words. growth_phase only from the overnight rule: 24 h stationary, 48/168/336 h late_stationary (inferred); 3-8 h left empty. treatment carbon_starvation only for 24 h and later (glucose exhaustion in glucose-limited medium, the study's 'starvation'); 3-8 h left empty because the text does not say when glucose ran out; exposure not given. No control condition identified (pure time course), is_control left out. Libraries: fragmented total RNA in a small-RNA kit with >100 bp inserts gel-selected, treated as total_rnaseq; the -ND samples were not rRNA depleted. WT re-read: unmodified REL606, so wild_type.",
+ "notes": "Reviewed 2026-11-15: growth phase of 27 samples taken from the submitters own growth-phase field in the duplicate deposit GSE94117 (3-8 h exponential, 24 and 48 h stationary, 168 and 336 h late stationary) | Time course in glucose-limited DM500 without OD or phase words. growth_phase only from the overnight rule: 24 h stationary, 48/168/336 h late_stationary (inferred); 3-8 h left empty. treatment carbon_starvation only for 24 h and later (glucose exhaustion in glucose-limited medium, the study's 'starvation'); 3-8 h left empty because the text does not say when glucose ran out; exposure not given. No control condition identified (pure time course), is_control left out. Libraries: fragmented total RNA in a small-RNA kit with >100 bp inserts gel-selected, treated as total_rnaseq; the -ND samples were not rRNA depleted. WT re-read: unmodified REL606, so wild_type. | 2026-11-20: treatment of the 24 h and later samples set to none. Glucose running out in a glucose-limited batch culture is ordinary entry into stationary phase, which growth_phase already records; carbon_starvation is kept for cells deliberately shifted to medium without a carbon source. | 2026-11-20: 168 h and 336 h moved from late_stationary to the new value long_term_stationary (more than 72 h); 48 h stays late_stationary where no phase is stated.",
  "default": {
   "base_medium": {
    "v": "other_minimal",
@@ -110,7 +110,7 @@
      "q": ""
     },
     "treatment": {
-     "v": "carbon_starvation",
+     "v": "none",
      "b": "inferred",
      "q": "Time course of E. coli growth and starvation in glucose-limited minimal medium"
     }
@@ -118,7 +118,7 @@
   },
   {
    "field": "ch:time point",
-   "regex": "^(48|168|336) hours$",
+   "regex": "^48 hours$",
    "set": {
     "growth_phase": {
      "v": "late_stationary",
@@ -126,7 +126,23 @@
      "q": ""
     },
     "treatment": {
-     "v": "carbon_starvation",
+     "v": "none",
+     "b": "inferred",
+     "q": "Time course of E. coli growth and starvation in glucose-limited minimal medium"
+    }
+   }
+  },
+  {
+   "field": "ch:time point",
+   "regex": "^(168|336) hours$",
+   "set": {
+    "growth_phase": {
+     "v": "long_term_stationary",
+     "b": "inferred",
+     "q": ""
+    },
+    "treatment": {
+     "v": "none",
      "b": "inferred",
      "q": "Time course of E. coli growth and starvation in glucose-limited minimal medium"
     }
@@ -164,7 +180,7 @@
    "regex": "^late_stationary",
    "set": {
     "growth_phase": {
-     "v": "late_stationary",
+     "v": "long_term_stationary",
      "b": "stated",
      "q": ""
     }

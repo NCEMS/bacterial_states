@@ -1,6 +1,6 @@
 {
  "gse": "GSE166491",
- "notes": "MAPS samples (MS2 affinity purification of MavR targets, GSM5073142-45) are IP_or_pulldown. MAPS samples carry MS2 or MS2-mavR constructs in the deltamavR background; genotype_class left out for MS2-mavR (complemented, tagged) and inducer status unknown for MAPS. Low-glucose DMEM, serum not mentioned -> defined_rich; carbon source left out. No temperature given.",
+ "notes": "MAPS samples (MS2 affinity purification of MavR targets, GSM5073142-45) are IP_or_pulldown. MAPS samples carry MS2 or MS2-mavR constructs in the deltamavR background; genotype_class left out for MS2-mavR (complemented, tagged) and inducer status unknown for MAPS. Low-glucose DMEM, serum not mentioned -> defined_rich; carbon source left out. No temperature given. | 2026-11-20: late_exponential merged into transition (the value was dropped from the scheme: submitters' 'late log' and 'early stationary' cannot be ordered against each other).",
  "default": {
   "strain_group": {
    "v": "EHEC_STEC",
@@ -90,7 +90,7 @@
      "q": ""
     },
     "growth_phase": {
-     "v": "late_exponential",
+     "v": "transition",
      "b": "stated",
      "q": ""
     }

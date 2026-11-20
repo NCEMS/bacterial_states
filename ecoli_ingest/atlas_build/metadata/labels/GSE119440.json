@@ -1,9 +1,9 @@
 {
  "gse": "GSE119440",
- "notes": "Indole (500 uM, added to medium before start) vs methanol vehicle; WT methanol is the control. Temperature, oxygen and culture mode not given. DMEM serum not mentioned -> defined_rich.",
+ "notes": "Indole (500 uM, added to medium before start) vs methanol vehicle; WT methanol is the control. Temperature, oxygen and culture mode not given. DMEM serum not mentioned -> defined_rich. | 2026-11-20: late_exponential merged into transition (the value was dropped from the scheme: submitters' 'late log' and 'early stationary' cannot be ordered against each other).",
  "default": {
   "growth_phase": {
-   "v": "late_exponential",
+   "v": "transition",
    "b": "stated",
    "q": "grown until late log phase in low gluocse DMEM"
   },

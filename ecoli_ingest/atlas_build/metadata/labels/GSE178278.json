@@ -1,6 +1,6 @@
 {
  "gse": "GSE178278",
- "notes": "MG1655 grown from dilution in LB of 1.0x, 0.75x, 0.5x, 0.25x richness (tryptone/yeast extract scaled); medium richness is a medium property, so treatment none and every sample is an untreated wild-type control. 'Appropriate antibiotics' mentioned but no plasmid described; genotype taken as reference. rRNA removal not stated.",
+ "notes": "MG1655 grown from dilution in LB of 1.0x, 0.75x, 0.5x, 0.25x richness (tryptone/yeast extract scaled); medium richness is a medium property, so treatment none and every sample is an untreated wild-type control. 'Appropriate antibiotics' mentioned but no plasmid described; genotype taken as reference. rRNA removal not stated. | 2026-11-20: a broth below full strength is neither rich nor minimal, so medium_class is left empty for it (base_medium kept). Applies to the 0.75x, 0.5x and 0.25x samples; the 1.0x samples stay complex.",
  "default": {
   "growth_phase": {
    "v": "mid_exponential",
@@ -88,6 +88,18 @@
    "q": "Examination of genome-wide responses under various media dilution."
   }
  },
- "rules": [],
+ "rules": [
+  {
+   "field": "ch:intracellular rnap concentration",
+   "regex": "^RNAP_0\\.(25|5|75)X$",
+   "set": {
+    "medium_class": {
+     "v": null,
+     "b": "",
+     "q": ""
+    }
+   }
+  }
+ ],
  "samples": {}
 }

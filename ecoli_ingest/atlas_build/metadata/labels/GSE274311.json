@@ -1,6 +1,6 @@
 {
  "gse": "GSE274311",
- "notes": "PHL628 is the only strain; its genotype is not given, so genotype_class/strain_group left out. Rhamnose (and glucose in M9) are carbon supplements -> treatment none; every sample is plain growth of the one strain in a medium, so all are controls (submitters' 'control' = no sugar in LB, glucose in M9). Planktonic culture mode not described (static vs shaken unknown); planktonic cells after 48 h -> late_stationary (inferred); biofilm -> not_applicable. Oxygen not stated.",
+ "notes": "PHL628 is the only strain; its genotype is not given, so genotype_class/strain_group left out. Rhamnose (and glucose in M9) are carbon supplements -> treatment none; every sample is plain growth of the one strain in a medium, so all are controls (submitters' 'control' = no sugar in LB, glucose in M9). Planktonic culture mode not described (static vs shaken unknown); planktonic cells after 48 h -> late_stationary (inferred); biofilm -> not_applicable. Oxygen not stated. | 2026-11-20: planktonic cells set to growth_phase not_applicable instead of late_stationary: they are the free-swimming fraction of a 48 h biofilm culture (culture mode not described), not a batch culture in a growth phase.",
  "default": {
   "strain_name": {
    "v": "PHL628",
@@ -151,7 +151,7 @@
    "regex": "^planktonic$",
    "set": {
     "growth_phase": {
-     "v": "late_stationary",
+     "v": "not_applicable",
      "b": "inferred",
      "q": "Cells were grown at 28 or 37 C for 48 h and harvested as biofilm cells or planktonic (swimming) cells."
     }

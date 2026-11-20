@@ -1,6 +1,6 @@
 {
  "gse": "GSE197541",
- "notes": "Spatially sorted biofilm layers (microfluidic chip, medium not stated) vs planktonic time course in M63B1 in a shaken 48-well plate reader (carbon source not stated). Planktonic samples are the submitters' reference (is_control true), biofilm false. Planktonic growth_phase by the >=12 h batch rule: 12.95 h and 22.05 h stationary, 25.28 h and 28.08 h late_stationary (inferred; ODs not given, minimal medium so the 12.95 h call is the least certain); 7.62-11.33 h left out. Growth temperature not stated for the chip or the plate (37 C only for the LB subculture). miniBac-seq is a custom low-input total RNA library method, rRNA handling not stated. WT re-read: BW25113 used unmodified.",
+ "notes": "Spatially sorted biofilm layers (microfluidic chip, medium not stated) vs planktonic time course in M63B1 in a shaken 48-well plate reader (carbon source not stated). Planktonic samples are the submitters' reference (is_control true), biofilm false. Planktonic growth_phase: 25.28 h and 28.08 h late_stationary by the >=12 h batch rule (inferred; ODs not given). 7.62-22.05 h left out: slow growth in minimal medium in a microplate, sampled 'when reaching desired OD600' over 28 h, so time alone does not show that the 12.95 h and 22.05 h cultures had stopped growing (decided 2026-11-20). Growth temperature not stated for the chip or the plate (37 C only for the LB subculture). miniBac-seq is a custom low-input total RNA library method, rRNA handling not stated. WT re-read: BW25113 used unmodified.",
  "default": {
   "genotype_class": {
    "v": "wild_type",
@@ -103,17 +103,6 @@
      "v": true,
      "b": "stated",
      "q": "the planktonic culture as a reference for comparison"
-    }
-   }
-  },
-  {
-   "field": "title",
-   "regex": "^planktonic_(12_95|22_05)h",
-   "set": {
-    "growth_phase": {
-     "v": "stationary",
-     "b": "inferred",
-     "q": ""
     }
    }
   },

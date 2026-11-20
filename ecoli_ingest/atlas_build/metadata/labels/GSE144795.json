@@ -1,6 +1,6 @@
 {
  "gse": "GSE144795",
- "notes": "Serotonin (host neurotransmitter) present from the start -> host_factor, adapted; water vehicle sample is the control. Temperature, aeration, rRNA removal not stated.",
+ "notes": "Serotonin (host neurotransmitter) present from the start -> host_factor, adapted; water vehicle sample is the control. Temperature, aeration, rRNA removal not stated. | 2026-11-20: late_exponential merged into transition (the value was dropped from the scheme: submitters' 'late log' and 'early stationary' cannot be ordered against each other).",
  "default": {
   "base_medium": {
    "v": "cell_culture",
@@ -23,7 +23,7 @@
    "q": "low gluocse DMEM"
   },
   "growth_phase": {
-   "v": "late_exponential",
+   "v": "transition",
    "b": "stated",
    "q": "grown until late log phase"
   },
