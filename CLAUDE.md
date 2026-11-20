@@ -142,6 +142,9 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   has v1's blocks (phase 6, medium 12, lab strain 4, residual 24) and v1's two stages: block encoders
   on their labelled samples, then the residual encoder and count decoder on all training samples with
   the blocks frozen. Lab strain = `strain_group` K-12/B/C/W against the other known groups.
+  Genes a strain lacks are called from the counts (`preprocess.missing_genes`, on by default) and masked:
+  out of the size factor, the gene statistics and the count likelihood, 0 as encoder input;
+  `--no-mask-missing` gives the unmasked fit, and bundles made before the calls embed without them.
   `ecoli_atlas axes` places samples on ordered axes of an embedding (ordinal and anchor scores, always
   scored without the sample's study; `--holdout` for extrapolation tests); its example inputs and runs
   are in `work/axes_example/`.

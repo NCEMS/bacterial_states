@@ -1,7 +1,8 @@
 """The model bundle: what `train` writes and `embed` / `evaluate` read.
 
     model.pt            weights (a state dict of tensors)
-    preprocessing.pt    tensors: reference profile, z-score and covariate statistics, feature means
+    preprocessing.pt    tensors: reference profile, z-score and covariate statistics, feature means, and the
+                        low end of every feature's expression for the missing-gene calls
     manifest.json       features, covariates, hyper-parameters, split settings, metrics, versions
     splits.csv          study, split and fold of every training-table sample
 
@@ -56,6 +57,7 @@ class ModelBundle:
     scaler: CovariateScaler
     ref_log: np.ndarray
     manifest: dict
+    low: np.ndarray | None = None      # low end of every feature's normalised count; None = a bundle without missing-gene calls
 
     @property
     def config(self) -> TrainConfig:
@@ -78,7 +80,8 @@ class ModelBundle:
         model.to(device).eval()
         return cls(model, fs, ZScore(pre["z_mu"].numpy(), pre["z_sd"].numpy()),
                    CovariateScaler(cov["names"], cov["numeric"], pre["cov_mu"].numpy(), pre["cov_sd"].numpy()),
-                   pre["ref_log"].numpy().astype(np.float64), manifest)
+                   pre["ref_log"].numpy().astype(np.float64), manifest,
+                   pre["missing_low"].numpy().astype(np.float64) if "missing_low" in pre else None)
 
 
 def save_bundle(path: str | Path, model, data: TrainingData, cfg: TrainConfig, device, seed: int,
@@ -88,7 +91,8 @@ def save_bundle(path: str | Path, model, data: TrainingData, cfg: TrainConfig, d
     torch.save({k: v.detach().cpu() for k, v in model.state_dict().items()}, path / MODEL_FILE)
     torch.save({"ref_log": torch.tensor(data.ref_log), "z_mu": torch.tensor(data.zscore.mu), "z_sd": torch.tensor(data.zscore.sd),
                 "cov_mu": torch.tensor(data.scaler.mu), "cov_sd": torch.tensor(data.scaler.sd),
-                "log_mean": torch.tensor(data.log_mean)}, path / PREPROCESSING_FILE)
+                "log_mean": torch.tensor(data.log_mean)}
+               | ({} if data.low is None else {"missing_low": torch.tensor(data.low)}), path / PREPROCESSING_FILE)
     data.splits.to_csv(path / SPLITS_FILE)
     split = data.split
     manifest = {
@@ -107,6 +111,9 @@ def save_bundle(path: str | Path, model, data: TrainingData, cfg: TrainConfig, d
                       "test": int(data.splits.loc[split == 3, "gse"].nunique())},
         "n_labelled_training": {h: {c: int((data.y_fit[h][data.tr_rows] == i).sum()) for i, c in enumerate(data.fit_classes[h])} for h in HEADS},
         "study_cap": int(data.study_cap),
+        "missing_genes": {"called": data.low is not None,
+                          "median_per_sample": float(np.median(data.M.sum(dim=1).numpy())) if data.M is not None else 0.0,
+                          "samples_with_100_or_more": int((data.M.sum(dim=1) >= 100).sum()) if data.M is not None else 0},
         "label_caps": {h: {data.fit_classes[h][c]: k for c, k in label_weights(data.y_fit[h], data.gse_codes, data.tr_rows, cfg.label_cap)[1].items()} for h in HEADS},
         "features": data.fs.to_dict(),
         "covariates": {"names": data.scaler.names, "numeric": data.scaler.numeric},

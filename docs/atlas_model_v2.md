@@ -3,7 +3,8 @@
 Status: design of 2026-11-15. A first stage is implemented in `ecoli_atlas` (2026-11-19, see
 `ecoli_atlas/README.md`): feature groups (section 1), normalization (2), the rRNA / tRNA and QC
 covariates (3, 5), the jointly trained model with its two heads and alignment terms (6) and part of
-the evaluation (8). Not implemented yet: missing-gene inference (4), the DNA term (5a), the
+the evaluation (8). Missing genes (4) are called and masked in a simpler form than designed (see the
+note in that section). Not implemented yet: the DNA term (5a), the
 corrected and denoised counts (7), the deletion and twin checks of section 8. The model is trained
 on counts from the revised inGEST (`docs/counting.md`); the QC the recount saves for it is listed
 in `docs/atlas_qc_inputs.md`.
@@ -118,6 +119,27 @@ The calls are made from the counts alone:
 During training, random contiguous blocks of genes are masked in addition, so that the embedding
 does not depend on which genes happen to be missing. `ecoli_atlas embed` writes the calls
 (`absent_genes.tsv`).
+
+**As implemented (2026-11-20, `preprocess.missing_genes`, on by default, `train --no-mask-missing`
+switches it off).** A rule in place of the likelihood ratio and the hidden Markov model:
+
+- The low end `q_g` is the 25th percentile of the normalized count over the reference training
+  samples in which the gene is not called missing (found in two rounds).
+- A gene is depleted in a sample when its count is at most 2% of `s_i · q_g`. Neighbouring depleted
+  genes in chromosome order form a run; the run is called missing when its genes together expected
+  at least 10 reads.
+- Missing genes are left out of the size factor, of the gene means and standard deviations and of
+  the count likelihood; the encoders see 0 (the gene's mean) for them.
+- In place of random blocks, half of the samples of every training batch also get the missing genes
+  of another training sample, as input only: their counts are still reconstructed.
+- `embed` makes the same calls with the low end saved in the bundle and writes `missing_genes.tsv`;
+  `predictions.tsv` of a bundle has `n_missing_genes`.
+- Not done: the refinement with the decoder's mean (5) and the coverage evidence (6).
+
+On the atlas the calls give a median of 3 genes in K-12 samples (mostly known deletions: `araBA`
+and `rhaBA` of BW25113, the `lac` region) and about 280 to 480 in the larger other strain groups. They find about
+80% of what calls pooled over a whole study and strain find, and 80% of them are confirmed by
+those.
 
 Strain metadata is used only to check the calls against the known deletions above. Genes that a
 strain has and MG1655 lacks are not counted and are outside this model.

@@ -66,6 +66,10 @@ def _fit_and_save(tables, fs, cfg, splits, device, seed: int, out: Path, cv: boo
     data = build_training(tables, fs, cfg, splits)
     _info(f"[seed {seed}] training pool {len(data.tr_rows)} samples, TEST {len(data.te_rows)}, "
           f"{fs.n} features, {data.C.shape[1]} covariates, study cap {data.study_cap}")
+    n_missing = data.M.sum(dim=1).numpy()
+    if cfg.mask_missing:
+        _info(f"[seed {seed}] genes called missing: median {int(np.median(n_missing))} per sample, "
+              f"{int((n_missing >= 100).sum())} samples with 100 or more")
     model, history = fit(data, cfg, device, seed=seed, log=_info)
     ev = evaluate(model, data, cfg, device)
     extra = {"phase_order": ev["report"]["phase_order"]}
@@ -75,7 +79,7 @@ def _fit_and_save(tables, fs, cfg, splits, device, seed: int, out: Path, cv: boo
     manifest = save_bundle(out, model, data, cfg, device, seed, metrics=ev["report"]["heads"].get("test", {}), extra=extra)
     _write_json(ev["report"] | extra, out / "evaluation.json")
     ev["embedding"].to_csv(out / "embedding.tsv", sep="\t", float_format="%.6g")
-    ev["predictions"].to_csv(out / "predictions.tsv", sep="\t", float_format="%.6g")
+    ev["predictions"].assign(n_missing_genes=n_missing).to_csv(out / "predictions.tsv", sep="\t", float_format="%.6g")
     ev["phase_lfc"].to_csv(out / "phase_lfc.tsv", sep="\t", index=False, float_format="%.4f")
     pd.DataFrame(history).to_csv(out / "history.tsv", sep="\t", index=False, float_format="%.6g")
     if cv:
@@ -98,6 +102,7 @@ def cmd_train(args) -> int:
     for name in ("epochs", "study_cap", "label_cap", "test_frac"):
         if getattr(args, name) is not None:
             setattr(cfg, name, getattr(args, name))
+    cfg.mask_missing = not args.no_mask_missing
     if args.threads:
         torch.set_num_threads(args.threads)
     out = Path(args.out)
@@ -524,6 +529,8 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--label-cap", type=int, help="samples of one class that one study may count for in a call's loss "
                                                   "(default: for every class the size of the second-largest study in it)")
     sp.add_argument("--test-frac", type=float)
+    sp.add_argument("--no-mask-missing", action="store_true", help="treat genes a strain does not have as measured zeros "
+                    "(default: they are called from the counts and left out of the fit)")
     sp.add_argument("--threads", type=int, help="torch CPU threads")
     add_device(sp)
     sp.set_defaults(func=cmd_train)

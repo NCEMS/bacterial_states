@@ -5,7 +5,8 @@ import pytest
 from ecoli_atlas.features import FeatureSet, read_feature_table
 from ecoli_atlas.io import read_counts, sample_id_from_column
 from ecoli_atlas.prepare import prepare
-from ecoli_atlas.preprocess import (ZScore, align_counts, composition_covariates, log_expression, reference_profile,
+from ecoli_atlas.preprocess import (ZScore, align_counts, composition_covariates, log_expression, low_expression_profile, missing_genes,
+                                    reference_profile,
                                     size_factors)
 
 
@@ -92,3 +93,38 @@ def test_prepare_from_ingest_results(tmp_path):
     counts, samples = prepare(res, None, tmp_path / "meta.tsv", tmp_path / "out")
     assert counts.loc["CDS_b0001_thrL", "S1"] == 7 and samples.loc["S1", "condition"] == "wt"
     assert (tmp_path / "out" / "counts.tsv").exists() and samples.loc["S1", "source_column"].endswith("S1_sort.bam")
+
+
+def test_missing_genes_are_called_in_runs_and_left_out_of_the_statistics():
+    rng = np.random.RandomState(3)
+    n, g = 40, 60
+    base = np.r_[np.full(30, 400.0), np.full(30, 3.0)]            # 30 well expressed genes, then 30 weak ones
+    depth = rng.uniform(0.5, 2.0, n)
+    Y = rng.poisson(base[None, :] * depth[:, None]).astype(float)
+    Y[:8, 5] = 0                                                   # a single well expressed gene
+    Y[:8, 40:52] = 0                                               # an island of weak genes
+    Y[20, :] = rng.poisson(base * 0.002)                           # a very shallow sample
+    order = np.arange(g)
+    s = np.r_[depth[:20], 0.002, depth[21:]]
+    low = low_expression_profile(Y, s, order)
+    assert (low[:30] > 200).all() and (low[30:] > 0).all()        # the samples without the gene do not pull the low end to 0
+    M = missing_genes(Y, s, low, order)
+    assert M[:8, 5].all() and M[:8, 40:52].all()
+    assert M[8:].sum() == 0 and not M[20].any()                    # nothing in the other samples, nor in the shallow one
+    assert M[:8].sum() == 8 * 13
+    # a weak gene alone is not called; a different chromosome order breaks the island
+    Y2 = Y.copy()
+    Y2[30, 45] = 0
+    assert not missing_genes(Y2, s, low, order)[30].any()
+    # missing genes do not enter the size factor or the gene statistics, and are set to the mean
+    ref = np.log(base)
+    Y3 = Y.copy()
+    Y3[:8, 5] = 1                                                  # a stray read on a well expressed gene: still called, and not used
+    M3 = missing_genes(Y3, s, low, order)
+    assert M3[:8, 5].all() and M3[:8, 40:52].all()
+    assert np.allclose(size_factors(Y3, ref, M3)[8:], size_factors(Y3, ref)[8:])
+    logx = log_expression(Y, s)
+    z = ZScore.fit(logx, missing=M)
+    assert abs(z.mu[5] - logx[8:, 5].mean()) < 1e-5 and z.mu[5] > ZScore.fit(logx).mu[5]
+    X = z.apply(logx, M)
+    assert (X[M] == 0).all() and abs(X[~M[:, 5], 5].mean()) < 1e-5

@@ -1,6 +1,7 @@
 """From a count table to model inputs: size factors, log expression, z-scores, composition."""
 from __future__ import annotations
 
+import warnings
 from dataclasses import dataclass
 
 import numpy as np
@@ -57,11 +58,13 @@ def reference_profile(Y: np.ndarray, is_mrna: np.ndarray, w: np.ndarray | None =
     return np.where(keep, ref, np.nan)
 
 
-def size_factors(Y: np.ndarray, ref_log: np.ndarray) -> np.ndarray:
-    """Median over reference genes with reads of count / reference (median-of-ratios)."""
+def size_factors(Y: np.ndarray, ref_log: np.ndarray, missing: np.ndarray | None = None) -> np.ndarray:
+    """Median over reference genes with reads of count / reference (median-of-ratios). Genes
+    called missing in a sample (``missing``, samples x features) are left out for that sample."""
     use = ~np.isnan(ref_log)
+    has = Y[:, use] > 0 if missing is None else (Y[:, use] > 0) & ~missing[:, use]
     with np.errstate(divide="ignore"):
-        ratio = np.where(Y[:, use] > 0, np.log(np.where(Y[:, use] > 0, Y[:, use], 1.0)) - ref_log[use], np.nan)
+        ratio = np.where(has, np.log(np.where(has, Y[:, use], 1.0)) - ref_log[use], np.nan)
     if np.isnan(ratio).all(axis=1).any():
         raise ValueError("a sample has no reads on any reference gene; no size factor can be given")
     return np.exp(np.nanmedian(ratio, axis=1))
@@ -69,6 +72,49 @@ def size_factors(Y: np.ndarray, ref_log: np.ndarray) -> np.ndarray:
 
 def log_expression(Y: np.ndarray, s: np.ndarray) -> np.ndarray:
     return np.log2(Y / s[:, None] + 1.0)
+
+
+def missing_genes(Y: np.ndarray, s: np.ndarray, low: np.ndarray, order: np.ndarray, min_expected: float = 10.0,
+                  low_fraction: float = 0.02) -> np.ndarray:
+    """Genes without reads because the strain does not have them (samples x features, bool).
+
+    ``low`` is the low end of every gene's normalised count among samples that have the gene
+    (``low_expression_profile``), so ``s * low`` reads are expected even where the gene is weakly
+    expressed. A gene is depleted in a sample when its count is at most ``low_fraction`` of that
+    (zero when the expectation is small). Neighbouring depleted genes in chromosome order
+    (``order``) form a run, and a run is called missing when its genes together expected at least
+    ``min_expected`` reads. A deleted island is so called with its weakly expressed genes, a single
+    gene only when it is well expressed, and a shallow sample gives no call."""
+    e = s[:, None] * np.nan_to_num(low)[None, :]
+    depleted = (Y <= low_fraction * e)[:, order]
+    e = e[:, order]
+    out = np.zeros_like(depleted)
+    for i in range(Y.shape[0]):
+        d = depleted[i]
+        if not d.any():
+            continue
+        run = np.cumsum(~d)                                   # constant within a run of depleted genes
+        total = np.bincount(run[d], weights=e[i][d], minlength=int(run[-1]) + 1)
+        out[i, d] = total[run[d]] >= min_expected
+    back = np.empty_like(order)
+    back[order] = np.arange(len(order))
+    return out[:, back]
+
+
+def low_expression_profile(Y: np.ndarray, s: np.ndarray, order: np.ndarray, min_expected: float = 10.0, low_fraction: float = 0.02,
+                           quantile: float = 0.25, start_quantile: float = 0.25, rounds: int = 2) -> np.ndarray:
+    """Per gene, the ``quantile`` of the normalised count over the samples (rows of ``Y``) in which
+    the gene is not called missing. The calls need the profile, so it is found in rounds: the
+    first calls use ``start_quantile`` over all samples, which is above zero as long as fewer
+    than that share of the samples lack the gene."""
+    N = Y / s[:, None]
+    low = np.quantile(N, start_quantile, axis=0)
+    for _ in range(rounds):
+        miss = missing_genes(Y, s, low, order, min_expected, low_fraction)
+        with np.errstate(all="ignore"), warnings.catch_warnings():
+            warnings.simplefilter("ignore", RuntimeWarning)
+            low = np.nan_to_num(np.nanquantile(np.where(miss, np.nan, N), quantile, axis=0))
+    return low
 
 
 def composition_covariates(Y: np.ndarray, fam: np.ndarray, is_mrna: np.ndarray) -> np.ndarray:
@@ -84,10 +130,22 @@ class ZScore:
     sd: np.ndarray
 
     @classmethod
-    def fit(cls, X: np.ndarray, w: np.ndarray | None = None, sd_floor: float = 0.0) -> "ZScore":
-        mu, sd = weighted_stats(X, w)
+    def fit(cls, X: np.ndarray, w: np.ndarray | None = None, sd_floor: float = 0.0, missing: np.ndarray | None = None) -> "ZScore":
+        """``missing`` (samples x features): entries left out of a gene's statistics."""
+        if missing is None or not missing.any():
+            mu, sd = weighted_stats(X, w)
+        else:
+            W = (np.ones(len(X)) if w is None else np.asarray(w, dtype=np.float64))[:, None] * ~missing
+            total = W.sum(axis=0)
+            safe = np.where(total > 0, total, 1.0)
+            mu = (W * X).sum(axis=0) / safe
+            sd = np.sqrt(np.maximum((W * (X - mu) ** 2).sum(axis=0) / safe, 0.0))
         sd = np.where(sd == 0, 1.0, np.maximum(sd, sd_floor))
         return cls(mu.astype(np.float32), sd.astype(np.float32))
 
-    def apply(self, X: np.ndarray) -> np.ndarray:
-        return ((X - self.mu) / self.sd).astype(np.float32)
+    def apply(self, X: np.ndarray, missing: np.ndarray | None = None) -> np.ndarray:
+        """z-scores; a missing gene is set to 0, the mean of the samples that have it."""
+        Z = ((X - self.mu) / self.sd).astype(np.float32)
+        if missing is not None:
+            Z[missing] = 0.0
+        return Z

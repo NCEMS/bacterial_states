@@ -295,3 +295,43 @@ def test_drivers_average_over_the_seeds_of_a_sweep(train_args, tmp_path):
     assert len(summary["models"]) == 3 and -1 <= summary["contrasts"][0]["rank_correlation_between_seeds"] <= 1
     assert main(["drivers", *train_args, "--models", str(sweep), "--out", str(out / "one"), "--device", "cpu", "--formats", "png", "--one-model"]) == 0
     assert "n_seeds" not in pd.read_csv(out / "one" / "drivers_phase_exponential_to_stationary.tsv", sep="\t").columns
+
+
+def test_genes_missing_from_a_strain_are_called_masked_and_not_fitted(atlas_files, tmp_path):
+    tables = load_tables(atlas_files["counts"], atlas_files["metadata"], atlas_files["qc"])
+    fs = FeatureSet.from_table(read_feature_table(atlas_files["features"]))
+    island = list(range(40, 56))
+    upec = (tables.meta["strain_group"] == "UPEC").to_numpy()
+    tables.counts.iloc[island, np.flatnonzero(upec)] = 0              # the UPEC studies lack a 16-gene island
+    cfg = TrainConfig(seed=5, test_frac=0.2, n_candidates=50, epochs=3, block_epochs=3, batch=40,
+                      hparams=HParams(enc_width=32, dec_width=32, block_width=16, res_dim=4))
+    splits = make_splits(tables.meta["GSE"], head_labels(tables.meta), is_reference(tables.meta), cfg)
+    data = build_training(tables, fs, cfg, splits)
+    M = data.M.numpy()
+    assert M[upec][:, island].all() and M[~upec].sum() <= 0.001 * M[~upec].size and M[upec].sum() <= upec.sum() * (len(island) + 1)
+    assert (data.X.numpy()[M] == 0).all() and (data.low[island] > 0).all()
+    # the island's statistics come from the samples that have it
+    plain = build_training(tables, fs, TrainConfig(**{**cfg.to_dict(), "hparams": cfg.hparams, "mask_missing": False}), splits)
+    assert plain.low is None and not plain.M.any() and (data.zscore.mu[island] > plain.zscore.mu[island]).all()
+    assert (plain.X.numpy()[upec][:, island] < -1).all()
+    # training samples are also seen with the gaps of other samples; the counts in the gaps do not enter the loss
+    from ecoli_atlas.train import model_input
+    rt = torch.as_tensor(np.flatnonzero(~upec)[:30])
+    x = model_input(data, rt, data.tr_rows, cfg, np.random.RandomState(0))
+    gaps = (x[:, island] == 0).all(dim=1).numpy()
+    assert 0 < gaps.sum() < len(rt) and torch.equal(x[~torch.as_tensor(gaps)], data.X[rt][~torch.as_tensor(gaps)])
+    model, hist = fit(data, cfg, "cpu")
+    changed = data.Y.clone()
+    changed[data.M] = 1e6
+    from ecoli_atlas.evaluate import count_fit
+    before = count_fit(model, data, data.tr_rows, "cpu")
+    data.Y = changed
+    assert count_fit(model, data, data.tr_rows, "cpu") == before
+    # a saved bundle makes the same calls for new samples
+    from ecoli_atlas.artifacts import save_bundle
+    save_bundle(tmp_path / "b", model, data, cfg, "cpu", 5)
+    bundle = ModelBundle.load(tmp_path / "b")
+    ids = [i for i, u in zip(data.ids, upec) if u][:3] + [i for i, u in zip(data.ids, upec) if not u][:3]
+    res = embed_counts(bundle, tables.counts[ids])
+    assert list(res["samples"]["n_missing_genes"]) == [int(M[data.ids.index(i)].sum()) for i in ids]
+    assert set(res["missing"]["sample"]) == set(ids[:3]) and set(res["missing"]["feature"]) >= {fs.ids[g] for g in island}

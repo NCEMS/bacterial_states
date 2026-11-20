@@ -29,7 +29,7 @@ from sklearn.linear_model import Ridge
 from .config import HEADS, TrainConfig
 from .data import COMPOSITION_NAMES, QC_NUMERIC, TrainingData
 from .labels import MEDIUM_CHECK, PHASE_CHECK, medium_check_group, phase_check_group
-from .losses import nb_nll
+from .losses import masked_mean, nb_nll
 from .metrics import knn_label_agreement, same_study_rate, within_study_order
 from .train import encode, head_metrics
 
@@ -44,9 +44,10 @@ def count_fit(model, data: TrainingData, rows: np.ndarray, device, chunk: int = 
         out = model(data.X[rt].to(device), data.C[rt].to(device), sample=False)
         log_mean = out["log_rate"] + data.log_s[rt].to(device)[:, None]
         y = data.Y[rt].to(device)
-        nll.append(nb_nll(y, log_mean, model.log_theta).mean(dim=1).cpu().numpy())
+        keep = torch.ones_like(y, dtype=torch.bool) if data.M is None else ~data.M[rt].to(device)      # the genes the sample has
+        nll.append(masked_mean(nb_nll(y, log_mean, model.log_theta), keep, dim=1).cpu().numpy())
         a, b = torch.log1p(y), torch.log1p(torch.exp(log_mean.clamp(max=30)))
-        a, b = a - a.mean(1, keepdim=True), b - b.mean(1, keepdim=True)
+        a, b = (a - masked_mean(a, keep, dim=1)[:, None]) * keep, (b - masked_mean(b, keep, dim=1)[:, None]) * keep
         cors.append(((a * b).sum(1) / torch.sqrt((a ** 2).sum(1) * (b ** 2).sum(1)).clamp_min(1e-12)).cpu().numpy())
     nll, cors = np.concatenate(nll), np.concatenate(cors)
     return {"n": int(len(rows)), "nll_per_feature": float(nll.mean()), "log_count_correlation_median": float(np.median(cors))}

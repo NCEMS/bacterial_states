@@ -12,6 +12,7 @@
 #   SEEDS=1,2,3,4,5,6,7,8 CV=1 sbatch ecoli_atlas/scripts/slurm_train.sh    # seed sweep ranked on out-of-fold scores
 #   FIT=one-pass OUT=outputs/models_v2_one_pass SPLITS=outputs/models_v2/splits.csv sbatch ecoli_atlas/scripts/slurm_train.sh
 #                                                         # another way of fitting, on the same split
+#   MASK=0 OUT=outputs/models_v2_unmasked ... sbatch ...  # without the missing-gene calls (zeros of absent genes are fitted)
 #
 # Run from the repository root. Name an x86 GPU type in --gpus (v100s, v100, a100, l40s): the conda
 # environment does not run on ARM GPU nodes. The pip build of torch in the `ecoli_atlas` environment
@@ -36,5 +37,6 @@ SPLITS=${SPLITS:-$OUT/splits.csv}
 [[ -n "${CV:-}" ]] && args+=(--cv)
 [[ -n "${EPOCHS:-}" ]] && args+=(--epochs "$EPOCHS")
 [[ -n "${PHASE_HEAD:-}" ]] && args+=(--phase-head "$PHASE_HEAD")     # binary (default) or ordinal
+[[ "${MASK:-1}" == 0 ]] && args+=(--no-mask-missing)                  # MASK=0: genes a strain lacks stay measured zeros
 [[ -n "${FIT:-}" ]] && args+=(--fit "$FIT")                           # two-stage (default), one-pass or unstructured
 python -m ecoli_atlas.cli train "${args[@]}"

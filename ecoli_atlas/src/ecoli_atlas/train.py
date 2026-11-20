@@ -30,7 +30,7 @@ import torch.nn.functional as F
 from .config import HEADS, TrainConfig
 from .data import AtlasTables, TrainingData, build_training, label_weights, study_fold
 from .features import FeatureSet
-from .losses import class_weights, cos_dist, cross_study_control_pull, kl_normal, nb_nll, within_study_push
+from .losses import class_weights, cos_dist, cross_study_control_pull, kl_normal, masked_mean, nb_nll, within_study_push
 from .metrics import classification_metrics, within_study_order
 from .models import AtlasModel, OrdinalHead, build_model
 from .utils import set_seed
@@ -64,6 +64,24 @@ def study_blocked_batches(rows, gse, batch_size: int, seed: int, cap: int) -> li
     if len(batch) > 1:
         out.append(np.array(batch))
     return out
+
+
+def model_input(data: TrainingData, rt: torch.Tensor, pool: np.ndarray, cfg: TrainConfig, rng: np.random.RandomState) -> torch.Tensor:
+    """The z-scored expression of the samples ``rt`` for a training step. A share
+    ``cfg.mask_transplant`` of them is also given the missing genes of a random sample of ``pool``
+    (set to 0, the gene's mean), so that every sample is seen with the gaps of other strains and
+    the pattern of gaps says nothing about the sample."""
+    x = data.X[rt]
+    if not cfg.mask_missing or cfg.mask_transplant <= 0 or data.M is None:
+        return x
+    take = rng.random_sample(len(rt)) < cfg.mask_transplant
+    if not take.any():
+        return x
+    donors = torch.as_tensor(rng.choice(pool, int(take.sum())))
+    x = x.clone()
+    idx = torch.as_tensor(np.flatnonzero(take))
+    x[idx] = x[idx].masked_fill(data.M[donors], 0.0)
+    return x
 
 
 def head_weighting(data: TrainingData, head: str, rows: np.ndarray, cfg: TrainConfig, device) -> tuple:
@@ -120,7 +138,7 @@ def fit_block(model: AtlasModel, data: TrainingData, head: str, cfg: TrainConfig
             rt = torch.as_tensor(order[i:i + cfg.block_batch])
             if len(rt) < 2:
                 continue
-            loss = loss_fn(block(data.X[rt].to(device))[1], y[rt].to(device), w[rt].to(device), cw)
+            loss = loss_fn(block(model_input(data, rt, rows, cfg, rng).to(device))[1], y[rt].to(device), w[rt].to(device), cw)
             opt.zero_grad()
             loss.backward()
             opt.step()
@@ -141,9 +159,9 @@ def set_block_statistics(model: AtlasModel, data: TrainingData, rows: np.ndarray
 
 def run_epochs(model, params: list, data: TrainingData, cfg: TrainConfig, device, rows: np.ndarray, seed: int, epochs: int,
                stage: str, heads: bool = False, train_blocks: bool = False, log=None) -> list:
-    """Optimise ``params`` over study-blocked batches of ``rows``. The loss is the count likelihood,
-    the KL term and the two alignment terms, plus each head's cross-entropy when ``heads`` is set.
-    Returns one history row per epoch (means of the terms)."""
+    """Optimise ``params`` over study-blocked batches of ``rows``. The loss is the count likelihood
+    (over the genes a sample has), the KL term and the two alignment terms, plus each head's
+    cross-entropy when ``heads`` is set. Returns one history row per epoch (means of the terms)."""
     hp = cfg.hparams
     opt = torch.optim.Adam(params, lr=hp.lr, weight_decay=hp.weight_decay)
     gse = torch.tensor(data.gse_codes, dtype=torch.long)
@@ -156,11 +174,12 @@ def run_epochs(model, params: list, data: TrainingData, cfg: TrainConfig, device
     for ep in range(epochs):
         sums: dict = {}
         nb_batches = 0
+        rng = np.random.RandomState(seed + 7919 * (ep + 1))
         for ridx in study_blocked_batches(rows, data.gse_codes, cfg.batch, seed + ep, data.study_cap):
             rt = torch.as_tensor(ridx)
-            out = model(data.X[rt].to(device), data.C[rt].to(device), train_blocks=train_blocks)
-            terms = {"counts": nb_nll(data.Y[rt].to(device), out["log_rate"] + data.log_s[rt].to(device)[:, None],
-                                      model.log_theta).mean().float(),
+            out = model(model_input(data, rt, rows, cfg, rng).to(device), data.C[rt].to(device), train_blocks=train_blocks)
+            nll = nb_nll(data.Y[rt].to(device), out["log_rate"] + data.log_s[rt].to(device)[:, None], model.log_theta)
+            terms = {"counts": (nll.mean() if data.M is None else masked_mean(nll, ~data.M[rt].to(device))).float(),
                      "kl": kl_normal(out["kl_mu"], out["kl_logvar"]).mean()}
             loss = terms["counts"] + hp.kl_w * terms["kl"]
             if heads:

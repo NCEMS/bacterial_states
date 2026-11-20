@@ -68,3 +68,11 @@ def nb_nll(y: torch.Tensor, log_mean: torch.Tensor, log_theta: torch.Tensor) -> 
 def kl_normal(mu: torch.Tensor, logvar: torch.Tensor) -> torch.Tensor:
     """KL divergence of N(mu, exp(logvar)) from the standard normal, mean over latent dimensions."""
     return 0.5 * (mu ** 2 + torch.exp(logvar) - 1.0 - logvar).mean(dim=1)
+
+
+def masked_mean(x: torch.Tensor, keep: torch.Tensor, dim=None) -> torch.Tensor:
+    """Mean of ``x`` over the entries where ``keep`` is set (0 where none is)."""
+    k = keep.to(x.dtype)
+    if dim is None:
+        return (x * k).sum() / k.sum().clamp_min(1.0)
+    return (x * k).sum(dim=dim) / k.sum(dim=dim).clamp_min(1.0)

@@ -79,6 +79,13 @@ class TrainConfig:
     # preprocessing
     min_gene_presence: float = 0.5   # a gene enters the size-factor reference if nonzero in this share of training samples
     sd_floor: float = 0.1            # per-gene sd of the log expression is floored here
+    # genes a strain does not have (preprocess.missing_genes): left out of the size factor, the gene
+    # statistics and the count likelihood; the encoders see the gene's mean instead
+    mask_missing: bool = True
+    mask_min_expected: float = 10.0  # reads a run of depleted genes must have expected at the low end of expression
+    mask_low_fraction: float = 0.02  # a gene is depleted at or below this share of its low-end expectation
+    mask_quantile: float = 0.25      # the low end: this quantile of a gene's normalised count over the reference samples that have it
+    mask_transplant: float = 0.5     # share of the samples of a batch that also get the missing genes of another training sample
     # training
     block_epochs: int = 40       # of each block encoder
     block_batch: int = 256

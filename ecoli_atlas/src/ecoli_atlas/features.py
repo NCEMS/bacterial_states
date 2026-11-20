@@ -39,6 +39,7 @@ class FeatureSet:
     is_mrna: np.ndarray       # bool over ids
     lengths: np.ndarray       # bp, over ids
     families: dict            # "16S" / "23S" / "5S" / "tRNA" -> list of feature ids
+    order: np.ndarray | None = None   # model features in chromosome order (indices into ids); None in bundles made before the missing-gene calls
 
     @classmethod
     def from_table(cls, feat: pd.DataFrame) -> "FeatureSet":
@@ -51,7 +52,16 @@ class FeatureSet:
         rrna = feat[feat["Type"] == "rRNA"]
         families = {name: list(rrna.index[rrna["Symbol"].str.startswith(prefix)]) for name, prefix in RRNA_FAMILIES.items()}
         families["tRNA"] = list(feat.index[feat["Type"] == "tRNA"])
-        return cls(ids, np.array([True] * len(mrna) + [False] * len(other)), feat.loc[ids, "Length"].to_numpy(), families)
+        # chromosome order of the model features (the table's own order when it has no positions)
+        sub = feat.loc[ids]
+        if "Start" in feat.columns:
+            keys = [pd.to_numeric(sub["Start"], errors="coerce").fillna(0).to_numpy()]
+            if "Chr" in feat.columns:
+                keys.append(pd.factorize(sub["Chr"])[0])
+            order = np.lexsort(keys)
+        else:
+            order = np.argsort(feat.index.get_indexer(ids), kind="stable")
+        return cls(ids, np.array([True] * len(mrna) + [False] * len(other)), sub["Length"].to_numpy(), families, order.astype(int))
 
     @property
     def n(self) -> int:
@@ -59,8 +69,9 @@ class FeatureSet:
 
     def to_dict(self) -> dict:
         return {"ids": self.ids, "is_mrna": [bool(x) for x in self.is_mrna], "lengths": [int(x) for x in self.lengths],
-                "families": self.families}
+                "families": self.families} | ({} if self.order is None else {"order": [int(x) for x in self.order]})
 
     @classmethod
     def from_dict(cls, d: dict) -> "FeatureSet":
-        return cls(list(d["ids"]), np.array(d["is_mrna"], dtype=bool), np.array(d["lengths"], dtype=int), dict(d["families"]))
+        return cls(list(d["ids"]), np.array(d["is_mrna"], dtype=bool), np.array(d["lengths"], dtype=int), dict(d["families"]),
+                   np.array(d["order"], dtype=int) if d.get("order") is not None else None)

@@ -16,8 +16,8 @@ from .config import HEADS, TrainConfig, fit_classes
 from .features import COMPOSITION, FeatureSet
 from .io import read_counts
 from .labels import condition_identity, fit_codes, head_labels, label_codes, phase_levels, scored_labels
-from .preprocess import (ZScore, align_counts, composition_covariates, log_expression, reference_profile,
-                         size_factors, weighted_stats)
+from .preprocess import (ZScore, align_counts, composition_covariates, log_expression, low_expression_profile, missing_genes,
+                         reference_profile, size_factors, weighted_stats)
 
 # QC covariates: values of the QC table (column `full_<name>`, or `<name>` in a plain table) that
 # describe the library and the run, not the biology or the strain.
@@ -197,6 +197,8 @@ class TrainingData:
     zscore: ZScore
     scaler: CovariateScaler
     log_mean: np.ndarray            # per-feature log of the mean normalised count over the reference training samples
+    M: torch.Tensor | None = None   # samples x features, True where the gene is called missing from the sample's strain
+    low: np.ndarray | None = None   # per-feature low end of the normalised count (for the missing-gene calls); None = no calls
     extra: dict = field(default_factory=dict)
 
     @property
@@ -245,19 +247,28 @@ def build_training(tables: AtlasTables, fs: FeatureSet, cfg: TrainConfig, splits
         raise ValueError("no reference sample among the samples to fit on")
     ref_log = reference_profile(Y[rows], fs.is_mrna, weights[rows], cfg.min_gene_presence)
     s = size_factors(Y, ref_log)
+    low, miss = None, np.zeros(Y.shape, dtype=bool)
+    if cfg.mask_missing:
+        if fs.order is None:
+            raise ValueError("the feature set has no chromosome order; the missing-gene calls need it")
+        low = low_expression_profile(Y[rows], s[rows], fs.order, cfg.mask_min_expected, cfg.mask_low_fraction, cfg.mask_quantile)
+        miss = missing_genes(Y, s, low, fs.order, cfg.mask_min_expected, cfg.mask_low_fraction)
+        s = size_factors(Y, ref_log, miss)
     logx = log_expression(Y, s)
-    zscore = ZScore.fit(logx[rows], weights[rows], cfg.sd_floor)
+    zscore = ZScore.fit(logx[rows], weights[rows], cfg.sd_floor, miss[rows])
     cov = covariate_frame(Y, fam, fs, tables.qc, ids)
     scaler = CovariateScaler.fit(cov, rows, weights[rows])
     labels = head_labels(tables.meta)
     w = weights[rows] / weights[rows].sum()
-    log_mean = np.log(np.maximum(w @ (Y[rows] / s[rows][:, None]), 1e-3))
+    have = w[:, None] * ~miss[rows]                    # a gene's mean is taken over the samples that have it
+    total = have.sum(axis=0)
+    log_mean = np.log(np.maximum((have * (Y[rows] / s[rows][:, None])).sum(axis=0) / np.where(total > 0, total, 1.0), 1e-3))
     assert set(label_codes(labels)) == set(HEADS)
     return TrainingData(ids=ids, fs=fs, meta=tables.meta, labels=labels, splits=splits,
-                        X=torch.tensor(zscore.apply(logx)), Y=torch.tensor(Y, dtype=torch.float32),
+                        X=torch.tensor(zscore.apply(logx, miss)), Y=torch.tensor(Y, dtype=torch.float32),
                         log_s=torch.tensor(np.log(s), dtype=torch.float32), C=torch.tensor(scaler.apply(cov)),
                         y=label_codes(labels), y_eval=label_codes(scored_labels(tables.meta, labels)),
                         y_fit=fit_codes(tables.meta, labels, cfg.phase_head), fit_classes={h: fit_classes(h, cfg.phase_head) for h in HEADS},
                         phase_level=phase_levels(tables.meta), gse_codes=pd.factorize(gse)[0], identity=condition_identity(tables.meta),
                         weights=weights, study_cap=cap, ref_log=ref_log, zscore=zscore, scaler=scaler,
-                        log_mean=log_mean.astype(np.float32), extra={"covariates_raw": cov})
+                        log_mean=log_mean.astype(np.float32), M=torch.tensor(miss), low=low, extra={"covariates_raw": cov})
