@@ -1,6 +1,6 @@
 {
  "gse": "GSE309890",
- "notes": "WTevo = 40-day sertraline-evolved lines; controls = lines passaged 40 days in TSB without sertraline (labelled reference/control). Not stated whether sertraline was present at harvest, so treatment left out for WTevo. No growth phase, OD or aeration given.",
+ "notes": "WTevo = 40-day sertraline-evolved lines; controls = lines passaged 40 days in TSB without sertraline (labelled reference/control). Not stated whether sertraline was present at harvest, so treatment left out for WTevo. No growth phase, OD or aeration given. Strain labels removed 2026-11-20: GEO states K-12 MG1655, but the counts show about 500 MG1655 genes without reads in every sample and 1-2.5% of reads off the MG1655 reference; the same pattern as in GSE275262 and GSE343594 (79% of the missing genes shared). The strain is not MG1655 and is not identified, so strain_group and strain_name are left empty.",
  "default": {
   "base_medium": {
    "v": "TSB",
@@ -21,16 +21,6 @@
    "v": 37,
    "b": "study_default",
    "q": "grown in tryptic soy broth at 37 °C"
-  },
-  "strain_group": {
-   "v": "K-12",
-   "b": "stated",
-   "q": "K-12 substr. MG1655"
-  },
-  "strain_name": {
-   "v": "MG1655",
-   "b": "stated",
-   "q": "K-12 substr. MG1655"
   },
   "inducer_added": {
    "v": false,

@@ -1,6 +1,6 @@
 {
  "gse": "GSE275262",
- "notes": "Experimental evolution under intermittent AgNP exposure; day 0 = ancestor (control), days 9 and 14 = evolved populations (evolved_isolate). The text does not say whether the sequenced day 9/14 cells were in AgNP exposure or in the recovery phase at harvest, so treatment and exposure are left out for them; no phase or OD given at harvest. Mutated genes not named, so perturbed_genes / global_regulator_perturbed left out for evolved samples.",
+ "notes": "Experimental evolution under intermittent AgNP exposure; day 0 = ancestor (control), days 9 and 14 = evolved populations (evolved_isolate). The text does not say whether the sequenced day 9/14 cells were in AgNP exposure or in the recovery phase at harvest, so treatment and exposure are left out for them; no phase or OD given at harvest. Mutated genes not named, so perturbed_genes / global_regulator_perturbed left out for evolved samples. Strain labels removed 2026-11-20: GEO states K-12 MG1655, but the counts show about 500 MG1655 genes without reads in every sample and 1-2.5% of reads off the MG1655 reference; the same pattern as in GSE309890 and GSE343594 (79% of the missing genes shared). The strain is not MG1655 and is not identified, so strain_group and strain_name are left empty.",
  "default": {
   "base_medium": {
    "v": "LB",
@@ -31,16 +31,6 @@
    "v": "aerobic",
    "b": "inferred",
    "q": "cells were cultured in LB medium at 37 °C under 180 rpm in the dark."
-  },
-  "strain_group": {
-   "v": "K-12",
-   "b": "stated",
-   "q": "E. coli K12 MG1655"
-  },
-  "strain_name": {
-   "v": "MG1655",
-   "b": "stated",
-   "q": "E. coli K12 MG1655"
   },
   "inducer_added": {
    "v": false,
