@@ -101,7 +101,7 @@ def test_bundle_files_and_evaluation(trained):
     assert list(calls.columns) == ["sample", "feature"] and calls.groupby("sample").size().reindex(pred.index, fill_value=0).equals(pred["n_missing_genes"])
 
 
-def test_embed_reproduces_the_training_embedding_and_works_without_qc(trained, atlas_files, tmp_path):
+def test_embed_reproduces_the_training_embedding_and_refuses_without_qc(trained, atlas_files, tmp_path):
     bundle = ModelBundle.load(trained)
     counts = read_counts(atlas_files["counts"])
     qc = pd.read_csv(atlas_files["qc"], sep="\t", dtype=str, keep_default_na=False).set_index("GSM")
@@ -109,12 +109,32 @@ def test_embed_reproduces_the_training_embedding_and_works_without_qc(trained, a
     ref = pd.read_csv(trained / "embedding.tsv", sep="\t", index_col=0).loc[["GSM0000", "GSM0105"]]
     assert np.allclose(res["embedding"].to_numpy(), ref.to_numpy(), atol=2e-4)
     assert res["coverage"].fraction == 1.0 and list(res["predictions"].columns) == ["p_stationary", "phase", "p_minimal", "medium", "p_lab", "lab_strain"]
-    assert main(["embed", "--counts", str(atlas_files["counts"]), "--models", str(trained), "--out", str(tmp_path / "e"), "--device", "cpu"]) == 0
-    noqc = pd.read_csv(tmp_path / "e" / "samples.tsv", sep="\t", index_col=0)
-    assert len(noqc) == 120 and (noqc["has_qc"] == 0).all() and (noqc["size_factor"] > 0).all()
+    # GSM0502 has no substitution rate (fitted with the mean in training), so the whole table is refused
+    assert main(["embed", "--counts", str(atlas_files["counts"]), "--qc", str(atlas_files["qc"]), "--models", str(trained),
+                 "--out", str(tmp_path / "e"), "--device", "cpu"]) == 1
+    # no QC table, a sample without a row, a sample without a required value, a table of the wrong kind: refused
+    assert main(["embed", "--counts", str(atlas_files["counts"]), "--models", str(trained), "--out", str(tmp_path / "x"), "--device", "cpu"]) == 1
+    two = counts[["GSM0000", "GSM0105"]]
+    with pytest.raises(ValueError, match="no QC table"):
+        embed_counts(bundle, two, None)
+    with pytest.raises(ValueError, match="not in the QC table"):
+        embed_counts(bundle, two, qc.drop(index="GSM0105"))
+    gap = qc.copy()
+    gap.loc["GSM0000", "full_fragment_q50"] = ""                    # paired-end: fragment sizes are required
+    gap.loc["GSM0105", "full_fragment_q50"] = ""                    # single-end: they never exist
+    with pytest.raises(ValueError, match=r"GSM0000 \(fragment_q50\)") as err:
+        embed_counts(bundle, two, gap)
+    assert "GSM0105" not in str(err.value)
+    with pytest.raises(ValueError, match="none of the QC values"):
+        embed_counts(bundle, two, pd.DataFrame({"x": ["1", "2"]}, index=["GSM0000", "GSM0105"]))
+    # no Centrifuge values (centrifuge: false): set to the training mean, with a warning
+    nogenus = qc.copy()
+    nogenus.loc["GSM0000", "full_pct_top_other_genus_nostable"] = ""
+    w = embed_counts(bundle, two, nogenus)["warnings"]
+    assert len(w) == 1 and "GSM0000" in w[0] and "Centrifuge" in w[0]
     few = counts.iloc[:20]
     with pytest.raises(ValueError, match="model features"):
-        embed_counts(bundle, few)
+        embed_counts(bundle, few, qc)
 
 
 def test_evaluate_command_repeats_the_training_report(trained, train_args, tmp_path):
@@ -335,7 +355,7 @@ def test_genes_missing_from_a_strain_are_called_masked_and_not_fitted(atlas_file
     save_bundle(tmp_path / "b", model, data, cfg, "cpu", 5)
     bundle = ModelBundle.load(tmp_path / "b")
     ids = [i for i, u in zip(data.ids, upec) if u][:3] + [i for i, u in zip(data.ids, upec) if not u][:3]
-    res = embed_counts(bundle, tables.counts[ids])
+    res = embed_counts(bundle, tables.counts[ids], tables.qc)
     assert list(res["samples"]["n_missing_genes"]) == [int(M[data.ids.index(i)].sum()) for i in ids]
     assert set(res["missing"]["sample"]) == set(ids[:3]) and set(res["missing"]["feature"]) >= {fs.ids[g] for g in island}
 
@@ -365,9 +385,10 @@ def test_antisense_table_vetoes_calls_in_training_and_embed(atlas_files, tmp_pat
     # embed: with the antisense table the bundle's own calls come back, without it the silent genes are called
     ids = in_model[:2] + upec[:2]
     counts[ids].to_csv(tmp_path / "q.tsv", sep="\t")
-    assert main(["embed", "--counts", str(tmp_path / "q.tsv"), "--models", str(tmp_path / "veto"), "--out", str(tmp_path / "e1"),
+    assert main(["embed", "--counts", str(tmp_path / "q.tsv"), "--qc", str(atlas_files["qc"]), "--models", str(tmp_path / "veto"), "--out", str(tmp_path / "e1"),
                  "--antisense", str(tmp_path / "antisense.tsv"), "--device", "cpu"]) == 0
-    assert main(["embed", "--counts", str(tmp_path / "q.tsv"), "--models", str(tmp_path / "veto"), "--out", str(tmp_path / "e2"), "--device", "cpu"]) == 0
+    assert main(["embed", "--counts", str(tmp_path / "q.tsv"), "--qc", str(atlas_files["qc"]), "--models", str(tmp_path / "veto"), "--out", str(tmp_path / "e2"),
+                 "--device", "cpu"]) == 0
     n1 = pd.read_csv(tmp_path / "e1" / "samples.tsv", sep="\t", index_col=0)["n_missing_genes"]
     n2 = pd.read_csv(tmp_path / "e2" / "samples.tsv", sep="\t", index_col=0)["n_missing_genes"]
     assert list(n1) == list(veto[ids]) and (n2[ids[:2]] >= 10).all() and list(n2[ids[2:]]) == list(n1[ids[2:]])
@@ -401,7 +422,7 @@ def test_pooled_calls_in_training_and_embed(atlas_files, tmp_path):
     # embed: the samples of one study given together get the training calls; --no-pool and a single sample call alone
     ids = [i for i in u if meta.loc[i, "GSE"] == meta.loc[u[0], "GSE"]]
     counts[ids].to_csv(tmp_path / "q.tsv", sep="\t")
-    base = ["embed", "--counts", str(tmp_path / "q.tsv"), "--models", str(tmp_path / "pool"), "--device", "cpu"]
+    base = ["embed", "--counts", str(tmp_path / "q.tsv"), "--qc", str(atlas_files["qc"]), "--models", str(tmp_path / "pool"), "--device", "cpu"]
     assert main(base + ["--out", str(tmp_path / "e1")]) == 0 and main(base + ["--out", str(tmp_path / "e2"), "--no-pool"]) == 0
     n1 = pd.read_csv(tmp_path / "e1" / "samples.tsv", sep="\t", index_col=0)["n_missing_genes"]
     n2 = pd.read_csv(tmp_path / "e2" / "samples.tsv", sep="\t", index_col=0)["n_missing_genes"]
@@ -493,13 +514,12 @@ def test_dna_term_in_training_and_embed(atlas_files, tmp_path):
     qc_high = qc.copy()
     qc_high.loc[ids[0], "full_dna_fraction_est"] = "0.25"
     flagged = embed_counts(bundle, noisy[ids], qc_high)["samples"]
-    assert list(flagged["high_dna"]) == [1, 0, 0, 0, 0, 0] and embed_counts(bundle, noisy[ids])["samples"]["high_dna"].sum() == 0
+    assert list(flagged["high_dna"]) == [1, 0, 0, 0, 0, 0]
     noisy[ids].to_csv(tmp_path / "q.tsv", sep="\t")
     qc_high.to_csv(tmp_path / "qc_high.tsv", sep="\t")
     assert main(["embed", "--counts", str(tmp_path / "q.tsv"), "--qc", str(tmp_path / "qc_high.tsv"), "--models", str(tmp_path / "b"), "--out", str(tmp_path / "e"),
                  "--device", "cpu"]) == 0
     assert pd.read_csv(tmp_path / "e" / "samples.tsv", sep="\t", index_col=0)["high_dna"].sum() == 1
-    assert not np.allclose(embed_counts(bundle, noisy[ids]).get("embedding").to_numpy()[:3], res["embedding"].to_numpy()[:3], atol=1e-3)   # no QC table: no correction
     m_off, _ = fit(raw, off, "cpu", epochs=2)
     save_bundle(tmp_path / "old", m_off, raw, off, "cpu", 5)
     man = json.loads((tmp_path / "old" / "manifest.json").read_text())
@@ -511,3 +531,64 @@ def test_dna_term_in_training_and_embed(atlas_files, tmp_path):
     assert not old.config.dna_decoder and not old.config.dna_inputs and not hasattr(old.model, "log_dna_scale")
     z_off = encode(m_off, raw.X, raw.C, "cpu")["z"]
     assert np.allclose(embed_counts(old, noisy[ids], qc)["embedding"].to_numpy(), z_off[[raw.ids.index(i) for i in ids]], atol=1e-4)
+
+
+def _fake_ingest_run(atlas_files, run_dir, samples):
+    """An inGEST run directory with featureCounts tables and a QC record per sample, made from the
+    fixture's counts and QC rows."""
+    counts = read_counts(atlas_files["counts"])[samples]
+    qc = pd.read_csv(atlas_files["qc"], sep="\t", dtype=str, keep_default_na=False).set_index("GSM")
+    res = run_dir / "x_results"
+    res.mkdir(parents=True)
+    head = "# Program:featureCounts v2.1.1\nGeneid\tChr\tStart\tEnd\tStrand\tLength\t" + "\t".join(f"x_results/{s}/vg/{s}_sort.bam" for s in samples)
+    for name, table in (("all_samples_raw_counts.txt", counts), ("all_samples_antisense_counts.txt", counts // 10)):
+        lines = [f"{g}\tNC\t1\t9\t+\t9\t" + "\t".join(str(int(v)) for v in row) for g, row in zip(table.index, table.to_numpy())]
+        (res / name).write_text(head + "\n" + "\n".join(lines) + "\n")
+    for s in samples:
+        r = {k[5:]: v for k, v in qc.loc[s].items() if k.startswith("full_")}
+        num = lambda k: float(r[k]) if r.get(k, "") != "" else None          # noqa: E731
+        paired = r["layout"] == "PE"
+        record = {
+            "sample": s, "runs": [{"instrument_model": qc.loc[s, "instrument_model"]}],
+            "reads": {"before": {"total_reads": 1000000}, "after": {"total_reads": round(num("pct_kept") * 10000), "gc_content": num("gc_content")},
+                      "adapter": {"trimmed_reads": round(num("pct_adapter_trimmed") * 10000)}, "duplication_rate": num("duplication_rate"),
+                      "cycles": [num("cycles_r1")] + ([num("cycles_r1")] if paired else []),
+                      "length_quantiles": {"r1": {"q05": num("length_q05_r1"), "q50": num("length_q50_r1"), "q95": num("length_q95_r1")},
+                                           **({"r2": {"q50": num("length_q50_r2")}} if paired else {})}},
+            "fragment": {"tlen_hist": [[num("fragment_q25"), 25], [num("fragment_q50"), 25], [num("fragment_q75"), 50]] if paired else []},
+            "alignment": {"vg_stats": {"total": 1000, "aligned": 950}, "substitution_rate": num("substitution_rate")},
+            "strand": {"layout": r["layout"], "fraction_forward": num("fraction_forward"), "fraction_reverse": num("fraction_reverse")},
+            "composition": {"by_type": {"CDS": 900, "rRNA": 100}, "short_features": {"reads": 20}},
+            "dna": {"dna_fraction_est": num("dna_fraction_est"), "leakage_b": num("leakage_b"), "intergenic_share": num("intergenic_share")},
+            "gene_body_slope": num("gene_body_slope"), "species": {"pct_top_other_genus_nostable": num("pct_top_other_genus_nostable")},
+        }
+        (res / s / "qc").mkdir(parents=True)
+        (res / s / "qc" / f"{s}.qc.json").write_text(json.dumps(record))
+    return res
+
+
+def test_embed_and_prepare_read_an_ingest_run(trained, atlas_files, tmp_path):
+    from ecoli_atlas.data import qc_covariates
+    from ecoli_atlas.prepare import prepare
+    from ecoli_atlas.qc_record import load_ingest_results
+    samples = ["GSM0000", "GSM0001", "GSM0105", "GSM0106"]                        # paired-end and single-end
+    res_dir = _fake_ingest_run(atlas_files, tmp_path / "run", samples)
+    run = load_ingest_results(tmp_path / "run")                                     # the run directory finds its results directory
+    assert run["results_dir"] == res_dir and list(run["counts"].columns) == samples and run["antisense"] is not None
+    qc = pd.read_csv(atlas_files["qc"], sep="\t", dtype=str, keep_default_na=False).set_index("GSM")
+    a, b = qc_covariates(qc, samples), qc_covariates(run["qc"], samples)
+    assert np.allclose(a.to_numpy(float), b.to_numpy(float), equal_nan=True)      # the records give the covariates of the QC table
+    # one step from the run, the same as counts + QC table
+    assert main(["embed", "--ingest-results", str(tmp_path / "run"), "--models", str(trained), "--out", str(tmp_path / "e1"), "--device", "cpu"]) == 0
+    assert main(["embed", "--counts", str(res_dir / "all_samples_raw_counts.txt"), "--qc", str(atlas_files["qc"]),
+                 "--antisense", str(res_dir / "all_samples_antisense_counts.txt"), "--models", str(trained), "--out", str(tmp_path / "e2"), "--device", "cpu"]) == 0
+    z1, z2 = (pd.read_csv(tmp_path / e / "embedding.tsv", sep="\t", index_col=0) for e in ("e1", "e2"))
+    assert list(z1.index) == samples and np.allclose(z1.to_numpy(), z2.to_numpy(), atol=1e-5) and (tmp_path / "e1" / "qc.tsv").exists()
+    assert main(["embed", "--ingest-results", str(tmp_path / "run"), "--counts", str(res_dir / "all_samples_raw_counts.txt"),
+                 "--models", str(trained), "--out", str(tmp_path / "e3"), "--device", "cpu"]) == 1
+    # prepare writes the same tables; a counted sample without a QC record is refused
+    prepare(res_dir, None, None, tmp_path / "p")
+    assert all((tmp_path / "p" / n).exists() for n in ("counts.tsv", "antisense_counts.tsv", "qc.tsv", "samples.tsv"))
+    (res_dir / "GSM0106" / "qc" / "GSM0106.qc.json").unlink()
+    with pytest.raises(ValueError, match="no QC record"):
+        load_ingest_results(res_dir)

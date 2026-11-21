@@ -218,9 +218,9 @@ existing `ecoli_ingest` env (`mamba install -n ecoli_ingest -c bioconda sra-tool
 container needs a rebuild to get them.
 
 Next after the DNA term is settled (user, 2026-11-21): how the QC covariates enter the model. The model is not trained
-without QC (user decision: no hiding of covariates in training). (1) `prepare --ingest-results` reads the samples' QC records
-and writes the QC table and the antisense counts, so that an inGEST user always embeds with both (today `embed --qc` needs a
-table that only `qc_table.py add-full` makes); (2) covariate R2 per embedding block, to see where the remaining composition
+without QC (user decision: no hiding of covariates in training), and `embed` refuses samples without QC values (done
+2026-11-21: `embed --ingest-results RUN_DIR` reads counts, antisense counts and the QC records in one step; `qc_record.py`,
+`data.check_qc`). Open: covariate R2 per embedding block, to see where the remaining composition
 signal sits (rRNA ratios 0.26, gene-body slope 0.22 from the whole embedding); then decide on covariates for the block
 encoders or a penalty on the residual block. A decoder term that interacts with the embedding and a separate technical
 block wait for the corrected counts.

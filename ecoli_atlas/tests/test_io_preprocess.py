@@ -83,14 +83,14 @@ def test_align_and_composition(feature_table):
     assert comp[0, 2] < -3                                             # no 23S reads
 
 
-def test_prepare_from_ingest_results(tmp_path):
+def test_prepare_from_an_ingest_count_table(tmp_path):
     res = tmp_path / "x_results"
     res.mkdir()
     (res / "all_samples_raw_counts.txt").write_text(
         "# Program:featureCounts\nGeneid\tChr\tStart\tEnd\tStrand\tLength\tx_results/S1/vg/S1_sort.bam\n"
         "CDS_b0001_thrL\tNC\t1\t9\t+\t9\t7\n")
     (tmp_path / "meta.tsv").write_text("sample\tcondition\nS1\twt\n")
-    counts, samples = prepare(res, None, tmp_path / "meta.tsv", tmp_path / "out")
+    counts, samples = prepare(None, res / "all_samples_raw_counts.txt", tmp_path / "meta.tsv", tmp_path / "out")
     assert counts.loc["CDS_b0001_thrL", "S1"] == 7 and samples.loc["S1", "condition"] == "wt"
     assert (tmp_path / "out" / "counts.tsv").exists() and samples.loc["S1", "source_column"].endswith("S1_sort.bam")
 

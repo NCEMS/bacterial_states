@@ -89,7 +89,7 @@ def test_qc_covariates_missing_values_and_flags(tables):
     assert cov.loc["GSM0000", "strand_purity"] == 0.97 and cov.loc["GSM0000", "instrument_novaseq"] == 1
     assert cov.loc["GSM0001", "dna_below_limit"] == 1 and np.isnan(cov.loc["GSM0001", "log_dna_fraction"])
     assert np.isclose(cov.loc["GSM0000", "log_dna_fraction"], np.log10(0.004))
-    assert np.isclose(cov.loc["GSM0100", "log_substitution_rate"], np.log10(0.006)) and np.isnan(qc_covariates(tables.qc, ["GSM0002"]).loc["GSM0002", "log_substitution_rate"])
+    assert np.isclose(cov.loc["GSM0100", "log_substitution_rate"], np.log10(0.006)) and np.isnan(qc_covariates(tables.qc, ["GSM0502"]).loc["GSM0502", "log_substitution_rate"])
     assert cov.loc["not_there", "has_qc"] == 0 and cov.loc["GSM0000", "has_qc"] == 1 and np.isnan(cov.loc["not_there", "gc_content"])
     assert qc_covariates(None, ["x"]).loc["x", "has_qc"] == 0
 

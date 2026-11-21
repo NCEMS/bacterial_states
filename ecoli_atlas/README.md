@@ -104,8 +104,10 @@ ecoli_atlas train $T --out outputs/models_v2 --splits outputs/models_v2/splits.c
 
 # evaluate a bundle again; embed new samples
 ecoli_atlas evaluate $T --models outputs/models_v2 --out outputs/models_v2_eval
-ecoli_atlas prepare --ingest-results my_run/results --out prepared [--models outputs/models_v2]
-ecoli_atlas embed --counts prepared/counts.tsv --models outputs/models_v2 --out embedded [--qc my_qc.tsv]
+ecoli_atlas embed --ingest-results my_run --models outputs/models_v2 --out embedded     # an inGEST run directory
+ecoli_atlas prepare --ingest-results my_run --out prepared [--metadata my_samples.tsv]   # the same tables, to look at or join
+ecoli_atlas embed --counts prepared/counts.tsv --qc prepared/qc.tsv --antisense prepared/antisense_counts.tsv \
+    --models outputs/models_v2 --out embedded
 
 # new samples against the atlas; studies of the atlas against the rest of it
 ecoli_atlas compare --embeddings embedded --models outputs/models_v2 --out compared \
@@ -226,12 +228,27 @@ out-of-fold AUROC with `--cv`, otherwise the first. Seeds are never ranked on TE
 
 ### `embed`
 
-Takes an inGEST count table (feature ids must be those of the counting annotation; fails below
-`--min-feature-coverage`, default 0.9) and writes `embedding.tsv`, `predictions.tsv`, `samples.tsv`
-(size factor, reads on mRNA features, number of genes called missing), `missing_genes.tsv` (the genes
-called missing from a sample's strain, see below) and `feature_coverage.tsv`. `--qc` gives a table with the QC
-columns of `sample_qc.tsv` (as `full_<name>` or `<name>`), indexed by sample; without it the QC
-covariates are set to the training means.
+The model takes every sample's QC values as covariates, so `embed` needs them. With an inGEST run,
+`--ingest-results DIR` (the run directory or its results directory) is all it needs: it reads the
+counts (`all_samples_raw_counts.txt`), the antisense counts (`all_samples_antisense_counts.txt`)
+and the QC record of every counted sample (`<sample>/qc/<sample>.qc.json`), and writes the QC table
+it used as `qc.tsv`. Otherwise give `--counts` and `--qc` (the `qc.tsv` of `prepare`, or a table with
+the QC columns of `sample_qc.tsv`, as `full_<name>` or `<name>`, indexed by sample), and
+`--antisense` when the bundle was trained with it. `prepare --ingest-results` writes the same four tables
+(`counts.tsv`, `antisense_counts.tsv`, `qc.tsv`, `samples.tsv`).
+
+`embed` refuses a sample without a QC row, or one that lacks a value every atlas sample has (read
+lengths and cycles, kept and duplicated shares, GC, strand purity, DNA leakage, intergenic share,
+gene-body slope, short-feature share, substitution rate; fragment sizes and mate-2 length for
+paired-end libraries). The adapter-trimmed share and the DNA estimate may be missing. A run made
+with `centrifuge: false` has no other-genus value: it is set to the atlas mean, with a warning. The
+QC table made from the records gives the same covariates as `sample_qc.tsv` for all 7,731 atlas
+samples, and embedding a recount batch this way gives the training embedding to 1e-5.
+
+Feature ids must be those of the counting annotation (fails below `--min-feature-coverage`, default
+0.9). Output: `embedding.tsv`, `predictions.tsv`, `samples.tsv` (size factor, reads on mRNA
+features, number of genes called missing, DNA estimate), `missing_genes.tsv` (the genes called
+missing from a sample's strain, see below) and `feature_coverage.tsv`.
 
 ### Genomic DNA in the library
 

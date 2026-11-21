@@ -67,7 +67,7 @@ def atlas_files(tmp_path_factory, feature_table):
                            full_fragment_q75=260 if paired else "", full_dna_fraction_est=0.0 if j == 1 else 0.004,
                            full_leakage_b=0.004, full_intergenic_share=0.05, full_gene_body_slope=-0.1 * (s % 4),
                            full_pct_short_features=2.0, full_pct_top_other_genus_nostable=0.5,
-                           full_substitution_rate=0.003 * (1 + s % 3) if j != 2 else ""))
+                           full_substitution_rate=0.003 * (1 + s % 3) if (s, j) != (5, 2) else ""))
     d = tmp_path_factory.mktemp("atlas")
     table = pd.DataFrame(counts, index=feat["Feature_ID"])
     table.index.name = "Feature_ID"

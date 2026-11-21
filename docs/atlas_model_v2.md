@@ -177,6 +177,13 @@ As implemented, the log substitution rate against MG1655 is a covariate as well 
 K-12 samples it spans a wider range (whole studies at 2 to 4%) than the medians of the strain
 groups differ (0.27% for K-12, 0.30 to 0.59% for the others), so it describes the sequencing run.
 
+New samples get the same covariates from their inGEST QC records (`ecoli_atlas/qc_record.py`, the
+formulas of `qc_metrics.py` repeated so that the packages stay apart; identical to `sample_qc.tsv`
+for all 7,731 atlas samples, checked 2026-11-21 with `work/qc_parity/record_parity.py`). `embed`
+refuses samples without them (`data.check_qc`: the values every atlas sample of its layout has)
+except the Centrifuge value, which a run with `centrifuge: false` lacks and which is then set to the
+training mean.
+
 Not inputs: study identity, strain, and quantities that mostly reflect strain (share of reads off
 the MG1655 reference, number of genes called absent). They are saved in the QC table but kept away from
 the decoder, which could otherwise explain away regulatory differences between strains.

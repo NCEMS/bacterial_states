@@ -26,8 +26,13 @@ def _write_json(obj, path: Path) -> None:
 # ---------------------------------------------------------------------------------------------
 def cmd_prepare(args) -> int:
     from .prepare import prepare
-    counts, _ = prepare(args.ingest_results, args.counts, args.metadata, args.out)
-    _info(f"wrote {Path(args.out) / 'counts.tsv'} ({counts.shape[0]} features x {counts.shape[1]} samples) and samples.tsv")
+    try:
+        counts, _ = prepare(args.ingest_results, args.counts, args.metadata, args.out)
+    except (ValueError, FileNotFoundError) as exc:
+        _info(f"error: {exc}")
+        return 1
+    written = [n for n in ("counts.tsv", "antisense_counts.tsv", "qc.tsv", "samples.tsv") if (Path(args.out) / n).exists()]
+    _info(f"wrote {', '.join(written)} to {args.out} ({counts.shape[0]} features x {counts.shape[1]} samples)")
     if args.models:
         from .artifacts import ModelBundle
         from .preprocess import align_counts
@@ -282,17 +287,37 @@ def cmd_embed(args) -> int:
     from .data import read_table
     from .embed import embed_counts
     from .io import read_counts
+    from .qc_record import load_ingest_results
+    if bool(args.ingest_results) == bool(args.counts):
+        _info("error: give an inGEST run with --ingest-results DIR, or --counts with --qc")
+        return 1
+    if args.counts and not args.qc:
+        _info("error: --counts needs --qc (the samples' QC table); with an inGEST run use --ingest-results DIR, "
+              "which reads the counts, antisense counts and QC records itself")
+        return 1
     device = pick_device(args.device)
     bundle = ModelBundle.load(args.models, device)
     try:
-        res = embed_counts(bundle, read_counts(args.counts), read_table(args.qc) if args.qc else None, device,
-                           args.min_feature_coverage, read_counts(args.antisense) if args.antisense else None,
+        if args.ingest_results:
+            run = load_ingest_results(args.ingest_results)
+            counts, qc = run["counts"], run["qc"]
+            antisense = read_counts(args.antisense) if args.antisense else run["antisense"]
+            _info(f"read {counts.shape[1]} samples from {run['results_dir']}"
+                  + ("" if antisense is not None else " (no antisense count table there)"))
+        else:
+            counts, qc = read_counts(args.counts), read_table(args.qc)
+            antisense = read_counts(args.antisense) if args.antisense else None
+        res = embed_counts(bundle, counts, qc, device, args.min_feature_coverage, antisense,
                            studies=_studies_arg(args.studies), pool=not args.no_pool)
-    except ValueError as exc:
+    except (ValueError, FileNotFoundError) as exc:
         _info(f"error: {exc}")
         return 1
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
+    if args.ingest_results:
+        qc.to_csv(out / "qc.tsv", sep="\t")
+    for w in res["warnings"]:
+        _info(f"warning: {w}")
     res["embedding"].to_csv(out / "embedding.tsv", sep="\t", float_format="%.6g")
     res["predictions"].to_csv(out / "predictions.tsv", sep="\t", float_format="%.6g")
     res["samples"].to_csv(out / "samples.tsv", sep="\t", float_format="%.6g")
@@ -305,8 +330,8 @@ def cmd_embed(args) -> int:
     res["missing"].to_csv(out / "missing_genes.tsv", sep="\t", index=False)
     res["coverage"].to_frame(bundle.fs.ids).to_csv(out / "feature_coverage.tsv", sep="\t")
     _info(f"embedded {len(res['embedding'])} samples ({res['coverage'].fraction:.1%} of the model features present); "
-          f"wrote embedding.tsv, predictions.tsv, samples.tsv, missing_genes.tsv and feature_coverage.tsv to {out}"
-          + ("" if args.qc else "; no --qc table: the QC covariates were set to the training means"))
+          f"wrote embedding.tsv, predictions.tsv, samples.tsv, missing_genes.tsv, feature_coverage.tsv"
+          + (" and qc.tsv" if args.ingest_results else "") + f" to {out}")
     return 0
 
 
@@ -585,8 +610,8 @@ def build_parser() -> argparse.ArgumentParser:
         sp.add_argument("--antisense", help="antisense count table of the atlas (features x samples); a gene with antisense reads "
                         "is not called missing from a strain")
 
-    sp = sub.add_parser("prepare", help="convert Ecoli_inGEST results into a count table for `embed`")
-    sp.add_argument("--ingest-results", metavar="DIR", help="an inGEST results directory")
+    sp = sub.add_parser("prepare", help="write the input tables of `embed` (counts, antisense counts, QC) from Ecoli_inGEST results")
+    sp.add_argument("--ingest-results", metavar="DIR", help="an inGEST run directory or its results directory")
     sp.add_argument("--counts", metavar="FILE", help="a count table instead of --ingest-results")
     sp.add_argument("--metadata", metavar="TSV", help="optional sample metadata (first column = sample id)")
     sp.add_argument("--models", metavar="DIR", help="model bundle; if given, also write feature_coverage.tsv")
@@ -646,12 +671,17 @@ def build_parser() -> argparse.ArgumentParser:
     add_device(sp)
     sp.set_defaults(func=cmd_drivers)
 
-    sp = sub.add_parser("embed", help="embed new samples with a trained bundle")
-    sp.add_argument("--counts", required=True, help="inGEST count table (or the counts.tsv of `prepare`)")
+    sp = sub.add_parser("embed", help="embed new samples with a trained bundle",
+                        description="Embed new samples. With an inGEST run: `ecoli_atlas embed --ingest-results RUN_DIR --models BUNDLE "
+                        "--out DIR` reads the counts, antisense counts and the samples' QC records. Otherwise give --counts and --qc.")
+    sp.add_argument("--ingest-results", metavar="DIR", help="an inGEST run directory (or its results directory): counts, "
+                    "antisense counts and QC records are read from it")
+    sp.add_argument("--counts", help="count table instead of --ingest-results (inGEST all_samples_raw_counts.txt, or the counts.tsv "
+                    "of `prepare`); needs --qc")
     sp.add_argument("--models", required=True, help="model bundle")
-    sp.add_argument("--qc", help="QC table of the samples (inGEST sample_qc.tsv layout); optional")
-    sp.add_argument("--antisense", help="antisense count table of the samples (inGEST all_samples_antisense_counts.txt); optional: "
-                    "a gene with antisense reads is not called missing")
+    sp.add_argument("--qc", help="QC table of the samples, with --counts (the qc.tsv of `prepare`, or the sample_qc.tsv layout)")
+    sp.add_argument("--antisense", help="antisense count table of the samples (inGEST all_samples_antisense_counts.txt; read from the "
+                    "run with --ingest-results): a gene with antisense reads is not called missing")
     sp.add_argument("--studies", help="table sample -> study (first column the sample; column GSE or study, else the second column): "
                     "the missing-gene calls are pooled within a study. Default: all samples of the table are one study")
     sp.add_argument("--no-pool", action="store_true", help="call the genes missing from a strain for every sample on its own")

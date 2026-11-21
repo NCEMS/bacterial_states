@@ -82,7 +82,49 @@ def qc_covariates(qc: pd.DataFrame | None, ids: list) -> pd.DataFrame:
     return out
 
 
-DNA_DEFAULT_LENGTH = 150.0     # bp added to a feature's length when a sample has no fragment or read length
+# Covariates that every atlas sample has (QC_PAIRED_REQUIRED: every paired-end one); `embed` refuses a
+# sample without them. The adapter-trimmed share may be missing (no adapter found), the DNA estimate
+# is missing where it is 0 (dna_below_limit), and the Centrifuge value is missing when the workflow ran
+# with `centrifuge: false`: it is then set to the training mean, with a warning.
+QC_REQUIRED = ("length_q05_r1", "length_q50_r1", "length_q95_r1", "cycles_r1", "pct_kept", "duplication_rate",
+               "gc_content", "strand_purity", "leakage_b", "intergenic_share", "gene_body_slope", "pct_short_features",
+               "log_substitution_rate")
+QC_PAIRED_REQUIRED = ("length_q50_r2", "fragment_q25", "fragment_q50", "fragment_q75")
+
+
+def check_qc(qc: pd.DataFrame | None, ids: list) -> list[str]:
+    """Refuse (ValueError) a QC table that cannot give the covariates of the samples ``ids``; returns
+    warnings for values that are filled with the training mean."""
+    if qc is None:
+        raise ValueError("no QC table: the model takes the samples' QC covariates (use --ingest-results with an inGEST "
+                         "run, or --qc with a QC table)")
+    lacking = [i for i in ids if i not in qc.index]
+    if lacking:
+        raise ValueError(f"{len(lacking)} of {len(ids)} samples are not in the QC table: {lacking[:5]}")
+    cov = qc_covariates(qc, ids)
+    if cov[list(QC_REQUIRED)].isna().all().all():
+        raise ValueError("the QC table has none of the QC values the model needs (expected the layout of an inGEST QC "
+                         "record or of sample_qc.tsv, e.g. columns length_q50_r1, pct_kept, gene_body_slope)")
+    no_layout = [i for i, v in _qc_value(qc.reindex(ids).fillna(""), "layout").items() if not str(v).strip()]
+    if no_layout:
+        raise ValueError(f"{len(no_layout)} samples have no layout (PE or SE) in the QC table: {no_layout[:5]}")
+    problems = []
+    for i in ids:
+        need = QC_REQUIRED + (QC_PAIRED_REQUIRED if cov.at[i, "paired"] == 1 else ())
+        miss = [n for n in need if pd.isna(cov.at[i, n])]
+        if miss:
+            problems.append(f"{i} ({', '.join(miss)})")
+    if problems:
+        raise ValueError(f"{len(problems)} samples lack QC values that every atlas sample has: " + "; ".join(problems[:5])
+                         + (" ..." if len(problems) > 5 else ""))
+    no_genus = [i for i in ids if pd.isna(cov.at[i, "log_other_genus"])]
+    if no_genus:
+        return [f"{len(no_genus)} sample(s) have no Centrifuge results (run with centrifuge: false?); their "
+                f"other-genus covariate was set to the atlas mean: {', '.join(no_genus[:5])}" + (" ..." if len(no_genus) > 5 else "")]
+    return []
+
+
+DNA_DEFAULT_LENGTH = 150.0    # bp added to a feature's length when a sample has no fragment or read length
 
 
 def dna_density(qc: pd.DataFrame | None, ids: list, genome_length: int | None) -> tuple[np.ndarray, np.ndarray]:

@@ -7,15 +7,16 @@ import torch
 
 from .artifacts import ModelBundle
 from .config import HEADS
-from .data import _qc_value, covariate_frame, dna_density, dna_reads
+from .data import _qc_value, check_qc, covariate_frame, dna_density, dna_reads
 from .preprocess import align_counts, call_groups, group_calls, log_expression, missing_genes, size_factors
 from .train import encode
 
 
-def embed_counts(bundle: ModelBundle, counts: pd.DataFrame, qc: pd.DataFrame | None = None, device="cpu",
+def embed_counts(bundle: ModelBundle, counts: pd.DataFrame, qc: pd.DataFrame, device="cpu",
                  min_coverage: float = 0.9, antisense: pd.DataFrame | None = None, studies=None, pool: bool = True) -> dict:
-    """counts: features x samples (inGEST feature ids). qc: optional table indexed by sample with the
-    QC columns of the inGEST QC table; without it the QC covariates are set to the training means.
+    """counts: features x samples (inGEST feature ids). qc: table indexed by sample with the QC values
+    (``qc_record.read_qc_records`` of an inGEST run, or the ``full_*`` columns of ``sample_qc.tsv``);
+    required, and every sample must have the values ``data.check_qc`` asks for.
     antisense: optional antisense count table of the same samples (inGEST's
     ``all_samples_antisense_counts.txt``); with it a silent gene that has antisense reads is not
     called missing.
@@ -29,14 +30,16 @@ def embed_counts(bundle: ModelBundle, counts: pd.DataFrame, qc: pd.DataFrame | N
     of each head), ``samples`` (size factor, reads on mRNA features, number of genes called missing,
     reads taken off the mRNA features as genomic DNA, the DNA estimate and whether it is above the
     bundle's limit ``max_dna_fraction``),
-    the feature ``coverage`` and ``missing`` (one row per sample and gene called missing from its
-    strain; such genes enter the encoders as the gene's mean).
+    the feature ``coverage``, ``missing`` (one row per sample and gene called missing from its
+    strain; such genes enter the encoders as the gene's mean) and ``warnings`` (QC values set to
+    the training mean).
     """
     ids = list(counts.columns)
     Y, fam, coverage = align_counts(counts, bundle.fs)
     if coverage.fraction < min_coverage:
         raise ValueError(f"only {coverage.n_present} of {coverage.n_model_features} model features are in the count table "
                          f"({coverage.fraction:.1%}); the table must use the inGEST feature ids (e.g. CDS_b0002_thrA)")
+    warnings = check_qc(qc, ids)
     cfg = bundle.config
     # genomic DNA, when the bundle was trained with corrected inputs: the expected DNA reads (from the QC table) come off the counts
     rho, dlen = dna_density(qc, ids, bundle.fs.genome_length) if cfg.dna_inputs else (np.zeros(len(ids)), np.zeros(len(ids)))
@@ -69,15 +72,15 @@ def embed_counts(bundle: ModelBundle, counts: pd.DataFrame, qc: pd.DataFrame | N
         pred[f"p_{pos}"] = enc["probs"][h]
         pred[h] = np.where(enc["probs"][h] >= 0.5, pos, neg)
     info = pd.DataFrame({"size_factor": s, "mrna_reads": Y[:, bundle.fs.is_mrna].sum(axis=1).astype(np.int64),
-                         "has_qc": 0 if qc is None else [int(i in qc.index) for i in ids],
                          "n_missing_genes": miss.sum(axis=1),
                          "dna_reads_removed": (Y - Yin)[:, bundle.fs.is_mrna].sum(axis=1).round(0).astype(np.int64)}, index=ids)
     # the genomic-DNA estimate of the QC table; above the bundle's limit the sample would not have been part of the atlas
-    dna = np.full(len(ids), np.nan) if qc is None else pd.to_numeric(_qc_value(qc.reindex(ids).fillna(""), "dna_fraction_est"), errors="coerce").to_numpy()
+    dna = pd.to_numeric(_qc_value(qc.reindex(ids).fillna(""), "dna_fraction_est"), errors="coerce").to_numpy()
     info["dna_fraction_est"] = dna
     info["high_dna"] = (np.nan_to_num(dna) > cfg.max_dna_fraction).astype(int)
     rows, cols = np.nonzero(miss)
     missing = pd.DataFrame({"sample": np.array(ids, dtype=object)[rows], "feature": np.array(bundle.fs.ids, dtype=object)[cols]})
     for df in (emb, pred, info):
         df.index.name = "sample"
-    return {"embedding": emb, "predictions": pred, "samples": info, "coverage": coverage, "missing": missing}
+    return {"embedding": emb, "predictions": pred, "samples": info, "coverage": coverage, "missing": missing,
+            "warnings": warnings}
