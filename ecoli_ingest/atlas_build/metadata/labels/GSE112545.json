@@ -1,6 +1,6 @@
 {
  "gse": "GSE112545",
- "notes": "Every sample is ciprofloxacin-treated (1 h); the submitters' 'Control' is cipro alone, so no untreated control exists and is_control is left out. ET2DA samples: abx_dna_gyrase;other_chemical. Organism field says MG1655 but strain stated as BW25113. WT re-read: reference -> wild_type, BW25113 used unmodified.",
+ "notes": "Every sample is ciprofloxacin-treated (1 h); the submitters' 'Control' is cipro alone, so no untreated control exists and is_control is left out. ET2DA samples: abx_dna_gyrase;other_chemical. Organism field says MG1655 but strain stated as BW25113. WT re-read: reference -> wild_type, BW25113 used unmodified. Lane split (noted 2026-11-21): the 8 samples are the 4 sequencing lanes of 2 libraries (titles S1_L001 to S2_L004); the counts of the lanes of one library agree to sampling noise. 2 independent samples, not 8; study_flag lane_split.",
  "default": {
   "strain_group": {
    "v": "K-12",

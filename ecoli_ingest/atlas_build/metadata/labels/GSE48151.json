@@ -1,6 +1,6 @@
 {
  "gse": "GSE48151",
- "notes": "Heat-shock medium, temperatures and pre-shift phase not given. MOPS-P read as phosphate starvation in MOPS; the 0h samples get no treatment/is_control (unclear whether reference or just shifted). LB OD 0.87 is above the inference range: no phase. Libraries made with a (TruSeq) Small RNA prep kit from rRNA-depleted total RNA: labelled total_rnaseq, but not certain there was no size selection. WT re-read: plain MG1655, genotype_class wild_type.",
+ "notes": "Heat-shock medium, temperatures and pre-shift phase not given. MOPS-P read as phosphate starvation in MOPS; the 0h samples get no treatment/is_control (unclear whether reference or just shifted). LB OD 0.87 is above the inference range: no phase. Libraries made with a (TruSeq) Small RNA prep kit from rRNA-depleted total RNA: labelled total_rnaseq, but not certain there was no size selection. WT re-read: plain MG1655, genotype_class wild_type. Read split (noted 2026-11-21): for six conditions the reads of one library are in two samples (titles _r1_HiSeq and _r2_HiSeq: GSM1170026/27, 29/30, 31/32, 33/34, 35/36, 37/38); same strand, counts agree to sampling noise. These pairs are not independent replicates; study_flag read_split.",
  "default": {
   "genotype_class": {
    "v": "wild_type",

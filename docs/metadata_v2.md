@@ -19,7 +19,7 @@ Code and curated inputs are in `ecoli_ingest/atlas_build/metadata/`:
 | `labels/<GSE>.json` | the labels of one study: `default`, then `rules` on sample fields, then `samples` |
 | `suppl_fields/<GSE>.tsv` | extra per-sample fields from a metadata sheet the submitters deposited (read as `sup:*`); `# key: value` header lines are fields shared by the whole study |
 | `duplicate_samples.tsv` | later copies of samples deposited in two studies (same read and base counts) |
-| `study_flags.tsv` | studies to be able to leave out of modelling steps (`GSE206047`, `large_study`) |
+| `study_flags.tsv` | studies with a note for modelling steps: `large_study` (`GSE206047`, to be able to leave it out), `lane_split` (`GSE112545`: its 8 samples are the lanes of 2 libraries), `read_split` (`GSE48151`: pairs of samples hold the reads of one library) |
 | `skipped_no_passing_sample.txt` | the 59 studies not read |
 | `fetch_geo_soft.py` | downloads the GEO SOFT text of every candidate study (rate-limited) |
 | `geo_digest.py` | reduces a SOFT file to a digest: study text, fields shared by all samples, table of the rest |
@@ -128,7 +128,7 @@ A fine class is meant for training only if at least 10 studies and 100 samples c
 
 - Libraries dominated by rRNA or tRNA pass the prescreen. The minimum is applied after the full
   inGEST run: a sample is in the model with at least 200,000 reads on CDS features
-  (`qc_table.py mark-model --metadata ... --min-cds-reads 200000`; 44 of the 7,803 counted samples
+  (`qc_table.py mark-model --metadata ... --min-cds-reads 200000 --max-dna-fraction 0.10`; 44 of the 7,803 counted samples
   are below it). `low_mrna_prescreen` marked the candidates before the recount.
 - About a dozen studies have a few samples whose labels were left out because the title and a
   field contradict each other; `notes` in their label files starts with `CONFLICT`. They can be

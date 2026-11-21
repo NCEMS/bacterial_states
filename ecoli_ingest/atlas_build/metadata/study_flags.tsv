@@ -1,2 +1,4 @@
 GSE	flag	reason
 GSE206047	large_study	1,077 candidate samples of one circuit-characterisation experiment; supplies over half of the usable stationary, heterologous-expression and inducer-added samples (user decision: keep, but flag so it can be left out of modelling steps)
+GSE112545	lane_split	8 samples are the 4 sequencing lanes of 2 libraries (titles S1_L001 to S2_L004; lanes agree to sampling noise): 2 independent samples, not 8
+GSE48151	read_split	6 conditions each have the reads of one library in two samples (_r1_HiSeq, _r2_HiSeq; same strand, agree to sampling noise; GSM1170026/27, 29/30, 31/32, 33/34, 35/36, 37/38): these pairs are not independent replicates
