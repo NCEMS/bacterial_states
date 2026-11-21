@@ -4,7 +4,7 @@ import pytest
 
 from ecoli_atlas.config import TrainConfig
 from ecoli_atlas.data import load_tables, qc_covariates, study_weights
-from ecoli_atlas.labels import is_reference, condition_identity, head_labels, label_codes, phase_check_group
+from ecoli_atlas.labels import REQUIRED, is_reference, condition_identity, head_labels, label_codes, phase_check_group
 from ecoli_atlas.splits import bucket_labels, check_no_leakage, make_splits
 
 
@@ -109,3 +109,10 @@ def test_label_weights_cap_every_study_within_a_class():
     assert caps == {0: 1, 1: 1} and np.isclose(fixed[(gse == "b") & (y == 0)].sum(), 1.0)
     plain, capped = class_weights(y, 2), class_weights(y, 2, sample_weight=w)
     assert plain.shape == capped.shape == (2,) and not np.allclose(plain, capped)
+
+
+def test_the_lab_strain_call_is_the_lab_lineages_against_every_other_known_group():
+    meta = pd.DataFrame({c: "" for c in REQUIRED}, index=[f"s{i}" for i in range(7)])
+    meta["strain_group"] = ["K-12", "B", "C", "W", "UPEC", "natural_isolate", ""]
+    lab = head_labels(meta)["lab_strain"]
+    assert list(lab[:6]) == ["lab", "lab", "lab", "lab", "non_lab", "non_lab"] and pd.isna(lab.iloc[6])

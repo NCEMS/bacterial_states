@@ -16,8 +16,8 @@ from .config import HEADS, TrainConfig, fit_classes
 from .features import COMPOSITION, FeatureSet
 from .io import read_counts
 from .labels import condition_identity, fit_codes, head_labels, label_codes, phase_levels, scored_labels
-from .preprocess import (ZScore, align_counts, composition_covariates, log_expression, low_expression_profile, missing_genes,
-                         reference_profile, size_factors, weighted_stats)
+from .preprocess import (ZScore, align_counts, call_groups, composition_covariates, group_calls, log_expression,
+                         low_expression_profile, missing_genes, pooled_low_profile, reference_profile, size_factors, weighted_stats)
 
 # QC covariates: values of the QC table (column `full_<name>`, or `<name>` in a plain table) that
 # describe the library and the run, not the biology or the strain.
@@ -115,15 +115,18 @@ class AtlasTables:
     counts: pd.DataFrame      # features x samples
     meta: pd.DataFrame        # indexed by sample
     qc: pd.DataFrame          # indexed by sample
+    antisense: pd.DataFrame | None = None     # features x samples: reads on the strand a feature is not transcribed from
 
     @property
     def ids(self) -> list:
         return list(self.counts.columns)
 
 
-def load_tables(counts_path, metadata_path, qc_path, model: str | None = None) -> AtlasTables:
+def load_tables(counts_path, metadata_path, qc_path, model: str | None = None, antisense_path=None) -> AtlasTables:
     """The samples the QC table assigns to a model (``in_model``; ``model`` selects one name),
-    with their counts and metadata. Fails if a model sample lacks counts or metadata."""
+    with their counts and metadata. Fails if a model sample lacks counts or metadata.
+    ``antisense_path``: the antisense count table of the same samples (optional; used by the
+    missing-gene calls)."""
     qc = read_table(qc_path)
     if "in_model" not in qc.columns:
         raise ValueError(f"{qc_path}: no in_model column (qc_table.py mark-model sets it)")
@@ -137,7 +140,14 @@ def load_tables(counts_path, metadata_path, qc_path, model: str | None = None) -
         if missing:
             raise ValueError(f"{len(missing)} model samples are not in the {name}: {missing[:5]}")
     ids = sorted(chosen)
-    return AtlasTables(counts[ids], meta.loc[ids], qc.loc[ids])
+    antisense = None
+    if antisense_path:
+        antisense = read_counts(antisense_path)
+        missing = sorted(set(ids) - set(antisense.columns))
+        if missing:
+            raise ValueError(f"{len(missing)} model samples are not in the antisense count table: {missing[:5]}")
+        antisense = antisense[ids]
+    return AtlasTables(counts[ids], meta.loc[ids], qc.loc[ids], antisense)
 
 
 def study_fold(splits: pd.DataFrame) -> np.ndarray:
@@ -199,6 +209,7 @@ class TrainingData:
     log_mean: np.ndarray            # per-feature log of the mean normalised count over the reference training samples
     M: torch.Tensor | None = None   # samples x features, True where the gene is called missing from the sample's strain
     low: np.ndarray | None = None   # per-feature low end of the normalised count (for the missing-gene calls); None = no calls
+    low_pool: np.ndarray | None = None   # the same for counts summed over a study's samples of one strain; None = no pooled calls
     extra: dict = field(default_factory=dict)
 
     @property
@@ -247,12 +258,22 @@ def build_training(tables: AtlasTables, fs: FeatureSet, cfg: TrainConfig, splits
         raise ValueError("no reference sample among the samples to fit on")
     ref_log = reference_profile(Y[rows], fs.is_mrna, weights[rows], cfg.min_gene_presence)
     s = size_factors(Y, ref_log)
-    low, miss = None, np.zeros(Y.shape, dtype=bool)
+    low, low_pool, miss = None, None, np.zeros(Y.shape, dtype=bool)
+    anti = None if tables.antisense is None else tables.antisense.reindex(fs.ids, fill_value=0).to_numpy(dtype=np.float64).T
     if cfg.mask_missing:
         if fs.order is None:
             raise ValueError("the feature set has no chromosome order; the missing-gene calls need it")
-        low = low_expression_profile(Y[rows], s[rows], fs.order, cfg.mask_min_expected, cfg.mask_low_fraction, cfg.mask_quantile)
-        miss = missing_genes(Y, s, low, fs.order, cfg.mask_min_expected, cfg.mask_low_fraction)
+        veto = lambda r: {} if anti is None else {"antisense": anti[r], "lengths": fs.lengths, "veto_reads": cfg.mask_veto_reads,       # noqa: E731
+                                                  "veto_fraction": cfg.mask_veto_fraction}
+        low = low_expression_profile(Y[rows], s[rows], fs.order, cfg.mask_min_expected, cfg.mask_low_fraction, cfg.mask_quantile, **veto(rows))
+        miss = missing_genes(Y, s, low, fs.order, cfg.mask_min_expected, cfg.mask_low_fraction, **veto(slice(None)))
+        if cfg.mask_pool:
+            # groups and the pooled profile from the reference training samples, the calls for every sample
+            call = {"min_expected": cfg.mask_min_expected, "low_fraction": cfg.mask_low_fraction}
+            ref_groups = call_groups(miss[rows], gse[rows], cfg.mask_pool_min_calls, cfg.mask_pool_jaccard)
+            low_pool = pooled_low_profile(Y[rows], s[rows], ref_groups, fs.order, quantile=cfg.mask_quantile, **call, **veto(rows))
+            groups = call_groups(miss, gse, cfg.mask_pool_min_calls, cfg.mask_pool_jaccard)
+            miss = miss | group_calls(Y, s, groups, low_pool, fs.order, **call, **veto(slice(None)))
         s = size_factors(Y, ref_log, miss)
     logx = log_expression(Y, s)
     zscore = ZScore.fit(logx[rows], weights[rows], cfg.sd_floor, miss[rows])
@@ -271,4 +292,17 @@ def build_training(tables: AtlasTables, fs: FeatureSet, cfg: TrainConfig, splits
                         y_fit=fit_codes(tables.meta, labels, cfg.phase_head), fit_classes={h: fit_classes(h, cfg.phase_head) for h in HEADS},
                         phase_level=phase_levels(tables.meta), gse_codes=pd.factorize(gse)[0], identity=condition_identity(tables.meta),
                         weights=weights, study_cap=cap, ref_log=ref_log, zscore=zscore, scaler=scaler,
-                        log_mean=log_mean.astype(np.float32), M=torch.tensor(miss), low=low, extra={"covariates_raw": cov})
+                        log_mean=log_mean.astype(np.float32), M=torch.tensor(miss), low=low, low_pool=low_pool,
+                        extra={"covariates_raw": cov, "antisense_veto": bool(cfg.mask_missing and anti is not None)})
+
+
+def prepared(cache: dict | None, key, tables: AtlasTables, fs: FeatureSet, cfg: TrainConfig, splits: pd.DataFrame,
+             fit_rows: np.ndarray | None = None) -> TrainingData:
+    """``build_training``, kept in ``cache`` under ``key``. Nothing in the training data depends on
+    the model seed (missing-gene calls, size factors, statistics, labels), so the seeds of a sweep
+    and their fold fits share it. The data is read, never changed, by the fits."""
+    if cache is None:
+        return build_training(tables, fs, cfg, splits, fit_rows=fit_rows)
+    if key not in cache:
+        cache[key] = build_training(tables, fs, cfg, splits, fit_rows=fit_rows)
+    return cache[key]

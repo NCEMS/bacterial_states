@@ -142,10 +142,17 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   **`late_stationary` has no label and is in no phase evaluation, not even as a check.** The embedding
   has v1's blocks (phase 6, medium 12, lab strain 4, residual 24) and v1's two stages: block encoders
   on their labelled samples, then the residual encoder and count decoder on all training samples with
-  the blocks frozen. Lab strain = `strain_group` K-12/B/C/W against the other known groups.
+  the blocks frozen. Lab strain = `strain_group` K-12/B/C/W (the laboratory lineages) against the other known groups.
+  A K-12-against-the-rest call (`k12`) was tried on 2026-11-20 and dropped: with missing genes masked, B, C and W strains
+  sit with K-12 in the blocks not trained on strain (`work/strain_axis/`). `outputs/models_v2_k12` is that sweep; the
+  current code refuses it (`ModelBundle.load` checks the bundle's calls).
   Genes a strain lacks are called from the counts (`preprocess.missing_genes`, on by default) and masked:
   out of the size factor, the gene statistics and the count likelihood, 0 as encoder input;
   `--no-mask-missing` gives the unmasked fit, and bundles made before the calls embed without them.
+  The calls are also pooled over a study's samples that lack the same genes (`--no-pool` off; `embed`
+  pools over the samples of its table, `--studies` splits them).
+  `--antisense` (antisense count table) vetoes calls of silent genes that have antisense reads; a
+  bundle trained with it needs the table again in `evaluate` / `figures` / `embed` to give the same calls.
   `ecoli_atlas axes` places samples on ordered axes of an embedding (ordinal and anchor scores, always
   scored without the sample's study; `--holdout` for extrapolation tests); its example inputs and runs
   are in `work/axes_example/`.

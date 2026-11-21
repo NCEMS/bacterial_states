@@ -10,7 +10,7 @@ same two stages (count model and covariates: [`docs/atlas_model_v2.md`](../docs/
 |---|---|---|
 | growth phase (exponential / stationary) | 6 | training samples with a phase label |
 | medium type (rich / minimal) | 12 | training samples with a medium label |
-| lab strain (lab / non-lab) | 4 | training samples with a known strain group |
+| lab strain (`lab_strain`: lab / non-lab) | 4 | training samples with a known strain group |
 | residual | 24 | all training samples, blocks frozen |
 
 - **Block encoders:** z-scored log expression → the block; a linear head on the block gives the
@@ -79,8 +79,10 @@ Covariates go to the residual encoder and the decoder, not to the block encoders
   Mueller-Hinton, TSB, BHI); minimal is salts with a carbon source (M9, MOPS, M63). Minimal medium
   with a hydrolysate, defined rich media (DMEM, MOPS EZ rich) and natural fluids have no label; the
   head's output on them is reported as a check.
-- Lab strain: `strain_group` K-12, B, C or W → lab; any other known group (pathogens, natural
-  isolates, probiotic strains) → non-lab; no label where the group is empty.
+- Lab strain (`lab_strain`): `strain_group` K-12, B, C or W (the laboratory lineages) → `lab`; any other
+  known group (pathogens, natural isolates, probiotic strains) → `non_lab`; no label where the group is
+  empty. The probability column is `p_lab`. A bundle trained for other calls (`outputs/models_v2_k12`
+  has a `k12` call, K-12 against the rest) is refused by this version.
 
 **Sample selection.** `qc_table.py mark-model --metadata metadata_v2.tsv --min-cds-reads 200000`
 marks the samples that are usable by the metadata, were counted by the full inGEST run and have at
@@ -237,6 +239,22 @@ expression, `docs/atlas_model_v2.md` section 4) and left out of the size factor,
 and the count likelihood; the encoders see the gene's mean. In training, half of the samples of a
 batch also get the missing genes of another sample as input. `train --no-mask-missing` treats the
 zeros as measured, as before. A bundle trained without the calls is embedded without them.
+
+`train` writes the calls of the atlas samples to `missing_genes.tsv` in the output directory (one row
+per sample and gene; once per seed sweep, since the calls do not depend on the seed), and their
+number per sample to `n_missing_genes` in `predictions.tsv`.
+
+The samples of a study that lack the same genes are also called together on their summed counts
+(found from the calls themselves, no strain metadata), which finds the weakly expressed genes of a
+missing island; `--no-pool` switches this off. In `embed` all samples of the count table count as
+one study unless `--studies` gives a table sample -> study, so a sample's calls can depend on the
+samples embedded with it; one sample alone, or `embed --no-pool`, is called on its own.
+
+With `--antisense` (the antisense count table of the same samples: `atlas_v2_antisense_counts.tsv`
+for the atlas, inGEST's `all_samples_antisense_counts.txt` for new samples) a silent gene that has
+antisense reads is not called missing. Give the table to `evaluate`, `figures` and `embed` as well
+when the bundle was trained with it (`missing_genes.antisense_veto` in the manifest); without it
+`embed` calls from the sense counts alone.
 
 ### `compare`: new samples against the atlas
 

@@ -8,14 +8,22 @@ import torch
 from .artifacts import ModelBundle
 from .config import HEADS
 from .data import covariate_frame
-from .preprocess import align_counts, log_expression, missing_genes, size_factors
+from .preprocess import align_counts, call_groups, group_calls, log_expression, missing_genes, size_factors
 from .train import encode
 
 
 def embed_counts(bundle: ModelBundle, counts: pd.DataFrame, qc: pd.DataFrame | None = None, device="cpu",
-                 min_coverage: float = 0.9) -> dict:
+                 min_coverage: float = 0.9, antisense: pd.DataFrame | None = None, studies=None, pool: bool = True) -> dict:
     """counts: features x samples (inGEST feature ids). qc: optional table indexed by sample with the
     QC columns of the inGEST QC table; without it the QC covariates are set to the training means.
+    antisense: optional antisense count table of the same samples (inGEST's
+    ``all_samples_antisense_counts.txt``); with it a silent gene that has antisense reads is not
+    called missing.
+    studies: optional study of every sample (a Series indexed by sample, or a mapping); without it
+    all samples of the table count as one study. With a bundle trained with pooled calls, the
+    samples of a study that lack the same genes are also called together on their summed counts,
+    so a sample's calls can depend on the samples embedded with it; ``pool=False`` calls every
+    sample on its own.
 
     Returns frames indexed by sample: ``embedding`` (z1..zN), ``predictions`` (probability and call
     of each head), ``samples`` (size factor, reads on mRNA features, number of genes called missing),
@@ -31,7 +39,21 @@ def embed_counts(bundle: ModelBundle, counts: pd.DataFrame, qc: pd.DataFrame | N
     miss = np.zeros(Y.shape, dtype=bool)
     cfg = bundle.config
     if bundle.low is not None and cfg.mask_missing and bundle.fs.order is not None:
-        miss = missing_genes(Y, s, bundle.low, bundle.fs.order, cfg.mask_min_expected, cfg.mask_low_fraction)
+        veto = {}
+        if antisense is not None:
+            lacking = sorted(set(ids) - set(antisense.columns))
+            if lacking:
+                raise ValueError(f"{len(lacking)} samples are not in the antisense count table: {lacking[:5]}")
+            veto = {"antisense": antisense[ids].reindex(bundle.fs.ids, fill_value=0).to_numpy(dtype=np.float64).T, "lengths": bundle.fs.lengths,
+                    "veto_reads": cfg.mask_veto_reads, "veto_fraction": cfg.mask_veto_fraction}
+        miss = missing_genes(Y, s, bundle.low, bundle.fs.order, cfg.mask_min_expected, cfg.mask_low_fraction, **veto)
+        if pool and cfg.mask_pool and bundle.low_pool is not None and len(ids) > 1:
+            study = np.array(["all"] * len(ids), dtype=object) if studies is None else pd.Series(studies).reindex(ids).to_numpy(dtype=object)
+            if pd.isna(study).any():
+                raise ValueError(f"no study for {int(pd.isna(study).sum())} samples, e.g. {[i for i, x in zip(ids, pd.isna(study)) if x][:5]}")
+            groups = call_groups(miss, study, cfg.mask_pool_min_calls, cfg.mask_pool_jaccard)
+            miss = miss | group_calls(Y, s, groups, bundle.low_pool, bundle.fs.order, min_expected=cfg.mask_min_expected,
+                                      low_fraction=cfg.mask_low_fraction, **veto)
         s = size_factors(Y, bundle.ref_log, miss)
     X = torch.tensor(bundle.zscore.apply(log_expression(Y, s), miss))
     C = torch.tensor(bundle.scaler.apply(covariate_frame(Y, fam, bundle.fs, qc, ids)))

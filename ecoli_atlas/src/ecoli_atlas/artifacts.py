@@ -58,6 +58,7 @@ class ModelBundle:
     ref_log: np.ndarray
     manifest: dict
     low: np.ndarray | None = None      # low end of every feature's normalised count; None = a bundle without missing-gene calls
+    low_pool: np.ndarray | None = None # the same for counts summed over a group of samples; None = no pooled calls
 
     @property
     def config(self) -> TrainConfig:
@@ -70,6 +71,9 @@ class ModelBundle:
             manifest = json.load(fh)
         if manifest.get("schema_version") != SCHEMA_VERSION:
             raise ValueError(f"{path}: bundle schema {manifest.get('schema_version')!r}, this version reads {SCHEMA_VERSION}")
+        if {h: tuple(c) for h, c in (manifest.get("heads") or {}).items()} != {h: tuple(c) for h, c in HEADS.items()}:
+            raise ValueError(f"{path}: the bundle was trained for the calls {manifest.get('heads')}, this version makes {dict(HEADS)} "
+                             "(a bundle with other calls needs the code it was trained with)")
         pre = torch.load(path / PREPROCESSING_FILE, map_location="cpu", weights_only=True)
         fs = FeatureSet.from_dict(manifest["features"])
         cov = manifest["covariates"]
@@ -81,7 +85,8 @@ class ModelBundle:
         return cls(model, fs, ZScore(pre["z_mu"].numpy(), pre["z_sd"].numpy()),
                    CovariateScaler(cov["names"], cov["numeric"], pre["cov_mu"].numpy(), pre["cov_sd"].numpy()),
                    pre["ref_log"].numpy().astype(np.float64), manifest,
-                   pre["missing_low"].numpy().astype(np.float64) if "missing_low" in pre else None)
+                   pre["missing_low"].numpy().astype(np.float64) if "missing_low" in pre else None,
+                   pre["missing_low_pool"].numpy().astype(np.float64) if "missing_low_pool" in pre else None)
 
 
 def save_bundle(path: str | Path, model, data: TrainingData, cfg: TrainConfig, device, seed: int,
@@ -92,7 +97,8 @@ def save_bundle(path: str | Path, model, data: TrainingData, cfg: TrainConfig, d
     torch.save({"ref_log": torch.tensor(data.ref_log), "z_mu": torch.tensor(data.zscore.mu), "z_sd": torch.tensor(data.zscore.sd),
                 "cov_mu": torch.tensor(data.scaler.mu), "cov_sd": torch.tensor(data.scaler.sd),
                 "log_mean": torch.tensor(data.log_mean)}
-               | ({} if data.low is None else {"missing_low": torch.tensor(data.low)}), path / PREPROCESSING_FILE)
+               | ({} if data.low is None else {"missing_low": torch.tensor(data.low)})
+               | ({} if data.low_pool is None else {"missing_low_pool": torch.tensor(data.low_pool)}), path / PREPROCESSING_FILE)
     data.splits.to_csv(path / SPLITS_FILE)
     split = data.split
     manifest = {
@@ -111,7 +117,8 @@ def save_bundle(path: str | Path, model, data: TrainingData, cfg: TrainConfig, d
                       "test": int(data.splits.loc[split == 3, "gse"].nunique())},
         "n_labelled_training": {h: {c: int((data.y_fit[h][data.tr_rows] == i).sum()) for i, c in enumerate(data.fit_classes[h])} for h in HEADS},
         "study_cap": int(data.study_cap),
-        "missing_genes": {"called": data.low is not None,
+        "missing_genes": {"called": data.low is not None, "antisense_veto": bool(data.extra.get("antisense_veto", False)),
+                          "pooled": data.low_pool is not None,
                           "median_per_sample": float(np.median(data.M.sum(dim=1).numpy())) if data.M is not None else 0.0,
                           "samples_with_100_or_more": int((data.M.sum(dim=1) >= 100).sum()) if data.M is not None else 0},
         "label_caps": {h: {data.fit_classes[h][c]: k for c, k in label_weights(data.y_fit[h], data.gse_codes, data.tr_rows, cfg.label_cap)[1].items()} for h in HEADS},

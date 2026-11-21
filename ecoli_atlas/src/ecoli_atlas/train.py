@@ -28,7 +28,7 @@ import torch
 import torch.nn.functional as F
 
 from .config import HEADS, TrainConfig
-from .data import AtlasTables, TrainingData, build_training, label_weights, study_fold
+from .data import AtlasTables, TrainingData, label_weights, prepared, study_fold
 from .features import FeatureSet
 from .losses import class_weights, cos_dist, cross_study_control_pull, kl_normal, masked_mean, nb_nll, within_study_push
 from .metrics import classification_metrics, within_study_order
@@ -259,18 +259,20 @@ def head_metrics(y: dict, probs: dict, rows: np.ndarray) -> dict:
 
 
 def cross_validate(tables: AtlasTables, fs: FeatureSet, cfg: TrainConfig, splits, device, seed: int | None = None,
-                   log=None) -> dict:
+                   log=None, cache: dict | None = None) -> dict:
     """Out-of-fold head metrics over the study folds (reference samples of the training pool). Each
     fold's model, and all preprocessing statistics, are fitted without any sample of the held-out
     fold's studies. Scored on the labels of ``y_eval``. ``phase_order`` is the within-study order of
     the phase score (``metrics.within_study_order``) over every sample of the held-out studies.
     ``predictions`` has the out-of-fold scores of those samples (reference or not; the metrics use the
-    reference samples, ``phase_order`` all), in the columns of ``predictions.tsv``."""
+    reference samples, ``phase_order`` all), in the columns of ``predictions.tsv``. ``cache`` (a
+    dict) keeps the training data of every fold for the next seed (``data.prepared``)."""
     folds = sorted(int(k) for k in splits.loc[splits["split"] == 1, "cv_fold"].dropna().unique())
     probs = None
+    ordered = splits.loc[tables.ids]
     for k in folds:
-        full = build_training(tables, fs, cfg, splits)
-        data = build_training(tables, fs, cfg, splits, fit_rows=full.fit_rows(k))
+        fit_rows = np.where((ordered["split"].to_numpy() == 1) & (study_fold(ordered) != k))[0]     # TrainingData.fit_rows(k)
+        data = prepared(cache, ("fold", k), tables, fs, cfg, splits, fit_rows=fit_rows)
         if log:
             log(f"[cv] fold {k}: fit on {len(data.fit_rows(k))} samples, held out {len(data.val_rows(k))}")
         model, _ = fit(data, cfg, device, rows=data.fit_rows(k), seed=seed)

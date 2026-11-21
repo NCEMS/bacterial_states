@@ -97,6 +97,8 @@ def test_bundle_files_and_evaluation(trained):
     assert len(pred) == len(emb) == 119 and emb.shape[1] == 46 and pred["p_stationary"].between(0, 1).all()
     splits = pd.read_csv(trained / "splits.csv", index_col=0)
     assert not set(splits.loc[splits["split"] == 1, "gse"]) & set(splits.loc[splits["split"] == 3, "gse"])
+    calls = pd.read_csv(trained / "missing_genes.tsv", sep="\t")              # one row per sample and gene called missing
+    assert list(calls.columns) == ["sample", "feature"] and calls.groupby("sample").size().reindex(pred.index, fill_value=0).equals(pred["n_missing_genes"])
 
 
 def test_embed_reproduces_the_training_embedding_and_works_without_qc(trained, atlas_files, tmp_path):
@@ -129,6 +131,7 @@ def test_seed_sweep_with_cv_copies_one_seed(train_args, tmp_path):
     assert set(sweep["seed"]) == {1, 2} and sweep.groupby("seed")["selected"].first().sum() == 1 and sweep["cv_auroc"].notna().all()
     chosen = int(sweep.loc[sweep["selected"], "seed"].iloc[0])
     assert json.loads((out / "manifest.json").read_text())["seed"] == chosen and (out / f"seed_{chosen}" / "model.pt").exists()
+    assert (out / "missing_genes.tsv").exists() and not list(out.glob("seed_*/missing_genes.tsv"))       # written once for the sweep
     # the out-of-fold scores behind the cv columns: every sample of the fold studies, scored by the model fitted without its study
     from sklearn.metrics import roc_auc_score
     from ecoli_atlas.metrics import within_study_order
@@ -335,3 +338,75 @@ def test_genes_missing_from_a_strain_are_called_masked_and_not_fitted(atlas_file
     res = embed_counts(bundle, tables.counts[ids])
     assert list(res["samples"]["n_missing_genes"]) == [int(M[data.ids.index(i)].sum()) for i in ids]
     assert set(res["missing"]["sample"]) == set(ids[:3]) and set(res["missing"]["feature"]) >= {fs.ids[g] for g in island}
+
+
+def test_antisense_table_vetoes_calls_in_training_and_embed(atlas_files, tmp_path):
+    counts = read_counts(atlas_files["counts"])
+    meta = pd.read_csv(atlas_files["metadata"], sep="\t", dtype=str, keep_default_na=False).set_index("GSM")
+    upec = list(meta.index[meta["strain_group"] == "UPEC"])
+    silent = list(meta.index[meta["GSE"] == "GSE00"])
+    counts.loc[counts.index[40:56], upec] = 0                        # missing from the UPEC studies
+    counts.loc[counts.index[60:70], silent] = 0                      # silent in one K-12 study
+    anti = pd.DataFrame(np.random.RandomState(1).poisson(12, size=counts.shape), index=counts.index, columns=counts.columns)
+    anti.loc[anti.index[40:56], upec] = 0
+    counts.to_csv(tmp_path / "counts.tsv", sep="\t")
+    anti.to_csv(tmp_path / "antisense.tsv", sep="\t")
+    args = ["--counts", str(tmp_path / "counts.tsv"), "--metadata", str(atlas_files["metadata"]), "--qc", str(atlas_files["qc"]),
+            "--features", str(atlas_files["features"]), "--epochs", "2", "--device", "cpu", "--test-frac", "0.2"]
+    assert main(["train", *args, "--out", str(tmp_path / "plain")]) == 0
+    assert main(["train", *args, "--out", str(tmp_path / "veto"), "--antisense", str(tmp_path / "antisense.tsv")]) == 0
+    plain = pd.read_csv(tmp_path / "plain" / "predictions.tsv", sep="\t", index_col=0)["n_missing_genes"]
+    veto = pd.read_csv(tmp_path / "veto" / "predictions.tsv", sep="\t", index_col=0)["n_missing_genes"]
+    in_model = [i for i in silent if i in plain.index]
+    assert (plain[in_model] >= 10).all() and (veto[in_model] <= 1).all()            # the silent genes are present
+    assert (veto[[i for i in upec if i in veto.index]] >= 16).all()                  # the deleted ones stay called
+    assert json.loads((tmp_path / "veto" / "manifest.json").read_text())["missing_genes"]["antisense_veto"] is True
+    assert json.loads((tmp_path / "plain" / "manifest.json").read_text())["missing_genes"]["antisense_veto"] is False
+    # embed: with the antisense table the bundle's own calls come back, without it the silent genes are called
+    ids = in_model[:2] + upec[:2]
+    counts[ids].to_csv(tmp_path / "q.tsv", sep="\t")
+    assert main(["embed", "--counts", str(tmp_path / "q.tsv"), "--models", str(tmp_path / "veto"), "--out", str(tmp_path / "e1"),
+                 "--antisense", str(tmp_path / "antisense.tsv"), "--device", "cpu"]) == 0
+    assert main(["embed", "--counts", str(tmp_path / "q.tsv"), "--models", str(tmp_path / "veto"), "--out", str(tmp_path / "e2"), "--device", "cpu"]) == 0
+    n1 = pd.read_csv(tmp_path / "e1" / "samples.tsv", sep="\t", index_col=0)["n_missing_genes"]
+    n2 = pd.read_csv(tmp_path / "e2" / "samples.tsv", sep="\t", index_col=0)["n_missing_genes"]
+    assert list(n1) == list(veto[ids]) and (n2[ids[:2]] >= 10).all() and list(n2[ids[2:]]) == list(n1[ids[2:]])
+
+
+def test_pooled_calls_in_training_and_embed(atlas_files, tmp_path):
+    counts = read_counts(atlas_files["counts"])
+    meta = pd.read_csv(atlas_files["metadata"], sep="\t", dtype=str, keep_default_na=False).set_index("GSM")
+    upec = list(meta.index[meta["strain_group"] == "UPEC"])
+    rng = np.random.RandomState(2)
+    weak = counts.index[60:80]
+    counts.loc[weak] = rng.poisson(0.3, size=(len(weak), counts.shape[1]))         # weakly expressed genes
+    counts.loc[counts.index[30:40], upec] = 0                                     # the UPEC studies lack a well expressed island ...
+    counts.loc[counts.index[62:78], upec] = 0                                     # ... and one of weakly expressed genes
+    counts.to_csv(tmp_path / "counts.tsv", sep="\t")
+    args = ["--counts", str(tmp_path / "counts.tsv"), "--metadata", str(atlas_files["metadata"]), "--qc", str(atlas_files["qc"]),
+            "--features", str(atlas_files["features"]), "--epochs", "2", "--device", "cpu", "--test-frac", "0.2"]
+    assert main(["train", *args, "--out", str(tmp_path / "pool")]) == 0
+    assert main(["train", *args, "--out", str(tmp_path / "single"), "--no-pool"]) == 0
+    pool = pd.read_csv(tmp_path / "pool" / "predictions.tsv", sep="\t", index_col=0)["n_missing_genes"]
+    single = pd.read_csv(tmp_path / "single" / "predictions.tsv", sep="\t", index_col=0)["n_missing_genes"]
+    u = [i for i in upec if i in pool.index]
+    assert (single[u] >= 10).all() and (single[u] < 20).all() and (pool[u] >= 24).all()      # the weak island needs the summed counts
+    others = [i for i in pool.index if i not in upec]
+    assert pool[others].median() == 0
+    saved = pd.read_csv(tmp_path / "pool" / "missing_genes.tsv", sep="\t")
+    assert saved.groupby("sample").size().reindex(pool.index, fill_value=0).equals(pool) and set(saved["sample"]) >= set(u)
+    man = json.loads((tmp_path / "pool" / "manifest.json").read_text())
+    assert man["missing_genes"]["pooled"] is True and json.loads((tmp_path / "single" / "manifest.json").read_text())["missing_genes"]["pooled"] is False
+    assert "missing_low_pool" in torch.load(tmp_path / "pool" / PREPROCESSING_FILE, weights_only=True)
+    # embed: the samples of one study given together get the training calls; --no-pool and a single sample call alone
+    ids = [i for i in u if meta.loc[i, "GSE"] == meta.loc[u[0], "GSE"]]
+    counts[ids].to_csv(tmp_path / "q.tsv", sep="\t")
+    base = ["embed", "--counts", str(tmp_path / "q.tsv"), "--models", str(tmp_path / "pool"), "--device", "cpu"]
+    assert main(base + ["--out", str(tmp_path / "e1")]) == 0 and main(base + ["--out", str(tmp_path / "e2"), "--no-pool"]) == 0
+    n1 = pd.read_csv(tmp_path / "e1" / "samples.tsv", sep="\t", index_col=0)["n_missing_genes"]
+    n2 = pd.read_csv(tmp_path / "e2" / "samples.tsv", sep="\t", index_col=0)["n_missing_genes"]
+    assert list(n1) == list(pool[ids]) and (n2 <= n1).all() and (n2 < n1).any()
+    # a table of studies splits the pooling
+    pd.DataFrame({"sample": ids, "GSE": [f"own{i}" for i in range(len(ids))]}).to_csv(tmp_path / "studies.tsv", sep="\t", index=False)
+    assert main(base + ["--out", str(tmp_path / "e3"), "--studies", str(tmp_path / "studies.tsv")]) == 0
+    assert list(pd.read_csv(tmp_path / "e3" / "samples.tsv", sep="\t", index_col=0)["n_missing_genes"]) == list(n2)

@@ -13,7 +13,8 @@ in `docs/atlas_qc_inputs.md`.
 > **As implemented (2026-11-20).** To keep the embedding comparable with the first atlas model, the
 > implementation keeps that model's block layout and two-stage fit instead of the single jointly
 > trained embedding described below: supervised blocks for growth phase (6), medium type (12) and
-> lab strain (4), each fitted on its labelled samples, then a residual block (24) fitted with the
+> lab strain (4: the laboratory lineages K-12, B, C and W against all other known strain groups),
+> each fitted on its labelled samples, then a residual block (24) fitted with the
 > count decoder on all training samples while the blocks are frozen. This brings back a lab-strain
 > call (decisions 3 and 4 below are superseded on that point). TEST and the folds hold reference
 > samples only, as before. The count likelihood, feature groups and covariates are as described here.
@@ -134,7 +135,19 @@ switches it off).** A rule in place of the likelihood ratio and the hidden Marko
   of another training sample, as input only: their counts are still reconstructed.
 - `embed` makes the same calls with the low end saved in the bundle and writes `missing_genes.tsv`;
   `predictions.tsv` of a bundle has `n_missing_genes`.
-- Not done: the refinement with the decoder's mean (5) and the coverage evidence (6).
+- With the antisense count table (`train --antisense`, `embed --antisense`) a depleted gene that has
+  more than 2 antisense reads, and more than a quarter of the sample's antisense background for a
+  gene of its length, is present and not called (`preprocess.background_rate`). Antisense reads only
+  remove calls: adding "no antisense reads" as evidence for a deletion was tried and calls the
+  silenced gene clusters of K-12 (`yddJKL`, `ypjBC`, `ygeF`-`ygeN`), which have no reads on either strand.
+- Pooled calls (`call_groups`, `pooled_low_profile`, `group_calls`; on by default, `--no-pool`): within
+  a study, samples whose calls overlap (intersection over union at least 0.5; samples with fewer
+  than 20 calls together) form a group, found without strain metadata. The group's counts are summed
+  and called like one deep sample against a low end made from pooled groups, and every sample gets
+  its own calls and its group's. Weakly expressed genes of a missing island, which give a single
+  sample too little evidence, are so found: of deletions put into MG1655 studies 99% are called
+  (79% per sample), with a median of 2 calls in K-12 samples as before.
+- Not done: the refinement with the decoder's mean (5) and the coverage tracks (6).
 
 On the atlas the calls give a median of 3 genes in K-12 samples (mostly known deletions: `araBA`
 and `rhaBA` of BW25113, the `lac` region) and about 280 to 480 in the larger other strain groups. They find about

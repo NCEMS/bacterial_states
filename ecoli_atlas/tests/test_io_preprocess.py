@@ -5,7 +5,7 @@ import pytest
 from ecoli_atlas.features import FeatureSet, read_feature_table
 from ecoli_atlas.io import read_counts, sample_id_from_column
 from ecoli_atlas.prepare import prepare
-from ecoli_atlas.preprocess import (ZScore, align_counts, composition_covariates, log_expression, low_expression_profile, missing_genes,
+from ecoli_atlas.preprocess import (ZScore, align_counts, call_groups, group_calls, pooled_low_profile, composition_covariates, log_expression, low_expression_profile, missing_genes,
                                     reference_profile,
                                     size_factors)
 
@@ -128,3 +128,57 @@ def test_missing_genes_are_called_in_runs_and_left_out_of_the_statistics():
     assert abs(z.mu[5] - logx[8:, 5].mean()) < 1e-5 and z.mu[5] > ZScore.fit(logx).mu[5]
     X = z.apply(logx, M)
     assert (X[M] == 0).all() and abs(X[~M[:, 5], 5].mean()) < 1e-5
+
+
+def test_antisense_reads_veto_a_missing_gene_call():
+    rng = np.random.RandomState(4)
+    n, g = 30, 40
+    base = np.full(g, 300.0)
+    depth = rng.uniform(0.5, 2.0, n)
+    Y = rng.poisson(base[None, :] * depth[:, None]).astype(float)
+    lengths = np.full(g, 1000)
+    A = rng.poisson(40.0 * depth[:, None] * np.ones((n, g))).astype(float)      # about 40 antisense reads per kb
+    Y[:6, 10:14] = 0
+    A[:6, 10:14] = 0                                               # a deleted island: no read on either strand
+    Y[6:12, 20:24] = 0                                             # a silenced island: no sense reads, antisense as elsewhere
+    Y[12, 30] = 0
+    A[12, 30] = 1                                                  # one stray antisense read does not veto
+    order = np.arange(g)
+    low = low_expression_profile(Y, depth, order)
+    plain = missing_genes(Y, depth, low, order)
+    assert plain[:6, 10:14].all() and plain[6:12, 20:24].all() and plain[12, 30]
+    veto = missing_genes(Y, depth, low, order, antisense=A, lengths=lengths)
+    assert veto[:6, 10:14].all() and not veto[6:12, 20:24].any() and veto[12, 30]
+    assert not (veto & ~plain).any()                               # antisense reads only remove calls
+    assert np.array_equal(low_expression_profile(Y, depth, order, antisense=A, lengths=lengths) > 0, low > 0)
+    with pytest.raises(ValueError, match="gene lengths"):
+        missing_genes(Y, depth, low, order, antisense=A)
+
+
+def test_calls_pooled_over_the_samples_of_a_study_that_lack_the_same_genes():
+    rng = np.random.RandomState(5)
+    g = 120
+    base = np.r_[np.full(60, 300.0), np.full(60, 0.4)]            # 60 well expressed genes, then 60 very weak ones
+    study = np.repeat([f"S{i}" for i in range(12)], 6)
+    n = len(study)
+    depth = rng.uniform(0.6, 1.6, n)
+    Y = rng.poisson(base[None, :] * depth[:, None]).astype(float)
+    strain_b = np.zeros(n, bool)
+    strain_b[:6] = True                                            # study S0: all samples of a strain without two islands
+    strain_b[6:9] = True                                           # study S1: half of its samples
+    Y[np.ix_(strain_b, np.r_[10:40, 70:100])] = 0
+    order = np.arange(g)
+    low = low_expression_profile(Y, depth, order)
+    M = missing_genes(Y, depth, low, order)
+    assert M[strain_b][:, 10:40].all() and not M[strain_b][:, 70:100].all()      # the weak island gives a single sample too little
+    groups = call_groups(M, study)
+    assert len(set(groups[:6])) == 1 and len(set(groups[6:9])) == 1 and len(set(groups[9:12])) == 1
+    assert groups[6] != groups[9] and groups[0] != groups[6]      # two strains in S1 are two groups; groups never span studies
+    assert len(set(groups)) == 13
+    low_pool = pooled_low_profile(Y, depth, groups, order)
+    assert (low_pool[60:] > 0).mean() > (low[60:] > 0).mean()
+    G = group_calls(Y, depth, groups, low_pool, order)
+    assert G[strain_b][:, 10:40].all() and G[strain_b][:, 70:100].all()         # summed over the group the weak island is called
+    assert G[~strain_b].mean() < 0.01
+    alone = group_calls(Y[:1], depth[:1], np.zeros(1, int), low_pool, order)
+    assert not alone.any()                                         # a sample alone in its group gets no group calls

@@ -44,7 +44,7 @@ def _training_inputs(args, cfg):
     from .features import FeatureSet, read_feature_table
     from .labels import head_labels, is_reference
     from .splits import check_no_leakage, load_splits, make_splits
-    tables = load_tables(args.counts, args.metadata, args.qc, getattr(args, "model_name", None))
+    tables = load_tables(args.counts, args.metadata, args.qc, getattr(args, "model_name", None), getattr(args, "antisense", None))
     fs = FeatureSet.from_table(read_feature_table(args.features))
     if getattr(args, "splits", None):
         splits = load_splits(args.splits)
@@ -58,23 +58,30 @@ def _training_inputs(args, cfg):
     return tables, fs, splits
 
 
-def _fit_and_save(tables, fs, cfg, splits, device, seed: int, out: Path, cv: bool) -> dict:
+def _fit_and_save(tables, fs, cfg, splits, device, seed: int, out: Path, cv: bool, missing_out: Path | None = None,
+                  cache: dict | None = None) -> dict:
+    """``missing_out``: where to write the missing-gene calls of the samples (they are the same for every seed).
+    ``cache``: a dict shared by the seeds of a sweep, in which the training data is kept (``data.prepared``)."""
     from .artifacts import save_bundle
-    from .data import build_training
+    from .data import prepared
     from .evaluate import evaluate
     from .train import cross_validate, fit
-    data = build_training(tables, fs, cfg, splits)
+    data = prepared(cache, "all", tables, fs, cfg, splits)
     _info(f"[seed {seed}] training pool {len(data.tr_rows)} samples, TEST {len(data.te_rows)}, "
           f"{fs.n} features, {data.C.shape[1]} covariates, study cap {data.study_cap}")
     n_missing = data.M.sum(dim=1).numpy()
     if cfg.mask_missing:
         _info(f"[seed {seed}] genes called missing: median {int(np.median(n_missing))} per sample, "
               f"{int((n_missing >= 100).sum())} samples with 100 or more")
+    if missing_out is not None:
+        rows, cols = np.nonzero(data.M.numpy())
+        pd.DataFrame({"sample": np.array(data.ids, dtype=object)[rows], "feature": np.array(fs.ids, dtype=object)[cols]}).to_csv(
+            missing_out, sep="\t", index=False)
     model, history = fit(data, cfg, device, seed=seed, log=_info)
     ev = evaluate(model, data, cfg, device)
     extra = {"phase_order": ev["report"]["phase_order"]}
     if cv:
-        cvr = cross_validate(tables, fs, cfg, splits, device, seed=seed, log=_info)
+        cvr = cross_validate(tables, fs, cfg, splits, device, seed=seed, log=_info, cache=cache)
         extra |= {"cv_metrics": cvr["metrics"], "cv_phase_order": cvr["phase_order"]}
     manifest = save_bundle(out, model, data, cfg, device, seed, metrics=ev["report"]["heads"].get("test", {}), extra=extra)
     _write_json(ev["report"] | extra, out / "evaluation.json")
@@ -103,6 +110,7 @@ def cmd_train(args) -> int:
         if getattr(args, name) is not None:
             setattr(cfg, name, getattr(args, name))
     cfg.mask_missing = not args.no_mask_missing
+    cfg.mask_pool = not args.no_pool
     if args.threads:
         torch.set_num_threads(args.threads)
     out = Path(args.out)
@@ -116,13 +124,15 @@ def cmd_train(args) -> int:
     device = pick_device(args.device)
     seeds = [int(s) for s in args.seeds.split(",")] if args.seeds else [cfg.seed]
     if len(seeds) == 1:
-        _fit_and_save(tables, fs, cfg, splits, device, seeds[0], out, args.cv)
+        _fit_and_save(tables, fs, cfg, splits, device, seeds[0], out, args.cv, out / "missing_genes.tsv")
         _info(f"wrote the model bundle and its evaluation to {out}")
         return 0
     # several seeds on one split: each in seed_<s>/, one of them copied to the output directory
-    rows, manifests = [], {}
+    rows, manifests, cache = [], {}, {}
     for s in seeds:
-        manifests[s] = _fit_and_save(tables, fs, cfg, splits, device, s, out / f"seed_{s}", args.cv)
+        manifests[s] = _fit_and_save(tables, fs, cfg, splits, device, s, out / f"seed_{s}", args.cv,
+                                     out / "missing_genes.tsv" if s == seeds[0] else None,      # once: the calls do not depend on the seed
+                                     cache)
         for h, m in manifests[s]["test_metrics"].items():
             cvm = (manifests[s].get("cv_metrics") or {}).get(h, {})
             rows.append({"seed": s, "head": h, "test_balanced_acc": m["balanced_acc"], "test_auroc": m["auroc"],
@@ -254,6 +264,16 @@ def cmd_drivers(args) -> int:
     return 0
 
 
+def _studies_arg(path):
+    """sample -> study from a table whose first column is the sample and whose second (or `GSE` / `study`) column is the study."""
+    if not path:
+        return None
+    from .compare import read_sample_table
+    t = read_sample_table(path)
+    col = next((c for c in ("GSE", "gse", "study") if c in t.columns), t.columns[0])
+    return t[col]
+
+
 def cmd_embed(args) -> int:
     from .artifacts import ModelBundle
     from .data import read_table
@@ -263,7 +283,8 @@ def cmd_embed(args) -> int:
     bundle = ModelBundle.load(args.models, device)
     try:
         res = embed_counts(bundle, read_counts(args.counts), read_table(args.qc) if args.qc else None, device,
-                           args.min_feature_coverage)
+                           args.min_feature_coverage, read_counts(args.antisense) if args.antisense else None,
+                           studies=_studies_arg(args.studies), pool=not args.no_pool)
     except ValueError as exc:
         _info(f"error: {exc}")
         return 1
@@ -552,6 +573,8 @@ def build_parser() -> argparse.ArgumentParser:
         sp.add_argument("--qc", required=True, help="QC table (sample_qc.tsv); its in_model column selects the samples")
         sp.add_argument("--features", required=True, help="feature table of the counting annotation (*_counting_v2.features.tsv)")
         sp.add_argument("--model-name", help="use only the samples whose in_model has this value (default: any)")
+        sp.add_argument("--antisense", help="antisense count table of the atlas (features x samples); a gene with antisense reads "
+                        "is not called missing from a strain")
 
     sp = sub.add_parser("prepare", help="convert Ecoli_inGEST results into a count table for `embed`")
     sp.add_argument("--ingest-results", metavar="DIR", help="an inGEST results directory")
@@ -580,6 +603,7 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--label-cap", type=int, help="samples of one class that one study may count for in a call's loss "
                                                   "(default: for every class the size of the second-largest study in it)")
     sp.add_argument("--test-frac", type=float)
+    sp.add_argument("--no-pool", action="store_true", help="do not pool the missing-gene calls over a study's samples of one strain")
     sp.add_argument("--no-mask-missing", action="store_true", help="treat genes a strain does not have as measured zeros "
                     "(default: they are called from the counts and left out of the fit)")
     sp.add_argument("--threads", type=int, help="torch CPU threads")
@@ -615,6 +639,11 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--counts", required=True, help="inGEST count table (or the counts.tsv of `prepare`)")
     sp.add_argument("--models", required=True, help="model bundle")
     sp.add_argument("--qc", help="QC table of the samples (inGEST sample_qc.tsv layout); optional")
+    sp.add_argument("--antisense", help="antisense count table of the samples (inGEST all_samples_antisense_counts.txt); optional: "
+                    "a gene with antisense reads is not called missing")
+    sp.add_argument("--studies", help="table sample -> study (first column the sample; column GSE or study, else the second column): "
+                    "the missing-gene calls are pooled within a study. Default: all samples of the table are one study")
+    sp.add_argument("--no-pool", action="store_true", help="call the genes missing from a strain for every sample on its own")
     sp.add_argument("--min-feature-coverage", type=float, default=0.9)
     sp.add_argument("--out", required=True)
     add_device(sp)
@@ -679,6 +708,7 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--models", help="model bundle; with it and the three tables below the model figures are drawn too")
     sp.add_argument("--counts", help="joined count table of the atlas")
     sp.add_argument("--qc", help="QC table (sample_qc.tsv)")
+    sp.add_argument("--antisense", help="antisense count table of the atlas, when the bundle was trained with one")
     sp.add_argument("--features", help="feature table of the counting annotation")
     sp.add_argument("--model-name", help="use only the samples whose in_model has this value (default: any)")
     sp.add_argument("--out", required=True)

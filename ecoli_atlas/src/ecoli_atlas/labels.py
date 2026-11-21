@@ -21,7 +21,8 @@ PHASE_CHECK = ("lag", "early_exponential", "transition")
 MEDIUM_CLASSES = HEADS["medium"]
 # media between the two classes (`medium_class` values): unlabelled, the head's output on them is reported as a check
 MEDIUM_CHECK = ("minimal_plus_hydrolysate", "defined_rich", "natural_fluid")
-# strain_group value -> lab strain class (the first model's `is_lab_strain`); an empty group has no label
+# strain_group values of the `lab` class of the lab_strain call: the laboratory lineages. Every other known group
+# (pathogens, natural isolates, probiotic strains) is `non_lab`; an empty group has no label
 LAB_GROUPS = ("K-12", "B", "C", "W")
 # a sample's condition within its study
 CONDITION_FIELDS = ("growth_phase", "culture_mode", "base_medium", "medium_class", "amino_acids_supplied", "carbon_source",
@@ -55,8 +56,9 @@ def head_labels(meta: pd.DataFrame) -> pd.DataFrame:
     where ``phase2`` is (untreated, standard RNA-seq samples) and the growth phase is one of the two
     clean classes. ``medium`` is `rich` for complex broths and `minimal` for salts with a carbon
     source; every medium in between has no label. ``lab_strain`` is `lab` for the laboratory
-    lineages (LAB_GROUPS) and `non_lab` for every other known strain group (pathogens, natural
-    isolates, probiotic strains)."""
+    lineages (LAB_GROUPS: K-12, B, C, W) and `non_lab` for every other known strain group (pathogens,
+    natural isolates, probiotic strains). It is a call about the lineage: with the genes a strain
+    lacks masked, B, C and W strains sit with K-12 in the blocks that are not trained on it."""
     check_columns(meta)
     out = pd.DataFrame(index=meta.index)
     out["phase"] = meta["growth_phase"].map(PHASE_CLASS).where(meta["phase2"].astype(str).str.strip() != "")

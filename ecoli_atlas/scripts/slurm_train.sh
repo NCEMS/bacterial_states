@@ -31,12 +31,14 @@ python -c "import torch; assert torch.cuda.is_available(), 'CUDA is not availabl
 
 args=(--counts "$DATA/atlas_v2_counts.tsv" --metadata "$DATA/metadata_v2.tsv" --qc "$DATA/sample_qc.tsv"
       --features "$FEATURES" --out "$OUT" --device cuda --threads "${SLURM_CPUS_PER_TASK:-8}")
+[[ -f "$DATA/atlas_v2_antisense_counts.tsv" ]] && args+=(--antisense "$DATA/atlas_v2_antisense_counts.tsv")   # veto for the missing-gene calls
 SPLITS=${SPLITS:-$OUT/splits.csv}
 [[ -f "$SPLITS" ]] && args+=(--splits "$SPLITS")                     # keep the split the figures were made from
 [[ -n "${SEEDS:-}" ]] && args+=(--seeds "$SEEDS")
 [[ -n "${CV:-}" ]] && args+=(--cv)
 [[ -n "${EPOCHS:-}" ]] && args+=(--epochs "$EPOCHS")
 [[ -n "${PHASE_HEAD:-}" ]] && args+=(--phase-head "$PHASE_HEAD")     # binary (default) or ordinal
+[[ "${POOL:-1}" == 0 ]] && args+=(--no-pool)                          # POOL=0: missing-gene calls per sample only
 [[ "${MASK:-1}" == 0 ]] && args+=(--no-mask-missing)                  # MASK=0: genes a strain lacks stay measured zeros
 [[ -n "${FIT:-}" ]] && args+=(--fit "$FIT")                           # two-stage (default), one-pass or unstructured
 python -m ecoli_atlas.cli train "${args[@]}"

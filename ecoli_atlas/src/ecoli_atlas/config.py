@@ -85,6 +85,11 @@ class TrainConfig:
     mask_min_expected: float = 10.0  # reads a run of depleted genes must have expected at the low end of expression
     mask_low_fraction: float = 0.02  # a gene is depleted at or below this share of its low-end expectation
     mask_quantile: float = 0.25      # the low end: this quantile of a gene's normalised count over the reference samples that have it
+    mask_veto_reads: float = 2.0     # with antisense counts: a gene with more antisense reads than this ...
+    mask_veto_fraction: float = 0.25 # ... and than this share of the sample's antisense background is present
+    mask_pool: bool = True           # also call the genes missing from a study's samples of one strain on their summed counts
+    mask_pool_min_calls: int = 20    # samples of a study with fewer calls than this form one group ...
+    mask_pool_jaccard: float = 0.5   # ... the others are joined when their call sets overlap this much
     mask_transplant: float = 0.5     # share of the samples of a batch that also get the missing genes of another training sample
     # training
     block_epochs: int = 40       # of each block encoder
