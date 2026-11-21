@@ -66,8 +66,18 @@ def test_layouts_of_flat_and_full_blocks(trained):
     lay = {L["name"]: L for L in build_layouts(emb, manifest["embedding_blocks"], preds, emb.iloc[:2], preds.iloc[:2], umap=False, log=lambda m: None)}
     assert {"pca_all", "pca_residual", "block_phase", "block_medium", "block_lab_strain", "axes"} <= set(lay)
     for L in lay.values():
-        assert L["atlas"].shape == (len(emb), 3) and L["overlay"].shape == (2, 3) and len(L["axes"]) == 3
+        K = L["atlas"].shape[1]
+        assert L["atlas"].shape == (len(emb), K) and L["overlay"].shape == (2, K) and len(L["axes"]) == K
         np.testing.assert_allclose(L["overlay"], L["atlas"][:2], atol=1e-6)      # atlas samples projected onto themselves
+    # ten components to choose from in the PCAs; the block layouts fix x to the block axis
+    assert lay["pca_all"]["atlas"].shape[1] == 10 and lay["pca_all"]["choose"] == [list(range(10))] * 3
+    assert lay["pca_residual"]["atlas"].shape[1] == 10
+    b = lay["block_phase"]
+    assert b["atlas"].shape[1] == 11 and b["choose"][0] == [0] and b["choose"][1] == list(range(1, 11)) and b["default"] == [0, 1, 2]
+    np.testing.assert_allclose(b["atlas"][:, 1:], lay["pca_residual"]["atlas"])
+    assert lay["axes"]["atlas"].shape[1] == 3 and lay["axes"].get("choose") is None
+    few = {L["name"]: L for L in build_layouts(emb, manifest["embedding_blocks"], preds, umap=False, n_pcs=4, log=lambda m: None)}
+    assert few["pca_all"]["atlas"].shape[1] == 4 and few["block_medium"]["atlas"].shape[1] == 5
     # the phase axis rises with p(stationary)
     assert np.corrcoef(lay["axes"]["atlas"][:, 0], preds["p_stationary"])[0, 1] > 0
     # a block that is not flat is drawn as its own 3-D PCA
@@ -95,7 +105,15 @@ def test_view_page(trained, atlas_files, text_tables, query_dir, tmp_path):
     assert {"split", "gse", "phase_call", "p_stationary", "growth_phase", "growth_phase_basis", "condition", "title_group"} <= set(fields)
     assert all(len(f["values"]) == len(ids) for f in p["fields"])
     for L in p["layouts"]:
-        assert len(L["atlas"]) == 3 * len(ids) and len(L["overlay"]) == 3 * len(QUERY)
+        own = L.get("own", L["ncol"])
+        assert len(L["atlas"]) == own * len(ids) and len(L["overlay"]) == own * len(QUERY)
+        assert len(L["axes"]) == L["ncol"] and len(L["default"]) == 3
+    pl = {L["name"]: L for L in p["layouts"]}
+    # the block layouts store their own axis and take the residual PCs from the residual PCA
+    for h in ("phase", "medium", "lab_strain"):
+        if pl[f"block_{h}"]["ncol"] == 11:
+            assert pl[f"block_{h}"]["base"] == "pca_residual" and pl[f"block_{h}"]["own"] == 1
+    assert "base" not in pl["pca_all"] and "base" not in pl["pca_residual"]
     # conditions: GSE00 varies in phase and genotype, GSE01 only in genotype
     cond = fields["condition"]
     by = {D: {cond["levels"][cond["values"][i]] for i, s in enumerate(ids) if s.startswith(f"GSM{D[3:]}")} for D in ("GSE00", "GSE01")}

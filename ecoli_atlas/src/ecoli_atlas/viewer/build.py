@@ -227,10 +227,31 @@ def _round(a: np.ndarray, digits: int = 3) -> list:
     return [None if not np.isfinite(v) else round(float(v), digits) for v in np.asarray(a, dtype=float).ravel()]
 
 
+def page_layout(L: dict, layouts: list[dict]) -> dict:
+    """A layout as the page stores it. Columns that repeat those of another layout (the residual PCs
+    of the block layouts) are not stored twice: ``base`` names that layout and ``own`` the number of
+    columns stored here; column ``own + k`` is column ``k`` of the base."""
+    out = {"name": L["name"], "label": L["label"], "axes": L["axes"], "ncol": int(L["atlas"].shape[1]),
+           "default": L.get("default", [0, 1, 2]), "choose": L.get("choose")}
+    own = out["ncol"]
+    for B in layouts:
+        nb = B["atlas"].shape[1]
+        if B is not L and 0 < own - nb and B["atlas"].shape[0] == L["atlas"].shape[0] \
+                and np.array_equal(L["atlas"][:, own - nb:], B["atlas"]) \
+                and ("overlay" in L) == ("overlay" in B) and ("overlay" not in L or np.array_equal(L["overlay"][:, own - nb:], B["overlay"])):
+            out.update(base=B["name"], own=own - nb)
+            own -= nb
+            break
+    out["atlas"] = _round(L["atlas"][:, :own])
+    if "overlay" in L:
+        out["overlay"] = _round(L["overlay"][:, :own])
+    return out
+
+
 def build_payload(models: str | Path, metadata: str | Path | None = None, studies: str | Path | None = None,
                   sample_text: str | Path | None = None, embeddings: list[str] | None = None, presets: str | Path | None = None,
                   umap: bool = True, k: int = 10, metric: str = "cosine", seed: int = 77, title: str | None = None,
-                  counts: str | Path | None = None, qc: str | Path | None = None, log=print) -> dict:
+                  counts: str | Path | None = None, qc: str | Path | None = None, n_pcs: int = 10, log=print) -> dict:
     d = Path(models)
     manifest = json.loads((d / "manifest.json").read_text())
     emb = read_embedding(d)
@@ -285,7 +306,8 @@ def build_payload(models: str | Path, metadata: str | Path | None = None, studie
         missing = [c for c in emb.columns if c not in overlay.columns]
         if missing:
             raise ValueError(f"the embedded samples lack embedding columns {missing[:5]}; embed them with this bundle")
-    layouts = build_layouts(emb, manifest.get("embedding_blocks", []), raw, overlay, overlay_probs, umap=umap, seed=seed, log=log)
+    layouts = build_layouts(emb, manifest.get("embedding_blocks", []), raw, overlay, overlay_probs, umap=umap, seed=seed, log=log,
+                            n_pcs=n_pcs)
 
     study_info = {}
     for g in sorted(set(gse) - {""}):
@@ -303,8 +325,7 @@ def build_payload(models: str | Path, metadata: str | Path | None = None, studie
                  "has_text": stext is not None, "has_studies": stable is not None, "qc_fields": qc_fields},
         "ids": ids,
         "fields": fields,
-        "layouts": [{"name": L["name"], "label": L["label"], "axes": L["axes"], "atlas": _round(L["atlas"])}
-                    | ({"overlay": _round(L["overlay"])} if "overlay" in L else {}) for L in layouts],
+        "layouts": [page_layout(L, layouts) for L in layouts],
         "studies": study_info,
         "sample_text": ({f: stext[f].fillna("").tolist() for f in SAMPLE_TEXT_FIELDS if f in stext.columns}
                         if stext is not None else {}),

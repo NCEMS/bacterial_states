@@ -312,6 +312,10 @@ which take a few minutes for the whole atlas. The page holds:
   component holds over 99% of its variance. So `block_<head>` draws that axis against residual
   PC1–2, and a block that is not flat (first component under 90%) gets its own 3-D PCA. Each block
   axis is signed so that it rises toward the call's positive class (stationary, minimal, lab).
+  The PCA layouts keep the first 10 components (`--n-pcs`), and X / Y / Z menus next to the layout
+  menu draw any three of them (e.g. PC2 × PC4 × PC5). In a `block_<head>` layout, x stays the block
+  axis and y and z can be any two residual PCs. The chosen axes are part of the page's link
+  (`#layout=pca_all&pcs=1,3,4`; the numbers count from 0).
 - **Hover and click.** Hovering shows the sample, its GEO title, the model's calls and the curated
   labels. Clicking a sample opens a panel with every curated label and its basis, the GEO sample
   record, its SRA runs (linked), and the study.
@@ -332,7 +336,7 @@ which take a few minutes for the whole atlas. The page holds:
 - **Examples.** These are preset views of single studies (growth-phase series, a biofilm, rich
   against minimal medium, a strain panel, the withheld study, the v1 case studies). They are kept
   in `src/ecoli_atlas/viewer/presets.json` (`id`, `title`, `gse`, `layout`, `color_by`,
-  `caption`); `--presets FILE` replaces them, and presets whose studies are not in the bundle are
+  `caption`, optionally `pcs`: the three columns to draw, counted from 0); `--presets FILE` replaces them, and presets whose studies are not in the bundle are
   dropped.
 - **Your samples** (`--embeddings DIR[=NAME]`, repeatable: output directories of `embed` made
   with the same bundle). They are drawn as diamonds, projected onto the atlas fit of every layout.

@@ -91,8 +91,10 @@
     size: 2.5,
     selected: null,                  // {kind: "atlas"|"overlay", i}
     hl: null,                        // atlas index highlighted from a table row
-    caption: null
+    caption: null,
+    cols: {}                         // layout name -> the three columns drawn (layouts with selectable columns)
   };
+  const colsOf = lay => S.cols[lay.name] || lay.default || [0, 1, 2];
 
   // ------------------------------------------------------------------ controls
   function fillControls() {
@@ -126,7 +128,12 @@
       o.label = (D.studies[g].title || "") + ` (${D.studies[g].n})`; dl.appendChild(o);
     });
     lay.value = S.layout; col.value = S.color;
-    lay.addEventListener("change", () => { S.layout = lay.value; draw(); writeHash(); });
+    lay.addEventListener("change", () => { S.layout = lay.value; fillPcs(); draw(); writeHash(); });
+    ["pc-x", "pc-y", "pc-z"].forEach((id, d) => $(id).addEventListener("change", e => {
+      const l = L[S.layout], c = colsOf(l).slice();
+      c[d] = +e.target.value; S.cols[l.name] = c; draw(); writeHash();
+    }));
+    fillPcs();
     col.addEventListener("change", () => { S.color = col.value; draw(); });
     $("size").addEventListener("input", e => { S.size = +e.target.value; draw(); });
     $("reset").addEventListener("click", () => { S.study = null; S.selected = null; S.hl = null; S.onlyGroup = null; setCaption(null); draw(); renderSample(); renderStudy(); writeHash(); });
@@ -135,6 +142,19 @@
     $("search").addEventListener("change", e => { if (D.studies[e.target.value.trim()]) search(e.target.value); });
     document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
     renderAbout();
+  }
+
+  function fillPcs() {                // the X / Y / Z menus of a layout with selectable columns
+    const l = L[S.layout];
+    $("pcs").hidden = !l.choose;
+    if (!l.choose) return;
+    const c = colsOf(l);
+    ["pc-x", "pc-y", "pc-z"].forEach((id, d) => {
+      const sel = $(id);
+      sel.innerHTML = l.choose[d].map(k => `<option value="${k}">${esc(l.axes[k])}</option>`).join("");
+      sel.value = String(c[d]);
+      sel.disabled = l.choose[d].length < 2;
+    });
   }
 
   function showTab(name) {
@@ -154,6 +174,8 @@
   function applyPreset(p) {
     S.layout = L[p.layout] ? p.layout : S.layout;
     $("layout").value = S.layout;
+    if (Array.isArray(p.pcs) && L[S.layout].choose) S.cols[S.layout] = p.pcs; else delete S.cols[S.layout];   // the example's own axes
+    fillPcs();
     if (p.color_by && F[p.color_by] && !p.gse) { S.color = p.color_by; $("color").value = S.color; }
     S.selected = null; S.hl = null; S.onlyGroup = null; S.hideOthers = !!p.hide_others;
     setCaption(p);
@@ -239,10 +261,16 @@
     return PALETTE[Math.abs(h) % PALETTE.length];
   }
 
-  function xyz(lay, idx, key) {
-    const a = lay[key || "atlas"]; const x = [], y = [], z = [];
-    idx.forEach(i => { x.push(a[3 * i]); y.push(a[3 * i + 1]); z.push(a[3 * i + 2]); });
-    return { x, y, z };
+  function column(lay, key, c) {       // accessor of column c of a layout (stored here or in its base layout)
+    const own = lay.base ? lay.own : (lay.ncol || 3);
+    if (lay.base && c >= own) return column(L[lay.base], key, c - own);
+    const a = lay[key] || [];
+    return i => a[own * i + c];
+  }
+  function xyz(lay, idx, key) {        // coordinates of samples idx in the three columns drawn
+    key = key || "atlas";
+    const [fx, fy, fz] = colsOf(lay).map(c => column(lay, key, c));
+    return { x: idx.map(fx), y: idx.map(fy), z: idx.map(fz) };
   }
 
   function pointTrace(lay, idx, opts) {
@@ -313,10 +341,10 @@
       const sets = [...new Set(OV.set)];
       sets.forEach((s, k) => {
         const jj = []; OV.set.forEach((v, j) => { if (v === s) jj.push(j); });
-        const a = lay.overlay || [];
+        const c = xyz(lay, jj, "overlay");
         traces.push({
-          type: "scatter3d", mode: "markers", name: `your samples: ${s} (${jj.length})`, x: jj.map(j => a[3 * j]), y: jj.map(j => a[3 * j + 1]),
-          z: jj.map(j => a[3 * j + 2]), customdata: jj.map(j => -1 - j), text: jj.map(j => ovHover[j]), hoverinfo: "text",
+          type: "scatter3d", mode: "markers", name: `your samples: ${s} (${jj.length})`, x: c.x, y: c.y,
+          z: c.z, customdata: jj.map(j => -1 - j), text: jj.map(j => ovHover[j]), hoverinfo: "text",
           hoverlabel: { align: "left" }, marker: { size: S.size * 2.6, symbol: "diamond", color: OVERLAY[k % OVERLAY.length], line: { width: 1, color: "#000" } }
         });
       });
@@ -328,8 +356,8 @@
     if (mark.length) {
       const x = [], y = [], z = [], sz = [], col = [];
       mark.forEach(m => {
-        const a = m.kind === "overlay" ? lay.overlay : lay.atlas; const i = m.i;
-        x.push(a[3 * i]); y.push(a[3 * i + 1]); z.push(a[3 * i + 2]);
+        const c = xyz(lay, [m.i], m.kind === "overlay" ? "overlay" : "atlas");
+        x.push(c.x[0]); y.push(c.y[0]); z.push(c.z[0]);
         sz.push(m.kind === "nb" ? S.size * 3 : S.size * 5); col.push(m.kind === "nb" ? "#e6007e" : "#000");
       });
       traces.push({ type: "scatter3d", mode: "markers", name: "selected", showlegend: false, hoverinfo: "skip", x, y, z,
@@ -339,7 +367,7 @@
     const layout = {
       uirevision: S.layout, margin: { l: 0, r: 0, t: 0, b: 0 }, paper_bgcolor: "#fafaf8",
       legend: { x: 0, y: 1, bgcolor: "rgba(255,255,255,0.75)", font: { size: 11 }, itemsizing: "constant" },
-      scene: { xaxis: ax(lay.axes[0]), yaxis: ax(lay.axes[1]), zaxis: ax(lay.axes[2]), aspectmode: "cube" },
+      scene: { xaxis: ax(lay.axes[colsOf(lay)[0]]), yaxis: ax(lay.axes[colsOf(lay)[1]]), zaxis: ax(lay.axes[colsOf(lay)[2]]), aspectmode: "cube" },
       hovermode: "closest"
     };
     Plotly.react("plot", traces, layout, { responsive: true, displaylogo: false, modeBarButtonsToRemove: ["resetCameraLastSave3d"] });
@@ -524,7 +552,7 @@
     const m = D.meta;
     let h = `<h2>About this map</h2><p>${m.n_atlas.toLocaleString()} RNA-seq samples of <i>E. coli</i> in ${m.n_studies} GEO studies, embedded by the model <b>${esc(m.bundle)}</b> (ecoli_atlas ${esc(m.version)}, page built ${esc(m.built)}).</p>`;
     h += `<p>The embedding has ${m.embedding_dim} dimensions in blocks: ` + m.blocks.map(b => `<span class="pill">${esc(b.block)} ${b.end - b.start}-d</span>`).join("") + `. Each block of the first three is trained to carry one call (growth phase, medium, lab strain); the residual block carries the rest of the expression profile.</p>`;
-    h += `<h3>Layouts</h3><table>` + D.layouts.map(l => `<tr><td class="k">${esc(l.label)}</td><td>${l.axes.map(esc).join(" · ")}</td></tr>`).join("") + `</table>`;
+    h += `<h3>Layouts</h3><table>` + D.layouts.map(l => `<tr><td class="k">${esc(l.label)}</td><td>${l.axes.slice(0, 3).map(esc).join(" · ")}${l.choose ? ` · … (${l.axes.length} columns; pick any three with X / Y / Z)` : ""}</td></tr>`).join("") + `</table>`;
     h += `<p class="muted">PCA and UMAP are fitted on the atlas samples; your samples are projected onto the same fit. Distances between neighbours are computed in the full embedding, not in the 3-D map.</p>`;
     h += `<h3>Using the map</h3><p>Drag to rotate, scroll to zoom, right-drag to pan. Click a legend entry to hide a group, double-click to show it alone. Click a point to open the sample; “Show this study” draws its study on top of the rest of the atlas, grouped by the labels that differ between its samples. The split filters show training samples, the held-out TEST studies and projected samples (in the atlas but not fitted).</p>`;
     if (OV) h += `<p>Your samples (${NO}) are drawn as diamonds; clicking one lists its nearest atlas samples.</p>`;
@@ -537,11 +565,17 @@
     if (S.study) p.set("study", S.study.join(","));
     if (S.selected && S.selected.kind === "atlas") p.set("sample", D.ids[S.selected.i]);
     if (S.layout) p.set("layout", S.layout);
+    if (S.cols[S.layout]) p.set("pcs", S.cols[S.layout].join(","));
     try { history.replaceState(null, "", "#" + p.toString()); } catch (e) { /* file:// in some browsers */ }
   }
   function readHash() {
     const p = new URLSearchParams(location.hash.slice(1));
-    if (p.get("layout") && L[p.get("layout")]) { S.layout = p.get("layout"); $("layout").value = S.layout; }
+    if (p.get("layout") && L[p.get("layout")]) {
+      S.layout = p.get("layout"); $("layout").value = S.layout;
+      const l = L[S.layout], c = (p.get("pcs") || "").split(",").map(Number);
+      if (l.choose && c.length === 3 && c.every((k, d) => l.choose[d].includes(k))) S.cols[l.name] = c;
+      fillPcs();
+    }
     const s = p.get("sample");
     if (s && idIndex[s] !== undefined) { S.selected = { kind: "atlas", i: idIndex[s] }; renderSample(); }
     if (p.get("study")) { enterStudy(p.get("study").split(","), null, true); return true; }

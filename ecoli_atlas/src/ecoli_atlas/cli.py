@@ -338,7 +338,7 @@ def cmd_view(args) -> int:
         out = write_view(args.out, plotly_js=args.plotly, log=_info, models=args.models, metadata=args.metadata,
                          studies=args.studies, sample_text=args.sample_text, embeddings=args.embeddings or None,
                          presets=args.presets, umap=not args.no_umap, k=args.k, metric=args.metric, seed=args.seed,
-                         title=args.title, counts=args.counts, qc=args.qc)
+                         title=args.title, counts=args.counts, qc=args.qc, n_pcs=args.n_pcs)
     except (ValueError, FileNotFoundError) as exc:
         _info(f"error: {exc}")
         return 1
@@ -710,6 +710,7 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--qc", help="QC table of the atlas samples (sample_qc.tsv): adds the QC covariates of the model")
     sp.add_argument("--presets", help="JSON list of example views (default: the examples shipped with the package)")
     sp.add_argument("--no-umap", action="store_true", help="skip the UMAP layouts (they need umap-learn and take a few minutes)")
+    sp.add_argument("--n-pcs", type=int, default=10, help="principal components kept per PCA layout; the page draws any three (default 10)")
     sp.add_argument("--plotly", default="auto", metavar="auto|inline|cdn|PATH",
                     help="where plotly.js comes from: inlined from the plotly Python package (auto falls back to the CDN when it "
                          "is not installed), the cdnjs CDN (smaller file, needs a network connection), or a local plotly.min.js")

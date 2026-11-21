@@ -1,12 +1,16 @@
 """3-D layouts of the atlas embedding for `ecoli_atlas view`.
 
 Every layout is fitted on the atlas samples only; samples of `embed` (the overlay) are projected with
-the same fit. A layout is ``{"name", "label", "axes": [3 titles], "atlas": n x 3, "overlay": m x 3}``.
+the same fit. A layout is ``{"name", "label", "axes": [K column titles], "atlas": n x K, "overlay": m x K,
+"default": [3 columns drawn first], "choose": [allowed columns of x, y, z] or None}``. PCA layouts keep
+``n_pcs`` components (default 10) so that the page can draw any three of them; ``choose`` None means
+the three columns are fixed.
 
   pca_all, pca_residual   PCA of the standardised embedding (whole, or the residual block); axis titles
                           give the share of variance
   block_<head>            a head block (phase, medium, lab_strain): its first component (such a block is
-                          in effect one axis) against residual PC1-2; a 3-D PCA of the block when it is not flat
+                          in effect one axis) on x against residual PCs on y and z (PC1-2 at first, any
+                          two selectable); a PCA of the block when it is not flat
   axes                    the three head-block axes together, each signed to rise with the call's positive
                           class (the logits of the calls when the bundle has no head blocks)
   umap_all, umap_residual 3-D UMAP (cosine, 30 neighbours, min_dist 0.3, as `compare`), optional
@@ -23,24 +27,28 @@ from sklearn.preprocessing import StandardScaler
 from ..config import HEADS
 
 LOGIT_CLIP = 10.0
+N_PCS = 10
 BLOCK_TITLES = {"phase": "phase block", "medium": "medium block", "lab_strain": "lab-strain block", "residual": "residual block"}
 
 
 def _pad3(x: np.ndarray) -> np.ndarray:
-    """Three columns (a block narrower than 3 gets zero columns)."""
+    """At least three columns (a block narrower than 3 gets zero columns)."""
     if x.shape[1] >= 3:
-        return x[:, :3]
+        return x
     return np.hstack([x, np.zeros((x.shape[0], 3 - x.shape[1]))])
 
 
-def pca_layout(name: str, label: str, atlas: np.ndarray, overlay: np.ndarray | None, seed: int = 0) -> dict:
+def pca_layout(name: str, label: str, atlas: np.ndarray, overlay: np.ndarray | None, seed: int = 0, n_pcs: int = N_PCS) -> dict:
+    """The first ``n_pcs`` principal components (at least 3 columns; a narrower block gets zero columns)."""
     scaler = StandardScaler().fit(atlas)
     a = scaler.transform(atlas)
-    k = min(3, a.shape[1], a.shape[0])
+    k = min(max(n_pcs, 3), a.shape[1], a.shape[0])
     pca = PCA(n_components=k, random_state=seed).fit(a)
     var = list(pca.explained_variance_ratio_) + [0.0] * (3 - k)
-    axes = [f"PC{i + 1} ({100 * v:.0f}%)" for i, v in enumerate(var)]
-    out = {"name": name, "label": label, "axes": axes, "atlas": _pad3(pca.transform(a))}
+    axes = [f"PC{i + 1} ({100 * v:.1f}%)" if v < 0.1 else f"PC{i + 1} ({100 * v:.0f}%)" for i, v in enumerate(var)]
+    cols = list(range(len(axes)))
+    out = {"name": name, "label": label, "axes": axes, "atlas": _pad3(pca.transform(a)), "default": [0, 1, 2],
+           "choose": [cols, cols, cols] if len(cols) > 3 else None}
     if overlay is not None and len(overlay):
         out["overlay"] = _pad3(pca.transform(scaler.transform(overlay)))
     return out
@@ -104,7 +112,7 @@ def _block_axis(a: np.ndarray, o: np.ndarray | None, orient: np.ndarray | None, 
 
 def build_layouts(embedding: pd.DataFrame, blocks: list[dict], atlas_probs: pd.DataFrame, overlay: pd.DataFrame | None = None,
                   overlay_probs: pd.DataFrame | None = None, umap: bool = True, seed: int = 77, log=print,
-                  flat_share: float = 0.9) -> list[dict]:
+                  flat_share: float = 0.9, n_pcs: int = N_PCS) -> list[dict]:
     """All layouts; ``blocks`` is ``manifest["embedding_blocks"]`` (block, start, end).
 
     A head block whose first component holds more than ``flat_share`` of its variance is in effect one
@@ -112,12 +120,12 @@ def build_layouts(embedding: pd.DataFrame, blocks: list[dict], atlas_probs: pd.D
     a = embedding.to_numpy(dtype=float)
     o = overlay[embedding.columns].to_numpy(dtype=float) if overlay is not None and len(overlay) else None
     sl = {b["block"]: slice(int(b["start"]), int(b["end"])) for b in blocks}
-    out = [pca_layout("pca_all", f"PCA — whole embedding ({a.shape[1]}-d)", a, o, seed=seed)]
+    out = [pca_layout("pca_all", f"PCA — whole embedding ({a.shape[1]}-d)", a, o, seed=seed, n_pcs=n_pcs)]
     res = None
     if "residual" in sl:
         w = sl["residual"].stop - sl["residual"].start
         res = pca_layout("pca_residual", f"PCA — {BLOCK_TITLES['residual']} ({w}-d)", a[:, sl["residual"]],
-                         None if o is None else o[:, sl["residual"]], seed=seed)
+                         None if o is None else o[:, sl["residual"]], seed=seed, n_pcs=n_pcs)
     head_axes = {}
     for h, (_, pos) in HEADS.items():
         if h not in sl:
@@ -128,14 +136,15 @@ def build_layouts(embedding: pd.DataFrame, blocks: list[dict], atlas_probs: pd.D
         head_axes[h] = (x, xo)
         title = BLOCK_TITLES.get(h, h + " block")
         if share[0] < flat_share or res is None:
-            out.append(pca_layout(f"block_{h}", f"PCA — {title} ({blk.shape[1]}-d)", blk, blk_o, seed=seed))
+            out.append(pca_layout(f"block_{h}", f"PCA — {title} ({blk.shape[1]}-d)", blk, blk_o, seed=seed, n_pcs=n_pcs))
             continue
-        L = {"name": f"block_{h}", "label": f"{title[0].upper()}{title[1:]} axis × residual PC1–2",
-             "axes": [f"{h.replace('_', ' ')} axis → {pos} ({100 * share[0]:.0f}% of the block)",
-                      "residual " + res["axes"][0], "residual " + res["axes"][1]],
-             "atlas": np.column_stack([x, res["atlas"][:, 0], res["atlas"][:, 1]])}
+        nr = res["atlas"].shape[1]
+        rcols = list(range(1, nr + 1))
+        L = {"name": f"block_{h}", "label": f"{title[0].upper()}{title[1:]} axis × residual PCs",
+             "axes": [f"{h.replace('_', ' ')} axis → {pos} ({100 * share[0]:.0f}% of the block)"] + ["residual " + t for t in res["axes"]],
+             "atlas": np.column_stack([x, res["atlas"]]), "default": [0, 1, 2], "choose": [[0], rcols, rcols] if nr > 2 else None}
         if xo is not None:
-            L["overlay"] = np.column_stack([xo, res["overlay"][:, 0], res["overlay"][:, 1]])
+            L["overlay"] = np.column_stack([xo, res["overlay"]])
         out.append(L)
     if res is not None:
         out.append(res)

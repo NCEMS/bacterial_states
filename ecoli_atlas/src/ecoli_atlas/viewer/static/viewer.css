@@ -21,6 +21,9 @@ button { padding: 3px 10px; border: 1px solid var(--line); border-radius: 5px; b
 button:hover { background: var(--row-hover); }
 button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
 button.primary:hover { filter: brightness(1.08); }
+.pcs { display: flex; gap: 6px; }
+.pcs[hidden] { display: none; }
+.pcs select { max-width: 150px; }
 .splits { display: flex; gap: 8px; font-size: 12px; }
 .splits label { color: var(--ink); }
 .size input { width: 80px; }
