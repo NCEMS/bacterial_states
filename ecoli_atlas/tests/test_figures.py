@@ -2,6 +2,7 @@ import json
 
 import pandas as pd
 
+from ecoli_atlas.config import HParams
 from ecoli_atlas.cli import main
 
 
@@ -39,7 +40,7 @@ def test_model_figures(trained, train_args, tmp_path):
     assert m["embedding_check"]["max_abs_diff"] < 1e-4                      # the bundle's embedding.tsv is made again
     assert m["test_metrics_vs_manifest"] and all(v["agree"] for v in m["test_metrics_vs_manifest"].values())
     assert set(m["study_leakage"]["rates"]) == {"input", "blocks", "embedding"}
-    assert m["factor_umaps"]["phase"]["block_dim"] == 6
+    assert m["factor_umaps"]["phase"]["block_dim"] == HParams().block_dims["phase"]
     # phase raises the first ten genes of the synthetic atlas: they lead the correlates of the phase call
     corr = pd.read_csv(figs / "factor_gene_correlations.tsv", sep="\t")
     top = corr[corr["factor"] == "phase"].sort_values("spearman_rho", ascending=False).head(10)

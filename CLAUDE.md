@@ -144,7 +144,8 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
 - Atlas model (`ecoli_atlas/README.md`): features are the inGEST ids; mRNA and other RNAs are
   inputs and outputs, rRNA and tRNA only covariates; size factors from mRNA. Phase head: `mid_exponential` against `stationary` where `phase2` is set;
   **`late_stationary` has no label and is in no phase evaluation, not even as a check.** The embedding
-  has v1's blocks (phase 6, medium 12, lab strain 4, residual 24) and v1's two stages: block encoders
+  has one block per call (phase 1, medium 1, lab strain 1; v1's 6 / 12 / 4 held nothing more, 2026-11-21, `train
+  --block-dims`) and a residual of 24, fitted in v1's two stages: block encoders
   on their labelled samples, then the residual encoder and count decoder on all training samples with
   the blocks frozen. Lab strain = `strain_group` K-12/B/C/W (the laboratory lineages) against the other known groups.
   A K-12-against-the-rest call (`k12`) was tried on 2026-11-20 and dropped: with missing genes masked, B, C and W strains

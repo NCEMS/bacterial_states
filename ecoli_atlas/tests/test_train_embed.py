@@ -67,7 +67,8 @@ def test_training_lowers_the_loss_and_uses_training_statistics_only(atlas_files)
     assert sum(len(data.fit_rows(k)) for k in (1, 2, 3)) < 3 * len(data.tr_rows)
     # the embedding is [phase | medium | lab strain | residual]; the blocks are standardised on the training pool
     z = encode(model, data.X, data.C, "cpu")["z"]
-    assert z.shape[1] == 6 + 12 + 4 + 8 and np.allclose(z[data.tr_rows, :22].mean(0), 0, atol=1e-3)
+    nb = sum(cfg.hparams.block_dims.values())
+    assert z.shape[1] == nb + 8 and np.allclose(z[data.tr_rows, :nb].mean(0), 0, atol=1e-3)
     # the residual stage leaves the block encoders as they were
     before = {k: v.clone() for k, v in model.blocks.state_dict().items()}
     blocks_only, _ = fit(data, cfg, "cpu", epochs=0)                       # same seed, no residual stage
@@ -85,7 +86,7 @@ def test_bundle_files_and_evaluation(trained):
         assert all(isinstance(v, torch.Tensor) for v in obj.values())
     manifest = json.loads((trained / "manifest.json").read_text())
     assert manifest["schema_version"] == 2 and manifest["heads"] == {"phase": ["exponential", "stationary"], "medium": ["rich", "minimal"], "lab_strain": ["non_lab", "lab"]}
-    assert [b["block"] for b in manifest["embedding_blocks"]] == ["phase", "medium", "lab_strain", "residual"] and manifest["embedding_blocks"][-1]["end"] == 46
+    assert [b["block"] for b in manifest["embedding_blocks"]] == ["phase", "medium", "lab_strain", "residual"] and manifest["embedding_blocks"][-1]["end"] == 27
     n = manifest["n_samples"]
     assert n["training_pool"] + n["test"] + n["projected_only"] == 119 and 0 < n["training_reference"] < n["training_pool"]
     report = json.loads((trained / "evaluation.json").read_text())
@@ -94,7 +95,7 @@ def test_bundle_files_and_evaluation(trained):
     assert set(report["medium_check"]) == {"minimal_plus_hydrolysate"} and report["medium_check"]["minimal_plus_hydrolysate"]["n_studies"] == 1
     pred = pd.read_csv(trained / "predictions.tsv", sep="\t", index_col=0)
     emb = pd.read_csv(trained / "embedding.tsv", sep="\t", index_col=0)
-    assert len(pred) == len(emb) == 119 and emb.shape[1] == 46 and pred["p_stationary"].between(0, 1).all()
+    assert len(pred) == len(emb) == 119 and emb.shape[1] == 27 and pred["p_stationary"].between(0, 1).all()
     splits = pd.read_csv(trained / "splits.csv", index_col=0)
     assert not set(splits.loc[splits["split"] == 1, "gse"]) & set(splits.loc[splits["split"] == 3, "gse"])
     calls = pd.read_csv(trained / "missing_genes.tsv", sep="\t")              # one row per sample and gene called missing
@@ -193,7 +194,7 @@ def test_the_one_loss_fits_train_save_and_embed(fit_name, atlas_files, tmp_path)
     for term in ("counts", "phase", "medium", "lab_strain"):
         assert hist[-1][term] < hist[0][term]
     z = encode(model, data.X, data.C, "cpu")["z"]
-    assert z.shape[1] == hp.z_dim == 30
+    assert z.shape[1] == hp.z_dim == sum(hp.block_dims.values()) + 8
     if fit_name == "one_pass":            # the blocks moved with the rest: not those of a two-stage fit from the same seed
         two, _ = fit(data, TrainConfig(seed=5, test_frac=0.2, n_candidates=50, epochs=0, batch=40, hparams=hp), "cpu")
         assert not all(torch.equal(v, two.blocks.state_dict()[k]) for k, v in model.blocks.state_dict().items())
@@ -212,22 +213,22 @@ def test_the_one_loss_fits_train_save_and_embed(fit_name, atlas_files, tmp_path)
 def test_block_dims_option_sets_the_embedding_layout(train_args, atlas_files, tmp_path):
     out = tmp_path / "b1"
     assert main(["train", *train_args, "--out", str(out), "--epochs", "4", "--device", "cpu", "--test-frac", "0.2",
-                 "--block-dims", "phase=1, residual=10"]) == 0
+                 "--block-dims", "phase=2, residual=10"]) == 0
     manifest = json.loads((out / "manifest.json").read_text())
-    assert [(b["block"], b["end"] - b["start"]) for b in manifest["embedding_blocks"]] == [("phase", 1), ("medium", 12), ("lab_strain", 4), ("residual", 10)]
+    assert [(b["block"], b["end"] - b["start"]) for b in manifest["embedding_blocks"]] == [("phase", 2), ("medium", 1), ("lab_strain", 1), ("residual", 10)]
     emb = pd.read_csv(out / "embedding.tsv", sep="\t", index_col=0)
-    assert emb.shape[1] == 27
+    assert emb.shape[1] == 14
     bundle = ModelBundle.load(out)                                   # the sizes come back from the bundle
-    assert bundle.config.hparams.block_dims["phase"] == 1 and bundle.config.hparams.res_dim == 10
+    assert bundle.config.hparams.block_dims["phase"] == 2 and bundle.config.hparams.res_dim == 10
     counts = read_counts(atlas_files["counts"])
     qc = pd.read_csv(atlas_files["qc"], sep="\t", dtype=str, keep_default_na=False).set_index("GSM")
     res = embed_counts(bundle, counts[["GSM0000", "GSM0105"]], qc)
     assert np.allclose(res["embedding"].to_numpy(), emb.loc[["GSM0000", "GSM0105"]].to_numpy(), atol=2e-4)
-    assert HParams().with_block_dims("medium=3").block_dims == {"phase": 6, "medium": 3, "lab_strain": 4}
+    assert HParams().with_block_dims("medium=3").block_dims == {"phase": 1, "medium": 3, "lab_strain": 1}
     for bad in ("strain=2", "phase=0", "phase"):
         with pytest.raises(ValueError, match="--block-dims"):
             HParams().with_block_dims(bad)
-    assert HParams().block_dims["phase"] == 6                         # the defaults are not changed in place
+    assert HParams().block_dims["phase"] == 1                         # the defaults are not changed in place
 
 
 def test_an_unknown_fit_is_refused():
@@ -652,7 +653,9 @@ def test_phase_order_term_follows_time_along_the_fitted_series(atlas_files, tmp_
     from ecoli_atlas.metrics import within_series_order
     from ecoli_atlas.train import order_pair_sampler
     fs = FeatureSet.from_table(read_feature_table(atlas_files["features"]))
-    hp = HParams(enc_width=32, dec_width=32, block_width=16, res_dim=4)
+    # v1's block sizes: with a 6-d phase block the score has no reason to follow time without the term. A 1-d block
+    # already orders 0.8 of the synthetic pairs without it (as on the atlas, where one dimension follows time best)
+    hp = HParams(enc_width=32, dec_width=32, block_width=16, res_dim=4, block_dims={"phase": 6, "medium": 12, "lab_strain": 4})
     off = TrainConfig(seed=3, test_frac=0.2, n_candidates=50, epochs=2, block_epochs=80, batch=40, hparams=hp)
     on = TrainConfig(**{**off.to_dict(), "hparams": hp, "phase_order_weight": 1.0})
     order_on, order_off = {}, {}

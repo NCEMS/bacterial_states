@@ -46,8 +46,10 @@ COVARIATES = ("paired", "fragment_q25", "fragment_q50", "fragment_q75",         
 
 @dataclass
 class HParams:
-    # the embedding is [one block per call | residual block]; the sizes are those of the first atlas model
-    block_dims: dict = field(default_factory=lambda: {"phase": 6, "medium": 12, "lab_strain": 4})
+    # the embedding is [one block per call | residual block]. One dimension per call (user decision 2026-11-21):
+    # v1's 6 / 12 / 4 held nothing more than the call's score (`work/phase_dims/NOTES.md`, sweeps
+    # models_v2_cov11_order_w1{,_phase1,_blocks1}); the residual keeps v1's 24
+    block_dims: dict = field(default_factory=lambda: {"phase": 1, "medium": 1, "lab_strain": 1})
     res_dim: int = 24
     # block encoders (one small classifier per call, fitted on its labelled samples only)
     block_width: int = 256

@@ -3,18 +3,20 @@
 Embeds *E. coli* RNA-seq samples with an encoder–decoder trained on thousands of public samples
 counted with Ecoli_inGEST, and places new samples in that embedding.
 
-The embedding has the block layout of the first atlas model, 46 dimensions, and is fitted in the
-same two stages (count model and covariates: [`docs/atlas_model_v2.md`](../docs/atlas_model_v2.md)):
+The embedding has one block per call and a residual block, 27 dimensions, and is fitted in the
+two stages of the first atlas model (count model and covariates: [`docs/atlas_model_v2.md`](../docs/atlas_model_v2.md)):
 
 | Block | Dimensions | Fitted on |
 |---|---|---|
-| growth phase (exponential / stationary) | 6 | training samples with a phase label |
-| medium type (rich / minimal) | 12 | training samples with a medium label |
-| lab strain (`lab_strain`: lab / non-lab) | 4 | training samples with a known strain group |
+| growth phase (exponential / stationary) | 1 | training samples with a phase label |
+| medium type (rich / minimal) | 1 | training samples with a medium label |
+| lab strain (`lab_strain`: lab / non-lab) | 1 | training samples with a known strain group |
 | residual | 24 | all training samples, blocks frozen |
 
-`train --block-dims` changes the sizes (`phase=1`, `phase=2,residual=28`; blocks not named keep
-theirs). The bundle records them (`embedding_blocks` in `manifest.json`), and `embed`, `evaluate` and
+The first model had 6 / 12 / 4 / 24 (46 dimensions). Sweeps with the call blocks cut to one dimension each
+lost nothing: the same calls, the same neighbours inside each block, the residual no richer; the decoder's TEST
+NLL rose by about one seed SD (`work/phase_dims/NOTES.md`). `train --block-dims` changes the sizes
+(`phase=6,medium=12,lab_strain=4` for v1's, `residual=16`; blocks not named keep theirs). The bundle records them (`embedding_blocks` in `manifest.json`), and `embed`, `evaluate` and
 `figures` read them from there.
 
 - **Block encoders:** z-scored log expression → the block; a linear head on the block gives the
@@ -128,9 +130,9 @@ ecoli_atlas neighbors GSE224463 --models outputs/models_v2 --out neighbors [--me
 
 ### Ways of fitting (`train --fit`)
 
-| `--fit` | Embedding (46 dimensions) | Fitting |
+| `--fit` | Embedding (27 dimensions) | Fitting |
 |---|---|---|
-| `two-stage` (default) | blocks 6 / 12 / 4 and residual 24 | block encoders on their labelled samples, then the residual encoder and the decoder on all training samples with the blocks frozen and standardised |
+| `two-stage` (default) | blocks 1 / 1 / 1 and residual 24 | block encoders on their labelled samples, then the residual encoder and the decoder on all training samples with the blocks frozen and standardised |
 | `one-pass` | the same blocks and residual | everything together in one loss: the heads' cross-entropy, the count likelihood, the KL term and the two alignment terms. The block encoders also receive the count and alignment gradients; the blocks are not standardised |
 | `unstructured` | one embedding without blocks | the encoder sees expression and covariates, the three heads read the whole embedding, all terms together |
 

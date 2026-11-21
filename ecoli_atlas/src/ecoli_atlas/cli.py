@@ -670,8 +670,8 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--phase-order-weight", type=float, default=0.0,
                     help="weight of the phase-order term of the phase block (0 = off): a ranking loss on the phase score over pairs of samples "
                     "whose order along the growth curve is known, inside a study (phase levels) or a culture series (--time-series)")
-    sp.add_argument("--block-dims", help="sizes of embedding blocks, e.g. phase=1 or phase=2,residual=28 (default: phase 6, "
-                    "medium 12, lab_strain 4, residual 24; blocks not named keep their size). The bundle records the sizes")
+    sp.add_argument("--block-dims", help="sizes of embedding blocks, e.g. phase=6,medium=12,lab_strain=4 (v1's) or residual=16 (default: 1 per call, "
+                    "residual 24; blocks not named keep their size). The bundle records the sizes")
     sp.add_argument("--no-pool", action="store_true", help="do not pool the missing-gene calls over a study's samples of one strain")
     sp.add_argument("--no-mask-missing", action="store_true", help="treat genes a strain does not have as measured zeros "
                     "(default: they are called from the counts and left out of the fit)")

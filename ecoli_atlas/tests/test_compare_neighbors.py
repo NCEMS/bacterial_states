@@ -8,6 +8,7 @@ import pytest
 from ecoli_atlas.cli import main
 from ecoli_atlas.compare import Atlas, calls_frame, compare, group_labels, group_order, knn, novelty, query_distances, read_embedding
 from ecoli_atlas.compare_plots import group_colors, is_ordered, neighbor_composition
+from ecoli_atlas.config import HParams
 from ecoli_atlas.io import read_counts
 from ecoli_atlas.neighbors import select_query, split_buckets
 
@@ -40,11 +41,11 @@ def embedded(trained, atlas_files, tmp_path_factory):
 
 
 def test_atlas_of_a_bundle(atlas):
-    assert atlas.embedding.shape == (119, 46) and list(atlas.layout["block"]) == ["phase", "medium", "lab_strain", "residual"]
+    assert atlas.embedding.shape == (119, 27) and list(atlas.layout["block"]) == ["phase", "medium", "lab_strain", "residual"]
     assert {"gse", "phase", "medium", "lab_strain", "strain_group", "growth_phase"} <= set(atlas.metadata.columns)
     assert set(atlas.metadata["phase"].dropna()) == {"exponential", "stationary"} and atlas.metadata["phase"].isna().any()
     assert set(atlas.predictions["phase_pred"]) <= {"exponential", "stationary"} and atlas.predictions["phase_prob_stationary"].between(0, 1).all()
-    assert len(atlas.block_columns(("phase", "residual"))) == 6 + 24
+    assert len(atlas.block_columns(("phase", "residual"))) == HParams().block_dims["phase"] + HParams().res_dim
     with pytest.raises(ValueError, match="unknown blocks"):
         atlas.block_columns(("nope",))
     assert atlas.label_source("medium").notna().sum() < 119          # curated labels, missing where a sample has none
