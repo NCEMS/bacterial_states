@@ -224,10 +224,27 @@ container needs a rebuild to get them.
 Next after the DNA term is settled (user, 2026-11-21): how the QC covariates enter the model. The model is not trained
 without QC (user decision: no hiding of covariates in training), and `embed` refuses samples without QC values (done
 2026-11-21: `embed --ingest-results RUN_DIR` reads counts, antisense counts and the QC records in one step; `qc_record.py`,
-`data.check_qc`). Open: covariate R2 per embedding block, to see where the remaining composition
-signal sits (rRNA ratios 0.26, gene-body slope 0.22 from the whole embedding); then decide on covariates for the block
-encoders or a penalty on the residual block. A decoder term that interacts with the embedding and a separate technical
-block wait for the corrected counts.
+`data.check_qc`). Covariates are technical only (`config.COVARIATES`, 11 since the instrument flags were dropped;
+`work/qc_blocks/`); the block encoders never see them.
+
+Batch-corrected counts (planned 2026-11-21, after the block-encoder work). Corrected counts = decoding a sample's z
+with the covariates set to a reference library. That needs z free of the batch effect, a covariate term of the right
+form, and technical effects separable from biology (covariates are near-constant within a study, so the term is
+learned from between-study differences). Order:
+1. `embed --corrected-counts` (decode at a reference c: paired-end, median fragment size, gc_slope = gc_curv = 0) and
+   metrics, on the current model, no retraining: twin pairs agree better than raw; between-study spread of one
+   reference condition drops; within-study `phase_lfc` and medium contrasts kept; same-study kNN rate falls while
+   label agreement holds; no gene GC / length trend left against the covariates.
+2. Mechanistic GC offset in the decoder: gc_slope * x_g + gc_curv * x_g^2 from each gene's GC profile, one learned
+   scale (the gene-level check gave factor 1.05, R2 0.39; `work/gc_bias/`); same idea for fragment size x gene length.
+3. Technical twins (`atlas_build/twins/make_twins.py`; only the DNA variants exist): the ~200-sample set of t36/t50/t75,
+   se, se_t50, d1M, d250k (about 1,400 short inGEST runs, the user submits); in training, an invariance loss that
+   makes a twin pair share z, so the covariate term is identified inside a sample. Truncation does not cover fragment
+   size, depletion kit or prep chemistry.
+4. Invariance penalty on the residual block (adversary predicting QC or study from z, or HSIC / MMD), small weight,
+   tuned on the metrics of step 1 with the block information checked.
+5. A nonlinear covariate branch on c alone (kept out of f(z)), only if step 1 shows it is needed.
+A decoder term that interacts with the embedding and a separate technical block wait for step 1.
 
 Atlas model, second stage: refinement of the missing-gene calls (decoder mean, coverage), corrected counts,
 hyper-parameter search; the root `README.md` and the two
