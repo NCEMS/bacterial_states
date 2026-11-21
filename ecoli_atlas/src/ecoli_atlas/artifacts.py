@@ -66,6 +66,8 @@ class ModelBundle:
         for key in ("dna_decoder", "dna_inputs"):          # a bundle made before the DNA term has neither
             if key not in self.manifest["config"]:
                 setattr(cfg, key, False)
+        if "covariates" not in self.manifest["config"]:    # a bundle made before the choice: the covariates it was trained with
+            cfg.covariates = tuple(self.manifest["covariates"]["names"])
         return cfg
 
     @classmethod

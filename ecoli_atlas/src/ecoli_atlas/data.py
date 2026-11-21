@@ -26,7 +26,7 @@ from .preprocess import (ZScore, align_counts, call_groups, composition_covariat
 QC_NUMERIC = ("length_q05_r1", "length_q50_r1", "length_q95_r1", "cycles_r1", "pct_kept", "pct_adapter_trimmed",
               "duplication_rate", "gc_content", "strand_purity", "length_q50_r2", "fragment_q25", "fragment_q50",
               "fragment_q75", "log_dna_fraction", "leakage_b", "intergenic_share", "gene_body_slope",
-              "pct_short_features", "log_other_genus", "log_substitution_rate")
+              "pct_short_features", "log_other_genus", "log_substitution_rate", "gc_slope", "gc_curv")
 INSTRUMENTS = ("novaseq", "nextseq", "hiseq", "miseq")
 QC_BINARY = ("paired",) + tuple("instrument_" + i for i in INSTRUMENTS) + ("has_qc", "dna_below_limit")
 COMPOSITION_NAMES = ("log_mrna_reads",) + tuple(f"log_{k}_to_mrna" for k in COMPOSITION)
@@ -83,18 +83,21 @@ def qc_covariates(qc: pd.DataFrame | None, ids: list) -> pd.DataFrame:
 
 
 # Covariates that every atlas sample has (QC_PAIRED_REQUIRED: every paired-end one); `embed` refuses a
-# sample without them. The adapter-trimmed share may be missing (no adapter found), the DNA estimate
-# is missing where it is 0 (dna_below_limit), and the Centrifuge value is missing when the workflow ran
-# with `centrifuge: false`: it is then set to the training mean, with a warning.
+# sample without those its bundle takes. The adapter-trimmed share may be missing (no adapter found), the
+# DNA estimate is missing where it is 0 (dna_below_limit), and the Centrifuge value is missing when the
+# workflow ran with `centrifuge: false`: it is then set to the training mean, with a warning.
 QC_REQUIRED = ("length_q05_r1", "length_q50_r1", "length_q95_r1", "cycles_r1", "pct_kept", "duplication_rate",
                "gc_content", "strand_purity", "leakage_b", "intergenic_share", "gene_body_slope", "pct_short_features",
-               "log_substitution_rate")
+               "log_substitution_rate", "gc_slope", "gc_curv")
 QC_PAIRED_REQUIRED = ("length_q50_r2", "fragment_q25", "fragment_q50", "fragment_q75")
 
 
-def check_qc(qc: pd.DataFrame | None, ids: list) -> list[str]:
-    """Refuse (ValueError) a QC table that cannot give the covariates of the samples ``ids``; returns
-    warnings for values that are filled with the training mean."""
+def check_qc(qc: pd.DataFrame | None, ids: list, names=None) -> list[str]:
+    """Refuse (ValueError) a QC table that cannot give the covariates ``names`` (default: all) of the
+    samples ``ids``; returns warnings for values that are filled with the training mean."""
+    names = set(QC_NUMERIC + QC_BINARY) if names is None else set(names)
+    required = tuple(n for n in QC_REQUIRED if n in names)
+    paired_required = tuple(n for n in QC_PAIRED_REQUIRED if n in names)
     if qc is None:
         raise ValueError("no QC table: the model takes the samples' QC covariates (use --ingest-results with an inGEST "
                          "run, or --qc with a QC table)")
@@ -102,22 +105,25 @@ def check_qc(qc: pd.DataFrame | None, ids: list) -> list[str]:
     if lacking:
         raise ValueError(f"{len(lacking)} of {len(ids)} samples are not in the QC table: {lacking[:5]}")
     cov = qc_covariates(qc, ids)
-    if cov[list(QC_REQUIRED)].isna().all().all():
+    if required and cov[list(required)].isna().all().all():
         raise ValueError("the QC table has none of the QC values the model needs (expected the layout of an inGEST QC "
-                         "record or of sample_qc.tsv, e.g. columns length_q50_r1, pct_kept, gene_body_slope)")
+                         f"record or of sample_qc.tsv, e.g. columns {', '.join(required[:3])})")
     no_layout = [i for i, v in _qc_value(qc.reindex(ids).fillna(""), "layout").items() if not str(v).strip()]
     if no_layout:
         raise ValueError(f"{len(no_layout)} samples have no layout (PE or SE) in the QC table: {no_layout[:5]}")
     problems = []
     for i in ids:
-        need = QC_REQUIRED + (QC_PAIRED_REQUIRED if cov.at[i, "paired"] == 1 else ())
+        need = required + (paired_required if cov.at[i, "paired"] == 1 else ())
         miss = [n for n in need if pd.isna(cov.at[i, n])]
         if miss:
             problems.append(f"{i} ({', '.join(miss)})")
     if problems:
+        gc_hint = ("; the GC bias (gc_slope, gc_curv) is in QC records made with the reference genome in the inGEST resources "
+                   "(annotation/GCF_000005845.2_ASM584v2_genomic.fna): add it and run `ecoli_ingest run -- --forcerun sample_qc`"
+                   if any("gc_slope" in p or "gc_curv" in p for p in problems) else "")
         raise ValueError(f"{len(problems)} samples lack QC values that every atlas sample has: " + "; ".join(problems[:5])
-                         + (" ..." if len(problems) > 5 else ""))
-    no_genus = [i for i in ids if pd.isna(cov.at[i, "log_other_genus"])]
+                         + (" ..." if len(problems) > 5 else "") + gc_hint)
+    no_genus = [i for i in ids if "log_other_genus" in names and pd.isna(cov.at[i, "log_other_genus"])]
     if no_genus:
         return [f"{len(no_genus)} sample(s) have no Centrifuge results (run with centrifuge: false?); their "
                 f"other-genus covariate was set to the atlas mean: {', '.join(no_genus[:5])}" + (" ..." if len(no_genus) > 5 else "")]
@@ -369,7 +375,10 @@ def build_training(tables: AtlasTables, fs: FeatureSet, cfg: TrainConfig, splits
     logx = log_expression(Yin, s)
     zscore = ZScore.fit(logx[rows], weights[rows], cfg.sd_floor, miss[rows])
     cov = covariate_frame(Y, fam, fs, tables.qc, ids)
-    scaler = CovariateScaler.fit(cov, rows, weights[rows])
+    unknown = [c for c in cfg.covariates if c not in cov.columns]
+    if unknown:
+        raise ValueError(f"unknown covariates {unknown}; known: {list(cov.columns)}")
+    scaler = CovariateScaler.fit(cov[list(cfg.covariates)], rows, weights[rows])
     labels = head_labels(tables.meta)
     w = weights[rows] / weights[rows].sum()
     have = w[:, None] * ~miss[rows]                    # a gene's mean is taken over the samples that have it

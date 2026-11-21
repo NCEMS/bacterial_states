@@ -39,7 +39,7 @@ def embed_counts(bundle: ModelBundle, counts: pd.DataFrame, qc: pd.DataFrame, de
     if coverage.fraction < min_coverage:
         raise ValueError(f"only {coverage.n_present} of {coverage.n_model_features} model features are in the count table "
                          f"({coverage.fraction:.1%}); the table must use the inGEST feature ids (e.g. CDS_b0002_thrA)")
-    warnings = check_qc(qc, ids)
+    warnings = check_qc(qc, ids, bundle.scaler.names)
     cfg = bundle.config
     # genomic DNA, when the bundle was trained with corrected inputs: the expected DNA reads (from the QC table) come off the counts
     rho, dlen = dna_density(qc, ids, bundle.fs.genome_length) if cfg.dna_inputs else (np.zeros(len(ids)), np.zeros(len(ids)))

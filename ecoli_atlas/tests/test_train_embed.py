@@ -127,10 +127,21 @@ def test_embed_reproduces_the_training_embedding_and_refuses_without_qc(trained,
     assert "GSM0105" not in str(err.value)
     with pytest.raises(ValueError, match="none of the QC values"):
         embed_counts(bundle, two, pd.DataFrame({"x": ["1", "2"]}, index=["GSM0000", "GSM0105"]))
-    # no Centrifuge values (centrifuge: false): set to the training mean, with a warning
+    # the bundle takes the technical covariates only, and needs none of the others
+    from ecoli_atlas.config import COVARIATES
+    from ecoli_atlas.data import check_qc
+    assert tuple(bundle.scaler.names) == COVARIATES and bundle.config.covariates == COVARIATES
+    dropped = qc.copy()
+    dropped.loc[["GSM0000", "GSM0105"], ["full_gene_body_slope", "full_duplication_rate", "full_pct_top_other_genus_nostable"]] = ""
+    assert embed_counts(bundle, two, dropped)["warnings"] == []
+    nogc = qc.copy()
+    nogc.loc["GSM0000", "full_gc_slope"] = ""                         # a record made without the reference genome
+    with pytest.raises(ValueError, match=r"GSM0000 \(gc_slope\).*forcerun sample_qc"):
+        embed_counts(bundle, two, nogc)
+    # a bundle that takes the Centrifuge value (older bundles): a sample without it gets the training mean, with a warning
     nogenus = qc.copy()
     nogenus.loc["GSM0000", "full_pct_top_other_genus_nostable"] = ""
-    w = embed_counts(bundle, two, nogenus)["warnings"]
+    w = check_qc(nogenus, ["GSM0000", "GSM0105"])
     assert len(w) == 1 and "GSM0000" in w[0] and "Centrifuge" in w[0]
     few = counts.iloc[:20]
     with pytest.raises(ValueError, match="model features"):
@@ -561,6 +572,7 @@ def _fake_ingest_run(atlas_files, run_dir, samples):
             "composition": {"by_type": {"CDS": 900, "rRNA": 100}, "short_features": {"reads": 20}},
             "dna": {"dna_fraction_est": num("dna_fraction_est"), "leakage_b": num("leakage_b"), "intergenic_share": num("intergenic_share")},
             "gene_body_slope": num("gene_body_slope"), "species": {"pct_top_other_genus_nostable": num("pct_top_other_genus_nostable")},
+            "gc_bias": {"gc_slope": num("gc_slope"), "gc_curv": num("gc_curv")},
         }
         (res / s / "qc").mkdir(parents=True)
         (res / s / "qc" / f"{s}.qc.json").write_text(json.dumps(record))

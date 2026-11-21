@@ -73,6 +73,8 @@ def record_row(record: dict) -> dict:
         "gene_body_slope": record.get("gene_body_slope"),
         "dna_fraction_est": dna.get("dna_fraction_est"), "leakage_b": dna.get("leakage_b"),
         "intergenic_share": dna.get("intergenic_share"),
+        # GC bias of the coverage inside genes (inGEST gc_bias.py; absent in records made without the reference FASTA)
+        "gc_slope": (record.get("gc_bias") or {}).get("gc_slope"), "gc_curv": (record.get("gc_bias") or {}).get("gc_curv"),
         # Centrifuge (absent when the workflow ran with centrifuge: false)
         "pct_top_other_genus_nostable": species.get("pct_top_other_genus_nostable"),
         "species_verdict": species.get("verdict"),

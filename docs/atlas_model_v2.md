@@ -177,6 +177,21 @@ As implemented, the log substitution rate against MG1655 is a covariate as well 
 K-12 samples it spans a wider range (whole studies at 2 to 4%) than the medians of the strain
 groups differ (0.27% for K-12, 0.30 to 0.59% for the others), so it describes the sequencing run.
 
+**Revised 2026-11-21 (user decision): technical covariates only.** The list above was the
+design; the model now takes 15 (`config.COVARIATES`): layout, fragment-size quantiles, read-1 length
+quantiles, strand purity, log substitution rate, GC slope and curvature, instrument family. The composition ratios,
+duplication rate, gene-body slope, GC content and short-feature share are left out because they
+move with the cells' state: within a study, stationary samples differ from exponential ones by
+0.8 to 1.5 SD in each of them (`work/qc_blocks/covariate_biology.tsv`). Depth is carried by the
+size factor, the DNA estimate by the 10% gate. Leakage, intergenic share, trimming shares, cycles,
+mate-2 length and other genus were dropped as redundant or not about the library. The permutation and
+forward-selection analyses behind the choice are in `work/qc_blocks/NOTES.md`. The GC bias replaces
+the read GC share. It is the within-gene fit of the QC record (inGEST `gc_bias.py`; for the atlas
+recount, whose records predate it, computed from the coverage tracks by `qc_table.py add-full
+--genome`). It shifts by 0.17 SD with phase (read GC share 0.79), has split-half reliability 0.99,
+and predicts the gene-level GC trend of the counts within studies (factor 1.05, R2 0.39;
+`work/gc_bias/NOTES.md`).
+
 New samples get the same covariates from their inGEST QC records (`ecoli_atlas/qc_record.py`, the
 formulas of `qc_metrics.py` repeated so that the packages stay apart; identical to `sample_qc.tsv`
 for all 7,731 atlas samples, checked 2026-11-21 with `work/qc_parity/record_parity.py`). `embed`

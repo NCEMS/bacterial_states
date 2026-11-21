@@ -27,6 +27,21 @@ def fit_classes(head: str, phase_head: str = "binary") -> tuple:
 #   unstructured  one embedding without blocks, heads on the whole of it, all fitted together
 FITS = ("two_stage", "one_pass", "unstructured")
 
+# The covariates the model takes (TrainConfig.covariates; data.covariate_frame computes these and
+# more). Technical values of the library and the sequencing run only (user decision 2026-11-21).
+# Left out as biology, since they shift by 0.8-1.5 within-study SD between exponential and stationary
+# samples (`work/qc_blocks/`): the rRNA / tRNA / mRNA composition, duplication rate, gene-body slope,
+# GC content, share of reads on short features. Left out as redundant or handled elsewhere: depth on
+# mRNA (the size factor), the DNA estimate (samples above 10% are gated out), DNA leakage (strand
+# purity), intergenic share, trimming shares, cycles and mate-2 length (read-1 lengths), other genus.
+# The GC bias is the within-gene fit of the QC record (inGEST gc_bias.py; `work/gc_bias/`): it shifts
+# by 0.17 SD with phase, against 0.79 for the read GC share, which it replaces.
+COVARIATES = ("paired", "fragment_q25", "fragment_q50", "fragment_q75",           # layout, fragment sizes (paired-end)
+              "length_q05_r1", "length_q50_r1", "length_q95_r1",                  # read lengths after trimming
+              "strand_purity", "log_substitution_rate",
+              "gc_slope", "gc_curv",                                              # GC bias of the coverage inside genes
+              "instrument_novaseq", "instrument_nextseq", "instrument_hiseq", "instrument_miseq")
+
 
 @dataclass
 class HParams:
@@ -95,6 +110,7 @@ class TrainConfig:
     # Samples above `max_dna_fraction` are kept out of the model when it is built (qc_table.py mark-model) and flagged by `embed`.
     # The two corrections are off: on the atlas they gave no gain and the input correction harms shallow libraries.
     max_dna_fraction: float = 0.10
+    covariates: tuple = COVARIATES   # columns of data.covariate_frame given to the residual encoder and the decoder
     dna_decoder: bool = False        # the count mean is size factor x RNA rate + expected DNA reads
     dna_inputs: bool = False         # the encoder inputs and size factors are made from the counts minus the expected DNA reads
     # training
@@ -120,7 +136,7 @@ class TrainConfig:
     def from_dict(cls, d: dict) -> "TrainConfig":
         known = {f.name for f in fields(cls)}
         kw = {k: v for k, v in d.items() if k in known and k != "hparams"}
-        for k in ("withheld_studies", "test_studies"):
+        for k in ("withheld_studies", "test_studies", "covariates"):
             if k in kw:
                 kw[k] = tuple(kw[k])
         hp_known = {f.name for f in fields(HParams)}

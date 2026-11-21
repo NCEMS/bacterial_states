@@ -55,16 +55,23 @@ Without installing, `bin/ecoli_atlas` runs the CLI from the checkout if the depe
 
 **Features.** mRNA features (CDS, pseudogenes) and the other RNAs (ncRNA genes, Rfam hits) are
 encoder inputs and decoder outputs. Only mRNA features enter the size factor. rRNA and tRNA are
-neither: their abundance relative to mRNA goes to the model as covariates.
+neither and are not used.
 
-**Covariates** (`data.py`): reads on mRNA features and the 16S, 23S, 5S and tRNA ratios (always
-available, from the counts); read-length quantiles, cycles, share of reads kept, adapter share,
-duplication, GC, strand purity, fragment-size quantiles, DNA-background estimate, leakage,
-intergenic share, gene-body slope, share of reads on short features, largest other genus, substitution
-rate against MG1655 (log; a property of the sequencing run more than of the strain); layout
-and instrument family. A value that does not exist for a sample is set to the training mean, with
-flags for "no QC row" and "DNA estimate below its limit". Study and strain are not covariates.
-Covariates go to the residual encoder and the decoder, not to the block encoders.
+**Covariates** (`config.COVARIATES`, recorded in the manifest as `config.covariates`): technical
+values of the library and the sequencing run only. Layout (paired or single), fragment-size
+quantiles (paired-end), read-1 length quantiles after trimming, strand purity, substitution rate
+against MG1655 (log; a property of the sequencing run more than of the strain), GC bias (slope
+and curvature of log coverage against GC inside genes, from the QC record's `gc_bias`, so
+expression levels drop out; it replaces the read GC share) and instrument family; 15 in all. A
+value that does not exist for a sample (fragment sizes of a single-end
+library) is set to the training mean. Left out because they move with the cells' state (0.8 to 1.5
+within-study SD between exponential and stationary samples; `work/qc_blocks/`): rRNA, tRNA and
+mRNA composition, duplication rate, gene-body slope, GC content, share of reads on short features.
+Left out as redundant or handled elsewhere: depth (the size factor), the DNA estimate (samples
+above 10% are gated out), DNA leakage, intergenic share, trimming shares, cycles, mate-2 length,
+other genus. Study and strain are not covariates. Covariates go to the residual encoder and the
+decoder, not to the block encoders. Bundles made before the choice keep the 32 covariates they were
+trained with.
 
 **Labels** (`labels.py`).
 
@@ -237,11 +244,14 @@ the QC columns of `sample_qc.tsv`, as `full_<name>` or `<name>`, indexed by samp
 `--antisense` when the bundle was trained with it. `prepare --ingest-results` writes the same four tables
 (`counts.tsv`, `antisense_counts.tsv`, `qc.tsv`, `samples.tsv`).
 
-`embed` refuses a sample without a QC row, or one that lacks a value every atlas sample has (read
-lengths and cycles, kept and duplicated shares, GC, strand purity, DNA leakage, intergenic share,
-gene-body slope, short-feature share, substitution rate; fragment sizes and mate-2 length for
-paired-end libraries). The adapter-trimmed share and the DNA estimate may be missing. A run made
-with `centrifuge: false` has no other-genus value: it is set to the atlas mean, with a warning. The
+`embed` refuses a sample without a QC row, or one that lacks a covariate of its bundle that every
+atlas sample has (read-1 lengths, strand purity, substitution rate, GC slope and curvature;
+fragment sizes for paired-end libraries). The GC bias is in records made with the reference
+genome in the inGEST resources (`annotation/GCF_000005845.2_ASM584v2_genomic.fna`). For an older
+run, add the genome and repeat the record step (`ecoli_ingest run -- --forcerun sample_qc`).
+Centrifuge is not needed. For a bundle made before the covariate choice, the older list
+applies, and a run made with `centrifuge: false` gets the atlas mean for the other-genus value, with
+a warning. The
 QC table made from the records gives the same covariates as `sample_qc.tsv` for all 7,731 atlas
 samples, and embedding a recount batch this way gives the training embedding to 1e-5.
 
