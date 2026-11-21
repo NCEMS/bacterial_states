@@ -173,8 +173,12 @@ companion indicator.
 | Bias | duplication rate, gene-body 5′/3′ slope, GC content, share of reads in features under 200 nt |
 | Other | share of reads from other genera, instrument family |
 
-Not inputs: study identity, strain, and quantities that mostly reflect strain (mismatch rate
-against MG1655, number of genes called absent). They are saved in the QC table but kept away from
+As implemented, the log substitution rate against MG1655 is a covariate as well (2026-11-20): among
+K-12 samples it spans a wider range (whole studies at 2 to 4%) than the medians of the strain
+groups differ (0.27% for K-12, 0.30 to 0.59% for the others), so it describes the sequencing run.
+
+Not inputs: study identity, strain, and quantities that mostly reflect strain (share of reads off
+the MG1655 reference, number of genes called absent). They are saved in the QC table but kept away from
 the decoder, which could otherwise explain away regulatory differences between strains.
 
 ## 5a. DNA contamination

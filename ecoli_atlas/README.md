@@ -61,7 +61,8 @@ neither: their abundance relative to mRNA goes to the model as covariates.
 **Covariates** (`data.py`): reads on mRNA features and the 16S, 23S, 5S and tRNA ratios (always
 available, from the counts); read-length quantiles, cycles, share of reads kept, adapter share,
 duplication, GC, strand purity, fragment-size quantiles, DNA-background estimate, leakage,
-intergenic share, gene-body slope, share of reads on short features, largest other genus; layout
+intergenic share, gene-body slope, share of reads on short features, largest other genus, substitution
+rate against MG1655 (log; a property of the sequencing run more than of the strain); layout
 and instrument family. A value that does not exist for a sample is set to the training mean, with
 flags for "no QC row" and "DNA estimate below its limit". Study and strain are not covariates.
 Covariates go to the residual encoder and the decoder, not to the block encoders.

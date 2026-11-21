@@ -20,11 +20,13 @@ from .preprocess import (ZScore, align_counts, call_groups, composition_covariat
                          low_expression_profile, missing_genes, pooled_low_profile, reference_profile, size_factors, weighted_stats)
 
 # QC covariates: values of the QC table (column `full_<name>`, or `<name>` in a plain table) that
-# describe the library and the run, not the biology or the strain.
+# describe the library and the run, not the biology or the strain. The substitution rate (mismatches
+# against MG1655) is mostly a property of the sequencing run: it spans a wider range among K-12 samples
+# than between strain groups. The share of reads off the MG1655 reference stays out: it follows the strain.
 QC_NUMERIC = ("length_q05_r1", "length_q50_r1", "length_q95_r1", "cycles_r1", "pct_kept", "pct_adapter_trimmed",
               "duplication_rate", "gc_content", "strand_purity", "length_q50_r2", "fragment_q25", "fragment_q50",
               "fragment_q75", "log_dna_fraction", "leakage_b", "intergenic_share", "gene_body_slope",
-              "pct_short_features", "log_other_genus")
+              "pct_short_features", "log_other_genus", "log_substitution_rate")
 INSTRUMENTS = ("novaseq", "nextseq", "hiseq", "miseq")
 QC_BINARY = ("paired",) + tuple("instrument_" + i for i in INSTRUMENTS) + ("has_qc", "dna_below_limit")
 COMPOSITION_NAMES = ("log_mrna_reads",) + tuple(f"log_{k}_to_mrna" for k in COMPOSITION)
@@ -63,6 +65,9 @@ def qc_covariates(qc: pd.DataFrame | None, ids: list) -> pd.DataFrame:
             dna = num("dna_fraction_est")
             out[name] = np.log10(dna.where(dna > 0))
             out["dna_below_limit"] = (dna == 0).astype(float)
+        elif name == "log_substitution_rate":
+            rate = num("substitution_rate")
+            out[name] = np.log10(rate.where(rate > 0))
         elif name == "log_other_genus":
             out[name] = np.log10(num("pct_top_other_genus_nostable") + 0.01)
         else:
