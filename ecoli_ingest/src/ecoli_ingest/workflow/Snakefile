@@ -19,6 +19,8 @@ def _resource(key, relpath):
 # Counting annotation and its BED12 twin, both written by ecoli_ingest/build/build_annotation.py.
 annotation_gff = _resource("annotation_gff", "annotation/GCF_000005845.2_ASM584v2_counting_v2.gff")
 annotation_bed = _resource("annotation_bed", "annotation/GCF_000005845.2_ASM584v2_counting_v2.bed")
+# Reference genome (NC_000913.3), for the GC bias of the coverage track in the QC record.
+genome_fasta = _resource("genome_fasta", "annotation/GCF_000005845.2_ASM584v2_genomic.fna")
 vg_index = _resource("vg_index", "vg/ecoli_graph_test")
 centrifuge_index_path = _resource("centrifuge_index_path", "centrifuge/p_compressed+h+v")
 
@@ -809,12 +811,15 @@ rule sample_qc:
         coverage = f"{results_dir}/{{sample}}/coverage/{{sample}}.cov100.npz",
         species = lambda wc: [f"{results_dir}/{wc.sample}/qc/{wc.sample}_species.json"] if centrifuge_enabled else [],
         versions = f"{results_dir}/tool_versions.json",
-        gff = annotation_gff
+        gff = annotation_gff,
+        # optional until the core bundle that ships it (resources-v2); without it the record has no gc_bias
+        genome = [genome_fasta] if os.path.exists(genome_fasta) else []
     output:
         f"{results_dir}/{{sample}}/qc/{{sample}}.qc.json"
     params:
         fastqc_r2 = lambda wc, input: f"--fastqc-r2 {input.fastqc[1]}" if len(input.fastqc) > 1 else "",
         species = lambda wc, input: f"--species {input.species[0]}" if input.species else "",
+        genome = lambda wc, input: f"--genome {input.genome[0]}" if input.genome else "",
         runs = lambda wc: _sample_runs(wc.sample),
         run_metadata = f"--run-metadata {run_metadata}" if run_metadata else ""
     shell:
@@ -822,7 +827,7 @@ rule sample_qc:
         python {scripts_dir}/sample_qc.py collect --sample {wildcards.sample:q} --fastp {input.fastp} \
             --fastqc-r1 {input.fastqc[0]} {params.fastqc_r2} --vg-stats {input.vg_stats} --gene-body {input.gene_body} \
             --strand {input.strand} --counts {input.counts} --antisense {input.antisense} --gff {input.gff} \
-            --bam-qc {input.bam_qc} --coverage {input.coverage} --bed {annotation_bed} {params.species} \
+            --bam-qc {input.bam_qc} --coverage {input.coverage} --bed {annotation_bed} {params.genome} {params.species} \
             --versions {input.versions} \
             --runs {params.runs:q} {params.run_metadata} --out {output}
         """

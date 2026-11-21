@@ -10,6 +10,7 @@ Alignments are large and are not kept for the atlas, so everything that needs th
 
 The record keeps distributions (read lengths, fragment sizes, coverage, gene-body profile), not only
 summary values, so that covariates can be redefined later without running the sample again.
+`collect --genome` (the reference FASTA) adds the GC bias of the coverage track (gc_bias.py).
 """
 from __future__ import annotations
 
@@ -23,6 +24,9 @@ import subprocess
 import sys
 import zipfile
 from urllib.parse import unquote
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import gc_bias  # noqa: E402
 
 BIN = 100
 TLEN_MAX = 1000
@@ -445,8 +449,11 @@ def collect(args) -> dict:
     aligned, mapped = vg.get("aligned"), bam.get("bam_mapped")
     profile = read_gene_body(args.gene_body) if args.gene_body else []
     dna = dna_estimates(sense, antisense, features, assignment, anti_assignment, bam.get("genome_length"))
+    gc = {}
     if args.coverage and args.bed and os.path.exists(args.coverage):
         dna.update(coverage_background(args.coverage, args.bed))      # includes dna_fraction_est
+        if args.genome and os.path.exists(args.genome):
+            gc = gc_bias.fit_files(args.coverage, args.bed, args.genome)
     versions = {}
     if args.versions and os.path.exists(args.versions):
         with open(args.versions, encoding="utf-8") as fh:
@@ -480,7 +487,9 @@ def collect(args) -> dict:
         "dna": dna,
         "gene_body": profile,
         "gene_body_slope": gene_body_slope(profile),
-        "coverage": {"file": os.path.basename(args.coverage) if args.coverage else None, "bin_size": bam.get("bin_size")},
+        # GC bias from the coverage track, within genes (gc_bias.py); {} without the reference FASTA
+        "gc_bias": gc,
+        "coverage":{"file": os.path.basename(args.coverage) if args.coverage else None, "bin_size": bam.get("bin_size")},
         "species": species,
     }
 
@@ -512,7 +521,7 @@ def main(argv: list[str] | None = None) -> int:
     c = sub.add_parser("collect")
     for name in ("sample", "fastp", "vg-stats", "strand", "counts", "antisense", "gff", "bam-qc", "out"):
         c.add_argument("--" + name, required=True)
-    for name in ("fastqc-r1", "fastqc-r2", "gene-body", "species", "versions", "coverage", "bed", "runs", "run-metadata"):
+    for name in ("fastqc-r1", "fastqc-r2", "gene-body", "species", "versions", "coverage", "bed", "genome", "runs", "run-metadata"):
         c.add_argument("--" + name, default=None)
     args = ap.parse_args(argv)
     if args.cmd == "bam":

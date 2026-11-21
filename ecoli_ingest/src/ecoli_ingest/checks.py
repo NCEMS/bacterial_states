@@ -90,6 +90,12 @@ def check_resources(cfg: dict, resources: Path | None, rundir: Path) -> list[Che
         p = resource_path(cfg, key, resources, rundir)
         if p is not None:
             out.append(Check(label, OK if _exists(p) else FAIL, str(p)))
+    # optional until the core bundle ships it (resources-v2)
+    p = resource_path(cfg, "genome_fasta", resources, rundir)
+    if p is not None:
+        out.append(Check("reference genome FASTA (GC bias)", OK if _exists(p) else WARN,
+                         str(p) if _exists(p) else f"absent ({p}); the QC records will have no GC bias, "
+                         "which the atlas model needs to embed the samples"))
 
     if runconfig.centrifuge_enabled(cfg):
         cf = resource_path(cfg, "centrifuge_index_path", resources, rundir)

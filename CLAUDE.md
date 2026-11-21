@@ -124,7 +124,9 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   `full_*` columns (`qc_metrics.RECORD_COLUMNS`). `dna_fraction_est` in the record is the
   coverage-based estimate (median over bins of the lower strand's depth), calibrated with
   DNA-spiked twins (`atlas_build/twins/make_twins.py`, `work/dna_calibration/`); the antisense fit
-  is kept as `dna_fraction_fit` only. The atlas model design is on branch `update-atlas`
+  is kept as `dna_fraction_fit` only. `gc_bias` in the record (`gc_bias.py`: GC slope and curvature of the coverage
+  inside genes) needs the reference FASTA `annotation/GCF_000005845.2_ASM584v2_genomic.fna`, optional until the
+  core bundle `resources-v2` ships it (`check` warns; the record then has no `gc_bias`). The atlas model design is on branch `update-atlas`
   (`work/worktrees/update-atlas`); model code does not go on `ingest-update`.
 - Sample metadata v2 (`docs/metadata_v2.md`): `atlas_build/metadata/` holds the label scheme, one
   curated `labels/<GSE>.json` per study and the scripts; `apply_labels.py` writes

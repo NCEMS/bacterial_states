@@ -242,3 +242,46 @@ def test_coverage_background_estimates_added_dna(tmp_path):
     assert spiked["dna_fraction_est"] == pytest.approx(truth, rel=0.05)
     assert spiked["floor_cov_plus"] < 2.0 < spiked["intergenic_cov_plus"] + 0.2          # low quantiles sit below the mean
     assert spiked["n_intergenic_bins"] > 10000 and spiked["dna_fraction_limit"] > 0
+
+
+def test_gc_bias_recovers_a_within_gene_gc_effect(tmp_path):
+    import numpy as np
+    import gc_bias
+    rng = np.random.default_rng(3)
+    n_bins = 30000                                        # 3 Mb genome
+    # sequence whose GC changes every 100 bp (35-70%), so the bins of one gene differ in GC
+    gc_share = rng.uniform(0.35, 0.70, n_bins)
+    seq = np.where(rng.random(n_bins * 100) < np.repeat(gc_share, 100), np.frombuffer(b"G", np.uint8)[0], np.frombuffer(b"A", np.uint8)[0])
+    (tmp_path / "g.fna").write_text(">NC_1 test genome\n" + seq.astype(np.uint8).tobytes().decode() + "\n")
+    genome = gc_bias.read_fasta(str(tmp_path / "g.fna"))
+    gcw = gc_bias.window_gc(genome["NC_1"])
+    slope, curv, pos = -0.30, -0.20, 0.25                 # true effects on log coverage (GC in 10-point units)
+    plus, minus, lines = np.zeros(n_bins), np.zeros(n_bins), []
+    for i, start in enumerate(range(10, n_bins - 30, 25)):           # 2 kb genes, alternating strands
+        strand = "+" if i % 2 == 0 else "-"
+        level = rng.lognormal(3.0, 1.0)                   # expression differs a lot between genes
+        b = np.arange(start, start + 20)
+        x = (gcw[b] - 0.5) * 10
+        rel = (b * 100 + 50 - start * 100) / 2000.0
+        rel = rel if strand == "+" else 1 - rel
+        depth = level * np.exp(slope * x + curv * x ** 2 + pos * rel)
+        (plus if strand == "+" else minus)[b] = rng.poisson(depth * 100)
+        lines.append(f"NC_1\t{start * 100}\t{(start + 20) * 100}\tCDS:CDS_b{i:04d}_g\t0\t{strand}\n")
+    (tmp_path / "a.bed").write_text("".join(lines))
+    path = tmp_path / "s.cov100.npz"
+    np.savez_compressed(path, bin_size=np.asarray(100), strand_call=np.asarray("reverse"),
+                        NC_1__plus=plus.astype(np.uint64), NC_1__minus=minus.astype(np.uint64))
+    fit = gc_bias.fit_files(str(path), str(tmp_path / "a.bed"), str(tmp_path / "g.fna"))
+    xbar = (fit["mean_gc"] - 0.5) * 10
+    assert fit["gc_curv"] == pytest.approx(curv, abs=0.02)
+    assert fit["gc_slope"] == pytest.approx(slope + 2 * curv * xbar, abs=0.02)     # the slope at the sample's mean GC
+    assert fit["pos_slope"] == pytest.approx(pos, abs=0.03)
+    assert fit["n_genes"] > 1000 and fit["gc_r2"] > 0.1
+    # no effect: slope and curvature near 0; too few genes covered: no estimate
+    flat = tmp_path / "flat.npz"
+    np.savez_compressed(flat, NC_1__plus=np.where(plus > 0, 2000, 0).astype(np.uint64), NC_1__minus=np.where(minus > 0, 2000, 0).astype(np.uint64))
+    f0 = gc_bias.fit_files(str(flat), str(tmp_path / "a.bed"), None, genome)
+    assert abs(f0["gc_slope"]) < 1e-6 and abs(f0["gc_curv"]) < 1e-6
+    empty = tmp_path / "empty.npz"
+    np.savez_compressed(empty, NC_1__plus=np.zeros(n_bins, np.uint64), NC_1__minus=np.zeros(n_bins, np.uint64))
+    assert gc_bias.fit_files(str(empty), str(tmp_path / "a.bed"), None, genome) == {}
