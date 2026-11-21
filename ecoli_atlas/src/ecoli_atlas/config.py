@@ -35,12 +35,13 @@ FITS = ("two_stage", "one_pass", "unstructured")
 # mRNA (the size factor), the DNA estimate (samples above 10% are gated out), DNA leakage (strand
 # purity), intergenic share, trimming shares, cycles and mate-2 length (read-1 lengths), other genus.
 # The GC bias is the within-gene fit of the QC record (inGEST gc_bias.py; `work/gc_bias/`): it shifts
-# by 0.17 SD with phase, against 0.79 for the read GC share, which it replaces.
+# by 0.17 SD with phase, against 0.79 for the read GC share, which it replaces. The instrument flags
+# were dropped after models_v2_techqc: shuffling them changed TEST NLL by -0.005..+0.002 over seeds 1-4
+# (train +0.003), i.e. they fitted the training studies only (`work/qc_blocks/NOTES.md`).
 COVARIATES = ("paired", "fragment_q25", "fragment_q50", "fragment_q75",           # layout, fragment sizes (paired-end)
               "length_q05_r1", "length_q50_r1", "length_q95_r1",                  # read lengths after trimming
               "strand_purity", "log_substitution_rate",
-              "gc_slope", "gc_curv",                                              # GC bias of the coverage inside genes
-              "instrument_novaseq", "instrument_nextseq", "instrument_hiseq", "instrument_miseq")
+              "gc_slope", "gc_curv")                                              # GC bias of the coverage inside genes
 
 
 @dataclass
