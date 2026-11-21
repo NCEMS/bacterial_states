@@ -1,0 +1,82 @@
+[
+  {
+    "id": "phase_lb_series",
+    "title": "Growth phase: exponential to long-term stationary in LB (GSE152619)",
+    "gse": ["GSE152619"],
+    "layout": "block_phase",
+    "color_by": "growth_phase",
+    "caption": "One K-12 culture in LB sampled from mid-exponential to long-term stationary phase. Along the phase axis the samples move from the exponential end to the stationary end; the late and long-term stationary samples fall back toward the middle (p(stationary) about 0.02)."
+  },
+  {
+    "id": "biofilm_depth",
+    "title": "Growth phase in a biofilm: depth bins and a planktonic time course (GSE197541)",
+    "gse": ["GSE197541"],
+    "layout": "block_phase",
+    "color_by": "p_stationary",
+    "caption": "Five K-12 biofilms (b1 to b5) cut into bins by depth, next to a planktonic time course of the same strain (7.6 h to 28 h). Colour is p(stationary): the deepest bins (about 700 µm and more) and the 25 h and 28 h cultures are called stationary. The Study tab lists the samples by their GEO titles."
+  },
+  {
+    "id": "phase_rel606_starvation",
+    "title": "Growth phase: REL606 from 3 h to two weeks of starvation (GSE67402, TEST)",
+    "gse": ["GSE67402"],
+    "layout": "block_phase",
+    "color_by": "title_group",
+    "caption": "E. coli B REL606 in glucose-limited Davis minimal medium, sampled from 3 h to 336 h. This study is in the TEST split: the model never saw it in training."
+  },
+  {
+    "id": "phase_large_study",
+    "title": "Growth phase: the large 96-well study (GSE206047)",
+    "gse": ["GSE206047"],
+    "layout": "block_phase",
+    "color_by": "growth_phase",
+    "caption": "Over a thousand circuit-characterisation samples in M9 + casamino acids at 5 h, 8 h and 18 h. Its weight on the stationary label is capped in training, because it would otherwise supply most of that class."
+  },
+  {
+    "id": "medium_rich_minimal",
+    "title": "Medium: BW25113 in LB and in M63 (GSE136101)",
+    "gse": ["GSE136101"],
+    "layout": "block_medium",
+    "color_by": "medium_type",
+    "caption": "One K-12 strain grown in LB and in M63 minimal medium. The two media sit at opposite ends of the medium axis (p(minimal) 0 and 1)."
+  },
+  {
+    "id": "strain_panel",
+    "title": "Lab strain: eight strains from five lineages (GSE150501)",
+    "gse": ["GSE150501"],
+    "layout": "block_lab_strain",
+    "color_by": "strain_group",
+    "caption": "K-12, B and W lab strains alongside pathogenic isolates (UPEC, EHEC, EAEC), all in the same minimal medium at mid-exponential phase. The lab-strain axis separates the lab lineages from the isolates."
+  },
+  {
+    "id": "withheld_study",
+    "title": "Withheld study: 179 cold and osmotic shock samples (GSE224463)",
+    "gse": ["GSE224463"],
+    "layout": "pca_all",
+    "color_by": "condition",
+    "caption": "This study was withheld from training and only projected into the atlas. It shows how a large new study lands among the training samples."
+  },
+  {
+    "id": "case_upec",
+    "title": "Case study: UPEC isolates (GSE128997)",
+    "gse": ["GSE128997"],
+    "layout": "block_lab_strain",
+    "color_by": "strain_name",
+    "caption": "Clinical uropathogenic isolates, one of the v1 case studies kept in TEST."
+  },
+  {
+    "id": "case_oxygen",
+    "title": "Case study: aerobic and microaerobic growth (GSE189154, TEST)",
+    "gse": ["GSE189154"],
+    "layout": "pca_all",
+    "color_by": "oxygen",
+    "caption": "K-12 in minimal medium under aerobic and microaerobic conditions, one of the v1 case studies kept in TEST."
+  },
+  {
+    "id": "worked_example",
+    "title": "Worked example: GSE271069 (the inGEST tutorial study)",
+    "gse": ["GSE271069"],
+    "layout": "block_phase",
+    "color_by": "growth_phase",
+    "caption": "The study of the worked example in examples/ of the repository: K-12 sampled through growth into late stationary phase. The transition samples sit between the two ends of the phase axis."
+  }
+]

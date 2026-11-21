@@ -23,4 +23,6 @@ dependencies:
   - pyyaml
   - matplotlib>=3.8    # `figures`
   - seaborn>=0.13
+  - umap-learn>=0.5   # UMAP layouts of `view`, `compare --umap`
+  - plotly>=5          # `view`: plotly.js inlined into the page
   - pytest

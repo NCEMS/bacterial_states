@@ -25,6 +25,7 @@ Code and curated inputs are in `ecoli_ingest/atlas_build/metadata/`:
 | `geo_digest.py` | reduces a SOFT file to a digest: study text, fields shared by all samples, table of the rest |
 | `apply_labels.py` | applies the label files, validates them, derives the lumped columns, writes the table |
 | `compare_readings.py` | per-label agreement between two tables written by `apply_labels.py` |
+| `study_text.py` | GEO text of the atlas studies and samples (title, summary, design, PubMed, sample titles and characteristics, SRA runs) plus the curation notes, for `ecoli_atlas view` |
 | `ANNOTATE.md`, `WT_REREAD.md` | the instructions the readers followed, including every settled rule |
 
 Outputs go to `atlas_data/` (not tracked): `metadata_v2.tsv` (one row per GSM),
@@ -39,7 +40,13 @@ python $M/geo_digest.py work/geo_text/soft work/metadata_v2/digest work/atlas_ma
 DIGEST_DIR=work/metadata_v2/digest python $M/apply_labels.py work/geo_text/soft \
     work/atlas_manifest/samples.tsv atlas_data/metadata_v2 \
     --v1 atlas_data/metadata_revised.csv --qc atlas_data/sample_qc.tsv
+# study and sample text for `ecoli_atlas view` (no pyyaml needed)
+python $M/study_text.py work/geo_text/soft atlas_data/metadata_v2.tsv atlas_data/metadata_v2 \
+    --qc atlas_data/sample_qc.tsv --studies work/atlas_manifest/studies.tsv
 ```
+
+`study_text.py` writes `metadata_v2_studies.tsv` and `metadata_v2_sample_text.tsv` (to ship with the
+model bundle of a release).
 
 `apply_labels.py` must report `0 problems`: every value is in the scheme, every label has a basis
 and a quote, and every quote occurs in the study's digest. `ONLY=GSE1,GSE2` restricts a run;

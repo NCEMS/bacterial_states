@@ -14,7 +14,8 @@ Two independently installable packages in one repo (GitHub `NCEMS/bacterial_stat
   count likelihood, trained on the recounted atlas (`docs/atlas_model_v2.md`, first stage). CLI:
   `prepare`, `train`, `embed`, `evaluate`, `figures` (data composition and the model figures), `casestudy`,
   `axes` (ordered categories as dimensions of the embedding), `drivers`, `compare` (new samples against the
-  atlas of a bundle) and `neighbors` (atlas studies against the rest of it), both ported from `main`.
+  atlas of a bundle) and `neighbors` (atlas studies against the rest of it), both ported from `main`, and `view` (one
+  self-contained HTML page with an interactive 3-D map of a bundle's atlas; `viewer/`, presets in `viewer/presets.json`).
   **On this branch it replaces the published model in place**: the v1 package (factor encoders,
   `verify-models`, `download`) is on `main`
   only; port from there (`git show main:<path>`), do not keep v1 copies here.

@@ -112,6 +112,11 @@ ecoli_atlas embed --counts prepared/counts.tsv --models outputs/models_v2 --out 
 ecoli_atlas compare --embeddings embedded --models outputs/models_v2 --out compared \
     [--atlas-metadata atlas_data/metadata_v2.tsv] [--metadata prepared/samples.tsv --group-by time_h --order-by time_h] [--umap]
 ecoli_atlas neighbors GSE224463 --models outputs/models_v2 --out neighbors [--metadata atlas_data/metadata_v2.tsv] [--umap]
+
+# an interactive 3-D map of the atlas (one HTML file), optionally with your embedded samples
+ecoli_atlas view --models outputs/models_v2 --metadata atlas_data/metadata_v2.tsv \
+    --studies atlas_data/metadata_v2_studies.tsv --sample-text atlas_data/metadata_v2_sample_text.tsv \
+    [--embeddings embedded=my_samples] --out atlas_view.html
 ```
 
 ### Ways of fitting (`train --fit`)
@@ -287,6 +292,44 @@ novelty. `summary.tsv` has one row per sample, `study_summary.tsv` one per study
 `neighbors_manifest.json` the settings. `query_split_bucket` / `atlas_split_bucket` say where a
 sample was in training: `test`, `fold<k>`, `train_only`, `withheld`, `projected` (in no split, e.g.
 the treated samples of a TEST study).
+
+### `view`: an interactive 3-D map of the atlas
+
+Writes one self-contained HTML page that opens in any web browser, with no server. Needs
+`pip install "ecoli-atlas[view]"` (plotly and umap-learn) for an offline page with the UMAP layouts;
+without plotly the page loads plotly.js from a CDN (`--plotly cdn`, smaller file, needs a network
+connection), or `--plotly PATH` inlines a local `plotly.min.js`. `--no-umap` skips the UMAP layouts,
+which take a few minutes for the whole atlas. The page holds:
+
+- **Layouts.** PCA of the whole embedding, PCA of the residual block, UMAP of each
+  (`umap_all`, `umap_residual`), one layout per head block, and "named axes", which puts the phase,
+  medium and lab-strain blocks on x, y and z. A trained head block is in effect one axis: its first
+  component holds over 99% of its variance. So `block_<head>` draws that axis against residual
+  PC1–2, and a block that is not flat (first component under 90%) gets its own 3-D PCA. Each block
+  axis is signed so that it rises toward the call's positive class (stationary, minimal, lab).
+- **Hover and click.** Hovering shows the sample, its GEO title, the model's calls and the curated
+  labels. Clicking a sample opens a panel with every curated label and its basis, the GEO sample
+  record, its SRA runs (linked), and the study.
+- **Study mode** (the "Show this study" button, the search box, or a URL ending in `#study=GSE…`).
+  The study is drawn over the faded atlas; "hide other samples" removes the rest of the atlas. The
+  study is grouped by its *condition*: the label columns that differ between its samples, or the
+  GEO sample title without its replicate part. You can also group by any single varying column or
+  by a call. Clicking a group shows it alone; hovering a sample in the list marks it in the plot.
+  The study card shows the GEO title, summary and overall design, links to PubMed, BioProject and
+  SRA, and the curation notes.
+- **Examples.** These are preset views of single studies (growth-phase series, a biofilm, rich
+  against minimal medium, a strain panel, the withheld study, the v1 case studies). They are kept
+  in `src/ecoli_atlas/viewer/presets.json` (`id`, `title`, `gse`, `layout`, `color_by`,
+  `caption`); `--presets FILE` replaces them, and presets whose studies are not in the bundle are
+  dropped.
+- **Your samples** (`--embeddings DIR[=NAME]`, repeatable: output directories of `embed` made
+  with the same bundle). They are drawn as diamonds, projected onto the atlas fit of every layout.
+  Clicking one lists its `-k` nearest atlas samples in the whole embedding (`--metric`, default
+  cosine as in `compare`) and their studies.
+
+The study and sample text come from `ecoli_ingest/atlas_build/metadata/study_text.py` (see
+`docs/metadata_v2.md`). Without `--studies` / `--sample-text` the page still works, but without the
+GEO text.
 
 ### `figures`
 

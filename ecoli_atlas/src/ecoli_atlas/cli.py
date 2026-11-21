@@ -331,6 +331,20 @@ def cmd_compare(args) -> int:
     return 0
 
 
+def cmd_view(args) -> int:
+    from .viewer.build import write_view
+    try:
+        out = write_view(args.out, plotly_js=args.plotly, log=_info, models=args.models, metadata=args.metadata,
+                         studies=args.studies, sample_text=args.sample_text, embeddings=args.embeddings or None,
+                         presets=args.presets, umap=not args.no_umap, k=args.k, metric=args.metric, seed=args.seed,
+                         title=args.title)
+    except (ValueError, FileNotFoundError) as exc:
+        _info(f"error: {exc}")
+        return 1
+    _info(f"wrote {out} ({out.stat().st_size / 1e6:.1f} MB); open it in a web browser")
+    return 0
+
+
 def cmd_neighbors(args) -> int:
     from .neighbors import run_neighbors
     gses = list(args.gse or [])
@@ -682,6 +696,25 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--seed", type=int, default=77)
     sp.add_argument("--allow-missing", action="store_true", help="continue when some GSEs are not in the atlas")
     sp.set_defaults(func=cmd_neighbors)
+
+    sp = sub.add_parser("view", help="write an interactive 3-D map of the atlas (one HTML file, opens in a web browser)")
+    sp.add_argument("--models", required=True, help="model bundle; its embedding.tsv / predictions.tsv are the atlas")
+    sp.add_argument("--metadata", help="sample metadata of the atlas (metadata_v2.tsv): labels shown and offered for colouring")
+    sp.add_argument("--studies", help="study text (metadata_v2_studies.tsv from atlas_build/metadata/study_text.py): GEO title, summary, design")
+    sp.add_argument("--sample-text", help="GEO sample text (metadata_v2_sample_text.tsv): sample titles, characteristics, SRA runs")
+    sp.add_argument("--embeddings", action="append", metavar="DIR[=NAME]",
+                    help="output directory of `embed` with your samples, drawn among the atlas samples; repeatable")
+    sp.add_argument("--presets", help="JSON list of example views (default: the examples shipped with the package)")
+    sp.add_argument("--no-umap", action="store_true", help="skip the UMAP layouts (they need umap-learn and take a few minutes)")
+    sp.add_argument("--plotly", default="auto", metavar="auto|inline|cdn|PATH",
+                    help="where plotly.js comes from: inlined from the plotly Python package (auto falls back to the CDN when it "
+                         "is not installed), the cdnjs CDN (smaller file, needs a network connection), or a local plotly.min.js")
+    sp.add_argument("-k", type=int, default=10, help="nearest atlas samples listed for each of your samples")
+    sp.add_argument("--metric", default="cosine", choices=["cosine", "euclidean"])
+    sp.add_argument("--seed", type=int, default=77)
+    sp.add_argument("--title", help="page title")
+    sp.add_argument("--out", required=True, help="HTML file to write")
+    sp.set_defaults(func=cmd_view)
 
     sp = sub.add_parser("axes", help="place the samples on ordered axes of the embedding (growth phase, medium, ...)")
     sp.add_argument("--models", required=True, help="bundle directory (embedding.tsv, manifest.json, splits.csv)")
