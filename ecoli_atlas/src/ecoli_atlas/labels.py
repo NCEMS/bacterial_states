@@ -18,6 +18,12 @@ PHASE_CLASS = {"mid_exponential": "exponential", "stationary": "stationary"}
 PHASE_LEVEL = {"mid_exponential": 0, "transition": 1, "stationary": 2, "late_stationary": 2}
 # phases between the two classes: unlabelled, and the head's output on them is reported as a check
 PHASE_CHECK = ("lag", "early_exponential", "transition")
+# growth_phase value -> position on the growth curve for the phase-order term (TrainConfig.phase_order_weight):
+# pairs of samples of one study at different positions. `lag` is left out (lag cells come from a stationary
+# inoculum), and late / long-term stationary as everywhere in the phase calls and evaluations.
+ORDER_LEVEL = {"early_exponential": 0, "mid_exponential": 1, "transition": 2, "stationary": 3}
+# samples left out of the time pairs inside a series for the same reason
+ORDER_EXCLUDED_PHASES = ("lag", "late_stationary", "long_term_stationary")
 MEDIUM_CLASSES = HEADS["medium"]
 # media between the two classes (`medium_class` values): unlabelled, the head's output on them is reported as a check
 MEDIUM_CHECK = ("minimal_plus_hydrolysate", "defined_rich", "natural_fluid")
@@ -92,6 +98,18 @@ def phase_levels(meta: pd.DataFrame) -> np.ndarray:
     standard RNA-seq samples have one, as for the phase classes."""
     check_columns(meta)
     return meta["growth_phase"].map(PHASE_LEVEL).where(_untreated_standard(meta)).fillna(-1).astype(int).to_numpy()
+
+
+def order_levels(meta: pd.DataFrame) -> np.ndarray:
+    """Position on the growth curve (ORDER_LEVEL; -1 = none) of untreated, standard RNA-seq samples."""
+    check_columns(meta)
+    return meta["growth_phase"].map(ORDER_LEVEL).where(_untreated_standard(meta)).fillna(-1).astype(int).to_numpy()
+
+
+def order_series_ok(meta: pd.DataFrame) -> np.ndarray:
+    """Samples that may enter a time pair inside a series: untreated, standard RNA-seq, not in ORDER_EXCLUDED_PHASES."""
+    check_columns(meta)
+    return np.asarray(_untreated_standard(meta)) & ~meta["growth_phase"].isin(ORDER_EXCLUDED_PHASES).to_numpy()
 
 
 def fit_codes(meta: pd.DataFrame, labels: pd.DataFrame, phase_head: str = "binary") -> dict:

@@ -604,3 +604,80 @@ def test_embed_and_prepare_read_an_ingest_run(trained, atlas_files, tmp_path):
     (res_dir / "GSM0106" / "qc" / "GSM0106.qc.json").unlink()
     with pytest.raises(ValueError, match="no QC record"):
         load_ingest_results(res_dir)
+
+
+def _order_term_case(atlas_files, tmp_path, direction):
+    """Genes 20-29 take a random level (-2..2 steps) in every sample of every study, except three studies that
+    follow one culture each through exponential phase (j = 0..4), along which they change steadily (rising or
+    falling). Nothing in them tells the two phase classes apart; only the time order inside the series does."""
+    counts = read_counts(atlas_files["counts"])
+    rng = np.random.RandomState(5)
+    series = []
+    for gsm in counts.columns:
+        s, j = int(gsm[3:5]), int(gsm[5:7])
+        in_series = s in (0, 3, 9) and j < 5
+        step = j - 2 if in_series else rng.randint(-2, 3)
+        counts.loc[counts.index[20:30], gsm] = rng.poisson(counts.loc[counts.index[20:30], gsm].to_numpy() * np.exp(0.5 * direction * step))
+        if in_series:
+            series.append((gsm, f"GSE{s:02d} culture", float(j)))
+    d = tmp_path / f"dir{direction}"
+    d.mkdir()
+    counts.to_csv(d / "counts.tsv", sep="\t")
+    pd.DataFrame(series, columns=["sample", "series", "x"]).to_csv(d / "ts.tsv", sep="\t", index=False)
+    return d
+
+
+def test_phase_order_term_follows_time_along_the_fitted_series(atlas_files, tmp_path):
+    from ecoli_atlas.metrics import within_series_order
+    from ecoli_atlas.train import order_pair_sampler
+    fs = FeatureSet.from_table(read_feature_table(atlas_files["features"]))
+    hp = HParams(enc_width=32, dec_width=32, block_width=16, res_dim=4)
+    off = TrainConfig(seed=3, test_frac=0.2, n_candidates=50, epochs=2, block_epochs=80, batch=40, hparams=hp)
+    on = TrainConfig(**{**off.to_dict(), "hparams": hp, "phase_order_weight": 1.0})
+    order_on, order_off = {}, {}
+    for direction in (1, -1):
+        d = _order_term_case(atlas_files, tmp_path, direction)
+        with_ts = load_tables(d / "counts.tsv", atlas_files["metadata"], atlas_files["qc"], time_series_path=d / "ts.tsv")
+        splits = make_splits(with_ts.meta["GSE"], head_labels(with_ts.meta), is_reference(with_ts.meta), off)
+        d_off, d_on = build_training(with_ts, fs, off, splits), build_training(with_ts, fs, on, splits)
+        assert d_off.order_pairs is None and d_on.order_pairs is not None and (d_on.series >= 0).sum() == 15
+        rows = np.array([r for r in d_on.tr_rows if d_on.splits["gse"].iloc[r] != "GSE09"])       # GSE09 is not fitted
+        m_off, _ = fit(d_off, off, "cpu", rows=rows)
+        if direction == 1:
+            # weight 0: the time-course table changes nothing
+            without = load_tables(d / "counts.tsv", atlas_files["metadata"], atlas_files["qc"])
+            d_plain = build_training(without, fs, off, splits)
+            m_plain, _ = fit(d_plain, off, "cpu", rows=rows)
+            assert np.allclose(encode(m_off, d_off.X, d_off.C, "cpu")["z"], encode(m_plain, d_plain.X, d_plain.C, "cpu")["z"])
+            # the sampler: pairs among the fitted samples only, every (source, study) group drawn equally often
+            smp = order_pair_sampler(d_on, rows)
+            fitted = [g for g in ("GSE00", "GSE03") if (d_on.splits["gse"].iloc[rows] == g).any()]      # the split may put one in TEST
+            assert fitted and smp["n_pairs"]["series"] == 10 * len(fitted) and smp["n_studies"]["series"] == len(fitted)
+            pr = d_on.order_pairs
+            grp = pr["group"][np.isin(pr["i"], rows) & np.isin(pr["j"], rows)]
+            assert np.allclose(pd.Series(smp["p"]).groupby(grp).sum().to_numpy(), 1 / smp["n_groups"])
+        m_on, hist = fit(d_on, on, "cpu", rows=rows)
+        assert any("order" in h for h in hist if h["stage"] == "phase")
+        names = d_on.splits["gse"].to_numpy()
+        score = lambda m, dd: encode(m, dd.X, dd.C, "cpu")["scores"]["phase"]       # noqa: E731
+        fitted_series = rows[d_on.series[rows] >= 0]
+        order_off[direction] = within_series_order(score(m_off, d_off), d_on.series, d_on.series_x, names, fitted_series)["share_in_order"]
+        order_on[direction] = within_series_order(score(m_on, d_on), d_on.series, d_on.series_x, names, fitted_series)["share_in_order"]
+        p, y = encode(m_on, d_on.X, d_on.C, "cpu")["probs"]["phase"], d_on.y["phase"]
+        assert p[y == 1].mean() > p[y == 0].mean() + 0.3                          # the classes are still told apart
+    # with the term the score follows time along the fitted series whichever way the genes go; without it, it does
+    # not (the classes give it nothing to go by). Held-out studies are the atlas evaluation's job (series_order).
+    assert min(order_on.values()) >= 0.9, order_on
+    assert max(order_off.values()) <= 0.7, order_off
+
+
+def test_within_series_order_counts_studies_equally():
+    from ecoli_atlas.metrics import within_series_order
+    score = np.array([1, 2, 3, 3, 2, 1, 1, 2, 3, 9.0])
+    series = np.array([0, 0, 0, 1, 1, 1, 2, 2, 2, -1])
+    x = np.array([1, 2, 3, 1, 2, 3, 1, 2, 3, 0.0])
+    gse = np.array(["A", "A", "A", "A", "A", "A", "B", "B", "B", "B"])
+    o = within_series_order(score, series, x, gse, np.arange(10))
+    assert o["n_studies"] == 2 and o["n_series"] == 3
+    assert o["per_study"]["A"]["share_in_order"] == 0.5 and o["per_study"]["B"]["share_in_order"] == 1.0
+    assert o["share_in_order"] == 0.75 and o["spearman"] == pytest.approx(0.5)

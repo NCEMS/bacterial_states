@@ -15,7 +15,7 @@ import torch
 from .config import HEADS, TrainConfig, fit_classes
 from .features import COMPOSITION, FeatureSet
 from .io import read_counts
-from .labels import condition_identity, fit_codes, head_labels, label_codes, phase_levels, scored_labels
+from .labels import condition_identity, fit_codes, head_labels, label_codes, order_levels, order_series_ok, phase_levels, scored_labels
 from .preprocess import (ZScore, align_counts, call_groups, composition_covariates, group_calls, log_expression,
                          low_expression_profile, missing_genes, pooled_low_profile, reference_profile, size_factors, weighted_stats)
 
@@ -200,17 +200,32 @@ class AtlasTables:
     meta: pd.DataFrame        # indexed by sample
     qc: pd.DataFrame          # indexed by sample
     antisense: pd.DataFrame | None = None     # features x samples: reads on the strand a feature is not transcribed from
+    time_series: pd.DataFrame | None = None   # indexed by sample: series, x (time_courses.tsv); the model samples among them
 
     @property
     def ids(self) -> list:
         return list(self.counts.columns)
 
 
-def load_tables(counts_path, metadata_path, qc_path, model: str | None = None, antisense_path=None) -> AtlasTables:
+def read_time_series(path) -> pd.DataFrame:
+    """A time-course table (sample, series, x[, x_label]), indexed by sample; one series = one culture line."""
+    t = pd.read_csv(path, sep="\t", dtype={"sample": str, "series": str})
+    missing = [c for c in ("sample", "series", "x") if c not in t.columns]
+    if missing:
+        raise ValueError(f"{path}: no column {missing} (expected sample, series, x)")
+    if t["sample"].duplicated().any():
+        raise ValueError(f"{path}: samples listed twice: {t.loc[t['sample'].duplicated(), 'sample'].tolist()[:5]}")
+    t["x"] = pd.to_numeric(t["x"], errors="raise")
+    return t.set_index("sample")[["series", "x"]]
+
+
+def load_tables(counts_path, metadata_path, qc_path, model: str | None = None, antisense_path=None,
+                time_series_path=None) -> AtlasTables:
     """The samples the QC table assigns to a model (``in_model``; ``model`` selects one name),
     with their counts and metadata. Fails if a model sample lacks counts or metadata.
     ``antisense_path``: the antisense count table of the same samples (optional; used by the
-    missing-gene calls)."""
+    missing-gene calls). ``time_series_path``: a time-course table (``read_time_series``); its rows of
+    model samples are kept."""
     qc = read_table(qc_path)
     if "in_model" not in qc.columns:
         raise ValueError(f"{qc_path}: no in_model column (qc_table.py mark-model sets it)")
@@ -231,7 +246,51 @@ def load_tables(counts_path, metadata_path, qc_path, model: str | None = None, a
         if missing:
             raise ValueError(f"{len(missing)} model samples are not in the antisense count table: {missing[:5]}")
         antisense = antisense[ids]
-    return AtlasTables(counts[ids], meta.loc[ids], qc.loc[ids], antisense)
+    series = None
+    if time_series_path:
+        series = read_time_series(time_series_path)
+        series = series.loc[[s for s in series.index if s in set(ids)]]
+    return AtlasTables(counts[ids], meta.loc[ids], qc.loc[ids], antisense, series)
+
+
+def series_codes(ids: list, time_series: pd.DataFrame | None) -> tuple:
+    """(series code of every sample, -1 = in none; x of every sample, NaN = none)."""
+    code, x = np.full(len(ids), -1), np.full(len(ids), np.nan)
+    if time_series is not None and len(time_series):
+        pos = {s: i for i, s in enumerate(ids)}
+        names = {n: k for k, n in enumerate(pd.unique(time_series["series"]))}
+        for s, r in time_series.iterrows():
+            if s in pos:
+                code[pos[s]], x[pos[s]] = names[r["series"]], r["x"]
+    return code, x
+
+
+def phase_order_pairs(meta: pd.DataFrame, gse: np.ndarray, series: np.ndarray, x: np.ndarray) -> dict:
+    """Pairs (i, j) of samples where j is further along the growth curve than i: inside one study
+    at different ORDER_LEVELs (source 0), and inside one culture series at different times
+    (source 1, samples allowed by ``labels.order_series_ok``). ``group`` = one (source, study)
+    each, so that every group can be given the same weight."""
+    level, ok = order_levels(meta), order_series_ok(meta)
+    i_all, j_all, grp = [], [], []
+    groups: dict = {}
+    for g in np.unique(gse):
+        r = np.where((gse == g) & (level >= 0))[0]
+        a, b = np.where(level[r][:, None] < level[r][None, :])
+        if len(a):
+            groups[(0, g)] = len(groups)
+            i_all.append(r[a]); j_all.append(r[b]); grp.append(np.full(len(a), groups[(0, g)]))
+    for s in np.unique(series[series >= 0]):
+        r = np.where((series == s) & ok)[0]
+        a, b = np.where(x[r][:, None] < x[r][None, :])
+        if len(a):
+            key = (1, gse[r[0]])
+            groups.setdefault(key, len(groups))
+            i_all.append(r[a]); j_all.append(r[b]); grp.append(np.full(len(a), groups[key]))
+    if not i_all:
+        return {"i": np.zeros(0, int), "j": np.zeros(0, int), "group": np.zeros(0, int), "source": np.zeros(0, int)}
+    grp = np.concatenate(grp)
+    source = np.array([k[0] for k in sorted(groups, key=groups.get)])[grp]
+    return {"i": np.concatenate(i_all), "j": np.concatenate(j_all), "group": grp, "source": source}
 
 
 def study_fold(splits: pd.DataFrame) -> np.ndarray:
@@ -296,6 +355,9 @@ class TrainingData:
     low_pool: np.ndarray | None = None   # the same for counts summed over a study's samples of one strain; None = no pooled calls
     dna_rho: torch.Tensor | None = None  # DNA fragments per base and strand of every sample (``dna_density``); None = no DNA term
     dna_len: torch.Tensor | None = None  # bp a fragment adds to a feature's length, per sample
+    series: np.ndarray | None = None     # culture series code of every sample (-1 = none), from the time-course table
+    series_x: np.ndarray | None = None   # the sample's time (or OD, or order) in its series
+    order_pairs: dict | None = None      # ``phase_order_pairs`` when the phase-order term is on
     extra: dict = field(default_factory=dict)
 
     def log_dna(self, rt: torch.Tensor) -> torch.Tensor | None:
@@ -385,16 +447,20 @@ def build_training(tables: AtlasTables, fs: FeatureSet, cfg: TrainConfig, splits
     total = have.sum(axis=0)
     log_mean = np.log(np.maximum((have * (Yin[rows] / s[rows][:, None])).sum(axis=0) / np.where(total > 0, total, 1.0), 1e-3))
     assert set(label_codes(labels)) == set(HEADS)
+    series, series_x = series_codes(ids, tables.time_series)
+    gse_codes = pd.factorize(gse)[0]
+    pairs = phase_order_pairs(tables.meta, gse_codes, series, series_x) if cfg.phase_order_weight > 0 else None
     return TrainingData(ids=ids, fs=fs, meta=tables.meta, labels=labels, splits=splits,
                         X=torch.tensor(zscore.apply(logx, miss)), Y=torch.tensor(Y, dtype=torch.float32),
                         log_s=torch.tensor(np.log(s), dtype=torch.float32), C=torch.tensor(scaler.apply(cov)),
                         y=label_codes(labels), y_eval=label_codes(scored_labels(tables.meta, labels)),
                         y_fit=fit_codes(tables.meta, labels, cfg.phase_head), fit_classes={h: fit_classes(h, cfg.phase_head) for h in HEADS},
-                        phase_level=phase_levels(tables.meta), gse_codes=pd.factorize(gse)[0], identity=condition_identity(tables.meta),
+                        phase_level=phase_levels(tables.meta), gse_codes=gse_codes, identity=condition_identity(tables.meta),
                         weights=weights, study_cap=cap, ref_log=ref_log, zscore=zscore, scaler=scaler,
                         log_mean=log_mean.astype(np.float32), M=torch.tensor(miss), low=low, low_pool=low_pool,
                         dna_rho=torch.tensor(rho, dtype=torch.float32) if cfg.dna_decoder else None,
                         dna_len=torch.tensor(dlen, dtype=torch.float32) if cfg.dna_decoder else None,
+                        series=series, series_x=series_x, order_pairs=pairs,
                         extra={"covariates_raw": cov, "antisense_veto": bool(cfg.mask_missing and anti is not None),
                                "dna_samples": int((rho > 0).sum())})
 

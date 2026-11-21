@@ -165,6 +165,36 @@ done
 ecoli_atlas train $T --phase-head ordinal --out outputs/models_v2_ordinal --splits outputs/models_v2/splits.csv --seeds 1,2,3,4 --cv
 ```
 
+### Phase-order term (`train --phase-order-weight`)
+
+The two-class phase head has no reason to order samples within a class, and the phases between the
+classes do not train it. The order term adds a pairwise ranking loss on the phase score to the
+fit of the phase block (stage 1), `log(1 + exp(-(s_j - s_i)))` for pairs where sample j is
+further along the growth curve than sample i:
+
+- **phase levels inside a study:** early exponential < mid exponential < transition < stationary
+  (`labels.ORDER_LEVEL`; untreated samples). Lag is left out (lag cells come from a stationary
+  inoculum), and late and long-term stationary as everywhere else;
+- **time inside a culture series** (`--time-series atlas_data/time_courses.tsv`, built by
+  `atlas_build/metadata/time_courses.py`; one series = one culture line followed along its growth
+  curve): earlier against later time points, without lag, late and long-term stationary samples.
+
+Pairs are only made within a study or a series, never across studies, and only among the
+samples a fit uses (folds included). Each step draws `phase_order_batch` (256) pairs so that every
+(source, study) group counts the same. Weight 0 (the default) is the model without the term; then
+the table changes nothing. The manifest records the weight and the pairs (`phase_order_term`).
+With `--time-series` the evaluation also reports `series_order` (TEST, withheld and training
+studies) and, with `--cv`, `cv_series_order`: along every series of 3 or more samples, the share of
+time pairs whose phase score is in time order, and the Spearman correlation, as means over
+series within a study and then over studies. `seed_sweep.tsv` gets `test_series_order`,
+`withheld_series_order` and `cv_series_order`. The held-out growth curves are GSE224463
+(withheld), GSE67402 and GSE226643 (TEST).
+
+```bash
+ecoli_atlas train $T --time-series atlas_data/time_courses.tsv --phase-order-weight 0.3 --out outputs/models_v2_order_w0.3 \
+    --splits outputs/models_v2/splits.csv --seeds 1,2,3,4,5,6,7,8 --cv
+```
+
 ### Split
 
 Whole studies only, and TEST and the folds are made of **reference samples** only, as in the first
@@ -232,6 +262,7 @@ out-of-fold AUROC with `--cv`, otherwise the first. Seeds are never ranked on TE
 | `phase_lfc` | studies with both phase classes: correlation of the observed stationary-vs-exponential log fold change with the decoder's at reference covariates |
 | `phase_check` | median P(stationary) of untreated samples in the in-between phases |
 | `medium_check` | median P(minimal) and share called minimal for the in-between media |
+| `series_order` | with `--time-series`: time order of the phase score along culture series (TEST, withheld, training studies; see the phase-order term) |
 
 ### `embed`
 

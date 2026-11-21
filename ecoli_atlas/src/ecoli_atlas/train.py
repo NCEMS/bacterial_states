@@ -31,7 +31,7 @@ from .config import HEADS, TrainConfig
 from .data import AtlasTables, TrainingData, label_weights, prepared, study_fold
 from .features import FeatureSet
 from .losses import class_weights, cos_dist, cross_study_control_pull, kl_normal, masked_mean, nb_nll, within_study_push
-from .metrics import classification_metrics, within_study_order
+from .metrics import classification_metrics, within_series_order, within_study_order
 from .models import AtlasModel, OrdinalHead, build_model, count_log_mean
 from .utils import set_seed
 
@@ -116,10 +116,45 @@ def weighted_ordinal_loss(cum: torch.Tensor, lab: torch.Tensor, w: torch.Tensor,
     return (per * wt).sum() / wt.sum()
 
 
+def head_score(block_out: torch.Tensor) -> torch.Tensor:
+    """The score of a head output: log-odds of the positive class (two classes), or the linear score
+    of an ordinal head (its first cumulative logit, up to a constant)."""
+    return block_out[:, 1] - block_out[:, 0] if block_out.shape[1] == 2 else block_out[:, 0]
+
+
+def order_pair_sampler(data: TrainingData, rows: np.ndarray) -> dict | None:
+    """The phase-order pairs whose two samples are both among ``rows``, with the probability of
+    drawing each so that every (source, study) group counts the same. None without pairs."""
+    pairs = data.order_pairs
+    if pairs is None or not len(pairs["i"]):
+        return None
+    inside = np.zeros(len(data.ids), bool)
+    inside[rows] = True
+    keep = inside[pairs["i"]] & inside[pairs["j"]]
+    if not keep.any():
+        return None
+    i, j, grp, src = pairs["i"][keep], pairs["j"][keep], pairs["group"][keep], pairs["source"][keep]
+    _, inv, size = np.unique(grp, return_inverse=True, return_counts=True)
+    p = 1.0 / size[inv]
+    return {"i": i, "j": j, "p": p / p.sum(), "n_groups": int(len(size)),
+            "n_pairs": {"levels": int((src == 0).sum()), "series": int((src == 1).sum())},
+            "n_studies": {"levels": int(len(np.unique(grp[src == 0]))), "series": int(len(np.unique(grp[src == 1])))}}
+
+
+def order_loss(score_i: torch.Tensor, score_j: torch.Tensor) -> torch.Tensor:
+    """Pairwise ranking loss: log(1 + exp(-(s_j - s_i))) for pairs where j is the later sample."""
+    return F.softplus(score_i - score_j).mean()
+
+
 def fit_block(model: AtlasModel, data: TrainingData, head: str, cfg: TrainConfig, device, rows: np.ndarray, seed: int) -> list:
     """Fit one block encoder on the labelled samples among ``rows``, every study capped within each
-    class (``head_weighting``). Returns the mean cross-entropy of every epoch."""
+    class (``head_weighting``). For the phase block with ``cfg.phase_order_weight`` > 0, each step
+    also draws ``cfg.phase_order_batch`` ordered pairs among ``rows`` (labelled or not;
+    ``order_pair_sampler``) and adds the weight times their ranking loss. Returns one row per epoch:
+    the mean cross-entropy and, with the order term, the mean order loss."""
     hp = cfg.hparams
+    sampler = order_pair_sampler(data, rows) if head == "phase" and cfg.phase_order_weight > 0 else None
+    pool = rows
     rows = rows[data.y_fit[head][rows] >= 0]
     if len(np.unique(data.y_fit[head][rows])) < len(data.fit_classes[head]):
         raise ValueError(f"{head}: the samples to fit on do not have all of {data.fit_classes[head]}")
@@ -133,17 +168,25 @@ def fit_block(model: AtlasModel, data: TrainingData, head: str, cfg: TrainConfig
     block.train()
     for _ in range(cfg.block_epochs):
         order = rng.permutation(rows)
-        total, n = 0.0, 0
+        total, total_order, n = 0.0, 0.0, 0
         for i in range(0, len(order), cfg.block_batch):
             rt = torch.as_tensor(order[i:i + cfg.block_batch])
             if len(rt) < 2:
                 continue
             loss = loss_fn(block(model_input(data, rt, rows, cfg, rng).to(device))[1], y[rt].to(device), w[rt].to(device), cw)
+            ce = float(loss.detach())
+            if sampler is not None:
+                k = rng.choice(len(sampler["p"]), size=cfg.phase_order_batch, p=sampler["p"])
+                both = torch.as_tensor(np.concatenate([sampler["i"][k], sampler["j"][k]]))
+                s = head_score(block(model_input(data, both, pool, cfg, rng).to(device))[1])
+                lo = order_loss(s[:len(k)], s[len(k):])
+                loss = loss + cfg.phase_order_weight * lo
+                total_order += float(lo.detach())
             opt.zero_grad()
             loss.backward()
             opt.step()
-            total, n = total + float(loss.detach()), n + 1
-        losses.append(total / max(n, 1))
+            total, n = total + ce, n + 1
+        losses.append({"ce": total / max(n, 1)} | ({"order": total_order / max(n, 1)} if sampler is not None else {}))
     block.eval()
     return losses
 
@@ -224,9 +267,10 @@ def fit(data: TrainingData, cfg: TrainConfig, device, rows: np.ndarray | None = 
     if cfg.fit == "two_stage":
         for h in HEADS:
             losses = fit_block(model, data, h, cfg, device, rows, seed)
-            history += [{"stage": h, "epoch": ep, "ce": v} for ep, v in enumerate(losses)]
+            history += [{"stage": h, "epoch": ep, **v} for ep, v in enumerate(losses)]
             if log:
-                log(f"  block {h}: {int((data.y_fit[h][rows] >= 0).sum())} labelled samples, loss {losses[0]:.4f} -> {losses[-1]:.4f}")
+                log(f"  block {h}: {int((data.y_fit[h][rows] >= 0).sum())} labelled samples, loss {losses[0]['ce']:.4f} -> {losses[-1]['ce']:.4f}"
+                    + (f"; order loss {losses[0]['order']:.4f} -> {losses[-1]['order']:.4f}" if "order" in losses[-1] else ""))
         set_block_statistics(model, data, rows, device)
         history += run_epochs(model, model.residual_parameters(), data, cfg, device, rows, seed, epochs, "residual", log=log)
     else:
@@ -303,5 +347,8 @@ def cross_validate(tables: AtlasTables, fs: FeatureSet, cfg: TrainConfig, splits
     pred["phase_level"] = data.phase_level
     pred.index.name = "sample"
     pred = pred.iloc[scored].astype({"cv_fold": int})
-    return {"metrics": head_metrics(y, probs, pool), "probs": probs, "predictions": pred,
-            "phase_order": within_study_order(phase_score, data.phase_level, data.gse_codes, scored)}
+    out = {"metrics": head_metrics(y, probs, pool), "probs": probs, "predictions": pred,
+           "phase_order": within_study_order(phase_score, data.phase_level, data.gse_codes, scored)}
+    if data.series is not None and (data.series >= 0).any():
+        out["series_order"] = within_series_order(phase_score, data.series, data.series_x, data.splits["gse"].to_numpy(), scored)
+    return out

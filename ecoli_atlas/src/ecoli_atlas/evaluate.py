@@ -30,7 +30,7 @@ from .config import HEADS, TrainConfig
 from .data import COMPOSITION_NAMES, QC_NUMERIC, TrainingData
 from .labels import MEDIUM_CHECK, PHASE_CHECK, medium_check_group, phase_check_group
 from .losses import masked_mean, nb_nll
-from .metrics import knn_label_agreement, same_study_rate, within_study_order
+from .metrics import knn_label_agreement, same_study_rate, within_series_order, within_study_order
 from .models import count_log_mean
 from .train import encode, head_metrics
 
@@ -122,6 +122,11 @@ def evaluate(model, data: TrainingData, cfg: TrainConfig, device) -> dict:
     report["phase_order"] = {name: within_study_order(enc["scores"]["phase"], data.phase_level, data.gse_codes, r)
                              for name, r in (("test", np.where(data.splits.groupby("gse")["split"].transform("max").to_numpy() == 3)[0]),
                                              ("training_pool", tr))}
+    if data.series is not None and (data.series >= 0).any():
+        # time order of the phase score along culture series (time-course table): TEST, withheld and training studies
+        names = data.splits["gse"].to_numpy()
+        report["series_order"] = {name: within_series_order(enc["scores"]["phase"], data.series, data.series_x, names, np.where(data.split == code)[0])
+                                  for name, code in (("test", 3), ("withheld", 0), ("training_pool", 1))}
     mcheck = medium_check_group(data.meta)
     pm = pd.Series(probs["medium"], index=data.ids)
     report["medium_check"] = {g: {"n": int((mcheck == g).sum()), "n_studies": int(data.meta.loc[(mcheck == g).to_numpy(), "GSE"].nunique()),

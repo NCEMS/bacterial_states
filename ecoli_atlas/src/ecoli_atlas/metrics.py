@@ -51,6 +51,32 @@ def knn_label_agreement(E_fit: np.ndarray, y_fit: np.ndarray, gse_fit: np.ndarra
     return float(np.mean([same[y_val == c].mean() for c in np.unique(y_val)]))
 
 
+def within_series_order(score: np.ndarray, series: np.ndarray, x: np.ndarray, gse: np.ndarray, rows: np.ndarray) -> dict:
+    """Along culture series (``series`` >= 0; ``x`` = time, OD or order inside the series), the
+    share of pairs of time points whose scores are in time order (ties count half) and the
+    Spearman correlation of score with time, for the series of 3 or more samples among ``rows``.
+    Each is the mean over series within a study, then over studies; ``per_study`` has the study means."""
+    from scipy.stats import spearmanr
+    rows = np.asarray(rows)
+    rows = rows[(series[rows] >= 0) & ~np.isnan(score[rows])]
+    by_study: dict = {}
+    for s in np.unique(series[rows]):
+        r = rows[series[rows] == s]
+        if len(r) < 3 or len(np.unique(x[r])) < 2:
+            continue
+        i, j = np.where(x[r][:, None] < x[r][None, :])
+        ok = (score[r][i] < score[r][j]) + 0.5 * (score[r][i] == score[r][j])
+        rho = spearmanr(x[r], score[r])[0]
+        by_study.setdefault(str(gse[r[0]]), []).append((float(ok.mean()), float(rho) if rho == rho else 0.0))
+    if not by_study:
+        return {"n_studies": 0, "n_series": 0, "share_in_order": None, "spearman": None, "per_study": {}}
+    per = {g: {"n_series": len(v), "share_in_order": float(np.mean([a for a, _ in v])), "spearman": float(np.mean([b for _, b in v]))}
+           for g, v in by_study.items()}
+    return {"n_studies": len(per), "n_series": int(sum(p["n_series"] for p in per.values())),
+            "share_in_order": float(np.mean([p["share_in_order"] for p in per.values()])),
+            "spearman": float(np.mean([p["spearman"] for p in per.values()])), "per_study": per}
+
+
 def within_study_order(score: np.ndarray, level: np.ndarray, gse: np.ndarray, rows: np.ndarray) -> dict:
     """Among pairs of samples of one study at different levels of an ordered scale (``level`` >= 0),
     the share whose scores are in the order of the levels (ties count half). Reported as the mean

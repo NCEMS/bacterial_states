@@ -49,7 +49,8 @@ def _training_inputs(args, cfg):
     from .features import FeatureSet, read_feature_table
     from .labels import head_labels, is_reference
     from .splits import check_no_leakage, load_splits, make_splits
-    tables = load_tables(args.counts, args.metadata, args.qc, getattr(args, "model_name", None), getattr(args, "antisense", None))
+    tables = load_tables(args.counts, args.metadata, args.qc, getattr(args, "model_name", None), getattr(args, "antisense", None),
+                         getattr(args, "time_series", None))
     fs = FeatureSet.from_table(read_feature_table(args.features))
     if getattr(args, "splits", None):
         splits = load_splits(args.splits)
@@ -80,16 +81,30 @@ def _fit_and_save(tables, fs, cfg, splits, device, seed: int, out: Path, cv: boo
               f"{int((n_missing >= 100).sum())} samples with 100 or more")
     if cfg.dna_decoder or cfg.dna_inputs:
         _info(f"[seed {seed}] genomic DNA: {int(data.extra.get('dna_samples', 0))} samples with an estimate above 0")
+    order_term = None
+    if cfg.phase_order_weight > 0:
+        from .train import order_pair_sampler
+        smp = order_pair_sampler(data, data.tr_rows)
+        if smp is None:
+            raise SystemExit("--phase-order-weight: no ordered pairs among the training samples")
+        order_term = {"weight": cfg.phase_order_weight, "pairs": smp["n_pairs"], "studies": smp["n_studies"],
+                      "time_series": bool(tables.time_series is not None)}
+        _info(f"[seed {seed}] phase-order term, weight {cfg.phase_order_weight}: {smp['n_pairs']['levels']} pairs of phase levels in "
+              f"{smp['n_studies']['levels']} studies, {smp['n_pairs']['series']} time pairs in {smp['n_studies']['series']} studies")
     if missing_out is not None:
         rows, cols = np.nonzero(data.M.numpy())
         pd.DataFrame({"sample": np.array(data.ids, dtype=object)[rows], "feature": np.array(fs.ids, dtype=object)[cols]}).to_csv(
             missing_out, sep="\t", index=False)
     model, history = fit(data, cfg, device, seed=seed, log=_info)
     ev = evaluate(model, data, cfg, device)
-    extra = {"phase_order": ev["report"]["phase_order"]}
+    extra = {"phase_order": ev["report"]["phase_order"]} | ({"series_order": ev["report"]["series_order"]} if "series_order" in ev["report"] else {})
+    if order_term:
+        extra["phase_order_term"] = order_term
     if cv:
         cvr = cross_validate(tables, fs, cfg, splits, device, seed=seed, log=_info, cache=cache)
         extra |= {"cv_metrics": cvr["metrics"], "cv_phase_order": cvr["phase_order"]}
+        if "series_order" in cvr:
+            extra["cv_series_order"] = cvr["series_order"]
     manifest = save_bundle(out, model, data, cfg, device, seed, metrics=ev["report"]["heads"].get("test", {}), extra=extra)
     _write_json(ev["report"] | extra, out / "evaluation.json")
     ev["embedding"].to_csv(out / "embedding.tsv", sep="\t", float_format="%.6g")
@@ -119,6 +134,7 @@ def cmd_train(args) -> int:
     cfg.mask_missing = not args.no_mask_missing
     cfg.mask_pool = not args.no_pool
     cfg.dna_decoder, cfg.dna_inputs = args.dna_decoder, args.dna_inputs
+    cfg.phase_order_weight = args.phase_order_weight
     if args.threads:
         torch.set_num_threads(args.threads)
     out = Path(args.out)
@@ -147,6 +163,10 @@ def cmd_train(args) -> int:
                          "cv_balanced_acc": cvm.get("balanced_acc"), "cv_auroc": cvm.get("auroc")}
                         | ({"test_order": manifests[s]["phase_order"]["test"]["share_in_order_mean_over_studies"],
                             "cv_order": (manifests[s].get("cv_phase_order") or {}).get("share_in_order_mean_over_studies")}
+                           | ({"test_series_order": ((manifests[s].get("series_order") or {}).get("test") or {}).get("share_in_order"),
+                               "withheld_series_order": ((manifests[s].get("series_order") or {}).get("withheld") or {}).get("share_in_order"),
+                               "cv_series_order": (manifests[s].get("cv_series_order") or {}).get("share_in_order")}
+                              if "series_order" in manifests[s] else {})
                            if h == "phase" else {}))
     # ranked on the out-of-fold scores, never on TEST; without --cv the first seed is taken
     chosen = max(seeds, key=lambda s: _mean_auroc(manifests[s].get("cv_metrics"))) if args.cv else seeds[0]
@@ -609,6 +629,8 @@ def build_parser() -> argparse.ArgumentParser:
         sp.add_argument("--model-name", help="use only the samples whose in_model has this value (default: any)")
         sp.add_argument("--antisense", help="antisense count table of the atlas (features x samples); a gene with antisense reads "
                         "is not called missing from a strain")
+        sp.add_argument("--time-series", help="time-course table (atlas_data/time_courses.tsv: sample, series, x): time pairs for the "
+                        "phase-order term, and the within-series order of the phase score in the evaluation")
 
     sp = sub.add_parser("prepare", help="write the input tables of `embed` (counts, antisense counts, QC) from Ecoli_inGEST results")
     sp.add_argument("--ingest-results", metavar="DIR", help="an inGEST run directory or its results directory")
@@ -639,6 +661,9 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--test-frac", type=float)
     sp.add_argument("--dna-decoder", action="store_true", help="add a genomic-DNA term to the expected counts (off by default)")
     sp.add_argument("--dna-inputs", action="store_true", help="take the expected genomic-DNA reads off the counts the encoders see (off by default)")
+    sp.add_argument("--phase-order-weight", type=float, default=0.0,
+                    help="weight of the phase-order term of the phase block (0 = off): a ranking loss on the phase score over pairs of samples "
+                    "whose order along the growth curve is known, inside a study (phase levels) or a culture series (--time-series)")
     sp.add_argument("--no-pool", action="store_true", help="do not pool the missing-gene calls over a study's samples of one strain")
     sp.add_argument("--no-mask-missing", action="store_true", help="treat genes a strain does not have as measured zeros "
                     "(default: they are called from the counts and left out of the fit)")

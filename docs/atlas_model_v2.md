@@ -282,6 +282,14 @@ One model, trained jointly.
     `early_exponential` and `transition` (which includes late exponential) carry no label in training and serve
     as a check: they should fall between the two classes. `late_stationary` carries no label
     either and is not a check: it is left out of every phase evaluation (decided 2026-11-19).
+  - Phase-order term (2026-11-21, `train --phase-order-weight`, off by default): the two-class head
+    left the phase block effectively one-dimensional and saturated within each class, while the
+    growth-curve movement of the time courses sat in the residual block (`work/phase_dims/NOTES.md`).
+    The term is a pairwise ranking loss on the phase score over pairs whose order along the growth
+    curve is known: phase levels inside a study (early exponential < mid exponential < transition
+    < stationary) and time points inside a culture series (`atlas_data/time_courses.tsv`, 10
+    studies, 43 series; GSE224463, GSE67402 and GSE226643 held out). It never compares studies.
+    Scored by `series_order` / `cv_series_order` (within-series time order of the phase score).
   - Medium type: complex against defined (`medium_type`, 1,117 and 1,080 in v1).
 - **Alignment terms**, as in v1 (`losses.py`, `train_residual.py`): samples of matching control
   conditions from different studies are pulled together, samples of different conditions within a

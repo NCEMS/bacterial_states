@@ -111,6 +111,11 @@ class TrainConfig:
     # The two corrections are off: on the atlas they gave no gain and the input correction harms shallow libraries.
     max_dna_fraction: float = 0.10
     covariates: tuple = COVARIATES   # columns of data.covariate_frame given to the residual encoder and the decoder
+    # phase-order term of the phase block (stage 1; 0 = off): a pairwise ranking loss on the phase score over pairs of
+    # samples whose order along the growth curve is known, inside one study (labels.ORDER_LEVEL) or one culture series
+    # (`train --time-series`, atlas_data/time_courses.tsv). Every (source, study) counts the same.
+    phase_order_weight: float = 0.0
+    phase_order_batch: int = 256     # pairs drawn per step of the phase block
     dna_decoder: bool = False        # the count mean is size factor x RNA rate + expected DNA reads
     dna_inputs: bool = False         # the encoder inputs and size factors are made from the counts minus the expected DNA reads
     # training
