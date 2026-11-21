@@ -23,7 +23,19 @@
     p_stationary: "p(stationary)", p_minimal: "p(minimal medium)", p_lab: "p(lab strain)", phase_logit: "phase logit",
     n_missing_genes: "genes called missing"
   };
-  const nice = n => NICE[n] || n.replace(/_/g, " ");
+  const COV = {                       // QC and composition covariates of the model (fields "cov:<name>")
+    log_mrna_reads: "mRNA reads (log10)", log_16S_to_mrna: "16S / mRNA reads (log10)", log_23S_to_mrna: "23S / mRNA reads (log10)",
+    log_5S_to_mrna: "5S / mRNA reads (log10)", log_tRNA_to_mrna: "tRNA / mRNA reads (log10)", length_q05_r1: "read 1 length, 5th percentile",
+    length_q50_r1: "read 1 length, median", length_q95_r1: "read 1 length, 95th percentile", cycles_r1: "sequencing cycles, read 1",
+    pct_kept: "% reads kept by fastp", pct_adapter_trimmed: "% reads adapter-trimmed", duplication_rate: "duplication rate",
+    gc_content: "GC content", strand_purity: "strand purity", length_q50_r2: "read 2 length, median", fragment_q25: "fragment length, 25th pct",
+    fragment_q50: "fragment length, median", fragment_q75: "fragment length, 75th pct", log_dna_fraction: "DNA fraction (log10)",
+    leakage_b: "antisense leakage", intergenic_share: "intergenic share", gene_body_slope: "gene-body coverage slope",
+    pct_short_features: "% reads on short features", log_other_genus: "other-genus share (log10)",
+    log_substitution_rate: "substitution rate vs MG1655 (log10)", paired: "paired-end", instrument: "instrument",
+    has_qc: "has QC row", dna_below_limit: "DNA below detection"
+  };
+  const nice = n => n.startsWith("cov:") ? (COV[n.slice(4)] || n.slice(4).replace(/_/g, " ")) : (NICE[n] || n.replace(/_/g, " "));
   const $ = id => document.getElementById(id);
   const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const natural = (a, b) => String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: "base" });
@@ -89,7 +101,8 @@
     D.layouts.forEach(l => { const o = document.createElement("option"); o.value = l.name; o.textContent = l.label; lay.appendChild(o); });
     const col = $("color");
     const groups = [["Model", ["split", "phase_call", "medium_call", "lab_strain_call", "p_stationary", "p_minimal", "p_lab", "phase_logit", "n_missing_genes"]],
-      ["Curated labels", ["phase_label", "medium_label", "lab_strain_label"].concat(D.meta.label_fields)], ["Study", ["gse"]]];
+      ["Curated labels", ["phase_label", "medium_label", "lab_strain_label"].concat(D.meta.label_fields)],
+      ["QC covariates", D.meta.qc_fields || []], ["Study", ["gse"]]];
     groups.forEach(([title, names]) => {
       const og = document.createElement("optgroup"); og.label = title;
       names.filter(n => F[n]).forEach(n => { const o = document.createElement("option"); o.value = n; o.textContent = nice(n); og.appendChild(o); });
@@ -336,6 +349,36 @@
   function link(url, label) { return `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(label)}</a>`; }
   const geo = acc => link(`https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=${acc}`, acc);
 
+  const sortedCache = {};
+  function percentile(name, v) {      // share of atlas samples with a lower value (numeric field)
+    if (v === "" || v == null || !F[name] || F[name].kind !== "num") return "";
+    let a = sortedCache[name];
+    if (!a) { a = F[name].values.filter(x => x != null).sort((x, y) => x - y); sortedCache[name] = a; }
+    let lo = 0, hi = a.length;
+    while (lo < hi) { const m = (lo + hi) >> 1; if (a[m] < v) lo = m + 1; else hi = m; }
+    return a.length ? Math.round(100 * lo / a.length) : "";
+  }
+  const fmtNum = v => {
+    const x = Number(v);
+    if (Number.isInteger(x)) return String(x);
+    return Math.abs(x) >= 100 ? x.toFixed(0) : Math.abs(x) >= 1 ? x.toFixed(2) : x.toPrecision(3);
+  };
+  const ordinal = n => n + ((n % 100 >= 11 && n % 100 <= 13) ? "th" : ({ 1: "st", 2: "nd", 3: "rd" }[n % 10] || "th"));
+
+  function qcTable(get) {             // get(fieldName) -> value of the sample ('' when missing)
+    const names = D.meta.qc_fields || [];
+    if (!names.length) return "";
+    let rows = "";
+    names.forEach(n => {
+      const v = get(n);
+      if (v === "" || v == null) return;
+      const num = F[n] && F[n].kind === "num";
+      const pc = num ? percentile(n, v) : "";
+      rows += `<tr><td class="k">${esc(nice(n))}</td><td>${esc(num ? fmtNum(v) : v)}</td><td class="basis">${pc === "" ? "" : ordinal(pc) + " pct"}</td></tr>`;
+    });
+    return rows ? `<h3>QC covariates</h3><table>${rows}</table><p class="muted">percentile among the atlas samples; these values enter the model as covariates</p>` : "";
+  }
+
   function select(sel) {
     S.selected = sel; S.hl = null;
     draw(); renderSample(); showTab("sample"); writeHash();
@@ -375,6 +418,7 @@
       h += `<tr><td class="k">${esc(c.replace(/_/g, " "))}</td><td>${esc(v)}</td><td class="basis">${esc(b)}</td></tr>`;
     });
     h += `</table>`;
+    h += qcTable(n => val(n, i));
     if (D.meta.has_text) {
       h += `<h3>GEO sample record</h3><table>`;
       [["source", "source_name"], ["characteristics", "characteristics"], ["description", "description"], ["layout", "layout"], ["instrument", "instrument"]].forEach(([k, f]) => {
@@ -394,6 +438,7 @@
     Object.keys(OV.calls || {}).forEach(k => { const c = OV.calls[k]; h += `<tr><td class="k">${esc(k.replace("_", " "))}</td><td>${esc(c.call[j])}</td><td>${fmtP(c.p[j])}</td></tr>`; });
     h += `</table>`;
     if (OV.n_missing_genes) h += `<p class="muted">${OV.n_missing_genes[j]} genes called missing</p>`;
+    if (OV.covariates) h += qcTable(n => { const c = OV.covariates[n]; return c ? (c[j] == null ? "" : c[j]) : ""; });
     h += `<h3>Nearest atlas samples (${esc(OV.metric)} distance, whole embedding)</h3><table><tr><th>#</th><th>sample</th><th>study</th><th>dist</th><th>phase / medium</th></tr>`;
     OV.neighbors[j].forEach(([i, d], r) => {
       h += `<tr class="click" data-i="${i}"><td>${r + 1}</td><td>${esc(D.ids[i])}</td><td>${esc(gseOf(i))}</td><td>${d.toFixed(3)}</td><td>${esc(val("growth_phase", i) || val("phase_label", i))} / ${esc(val("base_medium", i) || val("medium_label", i))}</td></tr>`;

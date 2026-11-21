@@ -83,6 +83,7 @@ def test_view_page(trained, atlas_files, text_tables, query_dir, tmp_path):
     out = tmp_path / "atlas.html"
     assert main(["view", "--models", str(trained), "--metadata", str(atlas_files["metadata"]), "--studies", str(text_tables["studies"]),
                  "--sample-text", str(text_tables["sample_text"]), "--embeddings", f"{query_dir}=mine", "--presets", str(presets),
+                 "--counts", str(atlas_files["counts"]), "--qc", str(atlas_files["qc"]),
                  "--no-umap", "--plotly", "cdn", "-k", "5", "--out", str(out)]) == 0
     html = out.read_text()
     assert html.count("</script>") == html.count("<script")          # the study text cannot close the data block
@@ -108,6 +109,20 @@ def test_view_page(trained, atlas_files, text_tables, query_dir, tmp_path):
     assert all(len(n) == 5 for n in ov["neighbors"])
     assert [ids[n[0][0]] for n in ov["neighbors"]] == QUERY
     assert set(ov["calls"]) == {"phase", "medium", "lab_strain"}
+    # QC covariates: composition from the counts, QC from the QC table, as the model computes them
+    qcf = p["meta"]["qc_fields"]
+    assert {"cov:log_mrna_reads", "cov:log_tRNA_to_mrna", "cov:duplication_rate", "cov:log_substitution_rate", "cov:instrument",
+            "cov:paired", "cov:has_qc"} <= set(qcf) and not any(n.startswith("cov:instrument_") for n in qcf)
+    assert fields["cov:duplication_rate"]["kind"] == "num" and fields["cov:duplication_rate"]["values"][0] == 0.3
+    assert fields["cov:instrument"]["levels"] == ["novaseq"] and fields["cov:paired"]["levels"] == ["no", "yes"]
+    sub = fields["cov:log_substitution_rate"]["values"]
+    assert sub[ids.index("GSM0002")] is None and sub[ids.index("GSM0000")] is not None      # no rate given for GSM..02
+    assert fields["cov:length_q50_r2"]["kind"] == "num"                                     # numeric although SE samples lack it
+    # the overlay's composition (from embed's covariates.tsv) equals that of the same atlas samples
+    oc = ov["covariates"]
+    for j, gsm in enumerate(QUERY):
+        assert oc["cov:log_mrna_reads"][j] == pytest.approx(fields["cov:log_mrna_reads"]["values"][ids.index(gsm)], abs=1e-3)
+    assert oc["cov:duplication_rate"] == [None] * 3 and oc["cov:has_qc"] == ["no"] * 3      # embedded without --qc
     # presets: absent studies dropped, unknown layout replaced
     pr = {q["id"]: q for q in p["presets"]}
     assert set(pr) == {"a", "c"} and pr["a"]["gse"] == ["GSE00"] and pr["c"]["layout"] == "pca_all"
@@ -116,7 +131,7 @@ def test_view_page(trained, atlas_files, text_tables, query_dir, tmp_path):
 def test_default_presets_and_minimal_inputs(trained, tmp_path):
     p = build_payload(trained, umap=False, log=lambda m: None)
     assert p["presets"] == []                     # the shipped examples name real GSEs, none in the synthetic atlas
-    assert "overlay" not in p and p["sample_text"] == {} and p["meta"]["label_fields"] == []
+    assert "overlay" not in p and p["sample_text"] == {} and p["meta"]["label_fields"] == [] and p["meta"]["qc_fields"] == []
     assert main(["view", "--models", str(trained), "--no-umap", "--plotly", "cdn", "--out", str(tmp_path / "x.html")]) == 0
 
 

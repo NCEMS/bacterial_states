@@ -115,8 +115,9 @@ def encode_field(name: str, values: pd.Series, kind: str | None = None) -> dict:
 
 
 def load_overlay(dirs: list[str]) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """(embedding, calls + probabilities, info) of `embed` output directories; ``DIR`` or ``DIR=NAME``."""
-    embs, probs, infos = [], [], []
+    """(embedding, calls + probabilities, info, covariates or None) of `embed` output directories;
+    ``DIR`` or ``DIR=NAME``. The covariates come from ``covariates.tsv`` (written by `embed`)."""
+    embs, probs, infos, covs = [], [], [], []
     for spec in dirs:
         path, _, name = spec.partition("=")
         d = Path(path)
@@ -133,11 +134,67 @@ def load_overlay(dirs: list[str]) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFr
             st.index = st.index.astype(str)
             if "n_missing_genes" in st.columns:
                 info["n_missing_genes"] = st["n_missing_genes"].reindex(emb.index)
+        cov = None
+        if (base / "covariates.tsv").exists():
+            cov = pd.read_csv(base / "covariates.tsv", sep="\t", index_col=0)
+            cov.index = cov.index.astype(str)
+            cov = cov.reindex(emb.index)
         emb.index = [f"{name}:{s}" if len(dirs) > 1 else s for s in emb.index]
         pred.index, info.index = emb.index, emb.index
+        if cov is not None:
+            cov.index = emb.index
+            covs.append(cov)
         info["sample"] = [s.split(":", 1)[-1] for s in emb.index]
         embs.append(emb), probs.append(pred), infos.append(info)
-    return pd.concat(embs), pd.concat(probs), pd.concat(infos)
+    return pd.concat(embs), pd.concat(probs), pd.concat(infos), (pd.concat(covs) if covs else None)
+
+
+def atlas_covariates(manifest: dict, ids: list, counts=None, qc=None, log=print) -> pd.DataFrame | None:
+    """The model's covariates of the atlas samples before scaling, computed as in `train`: the
+    composition columns from the count table (``counts``), the QC columns from the QC table
+    (``qc``). Columns that cannot be computed from what was given are left out."""
+    from ..data import COMPOSITION_NAMES, qc_covariates, read_table
+    parts = []
+    if counts is not None:
+        from ..features import FeatureSet
+        from ..io import read_counts
+        from ..preprocess import align_counts, composition_covariates
+        table = read_counts(counts)
+        lacking = sorted(set(ids) - set(table.columns))
+        if lacking:
+            log(f"{len(lacking)} atlas samples are not in the count table (e.g. {lacking[:3]}); no composition values for them")
+        fs = FeatureSet.from_dict(manifest["features"])
+        Y, fam, _ = align_counts(table.reindex(columns=ids), fs)
+        comp = pd.DataFrame(composition_covariates(np.nan_to_num(Y), np.nan_to_num(fam), fs.is_mrna), index=ids,
+                            columns=list(COMPOSITION_NAMES))
+        comp.loc[lacking] = np.nan
+        parts.append(comp)
+    if qc is not None:
+        parts.append(qc_covariates(read_table(qc), ids))
+    return pd.concat(parts, axis=1) if parts else None
+
+
+def covariate_columns(cov: pd.DataFrame) -> dict:
+    """Display columns of the covariates: numeric values as they are, the instrument flags as one
+    ``instrument`` column, the other flags as yes/no; flags of a sample without QC row are missing."""
+    out = {}
+    has_qc = cov["has_qc"].astype(float) > 0 if "has_qc" in cov.columns else pd.Series(True, index=cov.index)
+    inst = [c for c in cov.columns if c.startswith("instrument_")]
+    for c in cov.columns:
+        if c in inst:
+            continue
+        if c in ("paired", "has_qc", "dna_below_limit"):
+            yes = cov[c].astype(float) > 0
+            s = pd.Series(np.where(yes, "yes", "no"), index=cov.index, dtype=object)
+            out[c] = s if c == "has_qc" else s.where(has_qc, None)
+        else:
+            out[c] = pd.to_numeric(cov[c], errors="coerce")
+    if inst:
+        names = pd.Series("other", index=cov.index, dtype=object)
+        for c in inst:
+            names[cov[c].astype(float) > 0] = c.removeprefix("instrument_")
+        out["instrument"] = names.where(has_qc, None)
+    return out
 
 
 def neighbours(atlas: np.ndarray, query: np.ndarray, k: int, metric: str = "cosine") -> tuple[np.ndarray, np.ndarray]:
@@ -173,7 +230,7 @@ def _round(a: np.ndarray, digits: int = 3) -> list:
 def build_payload(models: str | Path, metadata: str | Path | None = None, studies: str | Path | None = None,
                   sample_text: str | Path | None = None, embeddings: list[str] | None = None, presets: str | Path | None = None,
                   umap: bool = True, k: int = 10, metric: str = "cosine", seed: int = 77, title: str | None = None,
-                  log=print) -> dict:
+                  counts: str | Path | None = None, qc: str | Path | None = None, log=print) -> dict:
     d = Path(models)
     manifest = json.loads((d / "manifest.json").read_text())
     emb = read_embedding(d)
@@ -215,10 +272,16 @@ def build_payload(models: str | Path, metadata: str | Path | None = None, studie
     fields.append(encode_field("condition", cond))
     if stext is not None:
         fields.append(encode_field("title_group", tgrp))
+    cov = atlas_covariates(manifest, ids, counts, qc, log=log)
+    qc_fields = []
+    if cov is not None:
+        for c, series in covariate_columns(cov).items():
+            fields.append(encode_field(f"cov:{c}", series, "num" if pd.api.types.is_numeric_dtype(series) else "cat"))
+            qc_fields.append(f"cov:{c}")
 
-    overlay = overlay_probs = overlay_info = None
+    overlay = overlay_probs = overlay_info = overlay_cov = None
     if embeddings:
-        overlay, overlay_probs, overlay_info = load_overlay(embeddings)
+        overlay, overlay_probs, overlay_info, overlay_cov = load_overlay(embeddings)
         missing = [c for c in emb.columns if c not in overlay.columns]
         if missing:
             raise ValueError(f"the embedded samples lack embedding columns {missing[:5]}; embed them with this bundle")
@@ -237,7 +300,7 @@ def build_payload(models: str | Path, metadata: str | Path | None = None, studie
                  "n_studies": len(study_info), "built": date.today().isoformat(), "version": __version__,
                  "embedding_dim": emb.shape[1], "blocks": manifest.get("embedding_blocks", []),
                  "heads": {h: list(v) for h, v in HEADS.items()}, "label_fields": [c for c in LABEL_FIELDS if c in meta.columns],
-                 "has_text": stext is not None, "has_studies": stable is not None},
+                 "has_text": stext is not None, "has_studies": stable is not None, "qc_fields": qc_fields},
         "ids": ids,
         "fields": fields,
         "layouts": [{"name": L["name"], "label": L["label"], "axes": L["axes"], "atlas": _round(L["atlas"])}
@@ -258,6 +321,11 @@ def build_payload(models: str | Path, metadata: str | Path | None = None, studie
                                   "p": _round(oc[f"{h}_prob_{pos}"], 5), "positive": pos}
         if "n_missing_genes" in overlay_info.columns:
             ov["n_missing_genes"] = _round(overlay_info["n_missing_genes"], 0)
+        if overlay_cov is not None:
+            ov["covariates"] = {}
+            for c, series in covariate_columns(overlay_cov).items():
+                ov["covariates"][f"cov:{c}"] = (_round(series, 4) if pd.api.types.is_numeric_dtype(series)
+                                                else [None if _missing(v) else str(v) for v in series])
         payload["overlay"] = ov
     payload["presets"] = load_presets(presets, set(study_info), {L["name"] for L in layouts}, log=log)
     return payload

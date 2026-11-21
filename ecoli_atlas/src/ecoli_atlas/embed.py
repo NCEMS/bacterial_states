@@ -27,6 +27,7 @@ def embed_counts(bundle: ModelBundle, counts: pd.DataFrame, qc: pd.DataFrame | N
 
     Returns frames indexed by sample: ``embedding`` (z1..zN), ``predictions`` (probability and call
     of each head), ``samples`` (size factor, reads on mRNA features, number of genes called missing),
+    ``covariates`` (the QC and composition covariates before scaling; QC values are NaN without ``qc``),
     the feature ``coverage`` and ``missing`` (one row per sample and gene called missing from its
     strain; such genes enter the encoders as the gene's mean).
     """
@@ -56,7 +57,8 @@ def embed_counts(bundle: ModelBundle, counts: pd.DataFrame, qc: pd.DataFrame | N
                                       low_fraction=cfg.mask_low_fraction, **veto)
         s = size_factors(Y, bundle.ref_log, miss)
     X = torch.tensor(bundle.zscore.apply(log_expression(Y, s), miss))
-    C = torch.tensor(bundle.scaler.apply(covariate_frame(Y, fam, bundle.fs, qc, ids)))
+    cov = covariate_frame(Y, fam, bundle.fs, qc, ids)
+    C = torch.tensor(bundle.scaler.apply(cov))
     enc = encode(bundle.model, X, C, device)
     emb = pd.DataFrame(enc["z"], index=ids, columns=[f"z{i + 1}" for i in range(enc["z"].shape[1])])
     pred = pd.DataFrame(index=ids)
@@ -68,6 +70,7 @@ def embed_counts(bundle: ModelBundle, counts: pd.DataFrame, qc: pd.DataFrame | N
                          "n_missing_genes": miss.sum(axis=1)}, index=ids)
     rows, cols = np.nonzero(miss)
     missing = pd.DataFrame({"sample": np.array(ids, dtype=object)[rows], "feature": np.array(bundle.fs.ids, dtype=object)[cols]})
-    for df in (emb, pred, info):
+    for df in (emb, pred, info, cov):
         df.index.name = "sample"
-    return {"embedding": emb, "predictions": pred, "samples": info, "coverage": coverage, "missing": missing}
+    return {"embedding": emb, "predictions": pred, "samples": info, "coverage": coverage, "missing": missing,
+            "covariates": cov}

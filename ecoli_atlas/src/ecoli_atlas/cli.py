@@ -294,9 +294,10 @@ def cmd_embed(args) -> int:
     res["predictions"].to_csv(out / "predictions.tsv", sep="\t", float_format="%.6g")
     res["samples"].to_csv(out / "samples.tsv", sep="\t", float_format="%.6g")
     res["missing"].to_csv(out / "missing_genes.tsv", sep="\t", index=False)
+    res["covariates"].to_csv(out / "covariates.tsv", sep="\t", float_format="%.6g")
     res["coverage"].to_frame(bundle.fs.ids).to_csv(out / "feature_coverage.tsv", sep="\t")
     _info(f"embedded {len(res['embedding'])} samples ({res['coverage'].fraction:.1%} of the model features present); "
-          f"wrote embedding.tsv, predictions.tsv, samples.tsv, missing_genes.tsv and feature_coverage.tsv to {out}"
+          f"wrote embedding.tsv, predictions.tsv, samples.tsv, covariates.tsv, missing_genes.tsv and feature_coverage.tsv to {out}"
           + ("" if args.qc else "; no --qc table: the QC covariates were set to the training means"))
     return 0
 
@@ -337,7 +338,7 @@ def cmd_view(args) -> int:
         out = write_view(args.out, plotly_js=args.plotly, log=_info, models=args.models, metadata=args.metadata,
                          studies=args.studies, sample_text=args.sample_text, embeddings=args.embeddings or None,
                          presets=args.presets, umap=not args.no_umap, k=args.k, metric=args.metric, seed=args.seed,
-                         title=args.title)
+                         title=args.title, counts=args.counts, qc=args.qc)
     except (ValueError, FileNotFoundError) as exc:
         _info(f"error: {exc}")
         return 1
@@ -704,6 +705,9 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--sample-text", help="GEO sample text (metadata_v2_sample_text.tsv): sample titles, characteristics, SRA runs")
     sp.add_argument("--embeddings", action="append", metavar="DIR[=NAME]",
                     help="output directory of `embed` with your samples, drawn among the atlas samples; repeatable")
+    sp.add_argument("--counts", help="count table of the atlas samples (atlas_v2_counts.tsv): adds the composition covariates "
+                    "(mRNA reads, rRNA and tRNA ratios)")
+    sp.add_argument("--qc", help="QC table of the atlas samples (sample_qc.tsv): adds the QC covariates of the model")
     sp.add_argument("--presets", help="JSON list of example views (default: the examples shipped with the package)")
     sp.add_argument("--no-umap", action="store_true", help="skip the UMAP layouts (they need umap-learn and take a few minutes)")
     sp.add_argument("--plotly", default="auto", metavar="auto|inline|cdn|PATH",

@@ -116,6 +116,7 @@ ecoli_atlas neighbors GSE224463 --models outputs/models_v2 --out neighbors [--me
 # an interactive 3-D map of the atlas (one HTML file), optionally with your embedded samples
 ecoli_atlas view --models outputs/models_v2 --metadata atlas_data/metadata_v2.tsv \
     --studies atlas_data/metadata_v2_studies.tsv --sample-text atlas_data/metadata_v2_sample_text.tsv \
+    --counts atlas_data/atlas_v2_counts.tsv --qc atlas_data/sample_qc.tsv \
     [--embeddings embedded=my_samples] --out atlas_view.html
 ```
 
@@ -232,7 +233,9 @@ out-of-fold AUROC with `--cv`, otherwise the first. Seeds are never ranked on TE
 
 Takes an inGEST count table (feature ids must be those of the counting annotation; fails below
 `--min-feature-coverage`, default 0.9) and writes `embedding.tsv`, `predictions.tsv`, `samples.tsv`
-(size factor, reads on mRNA features, number of genes called missing), `missing_genes.tsv` (the genes
+(size factor, reads on mRNA features, number of genes called missing), `covariates.tsv` (the
+composition and QC covariates before scaling, as the model sees them; QC values are empty without
+`--qc`), `missing_genes.tsv` (the genes
 called missing from a sample's strain, see below) and `feature_coverage.tsv`. `--qc` gives a table with the QC
 columns of `sample_qc.tsv` (as `full_<name>` or `<name>`), indexed by sample; without it the QC
 covariates are set to the training means.
@@ -312,6 +315,13 @@ which take a few minutes for the whole atlas. The page holds:
 - **Hover and click.** Hovering shows the sample, its GEO title, the model's calls and the curated
   labels. Clicking a sample opens a panel with every curated label and its basis, the GEO sample
   record, its SRA runs (linked), and the study.
+- **QC covariates** (with `--counts` and `--qc`). These are the model's 32 covariates, computed as
+  in `train`: the composition values (mRNA reads, 16S/23S/5S/tRNA-to-mRNA ratios) from the count
+  table, and the QC values (read and fragment lengths, adapter trimming, duplication, GC, strand
+  purity, DNA fraction, leakage, intergenic share, gene-body slope, other-genus share, substitution
+  rate, paired-end, instrument) from the QC table. They form a "QC covariates" group in the colour
+  menu. The sample panel lists them with each value's percentile among the atlas samples. Your own
+  samples get the same table from the `covariates.tsv` that `embed` writes.
 - **Study mode** (the "Show this study" button, the search box, or a URL ending in `#study=GSE…`).
   The study is drawn over the faded atlas; "hide other samples" removes the rest of the atlas. The
   study is grouped by its *condition*: the label columns that differ between its samples, or the
