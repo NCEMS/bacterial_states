@@ -45,6 +45,7 @@ from collections import Counter
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import qc_metrics  # noqa: E402
+import gc_bias  # noqa: E402  (workflow script; qc_metrics puts the scripts on the path)
 
 IDENTITY = ["GSM", "GSE", "runs", "n_runs", "layout", "reads", "bases", "scientific_name", "tax_id",
             "library_strategy", "library_source", "library_selection", "instrument_platform", "instrument_model",
@@ -183,7 +184,7 @@ def not_counted_reasons(results_dir: str) -> dict:
     return reasons
 
 
-def add_full_rows(rows: dict, results_dir: str, config: str | None, pipeline: str = "") -> tuple[int, list]:
+def add_full_rows(rows: dict, results_dir: str, config: str | None, pipeline: str = "", gc: dict | None = None) -> tuple[int, list]:
     """Fill the full_* columns of `rows` from one results directory. A sample that an earlier
     directory counted is not replaced by a result in which it was not counted (a sample re-run in
     a later batch keeps its counted result whatever the order). Returns (samples added, those kept)."""
@@ -213,6 +214,10 @@ def add_full_rows(rows: dict, results_dir: str, config: str | None, pipeline: st
         if os.path.exists(record):
             with open(record, encoding="utf-8") as fh:
                 record_data = json.load(fh)
+            # a record made before the GC bias: the fit from the sample's coverage track (`gc` = {bed, genome})
+            cov = os.path.join(results_dir, sample, "coverage", f"{sample}.cov100.npz")
+            if gc and not record_data.get("gc_bias") and os.path.exists(cov):
+                record_data["gc_bias"] = gc_bias.fit_files(cov, gc["bed"], None, gc["genome"])
             species = record_data.get("species") or {}
             metrics.update({k: v for k, v in species.items() if k in qc_metrics.METRICS})
         row = _row(rows, gsm)
@@ -239,22 +244,31 @@ def add_full_rows(rows: dict, results_dir: str, config: str | None, pipeline: st
     return n, kept
 
 
-def add_full(table: str, results_dir: str, config: str | None, pipeline: str = "") -> dict:
+def gc_inputs(bed: str | None, fasta: str | None) -> dict | None:
+    """{bed, genome} for the GC-bias fit of records made before it; None without a FASTA."""
+    if not fasta:
+        return None
+    if not bed:
+        raise SystemExit("--genome needs --bed (the counting annotation BED)")
+    return {"bed": bed, "genome": gc_bias.read_fasta(fasta)}
+
+
+def add_full(table: str, results_dir: str, config: str | None, pipeline: str = "", gc: dict | None = None) -> dict:
     rows = read_table(table)
-    n, kept = add_full_rows(rows, results_dir, config, pipeline)
+    n, kept = add_full_rows(rows, results_dir, config, pipeline, gc)
     write_table(rows, table)
     print(f"added full-run metrics for {n} samples from {results_dir}"
           + (f"; {len(kept)} kept their counted result from another run" if kept else ""), file=sys.stderr)
     return rows
 
 
-def add_full_batches(table: str, batches_dir: str, pipeline: str = "") -> dict:
+def add_full_batches(table: str, batches_dir: str, pipeline: str = "", gc: dict | None = None) -> dict:
     """add-full for every <batches_dir>/<batch>/results (with <batch>/config.yaml), in one pass."""
     rows = read_table(table)
     total, kept, n_batches = 0, [], 0
     for results_dir in sorted(glob.glob(os.path.join(batches_dir, "*", "results"))):
         config = os.path.join(os.path.dirname(results_dir), "config.yaml")
-        n, k = add_full_rows(rows, results_dir, config if os.path.exists(config) else None, pipeline)
+        n, k = add_full_rows(rows, results_dir, config if os.path.exists(config) else None, pipeline, gc)
         total, kept, n_batches = total + n, kept + k, n_batches + 1
     write_table(rows, table)
     print(f"added full-run metrics for {total} samples from {n_batches} batches in {batches_dir}"
@@ -372,6 +386,9 @@ def main(argv: list[str] | None = None) -> int:
     f.add_argument("--batches", default=None,
                    help="directory of batches: every <batch>/results is added, with <batch>/config.yaml")
     f.add_argument("--config", default=None, help="the run's config.yaml (maps sample names to GSM accessions)")
+    f.add_argument("--genome", default=None, help="reference FASTA: fit the GC bias from the coverage track for records "
+                   "made without it (needs --bed)")
+    f.add_argument("--bed", default=None, help="counting annotation BED, with --genome")
     d = sub.add_parser("decide", help="recompute pre_decision with (new) thresholds")
     _threshold_args(d)
     k = sub.add_parser("mark-model", help="record which samples are in a trained atlas model")
@@ -394,9 +411,9 @@ def main(argv: list[str] | None = None) -> int:
         if bool(args.results) == bool(args.batches):
             ap.error("add-full needs --results or --batches")
         if args.batches:
-            add_full_batches(args.table, args.batches, git_commit())
+            add_full_batches(args.table, args.batches, git_commit(), gc_inputs(args.bed, args.genome))
         else:
-            add_full(args.table, args.results, args.config, git_commit())
+            add_full(args.table, args.results, args.config, git_commit(), gc_inputs(args.bed, args.genome))
     elif args.cmd == "decide":
         rows = read_table(args.table)
         for row in rows.values():

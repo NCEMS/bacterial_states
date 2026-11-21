@@ -135,7 +135,9 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   not a later copy of a duplicated sample. `atlas_data/metadata_revised.csv` (v1) is never overwritten.
 - After the recount: `atlas_build/full_run/collect_results.py` joins the batches' count tables
   (a re-run sample is taken from the batch that counted it), `qc_table.py add-full --batches`
-  fills `full_*` (never replacing a counted result by a not-counted one), and `qc_table.py
+  fills `full_*` (never replacing a counted result by a not-counted one; add `--genome
+  resources/annotation/GCF_000005845.2_ASM584v2_genomic.fna --bed <counting BED>` so that the recount's records,
+  which predate `gc_bias`, get `full_gc_slope` / `full_gc_curv` from their coverage tracks), and `qc_table.py
   mark-model --metadata atlas_data/metadata_v2.tsv --min-cds-reads 200000 --max-dna-fraction 0.10 --model atlas_v2` sets
   `in_model` (usable, counted, at least 200,000 reads on CDS features, DNA estimate at most 10%). `ecoli_atlas` uses the
   samples with `in_model` set.

@@ -134,3 +134,28 @@ def test_model_gate_leaves_out_samples_with_much_genomic_dna():
     assert qc_table.model_gate(row | {"full_dna_fraction_est": "0.10"}, True, 200000, 0.10) == ""
     assert qc_table.model_gate(row | {"full_dna_fraction_est": ""}, True, 200000, 0.10) == ""     # no estimate: passes
     assert qc_table.model_gate(row | {"full_reads_CDS": "1000"}, True, 200000, 0.10) == "low_mrna"
+
+
+def test_add_full_takes_the_gc_bias_from_the_record_or_fits_it_from_the_coverage(tmp_path, monkeypatch):
+    root = tmp_path / "results"
+    write_batch(root, "PE_001", {"GSM1": [5, 100, 2], "GSM2": [7, 50, 0]})
+    res = root / "PE_001" / "results"
+    rec = json.loads((res / "GSM1" / "qc" / "GSM1.qc.json").read_text())
+    rec["gc_bias"] = {"gc_slope": -0.3, "gc_curv": -0.1}                    # a record made with the reference genome
+    (res / "GSM1" / "qc" / "GSM1.qc.json").write_text(json.dumps(rec))
+    (res / "GSM2" / "coverage").mkdir()
+    (res / "GSM2" / "coverage" / "GSM2.cov100.npz").write_bytes(b"")          # an older record: only the track
+    (tmp_path / "g.fna").write_text(">NC_000913.3\nACGT\n")
+    (tmp_path / "a.bed").write_text("")
+    calls = []
+    monkeypatch.setattr(qc_table.gc_bias, "fit_files", lambda cov, bed, fasta, genome: calls.append(cov) or {"gc_slope": 0.2, "gc_curv": -0.05})
+    table = str(tmp_path / "qc.tsv")
+    assert qc_table.main(["add-full", "--batches", str(root), "--table", table]) == 0
+    rows = qc_table.read_table(table)
+    assert (rows["GSM1"]["full_gc_slope"], rows["GSM2"]["full_gc_slope"]) == ("-0.3", "") and not calls
+    assert qc_table.main(["add-full", "--batches", str(root), "--table", table, "--genome", str(tmp_path / "g.fna"), "--bed", str(tmp_path / "a.bed")]) == 0
+    rows = qc_table.read_table(table)
+    assert (rows["GSM1"]["full_gc_slope"], rows["GSM2"]["full_gc_slope"], rows["GSM2"]["full_gc_curv"]) == ("-0.3", "0.2", "-0.05")
+    assert len(calls) == 1 and calls[0].endswith("GSM2.cov100.npz")
+    with pytest.raises(SystemExit, match="needs --bed"):
+        qc_table.main(["add-full", "--batches", str(root), "--table", table, "--genome", str(tmp_path / "g.fna")])

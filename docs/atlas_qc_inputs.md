@@ -236,7 +236,8 @@ Differences from the specification above:
   quartiles, `assigned`, `counting_unit`, `pct_assigned_not_stable`, the RNA family shares
   (`pct_16S`, `pct_23S`, `pct_5S`, `pct_tRNA_family`, `pct_ssrA`, `pct_rnpB`, `pct_ssrS`,
   `pct_ffs`), `pct_short_features`, `off_reference_fraction`, `substitution_rate`,
-  `gene_body_slope`, the DNA-background values, and `n_runs`, `library_selection`,
+  `gene_body_slope`, `gc_slope` and `gc_curv` (from `gc_bias`; with `--genome FASTA --bed BED`,
+  fitted from the coverage track for records made before it), the DNA-background values, and `n_runs`, `library_selection`,
   `instrument_model`, `pipeline_commit` as recorded by the run. Family shares are % of all
   read-feature assignments.
 

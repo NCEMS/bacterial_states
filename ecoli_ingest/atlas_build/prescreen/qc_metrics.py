@@ -163,7 +163,7 @@ RECORD_COLUMNS = [
     "fragment_q25", "fragment_q50", "fragment_q75",
     "assigned", "counting_unit", "pct_assigned_not_stable", "reads_CDS",
     "pct_16S", "pct_23S", "pct_5S", "pct_tRNA_family", "pct_ssrA", "pct_rnpB", "pct_ssrS", "pct_ffs", "pct_short_features",
-    "off_reference_fraction", "substitution_rate", "gene_body_slope",
+    "off_reference_fraction", "substitution_rate", "gene_body_slope", "gc_slope", "gc_curv",
     "intergenic_share", "antisense_share", "antisense_per_base", "dna_fraction_est", "dna_fraction_limit",
     "minstrand_cov", "dna_fraction_fit", "floor_a", "leakage_b",
     "floor_cov_plus", "floor_cov_minus", "intergenic_cov_plus", "intergenic_cov_minus",
@@ -211,6 +211,8 @@ def record_columns(record: dict) -> dict:
     align, dna = record.get("alignment", {}), record.get("dna", {})
     out.update(off_reference_fraction=align.get("off_reference_fraction"), substitution_rate=align.get("substitution_rate"),
                gene_body_slope=record.get("gene_body_slope"))
+    gc = record.get("gc_bias") or {}                      # GC bias inside genes (workflow gc_bias.py)
+    out.update(gc_slope=gc.get("gc_slope"), gc_curv=gc.get("gc_curv"))
     for key in ("intergenic_share", "antisense_share", "antisense_per_base", "dna_fraction_est",
                 "dna_fraction_limit", "minstrand_cov", "dna_fraction_fit", "floor_a", "leakage_b",
                 "floor_cov_plus", "floor_cov_minus", "intergenic_cov_plus", "intergenic_cov_minus"):
