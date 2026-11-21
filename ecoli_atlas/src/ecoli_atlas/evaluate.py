@@ -31,6 +31,7 @@ from .data import COMPOSITION_NAMES, QC_NUMERIC, TrainingData
 from .labels import MEDIUM_CHECK, PHASE_CHECK, medium_check_group, phase_check_group
 from .losses import masked_mean, nb_nll
 from .metrics import knn_label_agreement, same_study_rate, within_study_order
+from .models import count_log_mean
 from .train import encode, head_metrics
 
 MIN_PER_CLASS = 2      # samples of each phase class a study needs for the fold-change check
@@ -42,7 +43,8 @@ def count_fit(model, data: TrainingData, rows: np.ndarray, device, chunk: int = 
     for i in range(0, len(rows), chunk):
         rt = torch.as_tensor(rows[i:i + chunk])
         out = model(data.X[rt].to(device), data.C[rt].to(device), sample=False)
-        log_mean = out["log_rate"] + data.log_s[rt].to(device)[:, None]
+        log_dna = data.log_dna(rt)
+        log_mean = count_log_mean(model, out["log_rate"], data.log_s[rt].to(device), None if log_dna is None else log_dna.to(device))
         y = data.Y[rt].to(device)
         keep = torch.ones_like(y, dtype=torch.bool) if data.M is None else ~data.M[rt].to(device)      # the genes the sample has
         nll.append(masked_mean(nb_nll(y, log_mean, model.log_theta), keep, dim=1).cpu().numpy())

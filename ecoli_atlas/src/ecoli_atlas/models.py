@@ -15,7 +15,9 @@
 Both:
 
     decoder          log rate_g = a_g + f_g(z) + (B c)_g      B has low rank
-    counts           negative binomial with mean s * rate_g and a dispersion per feature
+    counts           negative binomial with mean s * rate_g + k * d_g and a dispersion per feature;
+                     d_g are the genomic DNA reads expected on the feature from the sample's QC
+                     (``data.dna_density``) and k one learned factor (``count_log_mean``)
 
 With the ordinal phase head (``phase_head="ordinal"``) the phase head is an ``OrdinalHead``: one
 score and a threshold between neighbouring phase levels. Its call, the probability of `stationary`,
@@ -86,9 +88,12 @@ class BlockEncoder(nn.Module):
 
 
 class AtlasModel(nn.Module):
-    def __init__(self, n_features: int, n_cov: int, hp: HParams, log_mean: torch.Tensor | None = None, phase_head: str = "binary"):
+    def __init__(self, n_features: int, n_cov: int, hp: HParams, log_mean: torch.Tensor | None = None, phase_head: str = "binary",
+                 dna: bool = False):
         super().__init__()
         self.n_features, self.n_cov, self.hp = n_features, n_cov, hp
+        if dna:
+            self.log_dna_scale = nn.Parameter(torch.zeros(()))        # log of the factor on the expected DNA reads
         self.blocks = nn.ModuleDict({h: BlockEncoder(n_features, hp.block_dims[h], hp, ordinal=h == "phase" and phase_head == "ordinal")
                                      for h in HEADS})
         d_block = sum(hp.block_dims[h] for h in HEADS)
@@ -157,9 +162,12 @@ class AtlasModel(nn.Module):
 
 
 class UnstructuredModel(nn.Module):
-    def __init__(self, n_features: int, n_cov: int, hp: HParams, log_mean: torch.Tensor | None = None, phase_head: str = "binary"):
+    def __init__(self, n_features: int, n_cov: int, hp: HParams, log_mean: torch.Tensor | None = None, phase_head: str = "binary",
+                 dna: bool = False):
         super().__init__()
         self.n_features, self.n_cov, self.hp = n_features, n_cov, hp
+        if dna:
+            self.log_dna_scale = nn.Parameter(torch.zeros(()))        # log of the factor on the expected DNA reads
         self.encoder = mlp(n_features + n_cov, hp.enc_width, hp.enc_depth, hp.dropout)
         self.to_mu = nn.Linear(hp.enc_width, hp.z_dim)
         self.to_logvar = nn.Linear(hp.enc_width, hp.z_dim)
@@ -189,6 +197,19 @@ class UnstructuredModel(nn.Module):
 
 
 def build_model(fit: str, n_features: int, n_cov: int, hp: HParams, log_mean: torch.Tensor | None = None,
-                phase_head: str = "binary") -> nn.Module:
-    """The model of a fit (``config.FITS``) with a phase head (``config.PHASE_HEADS``)."""
-    return (UnstructuredModel if fit == "unstructured" else AtlasModel)(n_features, n_cov, hp, log_mean, phase_head)
+                phase_head: str = "binary", dna: bool = False) -> nn.Module:
+    """The model of a fit (``config.FITS``) with a phase head (``config.PHASE_HEADS``); ``dna``: with
+    the learned scale of the DNA term (``count_log_mean``)."""
+    return (UnstructuredModel if fit == "unstructured" else AtlasModel)(n_features, n_cov, hp, log_mean, phase_head, dna)
+
+
+def count_log_mean(model: nn.Module, log_rate: torch.Tensor, log_s: torch.Tensor, log_dna: torch.Tensor | None = None) -> torch.Tensor:
+    """log of the expected counts: size factor x RNA rate, plus the genomic DNA reads when the
+    model has a DNA term (``log_dna``: log of the reads expected from the QC estimate, -inf for a
+    sample without DNA; the model's one learned factor scales them)."""
+    lm = log_rate + log_s[:, None]
+    if log_dna is None or not hasattr(model, "log_dna_scale"):
+        return lm
+    has = torch.isfinite(log_dna)
+    with_dna = torch.logaddexp(lm, model.log_dna_scale + torch.where(has, log_dna, torch.zeros_like(log_dna)))
+    return torch.where(has, with_dna, lm)

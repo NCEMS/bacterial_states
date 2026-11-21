@@ -38,6 +38,8 @@ SPLITS=${SPLITS:-$OUT/splits.csv}
 [[ -n "${CV:-}" ]] && args+=(--cv)
 [[ -n "${EPOCHS:-}" ]] && args+=(--epochs "$EPOCHS")
 [[ -n "${PHASE_HEAD:-}" ]] && args+=(--phase-head "$PHASE_HEAD")     # binary (default) or ordinal
+[[ "${DNA_DECODER:-0}" == 1 ]] && args+=(--dna-decoder)               # genomic-DNA term in the expected counts (off by default)
+[[ "${DNA_INPUTS:-0}" == 1 ]] && args+=(--dna-inputs)                 # expected DNA reads taken off the encoder inputs (off by default)
 [[ "${POOL:-1}" == 0 ]] && args+=(--no-pool)                          # POOL=0: missing-gene calls per sample only
 [[ "${MASK:-1}" == 0 ]] && args+=(--no-mask-missing)                  # MASK=0: genes a strain lacks stay measured zeros
 [[ -n "${FIT:-}" ]] && args+=(--fit "$FIT")                           # two-stage (default), one-pass or unstructured

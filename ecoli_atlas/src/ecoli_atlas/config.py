@@ -91,6 +91,12 @@ class TrainConfig:
     mask_pool_min_calls: int = 20    # samples of a study with fewer calls than this form one group ...
     mask_pool_jaccard: float = 0.5   # ... the others are joined when their call sets overlap this much
     mask_transplant: float = 0.5     # share of the samples of a batch that also get the missing genes of another training sample
+    # genomic DNA in the library (data.dna_density, from the QC table): reads on every gene in proportion to its length.
+    # Samples above `max_dna_fraction` are kept out of the model when it is built (qc_table.py mark-model) and flagged by `embed`.
+    # The two corrections are off: on the atlas they gave no gain and the input correction harms shallow libraries.
+    max_dna_fraction: float = 0.10
+    dna_decoder: bool = False        # the count mean is size factor x RNA rate + expected DNA reads
+    dna_inputs: bool = False         # the encoder inputs and size factors are made from the counts minus the expected DNA reads
     # training
     block_epochs: int = 40       # of each block encoder
     block_batch: int = 256

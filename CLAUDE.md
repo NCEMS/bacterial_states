@@ -134,8 +134,8 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
 - After the recount: `atlas_build/full_run/collect_results.py` joins the batches' count tables
   (a re-run sample is taken from the batch that counted it), `qc_table.py add-full --batches`
   fills `full_*` (never replacing a counted result by a not-counted one), and `qc_table.py
-  mark-model --metadata atlas_data/metadata_v2.tsv --min-cds-reads 200000 --model atlas_v2` sets
-  `in_model` (usable, counted, at least 200,000 reads on CDS features). `ecoli_atlas` uses the
+  mark-model --metadata atlas_data/metadata_v2.tsv --min-cds-reads 200000 --max-dna-fraction 0.10 --model atlas_v2` sets
+  `in_model` (usable, counted, at least 200,000 reads on CDS features, DNA estimate at most 10%). `ecoli_atlas` uses the
   samples with `in_model` set.
 - Atlas model (`ecoli_atlas/README.md`): features are the inGEST ids; mRNA and other RNAs are
   inputs and outputs, rRNA and tRNA only covariates; size factors from mRNA. Phase head: `mid_exponential` against `stationary` where `phase2` is set;
@@ -153,6 +153,10 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   pools over the samples of its table, `--studies` splits them).
   `--antisense` (antisense count table) vetoes calls of silent genes that have antisense reads; a
   bundle trained with it needs the table again in `evaluate` / `figures` / `embed` to give the same calls.
+  Genomic DNA: samples with `dna_fraction_est` above 10% are left out of the model (`mark-model --max-dna-fraction`, `high_dna`) and
+  `embed` warns for them (`high_dna` in `samples.tsv`); it does not refuse. The two corrections (`train --dna-decoder`: additive term in the
+  count mean; `--dna-inputs`: expected DNA reads taken off the encoder inputs; `data.dna_density`) are off: tried on 2026-11-21, no gain on
+  the atlas and the input correction harms shallow libraries (`outputs/models_v2_dna*`, `work/dna_term/`).
   `ecoli_atlas axes` places samples on ordered axes of an embedding (ordinal and anchor scores, always
   scored without the sample's study; `--holdout` for extrapolation tests); its example inputs and runs
   are in `work/axes_example/`.
@@ -213,7 +217,15 @@ reads per mate. (3) `sra-tools` + `pigz` are in `environment.yaml` but must be i
 existing `ecoli_ingest` env (`mamba install -n ecoli_ingest -c bioconda sra-tools pigz`); the
 container needs a rebuild to get them.
 
-Atlas model, second stage: refinement of the missing-gene calls (decoder mean, coverage), DNA term, corrected counts,
+Next after the DNA term is settled (user, 2026-11-21): how the QC covariates enter the model. The model is not trained
+without QC (user decision: no hiding of covariates in training). (1) `prepare --ingest-results` reads the samples' QC records
+and writes the QC table and the antisense counts, so that an inGEST user always embeds with both (today `embed --qc` needs a
+table that only `qc_table.py add-full` makes); (2) covariate R2 per embedding block, to see where the remaining composition
+signal sits (rRNA ratios 0.26, gene-body slope 0.22 from the whole embedding); then decide on covariates for the block
+encoders or a penalty on the residual block. A decoder term that interacts with the embedding and a separate technical
+block wait for the corrected counts.
+
+Atlas model, second stage: refinement of the missing-gene calls (decoder mean, coverage), corrected counts,
 hyper-parameter search; the root `README.md` and the two
 `examples/*/README.md` still describe the v1 atlas commands. GSEA,
 `atlas_build/` cleanup (`combine_counts.sh` assumes the old column layout), container rebuild from

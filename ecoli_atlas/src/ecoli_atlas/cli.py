@@ -73,6 +73,8 @@ def _fit_and_save(tables, fs, cfg, splits, device, seed: int, out: Path, cv: boo
     if cfg.mask_missing:
         _info(f"[seed {seed}] genes called missing: median {int(np.median(n_missing))} per sample, "
               f"{int((n_missing >= 100).sum())} samples with 100 or more")
+    if cfg.dna_decoder or cfg.dna_inputs:
+        _info(f"[seed {seed}] genomic DNA: {int(data.extra.get('dna_samples', 0))} samples with an estimate above 0")
     if missing_out is not None:
         rows, cols = np.nonzero(data.M.numpy())
         pd.DataFrame({"sample": np.array(data.ids, dtype=object)[rows], "feature": np.array(fs.ids, dtype=object)[cols]}).to_csv(
@@ -111,6 +113,7 @@ def cmd_train(args) -> int:
             setattr(cfg, name, getattr(args, name))
     cfg.mask_missing = not args.no_mask_missing
     cfg.mask_pool = not args.no_pool
+    cfg.dna_decoder, cfg.dna_inputs = args.dna_decoder, args.dna_inputs
     if args.threads:
         torch.set_num_threads(args.threads)
     out = Path(args.out)
@@ -293,6 +296,12 @@ def cmd_embed(args) -> int:
     res["embedding"].to_csv(out / "embedding.tsv", sep="\t", float_format="%.6g")
     res["predictions"].to_csv(out / "predictions.tsv", sep="\t", float_format="%.6g")
     res["samples"].to_csv(out / "samples.tsv", sep="\t", float_format="%.6g")
+    high = res["samples"].index[res["samples"]["high_dna"] == 1]
+    if len(high):
+        limit = bundle.config.max_dna_fraction
+        _info(f"warning: {len(high)} sample(s) have a genomic-DNA estimate above {limit:.0%}, the level above which samples were kept out of "
+              f"the atlas; their calls and position may be affected: " + ", ".join(f"{s} ({res['samples'].loc[s, 'dna_fraction_est']:.0%})" for s in high[:10])
+              + (" ..." if len(high) > 10 else ""))
     res["missing"].to_csv(out / "missing_genes.tsv", sep="\t", index=False)
     res["coverage"].to_frame(bundle.fs.ids).to_csv(out / "feature_coverage.tsv", sep="\t")
     _info(f"embedded {len(res['embedding'])} samples ({res['coverage'].fraction:.1%} of the model features present); "
@@ -603,6 +612,8 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--label-cap", type=int, help="samples of one class that one study may count for in a call's loss "
                                                   "(default: for every class the size of the second-largest study in it)")
     sp.add_argument("--test-frac", type=float)
+    sp.add_argument("--dna-decoder", action="store_true", help="add a genomic-DNA term to the expected counts (off by default)")
+    sp.add_argument("--dna-inputs", action="store_true", help="take the expected genomic-DNA reads off the counts the encoders see (off by default)")
     sp.add_argument("--no-pool", action="store_true", help="do not pool the missing-gene calls over a study's samples of one strain")
     sp.add_argument("--no-mask-missing", action="store_true", help="treat genes a strain does not have as measured zeros "
                     "(default: they are called from the counts and left out of the fit)")

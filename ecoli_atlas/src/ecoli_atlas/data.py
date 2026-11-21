@@ -82,6 +82,37 @@ def qc_covariates(qc: pd.DataFrame | None, ids: list) -> pd.DataFrame:
     return out
 
 
+DNA_DEFAULT_LENGTH = 150.0     # bp added to a feature's length when a sample has no fragment or read length
+
+
+def dna_density(qc: pd.DataFrame | None, ids: list, genome_length: int | None) -> tuple[np.ndarray, np.ndarray]:
+    """Genomic DNA in every library, from the QC table: (DNA fragments per base and strand, length
+    in bp that a fragment adds to a feature's reach).
+
+    density = dna_fraction_est x aligned fragments / (2 x genome length), with the aligned
+    fragments taken as reads kept x aligned share, halved for a paired-end library. A feature of
+    length L then collects about density x (L + length) DNA reads on its strand, where length is
+    the median fragment size (paired-end) or the median read length. The density is 0 where the DNA
+    estimate is 0 (below its detection limit) or a value is missing."""
+    n = len(ids)
+    if qc is None or not genome_length:
+        return np.zeros(n), np.full(n, DNA_DEFAULT_LENGTH)
+    q = qc.reindex(ids).fillna("")
+    num = lambda name: pd.to_numeric(_qc_value(q, name), errors="coerce").to_numpy(dtype=np.float64)       # noqa: E731
+    layout = _qc_value(q, "layout").where(_qc_value(q, "layout") != "", q["layout"] if "layout" in q.columns else "")
+    paired = layout.str.upper().isin(("PE", "PAIRED")).to_numpy()
+    fragments = num("reads_kept") * num("pct_aligned") / 100.0 / np.where(paired, 2.0, 1.0)
+    rho = num("dna_fraction_est") * fragments / (2.0 * float(genome_length))
+    length = np.where(paired, num("fragment_q50"), num("length_q50_r1"))
+    length = np.where(np.isnan(length) | (length <= 0), DNA_DEFAULT_LENGTH, length)
+    return np.where(np.isnan(rho) | (rho < 0), 0.0, rho), length
+
+
+def dna_reads(rho: np.ndarray, length: np.ndarray, feature_lengths: np.ndarray) -> np.ndarray:
+    """Expected DNA reads, samples x features."""
+    return rho[:, None] * (np.asarray(feature_lengths, dtype=np.float64)[None, :] + length[:, None])
+
+
 @dataclass
 class CovariateScaler:
     """Standardises the numeric covariates with training statistics; a missing value becomes 0 (the
@@ -215,7 +246,17 @@ class TrainingData:
     M: torch.Tensor | None = None   # samples x features, True where the gene is called missing from the sample's strain
     low: np.ndarray | None = None   # per-feature low end of the normalised count (for the missing-gene calls); None = no calls
     low_pool: np.ndarray | None = None   # the same for counts summed over a study's samples of one strain; None = no pooled calls
+    dna_rho: torch.Tensor | None = None  # DNA fragments per base and strand of every sample (``dna_density``); None = no DNA term
+    dna_len: torch.Tensor | None = None  # bp a fragment adds to a feature's length, per sample
     extra: dict = field(default_factory=dict)
+
+    def log_dna(self, rt: torch.Tensor) -> torch.Tensor | None:
+        """log of the expected DNA reads of the samples ``rt`` (samples x features; -inf where a
+        sample has none), or None when the decoder has no DNA term."""
+        if self.dna_rho is None:
+            return None
+        lengths = torch.tensor(np.asarray(self.fs.lengths, dtype=np.float32))      # a copy: the stored lengths are read-only
+        return torch.log(self.dna_rho[rt])[:, None] + torch.log(lengths[None, :] + self.dna_len[rt][:, None])
 
     @property
     def split(self) -> np.ndarray:
@@ -255,14 +296,17 @@ def build_training(tables: AtlasTables, fs: FeatureSet, cfg: TrainConfig, splits
     ids = tables.ids
     splits = splits.loc[ids]
     Y, fam, _ = align_counts(tables.counts, fs)
+    # genomic DNA: Yin are the counts the encoder inputs and size factors are made from
+    rho, dlen = dna_density(tables.qc, ids, fs.genome_length) if (cfg.dna_decoder or cfg.dna_inputs) else (np.zeros(len(ids)), np.zeros(len(ids)))
+    Yin = np.maximum(Y - dna_reads(rho, dlen, fs.lengths), 0.0) if cfg.dna_inputs else Y
     gse = tables.meta["GSE"].astype(str).to_numpy()
     fit_rows = np.where(splits["split"].to_numpy() == 1)[0] if fit_rows is None else np.asarray(fit_rows)
     weights, cap = study_weights(gse, fit_rows, cfg.study_cap)
     rows = fit_rows[splits["reference"].to_numpy(dtype=bool)[fit_rows]]
     if not len(rows):
         raise ValueError("no reference sample among the samples to fit on")
-    ref_log = reference_profile(Y[rows], fs.is_mrna, weights[rows], cfg.min_gene_presence)
-    s = size_factors(Y, ref_log)
+    ref_log = reference_profile(Yin[rows], fs.is_mrna, weights[rows], cfg.min_gene_presence)
+    s = size_factors(Yin, ref_log)
     low, low_pool, miss = None, None, np.zeros(Y.shape, dtype=bool)
     anti = None if tables.antisense is None else tables.antisense.reindex(fs.ids, fill_value=0).to_numpy(dtype=np.float64).T
     if cfg.mask_missing:
@@ -279,8 +323,8 @@ def build_training(tables: AtlasTables, fs: FeatureSet, cfg: TrainConfig, splits
             low_pool = pooled_low_profile(Y[rows], s[rows], ref_groups, fs.order, quantile=cfg.mask_quantile, **call, **veto(rows))
             groups = call_groups(miss, gse, cfg.mask_pool_min_calls, cfg.mask_pool_jaccard)
             miss = miss | group_calls(Y, s, groups, low_pool, fs.order, **call, **veto(slice(None)))
-        s = size_factors(Y, ref_log, miss)
-    logx = log_expression(Y, s)
+        s = size_factors(Yin, ref_log, miss)
+    logx = log_expression(Yin, s)
     zscore = ZScore.fit(logx[rows], weights[rows], cfg.sd_floor, miss[rows])
     cov = covariate_frame(Y, fam, fs, tables.qc, ids)
     scaler = CovariateScaler.fit(cov, rows, weights[rows])
@@ -288,7 +332,7 @@ def build_training(tables: AtlasTables, fs: FeatureSet, cfg: TrainConfig, splits
     w = weights[rows] / weights[rows].sum()
     have = w[:, None] * ~miss[rows]                    # a gene's mean is taken over the samples that have it
     total = have.sum(axis=0)
-    log_mean = np.log(np.maximum((have * (Y[rows] / s[rows][:, None])).sum(axis=0) / np.where(total > 0, total, 1.0), 1e-3))
+    log_mean = np.log(np.maximum((have * (Yin[rows] / s[rows][:, None])).sum(axis=0) / np.where(total > 0, total, 1.0), 1e-3))
     assert set(label_codes(labels)) == set(HEADS)
     return TrainingData(ids=ids, fs=fs, meta=tables.meta, labels=labels, splits=splits,
                         X=torch.tensor(zscore.apply(logx, miss)), Y=torch.tensor(Y, dtype=torch.float32),
@@ -298,7 +342,10 @@ def build_training(tables: AtlasTables, fs: FeatureSet, cfg: TrainConfig, splits
                         phase_level=phase_levels(tables.meta), gse_codes=pd.factorize(gse)[0], identity=condition_identity(tables.meta),
                         weights=weights, study_cap=cap, ref_log=ref_log, zscore=zscore, scaler=scaler,
                         log_mean=log_mean.astype(np.float32), M=torch.tensor(miss), low=low, low_pool=low_pool,
-                        extra={"covariates_raw": cov, "antisense_veto": bool(cfg.mask_missing and anti is not None)})
+                        dna_rho=torch.tensor(rho, dtype=torch.float32) if cfg.dna_decoder else None,
+                        dna_len=torch.tensor(dlen, dtype=torch.float32) if cfg.dna_decoder else None,
+                        extra={"covariates_raw": cov, "antisense_veto": bool(cfg.mask_missing and anti is not None),
+                               "dna_samples": int((rho > 0).sum())})
 
 
 def prepared(cache: dict | None, key, tables: AtlasTables, fs: FeatureSet, cfg: TrainConfig, splits: pd.DataFrame,

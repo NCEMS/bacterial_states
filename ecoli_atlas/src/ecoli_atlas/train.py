@@ -7,7 +7,7 @@ two_stage     as for the first atlas model. (1) One block encoder per call, each
 one_pass      the same blocks and residual, all fitted together with the whole loss.
 unstructured  one embedding without blocks, fitted with the whole loss.
 
-    loss = count likelihood (negative binomial, mean over features)
+    loss = count likelihood (negative binomial, mean over features; its mean includes the genomic DNA reads, ``models.count_log_mean``)
          + kl_w   * KL from the standard normal (residual block, or the unstructured embedding)
          + head_w * class-weighted cross-entropy of each head (labelled samples only; within a class no
                     study counts for more than the label cap, see ``data.label_weights``)
@@ -32,7 +32,7 @@ from .data import AtlasTables, TrainingData, label_weights, prepared, study_fold
 from .features import FeatureSet
 from .losses import class_weights, cos_dist, cross_study_control_pull, kl_normal, masked_mean, nb_nll, within_study_push
 from .metrics import classification_metrics, within_study_order
-from .models import AtlasModel, OrdinalHead, build_model
+from .models import AtlasModel, OrdinalHead, build_model, count_log_mean
 from .utils import set_seed
 
 GRAD_CLIP = 5.0
@@ -178,7 +178,9 @@ def run_epochs(model, params: list, data: TrainingData, cfg: TrainConfig, device
         for ridx in study_blocked_batches(rows, data.gse_codes, cfg.batch, seed + ep, data.study_cap):
             rt = torch.as_tensor(ridx)
             out = model(model_input(data, rt, rows, cfg, rng).to(device), data.C[rt].to(device), train_blocks=train_blocks)
-            nll = nb_nll(data.Y[rt].to(device), out["log_rate"] + data.log_s[rt].to(device)[:, None], model.log_theta)
+            log_dna = data.log_dna(rt)
+            nll = nb_nll(data.Y[rt].to(device), count_log_mean(model, out["log_rate"], data.log_s[rt].to(device),
+                                                               None if log_dna is None else log_dna.to(device)), model.log_theta)
             terms = {"counts": (nll.mean() if data.M is None else masked_mean(nll, ~data.M[rt].to(device))).float(),
                      "kl": kl_normal(out["kl_mu"], out["kl_logvar"]).mean()}
             loss = terms["counts"] + hp.kl_w * terms["kl"]
@@ -216,7 +218,8 @@ def fit(data: TrainingData, cfg: TrainConfig, device, rows: np.ndarray | None = 
     epochs = cfg.epochs if epochs is None else epochs
     rows = data.tr_rows if rows is None else np.asarray(rows)
     set_seed(seed)
-    model = build_model(cfg.fit, data.fs.n, data.C.shape[1], cfg.hparams, torch.tensor(data.log_mean), cfg.phase_head).to(device)
+    model = build_model(cfg.fit, data.fs.n, data.C.shape[1], cfg.hparams, torch.tensor(data.log_mean), cfg.phase_head,
+                        dna=data.dna_rho is not None).to(device)
     history = []
     if cfg.fit == "two_stage":
         for h in HEADS:

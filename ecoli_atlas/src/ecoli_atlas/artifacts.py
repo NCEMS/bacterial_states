@@ -62,7 +62,11 @@ class ModelBundle:
 
     @property
     def config(self) -> TrainConfig:
-        return TrainConfig.from_dict(self.manifest["config"])
+        cfg = TrainConfig.from_dict(self.manifest["config"])
+        for key in ("dna_decoder", "dna_inputs"):          # a bundle made before the DNA term has neither
+            if key not in self.manifest["config"]:
+                setattr(cfg, key, False)
+        return cfg
 
     @classmethod
     def load(cls, path: str | Path, device="cpu") -> "ModelBundle":
@@ -79,7 +83,7 @@ class ModelBundle:
         cov = manifest["covariates"]
         hp = HParams(**manifest["config"]["hparams"])
         model = build_model(manifest["config"].get("fit", "two_stage"), fs.n, len(cov["names"]), hp,
-                            phase_head=manifest["config"].get("phase_head", "binary"))
+                            phase_head=manifest["config"].get("phase_head", "binary"), dna=bool(manifest["config"].get("dna_decoder", False)))
         model.load_state_dict(torch.load(path / MODEL_FILE, map_location="cpu", weights_only=True))
         model.to(device).eval()
         return cls(model, fs, ZScore(pre["z_mu"].numpy(), pre["z_sd"].numpy()),
@@ -122,6 +126,9 @@ def save_bundle(path: str | Path, model, data: TrainingData, cfg: TrainConfig, d
                           "median_per_sample": float(np.median(data.M.sum(dim=1).numpy())) if data.M is not None else 0.0,
                           "samples_with_100_or_more": int((data.M.sum(dim=1) >= 100).sum()) if data.M is not None else 0},
         "label_caps": {h: {data.fit_classes[h][c]: k for c, k in label_weights(data.y_fit[h], data.gse_codes, data.tr_rows, cfg.label_cap)[1].items()} for h in HEADS},
+        "dna": {"decoder": bool(cfg.dna_decoder), "inputs": bool(cfg.dna_inputs),
+                "scale": float(torch.exp(model.log_dna_scale.detach())) if hasattr(model, "log_dna_scale") else None,
+                "samples_with_dna": int(data.extra.get("dna_samples", 0)), "genome_length": data.fs.genome_length},
         "features": data.fs.to_dict(),
         "covariates": {"names": data.scaler.names, "numeric": data.scaler.numeric},
         "config": cfg.to_dict() | {"hparams": asdict(cfg.hparams)},

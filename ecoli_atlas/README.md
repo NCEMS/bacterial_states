@@ -21,8 +21,7 @@ same two stages (count model and covariates: [`docs/atlas_model_v2.md`](../docs/
 - **Alignment terms** (residual stage, on the whole embedding): samples of one study known to
   differ are kept apart; matching control conditions of different studies are drawn together.
 
-This is the first stage of the design. Not yet in the model: the genomic-DNA term and
-batch-corrected counts. The earlier model and its `verify-models` / `download` commands are on
+This is the first stage of the design. Not yet in the model: batch-corrected counts. The earlier model and its `verify-models` / `download` commands are on
 branch `main`.
 
 ## Install
@@ -85,9 +84,9 @@ Covariates go to the residual encoder and the decoder, not to the block encoders
   empty. The probability column is `p_lab`. A bundle trained for other calls (`outputs/models_v2_k12`
   has a `k12` call, K-12 against the rest) is refused by this version.
 
-**Sample selection.** `qc_table.py mark-model --metadata metadata_v2.tsv --min-cds-reads 200000`
-marks the samples that are usable by the metadata, were counted by the full inGEST run and have at
-least 200,000 reads on CDS features.
+**Sample selection.** `qc_table.py mark-model --metadata metadata_v2.tsv --min-cds-reads 200000 --max-dna-fraction 0.10`
+marks the samples that are usable by the metadata, were counted by the full inGEST run, have at
+least 200,000 reads on CDS features and a genomic-DNA estimate of at most 10%.
 
 ## Commands
 
@@ -161,7 +160,9 @@ ecoli_atlas train $T --phase-head ordinal --out outputs/models_v2_ordinal --spli
 
 Whole studies only, and TEST and the folds are made of **reference samples** only, as in the first
 atlas model: untreated samples of the wild type or of the baseline genotype a study compares against
-(`treated` false and `is_reference_genotype` true; `labels.is_reference`).
+(`treated` false and `is_reference_genotype` true; `labels.is_reference`). The stricter choice, unmodified wild type only
+(`is_wild_type`), was tried on the same studies (2026-11-21): scored on the same samples the calls are
+equivalent, and it leaves 8 of the 44 TEST studies and 75 of the 302 fold studies without a scored sample.
 
 | `splits.csv` | Samples |
 |---|---|
@@ -231,6 +232,27 @@ Takes an inGEST count table (feature ids must be those of the counting annotatio
 called missing from a sample's strain, see below) and `feature_coverage.tsv`. `--qc` gives a table with the QC
 columns of `sample_qc.tsv` (as `full_<name>` or `<name>`), indexed by sample; without it the QC
 covariates are set to the training means.
+
+### Genomic DNA in the library
+
+DNA left in a library adds reads to every feature in proportion to its length, whatever its
+expression. It is handled by leaving the worst libraries out:
+
+- **Atlas:** samples whose DNA estimate (`dna_fraction_est` of the QC table) is above 10% are not
+  in the model (`qc_table.py mark-model --max-dna-fraction 0.10`; 38 samples, `high_dna`).
+- **New samples:** `embed` writes `dna_fraction_est` and `high_dna` to `samples.tsv` and prints a
+  warning for samples above the bundle's limit (`max_dna_fraction` in the manifest); they are
+  still embedded.
+- A shallow library reads 0 (below the estimate's detection limit) whatever its DNA content, so
+  it passes.
+
+Two corrections exist in the code and are **off** (`train --dna-decoder`, `--dna-inputs`): an
+additive DNA term in the decoder's count mean (`models.count_log_mean`, expected reads from
+`data.dna_density`) and taking the expected DNA reads off the counts the encoders see. Tried on
+the atlas (2026-11-21, `outputs/models_v2_dna`, `outputs/models_v2_dna_decoder`): the decoder term
+changed nothing useful; the input correction brought libraries with 5 and 20% added DNA back to
+their DNA-free twins at normal depth, but made shallow libraries much worse and gave no net gain
+on the atlas.
 
 ### Genes missing from a strain
 

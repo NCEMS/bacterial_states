@@ -24,7 +24,7 @@ One row per GEO sample (GSM). Columns:
     qc_table.py add-full --batches work/atlas_full/results --table atlas_data/sample_qc.tsv     # every <batch>/results
     qc_table.py decide --table atlas_data/sample_qc.tsv [--min-pct-aligned 50 ...]
     qc_table.py mark-model --samples samples.txt --model atlas_v2 --table atlas_data/sample_qc.tsv
-    qc_table.py mark-model --metadata atlas_data/metadata_v2.tsv --min-cds-reads 200000 --model atlas_v2 --table atlas_data/sample_qc.tsv
+    qc_table.py mark-model --metadata atlas_data/metadata_v2.tsv --min-cds-reads 200000 --max-dna-fraction 0.10 --model atlas_v2 --table atlas_data/sample_qc.tsv
     qc_table.py summary --table atlas_data/sample_qc.tsv
 
 Existing values are kept: each command only rewrites the columns it owns, for the samples it is given.
@@ -265,8 +265,10 @@ def add_full_batches(table: str, batches_dir: str, pipeline: str = "") -> dict:
 TRUE = {"true", "yes", "1"}
 
 
-def model_gate(row: dict, usable: bool, min_cds_reads: int) -> str:
-    """Why a sample is not part of the model ('' = it is): the rule of the atlas recount."""
+def model_gate(row: dict, usable: bool, min_cds_reads: int, max_dna_fraction: float | None = None) -> str:
+    """Why a sample is not part of the model ('' = it is): the rule of the atlas recount. With
+    `max_dna_fraction`, a sample whose genomic-DNA estimate (`full_dna_fraction_est`) is above it is
+    left out as `high_dna`; a sample without an estimate passes."""
     if not usable:
         return "not_usable"
     if not row["full_date"]:
@@ -277,13 +279,21 @@ def model_gate(row: dict, usable: bool, min_cds_reads: int) -> str:
         cds = float(row["full_reads_CDS"])
     except ValueError:
         return "no_qc_record"
-    return "" if cds >= min_cds_reads else "low_mrna"
+    if cds < min_cds_reads:
+        return "low_mrna"
+    if max_dna_fraction is not None:
+        try:
+            if float(row["full_dna_fraction_est"]) > max_dna_fraction:
+                return "high_dna"
+        except ValueError:
+            pass
+    return ""
 
 
-def mark_model_by_rule(table: str, metadata: str, model: str, min_cds_reads: int) -> dict:
+def mark_model_by_rule(table: str, metadata: str, model: str, min_cds_reads: int, max_dna_fraction: float | None = None) -> dict:
     """in_model = `model` for the samples that are usable in the metadata table, were counted by the
-    full run and have at least `min_cds_reads` reads on CDS features; cleared for the others that
-    carried this model's name."""
+    full run, have at least `min_cds_reads` reads on CDS features and a genomic-DNA estimate of at
+    most `max_dna_fraction`; cleared for the others that carried this model's name."""
     rows = read_table(table)
     with open(metadata, encoding="utf-8", newline="") as fh:
         usable = {r["GSM"] for r in csv.DictReader(fh, delimiter="\t") if r.get("usable", "").strip().lower() in TRUE}
@@ -291,7 +301,7 @@ def mark_model_by_rule(table: str, metadata: str, model: str, min_cds_reads: int
     for gsm, row in rows.items():
         if row["twin_of"]:
             continue
-        reason = model_gate(row, gsm in usable, min_cds_reads)
+        reason = model_gate(row, gsm in usable, min_cds_reads, max_dna_fraction)
         if not reason:
             row["in_model"] = model
         elif row["in_model"] == model:
@@ -301,7 +311,8 @@ def mark_model_by_rule(table: str, metadata: str, model: str, min_cds_reads: int
     missing = sorted(usable - set(rows))
     write_table(rows, table)
     print(f"{model}: {why['in_model']} of {len(usable)} usable samples are in the model "
-          f"(at least {min_cds_reads} reads on CDS features)", file=sys.stderr)
+          f"(at least {min_cds_reads} reads on CDS features"
+          + ("" if max_dna_fraction is None else f", DNA estimate at most {max_dna_fraction:g}") + ")", file=sys.stderr)
     for reason, n in sorted(why.items(), key=lambda kv: -kv[1]):
         if reason != "in_model":
             print(f"  left out, {reason}: {n}", file=sys.stderr)
@@ -370,6 +381,8 @@ def main(argv: list[str] | None = None) -> int:
                         "--min-cds-reads) instead of a sample list")
     k.add_argument("--min-cds-reads", type=int, default=200000,
                    help="with --metadata: fewest reads on CDS features (full_reads_CDS) of a sample in the model")
+    k.add_argument("--max-dna-fraction", type=float, default=0.10,
+                   help="with --metadata: largest genomic-DNA estimate (full_dna_fraction_est) of a sample in the model (default 0.10)")
     k.add_argument("--model", required=True)
     sub.add_parser("summary")
     for p in sub.choices.values():
@@ -390,7 +403,7 @@ def main(argv: list[str] | None = None) -> int:
             set_decision(row, _thresholds(args))
         write_table(rows, args.table)
     elif args.cmd == "mark-model" and args.metadata:
-        mark_model_by_rule(args.table, args.metadata, args.model, args.min_cds_reads)
+        mark_model_by_rule(args.table, args.metadata, args.model, args.min_cds_reads, args.max_dna_fraction)
     elif args.cmd == "mark-model":
         if not args.samples:
             ap.error("mark-model needs --samples or --metadata")

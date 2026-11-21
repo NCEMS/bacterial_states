@@ -4,7 +4,7 @@ Status: design of 2026-11-15. A first stage is implemented in `ecoli_atlas` (202
 `ecoli_atlas/README.md`): feature groups (section 1), normalization (2), the rRNA / tRNA and QC
 covariates (3, 5), the jointly trained model with its two heads and alignment terms (6) and part of
 the evaluation (8). Missing genes (4) are called and masked in a simpler form than designed (see the
-note in that section). Not implemented yet: the DNA term (5a), the
+note in that section). The DNA term (5a) was built, tried and left off; libraries above 10% DNA are left out instead (note there). Not implemented yet: the
 corrected and denoised counts (7), the deletion and twin checks of section 8. The model is trained
 on counts from the revised inGEST (`docs/counting.md`); the QC the recount saves for it is listed
 in `docs/atlas_qc_inputs.md`.
@@ -215,9 +215,35 @@ Use in the model:
 - The missing-gene calls of section 4 are unaffected: a gene the strain lacks gets no DNA reads
   either.
 
-These definitions have not been tried on data; the fit and the two cross-checks have to agree on
-samples of known DNA content (see the spike-in twins in `docs/atlas_qc_inputs.md`) before
-`dna_fraction_est` is used as an input.
+These definitions were then tried on data (`docs/atlas_qc_inputs.md`, calibration): the estimate
+used is the coverage-based `dna_fraction_est`.
+
+**As built (2026-11-21; `data.dna_density`, `models.count_log_mean`), and what was decided.**
+
+- DNA fragments per base and strand of a sample: `dna_fraction_est` × aligned fragments /
+  (2 × genome length), with the aligned fragments taken from the QC table (reads kept × aligned
+  share, halved for paired-end). A feature of length `L` expects that density × (`L` + median
+  fragment size, or read length for single-end) DNA reads.
+- Decoder: `mean = s · rate + k · DNA reads`, with one learned factor `k` (`train --no-dna-decoder`
+  switches the term off).
+- Encoder inputs and size factors are made from the counts minus the expected DNA reads, because
+  the block encoders see no covariates and cannot correct for DNA themselves (`--no-dna-inputs`).
+- Samples with an estimate of 0 (below the detection limit; 1,620 of 7,769) get no correction.
+- Check on the spiked twins: expected over added reads 0.93–1.04 at 5 and 20% DNA (0.80–0.96 at
+  1%); after the input correction 0–6% of the added reads are left (up to 23% over-removed at 1%).
+  Libraries below the limit (250,000 pairs with 1 or 5% DNA) are not corrected.
+- DNA is taken as even along the chromosome. In the 127 atlas samples above 5% DNA the background
+  near the replication origin is 1.2 times that near the terminus (median; 0.9–1.5 for 80% of
+  them), so a position term would change the DNA reads by about ±10% and is left out.
+- **Outcome.** Two 8-seed sweeps against the model without the term (`outputs/models_v2_dna`,
+  `outputs/models_v2_dna_decoder`): the decoder term alone left the calls unchanged and the count
+  fit slightly worse, with a learned factor of 0.31 instead of 1. With the input correction, twins
+  with 5 and 20% DNA at normal depth landed near their DNA-free parent (strain block 42 → 2
+  replicate distances at 20%), but shallow libraries moved much further away (250,000 pairs with
+  20% DNA: P(stationary) changed by 0.66 instead of 0.11), and the atlas showed no net gain (phase
+  TEST AUROC 0.952 → 0.934).
+- **Decision (user).** Both corrections are off by default. Samples with `dna_fraction_est` above
+  10% are left out of the model (38 of 7,769) and `embed` warns for such samples.
 
 ## 6. Architecture
 

@@ -410,3 +410,104 @@ def test_pooled_calls_in_training_and_embed(atlas_files, tmp_path):
     pd.DataFrame({"sample": ids, "GSE": [f"own{i}" for i in range(len(ids))]}).to_csv(tmp_path / "studies.tsv", sep="\t", index=False)
     assert main(base + ["--out", str(tmp_path / "e3"), "--studies", str(tmp_path / "studies.tsv")]) == 0
     assert list(pd.read_csv(tmp_path / "e3" / "samples.tsv", sep="\t", index_col=0)["n_missing_genes"]) == list(n2)
+
+
+def _with_dna(atlas_files, tmp_path, rho=0.06):
+    """The synthetic atlas with genomic DNA in two studies: counts with DNA reads added, and a QC table whose DNA estimate says so."""
+    from ecoli_atlas.data import dna_reads
+    counts = read_counts(atlas_files["counts"])
+    feat = read_feature_table(atlas_files["features"])
+    qc = pd.read_csv(atlas_files["qc"], sep="\t", dtype=str, keep_default_na=False).set_index("GSM")
+    genome = int(feat["Length"].sum())
+    qc["full_reads_kept"], qc["full_pct_aligned"], qc["full_dna_fraction_est"] = "1000000", "100", "0"
+    dirty = list(qc.index[qc["GSE"].isin(["GSE04", "GSE05"])])
+    paired = (qc.loc[dirty, "full_layout"] == "PE").to_numpy()
+    fragments = np.where(paired, 500000.0, 1000000.0)
+    qc.loc[dirty, "full_dna_fraction_est"] = [f"{x:.6g}" for x in rho * 2 * genome / fragments]
+    length = np.where(paired, 200.0, 75.0)                       # fragment_q50 / length_q50_r1 of the fixture
+    D = dna_reads(np.full(len(dirty), rho), length, feat.loc[counts.index, "Length"].to_numpy())
+    noisy = counts.copy()
+    cols = [c for c in dirty if c in counts.columns]
+    noisy[cols] = counts[cols] + np.random.RandomState(7).poisson(D[[dirty.index(c) for c in cols]]).T
+    noisy.to_csv(tmp_path / "counts_dna.tsv", sep="\t")
+    qc.to_csv(tmp_path / "qc_dna.tsv", sep="\t")
+    return counts, noisy, tmp_path / "counts_dna.tsv", tmp_path / "qc_dna.tsv", cols
+
+
+def test_dna_density_from_the_qc_table(atlas_files, tmp_path):
+    from ecoli_atlas.data import dna_density, dna_reads, read_table
+    _, _, _, qc_path, dirty = _with_dna(atlas_files, tmp_path)
+    qc = read_table(qc_path)
+    genome = 100000
+    rho, length = dna_density(qc, ["GSM0400", "GSM0500", "GSM0000", "not_there"], genome)
+    f = float(qc.loc["GSM0400", "full_dna_fraction_est"])
+    assert np.isclose(rho[0], f * 500000 / (2 * genome)) and length[0] == 200          # paired-end: fragments = reads / 2, fragment size
+    assert np.isclose(rho[1], float(qc.loc["GSM0500", "full_dna_fraction_est"]) * 1000000 / (2 * genome)) and length[1] == 75
+    assert rho[2] == 0 and rho[3] == 0                                                  # estimate 0, and no QC row
+    assert dna_density(None, ["a"], genome)[0][0] == 0 and dna_density(qc, ["GSM0400"], None)[0][0] == 0
+    assert np.allclose(dna_reads(np.array([0.5]), np.array([100.0]), np.array([900, 1900])), [[500.0, 1000.0]])
+
+
+def test_dna_term_in_training_and_embed(atlas_files, tmp_path):
+    clean, noisy, counts_path, qc_path, dirty = _with_dna(atlas_files, tmp_path)
+    fs = FeatureSet.from_table(read_feature_table(atlas_files["features"]))
+    hp = HParams(enc_width=32, dec_width=32, block_width=16, res_dim=4)
+    assert not TrainConfig().dna_decoder and not TrainConfig().dna_inputs and TrainConfig().max_dna_fraction == 0.10      # off unless asked for
+    cfg = TrainConfig(seed=5, test_frac=0.2, n_candidates=50, epochs=40, block_epochs=3, batch=40, hparams=hp, dna_decoder=True, dna_inputs=True)
+    off = TrainConfig(**{**cfg.to_dict(), "hparams": hp, "dna_decoder": False, "dna_inputs": False})
+    t_dna = load_tables(counts_path, atlas_files["metadata"], qc_path)
+    t_clean = load_tables(atlas_files["counts"], atlas_files["metadata"], qc_path)
+    splits = make_splits(t_dna.meta["GSE"], head_labels(t_dna.meta), is_reference(t_dna.meta), cfg)
+    truth = build_training(t_clean, fs, off, splits)             # the same libraries without DNA
+    corrected, raw = build_training(t_dna, fs, cfg, splits), build_training(t_dna, fs, off, splits)
+    r = [corrected.ids.index(i) for i in dirty]
+    err = lambda d: float((d.X[r] - truth.X[r]).abs().mean())                           # noqa: E731
+    assert err(corrected) < 0.4 * err(raw)                       # the inputs with the DNA taken off are close to the DNA-free ones
+    others = [i for i in range(len(corrected.ids)) if i not in r]
+    assert float((corrected.X[others] - truth.X[others]).abs().mean()) < 0.05
+    assert corrected.dna_rho is not None and int((corrected.dna_rho > 0).sum()) == len(dirty) and raw.dna_rho is None
+    # the decoder: the learned factor stays near 1, and the counts of the DNA samples are fitted better with the term
+    from ecoli_atlas.evaluate import count_fit
+    m_dna, _ = fit(corrected, cfg, "cpu")
+    assert 0.6 < float(torch.exp(m_dna.log_dna_scale)) < 1.6
+    only_inputs = TrainConfig(**{**cfg.to_dict(), "hparams": hp, "dna_decoder": False})
+    d2 = build_training(t_dna, fs, only_inputs, splits)
+    m2, _ = fit(d2, only_inputs, "cpu")
+    assert not hasattr(m2, "log_dna_scale")
+    rr = np.array(r)
+    assert count_fit(m_dna, corrected, rr, "cpu")["nll_per_feature"] < count_fit(m2, d2, rr, "cpu")["nll_per_feature"]
+    # bundle: the manifest says what was done, embed repeats it, and a bundle from before the term loads with it off
+    from ecoli_atlas.artifacts import save_bundle
+    save_bundle(tmp_path / "b", m_dna, corrected, cfg, "cpu", 5)
+    man = json.loads((tmp_path / "b" / "manifest.json").read_text())
+    assert man["dna"]["decoder"] and man["dna"]["inputs"] and 0.6 < man["dna"]["scale"] < 1.6 and man["dna"]["samples_with_dna"] == len(dirty)
+    bundle = ModelBundle.load(tmp_path / "b")
+    qc = pd.read_csv(qc_path, sep="\t", dtype=str, keep_default_na=False).set_index("GSM")
+    ids = dirty[:3] + [corrected.ids[i] for i in others[:3]]
+    res = embed_counts(bundle, noisy[ids], qc)
+    z = encode(m_dna, corrected.X, corrected.C, "cpu")["z"]
+    assert np.allclose(res["embedding"].to_numpy(), z[[corrected.ids.index(i) for i in ids]], atol=1e-4)
+    assert (res["samples"]["dna_reads_removed"][dirty[:3]] > 0).all() and (res["samples"]["dna_reads_removed"][ids[3:]] == 0).all()
+    # embed reports the DNA estimate and flags a sample above the bundle's limit; the command warns and still embeds
+    assert np.allclose(res["samples"]["dna_fraction_est"], [float(qc.loc[i, "full_dna_fraction_est"]) for i in ids]) and not res["samples"]["high_dna"].any()
+    qc_high = qc.copy()
+    qc_high.loc[ids[0], "full_dna_fraction_est"] = "0.25"
+    flagged = embed_counts(bundle, noisy[ids], qc_high)["samples"]
+    assert list(flagged["high_dna"]) == [1, 0, 0, 0, 0, 0] and embed_counts(bundle, noisy[ids])["samples"]["high_dna"].sum() == 0
+    noisy[ids].to_csv(tmp_path / "q.tsv", sep="\t")
+    qc_high.to_csv(tmp_path / "qc_high.tsv", sep="\t")
+    assert main(["embed", "--counts", str(tmp_path / "q.tsv"), "--qc", str(tmp_path / "qc_high.tsv"), "--models", str(tmp_path / "b"), "--out", str(tmp_path / "e"),
+                 "--device", "cpu"]) == 0
+    assert pd.read_csv(tmp_path / "e" / "samples.tsv", sep="\t", index_col=0)["high_dna"].sum() == 1
+    assert not np.allclose(embed_counts(bundle, noisy[ids]).get("embedding").to_numpy()[:3], res["embedding"].to_numpy()[:3], atol=1e-3)   # no QC table: no correction
+    m_off, _ = fit(raw, off, "cpu", epochs=2)
+    save_bundle(tmp_path / "old", m_off, raw, off, "cpu", 5)
+    man = json.loads((tmp_path / "old" / "manifest.json").read_text())
+    for key in ("dna_decoder", "dna_inputs"):
+        del man["config"][key]
+    del man["dna"]
+    (tmp_path / "old" / "manifest.json").write_text(json.dumps(man))
+    old = ModelBundle.load(tmp_path / "old")
+    assert not old.config.dna_decoder and not old.config.dna_inputs and not hasattr(old.model, "log_dna_scale")
+    z_off = encode(m_off, raw.X, raw.C, "cpu")["z"]
+    assert np.allclose(embed_counts(old, noisy[ids], qc)["embedding"].to_numpy(), z_off[[raw.ids.index(i) for i in ids]], atol=1e-4)

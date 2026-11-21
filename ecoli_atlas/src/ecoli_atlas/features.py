@@ -40,6 +40,7 @@ class FeatureSet:
     lengths: np.ndarray       # bp, over ids
     families: dict            # "16S" / "23S" / "5S" / "tRNA" -> list of feature ids
     order: np.ndarray | None = None   # model features in chromosome order (indices into ids); None in bundles made before the missing-gene calls
+    genome_length: int | None = None  # bp, for the DNA reads expected on a feature; None in bundles made before the DNA term
 
     @classmethod
     def from_table(cls, feat: pd.DataFrame) -> "FeatureSet":
@@ -61,7 +62,9 @@ class FeatureSet:
             order = np.lexsort(keys)
         else:
             order = np.argsort(feat.index.get_indexer(ids), kind="stable")
-        return cls(ids, np.array([True] * len(mrna) + [False] * len(other)), sub["Length"].to_numpy(), families, order.astype(int))
+        # the chromosome ends shortly after its last feature; without positions, the summed feature lengths stand in
+        genome = int(pd.to_numeric(feat["End"], errors="coerce").max()) if "End" in feat.columns else int(feat["Length"].sum())
+        return cls(ids, np.array([True] * len(mrna) + [False] * len(other)), sub["Length"].to_numpy(), families, order.astype(int), genome)
 
     @property
     def n(self) -> int:
@@ -69,9 +72,10 @@ class FeatureSet:
 
     def to_dict(self) -> dict:
         return {"ids": self.ids, "is_mrna": [bool(x) for x in self.is_mrna], "lengths": [int(x) for x in self.lengths],
-                "families": self.families} | ({} if self.order is None else {"order": [int(x) for x in self.order]})
+                "families": self.families} | (({} if self.order is None else {"order": [int(x) for x in self.order]})
+                | ({} if self.genome_length is None else {"genome_length": int(self.genome_length)}))
 
     @classmethod
     def from_dict(cls, d: dict) -> "FeatureSet":
         return cls(list(d["ids"]), np.array(d["is_mrna"], dtype=bool), np.array(d["lengths"], dtype=int), dict(d["families"]),
-                   np.array(d["order"], dtype=int) if d.get("order") is not None else None)
+                   np.array(d["order"], dtype=int) if d.get("order") is not None else None, d.get("genome_length"))

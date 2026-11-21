@@ -125,3 +125,12 @@ def test_add_full_batches_and_model_gate(tmp_path):
     qc_table.main(["mark-model", "--metadata", str(meta), "--min-cds-reads", "280000", "--model", "atlas_v2", "--table", table])
     rows = qc_table.read_table(table)
     assert (rows["GSM1"]["in_model"], rows["GSM3"]["in_model"]) == ("", "atlas_v2")
+
+
+def test_model_gate_leaves_out_samples_with_much_genomic_dna():
+    row = {"full_date": "2026-11-21", "full_counted": "yes", "full_not_counted_reason": "", "full_reads_CDS": "500000", "full_dna_fraction_est": "0.12"}
+    assert qc_table.model_gate(row, True, 200000) == ""                           # no DNA rule given
+    assert qc_table.model_gate(row, True, 200000, 0.10) == "high_dna"
+    assert qc_table.model_gate(row | {"full_dna_fraction_est": "0.10"}, True, 200000, 0.10) == ""
+    assert qc_table.model_gate(row | {"full_dna_fraction_est": ""}, True, 200000, 0.10) == ""     # no estimate: passes
+    assert qc_table.model_gate(row | {"full_reads_CDS": "1000"}, True, 200000, 0.10) == "low_mrna"
