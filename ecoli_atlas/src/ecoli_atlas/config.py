@@ -73,6 +73,28 @@ class HParams:
     def z_dim(self) -> int:
         return sum(self.block_dims[h] for h in HEADS) + self.res_dim
 
+    def with_block_dims(self, text: str) -> "HParams":
+        """A copy with some block sizes changed: ``text`` is ``name=size[,name=size...]`` over the
+        call blocks (``phase``, ``medium``, ``lab_strain``) and ``residual``; blocks not named keep their size."""
+        from dataclasses import replace
+        dims, res = dict(self.block_dims), self.res_dim
+        for part in filter(None, (p.strip() for p in text.split(","))):
+            name, _, size = part.partition("=")
+            name = name.strip()
+            if name not in (*HEADS, "residual"):
+                raise ValueError(f"--block-dims: unknown block {name!r} (blocks: {', '.join(HEADS)}, residual)")
+            try:
+                n = int(size)
+            except ValueError:
+                raise ValueError(f"--block-dims: {part!r} is not name=size") from None
+            if n < 1:
+                raise ValueError(f"--block-dims: block {name} needs at least 1 dimension")
+            if name == "residual":
+                res = n
+            else:
+                dims[name] = n
+        return replace(self, block_dims=dims, res_dim=res)
+
 
 @dataclass
 class TrainConfig:

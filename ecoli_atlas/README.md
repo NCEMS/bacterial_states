@@ -13,6 +13,10 @@ same two stages (count model and covariates: [`docs/atlas_model_v2.md`](../docs/
 | lab strain (`lab_strain`: lab / non-lab) | 4 | training samples with a known strain group |
 | residual | 24 | all training samples, blocks frozen |
 
+`train --block-dims` changes the sizes (`phase=1`, `phase=2,residual=28`; blocks not named keep
+theirs). The bundle records them (`embedding_blocks` in `manifest.json`), and `embed`, `evaluate` and
+`figures` read them from there.
+
 - **Block encoders:** z-scored log expression → the block; a linear head on the block gives the
   call. Class-weighted cross-entropy, labelled samples only.
 - **Residual encoder:** z-scored log expression plus library covariates → the residual block.

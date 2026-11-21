@@ -209,6 +209,27 @@ def test_the_one_loss_fits_train_save_and_embed(fit_name, atlas_files, tmp_path)
     assert np.allclose(res["embedding"].to_numpy(), z[:5], atol=2e-4)
 
 
+def test_block_dims_option_sets_the_embedding_layout(train_args, atlas_files, tmp_path):
+    out = tmp_path / "b1"
+    assert main(["train", *train_args, "--out", str(out), "--epochs", "4", "--device", "cpu", "--test-frac", "0.2",
+                 "--block-dims", "phase=1, residual=10"]) == 0
+    manifest = json.loads((out / "manifest.json").read_text())
+    assert [(b["block"], b["end"] - b["start"]) for b in manifest["embedding_blocks"]] == [("phase", 1), ("medium", 12), ("lab_strain", 4), ("residual", 10)]
+    emb = pd.read_csv(out / "embedding.tsv", sep="\t", index_col=0)
+    assert emb.shape[1] == 27
+    bundle = ModelBundle.load(out)                                   # the sizes come back from the bundle
+    assert bundle.config.hparams.block_dims["phase"] == 1 and bundle.config.hparams.res_dim == 10
+    counts = read_counts(atlas_files["counts"])
+    qc = pd.read_csv(atlas_files["qc"], sep="\t", dtype=str, keep_default_na=False).set_index("GSM")
+    res = embed_counts(bundle, counts[["GSM0000", "GSM0105"]], qc)
+    assert np.allclose(res["embedding"].to_numpy(), emb.loc[["GSM0000", "GSM0105"]].to_numpy(), atol=2e-4)
+    assert HParams().with_block_dims("medium=3").block_dims == {"phase": 6, "medium": 3, "lab_strain": 4}
+    for bad in ("strain=2", "phase=0", "phase"):
+        with pytest.raises(ValueError, match="--block-dims"):
+            HParams().with_block_dims(bad)
+    assert HParams().block_dims["phase"] == 6                         # the defaults are not changed in place
+
+
 def test_an_unknown_fit_is_refused():
     with pytest.raises(ValueError, match="fit must be one of"):
         TrainConfig(fit="joint")
