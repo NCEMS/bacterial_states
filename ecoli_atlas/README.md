@@ -295,9 +295,11 @@ the treated samples of a TEST study).
 
 ### `view`: an interactive 3-D map of the atlas
 
-Writes one self-contained HTML page that opens in any web browser, with no server. Needs
-`pip install "ecoli-atlas[view]"` (plotly and umap-learn) for an offline page with the UMAP layouts;
-without plotly the page loads plotly.js from a CDN (`--plotly cdn`, smaller file, needs a network
+Writes one self-contained HTML page that opens in any web browser, with no server. The
+`ecoli_atlas` conda environment (`environment.yaml`) has everything it needs (plotly and
+umap-learn); an environment made before they were added gets them with
+`mamba env update -n ecoli_atlas -f ecoli_atlas/environment.yaml`, and a pip install with
+`pip install "ecoli-atlas[view]"`. Without plotly the page loads plotly.js from a CDN (`--plotly cdn`, smaller file, needs a network
 connection), or `--plotly PATH` inlines a local `plotly.min.js`. `--no-umap` skips the UMAP layouts,
 which take a few minutes for the whole atlas. The page holds:
 
