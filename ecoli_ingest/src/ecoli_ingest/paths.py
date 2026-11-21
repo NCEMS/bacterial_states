@@ -10,6 +10,7 @@ RESOURCE_FILES = {
     "vg_index": "vg/ecoli_graph_test",
     "annotation_gff": "annotation/GCF_000005845.2_ASM584v2_counting_v2.gff",
     "annotation_bed": "annotation/GCF_000005845.2_ASM584v2_counting_v2.bed",
+    "genome_fasta": "annotation/GCF_000005845.2_ASM584v2_genomic.fna",     # NC_000913.3; GC bias in the QC record
     "centrifuge_index_path": "centrifuge/p_compressed+h+v",
 }
 CONTAINER_IMAGE = "container/rnaseq_vg.sif"

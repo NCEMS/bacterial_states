@@ -156,6 +156,8 @@ Layout of `qc/<s>.qc.json`:
           "dna_fraction_est": 0, "floor_cov_plus": 0, "floor_cov_minus": 0,
           "intergenic_cov_plus": 0, "intergenic_cov_minus": 0},
   "gene_body": [0, 0, 0],
+  "gc_bias": {"gc_slope": 0, "gc_curv": 0, "pos_slope": 0, "gc_r2": 0, "n_genes": 0, "n_bins": 0,
+              "mean_gc": 0, "window": 300, "min_depth": 5.0, "min_length": 600},
   "species": {"species_reads": 0, "pct_escherichia_shigella": 0, "top_other_genus": "",
               "pct_top_other_genus": 0, "pct_unclassified": 0, "pct_synthetic": 0}
 }
@@ -208,6 +210,17 @@ Differences from the specification above:
 - **Added:** `ladder` (reads in, kept, aligned, on the reference, assigned, assigned outside rRNA
   and tRNA), `antisense_assignment`, `gene_body_slope`, `reads.length_quantiles`,
   `composition.short_features` (reads on features under 200 nt, rRNA and tRNA genes left out).
+- **GC bias** (`gc_bias`, `workflow/scripts/gc_bias.py`, needs the reference FASTA
+  `annotation/GCF_000005845.2_ASM584v2_genomic.fna`; empty without it). It is computed from the
+  coverage track inside genes, so expression levels drop out. For the interior 100 bp bins of
+  CDS features of at least 600 bp with at least 5x mean coverage, log coverage is fitted on the GC of a
+  300 bp window around the bin (linear and quadratic) and on the position in the gene, all centred
+  within gene. `gc_slope` is the change of log coverage per 10 percentage points of GC at the
+  sample's mean GC; `gc_curv` is the curvature (negative: bins of middling GC are covered best);
+  `pos_slope` is the expression-free 5'-3' trend. On the atlas (2026-11-21, `work/gc_bias/`), the
+  slope shifts by 0.17 within-study SD between exponential and stationary samples (the read GC
+  share: 0.79). Its split-half reliability is 0.99, and within a study it predicts the gene-level
+  GC trend of the counts with factor 1.05 (R2 0.39).
 - Unstranded samples are not counted and get no record.
 - **Deleting alignments.** `<s>.gam` is always removed once `vg surject` and `vg stats` have
   read it. With `keep_alignments: false` in `config.yaml`, `<s>_sort.bam` and its index are

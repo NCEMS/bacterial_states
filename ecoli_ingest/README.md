@@ -68,6 +68,7 @@ resources/
 ├── annotation/GCF_000005845.2_ASM584v2_counting_v2.bed      # the same features as BED12 (RSeQC)
 ├── annotation/GCF_000005845.2_ASM584v2_counting_v2.features.tsv           # feature list with overlaps
 ├── annotation/GCF_000005845.2_ASM584v2_counting_v2.rfam_merge_report.tsv  # fate of every Rfam hit
+├── annotation/GCF_000005845.2_ASM584v2_genomic.fna           # NC_000913.3; GC bias in the QC record (from resources-v2)
 ├── centrifuge/p_compressed+h+v.{1,2,3}.cf                    # not needed with centrifuge: false
 └── container/rnaseq_vg.sif                                   # optional
 ```
