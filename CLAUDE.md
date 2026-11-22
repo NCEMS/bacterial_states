@@ -244,7 +244,11 @@ measured covariates remove ~0.01-0.02 of it). Order:
    and LB) against a shuffled-label null; within-study `phase_lfc` and medium contrasts kept; no gene GC / length trend
    left against the covariates; twin pairs agree better than raw, once twins exist. The decoded product also reports how
    much within-study contrast it keeps against the split-half noise ceiling.
-2. Mechanistic GC offset in the decoder: gc_slope * x_g + gc_curv * x_g^2 from each gene's GC profile, one learned
+2. BUILT 2026-11-21 as `train --gc-offset` (`models.GCTerm`; GC columns out of the linear term; scale in the manifest).
+   Learned scale (outputs/models_v2_gcterm): 0.62, z took the rest (GC-slope R2 from z 0.33 -> 0.57), NLL +0.6 SD: the split
+   is not identified. `--gc-scale fixed` (outputs/models_v2_gcterm_fixed): decoded GC trend 0.13 (learned 0.42), NLL 6.224,
+   z GC-slope R2 0.55 overall / 0.36 within conditions / 0.20 within replicates (linear term: 0.30 / 0.13): both variants put
+   more GC into z, so the linear term stays the default and the QC module (`work/qc_module/`) takes the work over. Mechanistic GC offset in the decoder: gc_slope * x_g + gc_curv * x_g^2 from each gene's GC profile, one learned
    scale (the gene-level check gave factor 1.05, R2 0.39; `work/gc_bias/`); same idea for fragment size x gene length.
    Preview without fitting: subtracting it from the observed counts removes the per-sample GC trend entirely (corr with
    gc_slope 0.61 -> 0.02; the learned linear term only 0.61 -> 0.35) and keeps within-study LFCs (r 0.9995).

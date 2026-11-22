@@ -16,6 +16,9 @@ each sample's own reads on mRNA features:
   denoised version. They lose real within-sample detail through the embedding (`work/batch_correction/`),
   so they are a summary, not corrected counts.
 
+A bundle trained with ``--gc-offset`` has the GC bias in its decoder (``models.GCTerm``): the GC offset is then
+that term, with its learned scale, and needs no feature table.
+
 The reference library: paired-end, every other numeric covariate at the training mean (0 on the scaled
 scale), other flags 0, no GC bias. Genes called missing from a strain stay at their observed count in
 the corrected counts and are 0 in the decoded counts.
@@ -79,11 +82,20 @@ def swapped_covariates(C: np.ndarray, scaler) -> np.ndarray:
 
 @torch.no_grad()
 def covariate_shift(model, C: np.ndarray, C_ref: np.ndarray) -> np.ndarray:
-    """W (c_ref - c): the change of the decoder's log rate when the covariates go from C to C_ref."""
+    """W (c_ref - c): the change of the linear covariate term of the decoder's log rate when the covariates go
+    from C to C_ref (without the GC columns when the model has a GC term; ``model_gc_offset`` is that term)."""
     dt = next(model.parameters()).dtype
     dev = next(model.parameters()).device
-    term = lambda c: model.cov_out(model.cov_in(torch.as_tensor(c, dtype=dt, device=dev))).cpu().numpy()   # noqa: E731
+    keep = model.gc_term.keep if hasattr(model, "gc_term") else 1.0
+    term = lambda c: model.cov_out(model.cov_in(torch.as_tensor(c, dtype=dt, device=dev) * keep)).cpu().numpy()   # noqa: E731
     return (term(C_ref) - term(C)).astype(np.float64)
+
+
+@torch.no_grad()
+def model_gc_offset(model, C: np.ndarray) -> np.ndarray:
+    """The decoder's own GC term (``train --gc-offset``) at the samples' covariates, learned scale included."""
+    p = next(model.parameters())
+    return model.gc_term(torch.as_tensor(C, dtype=p.dtype, device=p.device)).cpu().numpy().astype(np.float64)
 
 
 def gc_offset(gc: np.ndarray, slope: np.ndarray, curv: np.ndarray, is_mrna: np.ndarray, lengths: np.ndarray) -> np.ndarray:
@@ -109,11 +121,15 @@ def _to_mrna_total(counts: np.ndarray, observed: np.ndarray, is_mrna: np.ndarray
 
 def technical_counts(model, fs, scaler, Y: np.ndarray, C: np.ndarray, z: np.ndarray, log_s: np.ndarray, miss: np.ndarray,
                      gc: np.ndarray | None, slope: np.ndarray, curv: np.ndarray, corrected: bool = True, decoded: bool = False) -> dict:
-    """``corrected`` / ``decoded`` counts (samples x features, see the module text). ``gc`` None: no GC offset."""
+    """``corrected`` / ``decoded`` counts (samples x features, see the module text). A model with its own GC term
+    takes the GC bias off with that term (learned scale); otherwise with the measured fit at ``gc`` (None: no GC
+    offset)."""
     is_mrna = np.asarray(fs.is_mrna)
     C_ref = swapped_covariates(C, scaler)
     shift = covariate_shift(model, C, C_ref)
-    if gc is not None:
+    if hasattr(model, "gc_term"):
+        shift = shift - model_gc_offset(model, C)
+    elif gc is not None:
         shift = shift - gc_offset(gc, slope, curv, is_mrna, fs.lengths)
     out = {}
     if corrected:

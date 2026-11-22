@@ -398,6 +398,17 @@ class TrainingData:
         return np.where((self.split == 1) & (self.splits["cv_fold"].to_numpy() == k))[0]
 
 
+def _feature_gc(cfg: TrainConfig, fs: FeatureSet) -> np.ndarray | None:
+    """GC content of the model features for the decoder's GC term (None without it)."""
+    if not cfg.gc_offset:
+        return None
+    missing = [c for c in ("gc_slope", "gc_curv") if c not in cfg.covariates]
+    if missing:
+        raise ValueError(f"the GC term reads the covariates gc_slope and gc_curv; {missing} are not among this model's covariates")
+    from .technical import feature_gc_for, load_feature_gc
+    return feature_gc_for(fs, load_feature_gc(cfg.feature_gc))
+
+
 def build_training(tables: AtlasTables, fs: FeatureSet, cfg: TrainConfig, splits: pd.DataFrame,
                    fit_rows: np.ndarray | None = None) -> TrainingData:
     """Everything the model needs. ``fit_rows`` (default: the training pool) are the samples the
@@ -461,7 +472,7 @@ def build_training(tables: AtlasTables, fs: FeatureSet, cfg: TrainConfig, splits
                         dna_rho=torch.tensor(rho, dtype=torch.float32) if cfg.dna_decoder else None,
                         dna_len=torch.tensor(dlen, dtype=torch.float32) if cfg.dna_decoder else None,
                         series=series, series_x=series_x, order_pairs=pairs,
-                        extra={"covariates_raw": cov, "antisense_veto": bool(cfg.mask_missing and anti is not None),
+                        extra={"feature_gc": _feature_gc(cfg, fs), "covariates_raw": cov, "antisense_veto": bool(cfg.mask_missing and anti is not None),
                                "dna_samples": int((rho > 0).sum())})
 
 

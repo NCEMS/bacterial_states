@@ -134,6 +134,9 @@ def cmd_train(args) -> int:
     cfg.mask_missing = not args.no_mask_missing
     cfg.mask_pool = not args.no_pool
     cfg.dna_decoder, cfg.dna_inputs = args.dna_decoder, args.dna_inputs
+    cfg.gc_offset, cfg.gc_scale, cfg.feature_gc = args.gc_offset, args.gc_scale, args.feature_gc
+    if args.gc_scale != "learned" and not args.gc_offset:
+        raise SystemExit("--gc-scale applies to the GC term: give --gc-offset too")
     cfg.phase_order_weight = args.phase_order_weight
     if args.block_dims:
         try:
@@ -677,6 +680,14 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--test-frac", type=float)
     sp.add_argument("--dna-decoder", action="store_true", help="add a genomic-DNA term to the expected counts (off by default)")
     sp.add_argument("--dna-inputs", action="store_true", help="take the expected genomic-DNA reads off the counts the encoders see (off by default)")
+    sp.add_argument("--gc-offset", action="store_true",
+                    help="mechanistic GC bias in the decoder: each library's GC fit (gc_slope, gc_curv) at every feature's GC content, "
+                    "with one learned scale; the two GC covariates then leave the linear covariate term (off by default)")
+    sp.add_argument("--gc-scale", choices=["learned", "fixed"], default="learned",
+                    help="with --gc-offset: fit the term's scale (learned, default) or hold it at 1, the gene-level value of the "
+                    "measured fit (fixed), so the decoder cannot split the GC effect between the term and the embedding")
+    sp.add_argument("--feature-gc", help="with --gc-offset: GC content of the features (Feature_ID, Length, GC); default: the table "
+                    "for the inGEST counting annotation shipped with the package")
     sp.add_argument("--phase-order-weight", type=float, default=0.0,
                     help="weight of the phase-order term of the phase block (0 = off): a ranking loss on the phase score over pairs of samples "
                     "whose order along the growth curve is known, inside a study (phase levels) or a culture series (--time-series)")

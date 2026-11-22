@@ -44,6 +44,9 @@ COVARIATES = ("paired", "fragment_q25", "fragment_q50", "fragment_q75",         
               "gc_slope", "gc_curv")                                              # GC bias of the coverage inside genes
 
 
+GC_SCALES = ("learned", "fixed")     # the scale of the decoder's GC term (TrainConfig.gc_scale)
+
+
 @dataclass
 class HParams:
     # the embedding is [one block per call | residual block]. One dimension per call (user decision 2026-11-21):
@@ -143,6 +146,14 @@ class TrainConfig:
     phase_order_batch: int = 256     # pairs drawn per step of the phase block
     dna_decoder: bool = False        # the count mean is size factor x RNA rate + expected DNA reads
     dna_inputs: bool = False         # the encoder inputs and size factors are made from the counts minus the expected DNA reads
+    # mechanistic GC bias in the decoder (models.GCTerm): the library's GC fit at every feature's GC content, one learned scale;
+    # gc_slope and gc_curv then leave the linear covariate term. feature_gc: table of the features' GC content (default: the
+    # package table for the inGEST counting annotation, technical.load_feature_gc)
+    gc_offset: bool = False
+    # learned: the scale is fitted (it settled at 0.62 on the atlas, the rest of the GC effect going into z: `work/batch_correction/`);
+    # fixed: held at 1, the gene-level value of the measured fit, so the decoder cannot split GC between the term and z
+    gc_scale: str = "learned"
+    feature_gc: str | None = None
     # training
     block_epochs: int = 40       # of each block encoder
     block_batch: int = 256
@@ -156,6 +167,8 @@ class TrainConfig:
             raise ValueError(f"fit must be one of {FITS}, not {self.fit!r}")
         if self.phase_head not in PHASE_HEADS:
             raise ValueError(f"phase_head must be one of {PHASE_HEADS}, not {self.phase_head!r}")
+        if self.gc_scale not in GC_SCALES:
+            raise ValueError(f"gc_scale must be one of {GC_SCALES}, not {self.gc_scale!r}")
 
     def to_dict(self) -> dict:
         d = asdict(self)

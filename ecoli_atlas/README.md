@@ -322,6 +322,17 @@ between-study share of the variance is still about four times its no-study-effec
 covariates remove 0.01-0.02 of it (`work/batch_correction/`). Within-study contrasts are kept
 (r 0.999 against the observed counts).
 
+`train --gc-offset` puts the same GC offset into the decoder (`models.GCTerm`): each library's GC
+fit at every feature's GC content, with one learned scale (starting at 1; the manifest reports it
+under `gc_term`). `gc_slope` and `gc_curv` then leave the linear covariate term, so the decoder
+explains GC once; the residual encoder still sees them. Corrected counts from such a bundle use the
+decoder's own term and need no feature table. With a learned scale the atlas fit settled at 0.62 and
+the embedding took the rest of the GC effect (its GC-slope R2 rose from 0.33 to 0.57): the split
+between the term and z is not identified. `--gc-scale fixed` holds the scale at 1, the gene-level
+value of the measured fit (subtracting it leaves no GC trend in the observed counts). On the atlas it left less GC in the decoded
+counts (trend 0.13 against 0.42) but z still carried more GC than with the plain linear term,
+so neither variant is the default.
+
 The GC offset needs each feature's GC content: the package ships it for the inGEST counting
 annotation (`reference/feature_gc_counting_v2.tsv`, made by `scripts/feature_gc.py`); `--feature-gc`
 takes a table for another annotation, and `embed` refuses a table whose features or lengths do not

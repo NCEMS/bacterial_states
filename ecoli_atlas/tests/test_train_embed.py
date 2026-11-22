@@ -679,6 +679,56 @@ def test_corrected_and_decoded_counts(trained, atlas_files, tmp_path):
                  "--out", str(tmp_path / "nogc"), "--device", "cpu", "--corrected-counts"]) == 1          # no GC table for these features
 
 
+def test_gc_term_in_the_decoder(train_args, atlas_files, tmp_path):
+    from ecoli_atlas.technical import load_feature_gc
+    gc_path = _feature_gc_table(atlas_files, tmp_path)
+    out = tmp_path / "gc"
+    assert main(["train", *train_args, "--out", str(out), "--epochs", "4", "--device", "cpu", "--test-frac", "0.2",
+                 "--gc-offset", "--feature-gc", str(gc_path)]) == 0
+    manifest = json.loads((out / "manifest.json").read_text())
+    assert manifest["gc_term"]["on"] and manifest["config"]["gc_offset"] and abs(manifest["gc_term"]["scale"] - 1) < 0.5
+    assert manifest["gc_term"]["scale"] != 1.0                                     # the scale is fitted (starts at 1)
+    bundle = ModelBundle.load(out)
+    model, sc = bundle.model, bundle.scaler
+    gt = model.gc_term
+    j, k = sc.names.index("gc_slope"), sc.names.index("gc_curv")
+    assert gt.keep[j] == 0 and gt.keep[k] == 0 and gt.keep.sum() == len(sc.names) - 2
+    gc = load_feature_gc(gc_path).loc[bundle.fs.ids, "GC"].to_numpy()
+    assert np.allclose(gt.x.numpy(), (gc - 0.5) * 10, atol=1e-6)
+    # the GC covariates reach the decoder only through the GC term: a change of the slope moves the log rate by scale x slope x GC
+    z = torch.zeros(1, bundle.config.hparams.z_dim)
+    c = torch.zeros(1, len(sc.names))
+    c2 = c.clone()
+    c2[0, j] += 1.0 / sc.sd[sc.numeric.index("gc_slope")]                 # +1 on the raw gc_slope
+    with torch.no_grad():
+        d = (model.decode(z, c2) - model.decode(z, c)).numpy()[0]
+    x = gt.x.numpy()
+    mrna = np.asarray(bundle.fs.is_mrna)
+    assert np.allclose(d, float(gt.scale) * (x - x[mrna].mean()), atol=1e-4)
+    # embed reproduces the training embedding, and the corrected counts need no feature table (the term is in the bundle)
+    counts = read_counts(atlas_files["counts"])
+    qc = pd.read_csv(atlas_files["qc"], sep="\t", dtype=str, keep_default_na=False).set_index("GSM")
+    res = embed_counts(bundle, counts[["GSM0000", "GSM0105"]], qc, products=("corrected", "decoded"))
+    ref = pd.read_csv(out / "embedding.tsv", sep="\t", index_col=0).loc[["GSM0000", "GSM0105"]]
+    assert np.allclose(res["embedding"].to_numpy(), ref.to_numpy(), atol=2e-4) and res["corrected_counts"].shape[1] == 2
+    # a fixed scale stays at 1; --gc-scale needs the term
+    fixed = tmp_path / "gc_fixed"
+    assert main(["train", *train_args, "--out", str(fixed), "--epochs", "4", "--device", "cpu", "--test-frac", "0.2",
+                 "--gc-offset", "--gc-scale", "fixed", "--feature-gc", str(gc_path)]) == 0
+    mf = json.loads((fixed / "manifest.json").read_text())
+    assert mf["gc_term"]["scale"] == 1.0 and mf["config"]["gc_scale"] == "fixed"
+    with pytest.raises(SystemExit, match="--gc-offset"):
+        main(["train", *train_args, "--out", str(tmp_path / "x"), "--epochs", "1", "--device", "cpu", "--gc-scale", "fixed"])
+    with pytest.raises(ValueError, match="gc_scale"):
+        TrainConfig(gc_scale="free")
+    # a model without the GC covariates cannot have the term
+    from ecoli_atlas.data import _feature_gc
+    from ecoli_atlas.features import FeatureSet
+    cfg = TrainConfig(gc_offset=True, covariates=("paired", "strand_purity"))
+    with pytest.raises(ValueError, match="gc_slope and gc_curv"):
+        _feature_gc(cfg, FeatureSet.from_table(read_feature_table(atlas_files["features"])))
+
+
 def test_embed_and_prepare_read_an_ingest_run(trained, atlas_files, tmp_path):
     from ecoli_atlas.data import qc_covariates
     from ecoli_atlas.prepare import prepare

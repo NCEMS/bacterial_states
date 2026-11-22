@@ -92,7 +92,8 @@ def embed_counts(bundle: ModelBundle, counts: pd.DataFrame, qc: pd.DataFrame, de
         unknown = set(products) - {"corrected", "decoded"}
         if unknown:
             raise ValueError(f"unknown count products {sorted(unknown)}")
-        gc = feature_gc_for(bundle.fs, load_feature_gc() if feature_gc is None else feature_gc)
+        own = hasattr(bundle.model, "gc_term")            # a bundle with the GC term in its decoder needs no feature table
+        gc = None if own else feature_gc_for(bundle.fs, load_feature_gc() if feature_gc is None else feature_gc)
         q = qc.reindex(ids).fillna("")
         slope = pd.to_numeric(_qc_value(q, "gc_slope"), errors="coerce").to_numpy(dtype=np.float64)
         curv = pd.to_numeric(_qc_value(q, "gc_curv"), errors="coerce").to_numpy(dtype=np.float64)

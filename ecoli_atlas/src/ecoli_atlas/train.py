@@ -252,6 +252,18 @@ def run_epochs(model, params: list, data: TrainingData, cfg: TrainConfig, device
     return history
 
 
+def configure_gc_term(model, data: TrainingData) -> None:
+    """Set the GC term's feature GC content and the scaling of the two GC covariates (``models.GCTerm``)."""
+    from .technical import GC_FIT_MIN_LENGTH
+    gc = data.extra["feature_gc"]
+    names, numeric = list(data.scaler.names), list(data.scaler.numeric)
+    x = (gc - 0.5) * 10
+    long = np.asarray(data.fs.is_mrna) & (np.asarray(data.fs.lengths) >= GC_FIT_MIN_LENGTH)
+    k = [numeric.index(n) for n in ("gc_slope", "gc_curv")]
+    model.gc_term.configure(gc, data.fs.is_mrna, float(x[long].mean() if long.any() else x.mean()),
+                            (names.index("gc_slope"), names.index("gc_curv")), data.scaler.mu[k], data.scaler.sd[k])
+
+
 def fit(data: TrainingData, cfg: TrainConfig, device, rows: np.ndarray | None = None, seed: int | None = None,
         epochs: int | None = None, log=None) -> tuple:
     """Train on ``rows`` (default: the training pool) in the way ``cfg.fit`` names. Returns the model
@@ -262,7 +274,11 @@ def fit(data: TrainingData, cfg: TrainConfig, device, rows: np.ndarray | None = 
     rows = data.tr_rows if rows is None else np.asarray(rows)
     set_seed(seed)
     model = build_model(cfg.fit, data.fs.n, data.C.shape[1], cfg.hparams, torch.tensor(data.log_mean), cfg.phase_head,
-                        dna=data.dna_rho is not None).to(device)
+                        dna=data.dna_rho is not None, gc=cfg.gc_offset).to(device)
+    if cfg.gc_offset:
+        configure_gc_term(model, data)
+        if cfg.gc_scale == "fixed":
+            model.gc_term.scale.requires_grad_(False)          # held at 1 (no optimiser step reaches it without a gradient)
     history = []
     if cfg.fit == "two_stage":
         for h in HEADS:
