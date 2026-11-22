@@ -228,16 +228,25 @@ without QC (user decision: no hiding of covariates in training), and `embed` ref
 `data.check_qc`). Covariates are technical only (`config.COVARIATES`, 11 since the instrument flags were dropped;
 `work/qc_blocks/`); the block encoders never see them.
 
-Batch-corrected counts (planned 2026-11-21, after the block-encoder work). Corrected counts = decoding a sample's z
-with the covariates set to a reference library. That needs z free of the batch effect, a covariate term of the right
-form, and technical effects separable from biology (covariates are near-constant within a study, so the term is
-learned from between-study differences). Order:
-1. `embed --corrected-counts` (decode at a reference c: paired-end, median fragment size, gc_slope = gc_curv = 0) and
-   metrics, on the current model, no retraining: twin pairs agree better than raw; between-study spread of one
-   reference condition drops; within-study `phase_lfc` and medium contrasts kept; same-study kNN rate falls while
-   label agreement holds; no gene GC / length trend left against the covariates.
+Batch-corrected counts (planned 2026-11-21, after the block-encoder work; exploration in `work/batch_correction/`).
+Corrected counts = a sample's OBSERVED log counts with the technical part swapped for that of a reference library:
+log y + W (c_ref - c) (the decoder's covariate term is additive in the log rate) minus the mechanistic GC offset;
+every sample keeps its own detail. Decoded counts (the decoder at z) are a separate, denoised product, not corrected
+counts: they lose real within-study contrast through the embedding (stationary - exponential LFC r 0.88 against a
+noise ceiling of ~0.98 on training studies, 0.71 on the TEST study). Batch removal needs a covariate term of the right
+form and technical effects separable from biology (covariates are near-constant within a study, so the term is learned
+from between-study differences; within one strain and condition the between-study share is still ~4x the null, and the
+measured covariates remove ~0.01-0.02 of it). Order:
+1. `embed --corrected-counts` (observed + W (c_ref - c) - GC offset; reference c: paired-end, training means, paired-end
+   mean fragment sizes, gc_slope = gc_curv = 0) and `--decoded-counts` (denoised), with metrics, on the current model, no
+   retraining: between-study share of one reference condition (MG1655 / K-12, mid exponential, aerobic, 37 C, M9 glucose
+   and LB) against a shuffled-label null; within-study `phase_lfc` and medium contrasts kept; no gene GC / length trend
+   left against the covariates; twin pairs agree better than raw, once twins exist. The decoded product also reports how
+   much within-study contrast it keeps against the split-half noise ceiling.
 2. Mechanistic GC offset in the decoder: gc_slope * x_g + gc_curv * x_g^2 from each gene's GC profile, one learned
    scale (the gene-level check gave factor 1.05, R2 0.39; `work/gc_bias/`); same idea for fragment size x gene length.
+   Preview without fitting: subtracting it from the observed counts removes the per-sample GC trend entirely (corr with
+   gc_slope 0.61 -> 0.02; the learned linear term only 0.61 -> 0.35) and keeps within-study LFCs (r 0.9995).
 3. Technical twins (`atlas_build/twins/make_twins.py`; only the DNA variants exist): the ~200-sample set of t36/t50/t75,
    se, se_t50, d1M, d250k (about 1,400 short inGEST runs, the user submits); in training, an invariance loss that
    makes a twin pair share z, so the covariate term is identified inside a sample. Truncation does not cover fragment
