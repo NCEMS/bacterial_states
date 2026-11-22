@@ -133,3 +133,39 @@ def test_cli_writes_tables_and_figures(tmp_path):
     assert main(args + ["--axis", "letter:letter:a,b,c,d,e", "--blocks", "phase"]) == 0
     assert len(json.loads((out / "axis_letter_summary.json").read_text())["weights"]["ordinal"]) == 3
     assert main(args + ["--axis", "letter:nope:a,b"]) == 1 and main(args + ["--axis", "letter:letter:a,b", "--blocks", "nope"]) == 1
+
+
+def test_cli_scores_new_samples(tmp_path):
+    """--query places embedded new samples on the axes (scored only), --exclude-study keeps an atlas study out of the fits,
+    and --series reads a sample table as PATH:SERIES_COLUMN:X_COLUMN."""
+    Z, frame = synthetic()
+    models = tmp_path / "bundle"
+    models.mkdir()
+    cols = [f"z{i + 1}" for i in range(Z.shape[1])]
+    emb = pd.DataFrame(Z, index=frame.index, columns=cols)
+    emb.index.name = "sample"
+    emb.to_csv(models / "embedding.tsv", sep="\t")
+    pd.DataFrame({"gse": frame["gse"], "reference": True, "split": frame["split"], "cv_fold": 1.0}).to_csv(models / "splits.csv")
+    (models / "manifest.json").write_text(json.dumps({"embedding_blocks": [{"block": "phase", "start": 0, "end": 3}, {"block": "residual", "start": 3, "end": 8}]}))
+    pd.DataFrame({"GSM": frame.index, "GSE": frame["gse"].to_numpy(), "letter": frame["category"].to_numpy(), "treated": "false"}).to_csv(
+        tmp_path / "meta.tsv", sep="\t", index=False)
+    # new samples: copies of study G01's samples under other names, with a sample table giving a series
+    g01 = frame.index[frame["gse"] == "G01"]
+    q = emb.loc[g01].copy()
+    q.index = [f"new{i}" for i in range(len(q))]
+    (tmp_path / "embedded").mkdir()
+    q.to_csv(tmp_path / "embedded" / "embedding.tsv", sep="\t")
+    pd.DataFrame({"sample_id": q.index, "rep": "r1", "hours": np.arange(len(q)) + 1}).to_csv(tmp_path / "samples.csv", index=False)
+    out = tmp_path / "out"
+    args = ["axes", "--models", str(models), "--metadata", str(tmp_path / "meta.tsv"), "--out", str(out), "--formats", "png",
+            "--axis", "letter:letter:a,b,c,d,e", "--axis", "copy:letter:a,e", "--query", str(tmp_path / "embedded"), "--query-study", "NEW",
+            "--exclude-study", "G01", "--series", f"{tmp_path / 'samples.csv'}:rep:hours"]
+    assert main(args) == 0
+    s = pd.read_csv(out / "axis_letter_scores.tsv", sep="\t", index_col=0)
+    assert not set(g01) & set(s.index)                                   # the excluded study is gone
+    new = s.loc[list(q.index)]
+    assert (new["role"] == "query").all() and (new["gse"] == "NEW").all() and new["ordinal"].notna().all()
+    assert {"fig_axis_letter_series.png", "fig_axes_letter_by_copy.png"} <= {p.name for p in out.iterdir()}
+    # a query embedded with another bundle (other columns) is refused
+    q.rename(columns={"z1": "x1"}).to_csv(tmp_path / "embedded" / "embedding.tsv", sep="\t")
+    assert main(args) == 1

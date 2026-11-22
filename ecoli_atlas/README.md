@@ -531,7 +531,13 @@ ecoli_atlas axes --models outputs/models --metadata atlas_data/metadata_v2.tsv \
 - `--where COLUMN=VALUE` restricts which samples get a category; `--blocks` restricts the embedding
   to named blocks (`phase`, `medium`, `lab_strain`, `residual`).
 - `--series` is a table `sample, series, x[, x_label]` of ordered series (time courses), drawn as
-  trajectories of the ordinal score.
+  trajectories of the ordinal score, or `PATH:SERIES_COLUMN:X_COLUMN` for any sample table (CSV or TSV,
+  first column the sample id), e.g. `samples.csv:replicate:time_h`.
+- `--query DIR` places new samples (an `embed` output made with the same bundle) on the axes: they are
+  only scored, by the model of all fitted samples, get `role` = query in the score tables and are drawn
+  over the map of two axes, joined along their series. `--query-study` names their study (default
+  `query`); `--exclude-study GSE` leaves an atlas study out of the fits and the tables, e.g. the study the
+  new samples come from (the worked example `examples/GSE67402_*` does both).
 
 The example axes of the paper (growth phase, oxygen, sugar against non-sugar carbon sources and glycerol, the last two in
 defined minimal media) are one script, rerun after every refit:

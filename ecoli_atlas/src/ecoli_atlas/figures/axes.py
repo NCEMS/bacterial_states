@@ -86,8 +86,10 @@ def fig_axis_series(scores: pd.DataFrame, series: pd.DataFrame, spec, out_dir, f
     savefig(fig, out_dir, f"fig_axis_{spec.name}_series", formats)
 
 
-def fig_axes_map(scores_x: pd.DataFrame, spec_x, scores_y: pd.DataFrame, spec_y, out_dir, formats, method: str = "ordinal") -> None:
-    """Two axes against each other, twice: coloured by the categories of the first and of the second axis."""
+def fig_axes_map(scores_x: pd.DataFrame, spec_x, scores_y: pd.DataFrame, spec_y, out_dir, formats, method: str = "ordinal",
+                 query=None, series: pd.DataFrame | None = None) -> None:
+    """Two axes against each other, twice: coloured by the categories of the first and of the second axis. ``query``
+    samples (`axes --query`) are drawn on top, joined along their ``series`` in the order of x."""
     import matplotlib.pyplot as plt
     both = pd.DataFrame({"x": scores_x[method], "y": scores_y[method], "cx": scores_x["category"], "cy": scores_y["category"]}).dropna(subset=["x", "y"])
     fig, axes = plt.subplots(1, 2, figsize=(16, 7))
@@ -101,6 +103,16 @@ def fig_axes_map(scores_x: pd.DataFrame, spec_x, scores_y: pd.DataFrame, spec_y,
         ax.set_xlabel(f"{pretty(spec_x.name)} ({METHOD_LABEL[method]})")
         ax.set_ylabel(f"{pretty(spec_y.name)} ({METHOD_LABEL[method]})")
         ax.set_title(f"coloured by {pretty(spec.name)}", fontsize=13)
+        if query:
+            qs = both.loc[both.index.intersection(list(query))]
+            if series is not None:
+                path = series.set_index("sample").join(qs[["x", "y"]], how="inner", rsuffix="_score")
+                for _, line in path.groupby("series"):
+                    line = line.groupby("x")[["x_score", "y"]].mean() if "x_score" in line.columns else None
+                    if line is not None:
+                        ax.plot(line["x_score"], line["y"], color="black", lw=1.0, alpha=0.7, zorder=4)
+            ax.scatter(qs["x"], qs["y"], s=36, color="white", edgecolors="black", linewidths=1.0, zorder=5,
+                       label=f"query ({len(qs)})")
         ax.legend(fontsize=9, markerscale=2, frameon=False)
     fig.tight_layout()
     savefig(fig, out_dir, f"fig_axes_{spec_x.name}_by_{spec_y.name}", formats)

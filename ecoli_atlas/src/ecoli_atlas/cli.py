@@ -575,6 +575,27 @@ def cmd_casestudy(args) -> int:
     return 1 if failed else 0
 
 
+def _series_table(spec: str, query_study: str | None = None) -> pd.DataFrame:
+    """--series: a table (sample, series, x[, x_label]), or ``PATH:SERIES_COLUMN:X_COLUMN`` for any sample table (CSV or
+    TSV, first column the sample id), e.g. ``samples.csv:replicate:time_h``; then the series are named after the
+    query study (or the column) and its values."""
+    if Path(spec).exists() or spec.count(":") < 2:
+        t = pd.read_csv(spec, sep="\t", dtype={"sample": str, "series": str})
+        lacking = {"sample", "series", "x"} - set(t.columns)
+        if lacking:
+            raise ValueError(f"{spec} lacks columns {sorted(lacking)}")
+        return t
+    path, scol, xcol = spec.rsplit(":", 2)
+    t = pd.read_csv(path, sep="," if path.endswith(".csv") else "\t", dtype=str, keep_default_na=False)
+    t = t.set_index(t.columns[0])
+    for c in (scol, xcol):
+        if c not in t.columns:
+            raise KeyError(f"{path} has no column {c!r}")
+    prefix = f"{query_study} " if query_study else ""
+    return pd.DataFrame({"sample": t.index.astype(str).str.strip(), "series": [f"{prefix}{scol} {v}" for v in t[scol]],
+                         "x": pd.to_numeric(t[xcol], errors="coerce").to_numpy(), "x_label": xcol}).dropna(subset=["x"])
+
+
 def cmd_axes(args) -> int:
     from .axes import AxisSpec, axis_scores, category_frame, load_embedding, summarize
     from .data import read_table
@@ -587,21 +608,44 @@ def cmd_axes(args) -> int:
         _info(f"error: {e}")
         return 1
     meta = read_table(args.metadata)
+    if args.exclude_study:                       # atlas studies kept out of the fits and the tables (e.g. a held-out study)
+        keep = ~splits["gse"].astype(str).isin(args.exclude_study).to_numpy()
+        emb, splits = emb[keep], splits[keep]
     missing = sorted(set(emb.index) - set(meta.index))
     if missing:
         _info(f"error: {len(missing)} samples of the embedding are not in the metadata ({missing[:5]})")
         return 1
     meta = meta.loc[emb.index]
+    query_ids: list = []
+    if args.query:                               # new samples (`embed` output): only scored, never fitted
+        qpath = Path(args.query)
+        qpath = qpath / "embedding.tsv" if qpath.is_dir() else qpath
+        try:
+            q = pd.read_csv(qpath, sep="\t", index_col=0)
+        except FileNotFoundError as e:
+            _info(f"error: {e}")
+            return 1
+        q.index = q.index.astype(str)
+        lacking = [c for c in emb.columns if c not in q.columns]
+        clash = sorted(set(q.index) & set(emb.index))
+        if lacking or clash:
+            _info(f"error: --query {qpath}: " + (f"lacks the embedding columns {lacking[:5]} (embedded with another bundle?)" if lacking
+                                                  else f"{len(clash)} sample names are also atlas samples ({clash[:5]})"))
+            return 1
+        query_ids = list(q.index)
+        emb = pd.concat([emb, q[list(emb.columns)]])
+        splits = pd.concat([splits, pd.DataFrame({"gse": args.query_study, "split": 3}, index=q.index)])
+        meta = pd.concat([meta, pd.DataFrame("", index=q.index, columns=meta.columns)])
     where: dict = {}
     for w in args.where or ():
         col, _, values = w.partition("=")
         where[col.strip()] = [v.strip() for v in values.split(",")]
     series = None
     if args.series:
-        series = pd.read_csv(args.series, sep="\t", dtype={"sample": str, "series": str})
-        lacking = {"sample", "series", "x"} - set(series.columns)
-        if lacking:
-            _info(f"error: {args.series} lacks columns {sorted(lacking)}")
+        try:
+            series = _series_table(args.series, args.query_study if query_ids else None)
+        except (ValueError, FileNotFoundError, KeyError) as e:
+            _info(f"error: --series: {e}")
             return 1
     out, formats = Path(args.out), tuple(args.formats.split(","))
     out.mkdir(parents=True, exist_ok=True)
@@ -616,6 +660,8 @@ def cmd_axes(args) -> int:
             return 1
         scores = res["scores"]
         scores.index.name = "sample"
+        if query_ids:
+            scores.loc[query_ids, "role"] = "query"
         if spec.members:                          # grouped categories: keep the column value of each sample
             scores.insert(scores.columns.get_loc("category") + 1, "value",
                           meta[spec.column].astype(str).str.strip().reindex(scores.index).where(scores["category"] != "", ""))
@@ -638,7 +684,8 @@ def cmd_axes(args) -> int:
     names = list(done)
     for i in range(len(names)):
         for j in range(i + 1, len(names)):
-            fig_axes_map(done[names[i]][0], done[names[i]][1], done[names[j]][0], done[names[j]][1], out, formats)
+            fig_axes_map(done[names[i]][0], done[names[i]][1], done[names[j]][0], done[names[j]][1], out, formats,
+                         query=query_ids, series=series)
     _info(f"wrote the axis tables and figures to {out}")
     return 0
 
@@ -833,7 +880,14 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--where", action="append", metavar="COLUMN=VALUE[,VALUE]",
                     help="only samples with these metadata values get a category; repeatable")
     sp.add_argument("--blocks", default="all", help="embedding blocks to use, comma-separated (default: the whole embedding)")
-    sp.add_argument("--series", help="table (sample, series, x[, x_label]) of ordered series, e.g. time courses, drawn as trajectories")
+    sp.add_argument("--series", help="ordered series, e.g. time courses, drawn as trajectories: a table (sample, series, x[, x_label]), or "
+                    "PATH:SERIES_COLUMN:X_COLUMN for any sample table (first column the sample id), e.g. samples.csv:replicate:time_h")
+    sp.add_argument("--query", help="new samples to place on the axes: an `embed` output directory (or its embedding.tsv) made with the "
+                    "same bundle; they are only scored, by the model of all fitted samples, and drawn over the map of two axes")
+    sp.add_argument("--query-study", default="query", help="study label of the --query samples (default: query)")
+    sp.add_argument("--exclude-study", action="append", metavar="GSE",
+                    help="leave the atlas samples of this study out of the fits and the tables (repeatable), e.g. the study the "
+                    "--query samples come from, so that it stays unseen")
     sp.add_argument("--folds", type=int, default=5, help="study folds of the out-of-fold scores")
     sp.add_argument("--l2", type=float, default=1.0, help="ridge penalty of the ordinal model")
     sp.add_argument("--seed", type=int, default=0)
