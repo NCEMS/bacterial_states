@@ -33,7 +33,7 @@ Never `git add` any of these (all in `.gitignore`): `resources/`, `old_resources
 | `work/atlas_full/results/<batch>/` | the atlas recount: 102 batches plus re-runs (`PE_R01`) | source of the three `atlas_v2_*` tables and of the `full_*` columns |
 | `outputs/models/`, `outputs/figures/`, `outputs/axes_examples/` | bundle, figures and example axes of the model on this branch (unversioned paths: the package does not label directories with v1 / v2; only downloaded release packages carry a version) | written by `ecoli_atlas train` / `figures` / `scripts/axes_examples.sh`. Sweeps go to their own `outputs/models_<name>/` |
 | `outputs/v1_originals/` | the v1 originals, moved there on 2026-11-22 (user decision) to free their paths: `models/`, `atlas/` (Colab-trained bundle and its atlas; published as `ecoli_atlas_models_v1.tar.gz` in the `resources-v1` release), `figures/` (Colab reference figures, mixed sessions), `predictions/` (`final_embedding.csv`, 3342 samples), `factor_gene_correlations.txt` (GSEA list) | **never overwrite or commit**; not readable by this branch's code. `main` still expects them at `outputs/models` etc. |
-| `outputs/models_repro*/`, `outputs/atlas_repro/`, `outputs/figures_repro/` | v1 refits and reproductions made on `main` | kept for comparison |
+| `outputs/v1_originals/{models_repro,models_repro_sweep,atlas_repro,figures_repro,predictions_paper1}/` | v1 refits and reproductions made on `main`, moved there with the originals (2026-11-22) | kept for comparison |
 | `work/neighbors_*/` | `ecoli_atlas neighbors` runs (oxygen studies, withheld GSE224463) | scratch |
 | `examples/<GSE>_<name>/` | worked examples; only `config.yaml`, `samples.csv`, `README.md` are tracked, everything a run writes there (`sra/`, `results/`, `atlas/`, logs) is ignored | run directories with `results_dir: "results"` |
 | `work/experiment3/` | the tutorial run (4 samples) used for verification | a run directory; results in `experiment3_results/` |
@@ -204,8 +204,8 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   `figure_metrics.json` checks the embedding and the TEST metrics against the bundle; `--strict`).
   `ecoli_atlas casestudy` has `uti`, `oxygen` (GSE189154 only: GSE78756 and GSE80451 failed the
   prescreen) and `glu-cas` (GSE271069, now in the training pool, so no longer an outside test).
-  Both write into `outputs/figures/`; never into `outputs/v1_originals/` or `outputs/figures_repro`
-  (v1), and never into a bundle (out-of-fold scores made for `threshold_curves` stay beside the
+  Both write into `outputs/figures/`; never into `outputs/v1_originals/` (v1 originals and
+  refits), and never into a bundle (out-of-fold scores made for `threshold_curves` stay beside the
   figures). Run the two test suites in their own envs:
   `pytest ecoli_atlas/tests` (ecoli_atlas), `pytest ecoli_ingest/tests` (ecoli_ingest).
 
