@@ -1,13 +1,34 @@
 # Ecoli_ATLAS
 
-Embeds *E. coli* RNA-seq samples with a conditional encoder–decoder trained on thousands of public
-samples, and places new samples in the resulting **atlas**.
+Embeds *E. coli* RNA-seq samples with an encoder–decoder trained on thousands of public samples
+counted with Ecoli_inGEST, and places new samples in that embedding.
 
-The model is three supervised *factor encoders* (growth phase, medium type, lab strain) whose
-embedding blocks are concatenated with the output of a *residual autoencoder* that reconstructs
-expression from `[factor blocks | residual]` under a within-study push and a cross-study
-control pull. The final embedding has 46 dimensions (`growth_phase[0..5]`, `medium_type[0..11]`,
-`is_lab_strain[0..3]`, `residual[0..23]`).
+The embedding has one block per call and a residual block, 27 dimensions, and is fitted in the
+two stages of the first atlas model (count model and covariates: [`docs/atlas_model_v2.md`](../docs/atlas_model_v2.md)):
+
+| Block | Dimensions | Fitted on |
+|---|---|---|
+| growth phase (exponential / stationary) | 1 | training samples with a phase label |
+| medium type (rich / minimal) | 1 | training samples with a medium label |
+| lab strain (`lab_strain`: lab / non-lab) | 1 | training samples with a known strain group |
+| residual | 24 | all training samples, blocks frozen |
+
+The first model had 6 / 12 / 4 / 24 (46 dimensions). Sweeps with the call blocks cut to one dimension each
+lost nothing: the same calls, the same neighbours inside each block, the residual no richer; the decoder's TEST
+NLL rose by about one seed SD (`work/phase_dims/NOTES.md`). `train --block-dims` changes the sizes
+(`phase=6,medium=12,lab_strain=4` for v1's, `residual=16`; blocks not named keep theirs). The bundle records them (`embedding_blocks` in `manifest.json`), and `embed`, `evaluate` and
+`figures` read them from there.
+
+- **Block encoders:** z-scored log expression → the block; a linear head on the block gives the
+  call. Class-weighted cross-entropy, labelled samples only.
+- **Residual encoder:** z-scored log expression plus library covariates → the residual block.
+- **Decoder:** the whole embedding and the covariates → expected counts, with a negative binomial
+  likelihood on the raw counts and the size factor as an offset.
+- **Alignment terms** (residual stage, on the whole embedding): samples of one study known to
+  differ are kept apart; matching control conditions of different studies are drawn together.
+
+This is the first stage of the design. Not yet in the model: batch-corrected counts. The earlier (v1) model and its
+`verify-models` command are in the `v1.0.0` code release and the `resources-v1` data release.
 
 ## Install
 
@@ -18,238 +39,609 @@ pip install -e "./ecoli_atlas[dev]"
 pytest ecoli_atlas/tests
 ```
 
-The environment uses the CPU build of PyTorch, enough for `embed` and `compare`. For training on a
-GPU node install a CUDA build of `pytorch` instead. Without installing you can run
-`bin/ecoli_atlas` from the checkout if the dependencies are present.
+The environment has the CPU build of PyTorch. A single training run takes minutes on 8 CPU threads
+(about 3 s per epoch on 6,800 samples); a GPU is worth it for seed sweeps and cross-validation. For
+a GPU node:
 
-## Data
+```bash
+pip install --force-reinstall torch --index-url https://download.pytorch.org/whl/cu126
+python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"
+```
 
-Code and data are separate. Two bundles, downloaded with `ecoli_atlas download` from the
-[`resources-v1` release](https://github.com/NCEMS/bacterial_states/releases/tag/resources-v1) and checked against a
-pinned SHA-256 before unpacking:
+Without installing, `bin/ecoli_atlas` runs the CLI from the checkout if the dependencies are present.
 
-| Bundle | Files | Default location |
+## Data bundles
+
+```bash
+ecoli_atlas download models          # outputs/models: the model, its atlas embedding, all seeds
+ecoli_atlas download training-data   # atlas_data: everything needed to retrain the model or check its labels
+ecoli_atlas download all --dry-run   # what would be fetched, and where
+```
+
+Both are assets of the GitHub release
+[`resources-v2`](https://github.com/NCEMS/bacterial_states/releases/tag/resources-v2); each archive's SHA-256 is pinned in
+`download.py` and checked before anything is unpacked. `--dest` unpacks elsewhere; by default the target is under
+`$BS_DATA_ROOT`, or the current directory.
+
+| Bundle | Files | Size |
 |---|---|---|
-| `models` | `models/{growth_phase,medium_type,is_lab_strain}_encoder.pt`, `residual_ae.pt`, `preprocessing.pt`, `manifest.json`, `splits.csv`; `atlas/final_embedding.csv`, `sample_predictions.csv`, `embedding_block_layout.csv`, `atlas_metadata.csv`, `atlas_manifest.json` | `outputs/` |
-| `training-data` | `merged_count_table.txt` (4493 genes × 3342 samples), `metadata_revised.csv`, `GCF_000005845.2_ASM584v2_feature_table.txt` | `atlas_data/` |
+| `models` | `models/`: the selected seed (`model.pt`, `preprocessing.pt`, `manifest.json`, `splits.csv`, `evaluation.json`), the atlas it defines (`embedding.tsv`, `predictions.tsv`, `cv_predictions.tsv`, `missing_genes.tsv`), and `seed_1` ... `seed_8` (each a full bundle; `drivers` averages over them) | 312 MB download, 378 MB unpacked |
+| `training-data` | `atlas_v2_counts.tsv`, `atlas_v2_antisense_counts.tsv` (sense and antisense counts, inGEST feature ids x GSM), `metadata_v2.tsv` (labels per sample, with replicate groups), `sample_qc.tsv` (QC values; `in_model` = the model's samples), `time_courses.tsv` (the phase-order term's series), `atlas_v2_missing_genes.tsv` (genes called missing in each sample, `sample` / `feature`), and the metadata's sources: `metadata_v2_studies.tsv` and `metadata_v2_sample_text.tsv` (GEO text), `metadata_v2_evidence.tsv` (the passage behind each label), `metadata_v2_label_scheme.yaml` | 100 MB download, 301 MB unpacked |
 
-Defaults are relative to `$BS_DATA_ROOT` (or the current directory); override with
-`$ECOLI_ATLAS_DATA`, `$ECOLI_ATLAS_MODELS`, or the `--models` / `--atlas` / `--feature-table` options.
+The counting annotation (`*_counting_v2.features.tsv`, needed by `train`, `figures` and `casestudy`) is in the inGEST
+core bundle (`ecoli_ingest download core`). The archives are built by `release/make_release.py` (reproducible: the same
+files give the same bytes).
+
+## Inputs
+
+| Table | Made by | Content |
+|---|---|---|
+| `atlas_v2_counts.tsv` | `ecoli_ingest/atlas_build/full_run/collect_results.py` | features × samples, inGEST feature ids (`CDS_b0002_thrA`), GSM columns |
+| `metadata_v2.tsv` | `ecoli_ingest/atlas_build/metadata/apply_labels.py` | labels per sample ([`docs/metadata_v2.md`](../docs/metadata_v2.md)) |
+| `sample_qc.tsv` | `ecoli_ingest/atlas_build/prescreen/qc_table.py` | QC values per sample; `in_model` names the samples of the model |
+| `*_counting_v2.features.tsv` | the inGEST counting annotation | type, symbol and length of every feature |
+
+**Features.** mRNA features (CDS, pseudogenes) and the other RNAs (ncRNA genes, Rfam hits) are
+encoder inputs and decoder outputs. Only mRNA features enter the size factor. rRNA and tRNA are
+neither and are not used.
+
+**Covariates** (`config.COVARIATES`, recorded in the manifest as `config.covariates`): technical
+values of the library and the sequencing run only. Layout (paired or single), fragment-size
+quantiles (paired-end), read-1 length quantiles after trimming, strand purity, substitution rate
+against MG1655 (log; a property of the sequencing run more than of the strain), GC bias (slope
+and curvature of log coverage against GC inside genes, from the QC record's `gc_bias`, so
+expression levels drop out; it replaces the read GC share) and instrument family; 15 in all. A
+value that does not exist for a sample (fragment sizes of a single-end
+library) is set to the training mean. Left out because they move with the cells' state (0.8 to 1.5
+within-study SD between exponential and stationary samples; `work/qc_blocks/`): rRNA, tRNA and
+mRNA composition, duplication rate, gene-body slope, GC content, share of reads on short features.
+Left out as redundant or handled elsewhere: depth (the size factor), the DNA estimate (samples
+above 10% are gated out), DNA leakage, intergenic share, trimming shares, cycles, mate-2 length,
+other genus. Study and strain are not covariates. Covariates go to the residual encoder and the
+decoder, not to the block encoders. Bundles made before the choice keep the 32 covariates they were
+trained with.
+
+**Labels** (`labels.py`).
+
+- Phase: `mid_exponential` → exponential, `stationary` → stationary, only for untreated standard
+  RNA-seq samples (`phase2` set). `late_stationary` has no label and is not used in any phase
+  evaluation. Lag, early exponential and transition have no label; the head's output on them is
+  reported as a check. (With `--phase-head ordinal` transition is a fitted level and late
+  stationary counts as stationary; see below.) The phase call is **scored** (TEST, out-of-fold, nearest
+  neighbours) only on samples whose phase is stated in the study's text (`growth_phase_basis`
+  `stated`); a phase inferred from an OD or a culture time is used for fitting only.
+- Medium: `medium_type` (rich / minimal), the two extremes only. Rich is a complex broth (LB,
+  Mueller-Hinton, TSB, BHI); minimal is salts with a carbon source (M9, MOPS, M63). Minimal medium
+  with a hydrolysate, defined rich media (DMEM, MOPS EZ rich) and natural fluids have no label; the
+  head's output on them is reported as a check.
+- Lab strain (`lab_strain`): `strain_group` K-12, B, C or W (the laboratory lineages) → `lab`; any other
+  known group (pathogens, natural isolates, probiotic strains) → `non_lab`; no label where the group is
+  empty. The probability column is `p_lab`. A bundle trained for other calls (`outputs/models_v2_k12`
+  has a `k12` call, K-12 against the rest) is refused by this version.
+
+**Sample selection.** `qc_table.py mark-model --metadata metadata_v2.tsv --min-cds-reads 200000 --max-dna-fraction 0.10`
+marks the samples that are usable by the metadata, were counted by the full inGEST run, have at
+least 200,000 reads on CDS features and a genomic-DNA estimate of at most 10%.
 
 ## Commands
 
-Everyday use: `prepare`, `embed`, `compare`. Reproduction: `train`, `verify-models`, `figures`,
-`casestudy`, `neighbors` (the last three are described further down).
-
 ```bash
-# 1. inGEST results -> atlas input format (counts.tsv genes x samples, samples.tsv)
-ecoli_atlas prepare --ingest-results my_run/tutorial_results --out prepared [--models outputs/models]
+T="--counts atlas_data/atlas_v2_counts.tsv --metadata atlas_data/metadata_v2.tsv --qc atlas_data/sample_qc.tsv \
+   --features resources/annotation/GCF_000005845.2_ASM584v2_counting_v2.features.tsv"
 
-# 2. embed new samples -> final_embedding.csv, sample_predictions.csv, embedding_block_layout.csv, gene_coverage.tsv
-ecoli_atlas embed --counts prepared/counts.tsv --models outputs/models --out embedded \
-                  --feature-table atlas_data/GCF_000005845.2_ASM584v2_feature_table.txt
+# the study split only (splits.csv), then the figures of the data
+ecoli_atlas train $T --out outputs/models --split-only
+ecoli_atlas figures --metadata atlas_data/metadata_v2.tsv --splits outputs/models --out outputs/figures
 
-# 3. compare with the atlas -> neighbors.tsv, summary.tsv, query_distances.tsv [, umap_atlas.csv, umap_query.csv, umap.png]
-ecoli_atlas compare --embeddings embedded/final_embedding.csv --atlas outputs/atlas --out compared -k 15 [--umap] \
-                    [--metadata prepared/samples.tsv --group-by condition [--order-by time_h] [--color-by replicate]]
+# train on that split and evaluate on the held-out studies
+ecoli_atlas train $T --out outputs/models --splits outputs/models/splits.csv [--device cuda]
+ecoli_atlas train $T --out outputs/models --splits outputs/models/splits.csv --seeds 1,2,3,4 --cv
 
-# 4. (re)train the model from the training bundle
-ecoli_atlas train --counts atlas_data/merged_count_table.txt --metadata atlas_data/metadata_revised.csv \
-                  --feature-table atlas_data/GCF_000005845.2_ASM584v2_feature_table.txt \
-                  --out outputs/models_new --hparams outputs/models/manifest.json --splits outputs/models/splits.csv \
-                  --no-tune --device cuda --write-atlas
+# evaluate a bundle again; embed new samples
+ecoli_atlas evaluate $T --models outputs/models --out outputs/models_eval
+ecoli_atlas embed --ingest-results my_run --models outputs/models --out embedded     # an inGEST run directory
+ecoli_atlas prepare --ingest-results my_run --out prepared [--metadata my_samples.tsv]   # the same tables, to look at or join
+ecoli_atlas embed --counts prepared/counts.tsv --qc prepared/qc.tsv --antisense prepared/antisense_counts.tsv \
+    --models outputs/models --out embedded
 
-# 5. compare two bundles
-ecoli_atlas verify-models --old outputs/models --new outputs/models_new \
-                  --counts atlas_data/merged_count_table.txt --metadata atlas_data/metadata_revised.csv \
-                  --feature-table atlas_data/GCF_000005845.2_ASM584v2_feature_table.txt --report verify.json
+# new samples against the atlas; studies of the atlas against the rest of it
+ecoli_atlas compare --embeddings embedded --models outputs/models --out compared \
+    [--atlas-metadata atlas_data/metadata_v2.tsv] [--metadata prepared/samples.tsv --group-by time_h --order-by time_h] [--umap]
+ecoli_atlas neighbors GSE224463 --models outputs/models --out neighbors [--metadata atlas_data/metadata_v2.tsv] [--umap]
 ```
 
-`embed` accepts featureCounts output, the inGEST `*_gene_symbols.tsv` / `*_counts_extended.tsv`
-tables, or any genes × samples TSV whose first column holds gene symbols or K-12 locus tags
-(b-numbers). It drops rRNA/tRNA, renames locus tags to symbols with the feature table, aligns to the
-model's 4385 genes (absent genes become 0 counts) and refuses to continue if fewer than
-`--min-gene-coverage` (default 90 %) of the model genes are present. Check `gene_coverage.tsv`.
+### Ways of fitting (`train --fit`)
 
-Class calls use argmax; `--apply-thresholds growth_phase` uses the saved operating threshold instead.
-
-### `compare` output (`summary.tsv`, one row per new sample)
-
-- `nearest_atlas_sample`, `nearest_distance`, `mean_knn_distance`, `top_study`, `top_study_frac`
-- per factor: `<f>_knn_vote` (majority label among the k neighbours, from curated atlas metadata
-  when available), `<f>_knn_frac`, `<f>_encoder_pred`, `<f>_agree`
-- per block: `<block>_knn_dist` (mean distance to the neighbours inside that block's sub-space)
-- `novelty_knn_dist` and `novelty_percentile`: distance to the k-th neighbour, as a percentile of
-  the same statistic for atlas samples against other studies. Values near 1 flag samples unlike
-  anything in the atlas.
-
-`neighbors.tsv` lists every (sample, rank) pair with the neighbour's study, strain, growth phase,
-medium and predicted labels. `--blocks growth_phase,residual` restricts distances to chosen blocks.
-
-`query_distances.tsv` is the distance matrix between the new samples themselves (same metric and
-blocks), i.e. how they relate to each other rather than to the atlas.
-
-### Groups of samples: `--metadata`, `--group-by`, `--order-by`, `--color-by`
-
-`--metadata` takes a table of the new samples with the sample id in the first column: a CSV, or the
-`samples.tsv` that `prepare --metadata` writes. Its columns are put in front of `summary.tsv`, and
-every sample must have a row. With `--group-by COL` (or `COL1,COL2`) the samples are summarised per
-group, e.g. per condition or time point:
-
-- `group_summary.tsv`, one row per group: `n`, `samples`; per factor `<f>_called_<class>` (fraction
-  of the group's samples the encoder calls that class), `<f>_prob_<class>` (mean probability),
-  `<f>_knn_vote` / `_knn_frac` (majority label among the group's pooled neighbours) and `<f>_agree`;
-  `top_study`, `top_studies`; `mean_nearest_distance`, `mean_knn_distance`,
-  `mean_novelty_percentile`; `within_group_distance` (mean distance between the group's own
-  samples: replicate agreement) and `distance_to_previous` (between the centroids of consecutive
-  groups).
-- Groups are listed in the order of `--order-by COL` (numerically when the column holds numbers,
-  such as a time), otherwise by their label.
-- Figures (`--formats`, default pdf and png; `--plots` writes the first two without groups):
-
-| Figure | Shows |
-|---|---|
-| `fig_query_distances` | heatmap of `query_distances.tsv`, samples sorted by group |
-| `fig_umap_groups` | atlas UMAP in grey, new samples coloured by `--color-by` (default: the groups); with `--order-by` a line joins the group centroids in order. Needs `--umap` |
-| `fig_factor_by_group` | per factor, the predicted probability of each sample along the ordered groups, with the group mean |
-| `fig_neighbor_labels` | per group, what its atlas neighbours are: curated growth phase, medium type, lab strain, and study |
-
-A worked example on a growth-to-starvation time course is in
-[`examples/GSE67402_growth_starvation_time_course`](../examples/GSE67402_growth_starvation_time_course/README.md).
-
-## Training and reproduction
-
-`train` reproduces the notebook pipeline: metadata harmonisation → study-level TEST split and
-3 study folds → z-score on CPM fit on the training pool → factor encoders (optional Optuna,
-`--tune`) → out-of-fold operating thresholds → TEST metrics → residual autoencoder (optional
-Optuna) → bundle + `manifest.json` + `splits.csv`. With `--hparams manifest.json --splits splits.csv
---no-tune` it refits with the recorded hyper-parameters and split, which takes minutes on a GPU
-(`scripts/slurm_train_repro.sh`). `--write-atlas` also embeds the whole count table into
-`<out>/atlas/`.
-
-A refit is not bitwise identical to the original Colab run (different torch/CUDA builds), and with
-a TEST set of about 120 samples the balanced accuracy of a single fit moves by 0.1 to 0.2 between
-seeds. Judge refits by a **seed sweep**, not by one number:
-
-```bash
-ecoli_atlas train ... --hparams outputs/models/manifest.json --splits outputs/models/splits.csv --no-tune \
-                  --seeds 1,2,3,4,5,6,7,8 --select best --select-on cv --out outputs/models_repro_sweep --write-atlas
-```
-
-Every seed is fitted on the same split and saved under `<out>/seed_<s>/`; the selected one
-(`best` = highest mean AUROC, `median`, or `first`) is promoted to `<out>/`, and its
-`manifest.json` gains a `seed_sweep` block with the per-seed CV and TEST metrics and their min /
-max / mean / sd (also in `<out>/seed_sweep.tsv`). Seeds are ranked on the study-level
-out-of-fold (CV) AUROC of the training pool (`--select-on cv`, the default), so TEST stays an
-unbiased check of the promoted model; `--select-on test` exists only to reproduce older sweeps.
-Re-running with `--resume` re-selects without retraining. `verify-models --old <original> --new <out>` then
-reports `old_within_new_seed_spread`: the original bundle is considered reproduced when its TEST
-metrics fall inside the sweep's range and prediction agreement is above 95 %. Exact agreement (max
-deviation < 1e-4) is expected only when re-loading the same weights.
-
-`--write-atlas` writes to `<out>/atlas` unless `--atlas-out` is given; it never touches an existing
-`outputs/atlas`.
-
-## Reproducing the paper figures
-
-`figures` rebuilds every figure of the training notebook from a saved bundle and the training
-tables, without retraining the model: the recorded split (`splits.csv`) is re-applied, the input is
-z-scored with the bundle's saved statistics, and the encoders embed every sample. Only
-`threshold_curves` refits the three fold models per factor (about half a minute on 8 CPU threads);
-their out-of-fold scores are cached in `<out>/oof_scores.csv`.
-
-```bash
-ecoli_atlas figures --list
-ecoli_atlas figures --counts atlas_data/merged_count_table.txt --metadata atlas_data/metadata_revised.csv \
-    --feature-table atlas_data/GCF_000005845.2_ASM584v2_feature_table.txt --models outputs/models \
-    --atlas outputs/atlas --reference-sweep outputs/models_repro_sweep/manifest.json \
-    --out outputs/figures_repro --device cpu --threads 8 --strict
-```
-
-| Figure name | Files (pdf + png unless noted) | Notebook |
+| `--fit` | Embedding (27 dimensions) | Fitting |
 |---|---|---|
-| `corpus_composition` | `fig_corpus_composition` | cell 11 |
-| `factor_test_eval` | `fig_factor_test_eval`, `growth_phase_misclassified.tsv` | cells 29, 35 |
-| `split_balance` | `fig_split_balance` | cell 14 |
-| `pca_batch` | `fig_pca_mg1655_batch`, `fig_pca_bw_batch`, `fig_pca_strain_all_complex`, `pca_logcpm_coords.csv` | cell 16 |
-| `batch_genes` | `fig_batch_genes`, `batch_genes.tsv` | cell 17 |
-| `factor_umaps` | `fig_factor_umaps`, `fig_factor_umaps_overlay`, `umap_factor_coords.csv` | cell 27 |
-| `factor_gene_correlates` | `fig_factor_gene_correlates`, `factor_gene_correlations.txt` (GSEA input), `.tsv` | cells 31, 33 |
-| `study_leakage` | `fig_study_leakage` (`--recombat` adds the transductive reComBat bar if the package is installed) | cells 43, 44 |
-| `threshold_curves` | `fig_threshold_curves`, `oof_scores.csv` (skipped with `--no-retrain`) | cell 25 |
+| `two-stage` (default) | blocks 1 / 1 / 1 and residual 24 | block encoders on their labelled samples, then the residual encoder and the decoder on all training samples with the blocks frozen and standardised |
+| `one-pass` | the same blocks and residual | everything together in one loss: the heads' cross-entropy, the count likelihood, the KL term and the two alignment terms. The block encoders also receive the count and alignment gradients; the blocks are not standardised |
+| `unstructured` | one embedding without blocks | the encoder sees expression and covariates, the three heads read the whole embedding, all terms together |
 
-Every number behind the figures goes to `<out>/figure_metrics.json`, together with checks against
-the bundle's `manifest.json`: TEST sample counts must match exactly and TEST AUROC / balanced
-accuracy within 0.001 / 0.01 (same weights, so they agree to all digits); the regenerated embedding
-must match `--atlas` within 1e-3; the final embedding must mix studies better than the z-scored
-input. The out-of-fold refits of `threshold_curves` depend on the seed and hardware, so they are
-accepted when they fall inside the CV spread of a seed sweep given with `--reference-sweep`
-(otherwise within 0.03 of the manifest). `--strict` turns a failed check into exit status 1. Figures
-run independently; a failure is recorded in the sidecar and the others still run. The command
-refuses to write into the bundle, `<models>/../figures` or `<models>/../atlas`.
-
-### Case studies
+The tables, labels, split, cross-validation and evaluation are the same for all three, so runs on
+one `splits.csv` can be compared directly. The manifest records `fit` and `embedding_blocks`.
 
 ```bash
-ecoli_atlas casestudy all --counts atlas_data/merged_count_table.txt --metadata atlas_data/metadata_revised.csv \
-    --feature-table atlas_data/GCF_000005845.2_ASM584v2_feature_table.txt --models outputs/models --out outputs/figures_repro
-ecoli_atlas casestudy glu-cas --counts "raw_data/Contreras Paper/Paper1_all_samples_counts.tsv" \
-    --case-metadata "raw_data/Contreras Paper/metadata_paper1.csv" --models outputs/models --out outputs/figures_repro
+for FIT in two-stage one-pass unstructured; do
+  ecoli_atlas train $T --fit $FIT --out outputs/models_${FIT//-/_} --splits outputs/models/splits.csv \
+      --seeds 1,2,3,4,5,6,7,8 --cv --device cuda
+done
 ```
 
-- `uti` (GSE128997): UTI vs urine paired within patient on the full embedding; the GSM list and
-  titles are built in (`casestudy/uti.py`) because the metadata carries no condition. Writes
-  `fig_uti_axis`, `uti_axis_genes.tsv`, `uti_samples.tsv`, `uti_metrics.json`.
-- `oxygen` (GSE189154, GSE78756; `--oxygen-studies` to change): one LDA axis across the two withheld
-  oxygen studies, per-study AUROC, genes along the axis. Writes `fig_oxygen_lda_projection`,
-  `fig_oxygen_axis_genes`, `oxygen_axis_genes.tsv`, `oxygen_samples.tsv`, `oxygen_metrics.json`.
-  Oxygen spellings the notebook did not recognise (e.g. the 376 "aeorbic" rows) stay unlabelled and
-  are reported.
-- `glu-cas`: embeds an inference count table with the bundle and contrasts glucose vs casamino acids,
-  paired within (BioProject, timepoint) and with one LDA on all samples. The metadata columns
-  `treatment` ("GLU condition. timepoint S2") and `BioProject` are those of `metadata_paper1.csv`.
-  Writes `fig_glu_cas_axis`, `fig_glu_cas_lda_projection`, `fig_glu_cas_axis_genes`,
-  `glu_cas_gene_correlations.csv`, `glu_cas_lda_scores.csv`, `glu_cas_metrics.json`.
+### Phase head (`train --phase-head`)
 
-All case studies assert that their samples are not in TRAIN; sequencing runs of one GSM are averaged.
-The numbers (leave-one-out hits, sign / Wilcoxon / permutation p-values, AUROCs, top genes) are
-collected in `<out>/casestudy_metrics.json`.
+| `--phase-head` | Fitted on | Loss |
+|---|---|---|
+| `binary` (default) | `mid_exponential` against `stationary` | class-weighted cross-entropy, as the other calls |
+| `ordinal` | three ordered levels: exponential (`mid_exponential`) < transition (`transition`) < stationary (`stationary` and `late_stationary`) | proportional odds: one score of the phase block (or of the whole embedding in the unstructured fit) with a threshold between neighbouring levels |
 
-## Where do whole studies sit? `neighbors`
+- The call is the same in both: `p_stationary`, with the ordinal head the probability of lying above
+  the upper threshold. The scores on TEST and out of fold (exponential against stationary, stated
+  phases only) are therefore comparable between the two heads.
+- The levels are given to untreated standard RNA-seq samples only (`labels.phase_levels`). Lag,
+  early exponential and long-term stationary have no level.
+- The label cap applies to each level as it does to each class.
+- `predictions.tsv` has `phase_logit`, the log-odds of stationary, which is still graded where
+  `p_stationary` is 0 or 1.
+- **Within-study order** (`phase_order` in `evaluation.json`; `test_order` and `cv_order` in
+  `seed_sweep.tsv`): among pairs of untreated samples of one study at different levels, the share
+  whose `phase_logit` is in the order of the levels, as the mean over studies. It is reported for
+  both heads, on the TEST studies and study-blind over the folds. Stated and inferred phases count
+  alike. The seeds are still ranked on the mean out-of-fold AUROC.
 
 ```bash
-ecoli_atlas neighbors GSE189154 GSE78756 --atlas outputs/atlas --models outputs/models --out work/neighbors_oxygen --umap
+ecoli_atlas train $T --phase-head ordinal --out outputs/models_ordinal --splits outputs/models/splits.csv --seeds 1,2,3,4 --cv
 ```
 
-For every sample of the given GEO studies (which must already be in the atlas) this reports the `-k`
-nearest atlas samples in latent space. Same-study neighbours are excluded by default
-(`--within-study` keeps them) and the SRR runs of one GSM are averaged into one row
-(`--no-collapse-runs` keeps run-level rows). `--models` adds each sample's split bucket:
-`test`, `fold1..K`, `train(aug)` (pool samples without a fold), `withheld` (the proof-of-concept
-study), `projected_only` (in the table but never fitted on), `no_metadata`.
+### Phase-order term (`train --phase-order-weight`)
 
-- `neighbors.tsv`: one row per (query sample, rank) with the neighbour's metadata, split bucket and
-  encoder predictions.
-- `summary.tsv`: one row per query sample: nearest sample / distance / study, dominant neighbour
-  study and `top_studies`, per factor the kNN vote, its agreement with the sample's own metadata
-  (`<f>_agree_meta`) and with the encoder prediction (`<f>_agree_pred`), per-block neighbour
-  distances, novelty, UMAP coordinates with `--umap`.
-- `study_summary.tsv`: one row per GSE (split buckets, top neighbour studies, dominant votes and
-  agreement fractions, median nearest distance, mean novelty percentile).
-- `neighbors_manifest.json`: parameters and which studies were found; a GSE missing from the atlas
-  stops the command (exit 1) unless `--allow-missing`.
+The two-class phase head has no reason to order samples within a class, and the phases between the
+classes do not train it. The order term adds a pairwise ranking loss on the phase score to the
+fit of the phase block (stage 1), `log(1 + exp(-(s_j - s_i)))` for pairs where sample j is
+further along the growth curve than sample i:
 
-## Module map
+- **phase levels inside a study:** early exponential < mid exponential < transition < stationary
+  (`labels.ORDER_LEVEL`; untreated samples). Lag is left out (lag cells come from a stationary
+  inoculum), and late and long-term stationary as everywhere else;
+- **time inside a culture series** (`--time-series atlas_data/time_courses.tsv`, built by
+  `atlas_build/metadata/time_courses.py`; one series = one culture line followed along its growth
+  curve): earlier against later time points, without lag, late and long-term stationary samples.
 
-| Module | Role |
+Pairs are only made within a study or a series, never across studies, and only among the
+samples a fit uses (folds included). Each step draws `phase_order_batch` (256) pairs so that every
+(source, study) group counts the same. Weight 0 (the default) is the model without the term; then
+the table changes nothing. The manifest records the weight and the pairs (`phase_order_term`).
+With `--time-series` the evaluation also reports `series_order` (TEST, withheld and training
+studies) and, with `--cv`, `cv_series_order`: along every series of 3 or more samples, the share of
+time pairs whose phase score is in time order, and the Spearman correlation, as means over
+series within a study and then over studies. `seed_sweep.tsv` gets `test_series_order`,
+`withheld_series_order` and `cv_series_order`. The held-out growth curves are GSE224463
+(withheld), GSE67402 and GSE226643 (TEST).
+
+```bash
+ecoli_atlas train $T --time-series atlas_data/time_courses.tsv --phase-order-weight 0.3 --out outputs/models_order_w0.3 \
+    --splits outputs/models/splits.csv --seeds 1,2,3,4,5,6,7,8 --cv
+```
+
+### Split
+
+Whole studies only, and TEST and the folds are made of **reference samples** only, as in the first
+atlas model: untreated samples of the wild type or of the baseline genotype a study compares against
+(`treated` false and `is_reference_genotype` true; `labels.is_reference`). The stricter choice, unmodified wild type only
+(`is_wild_type`), was tried on the same studies (2026-11-21): scored on the same samples the calls are
+equivalent, and it leaves 8 of the 44 TEST studies and 75 of the 302 fold studies without a scored sample.
+
+| `splits.csv` | Samples |
 |---|---|
-| `io.py`, `prepare.py` | read count tables (all inGEST flavours), metadata, feature table; `prepare` |
-| `preprocess.py` | gene filtering/renaming, CPM, z-score, alignment + coverage report |
-| `labels.py`, `splits.py`, `data.py` | metadata → labels, study-level splits, `TrainingData` |
-| `models.py`, `losses.py` | `FactorEncoder`, `ResidualAE`, class weights, push / pull losses |
-| `train_factor.py`, `train_residual.py`, `tune.py`, `train.py` | training, CV objectives, Optuna, orchestration |
-| `artifacts.py` | save / load a model bundle (compatible with the original notebook files) |
-| `embed.py`, `compare.py`, `compare_plots.py`, `verify.py` | inference, atlas comparison (+ group figures), bundle comparison |
-| `figures/` | `context.py` rebuilds the notebook state from a bundle; one module per figure; `checks.py`, `run.py` |
-| `casestudy/` | `axis.py` (LDA / leave-one-group-out / permutation), `uti.py`, `oxygen.py`, `glu_cas.py` |
-| `neighbors.py` | whole-study nearest-neighbour report on the atlas |
+| `split` 3 | TEST: the reference samples of the TEST studies (about 10% of all reference samples, chosen to mirror the class proportions of the three labels) |
+| `split` 1, `cv_fold` 1–3 | reference samples of the other studies, in three study folds |
+| `split` 1, no `cv_fold` | the other samples of those studies: fitted, never scored; in cross-validation they are left out of the fit together with their study's fold |
+| `split` 0 | projected only: the withheld study `GSE224463`, and the samples of TEST studies that are not reference samples |
+
+The four case-study studies (`GSE128997`, `GSE189154`, `GSE78756`, `GSE80451`) are always TEST
+(`config.py`). A study with more than the TEST share of the reference samples stays in the training pool.
+
+All statistics (size-factor reference, z-scores, covariate scaling) come from the reference samples
+of the training pool.
+
+### Large studies
+
+A study contributes at most `study_cap` samples per epoch, drawn afresh each epoch; the default cap
+is the size of the second-largest study. The same weights are used for the training statistics and
+the class weights. With the present atlas only GSE206047 (1,072 samples) is affected.
+
+That cap does not stop one study from supplying most of a class: GSE206047 has 300 of the 424
+stationary training labels. So the labels of each call have a cap of their own (`label_cap`,
+`--label-cap`): within one class, a study counts for at most as many samples as the second-largest
+study of that class has (19 for stationary, 249 for exponential). It is applied as a weight on each
+sample's label in the call's cross-entropy, in all three fits, and the class weights are made from
+the weighted class sizes. The manifest records the caps as `label_caps`.
+
+### `train` output (the bundle)
+
+| File | Content |
+|---|---|
+| `model.pt`, `preprocessing.pt` | weights; reference profile, z-score and covariate statistics (tensors only: `torch.load(weights_only=True)`) |
+| `manifest.json` | features, covariates, `embedding_blocks` (columns of each block), hyper-parameters, split settings, TEST metrics, versions (`schema_version` 2) |
+| `splits.csv` | study, split and fold of every sample |
+| `evaluation.json` | the report below |
+| `embedding.tsv`, `predictions.tsv` | `z` and the head probabilities of every training-table sample |
+| `phase_lfc.tsv`, `history.tsv` | per-study fold-change check; loss per epoch of every stage (`stage`: a call, or `residual`) |
+
+With `--cv`, `cv_predictions.tsv` has the out-of-fold scores: every sample of the fold studies
+(reference or not), scored by the model that was fitted without its study, in the columns of
+`predictions.tsv` plus `cv_fold`, `reference` and `phase_level` (0 exponential, 1 transition,
+2 stationary, -1 not on the scale). The out-of-fold metrics use its `reference` rows, the
+within-study order all rows.
+
+With `--seeds`, every seed is in `seed_<s>/` and `seed_sweep.tsv` lists their TEST and (with `--cv`)
+out-of-fold metrics. One seed is copied to the output directory: the one with the best mean
+out-of-fold AUROC with `--cv`, otherwise the first. Seeds are never ranked on TEST.
+
+### Evaluation report
+
+| Key | Meaning |
+|---|---|
+| `heads` | balanced accuracy (at 0.5) and AUROC of the three calls, on TEST and on the training pool |
+| `knn_agreement` | share of a TEST sample's 15 nearest training neighbours with its label, class-balanced |
+| `same_study_rate` | share of a sample's nearest neighbours from its own study (lower = better mixing) |
+| `covariate_r2` | R² on TEST of a ridge regression from `z` to each covariate (lower = less technical signal) |
+| `counts` | negative binomial log-likelihood per feature; correlation of observed and expected log counts |
+| `phase_lfc` | studies with both phase classes: correlation of the observed stationary-vs-exponential log fold change with the decoder's at reference covariates |
+| `phase_check` | median P(stationary) of untreated samples in the in-between phases |
+| `medium_check` | median P(minimal) and share called minimal for the in-between media |
+| `series_order` | with `--time-series`: time order of the phase score along culture series (TEST, withheld, training studies; see the phase-order term) |
+
+### `embed`
+
+The model takes every sample's QC values as covariates, so `embed` needs them. With an inGEST run,
+`--ingest-results DIR` (the run directory or its results directory) is all it needs: it reads the
+counts (`all_samples_raw_counts.txt`), the antisense counts (`all_samples_antisense_counts.txt`)
+and the QC record of every counted sample (`<sample>/qc/<sample>.qc.json`), and writes the QC table
+it used as `qc.tsv`. Otherwise give `--counts` and `--qc` (the `qc.tsv` of `prepare`, or a table with
+the QC columns of `sample_qc.tsv`, as `full_<name>` or `<name>`, indexed by sample), and
+`--antisense` when the bundle was trained with it. `prepare --ingest-results` writes the same four tables
+(`counts.tsv`, `antisense_counts.tsv`, `qc.tsv`, `samples.tsv`).
+
+`embed` refuses a sample without a QC row, or one that lacks a covariate of its bundle that every
+atlas sample has (read-1 lengths, strand purity, substitution rate, GC slope and curvature;
+fragment sizes for paired-end libraries). The GC bias is in records made with the reference
+genome in the inGEST resources (`annotation/GCF_000005845.2_ASM584v2_genomic.fna`). For an older
+run, add the genome and repeat the record step (`ecoli_ingest run -- --forcerun sample_qc`).
+A record made with the genome can still lack the GC bias when the library is too shallow for the fit (fewer than 50
+genes of at least 600 bp at depth 5). `embed --fill-missing-gc study` embeds such samples with the median GC slope
+and curvature of the other samples of their study (`--studies`, else the whole table), `--fill-missing-gc atlas` with
+the training mean; `samples.tsv` says which (`gc_filled`) and `embed` warns. Such libraries are usually also below
+the depth gate (`low_depth`), outside the depths the model was trained on.
+Centrifuge is not needed. For a bundle made before the covariate choice, the older list
+applies, and a run made with `centrifuge: false` gets the atlas mean for the other-genus value, with
+a warning. The
+QC table made from the records gives the same covariates as `sample_qc.tsv` for all 7,731 atlas
+samples, and embedding a recount batch this way gives the training embedding to 1e-5.
+
+Feature ids must be those of the counting annotation (fails below `--min-feature-coverage`, default
+0.9). Output: `embedding.tsv`, `predictions.tsv`, `samples.tsv` (size factor, reads on mRNA
+features, number of genes called missing, DNA estimate), `missing_genes.tsv` (the genes called
+missing from a sample's strain, see below) and `feature_coverage.tsv`.
+
+### Corrected and decoded counts (`embed --corrected-counts`, `--decoded-counts`)
+
+Both are tables features x samples, each sample scaled to its own reads on mRNA features, with
+the technical part of the library swapped for that of a reference library: paired-end, the atlas's
+mean technical values and no GC bias (`technical.py`).
+
+- `corrected_counts.tsv`: the **observed** counts with (1) the decoder's covariate term moved from
+  the sample's covariates to the reference (it is additive in the log rate, so this changes exactly
+  what the model learned the covariates do) and (2) the library's GC bias taken off by its own fit
+  (inGEST `gc_bias`: slope and curvature of log coverage on GC inside genes) at every feature's GC
+  content. The GC covariates stay at the sample's values in (1), so GC is not taken off twice. Every
+  sample keeps its own detail.
+- `decoded_counts.tsv`: the decoder's expected counts at the sample's embedding, with the same swap.
+  A denoised summary, not corrected counts: on the atlas they keep within-study stationary against
+  exponential fold changes at r 0.88 against a noise ceiling of about 0.98, and 0.71 on the TEST
+  study. Genes called missing from a strain are 0 here; in the corrected counts they keep their
+  observed count. Genomic-DNA reads are not in the decoder's rate, so they are not in these counts.
+
+What is corrected: the measured technical covariates, and fully the GC bias (on the atlas the
+per-sample GC trend falls from r 0.61 against the library's GC slope to 0.02 with the offset alone).
+What is not: batch effects the covariates do not describe. Within one strain and condition the
+between-study share of the variance is still about four times its no-study-effect value, and the
+covariates remove 0.01-0.02 of it (`work/batch_correction/`). Within-study contrasts are kept
+(r 0.999 against the observed counts).
+
+`train --gc-offset` puts the same GC offset into the decoder (`models.GCTerm`): each library's GC
+fit at every feature's GC content, with one learned scale (starting at 1; the manifest reports it
+under `gc_term`). `gc_slope` and `gc_curv` then leave the linear covariate term, so the decoder
+explains GC once; the residual encoder still sees them. Corrected counts from such a bundle use the
+decoder's own term and need no feature table. With a learned scale the atlas fit settled at 0.62 and
+the embedding took the rest of the GC effect (its GC-slope R2 rose from 0.33 to 0.57): the split
+between the term and z is not identified. `--gc-scale fixed` holds the scale at 1, the gene-level
+value of the measured fit (subtracting it leaves no GC trend in the observed counts). On the atlas it left less GC in the decoded
+counts (trend 0.13 against 0.42) but z still carried more GC than with the plain linear term,
+so neither variant is the default.
+
+What the encoders see (default since 2026-11-22): counts with each library's measured GC offset taken off
+(`--clean-inputs`; the size factors are then made from these counts too), and a residual encoder that sees expression
+only (`--no-encoder-covariates`). The decoder is unchanged: it predicts the raw counts, with its linear covariate term
+on all covariates. On the atlas this took GC out of the embedding (GC-slope R2 from z 0.24 -> 0.03 within biological
+replicate groups, 0.33 -> 0.02 over all samples) with a slightly better TEST NLL (6.206 against 6.217;
+`work/qc_module/NOTES.md`). `--no-clean-inputs --encoder-covariates` give the earlier model; bundles made before keep
+it. `embed` repeats the cleaning and needs each sample's GC fit, which the QC record has. `train --qc-module` adds the
+decoder's GC term at fixed scale and the genomic-DNA term on top; it is not the default (it kept GC in z across
+samples). The manifest reports the encoder side under `encoder_inputs`.
+
+`train --dna-penalty W` (default 1 since 2026-11-22; 0 = off) adds W x the R2 of each sample's genomic-DNA estimate from the
+residual block, both centred within biological replicate groups (metadata_v2 `replicate_group`), to the loss: every
+step also encodes up to 256 replicate groups of the training rows. Replicates share their biology, so DNA that the
+residual holds between them is technical; the input cleaning does not reach it (`work/qc_module/NOTES.md`). On the atlas it took the DNA estimate out of
+z within replicates (R2 0.38 -> -0.03), kept the decoded within-study treatment contrasts (r 0.80) and raised kNN
+agreement (phase / medium / lab strain 0.74 / 0.86 / 0.73 -> 0.78 / 0.89 / 0.86); study clustering within
+conditions shared by several studies fell (0.67 -> 0.60). Without replicate groups in the metadata the term is left
+out; the manifest reports it under `dna_penalty`.
+
+The GC offset is the library's fitted curve averaged over each feature's 300 bp windows, the window the inGEST fit
+uses (log of the mean of exp(b1 x + b2 x^2) over the windows); within replicate groups it explains more of a
+sample's deviation than the curve at the feature's mean GC, with a slope close to 1 (`work/qc_module/gc_fragment.txt`;
+windows of the library's own fragment size add nothing). The GC offset needs each feature's GC content and window profile: the package ships it for the inGEST counting
+annotation (`reference/feature_gc_counting_v2.tsv`, made by `scripts/feature_gc.py`); `--feature-gc`
+takes a table for another annotation, and `embed` refuses a table whose features or lengths do not
+match the bundle.
+
+### Genomic DNA in the library
+
+DNA left in a library adds reads to every feature in proportion to its length, whatever its
+expression. It is handled by leaving the worst libraries out:
+
+- **Atlas:** samples whose DNA estimate (`dna_fraction_est` of the QC table) is above 10% are not
+  in the model (`qc_table.py mark-model --max-dna-fraction 0.10`; 38 samples, `high_dna`).
+- **New samples:** `embed` writes `dna_fraction_est` and `high_dna` to `samples.tsv` and prints a
+  warning for samples above the bundle's limit (`max_dna_fraction` in the manifest); they are
+  still embedded.
+- A shallow library reads 0 (below the estimate's detection limit) whatever its DNA content, so
+  it passes.
+- **Library depth:** `embed` also writes `cds_reads` (reads on CDS features) and `low_depth` (1 below 200,000, the
+  atlas's depth gate `qc_table.py mark-model --min-cds-reads`; the bundle's `min_cds_reads`) and warns for such samples;
+  it does not refuse them. No atlas sample is that shallow. The model has not learned that shallow means stationary in
+  general (deep atlas samples thinned to 200,000 CDS reads kept their call; within replicate groups depth barely
+  tracks the phase score), but single studies can be fragile: exponential libraries of GSE67402 thinned to 200,000,
+  and its total-RNA libraries (about 100,000), were called stationary (`work/qc_module/depth_checks.txt`).
+
+Two corrections exist in the code and are **off** (`train --dna-decoder`, `--dna-inputs`): an
+additive DNA term in the decoder's count mean (`models.count_log_mean`, expected reads from
+`data.dna_density`) and taking the expected DNA reads off the counts the encoders see. Tried on
+the atlas (2026-11-21, `outputs/models_v2_dna`, `outputs/models_v2_dna_decoder`): the decoder term
+changed nothing useful; the input correction brought libraries with 5 and 20% added DNA back to
+their DNA-free twins at normal depth, but made shallow libraries much worse and gave no net gain
+on the atlas.
+
+### Genes missing from a strain
+
+Counts are against MG1655, so a gene a strain lacks has no reads. Such genes are called from the
+counts (`preprocess.missing_genes`: runs of neighbouring genes far below the low end of their
+expression, `docs/atlas_model_v2.md` section 4) and left out of the size factor, the gene statistics
+and the count likelihood; the encoders see the gene's mean. In training, half of the samples of a
+batch also get the missing genes of another sample as input. `train --no-mask-missing` treats the
+zeros as measured, as before. A bundle trained without the calls is embedded without them.
+
+`train` writes the calls of the atlas samples to `missing_genes.tsv` in the output directory (one row
+per sample and gene; once per seed sweep, since the calls do not depend on the seed), and their
+number per sample to `n_missing_genes` in `predictions.tsv`.
+
+The samples of a study that lack the same genes are also called together on their summed counts
+(found from the calls themselves, no strain metadata), which finds the weakly expressed genes of a
+missing island; `--no-pool` switches this off. In `embed` all samples of the count table count as
+one study unless `--studies` gives a table sample -> study, so a sample's calls can depend on the
+samples embedded with it; one sample alone, or `embed --no-pool`, is called on its own.
+
+With `--antisense` (the antisense count table of the same samples: `atlas_v2_antisense_counts.tsv`
+for the atlas, inGEST's `all_samples_antisense_counts.txt` for new samples) a silent gene that has
+antisense reads is not called missing. Give the table to `evaluate`, `figures` and `embed` as well
+when the bundle was trained with it (`missing_genes.antisense_veto` in the manifest); without it
+`embed` calls from the sense counts alone.
+
+### `compare`: new samples against the atlas
+
+The atlas is the embedding of the samples a bundle was trained on (`embedding.tsv`, `predictions.tsv`
+of the bundle), so the new samples must have been embedded with the same bundle. `--embeddings` is
+the output directory of `embed`.
+
+| File | Content |
+|---|---|
+| `neighbors.tsv` | per new sample its `-k` (15) nearest atlas samples: distance, study, curated labels, the model's calls; with `--atlas-metadata` also strain, medium, growth phase, carbon source, oxygen, treatment, genotype |
+| `summary.tsv` | per new sample: nearest atlas sample, most frequent study among the neighbours, the neighbours' vote on every call (`<call>_knn_vote`, `_knn_frac`, `_knn_n_labelled`) and whether the model's own call agrees (`<call>_agree`), mean neighbour distance within every block (`<block>_knn_dist`), novelty |
+| `query_distances.tsv` | distances between the new samples |
+| `group_summary.tsv`, `fig_*` | with `--metadata` and `--group-by`: one row per group (calls, votes, top studies, distance within the group and to the previous group) and the figures `fig_query_distances`, `fig_factor_by_group`, `fig_neighbor_labels`, with `--umap` also `fig_umap_groups` |
+| `umap_atlas.tsv`, `umap_query.tsv`, `umap.png` | with `--umap`: a UMAP fitted on the atlas with the new samples projected onto it |
+
+The votes use the curated labels of the atlas samples (the labels the calls were trained on);
+neighbours without a label do not vote. `novelty_percentile` places a sample's distance to its
+k-th neighbour within the same distance of every atlas sample to the samples of other studies: near
+1, the sample is farther from the atlas than almost any atlas sample is from the rest of it.
+`--blocks phase,residual` restricts the distances to those blocks; `--metric` is cosine (default) or
+euclidean. Without `--metadata` / `--group-by` / `--plots` only the tables are written.
+
+### `neighbors`: studies of the atlas against the rest of it
+
+For every sample of the named studies: its nearest atlas samples outside its own study
+(`--within-study` allows them; the sample itself is always left out), the neighbours' votes against
+the sample's curated label (`<call>_agree_meta`) and the model's call (`<call>_agree_pred`), and the
+novelty. `summary.tsv` has one row per sample, `study_summary.tsv` one per study,
+`neighbors_manifest.json` the settings. `query_split_bucket` / `atlas_split_bucket` say where a
+sample was in training: `test`, `fold<k>`, `train_only`, `withheld`, `projected` (in no split, e.g.
+the treated samples of a TEST study).
+
+### `figures`
+
+Without a bundle, two figures of the data, from the metadata and a `splits.csv`:
+`fig_split_balance` (class proportions of the three labels per fold and TEST, by samples and by
+studies, with `split_balance.tsv`) and `fig_corpus_composition` (pies of phase, medium, carbon
+source, genotype class, stress family and strain group of the samples in the split).
+
+With `--models` and the three tables, also the figures of the earlier model's paper, made for this
+model (`--only` selects by the names below):
+
+```bash
+ecoli_atlas figures $T --models outputs/models --out outputs/figures [--only NAMES] [--strict]
+```
+
+| Name | Files | What it shows |
+|---|---|---|
+| `pca_batch` | `fig_pca_mg1655_batch`, `fig_pca_bw_batch`, `fig_pca_strain_all_complex`, `pca_log_expression_coords.tsv` | PCA of the log2 normalised expression (no model): MG1655 and BW25113 in one condition (exponential, untreated wild type, rich medium) coloured by study, and the rich-medium samples by strain |
+| `batch_genes` | `fig_batch_genes`, `batch_genes.tsv` | the genes that differ most between studies within those two subsets |
+| `factor_test_eval` | `fig_factor_test_eval`, `phase_misclassified.tsv` | confusion matrix of each call on TEST; the samples whose phase call is wrong |
+| `factor_umaps` | `fig_factor_umaps`, `fig_factor_umaps_overlay`, `umap_factor_coords.tsv` | UMAP of each head's block, by label and by training pool / TEST |
+| `factor_gene_correlates` | `fig_factor_gene_correlates`, `factor_gene_correlations.{txt,tsv}` | Spearman rho of every gene's expression with each head's probability (the `.txt` lists the top 50 each way, for gene-set enrichment) |
+| `study_leakage` | `fig_study_leakage` | share of a TEST sample's 25 nearest neighbours from its own study, in the z-scored expression and in the embedding |
+| `threshold_curves` | `fig_threshold_curves`, `cv_predictions.tsv` | balanced accuracy against the threshold on the out-of-fold probabilities |
+
+`figure_metrics.json` holds the numbers of every figure and two checks against the bundle: the
+embedding made from the tables against `embedding.tsv`, and the TEST metrics against the manifest
+(`--strict` exits 1 when one of them differs or a figure fails). `threshold_curves` reads
+`cv_predictions.tsv` from the bundle (`train --cv`); for a bundle without it the study folds are
+fitted once and the file is kept in the output directory. Those out-of-fold metrics are compared
+with the manifest's `cv_metrics` but are not expected to be identical on another device.
+
+### `casestudy`
+
+```bash
+ecoli_atlas casestudy {uti,oxygen,glu-cas,all} $T --models outputs/models --out outputs/figures
+```
+
+The case studies of the earlier model, on this model's embedding. Each writes its figures, its
+sample and gene tables and `<name>_metrics.json`; `casestudy_metrics.json` collects them.
+
+- `uti` (GSE128997): infection against urine culture, paired by patient isolate. The isolates'
+  samples are centred per patient, and each patient is scored on a discriminant fitted without it
+  (sign test, Wilcoxon, permutation of the labels within pairs). `fig_uti_axis` shows the genes
+  along that axis.
+- `oxygen` (default GSE189154; `--oxygen-studies`): aerobic against anaerobic or microaerobic,
+  untreated samples of studies outside the training pool. One discriminant
+  (`fig_oxygen_lda_projection`, `fig_oxygen_axis_genes`); the AUROC is given in sample and with
+  every sample scored by an axis fitted without it. GSE78756, the second study of the earlier
+  model's figure, did not pass the prescreen and is not in this atlas.
+- `glu-cas` (GSE271069): glucose against casamino acids, paired by growth phase
+  (`fig_glu_cas_axis`, `fig_glu_cas_lda_projection`, `fig_glu_cas_axis_genes`). For the earlier
+  model this study was an outside test. It is now in the training pool, and the metrics say so
+  (`fitted_by_the_model`).
+
+### `axes`: ordered categories as dimensions of the embedding
+
+Takes a bundle's embedding and one or more ordered axes (a metadata column and its values in
+order) and gives every sample a position on each axis.
+
+```bash
+ecoli_atlas axes --models outputs/models --metadata atlas_data/metadata_v2.tsv \
+    --axis phase:growth_phase:lag,early_exponential,mid_exponential,transition,stationary,late_stationary,long_term_stationary \
+    --where treated=false --where standard_rnaseq=true --holdout lag --holdout late_stationary --holdout long_term_stationary \
+    --axis medium:medium_class:complex,defined_rich,minimal_plus_hydrolysate,defined_minimal \
+    --series time_courses.tsv --out outputs/axes
+```
+
+- **Ordinal score:** a proportional-odds model, one linear score of the embedding with a threshold
+  between neighbouring categories. It is not bounded, so a sample can lie beyond the last fitted
+  category. A sample is always scored by a model that has seen no sample of its study.
+- **Anchor score:** the direction that separates the two end categories, fitted on those alone;
+  everything in between is placed without having been fitted.
+- Both are scaled so that the first fitted category has median 0 and the last median 1.
+- `--holdout CATEGORY` leaves a category out of both fits and only scores it: the test of
+  extrapolation (late stationary beyond stationary) or interpolation. An end category needs samples
+  of at least two studies, otherwise it is refused.
+- A category can group several values of the column: `label=value1+value2`, e.g.
+  `--axis carbon:carbon_source:sugar=glucose+other_sugar,non_sugar=glycerol+organic_acid`. The score table then
+  keeps each sample's own value (`value`) and the summary has the median of every value (`value_medians`), so the
+  values inside a category can be compared along the axis.
+- `--where COLUMN=VALUE` restricts which samples get a category; `--blocks` restricts the embedding
+  to named blocks (`phase`, `medium`, `lab_strain`, `residual`).
+- `--series` is a table `sample, series, x[, x_label]` of ordered series (time courses), drawn as
+  trajectories of the ordinal score, or `PATH:SERIES_COLUMN:X_COLUMN` for any sample table (CSV or TSV,
+  first column the sample id), e.g. `samples.csv:replicate:time_h`.
+- `--query DIR` places new samples (an `embed` output made with the same bundle) on the axes: they are
+  only scored, by the model of all fitted samples, get `role` = query in the score tables and are drawn
+  over the map of two axes, joined along their series. `--query-study` names their study (default
+  `query`); `--exclude-study GSE` leaves an atlas study out of the fits and the tables, e.g. the study the
+  new samples come from (the worked example `examples/GSE67402_*` does both).
+
+The example axes of the paper (growth phase, oxygen, sugar against non-sugar carbon sources and glycerol, the last two in
+defined minimal media) are one script, rerun after every refit:
+`MODELS=<bundle directory> bash ecoli_atlas/scripts/axes_examples.sh` (output: `OUT`, default `outputs/axes_examples`;
+from the repository root, in the `ecoli_atlas` environment; one folder per axis).
+
+Output per axis: `axis_<name>_scores.tsv` (category, role, both scores per sample),
+`axis_<name>_summary.json` (rank correlation; share of within-study sample pairs in the order of
+their categories, over all pairs and as the mean over studies, also per pair of categories;
+category medians; thresholds; the held-out categories; all of it also for the samples the
+embedding never fitted), `fig_axis_<name>_distributions`, `fig_axis_<name>_series`, and for two
+axes `fig_axes_<a>_by_<b>`.
+
+### `drivers`: the genes that move a call
+
+Takes a bundle and the training tables and, for a head and a pair of its classes, ranks the genes,
+and the groups of co-transcribed genes, whose change moves the head's score from the low class to
+the high class.
+
+```bash
+ecoli_atlas drivers $T --models outputs/models_ordinal --out outputs/drivers_ordinal   # all seeds of the sweep
+ecoli_atlas drivers $T --models outputs/models --head medium --out outputs/drivers_medium
+```
+
+- **Method:** integrated gradients of the head's score (`phase_logit` for the phase head) along the
+  line from the mean expression profile of the low class to each sample of the high class. The
+  attributions of a sample add up to its score minus the score of that baseline; they are averaged
+  with every study counting once.
+- **Contrasts:** by default the first class against the last, and with the ordinal phase head also
+  `exponential:transition` and `transition:stationary`; `--contrast LOW:HIGH` names others. It works
+  for either phase head, any fit and any head (`--head`).
+- **Seeds:** when `--models` holds the `seed_<n>` bundles of a sweep, all of them are used
+  (`--one-model` uses only the bundle itself). Attributions are the mean over the seeds;
+  `seeds_same_sign` and `seeds_in_top` say in how many seeds a row has that sign and is among the
+  top rows (`--top-genes` 200, `--top-units` 100), `attribution_sd` is the spread. Models that
+  differ only in the seed are equally good, so a row that is high in one seed only is not a finding.
+- **Expression units:** co-transcribed genes carry the same information, and a model may put its
+  weight on any of them. Neighbouring genes on the same strand, at most 500 bp apart, whose
+  expression has a correlation of at least `--unit-r` (0.6) within studies are joined into a unit, a
+  stand-in for operons made from the atlas itself, and the attributions of a unit are added up.
+  **The unit table is the one to read**; the gene table shows which members a model used.
+- **Studies:** the high class is a sample of studies, and with few of them the choice of studies
+  moves the ranking more than the seed does (phase, 33 stationary studies: seeds give about a
+  quarter of the uncertainty of the unit attributions, studies the rest; medium and lab strain,
+  with 130 and 300 studies, about half each). `--study-boot N` (200) draws the high-class studies
+  again with replacement, on the mean over the seeds, and gives `study_in_top`, `study_same_sign`
+  and `study_sd`. The low-class baseline is held fixed, so the study uncertainty is if anything
+  underestimated. A unit with a `study_in_top` near 1 does not hang on a few studies.
+
+`units_<head>_<low>_to_<high>.tsv` (one row per unit) and `drivers_<head>_<low>_to_<high>.tsv` (one
+row per model feature), strongest first:
+
+| Column | Meaning |
+|---|---|
+| `unit`, `genes`, `n_genes`, `products` | units only: a short name (`pspABCDE`, or `first-last (n)`), the members in genome order and their products |
+| `attribution` | contribution of the change of the gene, or of all genes of the unit, to the score; positive = moves the score towards the high class |
+| `attribution_per_gene` | units only: `attribution` divided by the number of genes, since a large unit adds up more |
+| `share` | its part of the summed absolute attributions |
+| `direction`, `log2fc` | whether the gene is higher (`up`) or lower (`down`) in the high class in the data, and by how much (mean of the members for a unit) |
+| `n_seeds`, `seeds_same_sign`, `seeds_in_top`, `attribution_sd` | with several seeds, see above |
+| `study_in_top`, `study_same_sign`, `study_sd` | share of the study draws in which the row is among the top rows (`--top-genes`, `--top-units`), share with the sign of `attribution`, spread of `attribution` over the draws |
+| `same_sign` | genes only: share of the high-class samples (studies weighted equally) in which the attribution has that sign |
+| `score_spearman` | genes only: rank correlation of the gene's expression with the score over the samples of both classes |
+
+The sign of the attribution is not the direction of the gene: a ribosomal protein operon that falls
+in stationary phase and so raises the phase score has a positive attribution and direction `down`.
+A negative attribution is a gene whose change pulls the score back towards the low class.
+
+`drivers_<head>.json` has, per contrast, the sample and study numbers, how concentrated the
+attribution is, the split between units that are up and down, the rank correlation of the unit
+attributions between seeds, the top units of each kind that hold in at least three of four
+seeds, and the number of units among the top rows in at least three of four seeds and in at least
+three quarters of the study draws. `fig_units_*` and `fig_drivers_*` show the top `--top` rows of each direction; with several
+seeds a row that does not hold in three of four seeds is drawn pale.
+
+## On a SLURM cluster
+
+`scripts/slurm_train.sh` trains on one GPU. Name an x86 GPU type in `--gpus`; the environment does
+not run on ARM GPU nodes.
+
+```bash
+sbatch ecoli_atlas/scripts/slurm_train.sh
+SEEDS=1,2,3,4,5,6,7,8 CV=1 sbatch ecoli_atlas/scripts/slurm_train.sh
+FIT=one-pass OUT=outputs/models_one_pass SPLITS=outputs/models/splits.csv sbatch ecoli_atlas/scripts/slurm_train.sh
+```

@@ -1,0 +1,258 @@
+{
+ "gse": "GSE140478",
+ "notes": "All strains are thermally evolved isolates; 'Anc' (Anc_42CA3, itself a 42C-adapted ALE strain) is the parent the high-temperature lineages are compared against, so it is taken as reference genotype per the label notes, and Anc at 30 and 37 C as controls (debatable: it is an evolved strain). The ch:genotype/variation field says 'adapted at 42C' for Anc at 30C but 'adapted at 45.3C' for Anc at 37/44C (field inconsistency across samples, not title vs field). 44 C growth from adaptation passages -> heat, adapted; 30 C taken as a standard temperature (treatment none). Mutated genes not listed, so perturbed_genes/global_regulator left out for evolved strains. Culture mode not given (aerated tubes, shaking not stated).",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "glucose M9 minimal"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "glucose M9 minimal"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "M9 minimal medium with 4g/L glucose supplementation"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "glucose M9 minimal"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "study_default",
+   "q": "grown fully aerated until mid-log phase (OD600 ≈ 0.6)"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "mid-log phase"
+  },
+  "genotype_class": {
+   "v": "evolved_isolate",
+   "b": "stated",
+   "q": "Expression profiling data for nine thermally adapted strains at three temperatures"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Expression profiling data for nine thermally adapted strains at three temperatures"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Expression profiling data for nine thermally adapted strains at three temperatures"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Expression profiling data for nine thermally adapted strains at three temperatures"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli K-12"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "The rRNA was removed using Illumina Ribo-Zero rRNA Removal Kit (Gram-Negative Bacteria)."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "study_default",
+   "q": "The rRNA was removed using Illumina Ribo-Zero rRNA Removal Kit (Gram-Negative Bacteria)."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Expression profiling data for nine thermally adapted strains at three temperatures"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:temperature",
+   "regex": "^30°C$",
+   "set": {
+    "growth_temperature": {
+     "v": 30,
+     "b": "stated",
+     "q": ""
+    },
+    "treatment": {
+     "v": "none",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:temperature",
+   "regex": "^37°C$",
+   "set": {
+    "growth_temperature": {
+     "v": 37,
+     "b": "stated",
+     "q": ""
+    },
+    "treatment": {
+     "v": "none",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:temperature",
+   "regex": "^44°C$",
+   "set": {
+    "growth_temperature": {
+     "v": 44,
+     "b": "stated",
+     "q": ""
+    },
+    "treatment": {
+     "v": "heat",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "Physiological adaptation was achieved by growing cell cultures exponentially over 2 passages for 5 to 10 generations at the target temperature."
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^Anc$",
+   "set": {
+    "strain_name": {
+     "v": "Anc_42CA3",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^A3F181$",
+   "set": {
+    "strain_name": {
+     "v": "A3F181",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^A3F228$",
+   "set": {
+    "strain_name": {
+     "v": "A3F228",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^A4F244$",
+   "set": {
+    "strain_name": {
+     "v": "A4F244",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^A8F232$",
+   "set": {
+    "strain_name": {
+     "v": "A8F232",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^A9F200$",
+   "set": {
+    "strain_name": {
+     "v": "A9F200",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^A9F255$",
+   "set": {
+    "strain_name": {
+     "v": "A9F255",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^A10F210$",
+   "set": {
+    "strain_name": {
+     "v": "A10F210",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^A16F258$",
+   "set": {
+    "strain_name": {
+     "v": "A16F258",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^Anc$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "inferred",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "^Anc_42CA3_(30|37)C",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

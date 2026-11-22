@@ -1,0 +1,29 @@
+{
+  "gse": "GSE93125",
+  "notes": "TolC-defective E. coli (strain background not named; nature of tolC defect not given, so genotype_class left out) in LB, overnight culture diluted to OD600 0.1, Carolacton (0.5 ug/ml in MeOH) vs MeOH vehicle, sampled at 0, 5, 15, 30 min. t0 and MeOH samples are controls (treatment none). Growth phase left out (OD 0.1 right after dilution of an overnight culture, below the inferred range). Shaking/temperature taken from the growth protocol (200 rpm, 37 C) as study default.",
+  "default": {
+    "base_medium": {"v": "LB", "b": "stated", "q": "E. coli TolC cells were grown o/n in LB medium at 37°C and 200 rpm."},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "E. coli TolC cells were grown o/n in LB medium at 37°C and 200 rpm."},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "E. coli TolC cells were grown o/n in LB medium at 37°C and 200 rpm."},
+    "growth_temperature": {"v": 37, "b": "study_default", "q": "E. coli TolC cells were grown o/n in LB medium at 37°C and 200 rpm."},
+    "culture_mode": {"v": "batch_shaken", "b": "study_default", "q": "E. coli TolC cells were grown o/n in LB medium at 37°C and 200 rpm."},
+    "oxygen": {"v": "aerobic", "b": "inferred", "q": "E. coli TolC cells were grown o/n in LB medium at 37°C and 200 rpm."},
+    "perturbed_genes": {"v": "tolC", "b": "stated", "q": "TolC defective (TolC-)"},
+    "global_regulator_perturbed": {"v": false, "b": "inferred", "q": "TolC defective (TolC-)"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "For each of the four examined time-points (0, 5, 15, 30), two biological replicates of Carolacton-treated and untreated samples were collected."},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "For each of the four examined time-points (0, 5, 15, 30), two biological replicates of Carolacton-treated and untreated samples were collected."},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "For each of the four examined time-points (0, 5, 15, 30), two biological replicates of Carolacton-treated and untreated samples were collected."},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "mRNA enrichment was conducted using the Ribo-Zero kit for Gram-negative bacteria (epicentre)."},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "mRNA enrichment was conducted using the Ribo-Zero kit for Gram-negative bacteria (epicentre)."}
+  },
+  "rules": [
+    {"field": "ch:treatment", "regex": "^none$",
+     "set": {"treatment": {"v": "none", "b": "stated", "q": ""},
+             "is_control": {"v": true, "b": "stated", "q": "Controls received the same volume MeOH."}}},
+    {"field": "ch:treatment", "regex": "Carolacton",
+     "set": {"treatment": {"v": "other_chemical", "b": "stated", "q": ""},
+             "exposure": {"v": "acute", "b": "inferred", "q": "t5, t15 and t30 min after addition of Carolacton"},
+             "is_control": {"v": false, "b": "inferred", "q": ""}}}
+  ],
+  "samples": {}
+}

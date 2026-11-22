@@ -1,0 +1,136 @@
+{
+ "gse": "GSE41190",
+ "notes": "WT vs delta-fnr, anaerobic MOPS glucose; oxygen set to anaerobic_fermentation since no electron acceptor is named (95% N2, 5% CO2).",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "grown to mid-log phase (O.D.600nm 0.3)"
+  },
+  "base_medium": {
+   "v": "MOPS",
+   "b": "stated",
+   "q": "in MOPS +0.2% glucose media"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "in MOPS +0.2% glucose media"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "in MOPS +0.2% glucose media"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "in MOPS +0.2% glucose media"
+  },
+  "oxygen": {
+   "v": "anaerobic_fermentation",
+   "b": "inferred",
+   "q": "anerobically (95% N2, 5% CO2) at 37°C in MOPS +0.2% glucose media"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "anerobically (95% N2, 5% CO2) at 37°C"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "two separate cultures of Escherichia coli MG1655 K-12 WT and two separate cultures of the ∆fnr mutant strain"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "two separate cultures of Escherichia coli MG1655 K-12 WT and two separate cultures of the ∆fnr mutant strain"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "two separate cultures of Escherichia coli MG1655 K-12 WT and two separate cultures of the ∆fnr mutant strain"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli MG1655 K-12"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "A RNA-seq study using total RNA"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "the 23S and 16S rRNA were removed using the Ambion MICROBExpress kit"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "two separate cultures of Escherichia coli MG1655 K-12 WT and two separate cultures of the ∆fnr mutant strain"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genoype",
+   "regex": "Wild-Type",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genoype",
+   "regex": "dFNR",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "fnr",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655 dfnr (PK4854)",
+     "b": "stated",
+     "q": "Escherichia coli MG1655 K-12 dFNR (PK4854)"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

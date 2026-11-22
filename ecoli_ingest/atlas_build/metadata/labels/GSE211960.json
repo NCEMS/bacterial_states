@@ -1,0 +1,127 @@
+{
+ "gse": "GSE211960",
+ "notes": "pnp+ parent C-1a, pnp ORF deletion, human PNPase cDNA replacing pnp. Phase word 'exponential phase' used (OD600 0.8). Medium and strain background not stated.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "exponential phase (OD600=0.8)"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown at 37 C"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Comparative gene expression profiling analysis of RNA-seq data for C-1a cells and its derivatives C-5691 and C-6001"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparative gene expression profiling analysis of RNA-seq data for C-1a cells and its derivatives C-5691 and C-6001"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparative gene expression profiling analysis of RNA-seq data for C-1a cells and its derivatives C-5691 and C-6001"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparative gene expression profiling analysis of RNA-seq data for C-1a cells and its derivatives C-5691 and C-6001"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "pnp ORF deletion"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "TruSeq Stranded Total RNA with Illumina Ribo-Zero Plus Sample Prep kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "TruSeq Stranded Total RNA with Illumina Ribo-Zero Plus Sample Prep kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:cell line",
+   "regex": "^C-1a$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "C-1a",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:cell line",
+   "regex": "^C-5691$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "pnp ORF deletion"
+    },
+    "perturbed_genes": {
+     "v": "pnp",
+     "b": "stated",
+     "q": "pnp ORF deletion"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "C-5691",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:cell line",
+   "regex": "^C-6001$",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": "substitution of the bacterial ORF with the human"
+    },
+    "perturbed_genes": {
+     "v": "pnp",
+     "b": "stated",
+     "q": "substitution of the bacterial ORF with the human"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "C-6001",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

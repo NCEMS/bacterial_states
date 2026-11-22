@@ -1,0 +1,126 @@
+{
+ "gse": "GSE157450",
+ "notes": "UPEC CFT073 wild type vs ΔryfA in LB to OD 0.6 (mid-log stated). Temperature not given.",
+ "default": {
+  "strain_group": {
+   "v": "UPEC",
+   "b": "stated",
+   "q": "Inactivation of ryfA in UPEC strain CFT073"
+  },
+  "strain_name": {
+   "v": "CFT073",
+   "b": "stated",
+   "q": "CFT073"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "LB O.D 0.6"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "LB O.D 0.6"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "LB O.D 0.6"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "grown until mid-log phase with shaking (250 rpm)"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "grown until mid-log phase with shaking (250 rpm)"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "grown until mid-log phase with shaking (250 rpm)"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Examination of transcriptome of CFT073 vs ΔryfA in LB at O.D 0.6"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA were depleted from 250 ng of total RNA using Ribo-Zero rRNA removal kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA were depleted from 250 ng of total RNA using Ribo-Zero rRNA removal kit"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of transcriptome of CFT073 vs ΔryfA in LB at O.D 0.6"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of transcriptome of CFT073 vs ΔryfA in LB at O.D 0.6"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of transcriptome of CFT073 vs ΔryfA in LB at O.D 0.6"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^delta_ryfA",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "ryfA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

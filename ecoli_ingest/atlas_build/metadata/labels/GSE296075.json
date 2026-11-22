@@ -1,0 +1,227 @@
+{
+ "gse": "GSE296075",
+ "notes": "Condition compendium of WT MG1655; every plain-growth condition (glucose, sorbitol+arginine, acetate, OD 2.0, TB, anaerobic) is an untreated control. 'stationary' samples: title says stationary but the protocol calls OD600 2.0 'later-log phase' -> growth_phase left out (conflicting phase evidence); their carbon source is not given. Anaerobic samples: no electron acceptor mentioned, labelled anaerobic_fermentation (inferred); their carbon source and culture mode not given. Lithium acetate (10 mM) labelled other_chemical, adapted (in the medium); carbon_source left out (glucose + acetate). Sorbitol+arginine: single amino acid supplement, amino_acids_supplied left out. Paraquat: oxidative, 30 min, acute.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "inoculated into M9 minimal media with sample-specific carbon source, supplemented with trace element solution"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "M9 minimal media with sample-specific carbon source, supplemented with trace element solution"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "M9 minimal media with sample-specific carbon source, supplemented with trace element solution"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "The fresh culture was incubated at 37C with agitation to the mid-log phase (OD600 ≈ 0.5)."
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "The fresh culture was incubated at 37C with agitation to the mid-log phase (OD600 ≈ 0.5)."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "incubated at 37C with agitation"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "incubated at 37C with agitation"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "WT"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "WT"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K-12 substr. MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiling of E. coli MG1655 under various conditions"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiling of E. coli MG1655 under various conditions"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiling of E. coli MG1655 under various conditions"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "the resulting rRNA-depleted RNA was used to make RNA-Seq libraries"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "One microgram of total RNA underwent ribosomal RNA removal using RiboRid"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RNA-seq profiling of E. coli MG1655 under various conditions"
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "RNA-seq profiling of E. coli MG1655 under various conditions"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^M9_glucose",
+   "set": {
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^sorbital_arginine",
+   "set": {
+    "carbon_source": {
+     "v": "other_sugar",
+     "b": "stated",
+     "q": "Carbon source: 4g/L sorbitol"
+    },
+    "amino_acids_supplied": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^acetate_",
+   "set": {
+    "carbon_source": {
+     "v": "organic_acid",
+     "b": "stated",
+     "q": "Carbon source: 4g/L acetate"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^stationary_",
+   "set": {
+    "growth_phase": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^TB_",
+   "set": {
+    "base_medium": {
+     "v": "TB_2xYT_SOB",
+     "b": "stated",
+     "q": "Cultured in TB media"
+    },
+    "medium_class": {
+     "v": "complex",
+     "b": "inferred",
+     "q": "Cultured in TB media"
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": "Cultured in TB media"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^anaerobic_",
+   "set": {
+    "oxygen": {
+     "v": "anaerobic_fermentation",
+     "b": "inferred",
+     "q": "Anaerobic culture"
+    },
+    "culture_mode": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^LiAcet_",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": "supplemented with 10mM Lithium Acetate"
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "Carbon source: 4g/L glucose, supplemented with 10mM Lithium Acetate"
+    },
+    "is_control": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^paraquat_",
+   "set": {
+    "treatment": {
+     "v": "oxidative",
+     "b": "stated",
+     "q": "160uM paraquat was added during mid-log phase"
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": "paraquat was added and the culture was continually incubated at 37C with agitation for 30 min"
+    },
+    "is_control": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,206 @@
+{
+ "gse": "GSE165151",
+ "notes": "CY706/CY708 are spontaneous clpX-V78F isolates from evolution on soft agar -> evolved_isolate; CY1166 is CY708 with clpX restored to wild type (evolved_isolate, perturbed_genes left out since its other mutations are not named). Two sequencing rounds, each with its own CY598 controls. strain_group K-12 from 'weakly-motile E. coli K12 strain'. WT re-read: reference -> wild_type, parent CY598 called wild type, no construct.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "evolving a weakly-motile E. coli K12 strain on the soft agar plates"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "Batch culture at 37oC, OD600~0.4"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "stated",
+   "q": "Batch culture at 37oC, OD600~0.4"
+  },
+  "base_medium": {
+   "v": "other_minimal",
+   "b": "stated",
+   "q": "N-C- minimal medium"
+  },
+  "medium_class": {
+   "v": "minimal_plus_hydrolysate",
+   "b": "inferred",
+   "q": "0.2% (w/v) Casamino acid"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "0.2% (w/v) Casamino acid"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "supplemented with 22 mM glucose"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "aerobically at 37°C water bath, 250rpm"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "aerobically at 37°C water bath"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "Determination of gene expression in the wild type strain CY598 and its derivates"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "No treatment."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Determination of gene expression in the wild type strain CY598 and its derivates"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Determination of gene expression in the wild type strain CY598 and its derivates"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Determination of gene expression in the wild type strain CY598 and its derivates"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was extracted by RNAiso plus (Takara) and PureLink RNA Mini Kit (Invitrogen)."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Determination of gene expression in the wild type strain CY598 and its derivates"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "^CY598$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": "Wild Type"
+    },
+    "strain_name": {
+     "v": "CY598",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "Wild Type"
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^CY70[68]$",
+   "set": {
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "stated",
+     "q": "spontaneous clpX-V78F mutant"
+    },
+    "perturbed_genes": {
+     "v": "clpX",
+     "b": "stated",
+     "q": "clpX-V78F (spontaneous)"
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^CY706$",
+   "set": {
+    "strain_name": {
+     "v": "CY706",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^CY708$",
+   "set": {
+    "strain_name": {
+     "v": "CY708",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^CY1102$",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": "manipulated clpX-V78F mutant"
+    },
+    "perturbed_genes": {
+     "v": "clpX",
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "CY1102",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^CY1166$",
+   "set": {
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "stated",
+     "q": "the CY708 strain with a wild-type clpX"
+    },
+    "strain_name": {
+     "v": "CY1166",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^CY1179$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "manipulated ∆clpX mutant"
+    },
+    "perturbed_genes": {
+     "v": "clpX",
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "CY1179",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

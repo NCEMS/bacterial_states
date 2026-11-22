@@ -1,0 +1,197 @@
+{
+ "gse": "GSE235194",
+ "notes": "Hfq co-IP samples are IP_or_pulldown. Total RNA libraries used 'a protocol adapted to capture the bacterial sRNAs' with no stated size selection or rRNA removal: taken as total_rnaseq (uncertain). Harvest at OD600 0.9-1.0 in LB: no phase. Anaerobic aliquot = shift to anaerobic LB+nitrate (medium_or_oxygen_shift, duration not given); the aerobic aliquot was pelleted and resuspended in the same medium (mock) = untreated control.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "The strains were cultured in LB supplemented with 5 mM NaNO3 at 37 °C with agitation."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "The strains were cultured in LB supplemented with 5 mM NaNO3 at 37 °C with agitation."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "The strains were cultured in LB supplemented with 5 mM NaNO3 at 37 °C with agitation."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "The strains were cultured in LB supplemented with 5 mM NaNO3 at 37 °C with agitation."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "The strains were cultured in LB supplemented with 5 mM NaNO3 at 37 °C with agitation."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "two growth conditions: aerobic(ae) and anaerobic (an), and two extraction methods: total RNA or anti-Hfq precipitated"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "two growth conditions: aerobic(ae) and anaerobic (an), and two extraction methods: total RNA or anti-Hfq precipitated"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "two growth conditions: aerobic(ae) and anaerobic (an), and two extraction methods: total RNA or anti-Hfq precipitated"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "There are 3 strains of E.coli K12 MG1655"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "There are 3 strains of E.coli K12 MG1655: wild type (WT), deletion of HbqA (dely) and D98AE102A mutant of HbqA (d98)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:growth condition",
+   "regex": "^aerobically$",
+   "set": {
+    "oxygen": {
+     "v": "aerobic",
+     "b": "stated",
+     "q": ""
+    },
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "The pellet of one aliquot was resuspended in the same volume of medium and grew continuously under aerobic condition."
+    }
+   }
+  },
+  {
+   "field": "ch:growth condition",
+   "regex": "^anaerobically$",
+   "set": {
+    "oxygen": {
+     "v": "anaerobic_respiration",
+     "b": "inferred",
+     "q": "The other aliquot was moved to an anaerobic chamber and resuspended in the same volume of deoxygenated LB with NaNO3 (5 mM) and grew anaerobically."
+    },
+    "treatment": {
+     "v": "medium_or_oxygen_shift",
+     "b": "stated",
+     "q": "The other aliquot was moved to an anaerobic chamber and resuspended in the same volume of deoxygenated LB with NaNO3 (5 mM) and grew anaerobically."
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "Hfq co-IP",
+   "set": {
+    "assay_class": {
+     "v": "IP_or_pulldown",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^Total RNA$",
+   "set": {
+    "assay_class": {
+     "v": "total_rnaseq",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^WT",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655 XL674",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^hqbA \\(XL678\\)",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "deletion of HbqA (dely)"
+    },
+    "perturbed_genes": {
+     "v": "hqbA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655 XL678",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^hqbAD98AE102A",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": "D98AE102A mutant of HbqA (d98)"
+    },
+    "perturbed_genes": {
+     "v": "hqbA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655 XL675",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^wt_(ip|total)_ae",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

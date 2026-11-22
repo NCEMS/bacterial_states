@@ -1,115 +1,102 @@
-"""`ecoli_atlas figures` on the synthetic corpus and its one-epoch bundle."""
 import json
 
 import pandas as pd
-import pytest
 
+from ecoli_atlas.config import HParams
 from ecoli_atlas.cli import main
-from ecoli_atlas.figures import FIGURES, figure_outputs
-from ecoli_atlas.figures.checks import all_pass, compare_to_manifest
 
 
-def _figures_args(synthetic, trained_models, out, *extra):
-    return ["figures", "--counts", str(synthetic / "merged_count_table.txt"),
-            "--metadata", str(synthetic / "metadata_revised.csv"),
-            "--feature-table", str(synthetic / "feature_table.txt"),
-            "--models", str(trained_models), "--out", str(out), "--device", "cpu", "--threads", "2", *extra]
+def test_split_only_then_figures(train_args, atlas_files, tmp_path):
+    out = tmp_path / "split"
+    assert main(["train", *train_args, "--out", str(out), "--split-only", "--test-frac", "0.2"]) == 0
+    assert sorted(p.name for p in out.iterdir()) == ["splits.csv"]
+    figs = tmp_path / "figs"
+    assert main(["figures", "--metadata", str(atlas_files["metadata"]), "--splits", str(out), "--out", str(figs), "--formats", "png"]) == 0
+    assert (figs / "fig_split_balance.png").stat().st_size > 10000 and (figs / "fig_corpus_composition.png").stat().st_size > 10000
+    table = pd.read_csv(figs / "split_balance.tsv", sep="\t")
+    samples = table[(table["unit"] == "samples") & (table["label"] == "phase")]
+    splits = pd.read_csv(out / "splits.csv", index_col=0)
+    in_split = splits["reference"] & splits["split"].isin([1, 3])            # only reference samples are in a fold or TEST
+    assert 0 < in_split.sum() < 119 and samples["n"].sum() == in_split.sum()
+    assert set(samples["bucket"]) == {"fold1", "fold2", "fold3", "test"}
+    assert (samples.groupby("bucket")["proportion"].sum().round(3) == 1.0).all()
+    assert set(table["class"]) == {"exponential", "stationary", "rich", "minimal", "non_lab", "lab", "Unlabeled"}
+    studies = table[(table["unit"] == "studies") & (table["label"] == "medium")].drop_duplicates("bucket")
+    assert studies["total"].sum() == splits.loc[in_split, "gse"].nunique()
+    comp = json.loads((figs / "corpus_composition.json").read_text())
+    assert comp["n_samples"] == 119 and set(comp["composition"]["phase"]["wedges"]) == {"exponential", "stationary"}
+    assert "none" not in comp["composition"]["stress_family"]["wedges"]
+    assert main(["figures", "--metadata", str(atlas_files["metadata"]), "--splits", str(out), "--out", str(figs), "--only", "nope"]) == 2
 
 
-def test_list(capsys):
-    assert main(["figures", "--list"]) == 0
-    out = capsys.readouterr().out
-    assert all(name in out for name in FIGURES)
+def test_model_figures(trained, train_args, tmp_path):
+    figs = tmp_path / "figs"
+    args = ["figures", *train_args, "--models", str(trained), "--out", str(figs), "--formats", "png", "--device", "cpu", "--strict"]
+    assert main(args) == 0
+    for name in ("split_balance", "corpus_composition", "pca_mg1655_batch", "pca_bw_batch", "pca_strain_all_complex", "batch_genes",
+                 "factor_test_eval", "factor_umaps", "factor_umaps_overlay", "factor_gene_correlates", "study_leakage", "threshold_curves"):
+        assert (figs / f"fig_{name}.png").stat().st_size > 3000, name
+    m = json.loads((figs / "figure_metrics.json").read_text())
+    assert m["embedding_check"]["max_abs_diff"] < 1e-4                      # the bundle's embedding.tsv is made again
+    assert m["test_metrics_vs_manifest"] and all(v["agree"] for v in m["test_metrics_vs_manifest"].values())
+    assert set(m["study_leakage"]["rates"]) == {"input", "blocks", "embedding"}
+    assert m["factor_umaps"]["phase"]["block_dim"] == HParams().block_dims["phase"]
+    # phase raises the first ten genes of the synthetic atlas: they lead the correlates of the phase call
+    corr = pd.read_csv(figs / "factor_gene_correlations.tsv", sep="\t")
+    top = corr[corr["factor"] == "phase"].sort_values("spearman_rho", ascending=False).head(10)
+    assert set(top["gene"]) <= {f"g{i:03d}" for i in range(10)} and "Top 50 Positive" in (figs / "factor_gene_correlations.txt").read_text()
+    # the bundle has no cv_predictions.tsv: the folds were fitted once and kept beside the figures
+    cv = pd.read_csv(figs / "cv_predictions.tsv", sep="\t", index_col=0)
+    assert m["cv_predictions"] == str(figs / "cv_predictions.tsv") and set(cv["cv_fold"]) == {1, 2, 3}
+    assert 0.02 <= m["threshold_curves"]["medium"]["best_threshold"] <= 0.98
+    stamp = (figs / "cv_predictions.tsv").stat().st_mtime_ns
+    assert main(args + ["--only", "threshold_curves"]) == 0 and (figs / "cv_predictions.tsv").stat().st_mtime_ns == stamp
+    assert main(["figures", "--metadata", train_args[3], "--out", str(figs), "--only", "study_leakage"]) == 2      # no bundle given
 
 
-def test_full_run_matches_manifest(synthetic, trained_models, tmp_path):
-    out = tmp_path / "figs"
-    rc = main(_figures_args(synthetic, trained_models, out, "--atlas", str(trained_models / "atlas")))
-    assert rc == 0
-    for f in figure_outputs():
-        assert (out / f).exists(), f
-    side = json.loads((out / "figure_metrics.json").read_text())
-    assert set(side["figures"]) == set(FIGURES) and not side["failed"]
-    # same weights, same split -> TEST metrics identical to the manifest, embedding identical to the atlas.
-    # (The study-mixing ordinal check is a property of a trained model, not of a one-epoch synthetic fit.)
-    failed = {k: v for k, v in side["checks"].items() if v["pass"] is False and k != "leakage.top_ae_below_input"}
-    assert not failed, failed
-    manifest = json.loads((trained_models / "manifest.json").read_text())
-    for f, m in manifest["test_metrics"].items():
-        assert side["metrics"]["test_metrics"][f]["n"] == m["n"]
-        assert abs(side["metrics"]["test_metrics"][f]["auroc"] - m["auroc"]) < 1e-9
-    assert side["zscore_max_abs_dev"] == 0.0
-    assert side["atlas_comparison"]["max_abs_diff"] < 1e-4
-    # out-of-fold refits: same rows as the manifest's threshold diagnostics
-    for f, d in manifest["threshold_diagnostics"].items():
-        assert side["metrics"]["threshold_diagnostics"][f]["n"] == d["n"]
-    oof = pd.read_csv(out / "oof_scores.csv")
-    assert set(oof["factor"]) == set(manifest["factor_order"])
-    txt = (out / "factor_gene_correlations.txt").read_text()
-    assert txt.startswith("Gene Correlations for Disentangled Factors\n") and "FACTOR: growth_phase" in txt
-    long = pd.read_csv(out / "factor_gene_correlations.tsv", sep="\t")
-    assert set(long["factor"]) == set(manifest["factor_order"]) and long["spearman_rho"].abs().max() <= 1.0 + 1e-9
-    assert (out / "growth_phase_misclassified.tsv").exists()
+def test_case_studies(trained, train_args, atlas_files, tmp_path):
+    import argparse
 
+    import numpy as np
 
-def test_only_skip_and_sidecar_merge(synthetic, trained_models, tmp_path):
-    out = tmp_path / "figs"
-    rc = main(_figures_args(synthetic, trained_models, out, "--only", "corpus_composition,factor_test_eval", "--formats", "png"))
-    assert rc == 0
-    assert (out / "fig_corpus_composition.png").exists() and not (out / "fig_corpus_composition.pdf").exists()
-    assert not (out / "fig_split_balance.png").exists()
-    side = json.loads((out / "figure_metrics.json").read_text())
-    assert set(side["figures"]) == {"corpus_composition", "factor_test_eval"}
-    # a second run into the same directory keeps the earlier figures in the sidecar
-    rc = main(_figures_args(synthetic, trained_models, out, "--only", "split_balance", "--formats", "png"))
-    assert rc == 0
-    side = json.loads((out / "figure_metrics.json").read_text())
-    assert set(side["figures"]) == {"corpus_composition", "factor_test_eval", "split_balance"}
-    assert "test_metrics" in side["metrics"]
-    # --skip and --no-retrain
-    rc = main(_figures_args(synthetic, trained_models, tmp_path / "f2", "--no-retrain", "--skip",
-                            "factor_umaps,pca_batch,batch_genes,factor_gene_correlates,study_leakage", "--formats", "png"))
-    assert rc == 0
-    side = json.loads((tmp_path / "f2" / "figure_metrics.json").read_text())
-    assert set(side["figures"]) == {"corpus_composition", "factor_test_eval", "split_balance"}
-    assert not (tmp_path / "f2" / "oof_scores.csv").exists()
-
-
-def test_unknown_figure_and_reference_dirs(synthetic, trained_models, tmp_path):
-    with pytest.raises(SystemExit):
-        main(_figures_args(synthetic, trained_models, tmp_path / "x", "--only", "nope"))
-    with pytest.raises(SystemExit):   # never write into the bundle ...
-        main(_figures_args(synthetic, trained_models, trained_models))
-    with pytest.raises(SystemExit):   # ... or next to it in <models>/../figures (the Colab reference location)
-        main(_figures_args(synthetic, trained_models, trained_models.parent / "figures"))
-
-
-def test_recombat_missing(synthetic, trained_models, tmp_path):
-    pytest.importorskip("matplotlib")
+    from ecoli_atlas.casestudy.glu_cas import run_glu_cas
+    from ecoli_atlas.casestudy.oxygen import run_oxygen
+    from ecoli_atlas.casestudy.uti import run_uti
+    from ecoli_atlas.cli import _figure_context
+    from ecoli_atlas.figures.plotting import apply_style
+    out = tmp_path / "case"
+    # the synthetic atlas has none of the studies of the case studies
+    assert main(["casestudy", "uti", *train_args, "--models", str(trained), "--out", str(out), "--device", "cpu"]) == 1
+    assert "error" in json.loads((out / "casestudy_metrics.json").read_text())["uti"]
+    ctx, _, _ = _figure_context(argparse.Namespace(models=str(trained), device="cpu", counts=str(atlas_files["counts"]),
+                                                   metadata=str(atlas_files["metadata"]), qc=str(atlas_files["qc"]),
+                                                   features=str(atlas_files["features"])))
+    apply_style()
+    test_studies = sorted(set(ctx.gse[ctx.split == 3]) - {"GSE07"})          # GSE07 has treated samples
+    train_study = ctx.gse[ctx.split == 1][0]
+    meta = ctx.data.meta
+    rows = np.where(ctx.gse == test_studies[0])[0]
+    # oxygen: half of a TEST study made anaerobic
+    meta.loc[meta.index[rows[::2]], "oxygen"] = "anaerobic"
+    res = run_oxygen(ctx, out, ("png",), studies=[test_studies[0]])
+    assert res["n_samples"] == len(rows) and res["per_study"][test_studies[0]]["n_low"] == len(rows[::2])
+    assert 0 <= res["auroc_leave_one_out"] <= 1 and (out / "fig_oxygen_lda_projection.png").exists()
     try:
-        import reComBat  # noqa: F401
-        pytest.skip("reComBat installed")
-    except ImportError:
+        run_oxygen(ctx, out, ("png",), studies=[train_study])
+        raise AssertionError("a training study must be refused")
+    except ValueError:
         pass
-    with pytest.raises(ImportError):
-        main(_figures_args(synthetic, trained_models, tmp_path / "rc", "--only", "study_leakage", "--recombat"))
-    rc = main(_figures_args(synthetic, trained_models, tmp_path / "rc2", "--only", "study_leakage", "--formats", "png"))
-    assert rc == 0 and (tmp_path / "rc2" / "fig_study_leakage.png").exists()
-
-
-def test_compare_to_manifest_unit():
-    manifest = {"test_metrics": {"growth_phase": {"n": 10, "auroc": 0.9, "balanced_acc": 0.8, "ba_ci": [0.7, 0.9]}},
-                "threshold_diagnostics": {"growth_phase": {"n": 50, "auroc": 0.85, "balanced_acc": 0.8}}}
-    metrics = {"test_metrics": {"growth_phase": {"n": 10, "auroc": 0.9005, "balanced_acc": 0.805, "ba_ci": [0.71, 0.9]}},
-               "threshold_diagnostics": {"growth_phase": {"n": 50, "auroc_refit": 0.80, "balanced_acc_refit": 0.79}},
-               "atlas_embedding_max_abs_diff": 1e-5,
-               "leakage": {"rates": {"top_ae": {"mean": 0.1}, "input_zcpm": {"mean": 0.3}}}}
-    checks = compare_to_manifest(metrics, manifest)
-    assert checks["test.growth_phase.n"]["pass"] and checks["test.growth_phase.auroc"]["pass"]
-    assert checks["oof.growth_phase.auroc"]["pass"] is False          # 0.80 vs 0.85 > 0.03
-    assert checks["leakage.top_ae_below_input"]["pass"] and not all_pass(checks)
-    sweep = {"cv_spread": {"growth_phase": {"auroc": {"min": 0.7, "max": 0.9, "n": 8}, "balanced_acc": {"min": 0.6, "max": 0.85, "n": 8}}}}
-    checks = compare_to_manifest(metrics, manifest, sweep=sweep)
-    assert checks["oof.growth_phase.auroc"]["pass"] and "seed sweep" in checks["oof.growth_phase.auroc"]["tolerance"]
-    assert all_pass(checks)
-    assert all_pass(compare_to_manifest({}, None))
+    # uti: five isolates with one sample in the host and one in urine each
+    meta["strain_name"], meta["in_host"] = "", "false"
+    for k in range(5):
+        meta.loc[meta.index[rows[2 * k:2 * k + 2]], "strain_name"] = f"HM{k}"
+        meta.loc[meta.index[rows[2 * k]], "in_host"] = "true"
+    res = run_uti(ctx, out, ("png",), study=test_studies[0], n_perm=20)
+    assert res["n_patients"] == 5 and res["conditions"] == {"UTI": 5, "UR": 5} and 0 <= res["correct"] <= 5
+    # glu-cas: the two media of a training study, paired by growth phase; the metrics say it was fitted
+    tr = np.where(ctx.gse == "GSE00")[0]                                      # exponential and stationary samples
+    meta.loc[meta.index[tr[::2]], "amino_acids_supplied"] = "true"
+    meta.loc[meta.index[tr[1::2]], "amino_acids_supplied"] = "false"
+    res = run_glu_cas(ctx, out, ("png",), study="GSE00", n_perm=20)
+    assert res["fitted_by_the_model"] == (ctx.split[tr] == 1).any() and res["lda"]["treatments"] == {"CAS": 5, "GLU": 5}
+    assert res["paired"]["n_pairs"] == 2 and (out / "fig_glu_cas_axis.png").exists() and (out / "fig_glu_cas_lda_projection.png").exists()

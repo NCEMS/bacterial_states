@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ecoli-atlas"
-version = "1.0.0"
-description = "Ecoli_ATLAS: conditional autoencoder embeddings of E. coli RNA-seq samples and comparison against the E. coli expression atlas"
+version = "2.0.0"
+description = "Ecoli_ATLAS: a count-based encoder-decoder that embeds E. coli RNA-seq samples in the E. coli expression atlas"
 readme = "README.md"
 requires-python = ">=3.10,<3.13"
 license = { text = "MIT" }
@@ -16,13 +16,10 @@ dependencies = [
     "scipy>=1.13",
     "scikit-learn>=1.5",
     "torch>=2.4",
-    "pyyaml>=5.4",
 ]
 
 [project.optional-dependencies]
-tune = ["optuna>=4"]
-umap = ["umap-learn>=0.5.7"]
-figures = ["matplotlib>=3.8", "seaborn>=0.13", "umap-learn>=0.5.7"]
+figures = ["matplotlib>=3.8", "seaborn>=0.13"]
 dev = ["pytest>=7"]
 
 [project.scripts]
@@ -33,6 +30,9 @@ Homepage = "https://github.com/NCEMS/bacterial_states"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+ecoli_atlas = ["reference/*.tsv"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,0 +1,106 @@
+{
+ "gse": "GSE125110",
+ "notes": "E. coli C: 5-day slide biofilm vs planktonic cells detached from the biofilm (the stated control). culture_mode biofilm and phase not_applicable for biofilm samples; for the planktonic control culture mode and phase are not given. Temperature not stated. WT re-read: genotype_class reference -> wild_type, E. coli C used as is in all samples.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "transferred to a fresh LB Miller broth daily"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "transferred to a fresh LB Miller broth daily"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "transferred to a fresh LB Miller broth daily"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "Escherichia coli strain C is the last of five E. coli strains"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "Planktonic (control) or biofilm (experiment)"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Planktonic (control) or biofilm (experiment)"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Planktonic (control) or biofilm (experiment)"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Planktonic (control) or biofilm (experiment)"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Planktonic (control) or biofilm (experiment)"
+  },
+  "strain_group": {
+   "v": "C",
+   "b": "study_default",
+   "q": "Escherichia coli strain C is the last of five"
+  },
+  "strain_name": {
+   "v": "C",
+   "b": "study_default",
+   "q": "Escherichia coli strain C is the last of five"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Extracted RNAs were processed with Illumina’s Ribozero bacteria kit to deplete of rRNA"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Extracted RNAs were processed with Illumina’s Ribozero bacteria kit to deplete of rRNA"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:experimental condition",
+   "regex": "^biofilm$",
+   "set": {
+    "culture_mode": {
+     "v": "biofilm",
+     "b": "stated",
+     "q": ""
+    },
+    "growth_phase": {
+     "v": "not_applicable",
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:experimental condition",
+   "regex": "^control$",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

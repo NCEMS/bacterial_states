@@ -1,0 +1,83 @@
+{
+ "gse": "GSE131992",
+ "notes": "Starvation/glucose re-feeding time course (29 time points). Which time points are before starvation, during starvation or after glucose re-addition is only in the paper's supplement, so treatment, exposure, growth_phase and is_control are left out for all samples. WT re-read: plain BW25113 -> wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "cultivated in 1 L bioreactor with 500 mL of M9 minimal medium containing 5 g*L-1 glucose"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "cultivated in 1 L bioreactor with 500 mL of M9 minimal medium containing 5 g*L-1 glucose"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "cultivated in 1 L bioreactor with 500 mL of M9 minimal medium containing 5 g*L-1 glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "cultivated in 1 L bioreactor with 500 mL of M9 minimal medium containing 5 g*L-1 glucose"
+  },
+  "culture_mode": {
+   "v": "batch_bioreactor",
+   "b": "stated",
+   "q": "E. coli BW25113 was cultivated in 1 L bioreactor"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "study_default",
+   "q": "Pelleted cells were resuspended in M9 medium at 37°C without glucose"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "E. coli BW25113 was cultivated in 1 L bioreactor"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli BW25113 was cultivated in 1 L bioreactor"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "By switching the culture conditions between starvation and growth for 20 hours"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "By switching the culture conditions between starvation and growth for 20 hours"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Expression profiles of E. coli at 29 timepoints in duplicates during a perturbation experiment"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "BW25113"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "After an Ribosom depletion, the library was constructed using Directional RNAseq Library"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "After an Ribosom depletion"
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

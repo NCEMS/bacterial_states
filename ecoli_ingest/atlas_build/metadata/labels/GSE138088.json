@@ -1,0 +1,101 @@
+{
+ "gse": "GSE138088",
+ "notes": "YE (yeast extract) base medium with glucose or glycerol+acetate; base_medium other, medium_class left empty (YE composition not given). Carbon source is a medium property: treatment none, both arms are wild-type controls. Temperature/oxygen not stated. WT re-read: unmodified MG1655 is wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "other",
+   "b": "stated",
+   "q": "YE medium was used changed carbon source in each treatment : glucose 2% and  Glycerol : sodium acetate (10 :1) 2%(w/v)"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "YE medium was used changed carbon source in each treatment : glucose 2% and  Glycerol : sodium acetate (10 :1) 2%(w/v)"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "mid exponential growth culture"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "12 Ribosomal depleted Total RNA profiles of mid-log phase of E. coli K-12 MG1655"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "12 Ribosomal depleted Total RNA profiles of mid-log phase of E. coli K-12 MG1655"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "inferred",
+   "q": "YE medium was used changed carbon source in each treatment : glucose 2% and  Glycerol : sodium acetate (10 :1) 2%(w/v)"
+  },
+  "is_control": {
+   "v": true,
+   "b": "inferred",
+   "q": "YE medium was used changed carbon source in each treatment : glucose 2% and  Glycerol : sodium acetate (10 :1) 2%(w/v)"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "YE medium was used changed carbon source in each treatment : glucose 2% and  Glycerol : sodium acetate (10 :1) 2%(w/v)"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "YE medium was used changed carbon source in each treatment : glucose 2% and  Glycerol : sodium acetate (10 :1) 2%(w/v)"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "12 Ribosomal depleted Total RNA profiles of mid-log phase of E. coli K-12 MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "12 Ribosomal depleted Total RNA profiles"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "RRNA were removed with Ribominus bacteria /yeast kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:carbon source",
+   "regex": "^Glucose",
+   "set": {
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:carbon source",
+   "regex": "Glycerol : sodium acetate",
+   "set": {
+    "carbon_source": {
+     "v": "mixed",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,127 @@
+{
+ "gse": "GSE35641",
+ "notes": "All samples are ribosome footprints (excluded class). MG1655 reps are the reference (control). OlacZ (orthogonal ribosomes + orthogonal lacZ on plasmids) genotype_class left out (engineered rRNA/mRNA pair, no fitting class); recoded ompF taken as point_mutation. BJW9 strain group unknown. Carbon source, temperature, phase not given; MOPS medium richness unknown so medium_class left out.",
+ "default": {
+  "base_medium": {
+   "v": "MOPS",
+   "b": "stated",
+   "q": "MOPS"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Identification of translation pause sites in vivo using ribosome profiling"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Identification of translation pause sites in vivo using ribosome profiling"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Identification of translation pause sites in vivo using ribosome profiling"
+  },
+  "assay_class": {
+   "v": "ribosome_footprints",
+   "b": "stated",
+   "q": "Ribosome-protected mRNA, Ribosome footprint sample digested with 60 units of micrococcal nuclease"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Identification of translation pause sites in vivo using ribosome profiling"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Using an orthogonal ribosome possessing an altered anti-SD sequence, we demonstrated that pausing is due to hybridization"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "^MG1655$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    },
+    "strain_group": {
+     "v": "K-12",
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "BW25113",
+   "set": {
+    "perturbed_genes": {
+     "v": "orthogonal 16S rRNA;orthogonal lacZ",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "strain_group": {
+     "v": "K-12",
+     "b": "inferred",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "BW25113",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "BJW9",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "inferred",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "ompF",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "BJW9",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

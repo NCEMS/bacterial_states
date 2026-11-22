@@ -1,0 +1,26 @@
+{
+  "gse": "GSE206960",
+  "notes": "All samples (wild type and orn ts mutant) were shifted to 42 C for 30 min; treatment heat, exposure acute for all, and the wild type is the study's reference (is_control true) despite the shift. 'rich defined medium' -> defined_rich; base medium not named. ornts read as a temperature-sensitive point allele of orn (point_mutation, inferred). Growth phase early_exponential from 'early log phase' before the 30 min shift. Aeration not described.",
+  "default": {
+    "strain_group": {"v": "K-12", "b": "inferred", "q": "MG1655 rph+"},
+    "strain_name": {"v": "MG1655 rph+", "b": "stated", "q": "MG1655 rph+"},
+    "medium_class": {"v": "defined_rich", "b": "stated", "q": "grown to early log phase in rich defined medium"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "grown to early log phase in rich defined medium"},
+    "growth_phase": {"v": "early_exponential", "b": "stated", "q": "grown to early log phase in rich defined medium, transferred to a 42C water bath for 30 min, then harvested for RNA preparation"},
+    "growth_temperature": {"v": 42, "b": "stated", "q": "42C, 30 min"},
+    "treatment": {"v": "heat", "b": "stated", "q": "transferred to a 42C water bath for 30 min"},
+    "exposure": {"v": "acute", "b": "stated", "q": "42C, 30 min"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "I created a temperature sensitive mutant and isolated RNA after temperature shift"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "I created a temperature sensitive mutant and isolated RNA after temperature shift"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "I created a temperature sensitive mutant and isolated RNA after temperature shift"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "The abundance of different RNAs in the wild-type and mutant strains was determined using RNA-Seq."},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "Ribosomal RNA was depleted using a bacterial rRNA depletion kit"},
+    "global_regulator_perturbed": {"v": false, "b": "inferred", "q": "The effect of Oligoribonuclease inactivation on RNA abundance was measured"}
+  },
+  "rules": [
+    {"field": "ch:genotype", "regex": "^Wild-type$", "set": {"genotype_class": {"v": "reference", "b": "stated", "q": ""}, "is_control": {"v": true, "b": "stated", "q": ""}}},
+    {"field": "ch:genotype", "regex": "^ornts$", "set": {"genotype_class": {"v": "point_mutation", "b": "inferred", "q": "I created a temperature sensitive mutant"},
+      "perturbed_genes": {"v": "orn", "b": "stated", "q": ""}, "is_control": {"v": false, "b": "stated", "q": ""}}}
+  ],
+  "samples": {}
+}

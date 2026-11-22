@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ecoli-ingest"
-version = "1.0.0"
+version = "2.0.0"
 description = "Ecoli_inGEST: Snakemake RNA-seq workflow for E. coli with a launcher that runs in any directory"
 readme = "README.md"
 requires-python = ">=3.9"

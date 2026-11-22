@@ -1,0 +1,137 @@
+{
+ "gse": "GSE122779",
+ "notes": "No wild-type sample: all are ∆menF∆entC or ALE endpoints (is_control left out). 'Ferrous sulfate and sodium citrate' taken as a medium supplement (treatment none) - uncertain, could be read as iron excess. ALE_39.91/29.82/30.83 from ∆menF∆entC; ALE_36.86/37.25/38.28 from ∆menF∆entC∆ubiC.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "The fresh culture was incubated at 37C with agitation to the mid-log phase (OD600 ≈ 0.5)."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "The fresh culture was incubated at 37C with agitation to the mid-log phase (OD600 ≈ 0.5)."
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9 minimal media w/ 4g/L glucose"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "M9 minimal media w/ 4g/L glucose"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "M9 minimal media w/ 4g/L glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "M9 minimal media w/ 4g/L glucose"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "The fresh culture was incubated at 37C with agitation to the mid-log phase (OD600 ≈ 0.5)."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "The fresh culture was incubated at 37C with agitation to the mid-log phase (OD600 ≈ 0.5)."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Growth of E. coli with various supplements was performed with biological duplicates."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Growth of E. coli with various supplements was performed with biological duplicates."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Growth of E. coli with various supplements was performed with biological duplicates."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "We performed evolution of ∆menF∆entC strain of Escherichia coli K12 MG1655"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli K12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was extracted from mid-log phase culture for RNA-Seq library preparation."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Growth of E. coli with various supplements was performed with biological duplicates."
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^∆menF∆entC",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "menF;entC",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^ALE_?(39\\.91|29\\.82|30\\.83)",
+   "set": {
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "stated",
+     "q": "ALE_39.91, ALE_29.82 and ALE_30.83 are the independent biological replicates of ∆menF∆entC which are evolved in our laboratory"
+    },
+    "perturbed_genes": {
+     "v": "menF;entC",
+     "b": "stated",
+     "q": "ALE_39.91, ALE_29.82 and ALE_30.83 are the independent biological replicates of ∆menF∆entC which are evolved in our laboratory"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^ALE_?(36\\.86|37\\.25|38\\.28)",
+   "set": {
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "stated",
+     "q": "ALE_36.86, ALE_37.25 and ALE_38.28 are the independent biological replicates of ∆menF∆entC∆ubiC which are evolved in our laboratory"
+    },
+    "perturbed_genes": {
+     "v": "menF;entC;ubiC",
+     "b": "stated",
+     "q": "ALE_36.86, ALE_37.25 and ALE_38.28 are the independent biological replicates of ∆menF∆entC∆ubiC which are evolved in our laboratory"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

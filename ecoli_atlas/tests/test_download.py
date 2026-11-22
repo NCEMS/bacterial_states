@@ -7,7 +7,7 @@ import pytest
 
 from ecoli_atlas import download as dl
 
-RELEASE = Path(__file__).resolve().parents[2] / "work" / "release_v1"
+RELEASE = Path(__file__).resolve().parents[2] / "work" / "release_v2"
 
 
 def _bundle(tmp_path, members, name="b.tar.gz"):
@@ -27,11 +27,11 @@ def _point_at(monkeypatch, bundle, tgz, digest):
 def test_every_bundle_pins_a_checksum():
     for info in dl.BUNDLES.values():
         assert len(info["sha256"]) == 64 and int(info["sha256"], 16) >= 0
-        assert info["url"].startswith("https://github.com/NCEMS/bacterial_states/releases/download/resources-v1/ecoli_atlas_")
+        assert info["url"].startswith("https://github.com/NCEMS/bacterial_states/releases/download/resources-v2/ecoli_atlas_")
 
 
 def test_download_verifies_then_unpacks(tmp_path, monkeypatch):
-    tgz, digest = _bundle(tmp_path, {"models/manifest.json": b"{}", "atlas/final_embedding.csv": b"sample\n"})
+    tgz, digest = _bundle(tmp_path, {"models/manifest.json": b"{}", "models/seed_1/manifest.json": b"{}"})
     _point_at(monkeypatch, "models", tgz, digest)
     log = io.StringIO()
     assert dl.download("models", tmp_path / "out", log=log) == 0
@@ -40,12 +40,12 @@ def test_download_verifies_then_unpacks(tmp_path, monkeypatch):
 
 
 def test_download_rejects_checksum_mismatch(tmp_path, monkeypatch):
-    tgz, _ = _bundle(tmp_path, {"merged_count_table.txt": b"x"})
+    tgz, _ = _bundle(tmp_path, {"atlas_v2_counts.tsv": b"x"})
     _point_at(monkeypatch, "training-data", tgz, "0" * 64)
     log = io.StringIO()
     assert dl.download("training-data", tmp_path / "out", log=log) == 1
     assert "checksum mismatch" in log.getvalue()
-    assert not (tmp_path / "out" / "merged_count_table.txt").exists()      # nothing unpacked
+    assert not (tmp_path / "out" / "atlas_v2_counts.tsv").exists()      # nothing unpacked
 
 
 def test_download_refuses_members_outside_target(tmp_path, monkeypatch):

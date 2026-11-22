@@ -1,0 +1,126 @@
+{
+ "gse": "GSE298072",
+ "notes": "Conflicting phase evidence: extract_protocol says 'mid-log phase culture' but growth protocol and titles say 24 h incubation after dilution; growth_phase left out. '24 hours incubation' is not a treatment.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9 minimal media with the glucose M9 minimal medium"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "M9 minimal media with the glucose M9 minimal medium"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "M9 minimal media with the glucose M9 minimal medium"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "M9 minimal media with the glucose M9 minimal medium"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "The fresh culture was incubated at 37 ℃ with agitation for additional 24 hrs."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "The fresh culture was incubated at 37 ℃ with agitation for additional 24 hrs."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "The fresh culture was incubated at 37 ℃ with agitation for additional 24 hrs."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K-12 substr. MG1655"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RNA-seq profiling of wild type and knock out strain (yfeC) in E. coli K-12 MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiling of wild type and knock out strain (yfeC) in E. coli K-12 MG1655"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiling of wild type and knock out strain (yfeC) in E. coli K-12 MG1655"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiling of wild type and knock out strain (yfeC) in E. coli K-12 MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Illumina Ribo-Zero rRNA removal kit (bacteria) (MRZMB126) was used"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Illumina Ribo-Zero rRNA removal kit (bacteria) (MRZMB126) was used"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "RNA-seq profiling of wild type and knock out strain (yfeC) in E. coli K-12 MG1655"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^wild-type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "yfeC deletion",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "yfeC",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

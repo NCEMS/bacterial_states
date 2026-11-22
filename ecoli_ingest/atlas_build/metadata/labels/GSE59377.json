@@ -1,0 +1,186 @@
+{
+ "gse": "GSE59377",
+ "notes": "Reviewed 2026-11-15: two chemostat samples are glucose-limited according to their duplicate deposit GSE72020; labelled nutrient_limited_growth. | Batch culture mode not further specified (no shaking stated), culture_mode left out for batch; chemostat samples not_applicable phase. Temperature and oxygen not given. rpoB point mutants (ALE-selected) labelled point_mutation.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Samples were taken from mid-log phase of batch cultures or steady state phase in chemostat cultures."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Samples were taken from mid-log phase of batch cultures or steady state phase in chemostat cultures."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Samples were taken from mid-log phase of batch cultures or steady state phase in chemostat cultures."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Samples were taken from mid-log phase of batch cultures or steady state phase in chemostat cultures."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribosomal RNA was substracted and dUTP method was used for library preparation"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA was substracted and dUTP method was used for library preparation"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:growth mode",
+   "regex": "^Batch$",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": "Samples for Batch mode were taken from mid-log phase"
+    }
+   }
+  },
+  {
+   "field": "ch:growth mode",
+   "regex": "^Chemostat$",
+   "set": {
+    "growth_phase": {
+     "v": "not_applicable",
+     "b": "inferred",
+     "q": "samples from chemostat were taken once the steady state was achieved"
+    },
+    "culture_mode": {
+     "v": "chemostat",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:media",
+   "regex": "^M9 minimal$",
+   "set": {
+    "base_medium": {
+     "v": "M9",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "defined_minimal",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": "glucose"
+    }
+   }
+  },
+  {
+   "field": "ch:media",
+   "regex": "^LB complex media$",
+   "set": {
+    "base_medium": {
+     "v": "LB",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "complex",
+     "b": "stated",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "rpoB",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rpoB",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "sup:growth_limitation",
+   "regex": "^Glucose",
+   "set": {
+    "treatment": {
+     "v": "nutrient_limited_growth",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

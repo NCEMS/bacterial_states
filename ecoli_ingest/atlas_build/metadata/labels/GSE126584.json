@@ -1,0 +1,96 @@
+{
+ "gse": "GSE126584",
+ "notes": "Medium and temperature not given. Wi-Fi exposure 5 h -> other_physical, adapted.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "6 samples at mid log phase including control and Wi-Fi exposed E.coli DH5α for 5 hours"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "inferred",
+   "q": "ch:strain**: DH5{alpha}"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "ch:strain**: DH5{alpha}"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "ch:strain**: DH5{alpha}"
+  },
+  "strain_name": {
+   "v": "DH5alpha",
+   "b": "stated",
+   "q": "ch:strain**: DH5{alpha}"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "6 samples at mid log phase including control and Wi-Fi exposed E.coli DH5α for 5 hours"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "6 samples at mid log phase including control and Wi-Fi exposed E.coli DH5α for 5 hours"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "6 samples at mid log phase including control and Wi-Fi exposed E.coli DH5α for 5 hours"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Library was constracted using Ribo-Zero rRNA Removal Kit (Bacteria) and TruSeq RNA Sample Prep."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Library was constracted using Ribo-Zero rRNA Removal Kit (Bacteria) and TruSeq RNA Sample Prep."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^control$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "Wi-Fi",
+   "set": {
+    "treatment": {
+     "v": "other_physical",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

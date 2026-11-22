@@ -1,5 +1,5 @@
-"""Batch structure in raw expression: PCA on log1p(CPM) and the most study-variable genes
-(notebook cells 16-17)."""
+"""Batch structure in the expression data itself, before any model: PCA of the log2 normalised
+expression, and the genes that differ most between studies of one strain in one condition."""
 from __future__ import annotations
 
 import re
@@ -7,30 +7,22 @@ import re
 import numpy as np
 import pandas as pd
 
-from ..labels import rowkey
 from .plotting import savefig
 
 N_TOP_BATCH = 10
+STRAINS = {"MG1655": r"mg[\s_-]?1655", "BW25113": r"bw[\s_-]?25113"}
+COORDS_FILE = "pca_log_expression_coords.tsv"
 
 
-def strain_masks(meta: pd.DataFrame) -> dict:
-    scols = [c for c in ["strain", "substrain", "strain_background_c"] if c in meta.columns]
-    stxt = rowkey(meta, scols, sep=" ").str.lower().values
-
-    def is_(pat):
-        return np.array([bool(re.search(pat, s)) for s in stxt])
-
-    return {"mg1655": is_(r"mg[\s_-]?1655"), "bw": is_(r"bw[\s_-]?25113"),
-            "control": meta["is_wildtype"].values.astype(bool),
-            "exp": (meta["growth_phase_c"] == "exponential").values,
-            "complex": (meta["medium_type_c"] == "complex").values}
-
-
-def matched_subsets(meta: pd.DataFrame) -> dict:
-    """The two strain / phase / medium matched subsets used by both batch figures."""
-    m = strain_masks(meta)
-    base = m["exp"] & m["control"] & m["complex"]
-    return {"MG1655": m["mg1655"] & base, "BW25113": m["bw"] & base, "_complex": m["complex"]}
+def matched_subsets(ctx) -> dict:
+    """MG1655 and BW25113 samples that are exponential, untreated wild type and in a rich medium;
+    ``_rich`` is every rich-medium sample."""
+    strain = pd.Series(ctx.column("strain_name")).str.lower()
+    rich = ctx.labels("medium") == "rich"
+    base = (ctx.labels("phase") == "exponential") & rich & (ctx.column("is_wild_type") == "true") & (ctx.column("treated") == "false")
+    out = {name: strain.map(lambda s: bool(re.search(pat, s))).to_numpy() & base for name, pat in STRAINS.items()}
+    out["_rich"] = rich
+    return out
 
 
 def fit_pca(M: np.ndarray, seed: int):
@@ -39,60 +31,56 @@ def fit_pca(M: np.ndarray, seed: int):
     return pca.fit_transform(M), pca.explained_variance_ratio_ * 100
 
 
-def _scatter(ax, PCx, ev, meta, mask, color_by, title, topn=None, s=20):
+def _scatter(ax, xy, ev, values, mask, legend_title, title, topn=None, s=20):
     import matplotlib.pyplot as plt
     if not mask.any():
         ax.axis("off")
         return
-    vals = meta[color_by].astype("object").to_numpy(copy=True)
+    vals = np.asarray(values, dtype=object).copy()
     vals[~mask] = "other"
+    vals[mask & (vals == "")] = "not stated"
     if topn is not None:
-        keep = pd.Series(vals[mask]).dropna().value_counts().head(topn).index.tolist()
+        keep = pd.Series(vals[mask]).value_counts().head(topn).index.tolist()
         vals[mask & ~np.isin(vals, keep)] = "other"
-    idx = np.arange(len(vals))
-    levels = sorted([c for c in pd.unique(vals) if not pd.isna(c) and c != "other"], key=str)
+    levels = sorted([c for c in pd.unique(vals) if c != "other"], key=str)
     cmap, ncmax = (plt.cm.tab20, 20) if len(levels) > 10 else (plt.cm.tab10, 10)
-    bg = idx[vals == "other"]
-    if len(bg):
-        ax.scatter(PCx[bg, 0], PCx[bg, 1], s=s * 0.6, alpha=0.15, color="lightgrey", label="other", zorder=1)
-    na = idx[pd.isna(pd.Series(vals)).values]
-    if len(na):
-        ax.scatter(PCx[na, 0], PCx[na, 1], s=s * 0.6, alpha=0.18, color="gainsboro", label="NaN", zorder=1)
+    bg = vals == "other"
+    if bg.any():
+        ax.scatter(xy[bg, 0], xy[bg, 1], s=s * 0.6, alpha=0.15, color="lightgrey", label="other", zorder=1)
     for j, lev in enumerate(levels):
-        sub = idx[vals == lev]
-        ax.scatter(PCx[sub, 0], PCx[sub, 1], s=s, alpha=0.85, color=cmap(j % ncmax), label=f"{lev} (n={len(sub)})", zorder=2)
+        sub = vals == lev
+        ax.scatter(xy[sub, 0], xy[sub, 1], s=s, alpha=0.85, color=cmap(j % ncmax), label=f"{lev} (n={int(sub.sum())})", zorder=2)
     ax.set_xlabel(f"PC1 ({ev[0]:.1f}%)")
     ax.set_ylabel(f"PC2 ({ev[1]:.1f}%)")
     ax.set_title(title, fontsize=10)
     ax.grid(alpha=0.15)
     h, l = ax.get_legend_handles_labels()
-    order = [i for i, x in enumerate(l) if x not in ("other", "NaN")] + [i for i, x in enumerate(l) if x in ("other", "NaN")]
-    ax.legend([h[i] for i in order], [l[i] for i in order], title=color_by, fontsize=7, framealpha=0.6,
-              markerscale=1.3, ncol=2 if len(levels) > 10 else 1, bbox_to_anchor=(1.04, 1), loc="upper left",
-              borderaxespad=0)
+    order = [i for i, x in enumerate(l) if x != "other"] + [i for i, x in enumerate(l) if x == "other"]
+    ax.legend([h[i] for i in order], [l[i] for i in order], title=legend_title, fontsize=7, title_fontsize=8, framealpha=0.6,
+              markerscale=1.3, ncol=2 if len(levels) > 10 else 1, bbox_to_anchor=(1.04, 1), loc="upper left", borderaxespad=0)
 
 
 def fig_pca_batch(ctx, out_dir, formats) -> dict:
     import matplotlib.pyplot as plt
-    meta = ctx.meta
-    M = ctx.logcpm
-    PCx, ev = fit_pca(M, ctx.seed)
-    subsets = matched_subsets(meta)
-    result = {"n_samples": int(M.shape[0]), "n_genes": int(M.shape[1]),
+    M = ctx.logx
+    xy, ev = fit_pca(M, ctx.seed)
+    subsets = matched_subsets(ctx)
+    result = {"n_samples": int(M.shape[0]), "n_features": int(M.shape[1]),
               "explained_variance_pct": [float(ev[0]), float(ev[1])], "subsets": {}}
-    for name, fn in [("MG1655", "fig_pca_mg1655_batch"), ("BW25113", "fig_pca_bw_batch")]:
+    for name, fn in (("MG1655", "fig_pca_mg1655_batch"), ("BW25113", "fig_pca_bw_batch")):
         mask = subsets[name]
-        result["subsets"][name] = {"n_samples": int(mask.sum()), "n_studies": int(meta.loc[mask, "gse"].nunique())}
+        result["subsets"][name] = {"n_samples": int(mask.sum()), "n_studies": int(len(np.unique(ctx.gse[mask])))}
         fig, ax = plt.subplots(figsize=(8.5, 5.5))
-        _scatter(ax, PCx, ev, meta, mask, "gse", f"{name}, exponential, untreated, complex medium, by study", topn=10)
+        _scatter(ax, xy, ev, ctx.gse, mask, "study", f"{name}, exponential, untreated wild type, rich medium, by study", topn=10)
         fig.tight_layout()
         savefig(fig, out_dir, fn, formats)
     fig, ax = plt.subplots(figsize=(9.5, 6))
-    _scatter(ax, PCx, ev, meta, subsets["_complex"], "strain_background_c", "Complex-medium samples by strain background",
-             topn=8, s=10)
+    _scatter(ax, xy, ev, ctx.column("strain_name"), subsets["_rich"], "strain", "Rich-medium samples by strain", topn=8, s=10)
     fig.tight_layout()
     savefig(fig, out_dir, "fig_pca_strain_all_complex", formats)
-    pd.DataFrame(PCx, index=meta.index, columns=["PC1", "PC2"]).to_csv(f"{out_dir}/pca_logcpm_coords.csv")
+    result["subsets"]["rich_medium"] = {"n_samples": int(subsets["_rich"].sum())}
+    pd.DataFrame(xy, index=pd.Index(ctx.ids, name="sample"), columns=["PC1", "PC2"]).to_csv(f"{out_dir}/{COORDS_FILE}", sep="\t",
+                                                                                           float_format="%.5g")
     return result
 
 
@@ -112,26 +100,23 @@ def top_batch_genes(M: np.ndarray, genes, gse: np.ndarray, mask: np.ndarray, n_t
 
 def fig_batch_genes(ctx, out_dir, formats) -> dict:
     import matplotlib.pyplot as plt
-    meta = ctx.meta
-    subsets = matched_subsets(meta)
-    gse = meta["gse"].astype(str).values
+    subsets = matched_subsets(ctx)
     fig, axes = plt.subplots(1, 2, figsize=(13, 6))
     tops, rows_out, result = {}, [], {}
-    for ax, (name, col) in zip(axes, [("MG1655", "#1f77b4"), ("BW25113", "#d62728")]):
-        g, n_s, n_st = top_batch_genes(ctx.logcpm, ctx.genes, gse, subsets[name])
+    for ax, (name, col) in zip(axes, (("MG1655", "#1f77b4"), ("BW25113", "#d62728"))):
+        g, n_s, n_st = top_batch_genes(ctx.logx, ctx.gene_names, ctx.gse, subsets[name])
         tops[name] = g
         result[name] = {"n_samples": int(n_s), "n_studies": int(n_st),
                         "top_genes": None if g is None else {k: float(v) for k, v in g.items()}}
         if g is None:
             ax.axis("off")
             continue
-        for gene, v in g.items():
-            rows_out.append({"subset": name, "gene": gene, "between_study_sd": float(v)})
+        rows_out += [{"subset": name, "gene": gene, "between_study_sd": float(v)} for gene, v in g.items()]
         y = np.arange(len(g))
         ax.barh(y, g.values[::-1], color=col, alpha=0.85)
         ax.set_yticks(y)
         ax.set_yticklabels(g.index[::-1], fontsize=8)
-        ax.set_xlabel("between-study SD of mean log1p(CPM)")
+        ax.set_xlabel("between-study SD of mean log2 expression")
         ax.set_title(f"{name} (n={n_s} samples, {n_st} studies)", fontsize=10)
         ax.grid(alpha=0.15, axis="x")
     fig.suptitle("Most study-variable genes within matched subsets", fontsize=12, y=1.02)

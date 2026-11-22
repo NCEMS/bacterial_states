@@ -1,0 +1,154 @@
+{
+ "gse": "GSE158198",
+ "notes": "Reviewed 2026-11-15: N-limited steady state (0 h) is nutrient_limited_growth | Ammonium-limited chemostat (D = 0.2 h-1) with a plug-flow loop that gives repeated short nitrogen starvation. t0 steady state (before PFR connection) = treatment none; WT t0 = control. 5 min samples = acute, 28 h samples = adapted (repeated stimulus for 28 h). Chemostat medium is not named (preculture is 'minimal media'), so base_medium/medium_class/carbon_source left out; temperature during the continuous phase not stated (batch phase 28-30 C). SR is a 'knock-out of stringent response' without gene names: genotype_class deletion, perturbed_genes left out, global_regulator_perturbed true inferred (stringent response = relA/spoT); SR strain background not stated, so strain_group/strain_name only for MG1655.",
+ "default": {
+  "culture_mode": {
+   "v": "chemostat",
+   "b": "stated",
+   "q": "The chemostat was operated at a dilution rate of D = 0.2 h-1 and ammonium was chosen as the limiting nutrient."
+  },
+  "growth_phase": {
+   "v": "not_applicable",
+   "b": "inferred",
+   "q": "The chemostat was operated at a dilution rate of D = 0.2 h-1 and ammonium was chosen as the limiting nutrient."
+  },
+  "is_control": {
+   "v": false,
+   "b": "stated",
+   "q": "The steady state prior to the PFR connection was used as reference state (S0: t = 0 h)."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "This study is focused on transcriptional changes due to fluctuating ammonia supply"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "This study is focused on transcriptional changes due to fluctuating ammonia supply"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "This study is focused on transcriptional changes due to fluctuating ammonia supply"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Samples were treated for rRNA depletion"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Samples were treated for rRNA depletion"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "^MG1655$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": "Escherichia coli WT MG1655"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": "Escherichia coli WT MG1655"
+    },
+    "strain_group": {
+     "v": "K-12",
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^SR$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "A previously created mutant E.coli SR was used to limit the reaction to environmntal influences via knock-out of stringent response."
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": "knock-out of stringent response"
+    }
+   }
+  },
+  {
+   "field": "ch:time point",
+   "regex": "^0h$",
+   "set": {
+    "treatment": {
+     "v": "nutrient_limited_growth",
+     "b": "inferred",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:time point",
+   "regex": "^5min$",
+   "set": {
+    "treatment": {
+     "v": "nitrogen_starvation",
+     "b": "stated",
+     "q": "Periodic passage from the STR through the PFR then creates a repeated short nitrogen starvation stimulus."
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "inferred",
+     "q": "the long-term response of cells investigated from samples taken from the STR after 5 min and 28 h"
+    }
+   }
+  },
+  {
+   "field": "ch:time point",
+   "regex": "^28h$",
+   "set": {
+    "treatment": {
+     "v": "nitrogen_starvation",
+     "b": "stated",
+     "q": "Periodic passage from the STR through the PFR then creates a repeated short nitrogen starvation stimulus."
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "the long-term response of cells investigated from samples taken from the STR after 5 min and 28 h"
+    }
+   }
+  }
+ ],
+ "samples": {
+  "GSM4795100": {
+   "is_control": {
+    "v": true,
+    "b": "stated",
+    "q": "1-WT-STR-0h"
+   }
+  },
+  "GSM4795110": {
+   "is_control": {
+    "v": true,
+    "b": "stated",
+    "q": "11-WT-STR-0h"
+   }
+  }
+ }
+}

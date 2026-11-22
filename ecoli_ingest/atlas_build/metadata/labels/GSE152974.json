@@ -1,0 +1,105 @@
+{
+ "gse": "GSE152974",
+ "notes": "Grad-seq: glycerol gradient fractions 01-20 and pellet 21P are assay_class other (gradient fractions); only the lysate input control Fraction_00L is total_rnaseq. rRNA removal not described. All samples are untreated wild type, so all are controls.",
+ "default": {
+  "growth_phase": {
+   "v": "transition",
+   "b": "stated",
+   "q": "Early stationary (OD 2.0)"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "grown to an OD600 nm of 2.0 (early stationary phase) at 37°C with shaking at 220 rpm."
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "1:100 dilutions in fresh LB"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "1:100 dilutions in fresh LB"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "1:100 dilutions in fresh LB"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "grown to an OD600 nm of 2.0 (early stationary phase) at 37°C with shaking at 220 rpm."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown to an OD600 nm of 2.0 (early stationary phase) at 37°C with shaking at 220 rpm."
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "wild type"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "wild type"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "22 total RNA samples from E. coli wild type resolved on a glycerol gradient resulting in 20 fractions and a pellet fraction."
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "22 total RNA samples from E. coli wild type resolved on a glycerol gradient resulting in 20 fractions and a pellet fraction."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "22 total RNA samples from E. coli wild type resolved on a glycerol gradient resulting in 20 fractions and a pellet fraction."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "22 total RNA samples from E. coli wild type resolved on a glycerol gradient resulting in 20 fractions and a pellet fraction."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "22 total RNA samples from E. coli wild type resolved on a glycerol gradient resulting in 20 fractions and a pellet fraction."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "assay_class": {
+   "v": "other",
+   "b": "stated",
+   "q": "Clarified lysates were centrifuged on a glycerol gradient, which was subsequently fractionated and the RNA extracted"
+  }
+ },
+ "rules": [
+  {
+   "field": "description",
+   "regex": "^Input control",
+   "set": {
+    "assay_class": {
+     "v": "total_rnaseq",
+     "b": "stated",
+     "q": "Input control was isolated using TRIzol reagent."
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,175 @@
+{
+ "gse": "GSE109819",
+ "notes": "BW25113 wild type vs rpoD E575V, with or without the exogenous GPCR NTR, IPTG-induced and then 4 h at 20 or 37 C. The 20 C step is the expression temperature after a shift from 37 C; recorded as growth_temperature, treatment none (not labelled as cold stress). WT_20 (no GPCR) is the control; WT_NTR_37 is heterologous expression, not a control. Sampled 4 h after induction from OD 0.5: no phase. One series sample not a candidate.",
+ "default": {
+  "base_medium": {
+   "v": "TB_2xYT_SOB",
+   "b": "stated",
+   "q": "E. coli cells were grown in 2×YT medium supplemented with 0.2% (w/v) glucose and 100"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "E. coli cells were grown in 2×YT medium supplemented with 0.2% (w/v) glucose and 100"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "E. coli cells were grown in 2×YT medium supplemented with 0.2% (w/v) glucose and 100"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "BW25113"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "protein expression was induced by addition of 250"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA samples (1000 ng) were ribosomal-RNA-depleted using the Ribo-Zero"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Total RNA samples (1000 ng) were ribosomal-RNA-depleted using the Ribo-Zero"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Escherichia coli strains producing exogenous internal membrane proteins"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Escherichia coli strains producing exogenous internal membrane proteins"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "the cells were cultivated at 20°C or 37 °C for 4 hours"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Escherichia coli strains producing exogenous internal membrane proteins"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:temperature c during protein induction",
+   "regex": "^20$",
+   "set": {
+    "growth_temperature": {
+     "v": 20,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:temperature c during protein induction",
+   "regex": "^37$",
+   "set": {
+    "growth_temperature": {
+     "v": 37,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^WT_20$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^MUT_20$",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": "rpoD E575V mutant"
+    },
+    "perturbed_genes": {
+     "v": "rpoD",
+     "b": "stated",
+     "q": "rpoD E575V mutant"
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": "rpoD E575V mutant"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^MUT_NTR_",
+   "set": {
+    "genotype_class": {
+     "v": "multiple",
+     "b": "stated",
+     "q": "rpoD E575V mutant"
+    },
+    "perturbed_genes": {
+     "v": "rpoD;NTR",
+     "b": "stated",
+     "q": "rpoD E575V mutant"
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": "rpoD E575V mutant"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^WT_NTR_",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": "Escherichia coli strains producing exogenous internal membrane proteins"
+    },
+    "perturbed_genes": {
+     "v": "NTR",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": "wild type"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

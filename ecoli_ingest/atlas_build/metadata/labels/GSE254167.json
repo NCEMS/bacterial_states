@@ -1,0 +1,96 @@
+{
+ "gse": "GSE254167",
+ "notes": "Not standard RNA-seq: RNC-seq, RNA from ribosome-nascent chain complexes pelleted through a sucrose cushion (assay_class other). Both arms overexpress S1 (WT or K247Q) with IPTG; no reference-genotype control, so is_control left out. Gene name rpsA for S1 protein. K247Q labelled point_mutation (overexpressed mutant). Phase left out (3 h after IPTG at OD 0.6).",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "LB（Luria-Bertani） medium"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "LB（Luria-Bertani） medium"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "LB（Luria-Bertani） medium"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "1mM IPTG was added to the strains"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "S1WT and S1K247Q overexpression strains grown in LB medium are used for RNC-seq"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "S1WT and S1K247Q overexpression strains grown in LB medium are used for RNC-seq"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Escherichia coli K-12 MG1655 S1WT and S1K247Q overexpression strains"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli K-12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli K-12 MG1655"
+  },
+  "assay_class": {
+   "v": "other",
+   "b": "stated",
+   "q": "ultracentrifuged at 4°C by T-865 fixed angle rotor (ThermoFisher, Germany) to pellet RNCs"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "S1WT and S1K247Q overexpression strains"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^S1 overexpression$",
+   "set": {
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rpsA",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^S1K247Qoverexpression$",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rpsA",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

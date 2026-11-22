@@ -1,0 +1,83 @@
+{
+ "gse": "GSE95310",
+ "notes": "Only the two MG1655 single-culture LB samples are candidates (co-cultures with P. putida not shown). The extract protocol says sub-lethal antibiotics (8 different ones listed) were added at OD 0.5 and cultures incubated 1 h more, which contradicts the design (single vs co-culture at exponential phase) and looks copied from another series; treatment, exposure and is_control left out. Phase mid_exponential from the design ('at exponential phase', OD 0.5). Temperature 30 C is stated for the overnight cultures only, taken as study default.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "growth in single-cultures and in co-cultures in LB at exponential phase"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "growth in single-cultures and in co-cultures in LB at exponential phase"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "growth in single-cultures and in co-cultures in LB at exponential phase"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "growth in single-cultures and in co-cultures in LB at exponential phase"
+  },
+  "growth_temperature": {
+   "v": 30,
+   "b": "study_default",
+   "q": "were grown overnight in Luria–Bertani (LB) medium at 30°C"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "50 ml aliquots were disposed in separate 250 ml Erlenmeyer flasks and incubated with shaking at 200 rpm"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "50 ml aliquots were disposed in separate 250 ml Erlenmeyer flasks and incubated with shaking at 200 rpm"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "MG1655"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "P. putida DOT-T1E and E. coli mRNA profiles comparing their growth in single-cultures and in co-cultures"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "P. putida DOT-T1E and E. coli mRNA profiles comparing their growth in single-cultures and in co-cultures"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "P. putida DOT-T1E and E. coli mRNA profiles comparing their growth in single-cultures and in co-cultures"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "stated",
+   "q": "MG1655_LB"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "total RNA was extracted with Trizol (Invitrogen)"
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

@@ -57,15 +57,29 @@ deseq2:
 # it: Centrifuge is then not run, its gate is ignored and it is left out of the MultiQC report.
 centrifuge: true
 
-# Paired-end reads only. false = plain fastp defaults (adapters removed only where the mates
-# overlap), as used for the atlas training counts. Set true to have fastp detect and trim the
-# adapter of each mate (--detect_adapter_for_pe); libraries with very short inserts need it.
-fastp_detect_adapter_for_pe: false
+# Strand specificity. Only strand-specific libraries are counted: a sample whose reads are not
+# at least `strandedness_min_fraction` on one strand is left out of the count table (see
+# <results>/strandedness.tsv). "auto" calls each sample from its alignments; "forward" or
+# "reverse" states it for every sample of the run. There is no unstranded mode.
+strandedness: "auto"
+strandedness_min_fraction: 0.8
 
-# Quality-control gates. A sample that fails any configured gate is excluded from alignment and
-# counting (see checkpoints/qc_failures.json). Remove a line to disable that gate.
-centrifuge_organism: "Escherichia coli"
-centrifuge_min_percentage: 30.0
+# Species gate (needs Centrifuge). A sample is not counted when it is not E. coli: another
+# organism, a phage infection, or a mixture. It is judged from the genus of the reads Centrifuge
+# places uniquely, with Escherichia and Shigella counted together. Samples that are clearly
+# something else are stopped before alignment (checkpoints/qc_failures.json, reason "species");
+# the full rule is applied after alignment (<results>/strandedness.tsv, column
+# not_counted_reason). Set false to only report the values (<sample>/qc/<sample>_species.json).
+species_gate: true
+# Thresholds, if the defaults (workflow/scripts/species_metrics.py, SPECIES_THRESHOLDS) do not fit:
+# species_thresholds:
+#   min_pct_escherichia_shigella: 50.0   # share of genus-resolved reads in Escherichia / Shigella
+#   min_pct_foreign_of_all: 2.0          # ... and the largest other genus is at least this % of all reads
+#   max_pct_foreign_of_all: 10.0         # largest other genus above this % of all reads: mixed sample
+#   min_pct_phage_of_all: 0.5            # a phage as the largest other genus at this % of all reads
+
+# Read-filter gate. A sample of which fastp keeps less than this percentage of reads is excluded
+# from alignment and counting (see checkpoints/qc_failures.json). Remove the line to disable it.
 fastp_min_kept_percentage: 75.0
 
 # Samples given by accession: where downloads and the resolution cache go (default: sra/ in this
@@ -73,6 +87,15 @@ fastp_min_kept_percentage: 75.0
 # how many runs are fetched at the same time (`ecoli_ingest run --max-downloads N` overrides).
 # sra_method: auto = sra-tools (prefetch + fasterq-dump, from NCBI) first and the ENA FASTQ files as
 # the backup; "sra-tools" or "ena" = that source only.
+# The sorted BAM (<sample>/vg/<sample>_sort.bam) is the largest output. Set false to have it
+# deleted once counting and the QC record are done; the per-sample QC record and the coverage
+# track keep what is needed from it. (The .gam is always deleted once used.)
+keep_alignments: true
+
+# Optional table with a `run_accession` column (for example the atlas manifest's runs.tsv). Library
+# and instrument fields of each sample's runs are copied from it into <sample>/qc/<sample>.qc.json.
+# run_metadata: "/path/to/runs.tsv"
+
 # sra_dir: "sra"
 # max_downloads: 4
 # sra_method: "auto"
@@ -81,7 +104,6 @@ fastp_min_kept_percentage: 75.0
 # no changes. Uncomment to override individual files.
 # ref: "GCF_000005845_2_ASM584v2_genomic#0#NC_000913.3"
 # vg_index: "/path/to/resources/vg/ecoli_graph_test"
-# annotation_gff: "/path/to/resources/annotation/GCF_000005845.2_ASM584v2_genomic_siRNA.gff"
-# annotation_source_gff: "/path/to/resources/annotation/GCF_000005845.2_ASM584v2_genomic.gff"
-# annotation_bed: "/path/to/resources/annotation/GCF_000005845.2_ASM584v2_genomic.bed"
+# annotation_gff: "/path/to/resources/annotation/GCF_000005845.2_ASM584v2_counting_v2.gff"
+# annotation_bed: "/path/to/resources/annotation/GCF_000005845.2_ASM584v2_counting_v2.bed"
 # centrifuge_index_path: "/path/to/resources/centrifuge/p_compressed+h+v"

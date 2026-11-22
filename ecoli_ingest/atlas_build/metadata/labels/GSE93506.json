@@ -1,0 +1,142 @@
+{
+ "gse": "GSE93506",
+ "notes": "Only the RNA-seq samples are candidates. IPTG is in the growth protocol for all samples, so inducer_added true for the no-vector WT too; WT still taken as control. WT sample lists an anti-FLAG antibody but is titled WT_RNASeq with total RNA; kept total_rnaseq. No OD/phase given. rRNA removal not stated.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Cells were grown in LB media with 1mM IPTG at 37 °C with shaking for 2 hours"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Cells were grown in LB media with 1mM IPTG at 37 °C with shaking for 2 hours"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Cells were grown in LB media with 1mM IPTG at 37 °C with shaking for 2 hours"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Cells were grown in LB media with 1mM IPTG at 37 °C with shaking for 2 hours"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Cells were grown in LB media with 1mM IPTG at 37 °C with shaking for 2 hours"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Cells were grown in LB media with 1mM IPTG at 37 °C with shaking for 2 hours"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "Cells were grown in LB media with 1mM IPTG at 37 °C with shaking for 2 hours"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Performed chromatin immunoprecipitation and total RNA extraction on WT strains cloned with inducible TFs in E. coli K-12 MG1655."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Performed chromatin immunoprecipitation and total RNA extraction on WT strains cloned with inducible TFs in E. coli K-12 MG1655."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Performed chromatin immunoprecipitation and total RNA extraction on WT strains cloned with inducible TFs in E. coli K-12 MG1655."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA extraction was done using TRIzol reagent and DNAse digested."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Performed chromatin immunoprecipitation and total RNA extraction on WT strains cloned with inducible TFs in E. coli K-12 MG1655."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:transcription factor",
+   "regex": "^none",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:transcription factor",
+   "regex": "^CsiR$",
+   "set": {
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "inferred",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "csiR",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:transcription factor",
+   "regex": "^Nac$",
+   "set": {
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "inferred",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "nac",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

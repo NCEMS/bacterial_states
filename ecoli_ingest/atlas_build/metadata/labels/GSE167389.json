@@ -1,0 +1,98 @@
+{
+ "gse": "GSE167389",
+ "notes": "All 8 samples are evolved pdhR-deletion ALE endpoints; no wild-type or unevolved parent in the series, so no control. rRNA removal not stated (KAPA Stranded RNA-Seq Kit).",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "study_default",
+   "q": "The fresh culture was incubated at 37C with shaking to the mid-log phase (OD600 ≈ 0.5)."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "The fresh culture was incubated at 37C with shaking to the mid-log phase (OD600 ≈ 0.5)."
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "study_default",
+   "q": "M9 minimal media w/ 4g/L glucose"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "M9 minimal media w/ 4g/L glucose"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "M9 minimal media w/ 4g/L glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "study_default",
+   "q": "M9 minimal media w/ 4g/L glucose"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "The fresh culture was incubated at 37C with shaking to the mid-log phase (OD600 ≈ 0.5)."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "study_default",
+   "q": "The fresh culture was incubated at 37C with shaking to the mid-log phase (OD600 ≈ 0.5)."
+  },
+  "genotype_class": {
+   "v": "evolved_isolate",
+   "b": "study_default",
+   "q": "We have performed adaptive laboratory evolution of E. coli pdhR gene deletion strain"
+  },
+  "perturbed_genes": {
+   "v": "pdhR",
+   "b": "study_default",
+   "q": "adaptive laboratory evolution of E. coli pdhR gene deletion strain"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "adaptive laboratory evolution of E. coli pdhR gene deletion strain"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "We have performed adaptive laboratory evolution of E. coli pdhR gene deletion strain to examine the adaptive strategies of E. coli."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "We have performed adaptive laboratory evolution of E. coli pdhR gene deletion strain to examine the adaptive strategies of E. coli."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Growth of E. coli on M9 minimal media supplemented with 4g/l Glucose at 37C was performed with biological duplicates."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Total RNA was extracted from mid-log phase culture for RNA-Seq library preparation."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Growth of E. coli on M9 minimal media supplemented with 4g/l Glucose at 37C was performed with biological duplicates."
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

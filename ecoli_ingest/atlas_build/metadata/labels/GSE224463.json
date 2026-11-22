@@ -1,0 +1,235 @@
+{
+ "gse": "GSE224463",
+ "notes": "CONFLICT resolved: titles used; ch:genotype and ch:treatment are wrong (checked against expression of osmY, dps, otsB, gadB, proV, deaD). All labels are read from the title (genotype, series, time point); ch:genotype and ch:treatment are ignored. Time 0 of every series = culture at OD600 ~0.3 in LB sampled before the stressor: treatment none, mid_exponential (inferred from OD), 37 C. Wild-type time-0 samples of all three series are controls. Low temperature = shift to 15 C, high osmolarity = NaCl addition; exposure acute (30 min), short (60-120 min), adapted (150-300 min); these keep mid_exponential up to 120 min (inferred, pre-shift phase), later samples no phase. Stationary-phase series: no stressor applied (continued growth), treatment none; the text gives no phase per time point (only 'transition from exponential to stationary phase' for the series), so growth_phase is left out after time 0. Replicate names SP_/LSP_ (stationary) and short_/long_ (cold) are not explained in the text. WT re-read: wild-type BW27786 with no stated modification -> wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Luria-bertani (LB) broth (1% tryptone, 0.5% yeast extract, 1% NaCl)"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Luria-bertani (LB) broth (1% tryptone, 0.5% yeast extract, 1% NaCl)"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Luria-bertani (LB) broth (1% tryptone, 0.5% yeast extract, 1% NaCl)"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "continued to grow at 37˚C with shaking at 225 rpm until the OD600 of the culture reached approximately  0.3"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "continued to grow at 37˚C with shaking at 225 rpm until the OD600 of the culture reached approximately  0.3"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "study_default",
+   "q": "continued to grow at 37˚C with shaking at 225 rpm until the OD600 of the culture reached approximately  0.3"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Strain K-12, substrain BW27786"
+  },
+  "strain_name": {
+   "v": "BW27786",
+   "b": "stated",
+   "q": "Strain K-12, substrain BW27786"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq for E. coli K-12 (both wt and ∆rpoS) at time points during the transition from exponenital to stationary phase, and following shift to high osmolarity and low temperature"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq for E. coli K-12 (both wt and ∆rpoS) at time points during the transition from exponenital to stationary phase, and following shift to high osmolarity and low temperature"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq for E. coli K-12 (both wt and ∆rpoS) at time points during the transition from exponenital to stationary phase, and following shift to high osmolarity and low temperature"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Barcoded RNAs were pooled and depleted of rRNA using the RiboZero rRNA depletion kit (Epicentre)."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Barcoded RNAs were pooled and depleted of rRNA using the RiboZero rRNA depletion kit (Epicentre)."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq for E. coli K-12 (both wt and ∆rpoS) at time points during the transition from exponenital to stationary phase, and following shift to high osmolarity and low temperature"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^wild-type, ",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^∆rpoS, ",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rpoS",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^[^,]+, low temperature, [1-9][0-9]* ?mins?,",
+   "set": {
+    "treatment": {
+     "v": "cold",
+     "b": "stated",
+     "q": "for low temperature, they were moved to a 15°C shaking water bath"
+    },
+    "growth_temperature": {
+     "v": 15,
+     "b": "stated",
+     "q": "for low temperature, they were moved to a 15°C shaking water bath"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^[^,]+, high osmolarity, [1-9][0-9]* ?mins?,",
+   "set": {
+    "treatment": {
+     "v": "hyperosmotic",
+     "b": "stated",
+     "q": "for high osmolarity, 3mL of 5M NaCl was added to the cultures"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^[^,]+, stationary phase, ",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "study_default",
+     "q": "or they were left to continue growing to reach stationary phase"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "(low temperature|high osmolarity), 30 ?mins?,",
+   "set": {
+    "exposure": {
+     "v": "acute",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "(low temperature|high osmolarity), (60|90|120) ?mins?,",
+   "set": {
+    "exposure": {
+     "v": "short",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "(low temperature|high osmolarity), (150|180|240|300) ?mins?,",
+   "set": {
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "(low temperature|high osmolarity), (30|60|90|120) ?mins?,",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": "until the OD600 of the culture reached approximately  0.3"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": ", 0 ?mins?,",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "At this point, samples were taken for RNA and protein isolation and then the culture was exposed to the stressor of interest"
+    },
+    "exposure": {
+     "v": null,
+     "b": "",
+     "q": ""
+    },
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": "until the OD600 of the culture reached approximately  0.3"
+    },
+    "growth_temperature": {
+     "v": 37,
+     "b": "stated",
+     "q": "continued to grow at 37˚C with shaking at 225 rpm until the OD600 of the culture reached approximately  0.3"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^wild-type, [a-z ]+, 0 ?mins?,",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "At this point, samples were taken for RNA and protein isolation and then the culture was exposed to the stressor of interest"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

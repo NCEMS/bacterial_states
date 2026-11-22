@@ -1,0 +1,149 @@
+{
+ "gse": "GSE66481",
+ "notes": "All samples grown at pH 5.5 from inoculation (treatment acid, adapted). No untreated sample exists, so is_control left out although WT at pH 5.5 is the comparison reference.",
+ "default": {
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K-12 MG1655"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12 MG1655"
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "grown to mid-log phase (OD600 = 0.3) aerobically (250 rpm) at 37°C in M9 minimal media supplemented with 0.2% glucose at pH 5.5"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "grown to mid-log phase (OD600 = 0.3) aerobically (250 rpm) at 37°C in M9 minimal media supplemented with 0.2% glucose at pH 5.5"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "grown to mid-log phase (OD600 = 0.3) aerobically (250 rpm) at 37°C in M9 minimal media supplemented with 0.2% glucose at pH 5.5"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "grown to mid-log phase (OD600 = 0.3) aerobically (250 rpm) at 37°C in M9 minimal media supplemented with 0.2% glucose at pH 5.5"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown to mid-log phase (OD600 = 0.3) aerobically (250 rpm) at 37°C in M9 minimal media supplemented with 0.2% glucose at pH 5.5"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "grown to mid-log phase (OD600 = 0.3) aerobically (250 rpm) at 37°C in M9 minimal media supplemented with 0.2% glucose at pH 5.5"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "grown to mid-log phase (OD600 = 0.3) aerobically (250 rpm) at 37°C in M9 minimal media supplemented with 0.2% glucose at pH 5.5"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "mid-log phase (OD600 = 0.3)"
+  },
+  "treatment": {
+   "v": "acid",
+   "b": "stated",
+   "q": "grown to mid-log phase (OD600 = 0.3) aerobically (250 rpm) at 37°C in M9 minimal media supplemented with 0.2% glucose at pH 5.5"
+  },
+  "exposure": {
+   "v": "adapted",
+   "b": "inferred",
+   "q": "WT and gadEWX mutant cells were cultured in M9 glucose minimal media at pH 5.5"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT and gadEWX mutant cells were cultured in M9 glucose minimal media at pH 5.5"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT and gadEWX mutant cells were cultured in M9 glucose minimal media at pH 5.5"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT and gadEWX mutant cells were cultured in M9 glucose minimal media at pH 5.5"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "RNA libraries were prepared for sequencing using standard Illumina protocols"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT and gadEWX mutant cells"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": "WT"
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^delta-gad[EWX]$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^delta-gadE$",
+   "set": {
+    "perturbed_genes": {
+     "v": "gadE",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^delta-gadW$",
+   "set": {
+    "perturbed_genes": {
+     "v": "gadW",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^delta-gadX$",
+   "set": {
+    "perturbed_genes": {
+     "v": "gadX",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

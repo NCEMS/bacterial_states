@@ -1,0 +1,144 @@
+{
+ "gse": "GSE179434",
+ "notes": "Antibiotic named as ampicillin in the summary, protocol lists ampicillin/penicillin G/carbenicillin (all cell-wall). 8 h after 1:50 dilution in LB: no phase word, growth_phase left out. rRNA removal not stated.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Luria-Bertani (LB) was used as broth"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Luria-Bertani (LB) was used as broth"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Luria-Bertani (LB) was used as broth"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "an overnight culture (0.6 ml; 1 x 109 CFU/ml cells) was diluted 1:50 into 30 ml LB medium supplemented with antibiotics (50 μg/ml ampicillin, 1 mg/ml penicillin G, or 200 μg/ml carbenicillin) and incubated at 37ºC with shaking at 250 rpm for 8 hours"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "incubated at 37ºC with shaking at 250 rpm for 8 hours"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "incubated at 37ºC with shaking at 250 rpm for 8 hours"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA profiles of E.coli, wild type (WT) and ΔrecA with or without antibiotics treatment"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA profiles of E.coli, wild type (WT) and ΔrecA with or without antibiotics treatment"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA profiles of E.coli, wild type (WT) and ΔrecA with or without antibiotics treatment"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "str. K-12 substr. MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "1 μg total RNA with RIN value above 6.5 was used for following library preparation"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "wild type (WT) and ΔrecA"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA profiles of E.coli, wild type (WT) and ΔrecA with or without antibiotics treatment"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "recA",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "recA",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "without pressure",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "with antibiotics",
+   "set": {
+    "treatment": {
+     "v": "abx_cell_wall",
+     "b": "stated",
+     "q": "The treatment of ampicillin affected the transcriptomic profile"
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "stated",
+     "q": "an overnight culture (0.6 ml; 1 x 109 CFU/ml cells) was diluted 1:50 into 30 ml LB medium supplemented with antibiotics (50 μg/ml ampicillin, 1 mg/ml penicillin G, or 200 μg/ml carbenicillin) and incubated at 37ºC with shaking at 250 rpm for 8 hours"
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "^wild type_8h culture without pressure$",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,120 @@
+{
+ "gse": "GSE144068",
+ "notes": "Anaerobic chamber, no electron acceptor named: anaerobic_fermentation inferred. Sealed Hungate tubes, culture_mode left empty. MOPS carbon source not given. 15/30 min samples keep the pre-shift mid_exponential phase (<= 2 h).",
+ "default": {
+  "base_medium": {
+   "v": "MOPS",
+   "b": "stated",
+   "q": "in MOPS minimal media (Teknova)"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "in MOPS minimal media (Teknova)"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "in MOPS minimal media (Teknova)"
+  },
+  "oxygen": {
+   "v": "anaerobic_fermentation",
+   "b": "inferred",
+   "q": "grown anaerobically (90% N2, 5% CO2, 5% H2, maintained with a Coy Laboratory Products anaerobic chamber)"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "at 37°C in MOPS minimal media"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "in sealed Hungate tubes to an A600 = 0.25"
+  },
+  "strain_group": {
+   "v": "probiotic",
+   "b": "stated",
+   "q": "Nissle 1917"
+  },
+  "strain_name": {
+   "v": "Nissle 1917",
+   "b": "stated",
+   "q": "Nissle 1917"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "E. coli Nissle 1917 was grown anaerobically"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Samples: 0 mins, 15 mins, and 30 mins post HOCl treatment"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Samples: 0 mins, 15 mins, and 30 mins post HOCl treatment"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Samples: 0 mins, 15 mins, and 30 mins post HOCl treatment"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Samples: 0 mins, 15 mins, and 30 mins post HOCl treatment"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "ribosome reduction with the RiboMinus protocol"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "ribosome reduction with the RiboMinus protocol"
+  },
+  "treatment": {
+   "v": "oxidative",
+   "b": "stated",
+   "q": "the cells were treated anaerobically with 0.4 mM HOCl"
+  },
+  "exposure": {
+   "v": "acute",
+   "b": "stated",
+   "q": "15 or 30 minutes after HOCl addition"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Samples: 0 mins, 15 mins, and 30 mins post HOCl treatment"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:time after hocl stress",
+   "regex": "^0$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "immediately before"
+    },
+    "exposure": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

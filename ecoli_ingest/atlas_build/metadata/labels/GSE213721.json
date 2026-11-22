@@ -1,0 +1,29 @@
+{
+  "gse": "GSE213721",
+  "notes": "MG1655 rph+ wild type vs hfq deletion, rich defined medium (base not named), 37 C, mid log. Libraries made with the NEBNext Small RNA prep kit, so assay_class small_rna (not standard total RNA-seq). Aeration not stated.",
+  "default": {
+    "medium_class": {"v": "defined_rich", "b": "stated", "q": "grown at 37C in rich defined medium to mid log phase"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "grown at 37C in rich defined medium"},
+    "growth_temperature": {"v": 37, "b": "stated", "q": "grown at 37C in rich defined medium"},
+    "growth_phase": {"v": "mid_exponential", "b": "stated", "q": "to mid log phase then harvested for RNA preparation"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "MG1655 rph+"},
+    "strain_name": {"v": "MG1655 rph+", "b": "stated", "q": "MG1655 rph+"},
+    "treatment": {"v": "none", "b": "study_default", "q": "we created a Hfq-deletion mutant strain and isolated RNA from wild-type and the mutant strains"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "we created a Hfq-deletion mutant strain and isolated RNA from wild-type and the mutant strains"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "we created a Hfq-deletion mutant strain and isolated RNA from wild-type and the mutant strains"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "we created a Hfq-deletion mutant strain and isolated RNA from wild-type and the mutant strains"},
+    "assay_class": {"v": "small_rna", "b": "stated", "q": "Libraries were constructed using NEBNext Small RNA prep kit"}
+  },
+  "rules": [
+    {"field": "ch:genotype", "regex": "^Wild-type$", "set": {
+      "genotype_class": {"v": "reference", "b": "stated", "q": ""},
+      "global_regulator_perturbed": {"v": false, "b": "stated", "q": ""},
+      "is_control": {"v": true, "b": "stated", "q": ""}}},
+    {"field": "ch:genotype", "regex": "^hfq deletion$", "set": {
+      "genotype_class": {"v": "deletion", "b": "stated", "q": ""},
+      "perturbed_genes": {"v": "hfq", "b": "stated", "q": ""},
+      "global_regulator_perturbed": {"v": true, "b": "stated", "q": ""},
+      "is_control": {"v": false, "b": "stated", "q": ""}}}
+  ],
+  "samples": {}
+}

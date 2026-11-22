@@ -1,0 +1,131 @@
+{
+ "gse": "GSE99042",
+ "notes": "K-12 (substrain not given) in M9 + thiamine + 2% glucose to mid-log, with or without CNTRENE C100LM carbon nanotubes from the start of growth; nanotube exposure labelled other_chemical, adapted.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "Escherichia coli were grown in M9 medium with 1mM thiamine and 2% glucose at 37C and 200 rpm until they reached mid-log phase"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "M9 medium with 1mM thiamine and 2% glucose"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "M9 medium with 1mM thiamine and 2% glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "M9 medium with 1mM thiamine and 2% glucose"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "2% glucose at 37C and 200 rpm"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "2% glucose at 37C and 200 rpm"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "2% glucose at 37C and 200 rpm"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "until they reached mid-log phase"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "Total RNA was obtained from Escherichia coli grown in the presence of CNTRENE C100LM until cells reached mid-log phase and compared to unexposed cells"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total RNA was obtained from Escherichia coli grown in the presence of CNTRENE C100LM until cells reached mid-log phase and compared to unexposed cells"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total RNA was obtained from Escherichia coli grown in the presence of CNTRENE C100LM until cells reached mid-log phase and compared to unexposed cells"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total RNA was obtained from Escherichia coli grown in the presence of CNTRENE C100LM until cells reached mid-log phase and compared to unexposed cells"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total RNA was obtained from Escherichia coli grown in the presence of CNTRENE C100LM until cells reached mid-log phase and compared to unexposed cells"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli K-12"
+  },
+  "strain_name": {
+   "v": "K12",
+   "b": "stated",
+   "q": "K12"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Libraries were prepared by removing ribosomal rRNA using the bacterial Ribo-Zero rRNA Removal Kit"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "the SMARTer Stranded RNA-Seq kit (Clontech, Mountain View, Ca, USA) was used to prepare cDNA from RNA samples"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:agent",
+   "regex": "^none$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:agent",
+   "regex": "CNTRENE",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "grown in the presence of CNTRENE C100LM until cells reached mid-log phase"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

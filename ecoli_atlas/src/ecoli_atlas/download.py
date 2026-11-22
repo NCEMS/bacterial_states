@@ -1,5 +1,5 @@
-"""Data bundles for Ecoli_ATLAS: assets of the GitHub release `resources-v1` of NCEMS/bacterial_states. The
-URLs below are the only place that names the download location.
+"""Data bundles for Ecoli_ATLAS: assets of the GitHub release `resources-v2` of NCEMS/bacterial_states (built by
+`release/make_release.py`). The URLs below are the only place that names the download location.
 
 Each bundle pins the SHA-256 of its archive. The archives are built reproducibly, so the same files
 always give the same checksum; a download that does not match is rejected before anything is
@@ -14,7 +14,7 @@ import tempfile
 import urllib.request
 from pathlib import Path
 
-ATLAS_DATA_VERSION = "v1"
+ATLAS_DATA_VERSION = "v2"
 # assets of the GitHub data release `resources-<version>` (code releases are tagged vX.Y.Z)
 RELEASE_URL = f"https://github.com/NCEMS/bacterial_states/releases/download/resources-{ATLAS_DATA_VERSION}"
 ENV_DATA = "ECOLI_ATLAS_DATA"
@@ -24,23 +24,24 @@ ENV_DATA_ROOT = "BS_DATA_ROOT"
 BUNDLES = {
     "training-data": {
         "url": f"{RELEASE_URL}/ecoli_atlas_training_data_{ATLAS_DATA_VERSION}.tar.gz",
-        "sha256": "233b11db20391c5cd9dc32c421fd43449ef3877b34b52b3d065adfe46e33bd49",
-        "size": "23 MB download, 56 MB unpacked",
-        "contents": ["merged_count_table.txt", "metadata_revised.csv", "GCF_000005845.2_ASM584v2_feature_table.txt"],
+        "sha256": "a1edcd18a016fbb2cdbb4a407027d5acef01b86c70b9e2ccdd51df6beb4ebbe9",
+        "size": "100 MB download, 301 MB unpacked",
+        "contents": ["atlas_v2_counts.tsv", "atlas_v2_antisense_counts.tsv", "metadata_v2.tsv", "sample_qc.tsv",
+                     "time_courses.tsv", "atlas_v2_missing_genes.tsv (genes called missing, per sample)",
+                     "metadata_v2_studies.tsv, metadata_v2_sample_text.tsv (GEO text)",
+                     "metadata_v2_evidence.tsv (the text behind each label)", "metadata_v2_label_scheme.yaml"],
         "subdir": "atlas_data",
     },
     "models": {
         "url": f"{RELEASE_URL}/ecoli_atlas_models_{ATLAS_DATA_VERSION}.tar.gz",
-        "sha256": "23d8efbbdc04f9e76e9e7a85c7e60e74c1cf868638d17981a3fc63efafaa0015",
-        "size": "17 MB download, 20 MB unpacked",
-        "contents": ["models/{growth_phase,medium_type,is_lab_strain}_encoder.pt", "models/residual_ae.pt",
-                     "models/preprocessing.pt", "models/manifest.json", "models/splits.csv",
-                     "atlas/final_embedding.csv", "atlas/sample_predictions.csv", "atlas/embedding_block_layout.csv",
-                     "atlas/atlas_metadata.csv", "atlas/atlas_manifest.json"],
+        "sha256": "ca953af2624c3e485d9e31af83ff30c90c4094de33937062be9afd5b0c0aae25",
+        "size": "312 MB download, 378 MB unpacked",
+        "contents": ["models/ (the selected bundle: model.pt, preprocessing.pt, manifest.json, splits.csv, the atlas's "
+                     "embedding.tsv, predictions.tsv, missing_genes.tsv, evaluation.json)",
+                     "models/seed_1 ... seed_8 (every seed of the sweep, for drivers and seed spreads)"],
         "subdir": "outputs",
     },
 }
-FEATURE_TABLE = "GCF_000005845.2_ASM584v2_feature_table.txt"
 
 
 def data_root() -> Path:
@@ -53,15 +54,6 @@ def default_data_dir() -> Path:
 
 def default_models_dir() -> Path:
     return Path(os.environ.get(ENV_MODELS, data_root() / "outputs" / "models"))
-
-
-def default_atlas_dir() -> Path:
-    return default_models_dir().parent / "atlas"
-
-
-def default_feature_table() -> Path | None:
-    p = default_data_dir() / FEATURE_TABLE
-    return p if p.exists() else None
 
 
 def download(bundle: str, dest: Path | None = None, dry_run: bool = False, log=None) -> int:

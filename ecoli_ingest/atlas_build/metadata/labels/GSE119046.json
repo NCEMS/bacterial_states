@@ -1,0 +1,40 @@
+{
+  "gse": "GSE119046",
+  "notes": "rpoS819 and rpoS92 are alleles isolated during prolonged stationary-phase evolution, reconstructed in the ZK126 background; classed as point_mutation (allele type not described in the text). ZK92 also carries tna::Tn10 (marker). Carbon source of LB not given.",
+  "default": {
+    "base_medium": {"v": "LB", "b": "stated", "q": "LB Broth"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "grown in Lysogeny broth at 37 degree Celsius and 200 rpm"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "grown in Lysogeny Broth culture for sixteen hours"},
+    "growth_phase": {"v": "stationary", "b": "stated", "q": "Stationary (16 hours)"},
+    "culture_mode": {"v": "batch_shaken", "b": "inferred", "q": "grown in Lysogeny broth at 37 degree Celsius and 200 rpm"},
+    "oxygen": {"v": "aerobic", "b": "inferred", "q": "grown in Lysogeny broth at 37 degree Celsius and 200 rpm"},
+    "growth_temperature": {"v": 37, "b": "stated", "q": "grown in Lysogeny broth at 37 degree Celsius"},
+    "treatment": {"v": "none", "b": "study_default", "q": "compare system level changes in gene-expression in naturally isolated alleles of stationary-phase sigma factor rpoS"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "Two biological replicates for each strain were grown in Lysogeny Broth culture for sixteen hours"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "Two biological replicates for each strain were grown in Lysogeny Broth culture for sixteen hours"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "Two biological replicates for each strain were grown in Lysogeny Broth culture for sixteen hours"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "total RNA was depleted of ribosomal RNA using Microbe express kit from Ambion"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "total RNA was depleted of ribosomal RNA using Microbe express kit from Ambion"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "W3110 <delta>lacU169"}
+  },
+  "rules": [
+    {"field": "title", "regex": "^wild type rpoS",
+     "set": {"genotype_class": {"v": "reference", "b": "stated", "q": ""},
+             "is_control": {"v": true, "b": "stated", "q": ""},
+             "global_regulator_perturbed": {"v": false, "b": "stated", "q": ""},
+             "strain_name": {"v": "ZK126", "b": "stated", "q": ""}}},
+    {"field": "title", "regex": "^rpoS819",
+     "set": {"genotype_class": {"v": "point_mutation", "b": "inferred", "q": "ZK126 (W3110 <delta>lacU169) rpoS819 Smr"},
+             "perturbed_genes": {"v": "rpoS", "b": "stated", "q": ""},
+             "global_regulator_perturbed": {"v": true, "b": "stated", "q": ""},
+             "is_control": {"v": false, "b": "stated", "q": ""},
+             "strain_name": {"v": "ZK819", "b": "stated", "q": ""}}},
+    {"field": "title", "regex": "^rpoS92",
+     "set": {"genotype_class": {"v": "point_mutation", "b": "inferred", "q": "ZK819 rpoS92 tna::Tn10 Tetr"},
+             "perturbed_genes": {"v": "rpoS", "b": "stated", "q": ""},
+             "global_regulator_perturbed": {"v": true, "b": "stated", "q": ""},
+             "is_control": {"v": false, "b": "stated", "q": ""},
+             "strain_name": {"v": "ZK92", "b": "stated", "q": ""}}}
+  ],
+  "samples": {}
+}

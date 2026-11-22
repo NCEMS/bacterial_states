@@ -1,0 +1,120 @@
+{
+ "gse": "GSE273773",
+ "notes": "Sampled after 10 h of batch growth with no phase word or OD: growth_phase left out. Gallium nitrate present from inoculation -> metal_excess, adapted. WT re-read: BW25113 wild type is wild_type.",
+ "default": {
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Escherichia coli K12 BW25113 was cultured in 15mL of M9-glucose minimal media and incubated at 37 ºC 150 rpm for 10 hours in a shaker incubator."
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "Escherichia coli K12 BW25113 was cultured in 15mL of M9-glucose minimal media and incubated at 37 ºC 150 rpm for 10 hours in a shaker incubator."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "Escherichia coli K12 BW25113 was cultured in 15mL of M9-glucose minimal media and incubated at 37 ºC 150 rpm for 10 hours in a shaker incubator."
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "Escherichia coli K12 BW25113 was cultured in 15mL of M9-glucose minimal media and incubated at 37 ºC 150 rpm for 10 hours in a shaker incubator."
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "Escherichia coli K12 BW25113 was cultured in 15mL of M9-glucose minimal media and incubated at 37 ºC 150 rpm for 10 hours in a shaker incubator."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Escherichia coli K12 BW25113 was cultured in 15mL of M9-glucose minimal media and incubated at 37 ºC 150 rpm for 10 hours in a shaker incubator."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Escherichia coli K12 BW25113 was cultured in 15mL of M9-glucose minimal media and incubated at 37 ºC 150 rpm for 10 hours in a shaker incubator."
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "Wild type"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "Wild type"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Two treatment groups were set up: a non-metal control with M9-glucose minimal media, and a metal challenge"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Two treatment groups were set up: a non-metal control with M9-glucose minimal media, and a metal challenge"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Two treatment groups were set up: a non-metal control with M9-glucose minimal media, and a metal challenge"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K12 BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "K12 BW25113"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "NEBNext Ultra II Directional RNA Library Prep Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA depletion was performed using the NEB rRNA Depletion Bacterial Module"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "Control - no metal challenge"
+  },
+  "is_control": {
+   "v": true,
+   "b": "stated",
+   "q": "Control - no metal challenge"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "gallium nitrate",
+   "set": {
+    "treatment": {
+     "v": "metal_excess",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "stated",
+     "q": "spiked with a sublethal concentration of gallium nitrate (1.25 mM) prior to inoculation"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

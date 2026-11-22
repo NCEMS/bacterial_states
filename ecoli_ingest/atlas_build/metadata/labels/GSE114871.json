@@ -1,0 +1,33 @@
+{
+  "gse": "GSE114871",
+  "notes": "BW25113 carrying pKT-CNP (rat CNPase, heterologous) vs pKT-CNP-inact (catalytically inactive variant, called control). The inactive-variant strain is treated like an empty-vector control (genotype_class reference, is_control true); both arms induced with aTc. Medium M9 + glucose + casamino acids = minimal_plus_hydrolysate. Growth phase 'logarithmic' (stated), OD600 0.5-0.6.",
+  "default": {
+    "base_medium": {"v": "M9", "b": "stated", "q": "M9 minimal medium (supplemented with 0.4% glucose, 0.2% casamino acids, and 100 µg/mL carbenicillin)"},
+    "medium_class": {"v": "minimal_plus_hydrolysate", "b": "inferred", "q": "M9 minimal medium (supplemented with 0.4% glucose, 0.2% casamino acids, and 100 µg/mL carbenicillin)"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "M9 minimal medium (supplemented with 0.4% glucose, 0.2% casamino acids, and 100 µg/mL carbenicillin)"},
+    "carbon_source": {"v": "glucose", "b": "stated", "q": "M9 minimal medium (supplemented with 0.4% glucose, 0.2% casamino acids, and 100 µg/mL carbenicillin)"},
+    "growth_phase": {"v": "mid_exponential", "b": "stated", "q": "logarithmic"},
+    "growth_temperature": {"v": 37, "b": "stated", "q": "at 37°C overnight (~18 h) with shaking at 200-225 rpm"},
+    "culture_mode": {"v": "batch_shaken", "b": "inferred", "q": "subcultured 1:100 into 10 mL of the same medium and incubated under the same conditions"},
+    "oxygen": {"v": "aerobic", "b": "inferred", "q": "at 37°C overnight (~18 h) with shaking at 200-225 rpm"},
+    "inducer_added": {"v": true, "b": "stated", "q": "All cultures subsequently were treated with anhydrotetracycline (25 ng/mL) to induce protein expression from the pKT vector."},
+    "treatment": {"v": "none", "b": "study_default", "q": "Global transcript levels in E. coli expressing CNPase were compared to levels in control cells expressing a catalytically inactive variant of the enzyme"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "Global transcript levels in E. coli expressing CNPase were compared to levels in control cells expressing a catalytically inactive variant of the enzyme"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "Global transcript levels in E. coli expressing CNPase were compared to levels in control cells expressing a catalytically inactive variant of the enzyme"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "BW25113"},
+    "strain_name": {"v": "BW25113", "b": "stated", "q": "BW25113"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "Ribosomal transcripts were depleted from 2 ug of total RNA"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "libraries were generated following Illumina's Scripseq V2 Complete- Bacterial library prep kits"},
+    "global_regulator_perturbed": {"v": false, "b": "inferred", "q": "heterologous expression of a 2',3'-cyclic nucleotide phosphodiesterase (CNPase)"}
+  },
+  "rules": [
+    {"field": "ch:plasmid", "regex": "^pKT-CNP \\(Rattus",
+     "set": {"genotype_class": {"v": "heterologous_expression", "b": "stated", "q": ""},
+             "perturbed_genes": {"v": "CNP (Rattus norvegicus)", "b": "stated", "q": ""},
+             "is_control": {"v": false, "b": "stated", "q": ""}}},
+    {"field": "ch:plasmid", "regex": "^pKT-CNP-inact",
+     "set": {"genotype_class": {"v": "reference", "b": "stated", "q": ""},
+             "is_control": {"v": true, "b": "stated", "q": ""}}}
+  ],
+  "samples": {}
+}

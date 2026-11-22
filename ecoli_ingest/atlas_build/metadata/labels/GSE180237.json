@@ -1,0 +1,48 @@
+{
+ "gse": "GSE180237",
+ "notes": "BacDrop droplet single-cell RNA-seq of E. coli GFP reporter strains -> assay_class other. Medium unknown ('regular laboratory condition'). mixed_organism left out (not described for these libraries). Reporter strains treated as reference genotype.",
+ "default": {
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "37ºC, regular laboratory condition"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "untreated"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "untreated"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "untreated"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "inferred",
+   "q": "E. coli expressing a GFP reporter driven by the promoter of"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "E. coli expressing a GFP reporter driven by the promoter of"
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "untreated"
+  },
+  "assay_class": {
+   "v": "other",
+   "b": "stated",
+   "q": "BacDrop, a bacterial droplet-based high throughput scRNA-seq technology"
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

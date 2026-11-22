@@ -1,0 +1,160 @@
+{
+ "gse": "GSE78814",
+ "notes": "WT vs delta-rnr (Keio JW5741-1), oxic vs anoxic with nitrate, glycerol with or without propionate. Propionate is an alternative carbon source (medium property, treatment none). Medium M4 salts + 0.1 g/l casein hydrolysate -> minimal_plus_hydrolysate. Every WT sample is a control (several reference conditions). No growth phase, culture mode or WT strain name given. WT re-read: K-12 wild type is unmodified -> wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "other_minimal",
+   "b": "stated",
+   "q": "Cells were grown at 37°C in M4 minimal medium under oxic and anoxic conditions."
+  },
+  "medium_class": {
+   "v": "minimal_plus_hydrolysate",
+   "b": "inferred",
+   "q": "was supplemented with 0.1 g/l caseinhydrolysate"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "was supplemented with 0.1 g/l caseinhydrolysate"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Cells were grown at 37°C in M4 minimal medium"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "RNA-seq of E. coli K12 wild type and delta-rnr mutant"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "No further treatment was applied."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq of E. coli K12 wild type and delta-rnr mutant under aerobic and anaerobic growth with and without propionate."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq of E. coli K12 wild type and delta-rnr mutant under aerobic and anaerobic growth with and without propionate."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq of E. coli K12 wild type and delta-rnr mutant under aerobic and anaerobic growth with and without propionate."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "total RNA (ribosome-depleted)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "total RNA (ribosome-depleted)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:carbon source",
+   "regex": "^glycerol$",
+   "set": {
+    "carbon_source": {
+     "v": "glycerol",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:carbon source",
+   "regex": "propionate",
+   "set": {
+    "carbon_source": {
+     "v": "mixed",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:oxic/anoxic",
+   "regex": "^oxic$",
+   "set": {
+    "oxygen": {
+     "v": "aerobic",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:oxic/anoxic",
+   "regex": "anoxic \\(NO3\\)",
+   "set": {
+    "oxygen": {
+     "v": "anaerobic_respiration",
+     "b": "stated",
+     "q": "Potassium nitrate (50 mM) was the electron acceptor under anoxic conditions."
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "wild type",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "delta-rnr",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rnr",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "JW5741-1",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,21 @@
+{
+  "gse": "GSE129787",
+  "notes": "STEC FHI96 phase variants of the Type III methyltransferase mod (ON 52 repeats vs OFF 51 repeats); neither is presented as wild type, so genotype_class and is_control left out.",
+  "default": {
+    "growth_phase": {"v": "mid_exponential", "b": "stated", "q": "Mid-log cultures in LB broth."},
+    "base_medium": {"v": "LB", "b": "stated", "q": "Mid-log cultures in LB broth."},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "Mid-log cultures in LB broth."},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "Mid-log cultures in LB broth."},
+    "strain_group": {"v": "EHEC_STEC", "b": "stated", "q": "Shiga toxin-producing Escherichia coli strain FHI96"},
+    "strain_name": {"v": "FHI96", "b": "stated", "q": "FHI96"},
+    "perturbed_genes": {"v": "mod", "b": "stated", "q": "STEC strain FHI96 expressing methyltransferase mod (ON; 52reps) or not (OFF; 51reps)"},
+    "global_regulator_perturbed": {"v": false, "b": "stated", "q": "STEC strain FHI96 expressing methyltransferase mod (ON; 52reps) or not (OFF; 51reps)"},
+    "treatment": {"v": "none", "b": "study_default", "q": "RNA isolated from triplicate cultures of each strain (STECmod ON 52reps and STECmod OFF 51reps) grown in LB to mid-log"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "RNA isolated from triplicate cultures of each strain (STECmod ON 52reps and STECmod OFF 51reps) grown in LB to mid-log"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "RNA isolated from triplicate cultures of each strain (STECmod ON 52reps and STECmod OFF 51reps) grown in LB to mid-log"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "RNA isolated from triplicate cultures of each strain (STECmod ON 52reps and STECmod OFF 51reps) grown in LB to mid-log"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "RNA libraries were prepared for sequencing using standard Illumina TruSeq protocols."}
+  },
+  "rules": [],
+  "samples": {}
+}

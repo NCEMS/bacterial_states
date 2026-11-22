@@ -1,0 +1,193 @@
+{
+ "gse": "GSE94117",
+ "notes": "REL606 (B). Base medium and its composition are not given (only carbon source and Mg/Na levels), so base_medium/medium_class/amino_acids_supplied left out; temperature, oxygen, culture mode not given. Phase from ch:growth phase as stated (exponential samples up to 14 h on glycerol taken as stated). Gluconate and lactate -> organic_acid. Treatments: highNa -> hyperosmotic, highMg (8-400 mM) -> metal_excess, lowMg (<=0.08 mM) -> metal_limitation; exposure adapted inferred because samples were taken >=5 h into growth in the condition (when the salt was added is not stated). All base Na/base Mg samples (any carbon source, any phase) are controls per the several-reference-conditions rule; the study names glucose/5 mM Na/0.8 mM Mg as its reference. WT re-read: unmodified REL606, so wild_type.",
+ "default": {
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Illumina Ribozero rRNA removal followed by NEB Next RNA library Prep set."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Illumina Ribozero rRNA removal"
+  },
+  "strain_group": {
+   "v": "B",
+   "b": "stated",
+   "q": "Escherichia coli B str. REL606"
+  },
+  "strain_name": {
+   "v": "REL606",
+   "b": "stated",
+   "q": "Escherichia coli B str. REL606"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "Escherichia coli B str. REL606"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "The goal of the study is to obtain rna concentrations of E.coli under different growth conditions including growth phase carbon source and salt stresses of Mg+2 and Na+"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "The goal of the study is to obtain rna concentrations of E.coli under different growth conditions including growth phase carbon source and salt stresses of Mg+2 and Na+"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "The goal of the study is to obtain rna concentrations of E.coli under different growth conditions including growth phase carbon source and salt stresses of Mg+2 and Na+"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "The goal of the study is to obtain rna concentrations of E.coli under different growth conditions including growth phase carbon source and salt stresses of Mg+2 and Na+"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "The reference condition to be glucose as carbon source, with 5 mM Na+ and 0.8 mM Mg2+."
+  },
+  "is_control": {
+   "v": true,
+   "b": "stated",
+   "q": "The reference condition to be glucose as carbon source, with 5 mM Na+ and 0.8 mM Mg2+."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:growth phase",
+   "regex": "^exponential$",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:growth phase",
+   "regex": "^stationary$",
+   "set": {
+    "growth_phase": {
+     "v": "stationary",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:growth phase",
+   "regex": "^late_stationary$",
+   "set": {
+    "growth_phase": {
+     "v": "late_stationary",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:carbon source",
+   "regex": "^glucose$",
+   "set": {
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:carbon source",
+   "regex": "^glycerol$",
+   "set": {
+    "carbon_source": {
+     "v": "glycerol",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:carbon source",
+   "regex": "^(lactate|gluconate)$",
+   "set": {
+    "carbon_source": {
+     "v": "organic_acid",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:na+1 (levels)",
+   "regex": "^highNa$",
+   "set": {
+    "treatment": {
+     "v": "hyperosmotic",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:mg+2 (levels)",
+   "regex": "^highMg$",
+   "set": {
+    "treatment": {
+     "v": "metal_excess",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:mg+2 (levels)",
+   "regex": "^lowMg$",
+   "set": {
+    "treatment": {
+     "v": "metal_limitation",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

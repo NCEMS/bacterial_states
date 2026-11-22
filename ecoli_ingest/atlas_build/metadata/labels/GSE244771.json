@@ -1,0 +1,121 @@
+{
+ "gse": "GSE244771",
+ "notes": "Apoptotic-metabolite mixes (spermidine, nucleotides, sugar phosphates) treated as other_chemical (metabolite signals, not a nutrient change), adapted (present during growth). strain_group left empty: this digest does not say what HS is (the companion series GSE244769 calls it a human commensal). WT re-read: genotype_class reference -> wild_type, unmodified strain HS.",
+ "default": {
+  "strain_name": {
+   "v": "HS",
+   "b": "stated",
+   "q": "HS"
+  },
+  "base_medium": {
+   "v": "cell_culture",
+   "b": "stated",
+   "q": "DMEM media containing 10% heat-inactived FBS was supplemented with a 6 metabolite mixture (spermidine, FBP, DHAP, GMP, IMP and UDP-glucose) or a 3 metabolite mixture (spermidine, GMP, IMP)."
+  },
+  "medium_class": {
+   "v": "natural_fluid",
+   "b": "inferred",
+   "q": "DMEM media containing 10% heat-inactived FBS was supplemented with a 6 metabolite mixture (spermidine, FBP, DHAP, GMP, IMP and UDP-glucose) or a 3 metabolite mixture (spermidine, GMP, IMP)."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "DMEM media containing 10% heat-inactived FBS was supplemented with a 6 metabolite mixture (spermidine, FBP, DHAP, GMP, IMP and UDP-glucose) or a 3 metabolite mixture (spermidine, GMP, IMP)."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "E. coli was grown aerobically at 37 degrees with 200rpm agitation"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "E. coli was grown aerobically at 37 degrees with 200rpm agitation"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "E. coli was grown aerobically at 37 degrees with 200rpm agitation"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "The transcriptional profile was assessed during mid log growth phase"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "HS"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli was grown in media (control), the presence of 6 apoptotic metabolites (MM6), or the presence of 3 apoptotic metabolites (MM3)."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "An mRNA library was constructed following rRNA depletion"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "An mRNA library was constructed following rRNA depletion"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli was grown in media (control), the presence of 6 apoptotic metabolites (MM6), or the presence of 3 apoptotic metabolites (MM3)."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli was grown in media (control), the presence of 6 apoptotic metabolites (MM6), or the presence of 3 apoptotic metabolites (MM3)."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli was grown in media (control), the presence of 6 apoptotic metabolites (MM6), or the presence of 3 apoptotic metabolites (MM3)."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli was grown in media (control), the presence of 6 apoptotic metabolites (MM6), or the presence of 3 apoptotic metabolites (MM3)."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^control$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^MM[36]$",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "DMEM media containing 10% heat-inactived FBS was supplemented with a 6 metabolite mixture (spermidine, FBP, DHAP, GMP, IMP and UDP-glucose) or a 3 metabolite mixture (spermidine, GMP, IMP)."
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

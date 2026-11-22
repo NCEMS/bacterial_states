@@ -1,0 +1,306 @@
+{
+ "gse": "GSE128997",
+ "notes": "UPEC clinical isolates: UTI samples are RNA from patient urine (in_host, mixed with human RNA; human reads removed); UR samples are the same isolates cultured statically 2 h in filtered pooled human urine at 37 C (mid-log stated), taken as controls. Treatment for in-host samples left out. Oxygen not stated (static). Isolates are unmodified: genotype_class reference.",
+ "default": {
+  "strain_group": {
+   "v": "UPEC",
+   "b": "stated",
+   "q": "Uropathogenic Escherichia coli (UPEC)"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "Here we identify a transcriptional program shared by genetically diverse UPEC strains isolated from 14 patients during uncomplicated UTIs."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Here we identify a transcriptional program shared by genetically diverse UPEC strains isolated from 14 patients during uncomplicated UTIs."
+  },
+  "base_medium": {
+   "v": "urine",
+   "b": "stated",
+   "q": "14 UPEC mRNA profiles isolated directly from patient urine (collected into RNAprotect), and 14 UPEC mRNA profiles from in vitro cultures in filter-sterilized urine"
+  },
+  "medium_class": {
+   "v": "natural_fluid",
+   "b": "inferred",
+   "q": "14 UPEC mRNA profiles isolated directly from patient urine (collected into RNAprotect), and 14 UPEC mRNA profiles from in vitro cultures in filter-sterilized urine"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "14 UPEC mRNA profiles isolated directly from patient urine (collected into RNAprotect), and 14 UPEC mRNA profiles from in vitro cultures in filter-sterilized urine"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "14 UPEC mRNA profiles isolated directly from patient urine (collected into RNAprotect), and 14 UPEC mRNA profiles from in vitro cultures in filter-sterilized urine"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Illumina ScriptSeq v2 library kit was used to construct rRNA-depleted stranded cDNA libraries."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA-depleted stranded cDNA libraries"
+  }
+ },
+ "rules": [
+  {
+   "field": "source_name",
+   "regex": "UTI patient urine",
+   "set": {
+    "culture_mode": {
+     "v": "in_host",
+     "b": "stated",
+     "q": ""
+    },
+    "growth_phase": {
+     "v": "not_applicable",
+     "b": "inferred",
+     "q": ""
+    },
+    "mixed_organism": {
+     "v": true,
+     "b": "stated",
+     "q": "Bacterial content of patient samples was enriched using MICROBenrich kit (Ambion)"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "in vitro urine culture",
+   "set": {
+    "culture_mode": {
+     "v": "static_liquid",
+     "b": "stated",
+     "q": "cultured statically at 37C for 2 hours"
+    },
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": "in vitro cultures in filter-sterilized urine (mid-log phase)"
+    },
+    "growth_temperature": {
+     "v": 37,
+     "b": "stated",
+     "q": "cultured statically at 37C for 2 hours"
+    },
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "mixed_organism": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {
+  "GSM3689802": {
+   "strain_name": {
+    "v": "HM01",
+    "b": "stated",
+    "q": "HM01"
+   }
+  },
+  "GSM3689803": {
+   "strain_name": {
+    "v": "HM03",
+    "b": "stated",
+    "q": "HM03"
+   }
+  },
+  "GSM3689804": {
+   "strain_name": {
+    "v": "HM06",
+    "b": "stated",
+    "q": "HM06"
+   }
+  },
+  "GSM3689805": {
+   "strain_name": {
+    "v": "HM07",
+    "b": "stated",
+    "q": "HM07"
+   }
+  },
+  "GSM3689806": {
+   "strain_name": {
+    "v": "HM14",
+    "b": "stated",
+    "q": "HM14"
+   }
+  },
+  "GSM3689807": {
+   "strain_name": {
+    "v": "HM17",
+    "b": "stated",
+    "q": "HM17"
+   }
+  },
+  "GSM3689808": {
+   "strain_name": {
+    "v": "HM43",
+    "b": "stated",
+    "q": "HM43"
+   }
+  },
+  "GSM3689809": {
+   "strain_name": {
+    "v": "HM54",
+    "b": "stated",
+    "q": "HM54"
+   }
+  },
+  "GSM3689810": {
+   "strain_name": {
+    "v": "HM56",
+    "b": "stated",
+    "q": "HM56"
+   }
+  },
+  "GSM3689811": {
+   "strain_name": {
+    "v": "HM57",
+    "b": "stated",
+    "q": "HM57"
+   }
+  },
+  "GSM3689812": {
+   "strain_name": {
+    "v": "HM60",
+    "b": "stated",
+    "q": "HM60"
+   }
+  },
+  "GSM3689814": {
+   "strain_name": {
+    "v": "HM68",
+    "b": "stated",
+    "q": "HM68"
+   }
+  },
+  "GSM3689815": {
+   "strain_name": {
+    "v": "HM86",
+    "b": "stated",
+    "q": "HM86"
+   }
+  },
+  "GSM3689816": {
+   "strain_name": {
+    "v": "HM01",
+    "b": "stated",
+    "q": "HM01"
+   }
+  },
+  "GSM3689817": {
+   "strain_name": {
+    "v": "HM03",
+    "b": "stated",
+    "q": "HM03"
+   }
+  },
+  "GSM3689818": {
+   "strain_name": {
+    "v": "HM06",
+    "b": "stated",
+    "q": "HM06"
+   }
+  },
+  "GSM3689819": {
+   "strain_name": {
+    "v": "HM07",
+    "b": "stated",
+    "q": "HM07"
+   }
+  },
+  "GSM3689820": {
+   "strain_name": {
+    "v": "HM14",
+    "b": "stated",
+    "q": "HM14"
+   }
+  },
+  "GSM3689821": {
+   "strain_name": {
+    "v": "HM17",
+    "b": "stated",
+    "q": "HM17"
+   }
+  },
+  "GSM3689822": {
+   "strain_name": {
+    "v": "HM43",
+    "b": "stated",
+    "q": "HM43"
+   }
+  },
+  "GSM3689823": {
+   "strain_name": {
+    "v": "HM54",
+    "b": "stated",
+    "q": "HM54"
+   }
+  },
+  "GSM3689824": {
+   "strain_name": {
+    "v": "HM56",
+    "b": "stated",
+    "q": "HM56"
+   }
+  },
+  "GSM3689825": {
+   "strain_name": {
+    "v": "HM57",
+    "b": "stated",
+    "q": "HM57"
+   }
+  },
+  "GSM3689826": {
+   "strain_name": {
+    "v": "HM60",
+    "b": "stated",
+    "q": "HM60"
+   }
+  },
+  "GSM3689827": {
+   "strain_name": {
+    "v": "HM66",
+    "b": "stated",
+    "q": "HM66"
+   }
+  },
+  "GSM3689828": {
+   "strain_name": {
+    "v": "HM68",
+    "b": "stated",
+    "q": "HM68"
+   }
+  },
+  "GSM3689829": {
+   "strain_name": {
+    "v": "HM86",
+    "b": "stated",
+    "q": "HM86"
+   }
+  }
+ }
+}

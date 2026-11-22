@@ -1,0 +1,126 @@
+{
+ "gse": "GSE139988",
+ "notes": "Only the 4 total-RNA samples are candidates (IP samples not shown). Harvested at OD600 ~1 in LB: no phase word, above the inference range, growth_phase left out. Hfq65 is a chromosomal deletion of the Hfq C-terminal domain (deletion of part of hfq). WT re-read: reference -> wild_type, MG1655 wild type, no construct.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "All strains used in this study were grown at 37 oC under aerobic conditions in LB."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "All strains used in this study were grown at 37 oC under aerobic conditions in LB."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "All strains used in this study were grown at 37 oC under aerobic conditions in LB."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "All strains used in this study were grown at 37 oC under aerobic conditions in LB."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "All strains used in this study were grown at 37 oC under aerobic conditions in LB."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Wild Type (WT) and Hfq65 (CTD deleted mutant) E.coli total RNA and RNA immunoprecipitated with Hfq were collected and sequenced with Illumina."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Wild Type (WT) and Hfq65 (CTD deleted mutant) E.coli total RNA and RNA immunoprecipitated with Hfq were collected and sequenced with Illumina."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Wild Type (WT) and Hfq65 (CTD deleted mutant) E.coli total RNA and RNA immunoprecipitated with Hfq were collected and sequenced with Illumina."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Wild Type (WT) and Hfq65 (CTD deleted mutant) E.coli total RNA and RNA immunoprecipitated with Hfq were collected and sequenced with Illumina."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E.coli K12 MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was isolated from 100 μl of cell lysate by Trizol"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "The DNA free RNA samples were then subjected to rRNA depletion using Ribo-zero kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^Wild Type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655 KK2440",
+     "b": "stated",
+     "q": "KK2440 (WT)"
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^Hfq65 mutant$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "Hfq65 (CTD deleted mutant)"
+    },
+    "perturbed_genes": {
+     "v": "hfq",
+     "b": "stated",
+     "q": "Hfq65 (CTD deleted mutant)"
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": "Hfq65 (CTD deleted mutant)"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655 KK2448",
+     "b": "stated",
+     "q": "KK2448 (Hfq65)"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

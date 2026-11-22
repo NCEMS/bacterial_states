@@ -1,0 +1,32 @@
+{
+  "gse": "GSE95318",
+  "notes": "Every sample is a rifampicin time course (time0 = 3.5 min after rifampicin), so transcription_arrested true and treatment abx_transcription for all; no untreated sample, so is_control left out. Phase mid_exponential kept (all samples within 2 h of rifampicin). MG1693 / SK4455 mapped to K-12 from strain names (organism field only says Escherichia coli).",
+  "default": {
+    "base_medium": {"v": "LB", "b": "stated", "q": "Cells were grown to exponential phase in Lysogeny broth, 37oC with shaking"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "Lysogeny broth"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "Lysogeny broth"},
+    "growth_phase": {"v": "mid_exponential", "b": "stated", "q": "Cells were grown to exponential phase in Lysogeny broth"},
+    "oxygen": {"v": "aerobic", "b": "inferred", "q": "37oC with shaking"},
+    "culture_mode": {"v": "batch_shaken", "b": "inferred", "q": "37oC with shaking"},
+    "growth_temperature": {"v": 37, "b": "stated", "q": "37oC with shaking"},
+    "strain_group": {"v": "K-12", "b": "inferred", "q": "MG1693"},
+    "treatment": {"v": "abx_transcription", "b": "stated", "q": "Cells were harvested after the addition of rifampicin  (250 μg/ml) to stop nascent transcription"},
+    "exposure": {"v": "acute", "b": "stated", "q": "further samples were taken at 2.5, 5, 7.5, 10, and 20 minutes"},
+    "transcription_arrested": {"v": true, "b": "stated", "q": "after the addition of rifampicin  (250 μg/ml) to stop nascent transcription"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "Examination of RNA-seq read coverage between a strain with and without RNase III throughout time after preventing nascent transcription with rifampicin"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "Examination of RNA-seq read coverage between a strain with and without RNase III"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "rRNA reduction with EpiCentre Ribo-Zero Gram Negative Ribosomal RNA reduction kit"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "rRNA reduction with EpiCentre Ribo-Zero Gram Negative Ribosomal RNA reduction kit"},
+    "global_regulator_perturbed": {"v": false, "b": "stated", "q": "a strain with and without RNase III"}
+  },
+  "rules": [
+    {"field": "ch:genotype/variation", "regex": "^wild type$",
+     "set": {"genotype_class": {"v": "reference", "b": "stated", "q": ""},
+             "strain_name": {"v": "MG1693", "b": "stated", "q": "MG1693"}}},
+    {"field": "ch:genotype/variation", "regex": "rnc- deletion",
+     "set": {"genotype_class": {"v": "deletion", "b": "stated", "q": ""},
+             "perturbed_genes": {"v": "rnc", "b": "stated", "q": "rnc- deletion mutant"},
+             "strain_name": {"v": "SK4455", "b": "stated", "q": "SK4455"}}}
+  ],
+  "samples": {}
+}

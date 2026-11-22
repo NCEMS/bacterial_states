@@ -1,0 +1,106 @@
+{
+ "gse": "GSE242875",
+ "notes": "ALE of an ndh deletion strain: the parent ({delta}ndh) and four evolved lines (e{delta}ndh-A..D). The baseline is a deletion mutant, not a reference genotype, so is_control is left out. Oxygen/shaking not stated.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Total RNA was extracted from mid-log phase culture"
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "Growth of E. coli on M9 minimal media supplemented with 4g/l Glucose at 37C was performed with biological duplicates."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "Growth of E. coli on M9 minimal media supplemented with 4g/l Glucose at 37C was performed with biological duplicates."
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "Growth of E. coli on M9 minimal media supplemented with 4g/l Glucose at 37C was performed with biological duplicates."
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "Growth of E. coli on M9 minimal media supplemented with 4g/l Glucose at 37C was performed with biological duplicates."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Growth of E. coli on M9 minimal media supplemented with 4g/l Glucose at 37C was performed with biological duplicates."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Growth of E. coli on M9 minimal media supplemented with 4g/l Glucose at 37C was performed with biological duplicates."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "We have performed adaptive laboratory evolution of E. coli ndh gene deletion strain"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "We have performed adaptive laboratory evolution of E. coli ndh gene deletion strain"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "We have performed adaptive laboratory evolution of E. coli ndh gene deletion strain"
+  },
+  "perturbed_genes": {
+   "v": "ndh",
+   "b": "stated",
+   "q": "E. coli ndh gene deletion strain"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "E. coli ndh gene deletion strain"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K12"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was extracted from mid-log phase culture for RNA-Seq library preparation."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^\\{delta\\}ndh$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^e\\{delta\\}ndh-",
+   "set": {
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "stated",
+     "q": "We have performed adaptive laboratory evolution of E. coli ndh gene deletion strain"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

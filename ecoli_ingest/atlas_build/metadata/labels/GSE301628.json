@@ -1,0 +1,171 @@
+{
+ "gse": "GSE301628",
+ "notes": "relA strain: genotype field says 'relA konockdown', summary/design say ∆relA mutant -> deletion. Only the relA mutant was CNMA-treated in this series (WT treated samples are in GSE252441). Treatment at OD 0.1 in LB, below the inferred-phase range, so no growth_phase. CNMA dissolved in DMSO. WT re-read: MG1655 WT is unmodified -> wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Escherichia coli MG1655 or its relA- isogenic strain cultured in fresh LB, aerobically with shaking at 37°C"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Escherichia coli MG1655 or its relA- isogenic strain cultured in fresh LB, aerobically with shaking at 37°C"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Escherichia coli MG1655 or its relA- isogenic strain cultured in fresh LB, aerobically with shaking at 37°C"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Escherichia coli MG1655 or its relA- isogenic strain cultured in fresh LB, aerobically with shaking at 37°C"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "Escherichia coli MG1655 or its relA- isogenic strain cultured in fresh LB, aerobically with shaking at 37°C"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Escherichia coli MG1655 or its relA- isogenic strain cultured in fresh LB, aerobically with shaking at 37°C"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli MG1655 WT and ∆relA strains were treated with 0.25×MIC of CNMA"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli MG1655 WT and ∆relA strains were treated with 0.25×MIC of CNMA"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli MG1655 WT and ∆relA strains were treated with 0.25×MIC of CNMA"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "TruSeq total RNA stranded with NebNext Ribodepletion kit (bacteria)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "TruSeq total RNA stranded with NebNext Ribodepletion kit (bacteria)"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Untreated cultures served as controls."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "relA",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "its ∆relA mutant"
+    },
+    "perturbed_genes": {
+     "v": "relA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^none$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^MG1655, control",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "CNMA",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": "CNMA (Sigma) was added to treated samples (OD=0.1)"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "30min",
+   "set": {
+    "exposure": {
+     "v": "acute",
+     "b": "inferred",
+     "q": "Then, cultures were incubated in aerobic contitions by 30 and 60 min. Untreated bacteria were used as a control."
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "60min",
+   "set": {
+    "exposure": {
+     "v": "short",
+     "b": "inferred",
+     "q": "Then, cultures were incubated in aerobic contitions by 30 and 60 min. Untreated bacteria were used as a control."
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,111 @@
+{
+ "gse": "GSE226409",
+ "notes": "Citric acid treated O157:H7 (1% for 6 h, then removed and re-suspended overnight; 'continuous passage induction') vs WT. Treatment set to acid, exposure adapted (6 h plus passage); unsure since the acid was removed before sampling. Growth phase not given for WT; treated likely overnight but left out.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "E. coli O157 was cultured in Luria-Bertani (LB) liquid medium under aerobic condition at 37 ℃."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "E. coli O157 was cultured in Luria-Bertani (LB) liquid medium under aerobic condition at 37 ℃."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "E. coli O157 was cultured in Luria-Bertani (LB) liquid medium under aerobic condition at 37 ℃."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "E. coli O157 was cultured in Luria-Bertani (LB) liquid medium under aerobic condition at 37 ℃."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "E. coli O157 was cultured in Luria-Bertani (LB) liquid medium under aerobic condition at 37 ℃."
+  },
+  "strain_group": {
+   "v": "EHEC_STEC",
+   "b": "stated",
+   "q": "Escherichia coli O157: H7"
+  },
+  "strain_name": {
+   "v": "O157:H7",
+   "b": "stated",
+   "q": "Escherichia coli O157: H7"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "E. coli O157 was cultured in Luria-Bertani (LB) liquid medium under aerobic condition at 37 ℃."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "In vitro, citric acid was added during bacterial culture to artificially induce antibiotic tolerance of E.coli O157: H7 bacteria."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "In vitro, citric acid was added during bacterial culture to artificially induce antibiotic tolerance of E.coli O157: H7 bacteria."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "In vitro, citric acid was added during bacterial culture to artificially induce antibiotic tolerance of E.coli O157: H7 bacteria."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "In vitro, citric acid was added during bacterial culture to artificially induce antibiotic tolerance of E.coli O157: H7 bacteria."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Total RNA was extracted from the tissue using TRIzol"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^WT$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "citric acid",
+   "set": {
+    "treatment": {
+     "v": "acid",
+     "b": "stated",
+     "q": "The strain E.coli O157 was cultured overnight and added 1% citric acid for 6 hours. After the citric acid was removed by centrifugation, the strain was suspended overnight."
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "The strain E.coli O157 was cultured overnight and added 1% citric acid for 6 hours. After the citric acid was removed by centrifugation, the strain was suspended overnight."
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

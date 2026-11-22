@@ -1,0 +1,121 @@
+{
+ "gse": "GSE149059",
+ "notes": "Pulse overexpression of sRNA MdoR from pBAD vs empty pBAD, both induced with arabinose, 15 min post-induction; empty vector induced = control. Strain field says TOP10F' while design/treatment protocol say MG1655: strain_name left out (both K-12). OD 0.4 in LB, 15 min after induction -> mid_exponential inferred. Culture vessel/shaking not described: culture_mode left out.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Cells were grown in standard LB medium to the desired optical density (OD600)."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Cells were grown in standard LB medium"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Cells were grown in standard LB medium"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown aerobically at 37°C to OD600 0.4"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "grown aerobically at 37°C to OD600 0.4"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "grown aerobically at 37°C to OD600 0.4"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "overnight MG1655 cultures containing pBAD::MdoR and empty pBAD control plasmids"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "For induction, cultures were supplemented with L-arabinose"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "For pulse-overexpression studies overnight MG1655 cultures containing pBAD::sRNA and empty pBAD+1 control plasmids"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "For pulse-overexpression studies overnight MG1655 cultures containing pBAD::sRNA and empty pBAD+1 control plasmids"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "overnight MG1655 cultures containing pBAD::MdoR"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribosomal RNA was removed with the Illumina Gram-negative Ribo-Zero rRNA Removal Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA was removed with the Illumina Gram-negative Ribo-Zero rRNA Removal Kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^empty plasmid control$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "MdoR",
+   "set": {
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "mdoR",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

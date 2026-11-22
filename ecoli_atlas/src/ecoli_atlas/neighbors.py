@@ -1,87 +1,54 @@
 """`ecoli_atlas neighbors`: where do whole GEO studies that are already in the atlas sit?
 
-For every sample of the given GSE accessions the command reports the nearest atlas samples in latent
-space, the label votes of those neighbours against the sample's own metadata and encoder prediction,
-and a novelty score; a per-study table summarises each GSE. Same-study neighbours are excluded by
-default (``--within-study`` keeps them), and the sequencing runs of one GSM are averaged into one
-row by default (``--no-collapse-runs`` keeps SRR-level rows).
+For every sample of the given GSE accessions the command reports the nearest atlas samples in the
+embedding, the votes of those neighbours on every call against the sample's own curated label and
+the model's call, and a novelty score; a per-study table summarises each GSE. Same-study neighbours
+are excluded by default (``--within-study`` keeps them).
 
 Outputs
-  neighbors.tsv       one row per (query sample, rank): atlas sample, distance, its metadata, split bucket, predictions
+  neighbors.tsv       one row per (query sample, rank): atlas sample, distance, its metadata, split bucket, calls
   summary.tsv         one row per query sample
   study_summary.tsv   one row per GSE
-  umap_atlas.csv, umap.png   with --umap: a UMAP of the whole atlas with the query studies coloured
+  umap_atlas.tsv, umap.png   with --umap: a UMAP of the whole atlas with the query studies coloured
   neighbors_manifest.json    parameters, found / missing studies
 """
 from __future__ import annotations
 
 import datetime
 import json
-from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
 from . import __version__
-from .artifacts import MANIFEST_FILE, load_splits
+from .artifacts import SPLITS_FILE
 from .compare import DEFAULT_FACTORS, NEIGHBOR_META_COLS, Atlas, knn, label_votes, novelty, per_block_distances, umap_fit
-from .labels import collapse_runs
+from .splits import bucket_labels, load_splits
 
-BUCKET_ORDER = ("test", "fold", "train(aug)", "withheld", "projected_only", "no_metadata")
+BUCKET_ORDER = ("test", "fold", "train_only", "withheld", "projected", "no_split")
 
 
-def split_buckets(splits: pd.DataFrame | None, withheld_study: str | None, index, studies: pd.Series | None = None) -> pd.Series:
-    """Split bucket per atlas sample id: ``test`` | ``fold<k>`` | ``train(aug)`` | ``withheld`` |
-    ``projected_only`` | ``no_metadata`` (not in splits.csv). For collapsed (GSM-level) ids the bucket
-    of the first run with that accession is used."""
+def split_buckets(splits: pd.DataFrame | None, withheld_studies, index) -> pd.Series:
+    """Split bucket per atlas sample id: ``test`` | ``fold<k>`` | ``train_only`` (in the training pool
+    but in no fold) | ``withheld`` (a study kept out of every split) | ``projected`` (in no split,
+    e.g. the treated samples of a TEST study) | ``no_split`` (not in splits.csv)."""
     idx = pd.Index(index).astype(str)
-    out = pd.Series("no_metadata", index=idx, dtype=object)
+    out = pd.Series("no_split", index=idx, dtype=object)
     if splits is None:
         return out
-    sp = splits.copy()
-    sp.index = sp.index.astype(str)
-    from .labels import gsm_accession
-    by_gsm = sp.groupby(gsm_accession(sp.index).fillna(pd.Series(sp.index, index=sp.index)).values).first()
-    for key, table in ((sp, idx[idx.isin(sp.index)]), (by_gsm, idx[~idx.isin(sp.index) & idx.isin(by_gsm.index)])):
-        if len(table) == 0:
-            continue
-        rows = key.loc[table]
-        lab = pd.Series("projected_only", index=table, dtype=object)
-        lab[(rows["split"] == 3).values] = "test"
-        pool = (rows["split"] == 1).values
-        fold = rows["cv_fold"]
-        lab[pool & fold.notna().values] = "fold" + fold[pool & fold.notna().values].astype(int).astype(str)
-        lab[pool & fold.isna().values] = "train(aug)"
-        if withheld_study is not None and "gse" in rows.columns:
-            lab[(rows["split"] == 0).values & (rows["gse"].astype(str) == str(withheld_study)).values] = "withheld"
-        out.loc[table] = lab
+    lab = bucket_labels(splits)
+    lab[(splits["split"] == 0).to_numpy() & splits["gse"].astype(str).isin([str(g) for g in withheld_studies or ()]).to_numpy()] = "withheld"
+    lab.index = lab.index.astype(str)
+    known = idx[idx.isin(lab.index)]
+    out.loc[known] = lab.loc[known].to_numpy()
     return out
-
-
-def collapse_atlas(atlas: Atlas, how: str = "mean") -> Atlas:
-    """Average the SRR-level rows of one GSM in the embedding (and predictions / metadata)."""
-    emb = collapse_runs(atlas.embedding, how)
-    preds = collapse_runs(atlas.predictions, how).reindex(emb.index) if atlas.predictions is not None else None
-    meta = collapse_runs(atlas.metadata, how).reindex(emb.index) if atlas.metadata is not None else None
-    if preds is not None:
-        for c in [c for c in preds.columns if c.endswith("_pred")]:
-            # a GSM's runs may disagree: keep the majority call among its runs
-            votes = atlas.predictions[c].groupby(_gsm_key(atlas.predictions.index)).agg(lambda s: s.astype(str).value_counts().idxmax())
-            preds[c] = votes.reindex(preds.index).values
-    return replace(atlas, embedding=emb, predictions=preds, metadata=meta)
-
-
-def _gsm_key(index) -> np.ndarray:
-    from .labels import gsm_accession
-    acc = gsm_accession(index)
-    return acc.where(acc.notna(), pd.Series(pd.Index(index).astype(str), index=acc.index)).values
 
 
 def select_query(atlas: Atlas, gses) -> tuple[pd.DataFrame, pd.Series, dict]:
     """Atlas rows belonging to the given studies: (embedding, study per row, {found: {gse: n}, missing: [...]})."""
     if atlas.metadata is None or "gse" not in atlas.metadata.columns:
-        raise ValueError("the atlas has no atlas_metadata.csv with a gse column; cannot select studies")
+        raise ValueError("the atlas has no study (gse) for its samples; cannot select studies")
     gse_of = atlas.metadata.reindex(atlas.embedding.index)["gse"].astype(object)
     gse_of = gse_of.where(gse_of.notna(), None).map(lambda x: None if x is None else str(x))
     wanted = [str(g) for g in gses]
@@ -96,7 +63,7 @@ def study_summary(neighbors: pd.DataFrame, summary: pd.DataFrame, query_meta: pd
     rows = []
     for gse, s in summary.groupby("query_gse", sort=True):
         nb = neighbors[neighbors["query"].isin(s.index)]
-        rec = {"gse": gse, "n_rows": int(s["n_runs"].sum()) if "n_runs" in s.columns else int(len(s)), "n_query_samples": int(len(s)),
+        rec = {"gse": gse, "n_query_samples": int(len(s)),
                "split_buckets": ";".join(f"{k}:{v}" for k, v in s["query_split_bucket"].value_counts().items())}
         if "gse" in nb.columns:
             vc = nb["gse"].dropna().astype(str).value_counts()
@@ -119,21 +86,15 @@ def study_summary(neighbors: pd.DataFrame, summary: pd.DataFrame, query_meta: pd
     return pd.DataFrame(rows).set_index("gse")
 
 
-def run_neighbors(gses, atlas_dir, out_dir, models_dir=None, k: int = 15, metric: str = "cosine", blocks="all",
-                  exclude_same_study: bool = True, collapse_runs_: bool = True, do_umap: bool = False, seed: int = 77,
-                  allow_missing: bool = False, factors=DEFAULT_FACTORS, log=None, **kw) -> dict:
+def run_neighbors(gses, models_dir, out_dir, metadata=None, k: int = 15, metric: str = "cosine", blocks="all",
+                  exclude_same_study: bool = True, do_umap: bool = False, seed: int = 77,
+                  allow_missing: bool = False, factors=DEFAULT_FACTORS, log=None) -> dict:
+    """``models_dir``: the bundle whose embedding is the atlas. ``metadata``: the atlas sample
+    metadata (optional; adds descriptive columns)."""
     log = log or (lambda *_: None)
-    if "collapse_runs" in kw:
-        collapse_runs_ = kw.pop("collapse_runs")
-    if kw:
-        raise TypeError(f"unexpected arguments {sorted(kw)}")
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
-    atlas = Atlas.load(atlas_dir)
-    n_rows = len(atlas.embedding)
-    if collapse_runs_:
-        atlas = collapse_atlas(atlas)
-        log(f"atlas: {n_rows} rows -> {len(atlas.embedding)} samples after averaging runs per GSM")
+    atlas = Atlas.load(models_dir, metadata)
     query, q_gse, report = select_query(atlas, gses)
     for g, n in report["found"].items():
         log(f"  {g}: {n} atlas samples")
@@ -143,12 +104,9 @@ def run_neighbors(gses, atlas_dir, out_dir, models_dir=None, k: int = 15, metric
             raise ValueError(msg + ("" if report["found"] else " (nothing found)") + "; use --allow-missing to continue")
         log("warning: " + msg)
 
-    splits, withheld = None, None
-    if models_dir:
-        splits = load_splits(models_dir)
-        mf = Path(models_dir) / MANIFEST_FILE
-        if mf.exists():
-            withheld = json.loads(mf.read_text()).get("split_config", {}).get("withheld_study")
+    sp = Path(models_dir) / SPLITS_FILE
+    splits = load_splits(sp) if sp.exists() else None
+    withheld = list(((atlas.manifest or {}).get("config") or {}).get("withheld_studies") or [])
     bucket = split_buckets(splits, withheld, atlas.embedding.index)
 
     nb = knn(query, atlas, k, metric, blocks, exclude_self=True, exclude_studies=q_gse if exclude_same_study else None)
@@ -160,11 +118,8 @@ def run_neighbors(gses, atlas_dir, out_dir, models_dir=None, k: int = 15, metric
     summary = pd.DataFrame(index=pd.Index(query.index, name="sample"))
     summary["query_gse"] = q_gse.reindex(summary.index).values
     summary["query_split_bucket"] = bucket.reindex(summary.index).values
-    if collapse_runs_:
-        runs = pd.Series(_gsm_key(pd.read_csv(Path(atlas_dir) / "final_embedding.csv", usecols=[0]).iloc[:, 0].astype(str).values))
-        summary["n_runs"] = runs.value_counts().reindex(summary.index).fillna(1).astype(int).values
     if atlas.metadata is not None:
-        meta_cols = [c for c in NEIGHBOR_META_COLS if c in atlas.metadata.columns and c != "gse"]
+        meta_cols = [c for c in NEIGHBOR_META_COLS if c in atlas.metadata.columns and c != "gse" and c not in factors]
         summary = summary.join(atlas.metadata.reindex(summary.index)[meta_cols].add_prefix("query_"))
     first = nb[nb["rank"] == 1].set_index("query")
     summary["nearest_atlas_sample"] = first["atlas_sample"].reindex(summary.index)
@@ -199,7 +154,7 @@ def run_neighbors(gses, atlas_dir, out_dir, models_dir=None, k: int = 15, metric
         a_xy = pd.DataFrame(reducer.embedding_, index=atlas.embedding.index, columns=["umap1", "umap2"])
         a_xy["gse"] = atlas.metadata.reindex(a_xy.index)["gse"].values if atlas.metadata is not None else None
         a_xy["queried"] = a_xy.index.isin(summary.index)
-        a_xy.to_csv(out / "umap_atlas.csv")
+        a_xy.to_csv(out / "umap_atlas.tsv", sep="\t")
         summary["umap1"] = a_xy["umap1"].reindex(summary.index)
         summary["umap2"] = a_xy["umap2"].reindex(summary.index)
         _umap_plot(a_xy, summary, out / "umap.png")
@@ -208,10 +163,10 @@ def run_neighbors(gses, atlas_dir, out_dir, models_dir=None, k: int = 15, metric
     ss = study_summary(nb, summary, atlas.metadata, factors)
     ss.to_csv(out / "study_summary.tsv", sep="\t")
     report.update({"created_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(), "ecoli_atlas_version": __version__,
-                   "atlas_dir": str(atlas_dir), "models_dir": None if models_dir is None else str(models_dir),
+                   "models_dir": str(models_dir), "metadata": None if metadata is None else str(metadata),
                    "n_query": int(len(summary)), "k": k, "metric": metric, "blocks": blocks if blocks == "all" else list(blocks),
-                   "exclude_same_study": exclude_same_study, "collapse_runs": collapse_runs_, "umap": do_umap, "seed": seed,
-                   "withheld_study": withheld, "buckets": {str(k_): int(v) for k_, v in summary["query_split_bucket"].value_counts().items()}})
+                   "exclude_same_study": exclude_same_study, "umap": do_umap, "seed": seed,
+                   "withheld_studies": withheld, "buckets": {str(k_): int(v) for k_, v in summary["query_split_bucket"].value_counts().items()}})
     (out / "neighbors_manifest.json").write_text(json.dumps(report, indent=2, default=str))
     log(f"{len(summary)} query samples from {len(report['found'])} studies; buckets {report['buckets']}")
     return report

@@ -1,0 +1,126 @@
+{
+ "gse": "GSE278735",
+ "notes": "Only the LB agar plate (lawn) samples are in this series; liquid samples are in GSE222248. Lawns plated from a 37 °C culture and incubated at 23 or 37 °C; incubation time on the plate not given. 23 °C treated as cold (summary: 'prolonged cold stress'), exposure adapted since growth on the plate occurred at 23 °C. Oxygen not stated.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "LB agar plate"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "LB agar plate"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "LB agar plate"
+  },
+  "culture_mode": {
+   "v": "agar_surface",
+   "b": "stated",
+   "q": "200 uL of each sample was plated to make a lawn on an 1.5% LB agar plate that was incubated at 23 or 37°C."
+  },
+  "growth_phase": {
+   "v": "not_applicable",
+   "b": "inferred",
+   "q": "200 uL of each sample was plated to make a lawn on an 1.5% LB agar plate"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "WT"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "WT"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E. coli K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "E. coli K-12 substr. MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "To investigate the effect of growth on LB agar plates and temperature has on the global transcriptomic of E. coli K-12 substr. MG1655."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "To investigate the effect of growth on LB agar plates and temperature has on the global transcriptomic of E. coli K-12 substr. MG1655."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "To investigate the effect of growth on LB agar plates and temperature has on the global transcriptomic of E. coli K-12 substr. MG1655."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA subtraction was performed with the bacterial RiboMinus Kit (Ambion)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA subtraction was performed with the bacterial RiboMinus Kit (Ambion)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "23°C",
+   "set": {
+    "growth_temperature": {
+     "v": 23,
+     "b": "stated",
+     "q": ""
+    },
+    "treatment": {
+     "v": "cold",
+     "b": "stated",
+     "q": "general stress response to prolonged cold stress"
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "a lawn on an 1.5% LB agar plate that was incubated at 23 or 37°C"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "37°C",
+   "set": {
+    "growth_temperature": {
+     "v": 37,
+     "b": "stated",
+     "q": ""
+    },
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

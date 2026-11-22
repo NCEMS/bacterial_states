@@ -56,7 +56,7 @@ ecoli_ingest download core                  # or name bundles one at a time: cor
 
 | Bundle | Contents | Size | Source |
 |---|---|---|---|
-| `core` | vg graph index + annotation | 173 MB download, 674 MB unpacked | this project ([release `resources-v1`](https://github.com/NCEMS/bacterial_states/releases/tag/resources-v1)) |
+| `core` | vg graph index, counting annotation, reference genome FASTA | 175 MB download, 676 MB unpacked | this project ([release `resources-v2`](https://github.com/NCEMS/bacterial_states/releases/tag/resources-v2)) |
 | `centrifuge` | `p_compressed+h+v` contamination index, not needed with `centrifuge: false` | 5.4 GB download, 6.9 GB unpacked | the Centrifuge authors' prebuilt index (`genome-idx.s3.amazonaws.com/centrifuge/`, pinned S3 object version) |
 | `container` | Apptainer image `rnaseq_vg.sif` | ~5.3 GB | this project (CyVerse for now, see below) |
 
@@ -72,9 +72,11 @@ Expected layout:
 ```
 resources/
 ├── vg/ecoli_graph_test.d2.{gbz,dist,min,k15.min,shortread.zipcodes}
-├── annotation/GCF_000005845.2_ASM584v2_genomic.gff          # RefSeq (gene products)
-├── annotation/GCF_000005845.2_ASM584v2_genomic_siRNA.gff    # featureCounts annotation (+ Rfam ncRNAs)
-├── annotation/GCF_000005845.2_ASM584v2_genomic.bed
+├── annotation/GCF_000005845.2_ASM584v2_counting_v2.gff      # counting annotation: NCBI genes + Rfam ncRNAs
+├── annotation/GCF_000005845.2_ASM584v2_counting_v2.bed      # the same features as BED12 (RSeQC)
+├── annotation/GCF_000005845.2_ASM584v2_counting_v2.features.tsv           # feature list with overlaps
+├── annotation/GCF_000005845.2_ASM584v2_counting_v2.rfam_merge_report.tsv  # fate of every Rfam hit
+├── annotation/GCF_000005845.2_ASM584v2_genomic.fna           # NC_000913.3; GC bias in the QC record
 ├── centrifuge/p_compressed+h+v.{1,2,3}.cf                    # not needed with centrifuge: false
 └── container/rnaseq_vg.sif                                   # optional
 ```
@@ -111,16 +113,15 @@ deseq2:
   contrasts:
     - ["condition", "wildtype", "knockout"]   # [factor, reference, test]
 centrifuge: true                  # false: skip Centrifuge entirely (not run, not in MultiQC)
-centrifuge_organism: "Escherichia coli"
-centrifuge_min_percentage: 30.0   # remove to disable the contamination gate
-fastp_detect_adapter_for_pe: false # true: fastp --detect_adapter_for_pe for paired reads (short-insert libraries)
+species_gate: true                # with Centrifuge on: samples that are not E. coli are not counted
+strandedness: "auto"              # or "forward" / "reverse"; unstranded libraries are not counted
 fastp_min_kept_percentage: 75.0   # remove to disable the read-filter gate
 ```
 
 Paths are relative to the run directory. If any sample lacks `r2` the whole run is treated as
 single-end. Reference files default to the standard names in the resources directory; individual
-files can be overridden with `vg_index`, `annotation_gff`, `annotation_source_gff`,
-`annotation_bed`, `centrifuge_index_path`.
+files can be overridden with `vg_index`, `annotation_gff`, `annotation_bed`,
+`centrifuge_index_path`.
 
 Reads for a sample can also be several files per mate, or an SRA/GEO accession:
 
@@ -190,30 +191,61 @@ Set `results_dir: "results"` in `config.yaml` for a fixed directory name instead
 | File | Content |
 |---|---|
 | `multiqc_report.html` | all QC in one report (fastp, FastQC, Centrifuge, vg stats, RSeQC, feature overlap, PCA) |
-| `all_samples_raw_counts.txt` | featureCounts table; `Geneid` is the gene symbol |
-| `all_samples_counts_extended.tsv` | `Gene_Symbol, Gene_IDs_Field (locus tag + Dbxrefs), Gene_Summary (RefSeq product), Chr, Start, End, Strand, Length, counts…` |
-| `all_samples_gene_symbols.tsv` | `Gene_Symbol`, coordinates, counts |
+| `all_samples_raw_counts.txt` | featureCounts table; `Geneid` is the feature id (`CDS_b0002_thrA`, `ncRNA_b4577_sgrS`, `ncRNA_Thr_leader`) |
+| `all_samples_counts_extended.tsv` | `Feature_ID, Symbol, Locus_Tag, Type, Source, Rfam, Dbxref, Product, Chr, Start, End, Strand, Length, counts…` |
+| `all_samples_counts.tsv` | `Feature_ID`, coordinates, counts |
+| `all_samples_antisense_counts.txt` | the same counting with every sample's strand reversed: reads antisense to each feature |
+| `<sample>/qc/<sample>.qc.json` | per-sample QC record: read-length and fragment-size histograms, alignment statistics, read ladder, reads per RNA family and type, antisense and DNA-background values, gene-body profile, species statistics, tool versions ([docs/atlas_qc_inputs.md](../docs/atlas_qc_inputs.md)) |
+| `<sample>/coverage/<sample>.cov100.npz` | read depth per strand in 100 bp bins |
+| `tool_versions.json` | versions of the tools used |
+| `strandedness.tsv` | per sample: read orientation fractions, the call (forward, reverse, unstranded) and whether it was counted |
+| `counting_method.json` | annotation, featureCounts options and the orientation used for each sample |
 | `deseq2/` | normalized counts, PCA, one `<ref>_vs_<test>_deseq_results.tsv` per contrast |
-| `<sample>/` | per-sample fastp, FastQC, Centrifuge, vg (sorted BAM, `vg stats`), RSeQC, feature overlap. The trimmed reads, Centrifuge's per-read tables and the `.gam` (several GB per sample) are deleted once used |
+| `<sample>/` | per-sample fastp, FastQC, Centrifuge, vg (sorted BAM, `vg stats`), RSeQC, feature overlap. The trimmed reads, Centrifuge's per-read tables and the `.gam` (several GB per sample) are deleted once used; the sorted BAM too with `keep_alignments: false` |
 | `../checkpoints/qc_failures.json` | samples excluded by the QC gates and why |
+| `../checkpoints/strandedness_failures.json` | samples not counted after alignment: library not strand-specific, or refused by the species gate |
+| `<sample>/qc/<sample>_species.json` | species statistics and the gate's verdict (`ok`, `not_ecoli`, `phage`, `mixed_organism`, `no_species`) |
 
-The count tables feed [Ecoli_ATLAS](../ecoli_atlas/README.md): `ecoli_atlas prepare --ingest-results <experiment>_results`.
+How reads are counted (feature set, strandedness, overlapping features) is described in
+[docs/counting.md](../docs/counting.md). Only strand-specific libraries are counted; the tutorial
+data below (GSE73673) is unstranded, so on this branch it stops after `strandedness.tsv`.
+
+**Counts from this branch do not match the published atlas model** (`ecoli_atlas_models_v1`),
+which was trained on counts made with the previous method. Use the `main` branch to make counts
+for [Ecoli_ATLAS](../ecoli_atlas/README.md) until the atlas has been recounted.
 
 ## 5. Notes
 
 - Nothing needs network access at run time unless samples are given by `accession`; those are
-  resolved (NCBI/ENA metadata) and fetched by the workflow itself (NCBI with sra-tools, else ENA). Gene identifiers and
-  product descriptions come from the two annotation GFFs (`workflow/scripts/annotate_counts.py`).
+  resolved (NCBI/ENA metadata) and fetched by the workflow itself (NCBI with sra-tools, else ENA). Feature identifiers and
+  product descriptions come from the counting annotation (`workflow/scripts/annotate_counts.py`).
 - Reads shorter than 50 bp automatically use the k=15 minimizer index.
 - Centrifuge runs for every sample unless the config says `centrifuge: false` (`ecoli_ingest init
-  --without-centrifuge` writes that); a missing key means on. With it off, Centrifuge is not run, its
-  gate is ignored and old Centrifuge reports are left out of MultiQC. The gate itself applies only
-  when `centrifuge_min_percentage` is set.
-- Paired-end runs call fastp with its defaults, which is how the counts the atlas model was
-  trained on were made: adapters are trimmed only where the mates overlap. That leaves adapter in
-  libraries with very short inserts; for those set `fastp_detect_adapter_for_pe: true`, which adds
-  `--detect_adapter_for_pe`. A missing key means off. Single-end runs are not affected. In an existing run directory a
-  changed setting needs `ecoli_ingest run -- --forcerun fastp_pe`.
+  --without-centrifuge` writes that); a missing key means on. With it off, Centrifuge is not run,
+  there is no species gate and old Centrifuge reports are left out of MultiQC.
+- **Species gate** (on with Centrifuge unless `species_gate: false`). A sample is not counted when
+  it is not *E. coli*. The test uses the genus of the reads Centrifuge places uniquely, with
+  *Escherichia* and *Shigella* counted together (they cannot be told apart):
+  - `phage`: the largest other genus is a bacteriophage at 0.5 % or more of all reads;
+  - `not_ecoli`: under 50 % of genus-resolved reads are *Escherichia* / *Shigella* and the largest
+    other genus is at least 2 % of all reads;
+  - `mixed_organism`: the largest other genus is 10 % or more of all reads.
+
+  Samples that are clearly something else (phage, or under 20 % *Escherichia* / *Shigella* with
+  another genus at 5 % or more of all reads) are stopped before alignment and listed in
+  `checkpoints/qc_failures.json`; the aligner is very slow on reads that do not match the graph.
+  The full rule is applied after alignment, leaving out reads on rRNA / tRNA genes, and its result
+  is the `not_counted_reason` column of `strandedness.tsv`. Thresholds: `species_thresholds` in
+  the config. The rule and its thresholds come from a screen of 10,829 GEO samples
+  ([docs/prescreen.md](../docs/prescreen.md)). The former keys `centrifuge_organism` and
+  `centrifuge_min_percentage` are ignored with a warning: that gate asked for the species
+  *E. coli* among uniquely placed reads and failed real *E. coli* libraries.
+- Paired-end runs always call fastp with `--detect_adapter_for_pe`, so adapters are trimmed from
+  each mate and not only where the mates overlap (which leaves adapter in libraries with very
+  short inserts). The old config key `fastp_detect_adapter_for_pe` is ignored. Single-end runs are
+  not affected.
+- The counting annotation is rebuilt with `build/build_annotation.py` from the unmodified NCBI
+  GFF and a `cmscan` table of Rfam hits; see [docs/counting.md](../docs/counting.md).
 - Maintainers: `ecoli_ingest manifest` regenerates `resources.manifest.tsv` (sha256 of every
   resource file, used by `check --verify` and `download`). The container is rebuilt from
   `build/Singularity.def`, which installs `environment.yaml`.

@@ -1,0 +1,91 @@
+{
+ "gse": "GSE152170",
+ "notes": "Empty vector pNW129 + arabinose is the control. RNAtag-seq of total RNA; rRNA removal not stated. Medium and temperature not given.",
+ "default": {
+  "strain_group": {
+   "v": "B",
+   "b": "stated",
+   "q": "Escherichia coli BL21(DE3)"
+  },
+  "strain_name": {
+   "v": "BL21(DE3)",
+   "b": "stated",
+   "q": "Escherichia coli BL21(DE3)"
+  },
+  "growth_phase": {
+   "v": "early_exponential",
+   "b": "stated",
+   "q": "grown to early log phase (OD600 ~ 0.3)"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "induced with 0.2% arabinose for 20 minutes"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "BL21(DE3) E. coli containing either pNW129 or pNW129-MotB were grown to early log phase (OD600 ~ 0.3)  then induced with 0.2% arabinose for 20 minutes."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "BL21(DE3) E. coli containing either pNW129 or pNW129-MotB were grown to early log phase (OD600 ~ 0.3)  then induced with 0.2% arabinose for 20 minutes."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "BL21(DE3) E. coli containing either pNW129 or pNW129-MotB were grown to early log phase (OD600 ~ 0.3)  then induced with 0.2% arabinose for 20 minutes."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "BL21(DE3) E. coli containing either pNW129 or pNW129-MotB were grown to early log phase (OD600 ~ 0.3)  then induced with 0.2% arabinose for 20 minutes."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Optimum fragmentation of the total RNA samples in this library was determined to be 3 min at 94C"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:plasmid",
+   "regex": "MotB",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "motB (T4)",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:plasmid",
+   "regex": "^pNW129$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

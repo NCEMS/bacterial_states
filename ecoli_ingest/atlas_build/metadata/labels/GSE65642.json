@@ -1,0 +1,154 @@
+{
+ "gse": "GSE65642",
+ "notes": "WT vs cra deletion in M9 with three carbon sources; WT in each carbon source = control. Culture vessel and rRNA removal not stated.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "E. coli K-12 MG1655 WT, and Δcra were grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose, fructose and acetate."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "E. coli K-12 MG1655 WT, and Δcra were grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose, fructose and acetate."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "E. coli K-12 MG1655 WT, and Δcra were grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose, fructose and acetate."
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "E. coli K-12 MG1655 WT, and Δcra were grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose, fructose and acetate."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "E. coli K-12 MG1655 WT, and Δcra were grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose, fructose and acetate."
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "E. coli K-12 MG1655 WT, and Δcra were grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% glucose, fructose and acetate."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "WT and Δcra mutant cells were cultured in M9 minimal media with 3 different carbon sources, glucose, fructose, and acetate."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT and Δcra mutant cells were cultured in M9 minimal media with 3 different carbon sources, glucose, fructose, and acetate."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT and Δcra mutant cells were cultured in M9 minimal media with 3 different carbon sources, glucose, fructose, and acetate."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT and Δcra mutant cells were cultured in M9 minimal media with 3 different carbon sources, glucose, fructose, and acetate."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K-12 MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Total RNA was extracted using the RNeasy Plus Mini kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:carbon source",
+   "regex": "glucose",
+   "set": {
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:carbon source",
+   "regex": "fructose",
+   "set": {
+    "carbon_source": {
+     "v": "other_sugar",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:carbon source",
+   "regex": "acetate",
+   "set": {
+    "carbon_source": {
+     "v": "organic_acid",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "delta_cra",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "cra",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

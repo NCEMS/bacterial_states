@@ -1,0 +1,111 @@
+{
+ "gse": "GSE165446",
+ "notes": "No temperature or shaking given. RiboZero then TruSeq mRNA kit -> depletion.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "growth_phase": {
+   "v": "early_exponential",
+   "b": "stated",
+   "q": "early exponential near steady state"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Overnight cultures were diluted 1:1,000 into 50ml LB"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "diluted 1:1,000 into 50ml LB"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "diluted 1:1,000 into 50ml LB"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Independently grown colonies of the rpoB encoding a substitution in 1304 aa residue of RpoB have been compared to the wild-type control"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Independently grown colonies of the rpoB encoding a substitution in 1304 aa residue of RpoB have been compared to the wild-type control"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Independently grown colonies of the rpoB encoding a substitution in 1304 aa residue of RpoB have been compared to the wild-type control"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Independently grown colonies of the rpoB encoding a substitution in 1304 aa residue of RpoB have been compared to the wild-type control"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "Independently grown colonies of the rpoB encoding a substitution in 1304 aa residue of RpoB have been compared to the wild-type control"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was purified following a standard RNAeasy mini prep kit protocol"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA was removed using a RiboZero kit from Illumina"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Independently grown colonies of the rpoB encoding a substitution in 1304 aa residue of RpoB have been compared to the wild-type control"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "wild-type control"
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^rpoB mutant$",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": "rpoB M1304R"
+    },
+    "perturbed_genes": {
+     "v": "rpoB",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

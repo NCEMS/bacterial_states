@@ -1,0 +1,71 @@
+{
+ "gse": "GSE260605",
+ "notes": "Design compares evolved SFEc+ with wild-type Ec, but samples are titled 'control' vs 'sulfur-free'; unclear whether 'sulfur-free' is the evolved strain, a sulfur-free medium, or both. Genotype and treatment left out for sulfur-free samples; control samples taken as the wild type (reference, untreated). Medium, phase, temperature unknown. mixed_organism left out ('extracted from the tissue' in protocol, likely boilerplate). rRNA removal not stated.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K-12 MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "RNA-seq transcriptome library was prepared following Illumina® Stranded mRNA Prep, Ligation (San Diego, CA) using of total RNA."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "compare the genetic expression profiles between SFEc+ and Ec"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "compare the genetic expression profiles between SFEc+ and Ec"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^control$",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": "compared to the wild-type strain"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^sulfur-free$",
+   "set": {
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

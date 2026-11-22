@@ -1,149 +1,158 @@
 # Example: growth to long-term starvation (GEO GSE67402)
 
-From GEO accessions to atlas neighbours, with every command and what came out of it.
+From GEO accessions to counts and to a growth-phase call for every sample, with every command and
+what came out of it.
 
-**Data.** *E. coli* B REL606 in glucose-limited minimal medium, sampled at 3, 4, 5, 6, 8, 24, 48,
-168 and 336 hours: three biological replicates of rRNA-depleted RNA, and replicate 3 again
-without rRNA depletion (36 paired-end libraries, 77 SRA runs, 38 GB of FASTQ). Houser et al. 2015,
-PLoS Comput Biol 11:e1004400. None of the samples, and no REL606 sample at all, is in the atlas
-training data, so this is a held-out test.
+**Data.** *E. coli* B REL606 in glucose-limited minimal medium (DM25), sampled at 3, 4, 5, 6, 8,
+24, 48, 168 and 336 hours, three biological replicates of rRNA-depleted RNA (Houser et al. 2015,
+PLoS Comput Biol 11:e1004400). The study also sequenced replicate 3 a second time without rRNA
+depletion; those nine libraries are not part of this example (see *Choices* below). GSE67402 is
+held out of the atlas model's training (a forced TEST study), so everything the model says about
+these samples is out of sample.
 
-**Files here.** `config.yaml` (the inGEST run configuration) and `samples.csv` (time, replicate and
-library type per sample) are tracked. Everything the commands below write (`sra/`, `results/`,
-`checkpoints/`, `benchmarks/`, `atlas/`, logs) stays in this folder and is ignored by git.
+**Files here.** `config.yaml` (the inGEST run configuration) and `samples.csv` (time and replicate
+per sample) are tracked. Everything the commands below write (`sra/`, `results/`, `checkpoints/`,
+`benchmarks/`, `atlas/`, logs) stays in this folder and is ignored by git.
 
-The numbers quoted are from the run of 2026-11-13 (96 cores, 72 GB, one 6-hour job).
+The numbers below are from the run of 2026-11-22 (inGEST counting of branch `ingest-update`; the
+atlas model of branch `update-atlas`, default settings).
 
 ## 1. inGEST: reads to counts
 
 ```bash
 cd examples/GSE67402_growth_starvation_time_course
 conda activate ecoli_ingest
-ecoli_ingest check                 # tools, resources, 36 accessions -> 77 runs, 154 files, 38.24 GB
-ecoli_ingest run -n                # what would run
-ecoli_ingest run --cores 72 --max-downloads 12
+ecoli_ingest check                 # tools, resources, accessions -> runs and files to download
+ecoli_ingest run --cores 44
 ```
 
-Samples are listed by GSM accession in `config.yaml`; the workflow resolves them to runs, fetches
-the reads into `sra/`, merges the runs of a sample, and goes through fastp, (Centrifuge,) `vg
-giraffe`, featureCounts, DESeq2 and MultiQC. Results are in `results/`:
+Samples are listed by GSM accession in `config.yaml`; the workflow resolves them to SRA runs,
+fetches the reads into `sra/` (sra-tools, with the ENA files as the backup), merges the runs of a
+sample, and goes through fastp, `vg giraffe`, the strandedness call, featureCounts, the QC record,
+DESeq2 and MultiQC. The 36 libraries of the study took 1 h 55 min on 44 cores, downloads included.
 
 | Look at | What it tells you |
 |---|---|
 | `results/multiqc_report.html` | all QC in one report |
-| `checkpoints/qc_failures.json` | samples excluded by a QC gate (empty here) |
-| `results/all_samples_raw_counts.txt` | gene x sample counts (36 sample columns) |
+| `checkpoints/qc_failures.json` | samples stopped by a QC gate (`t005h_rep1`, see below) |
+| `results/strandedness.tsv` | every library is forward-stranded (0.97-0.99 of reads on the sense strand) |
+| `results/all_samples_raw_counts.txt` | feature x sample counts (26 samples) |
+| `results/<sample>/qc/<sample>.qc.json` | the QC record of a sample (read lengths, fragment sizes, GC bias, DNA estimate, ...) |
 | `results/deseq2/pca_plot.png`, `t003h_vs_t*_deseq_results.tsv` | PCA and one table per contrast |
 
-What happened in this run, including the parts that did not go smoothly:
+**DESeq2**, every later time point against 3 h (padj < 0.05 and at least two-fold): 0, 5 and 33
+genes at 4, 5 and 6 h, then 1,129 at 8 h, 1,972 at 24 h, 1,906 at 48 h, 2,365 at 168 h and 2,035
+at 336 h. The culture changes little during growth and switches between 6 and 8 hours.
 
-- **Downloads.** The reads were downloaded from ENA at about 1 MB/s per connection. One file
-  (`SRR1945242_2.fastq.gz`) is an empty directory on the ENA server and was taken from NCBI with
-  `fasterq-dump` instead; its mate 1 from NCBI is identical to the ENA file. This is why the
-  workflow now fetches with sra-tools first and uses ENA as the backup (`sra_method`, see the
-  [inGEST README](../../ecoli_ingest/README.md)); the same run takes 20 seconds that way.
-- **Adapters.** These libraries contain many very short inserts. The first pass, before fastp was
-  given `--detect_adapter_for_pe`, left adapter read-through in about half of the read pairs;
-  Centrifuge classified those as "synthetic construct" (83-99 % of the classified reads) and every
-  sample failed the 30 % *E. coli* gate. With the option, fastp trims both adapters; the median
-  sample keeps 78 % of its reads (mean length about 50 of 101 bp). The option is off by default
-  (it was not used for the atlas training counts); this config turns it on with
-  `fastp_detect_adapter_for_pe: true`.
-- **Two weak samples.** `t005h_rep1` and `t168h_rep1` keep only 25 % and 32 % of their reads (mean
-  length 26 and 31 bp) and align worst (17 % and 40 %; the median sample aligns 69 %). They are
-  included because `fastp_min_kept_percentage` is set to 20 in this config; with the default 75 they
-  and 13 other samples would be excluded. Read their results with that in mind.
-- **Centrifuge is off in this config** (`centrifuge: false`) to fit one 6-hour job: the screen takes
-  up to 75 minutes for the largest samples. Set it to `true` to run it.
-- **DESeq2**, every later time point against 3 h (padj < 0.05 and at least two-fold): 9, 16 and 14
-  genes at 4, 5 and 6 h, then 1529 at 8 h, 2524 at 24 h, 2308 at 48 h, 2274 at 168 h and 1962 at
-  336 h. The culture changes little during growth and switches between 6 and 8 hours.
+## Choices made for this study
 
-## 2. Ecoli_ATLAS: counts to a position in the atlas
+- **Read filter.** These libraries hold many very short inserts: after adapter trimming the median
+  read is about 35 of 101 bp and the median sample keeps 75 % of its reads (the default gate,
+  `fastp_min_kept_percentage: 75`, would stop half of them). The gate is set to **30**, which stops
+  one sample, `t005h_rep1` (25 % kept). That library is unlike anything in the atlas: median insert
+  27 bp and trimmed read 18 bp (shorter than in any atlas sample), 17 % of its reads align, and its
+  GC bias has the opposite sign to its replicates'. Its expression matches the other exponential
+  samples, but the atlas model calls it stationary, so it is a technical failure, not biology.
+- **No total-RNA libraries.** The nine replicate-3 libraries made without rRNA depletion are left
+  out of `config.yaml`: about 95 % of their reads are rRNA, which leaves them with about 100,000
+  reads on genes, far below the 200,000 the atlas requires of its own samples, and the model calls
+  even their exponential samples stationary.
+- **Centrifuge is off** (`centrifuge: false`) to keep the run short; the species gate then does not
+  apply. Set it to `true` to screen the reads.
+
+## 2. Ecoli_ATLAS: counts to a growth-phase call
 
 ```bash
 conda activate ecoli_atlas
-FT=../../atlas_data/GCF_000005845.2_ASM584v2_feature_table.txt
-M=../../outputs/models ; A=../../outputs/atlas
-
-ecoli_atlas prepare --ingest-results results --metadata samples.csv --models $M --feature-table $FT --out atlas/prepared
-ecoli_atlas embed   --counts atlas/prepared/counts.tsv --models $M --feature-table $FT --out atlas/embedded
-ecoli_atlas compare --embeddings atlas/embedded/final_embedding.csv --atlas $A --out atlas/compared -k 15 --umap \
-    --metadata atlas/prepared/samples.tsv --group-by time_h --order-by time_h
+M=../../outputs/models                       # the atlas model bundle
+ecoli_atlas embed --ingest-results . --models $M --fill-missing-gc study --out atlas
 ```
 
-- `prepare` turns the inGEST counts into the atlas input (`counts.tsv`, 4493 genes x 36 samples) and
-  attaches `samples.csv` (`samples.tsv`).
-- `embed` gives each sample its 46-dimensional embedding and the three encoder calls. Gene coverage
-  is 4367 of 4385 model genes (99.6 %), although REL606 is a B strain (`gene_coverage.tsv`).
-- `compare` finds the 15 nearest atlas samples of every sample and, with `--group-by time_h`,
-  summarises per time point.
+`embed` reads the counts, antisense counts and QC records of the run directory and writes, per
+sample, the embedding (`atlas/embedding.tsv`: phase, medium and lab-strain scores and the 24-d
+residual), the three calls (`atlas/predictions.tsv`) and the sample table (`atlas/samples.tsv`).
+It printed two warnings, both worth reading:
 
-| Look at | What it tells you |
+- **`--fill-missing-gc study`.** Four libraries (`t024h_rep1`, `t024h_rep3`, `t048h_rep1`,
+  `t048h_rep3`, 21,000-67,000 reads on CDS) are too shallow for the GC-bias fit of the QC record,
+  and the model needs it. With the option they get the median GC slope and curvature of the other
+  samples of the study (`gc_filled` in `samples.tsv`); without it `embed` refuses them.
+- **Low depth.** Seven samples have fewer than 200,000 reads on CDS features (`low_depth` in
+  `samples.tsv`): `t008h_rep3`, the four above, `t048h_rep2` and `t168h_rep1`. They are outside the
+  depths the model was trained on; their calls agree with their replicates here, but read them with
+  care.
+
+**Growth phase.** Probability of stationary phase (`p_stationary` in `predictions.tsv`); `*` low
+depth, `+` GC bias filled:
+
+| Hours | rep1 | rep2 | rep3 |
+|---|---|---|---|
+| 3 | 0.02 | 0.00 | 0.00 |
+| 4 | 0.00 | 0.00 | 0.00 |
+| 5 | (stopped by QC) | 0.00 | 0.00 |
+| 6 | 0.00 | 0.00 | 0.00 |
+| 8 | 1.00 | 1.00 | 1.00 * |
+| 24 | 1.00 *+ | 1.00 | 1.00 *+ |
+| 48 | 1.00 *+ | 1.00 * | 1.00 *+ |
+| 168 | 1.00 * | 1.00 | 1.00 |
+| 336 | 1.00 | 1.00 | 1.00 |
+
+Every sample from 3 to 6 h is called exponential and every sample from 8 h on stationary. The
+model places the switch between 6 and 8 hours, as DESeq2 does, although the GEO text labels the
+8 h samples mid-exponential. The phase score (`z1` in `embedding.tsv`) tells the same: 0.41-0.53
+for the growing samples (`t003h_rep1`, -0.22, is the least clear) and -2.36 to -2.39 from 8 h on.
+
+**Medium and strain.** All 26 samples are called lab strain (REL606 is a lab strain). The medium
+call is minimal through 24 h; from 48 h on it moves toward rich and is firmly rich by one week
+(`p_minimal` 0.005-0.06 at 168 and 336 h). This follows the time spent starving, not the entry into
+stationary phase (the 8 h samples are still clearly minimal), and it is not caused by depth or by
+the filled GC bias: the deep one-week libraries stay rich when thinned to 50,000 reads or given the
+study-median GC. The atlas has no minimal-medium samples starved for days; in long starvation the
+biosynthetic genes that mark minimal medium shut down, and the cells may also live on what dead
+cells release. The two 48 h replicates still called minimal are the two shallowest libraries of the
+example (46,000 and 21,000 reads on CDS).
+
+## 3. Both dimensions along the time course
+
+`ecoli_atlas axes` places samples on ordered dimensions of the embedding. With `--query` it scores
+the new samples on dimensions fitted on the atlas; `--exclude-study GSE67402` leaves the study's own
+atlas samples out of the fits, so the dimensions have seen nothing of it:
+
+```bash
+ecoli_atlas axes --models $M --metadata ../../atlas_data/metadata_v2.tsv \
+    --query atlas --query-study GSE67402 --exclude-study GSE67402 \
+    --axis phase:growth_phase:lag,early_exponential,mid_exponential,transition,stationary,late_stationary,long_term_stationary \
+    --holdout lag --holdout late_stationary --holdout long_term_stationary \
+    --axis medium:medium_class:complex,defined_rich,minimal_plus_hydrolysate,defined_minimal \
+    --where treated=false --where standard_rnaseq=true --series samples.csv:replicate:time_h --out atlas/axes
+```
+
+Each dimension is scaled so that its first fitted category of the atlas has median 0 and its last
+median 1: growth phase from mid exponential (0) to stationary (1), medium from complex (0) to
+defined minimal (1).
+
+| Hours | Growth phase | Medium |
+|---|---|---|
+| 3-6 | 0.21-0.40 | 0.94-1.16 |
+| 8 | 0.82-0.90 | 0.77-1.10 |
+| 24 | 0.86-0.91 | 0.73-0.75 |
+| 48 | 0.91-0.98 | 0.45-0.68 |
+| 168 | 0.97-0.99 | 0.44-0.59 |
+| 336 | 0.94-0.99 | 0.46-0.52 |
+
+| Look at | What it shows |
 |---|---|
-| `atlas/embedded/sample_predictions.csv` | growth phase, medium type and lab-strain call with probabilities |
-| `atlas/compared/summary.tsv` | per sample: nearest atlas sample and study, neighbour votes, novelty |
-| `atlas/compared/group_summary.tsv` | the same per time point, plus replicate agreement and step size |
-| `atlas/compared/fig_factor_by_group.png` | encoder probabilities along the time course |
-| `atlas/compared/fig_umap_groups.png` | the samples on the atlas UMAP, coloured by time, centroids joined in order |
-| `atlas/compared/fig_query_distances.png` | distances between the 36 samples |
-| `atlas/compared/fig_neighbor_labels.png` | what the neighbours of each time point are |
+| `atlas/axes/fig_axes_phase_by_medium.png` | the atlas on both dimensions, the 26 samples on top, joined in time order per replicate |
+| `atlas/axes/fig_axis_phase_series.png`, `fig_axis_medium_series.png` | each dimension against time, one line per replicate |
+| `atlas/axes/axis_*_scores.tsv` | the scores of every sample (`role` = query for the new ones) |
 
-What the model says about a strain and a design it has never seen:
-
-- **Growth phase.** All 12 samples from 3 to 5 h and 3 of 4 at both 6 h and 8 h are called exponential. At 24 h
-  three of four are called stationary (mean probability 0.81). The call does not stay there: one of
-  four at 48 h and at 168 h and two of four at 336 h are called stationary. The two-class encoder
-  finds the entry into stationary phase but does not recognise long-term starvation as stationary.
-- **Medium.** 31 of 36 samples are called defined, which is correct; the five "complex" calls are
-  at 4 h, 24 h and 48 h.
-- **Lab strain.** 30 of 36 are called a lab strain. REL606 is one, but a B strain, which the
-  training data does not contain.
-- **Relationships between the samples** (`fig_query_distances`). The 3-6 h samples form one tight
-  group (cosine distance about 0.002 between and within time points). The 8 h samples move away
-  (centroid step 0.19) and disagree with each other (within-group distance 0.09), 24 h and 48 h sit
-  close to the growth group again, and 168 h and 336 h move away once more (steps 0.27 and 0.09).
-  Replicates of one time point are closer than samples of different time points (median 0.005
-  against 0.057 for the rRNA-depleted libraries).
-- **Novelty.** The mean novelty percentile per time point is 0.30-0.64, highest at 8 h and 168 h: no
-  time point is unlike everything in the atlas.
-- **Neighbour studies.** Growth-phase samples sit next to GSE107093 and GSE21341 (K-12 in M9),
-  24-48 h next to GSE224463 (the study withheld from training, LB), 8 h and the starved samples next
-  to GSE111874 (MG1655 in MOPS through exponential, early stationary and stationary phase) and
-  GSE235465.
-
-Two variations on the same command:
-
-```bash
-# growth-phase block only (6 of the 46 dimensions)
-ecoli_atlas compare --embeddings atlas/embedded/final_embedding.csv --atlas $A --out atlas/compared_growth_phase -k 15 --umap \
-    --blocks growth_phase --metadata atlas/prepared/samples.tsv --group-by time_h --order-by time_h
-# rRNA-depleted against total RNA
-ecoli_atlas compare --embeddings atlas/embedded/final_embedding.csv --atlas $A --out atlas/compared_library -k 15 --umap \
-    --metadata atlas/prepared/samples.tsv --group-by library
-```
-
-Library type hardly matters: the rRNA-depleted and the total-RNA library of the same RNA
-(replicate 3) are 0.000-0.017 apart at the nine time points, less than replicates are from each
-other, and both groups have the same neighbour studies.
-
-## 3. Where the neighbouring studies sit
-
-`compare` is for new samples. `neighbors` asks the same question for studies that are already in
-the atlas; here the four that the time course lands next to:
-
-```bash
-ecoli_atlas neighbors GSE107093 GSE224463 GSE111874 GSE21341 --atlas $A --models $M --out atlas/neighbors_top_studies --umap
-```
-
-`atlas/neighbors_top_studies/study_summary.tsv` has one row per study (which split it was in, its
-own nearest studies, how often the neighbour votes agree with its metadata), `summary.tsv` one row
-per sample, `umap.png` the studies on the atlas UMAP. GSE107093 and GSE224463 are each other's
-nearest studies, and GSE111874's neighbours agree with its curated growth phase for only 42 % of its
-samples, so the region where the starved samples land is one where growth phase is mixed.
+The samples start among the atlas's exponential samples in minimal media, move to the stationary
+level between 6 and 8 h, and then drift down the medium dimension with time in starvation. On the
+continuous dimension the drift stops about halfway (0.45-0.6 at one and two weeks, between the
+atlas's defined rich media, 0.32, and minimal media, 0.97): the starved cells look less minimal
+than growing ones, not like cells in a complex medium.
 
 ## Not covered here
 
-Reproducing the paper figures and case studies (`ecoli_atlas figures`, `casestudy`) and retraining
-(`train`, `verify-models`) work on the atlas training data, not on new samples: see the
-[Ecoli_ATLAS README](../../ecoli_atlas/README.md).
+Training the model, the paper figures and the case studies work on the atlas training data, not on
+new samples: see the [Ecoli_ATLAS README](../../ecoli_atlas/README.md).

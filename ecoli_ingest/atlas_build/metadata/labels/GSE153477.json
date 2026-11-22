@@ -1,0 +1,83 @@
+{
+ "gse": "GSE153477",
+ "notes": "Engineered and lab-evolved synthetic methylotroph SM1 (BW25113 background) on methanol MOPS at OD 0.7 and 1.1 (above minimal-medium range, no phase word): no phase. Methanol fits no carbon_source class: left out. No reference strain in the series: is_control left out. Engineered genes not named: perturbed_genes and global_regulator_perturbed left out.",
+ "default": {
+  "base_medium": {
+   "v": "MOPS",
+   "b": "stated",
+   "q": "400 mM methanol MOPS medium"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "400 mM methanol MOPS medium"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "400 mM methanol MOPS medium"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "SM1 strain was cultured in 400 mM methanol MOPS medium at 37°C 250 rpm in a New Brunswick Scientific Innova 44"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "SM1 strain was cultured in 400 mM methanol MOPS medium at 37°C 250 rpm in a New Brunswick Scientific Innova 44"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "SM1 strain was cultured in 400 mM methanol MOPS medium at 37°C 250 rpm in a New Brunswick Scientific Innova 44"
+  },
+  "genotype_class": {
+   "v": "multiple",
+   "b": "stated",
+   "q": "we reprogrammed E. coli using metabolic robustness criteria followed by laboratory evolution"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "SM1 strain RNA expression profile in 400 mM methanol MOPS medium at OD600=1.1 and OD600=0.7"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "SM1 strain RNA expression profile in 400 mM methanol MOPS medium at OD600=1.1 and OD600=0.7"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "SM1 strain RNA expression profile in 400 mM methanol MOPS medium at OD600=1.1 and OD600=0.7"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "SM1 strain RNA expression profile in 400 mM methanol MOPS medium at OD600=1.1 and OD600=0.7"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "BW25113"
+  },
+  "strain_name": {
+   "v": "SM1 (BW25113)",
+   "b": "stated",
+   "q": "SM1 strain was cultured"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "RNA libraries were constructed using  Illumina TureSeq Standard mRNA with Ribo-Zero rRNA Removal kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "RNA libraries were constructed using  Illumina TureSeq Standard mRNA with Ribo-Zero rRNA Removal kit"
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

@@ -1,0 +1,170 @@
+{
+ "gse": "GSE136977",
+ "notes": "No wild-type BW25113 sample: the two parent strains pykF(C8Y) and rpoB(T1037P) (fast-growing M9-glucose adapted mutants) are the strains the rifampicin-resistant derivatives are compared against, labelled genotype_class reference and, in M9G without rifampicin, is_control true; derived strains are point_mutation with both genes. Rifampicin present from dilution (adapted); resistant strains keep growing, transcription_arrested false. rRNA removal not stated (TruSeq stranded RNA kit). Oxygen/shaking not stated.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "E. coli strains were grown to mid-log phase (OD600 ~0.2) in M9 defined medium containing 0.4% glucose or 0.4% glucose + 7.5 micrograms/ml rifampicin."
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "E. coli strains were grown to mid-log phase (OD600 ~0.2) in M9 defined medium containing 0.4% glucose or 0.4% glucose + 7.5 micrograms/ml rifampicin."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "E. coli strains were grown to mid-log phase (OD600 ~0.2) in M9 defined medium containing 0.4% glucose or 0.4% glucose + 7.5 micrograms/ml rifampicin."
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "E. coli strains were grown to mid-log phase (OD600 ~0.2) in M9 defined medium containing 0.4% glucose or 0.4% glucose + 7.5 micrograms/ml rifampicin."
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "E. coli strains were grown to mid-log phase (OD600 ~0.2) in M9 defined medium containing 0.4% glucose or 0.4% glucose + 7.5 micrograms/ml rifampicin."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "All strains were cultivated in M9G at 37°C; starter cultures were diluted to OD600 = 0.01 in M9G and grown at 37°C with or without 7.5 mg/ml rifampicin to an OD600 of ~0.18-0.22."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "We were assessing transcript levels across multiple genetic backgrounds, when cells were cultivated in M9G either with or without rifampicin added."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "We were assessing transcript levels across multiple genetic backgrounds, when cells were cultivated in M9G either with or without rifampicin added."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "We were assessing transcript levels across multiple genetic backgrounds, when cells were cultivated in M9G either with or without rifampicin added."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli BW25113"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "RNA-seq libraries were prepared with an Illumina TruSeq stranded RNA kit according to manufacturer's instructions."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "E. coli strains were grown to mid-log phase (OD600 ~0.2) in M9 defined medium containing 0.4% glucose or 0.4% glucose + 7.5 micrograms/ml rifampicin."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "We measured steady-state E. coli transcript levels in 1) a pykF(C8Y) mutant, 2) a rpoB(T1037P) mutant, and 3) five rifampicin-resistant rpoB mutant strains selected from each of these single mutants"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "We measured steady-state E. coli transcript levels in 1) a pykF(C8Y) mutant, 2) a rpoB(T1037P) mutant, and 3) five rifampicin-resistant rpoB mutant strains selected from each of these single mutants, in the presence and absence of rifampicin."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^pykF\\(C8Y\\)$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "inferred",
+     "q": "We isolated RNA for sequencing from both parent strains (pykF(C8Y) and rpoB(T1037P)"
+    },
+    "strain_name": {
+     "v": "BW25113 pykF(C8Y)",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^rpoB\\(T1037P\\)$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "inferred",
+     "q": "We isolated RNA for sequencing from both parent strains (pykF(C8Y) and rpoB(T1037P)"
+    },
+    "strain_name": {
+     "v": "BW25113 rpoB(T1037P)",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^pykF\\(C8Y\\) rpoB",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "pykF;rpoB",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^rpoB\\(T1037P\\) rpoB",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rpoB",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:medium",
+   "regex": "rifampicin",
+   "set": {
+    "treatment": {
+     "v": "abx_transcription",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "All strains were cultivated in M9G at 37°C; starter cultures were diluted to OD600 = 0.01 in M9G and grown at 37°C with or without 7.5 mg/ml rifampicin to an OD600 of ~0.18-0.22."
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^E\\. coli (pykF\\(C8Y\\)|rpoB\\(T1037P\\)) replicate",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

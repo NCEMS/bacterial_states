@@ -1,3 +1,3 @@
-"""Ecoli_ATLAS: embed E. coli RNA-seq samples with the atlas encoder-decoder and compare them to the atlas."""
+"""Ecoli_ATLAS: embed E. coli RNA-seq samples with a count-based encoder-decoder trained on the atlas."""
 
-__version__ = "1.0.0"
+__version__ = "2.0.0"

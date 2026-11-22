@@ -1,0 +1,149 @@
+{
+ "gse": "GSE237609",
+ "notes": "trmA, truB, trmA truB deletions vs BW25113 wild type, all in LB + 2% sodium formate (medium additive for all samples, treated as medium property: treatment none). Shaking not described, oxygen left out. WT re-read: BW25113 wildtype is wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "we extracted  total RNA from each strain after growth in LB + 2% sodium formate to an OD600 between 0.3 and 0.4 using TRIzol"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "we extracted  total RNA from each strain after growth in LB + 2% sodium formate to an OD600 between 0.3 and 0.4 using TRIzol"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "we extracted  total RNA from each strain after growth in LB + 2% sodium formate to an OD600 between 0.3 and 0.4 using TRIzol"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Cultures were grown at 37°C until reaching an OD600 between 0.3 and 0.4"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "Cultures were grown at 37°C until reaching an OD600 between 0.3 and 0.4"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "BW25113"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "To examine how mRNA levels compare between Escherichia coli lacking trmA, truB,  or both trmA and truB genes and the parental E. coli BW25113 strain"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "To examine how mRNA levels compare between Escherichia coli lacking trmA, truB,  or both trmA and truB genes and the parental E. coli BW25113 strain"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "To examine how mRNA levels compare between Escherichia coli lacking trmA, truB,  or both trmA and truB genes and the parental E. coli BW25113 strain"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "To examine how mRNA levels compare between Escherichia coli lacking trmA, truB,  or both trmA and truB genes and the parental E. coli BW25113 strain"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Strand-specific RNA-seq (2x150 bp, single index) with rRNA depletion (bacteria)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Strand-specific RNA-seq (2x150 bp, single index) with rRNA depletion (bacteria)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^wildtype$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "deletion",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^trmA deletion$",
+   "set": {
+    "perturbed_genes": {
+     "v": "trmA",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^truB deletion$",
+   "set": {
+    "perturbed_genes": {
+     "v": "truB",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^trmA truB deletion$",
+   "set": {
+    "perturbed_genes": {
+     "v": "trmA;truB",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

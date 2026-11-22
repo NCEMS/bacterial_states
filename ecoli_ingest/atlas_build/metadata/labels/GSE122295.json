@@ -1,0 +1,196 @@
+{
+ "gse": "GSE122295",
+ "notes": "Supplements (amino acids, nucleosides, adenine, thiamine, nitrate) are treated as medium properties (treatment none); glutathione left without treatment because it is neither clearly a nutrient nor a named stress. Single amino acid supplements: amino_acids_supplied false. Glucarate, gluconate and pyruvate classed organic_acid; sorbitol, ribose, N-acetylglucosamine, galactose other_sugar. bw_delpurR_cytd: purR deletion only from the title (strain field just BW25113). Nitrate samples: anaerobic by gas sparging, so culture_mode left out for them. Only plain wt_glc samples (no supplement, MG1655) are controls. WT re-read: unmodified baseline strain relabelled wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "inoculated into M9 minimal media with sample-specific carbon source"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "inoculated into M9 minimal media with sample-specific carbon source, supplemented with 1 ml trace element solution (100X)"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "M9 minimal media with sample-specific carbon source"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "to the mid-log phase (OD600 ≈ 0.5)"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "The fresh culture was incubated at 37C with agitation to the mid-log phase"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "The fresh culture was incubated at 37C with agitation to the mid-log phase"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "The fresh culture was incubated at 37C with agitation"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Growth of E. coli with various supplements was performed with biological duplicates"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Growth of E. coli with various supplements was performed with biological duplicates"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Growth of E. coli with various supplements was performed with biological duplicates"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Growth of E. coli with various supplements was performed with biological duplicates"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "The rRNA was removed using Illumina Ribo-Zero rRNA removal kit for Gram Negative Bacteria."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "The rRNA was removed using Illumina Ribo-Zero rRNA removal kit for Gram Negative Bacteria."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E. coli K12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "E. coli K12 MG1655"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "RNA sequencing was performed on E. coli K12 MG1655 with various supplements"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA sequencing was performed on E. coli K12 MG1655 with various supplements"
+  },
+  "is_control": {
+   "v": false,
+   "b": "inferred",
+   "q": "RNA sequencing was performed on E. coli K12 MG1655 with various supplements designed to activate transcriptional regulators"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:media",
+   "regex": "glucose",
+   "set": {
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:media",
+   "regex": "sorbitol|ribose|N-acetylglucosamine|galactose",
+   "set": {
+    "carbon_source": {
+     "v": "other_sugar",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:media",
+   "regex": "glucarate|gluconate|pyruvate",
+   "set": {
+    "carbon_source": {
+     "v": "organic_acid",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^wt_glc",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:supplement",
+   "regex": "glutathione",
+   "set": {
+    "treatment": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:media",
+   "regex": "^anaerobic",
+   "set": {
+    "oxygen": {
+     "v": "anaerobic_respiration",
+     "b": "stated",
+     "q": "For nitrate respiration cultures, a 35:50 ratio of carbon dioxide to nitrogen was bubbled through hte media to deoxygenate."
+    },
+    "culture_mode": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^bw_delpurR",
+   "set": {
+    "strain_name": {
+     "v": "BW25113",
+     "b": "stated",
+     "q": ""
+    },
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "bw_delpurR_cytd__1"
+    },
+    "perturbed_genes": {
+     "v": "purR",
+     "b": "stated",
+     "q": "bw_delpurR_cytd__1"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,111 @@
+{
+ "gse": "GSE73969",
+ "notes": "logarithmic phase stated (OD 0.8 in LB); phase word wins. Temperature and aeration not stated.",
+ "default": {
+  "strain_group": {
+   "v": "EHEC_STEC",
+   "b": "stated",
+   "q": "Enterohemorrhagic Escherichia coli O157:H7 strain EDL933"
+  },
+  "strain_name": {
+   "v": "EDL933",
+   "b": "stated",
+   "q": "Enterohemorrhagic Escherichia coli O157:H7 strain EDL933"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "diluted 1:100 in fresh LB broth"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "diluted 1:100 in fresh LB broth"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "diluted 1:100 in fresh LB broth"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "logarithmic phase"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RNA sequencing of EHEC O157:H7 strain EDL933 and Δhns in 2 biological repeats."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA sequencing of EHEC O157:H7 strain EDL933 and Δhns in 2 biological repeats."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA sequencing of EHEC O157:H7 strain EDL933 and Δhns in 2 biological repeats."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA sequencing of EHEC O157:H7 strain EDL933 and Δhns in 2 biological repeats."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "RNA extraction was performed using RiboPure-BacteriaTM Bacteria kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "hns",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "hns",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

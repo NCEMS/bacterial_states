@@ -1,0 +1,101 @@
+{
+ "gse": "GSE135906",
+ "notes": "Only the RNAseq arm of a ribosome-profiling series is a candidate; these libraries were made from lysate RNA with the standard TruSeq Stranded Total RNA Gold kit (not the footprint gel protocol), so assay_class total_rnaseq; flag if the 'mRNA-seq arm of ribosome profiling' exclusion is meant to cover this. Samples C/O/S/A carry plasmid-borne MS2-tagged ribosomes with different anti-SD sequences; which letter is wild-type anti-SD is not stated, so genotype_class, perturbed_genes and is_control are left out. Cold sample: shifted from OD600 0.65, phase left out.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "cells were cultured at 37 °C in 500 mL of LB + ampicillin (50 mg/L)"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "cells were cultured at 37 °C in 500 mL of LB + ampicillin (50 mg/L)"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "cells were cultured at 37 °C in 500 mL of LB + ampicillin (50 mg/L)"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "IPTG was added (0.3 mM final concentration)"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Ribosome profiling of purified MS2-tagged ribosomes with anti-Shine Dalgarno mutations from E. coli MG1655"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Ribosome profiling of purified MS2-tagged ribosomes with anti-Shine Dalgarno mutations from E. coli MG1655"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "For RNAseq, libraries were constructed by TruSeq Stranded Total RNA Gold"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "inferred",
+   "q": "For RNAseq, libraries were constructed by TruSeq Stranded Total RNA Gold"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:growth conditions",
+   "regex": "^37 C OD600 = 0\\.5",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": ""
+    },
+    "growth_temperature": {
+     "v": 37,
+     "b": "stated",
+     "q": ""
+    },
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "IPTG was added (0.3 mM final concentration) when the culture reached OD600 = 0.3 and cells were harvested by filtration at OD600 = 0.5."
+    }
+   }
+  },
+  {
+   "field": "ch:growth conditions",
+   "regex": "^10 C for 30 min",
+   "set": {
+    "growth_temperature": {
+     "v": 10,
+     "b": "stated",
+     "q": ""
+    },
+    "treatment": {
+     "v": "cold",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

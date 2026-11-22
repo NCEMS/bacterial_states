@@ -1,0 +1,154 @@
+{
+ "gse": "GSE267531",
+ "notes": "37 °C samples are time 0 before the shift (exponential); 15 °C samples taken 3 h after the shift -> treatment cold, exposure adapted (> 2 h), no phase. Control = wild type at 37 °C. Shaking not described.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Bacteria were grown in LB at 37°C"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Bacteria were grown in LB at 37°C"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Bacteria were grown in LB at 37°C"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "This experiment measured the how six species of bacteria responded to a shift in tempterature from 37°C to 15°C."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "This experiment measured the how six species of bacteria responded to a shift in tempterature from 37°C to 15°C."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "This experiment measured the how six species of bacteria responded to a shift in tempterature from 37°C to 15°C."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Barcoded RNAs were pooled and depleted of rRNA using the RiboZero rRNA depletion kit (Epicentre)."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Barcoded RNAs were pooled and depleted of rRNA using the RiboZero rRNA depletion kit (Epicentre)."
+  },
+  "is_control": {
+   "v": false,
+   "b": "stated",
+   "q": "Bacteria were growing exponentially at 37°C in LB media, then shifted to 15°C for 3 hours."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^37°C$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "At time 0, samples were taken and cultures shifted to 15°C."
+    },
+    "growth_temperature": {
+     "v": 37,
+     "b": "stated",
+     "q": ""
+    },
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": "Bacteria were growing exponentially at 37°C in LB media, then shifted to 15°C for 3 hours."
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^15°C$",
+   "set": {
+    "treatment": {
+     "v": "cold",
+     "b": "stated",
+     "q": "Bacteria were growing exponentially at 37°C in LB media, then shifted to 15°C for 3 hours."
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "Bacteria were growing exponentially at 37°C in LB media, then shifted to 15°C for 3 hours."
+    },
+    "growth_temperature": {
+     "v": 15,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^wild-type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "rpoS",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rpoS",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "wild-type, 37°C",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

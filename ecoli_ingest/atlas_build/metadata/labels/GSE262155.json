@@ -1,0 +1,78 @@
+{
+ "gse": "GSE262155",
+ "notes": "L-arabinose is a nutrient supplement (treatment none), so both media arms are untreated wild type and both are controls under the settled rule. MEM-HEPES without serum -> cell_culture / defined_rich. Carbon source, temperature, phase, aeration not stated. WT re-read: TUV93-0 (standard EHEC lab strain) used as is, taken as wild_type; the digest names no plasmid or other change.",
+ "default": {
+  "base_medium": {
+   "v": "cell_culture",
+   "b": "stated",
+   "q": "Cells were grown in MEM-HEPES and supplemented with or without 1mg/ml L-arabinose."
+  },
+  "medium_class": {
+   "v": "defined_rich",
+   "b": "inferred",
+   "q": "Cells were grown in MEM-HEPES and supplemented with or without 1mg/ml L-arabinose."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Cells were grown in MEM-HEPES and supplemented with or without 1mg/ml L-arabinose."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Cells were grown in MEM-HEPES and supplemented with or without 1mg/ml L-arabinose."
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "3 independent biological replicates were grown in the presence or absence of L-arabinose (total of 6 samples )"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "3 independent biological replicates were grown in the presence or absence of L-arabinose (total of 6 samples )"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "3 independent biological replicates were grown in the presence or absence of L-arabinose (total of 6 samples )"
+  },
+  "strain_group": {
+   "v": "EHEC_STEC",
+   "b": "stated",
+   "q": "Escherichia coli O157:H7"
+  },
+  "strain_name": {
+   "v": "TUV93-0",
+   "b": "stated",
+   "q": "TUV93-0"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "3 independent biological replicates were grown in the presence or absence of L-arabinose (total of 6 samples )"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "3 independent biological replicates were grown in the presence or absence of L-arabinose (total of 6 samples )"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "3 independent biological replicates were grown in the presence or absence of L-arabinose (total of 6 samples )"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribosomal depletion and library assembly of DNA-free total RNA samples was carried out using an Illumina Ribo-Zero Tru-seq kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal depletion and library assembly of DNA-free total RNA samples was carried out using an Illumina Ribo-Zero Tru-seq kit"
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

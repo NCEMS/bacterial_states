@@ -1,0 +1,118 @@
+{
+ "gse": "GSE142291",
+ "notes": "RNA samples were taken immediately before rifampicin addition (rifampicin is for the IPOD/ChIP samples), so transcription_arrested false and treatment none. GSM4224648: 'early stationary phase (3 hours after reaching OD600=0.2)' in growth_protocol, 'Stationary phase' in ch:condition; labelled transition following the inference rule for 'early stationary'. Strain, temperature and aeration not stated. Each wild-type condition counted as a control. WT re-read: samples called WT with nothing said about modifications, genotype_class wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9/glu defined minimal medium"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "M9/glu defined minimal medium"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "WT"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "WT"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "Samples for RNA isolation were preserved immediately prior to rifampicin addition"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "stated",
+   "q": "Samples for RNA isolation were preserved immediately prior to rifampicin addition"
+  },
+  "is_control": {
+   "v": true,
+   "b": "stated",
+   "q": "WT"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "IPOD, Input, and RNA polymerase ChIP data (2 or more replicates each) for cells from each of seven different conditions"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "IPOD, Input, and RNA polymerase ChIP data (2 or more replicates each) for cells from each of seven different conditions"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribosome-depleted RNA"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "ribosome-depleted using the Illumina RiboZero Gram-negative bacteria kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "growth_protocol",
+   "regex": "rdm/glu rich defined medium",
+   "set": {
+    "medium_class": {
+     "v": "defined_rich",
+     "b": "stated",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "growth_protocol",
+   "regex": "M9/glu minimal medium",
+   "set": {
+    "medium_class": {
+     "v": "defined_minimal",
+     "b": "stated",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "growth_protocol",
+   "regex": "^Cells were grown to exponential phase \\(OD600=0\\.2\\)",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "growth_protocol",
+   "regex": "early stationary phase",
+   "set": {
+    "growth_phase": {
+     "v": "transition",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

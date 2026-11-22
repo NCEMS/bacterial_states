@@ -1,0 +1,102 @@
+{
+ "gse": "GSE348946",
+ "notes": "Growth medium for RNA-seq given only as 'respective media' (evolution was in glucose minimal medium) -> medium labels left out. NADH dehydrogenase genes not named -> perturbed_genes left out; global_regulator_perturbed false.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Total RNA was extracted from the mid-log phase culture"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "were grown at 37C in 5 biological replicates for each strain. Total RNA was extracted from the mid-log phase culture"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Ecoli MG1655 wild type"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Ecoli MG1655 wild type"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Ecoli MG1655 wild type, the unevolved NADH dehydrogenase deficient strain and the evolved NADH dehydrogenase deficient strain"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Ecoli MG1655 wild type, the unevolved NADH dehydrogenase deficient strain and the evolved NADH dehydrogenase deficient strain"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Ecoli MG1655 wild type, the unevolved NADH dehydrogenase deficient strain and the evolved NADH dehydrogenase deficient strain"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Ecoli MG1655 wild type, the unevolved NADH dehydrogenase deficient strain and the evolved NADH dehydrogenase deficient strain"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "NEBNext Ultra II Directional RNA Library prep kit"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "NADH dehydrogenase deficient"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Ecoli MG1655 wild type, the unevolved NADH dehydrogenase deficient strain and the evolved NADH dehydrogenase deficient strain"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^WT-",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^ΔNDH-",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "the unevolved NADH dehydrogenase deficient strain"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^eΔNDH-A",
+   "set": {
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "stated",
+     "q": "the evolved NADH dehydrogenase deficient strain (Lineage A)"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

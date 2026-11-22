@@ -1,0 +1,208 @@
+{
+ "gse": "GSE183061",
+ "notes": "Not all standard: GSM5550331-36 are in vitro Cas13a digests of purified total RNA (assay_class other; no growth labels). In vivo samples: rRNA-depleted, RppH/PNK-treated, sonicated to ~200 nt, NEBNext Small RNA kit, analysed by 5' end counts; labelled total_rnaseq because the fragmentation is ordinary sonication of whole RNA, but the protocol is designed to capture degradation products (could be argued end_mapping). All in vivo cells carry LshCas13a + crRNA plasmids (heterologous_expression) and are aTc-induced; targeting vs nontargeting differ by spacer, no reference-genotype control, so is_control left out. C3000 strain group not stated (left out); D10 parent not stated. M13 samples: phage, timing of infection not given (exposure left out). Growth phase not stated (1 h after 1:100 dilution, no OD).",
+ "default": {
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Cell cultures were diluted 1:100 in fresh LB with double selection and grown for 1 hour at 37 °C with continuous shaking."
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Cell cultures were diluted 1:100 in fresh LB with double selection and grown for 1 hour at 37 °C with continuous shaking."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Cell cultures were diluted 1:100 in fresh LB with double selection and grown for 1 hour at 37 °C with continuous shaking."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Cell cultures were diluted 1:100 in fresh LB with double selection and grown for 1 hour at 37 °C with continuous shaking."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Cell cultures were diluted 1:100 in fresh LB with double selection and grown for 1 hour at 37 °C with continuous shaking."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Cell cultures were diluted 1:100 in fresh LB with double selection and grown for 1 hour at 37 °C with continuous shaking."
+  },
+  "genotype_class": {
+   "v": "heterologous_expression",
+   "b": "study_default",
+   "q": "we used Escherichia coli strain harboring Type VI spacer matching inducible transcript (\"targeting\" cells) or strain that does not encode spacers matching any E. coli transcripts (\"nontargeting\" cells)."
+  },
+  "perturbed_genes": {
+   "v": "LshCas13a",
+   "b": "study_default",
+   "q": "We investigated the in vivo and in vitro specificity of collateral RNA degradation mediated by LshCas13a protein"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "we used Escherichia coli strain harboring Type VI spacer matching inducible transcript (\"targeting\" cells) or strain that does not encode spacers matching any E. coli transcripts (\"nontargeting\" cells)."
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "Expression of target transcript was induced with 500 ng/ml anhydrotetracyline"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "The differences between targeting and nontargeting samples were analyzed."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "The differences between targeting and nontargeting samples were analyzed."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "inferred",
+   "q": "Fragmentation was carried out by sonication using the Covaris protocol to obtain fragments of 200 nt size."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Total RNA samples were treated with MICROBExpress Bacterial mRNA Enrichment Kit (Invitrogen) for rRNA depletion prior to library preparation."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "The differences between targeting and nontargeting samples were analyzed."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "C3000",
+   "set": {
+    "strain_name": {
+     "v": "C3000",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "delta",
+   "set": {
+    "strain_name": {
+     "v": "Δ10",
+     "b": "stated",
+     "q": "Escherichia coli Δ10 cells"
+    },
+    "genotype_class": {
+     "v": "multiple",
+     "b": "stated",
+     "q": "we repeated the described experiment on E. coli strain lacking ten known ribonuclease-encoding toxin-antitoxin loci"
+    },
+    "perturbed_genes": {
+     "v": "LshCas13a; ten RNase toxin-antitoxin loci",
+     "b": "stated",
+     "q": "E. coli strain lacking ten known ribonuclease-encoding toxin-antitoxin loci"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "M13 phage",
+   "set": {
+    "treatment": {
+     "v": "phage",
+     "b": "stated",
+     "q": ""
+    },
+    "mixed_organism": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "description",
+   "regex": "in vitro",
+   "set": {
+    "assay_class": {
+     "v": "other",
+     "b": "stated",
+     "q": "To investigate in vitro specificity of LshCas13a protein, we analyzed products of the degradation on total E. coli RNA by purified LshCas13a supplemented with crRNA and targeted or nontargeted transcripts."
+    },
+    "culture_mode": {
+     "v": null,
+     "b": "",
+     "q": ""
+    },
+    "base_medium": {
+     "v": null,
+     "b": "",
+     "q": ""
+    },
+    "medium_class": {
+     "v": null,
+     "b": "",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": null,
+     "b": "",
+     "q": ""
+    },
+    "oxygen": {
+     "v": null,
+     "b": "",
+     "q": ""
+    },
+    "growth_temperature": {
+     "v": null,
+     "b": "",
+     "q": ""
+    },
+    "genotype_class": {
+     "v": null,
+     "b": "",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": null,
+     "b": "",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": null,
+     "b": "",
+     "q": ""
+    },
+    "inducer_added": {
+     "v": null,
+     "b": "",
+     "q": ""
+    },
+    "treatment": {
+     "v": null,
+     "b": "",
+     "q": ""
+    },
+    "rrna_removal": {
+     "v": null,
+     "b": "",
+     "q": ""
+    },
+    "transcription_arrested": {
+     "v": null,
+     "b": "",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

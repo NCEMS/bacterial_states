@@ -1,0 +1,163 @@
+{
+ "gse": "GSE298101",
+ "notes": "All strains carry reporter plasmid pALA3047 (Plac-cfp-ParB) induced with 10 µM IPTG -> treated as reference (reporter), inducer_added true. Lysogens (lambda cI857 prophage) -> genotype_class left out (no fitting class), not controls. Phage infection time course from OD 0.4 cells (concentrated, 30 min on ice, diluted) -> mid_exponential kept (<= 60 min, inferred); exposure from minutes post-infection (0+-20 min acute, 45/60 min short). Mock-infected and uninfected hosts are controls. Phage RNA in infected samples not counted as mixed_organism.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "stated",
+   "q": "E. coli MG1655 wild-type cells"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "E. coli MG1655 wild-type cells"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Bacterial cells were grown at 30°C in LB medium supplemented with 10 mM MgSO₄, 0.2% maltose, and 10 μM IPTG, with shaking at 220 rpm."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Bacterial cells were grown at 30°C in LB medium supplemented with 10 mM MgSO₄, 0.2% maltose, and 10 μM IPTG, with shaking at 220 rpm."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Bacterial cells were grown at 30°C in LB medium supplemented with 10 mM MgSO₄, 0.2% maltose, and 10 μM IPTG, with shaking at 220 rpm."
+  },
+  "growth_temperature": {
+   "v": 30,
+   "b": "stated",
+   "q": "Bacterial cells were grown at 30°C in LB medium supplemented with 10 mM MgSO₄, 0.2% maltose, and 10 μM IPTG, with shaking at 220 rpm."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Bacterial cells were grown at 30°C in LB medium supplemented with 10 mM MgSO₄, 0.2% maltose, and 10 μM IPTG, with shaking at 220 rpm."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Bacterial cells were grown at 30°C in LB medium supplemented with 10 mM MgSO₄, 0.2% maltose, and 10 μM IPTG, with shaking at 220 rpm."
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "When cultures reached OD₆₀₀ ≈ 0.4, cells were harvested by centrifugation"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "10 μM IPTG"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total RNA-seq was performed on E. coli MG1655 wild-type cells infected with phage lambda at high or low multiplicity of infection (MOI), or mock-infected with buffer"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total RNA-seq was performed on E. coli MG1655 wild-type cells infected with phage lambda at high or low multiplicity of infection (MOI), or mock-infected with buffer"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA-seq was performed"
+  },
+  "rrna_removal": {
+   "v": "none",
+   "b": "stated",
+   "q": "without rRNA depletion"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "As controls, libraries were similarly generated from uninfected MG1655 host cells and lambda lysogens."
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "As controls, libraries were similarly generated from uninfected MG1655 host cells and lambda lysogens."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "prophage lambda",
+   "set": {
+    "genotype_class": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "lambda cI857 prophage",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "infected by P\\+ phage",
+   "set": {
+    "treatment": {
+     "v": "phage",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "infected by P\\+ phage.*, (0\\+|2\\.5|5|10|20)min",
+   "set": {
+    "exposure": {
+     "v": "acute",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "infected by P\\+ phage.*, (45|60)min",
+   "set": {
+    "exposure": {
+     "v": "short",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,154 @@
+{
+ "gse": "GSE124673",
+ "notes": "Long-term (12h) arm: 12h pre-culture diluted 1:100 into M9 + biocide and grown to mid-exponential (exposure adapted, phase mid_exponential stated); its controls grown the same way without biocide. Short-term (30 min) arm: 12h M9 cultures ('mid to late exponential') exposed 30 min (acute); growth_phase left out for this arm because the pre-shift phase is given only as 'mid to late exponential'. Treatment classes: H2O2, peracetic acid, hypochlorite -> oxidative;envelope_solvent_biocide; quaternary ammonium, alcohols, glutaraldehyde, chlorophene, chlorhexidine, povidone-iodine -> envelope_solvent_biocide (povidone-iodine could also be called oxidative). Culture vessel/shaking not stated. WT re-read: MG1655 used unmodified.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "Escherichia coli MG1655 was grown in minimal media (M9 with 0.4% w/v glucose) for 12h (mid to late exponential growth) at 37°C (pre-inoculum)."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "Escherichia coli MG1655 was grown in minimal media (M9 with 0.4% w/v glucose) for 12h (mid to late exponential growth) at 37°C (pre-inoculum)."
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "Escherichia coli MG1655 was grown in minimal media (M9 with 0.4% w/v glucose) for 12h (mid to late exponential growth) at 37°C (pre-inoculum)."
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "Escherichia coli MG1655 was grown in minimal media (M9 with 0.4% w/v glucose) for 12h (mid to late exponential growth) at 37°C (pre-inoculum)."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "study_default",
+   "q": "Escherichia coli MG1655 was grown in minimal media (M9 with 0.4% w/v glucose) for 12h (mid to late exponential growth) at 37°C (pre-inoculum)."
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "E. coli MG1655 was exposed to one out of ten biocides (antiseptics and disinfectants) for long (7-12h) term, in triplicate."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "E. coli MG1655 was exposed to one out of ten biocides (antiseptics and disinfectants) for long (7-12h) term, in triplicate."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli MG1655 was exposed to one out of ten biocides (antiseptics and disinfectants) for long (7-12h) term, in triplicate."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli MG1655 was exposed to one out of ten biocides (antiseptics and disinfectants) for long (7-12h) term, in triplicate."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli MG1655 was exposed to one out of ten biocides (antiseptics and disinfectants) for long (7-12h) term, in triplicate."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Ribosomal RNA was removed with capture oligonucleotide mix (MICROBExpress, Ambition)."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA was removed with capture oligonucleotide mix (MICROBExpress, Ambition)."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli MG1655 was exposed to one out of ten biocides (antiseptics and disinfectants) for long (7-12h) term, in triplicate."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:time",
+   "regex": "^12h$",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": "and growth to mid-exponential"
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "followed by 1:100 dilution in M9 + benzalkonium chloride (3.63 mg/L) and growth to mid-exponential"
+    }
+   }
+  },
+  {
+   "field": "ch:time",
+   "regex": "^30min$",
+   "set": {
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "benzalkonium|ethanol|glutaraldehyde|isopropanol|chlorophene|povidone|chlorhexidine",
+   "set": {
+    "treatment": {
+     "v": "envelope_solvent_biocide",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "hydrogen peroxide|peracetic|hypochlorite",
+   "set": {
+    "treatment": {
+     "v": "oxidative;envelope_solvent_biocide",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^none$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

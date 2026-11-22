@@ -1,0 +1,131 @@
+{
+ "gse": "GSE337979",
+ "notes": "pth-Tn::Cm transposon insertion in an essential gene labelled deletion (disruption); may be partial loss of function.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "incubated at 37 °C, 220 rpm for 3-5 h to mid-exponential phase"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "diluted 1:100 into fresh liquid LB medium"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "diluted 1:100 into fresh liquid LB medium"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "diluted 1:100 into fresh liquid LB medium"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "incubated at 37 °C, 220 rpm for 3-5 h to mid-exponential phase"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "incubated at 37 °C, 220 rpm for 3-5 h to mid-exponential phase"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "incubated at 37 °C, 220 rpm for 3-5 h to mid-exponential phase"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655 ΔaraD-B WT and pth-Tn::Cm strains were inoculated into LB medium and cultured overnight at 37 °C with shaking at 220 rpm."
+  },
+  "strain_name": {
+   "v": "MG1655 ΔaraD-B",
+   "b": "stated",
+   "q": "MG1655 ΔaraD-B WT and pth-Tn::Cm strains were inoculated into LB medium and cultured overnight at 37 °C with shaking at 220 rpm."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "MG1655 ΔaraD-B WT and pth-Tn::Cm strains were inoculated into LB medium and cultured overnight at 37 °C with shaking at 220 rpm."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "MG1655 ΔaraD-B WT and pth-Tn::Cm strains were inoculated into LB medium and cultured overnight at 37 °C with shaking at 220 rpm."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "MG1655 ΔaraD-B WT and pth-Tn::Cm strains were inoculated into LB medium and cultured overnight at 37 °C with shaking at 220 rpm."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "MG1655 ΔaraD-B WT and pth-Tn::Cm strains were inoculated into LB medium and cultured overnight at 37 °C with shaking at 220 rpm."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "ribosomal RNA (rRNA) was depleted to enrich mRNA"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "ribosomal RNA (rRNA) was depleted to enrich mRNA"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "pth-Tn",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "pth",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

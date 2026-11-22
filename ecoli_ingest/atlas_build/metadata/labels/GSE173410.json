@@ -1,0 +1,126 @@
+{
+ "gse": "GSE173410",
+ "notes": "WT vs ydhB (punR) deletion in M9 glucose + 2.5 mM adenosine (nutrient supplement, not a treatment). Phase stated as aerobic exponential (OD 0.5-0.6). Temperature and shaking not stated. WT re-read: WT MG1655 is wild_type.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E. coli K12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "E. coli K12 MG1655"
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "The cells were grown in M9 glucose medium supplemented with 2.5 mM adenosine"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "The cells were grown in M9 glucose medium supplemented with 2.5 mM adenosine"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "The cells were grown in M9 glucose medium supplemented with 2.5 mM adenosine"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "The cells were grown in M9 glucose medium supplemented with 2.5 mM adenosine"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "aerobic exponential growth conditions"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "aerobic exponential growth conditions"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "The rRNA was removed using Illumina Ribo-Zero rRNA removal kit for Gram Negative Bacteria."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "The rRNA was removed using Illumina Ribo-Zero rRNA removal kit for Gram Negative Bacteria."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "The wild type MG1655 strain was grown as a control for the isogenic punR mutant strain."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "The wild type MG1655 strain was grown as a control for the isogenic punR mutant strain."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "The wild type MG1655 strain was grown as a control for the isogenic punR mutant strain."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "The wild type MG1655 strain was grown as a control for the isogenic punR mutant strain."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "The wild type MG1655 strain was grown as a control for the isogenic punR mutant strain."
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "ydhB",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "ydhB",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": "The wild type MG1655 strain was grown as a control for the isogenic punR mutant strain."
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

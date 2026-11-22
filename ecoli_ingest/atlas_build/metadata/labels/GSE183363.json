@@ -1,0 +1,159 @@
+{
+ "gse": "GSE183363",
+ "notes": "RNA cultures in 0.5% polypeptone (PP) in water, labelled complex/other. Negamycin (16 ug/ml, 40-45 min) labelled abx_translation, exposure short. Phase early_exponential at the split; treated samples sampled 45 min later keep it (<2 h rule).",
+ "default": {
+  "base_medium": {
+   "v": "other",
+   "b": "study_default",
+   "q": "0.5% polypeptone (PP) in water"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "0.5% polypeptone (PP) in water"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "0.5% polypeptone (PP) in water"
+  },
+  "growth_phase": {
+   "v": "early_exponential",
+   "b": "stated",
+   "q": "cells were grown in PP at 37°C (190 rpm) until early exponential growth phase"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "cells were grown in PP at 37°C (190 rpm) until early exponential growth phase"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "cells were grown in PP at 37°C (190 rpm) until early exponential growth phase"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "cells were grown in PP at 37°C (190 rpm) until early exponential growth phase"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E. coli BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "BW25113"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA depletion using the Ribo-Zero™ Plus Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA depletion using the Ribo-Zero™ Plus Kit"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Growth of wildtype Escherichia coli and three mutants"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "under no treatment and treatment with Negamycin (only wildtype)"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "under no treatment and treatment with Negamycin (only wildtype)"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "under no treatment and treatment with Negamycin (only wildtype)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^Wildtype$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^delta_ompN$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "ompN",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^None$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "Negamycin",
+   "set": {
+    "treatment": {
+     "v": "abx_translation",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "Wildtype with treatment: None",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

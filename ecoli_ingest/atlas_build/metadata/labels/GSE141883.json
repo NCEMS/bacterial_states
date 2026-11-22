@@ -1,0 +1,329 @@
+{
+ "gse": "GSE141883",
+ "notes": "Control = parent ZK126 (wild-type rpoS, rpoC). Evolved backgrounds (ZK819, SCV, LCV) labelled evolved_isolate; with the introduced rpoC A494V or rpoS deletion -> multiple. strain_group not stated (ZK126 background not named in text). LCV genotype beyond rpoS wild type not described.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Cells were grown overnight in rich media (LB) and Whole RNA fraction isolated in stationary phase"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Cells were grown overnight in rich media (LB) and Whole RNA fraction isolated in stationary phase"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Cells were grown overnight in rich media (LB) and Whole RNA fraction isolated in stationary phase"
+  },
+  "growth_phase": {
+   "v": "stationary",
+   "b": "stated",
+   "q": "Cells were grown overnight in rich media (LB) and Whole RNA fraction isolated in stationary phase"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown in rich media (LB) till stationary phase at 37 degrees Celcius at 180 rpm"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "at 37 degrees Celcius at 180 rpm"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "at 37 degrees Celcius at 180 rpm"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "pairwise comparison between mutant and wild type strains have been done in each different backgrounds"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "pairwise comparison between mutant and wild type strains have been done in each different backgrounds"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "pairwise comparison between mutant and wild type strains have been done in each different backgrounds"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "pairwise comparison between mutant and wild type strains have been done in each different backgrounds"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "MRNA enrichment was performed with the MicrobeExpress kit(AMBION)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "MRNA enrichment was performed with the MicrobeExpress kit(AMBION)"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "pairwise comparison between mutant and wild type strains have been done in each different backgrounds"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^delrpoS-B",
+   "set": {
+    "strain_name": {
+     "v": "ZK819",
+     "b": "stated",
+     "q": "E.coli ZK819 lacking rpoS gene"
+    },
+    "genotype_class": {
+     "v": "multiple",
+     "b": "inferred",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rpoS",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^delrpos-rpoc_star",
+   "set": {
+    "strain_name": {
+     "v": "ZK819",
+     "b": "stated",
+     "q": ""
+    },
+    "genotype_class": {
+     "v": "multiple",
+     "b": "inferred",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rpoS;rpoC",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^LCV-B",
+   "set": {
+    "strain_name": {
+     "v": "LCV",
+     "b": "stated",
+     "q": ""
+    },
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "stated",
+     "q": "Evolutionary co-exisitng strain (LCV)"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^LCV_star",
+   "set": {
+    "strain_name": {
+     "v": "LCV",
+     "b": "stated",
+     "q": ""
+    },
+    "genotype_class": {
+     "v": "multiple",
+     "b": "inferred",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rpoC",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^SCV_B",
+   "set": {
+    "strain_name": {
+     "v": "SCV",
+     "b": "stated",
+     "q": ""
+    },
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "stated",
+     "q": "Small colony variant(SCV) isolated from deep stationary phase"
+    },
+    "perturbed_genes": {
+     "v": "rpoS;rpoC",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^SCV_rpoCWT",
+   "set": {
+    "strain_name": {
+     "v": "SCV",
+     "b": "stated",
+     "q": ""
+    },
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "stated",
+     "q": "Small colony variant(SCV) isolated from deep stationary phase"
+    },
+    "perturbed_genes": {
+     "v": "rpoS",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^ZK126-B",
+   "set": {
+    "strain_name": {
+     "v": "ZK126",
+     "b": "stated",
+     "q": ""
+    },
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": "Parent strain of ZK819, E.coli ZK126 carrying wild type rpoS allele"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^ZK126_star",
+   "set": {
+    "strain_name": {
+     "v": "ZK126",
+     "b": "stated",
+     "q": ""
+    },
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": "E.coli ZK126 carrying wild type rpoS allele and rpoCA494V mutation"
+    },
+    "perturbed_genes": {
+     "v": "rpoC",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^ZK819-B",
+   "set": {
+    "strain_name": {
+     "v": "ZK819",
+     "b": "stated",
+     "q": ""
+    },
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "stated",
+     "q": "Escherichia coli ZK819, isolated on 10 day in rpolonged stationary phase"
+    },
+    "perturbed_genes": {
+     "v": "rpoS",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^ZK819_star",
+   "set": {
+    "strain_name": {
+     "v": "ZK819",
+     "b": "stated",
+     "q": ""
+    },
+    "genotype_class": {
+     "v": "multiple",
+     "b": "inferred",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rpoS;rpoC",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

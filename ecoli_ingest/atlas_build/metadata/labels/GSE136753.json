@@ -1,0 +1,179 @@
+{
+ "gse": "GSE136753",
+ "notes": "Every sample contains 1% spike-in cells of E. coli BL21(DE3) pQrr2 (same species, other strain); mixed_organism left out. Valine addition = isoleucine starvation (amino_acid_starvation). Rifampicin samples were taken 10-45 min after rifampicin, which was added after 80 min of starvation: treatment abx_transcription;amino_acid_starvation, exposure from rifampicin time; the 45 min rifampicin sample (125 min after the shift) gets no growth phase.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "cultures were grown for at least 9 generations in exponential phase before sampling"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Cells were grown at 37°C at 200 rpm in morpholinepropanesulfonic acid (MOPS) minimal medium supplemented with 0.2% glucose."
+  },
+  "base_medium": {
+   "v": "MOPS",
+   "b": "stated",
+   "q": "Cells were grown at 37°C at 200 rpm in morpholinepropanesulfonic acid (MOPS) minimal medium supplemented with 0.2% glucose."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "Cells were grown at 37°C at 200 rpm in morpholinepropanesulfonic acid (MOPS) minimal medium supplemented with 0.2% glucose."
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "Cells were grown at 37°C at 200 rpm in morpholinepropanesulfonic acid (MOPS) minimal medium supplemented with 0.2% glucose."
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "Cells were grown at 37°C at 200 rpm in morpholinepropanesulfonic acid (MOPS) minimal medium supplemented with 0.2% glucose."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Cells were grown at 37°C at 200 rpm in morpholinepropanesulfonic acid (MOPS) minimal medium supplemented with 0.2% glucose."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Cells were grown at 37°C at 200 rpm in morpholinepropanesulfonic acid (MOPS) minimal medium supplemented with 0.2% glucose."
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "study_default",
+   "q": "Escherichia coli K-12 + 1% Escherichia coli B"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Three samples were collected during steady-state growth immediately before starvation and five samples in total were collected in a time series; 5, 10, 20, 40 and 80 minutes after L-valine addition."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Three samples were collected during steady-state growth immediately before starvation and five samples in total were collected in a time series; 5, 10, 20, 40 and 80 minutes after L-valine addition."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Three samples were collected during steady-state growth immediately before starvation and five samples in total were collected in a time series; 5, 10, 20, 40 and 80 minutes after L-valine addition."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MAS1081 (MG1655)"
+  },
+  "strain_name": {
+   "v": "MG1655 MAS1081",
+   "b": "stated",
+   "q": "MAS1081 (MG1655)"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "RNA libraries were prepared for sequencing by GATC BIOTECH using standard Illumina protocols without prior rRNA depleation"
+  },
+  "rrna_removal": {
+   "v": "none",
+   "b": "stated",
+   "q": "without prior rRNA depleation"
+  },
+  "treatment": {
+   "v": "amino_acid_starvation",
+   "b": "stated",
+   "q": "Isoleucine starvation was induced by adding valine to a final concentration of 400 µg/ml."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Three samples were collected during steady-state growth immediately before starvation and five samples in total were collected in a time series; 5, 10, 20, 40 and 80 minutes after L-valine addition."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^Steady state$",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": "cultures were grown for at least 9 generations in exponential phase before sampling"
+    },
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "Starvation (5|10|20)min$",
+   "set": {
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "Starvation (40|80)min$",
+   "set": {
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "Rifampicin",
+   "set": {
+    "treatment": {
+     "v": "abx_transcription;amino_acid_starvation",
+     "b": "stated",
+     "q": ""
+    },
+    "transcription_arrested": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "Rifampicin 45min",
+   "set": {
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": ""
+    },
+    "growth_phase": {
+     "v": null,
+     "b": "",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

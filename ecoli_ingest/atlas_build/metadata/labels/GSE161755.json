@@ -1,0 +1,142 @@
+{
+ "gse": "GSE161755",
+ "notes": "All cultures were washed into medium lacking glucose >=30 min before arabinose induction; applied to every sample, so treatment none and carbon_source glycerol (casamino acids also present). Empty-vector samples induced with arabinose are controls. genotype_class left out for ToxN samples (origin of toxN not stated, native vs heterologous unknown). Library gel extraction is of the finished library (normal).",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "Overnight cultures were back diluted into fresh media and grown 3-4 hours to an OD600 of ~0.35 at 37°C in an orbital shaker at 200 RPM."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Overnight cultures were back diluted into fresh media and grown 3-4 hours to an OD600 of ~0.35 at 37°C in an orbital shaker at 200 RPM."
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9 media supplemented with 0.1% casamino acids, 0.4% glycerol, 0.4% glucose"
+  },
+  "medium_class": {
+   "v": "minimal_plus_hydrolysate",
+   "b": "inferred",
+   "q": "M9 media supplemented with 0.1% casamino acids, 0.4% glycerol, 0.4% glucose"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "M9 media supplemented with 0.1% casamino acids, 0.4% glycerol, 0.4% glucose"
+  },
+  "carbon_source": {
+   "v": "glycerol",
+   "b": "inferred",
+   "q": "Cultures were centrifuged, washed, and back diluted into media lacking glucose."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Overnight cultures were back diluted into fresh media and grown 3-4 hours to an OD600 of ~0.35 at 37°C in an orbital shaker at 200 RPM."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Overnight cultures were back diluted into fresh media and grown 3-4 hours to an OD600 of ~0.35 at 37°C in an orbital shaker at 200 RPM."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "One replicate of +ToxN and empty vector samples after 5 minutes of induction"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "Para was induced by adding arabinose to 0.2%."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "One replicate of +ToxN and empty vector samples after 5 minutes of induction"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "One replicate of +ToxN and empty vector samples after 5 minutes of induction"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "samples with rRNA subtraction with treated with bacterial Ribo-Zero kit (Illumina)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "samples with rRNA subtraction with treated with bacterial Ribo-Zero kit (Illumina)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:plasmid",
+   "regex": "empty",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:plasmid",
+   "regex": "ToxN",
+   "set": {
+    "perturbed_genes": {
+     "v": "toxN",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:plasmid",
+   "regex": "toxI",
+   "set": {
+    "perturbed_genes": {
+     "v": "toxN;toxI",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

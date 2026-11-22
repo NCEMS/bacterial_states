@@ -1,0 +1,158 @@
+{
+ "gse": "GSE135867",
+ "notes": "ALE-1/2/3 taken as evolved isolates of the delta-ubiC strain (summary: evolution to adapt to loss of ubiC); perturbed_genes ubiC inferred for them. Design mentions 'various supplements' but ch:media is identical for all samples (M9 glucose + trace elements).",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9 minimal media w/ 4g/L glucose"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "M9 minimal media w/ 4g/L glucose"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "M9 minimal media w/ 4g/L glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "M9 minimal media w/ 4g/L glucose"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "The fresh culture was incubated at 37C with agitation to the mid-log phase (OD600 ≈ 0.5)."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "The fresh culture was incubated at 37C with agitation to the mid-log phase (OD600 ≈ 0.5)."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "The fresh culture was incubated at 37C with agitation to the mid-log phase (OD600 ≈ 0.5)."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "The fresh culture was incubated at 37C with agitation to the mid-log phase (OD600 ≈ 0.5)."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Total RNA was extracted from mid-log phase culture for RNA-Seq library preparation."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Growth of E. coli with various supplements was performed with biological duplicates."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Growth of E. coli with various supplements was performed with biological duplicates."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Growth of E. coli with various supplements was performed with biological duplicates."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "We performed evolution of Escherichia coli K12 MG1655 to study how the system adapts to loss of ubiC gene"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "We performed evolution of Escherichia coli K12 MG1655 to study how the system adapts to loss of ubiC gene"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "KAPA Stranded RNA-Seq Kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "ubiC",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "ubiC",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "pdhR",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "pdhR",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^ALE-",
+   "set": {
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "ubiC",
+     "b": "inferred",
+     "q": "We performed evolution of Escherichia coli K12 MG1655 to study how the system adapts to loss of ubiC gene"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

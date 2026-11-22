@@ -1,0 +1,116 @@
+{
+ "gse": "GSE249586",
+ "notes": "All strains are an rne C-terminal deletion (Rned500) carrying a plasmid: pFL (full-length RNase E) is the comparison baseline -> reference/control; p500 and p600 express only N-terminal RNase E -> genotype_class deletion (truncation), perturbed rne. Soft-agar (0.35%) LB plate, 24 h at 30 °C: culture_mode agar_surface and growth_phase not_applicable both inferred (closest classes for a soft-agar plate culture). ERCC spike-ins are synthetic RNA, mixed_organism false. Strain name not given.",
+ "default": {
+  "culture_mode": {
+   "v": "agar_surface",
+   "b": "inferred",
+   "q": "RNA samples were isolated from bacterial culture grown on 0.35% soft-agar LB plate after 24 h incubation."
+  },
+  "growth_phase": {
+   "v": "not_applicable",
+   "b": "inferred",
+   "q": "RNA samples were isolated from bacterial culture grown on 0.35% soft-agar LB plate after 24 h incubation."
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "grown on 0.35% soft-agar LB plate after 24 h incubation"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "grown on 0.35% soft-agar LB plate after 24 h incubation"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "grown on 0.35% soft-agar LB plate after 24 h incubation"
+  },
+  "growth_temperature": {
+   "v": 30,
+   "b": "stated",
+   "q": "incubate at 30 ℃ for 24 h"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli K-12"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "we compared RNase E C-terminal deletion strain with plasmid ectopically expressing full-length RNase E to that expressing only N-termianl of RNase E protein"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "stated",
+   "q": "Plasmid ectopic expressed proteins are under the transcription control of rne native promoter."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "we compared RNase E C-terminal deletion strain with plasmid ectopically expressing full-length RNase E to that expressing only N-termianl of RNase E protein"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "five ug total RNA with ERCC control RNA were prepared for libraries"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribominus bacteria 2.0  Kit (ThermoFisher A47335) and Illumina TruSeq total  RNA standard Sample Prep protocol"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribominus bacteria 2.0  Kit"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "we compared RNase E C-terminal deletion strain with plasmid ectopically expressing full-length RNase E to that expressing only N-termianl of RNase E protein"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "/pFL,",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": "we compared RNase E C-terminal deletion strain with plasmid ectopically expressing full-length RNase E to that expressing only N-termianl of RNase E protein"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "/p[56]00,",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "we compared RNase E C-terminal deletion strain with plasmid ectopically expressing full-length RNase E to that expressing only N-termianl of RNase E protein"
+    },
+    "perturbed_genes": {
+     "v": "rne",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

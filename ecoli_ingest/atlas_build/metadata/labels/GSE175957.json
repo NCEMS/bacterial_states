@@ -1,0 +1,136 @@
+{
+ "gse": "GSE175957",
+ "notes": "Iron (0.001 g/L ammonium ferric citrate) supplementation treated as a medium supplement (treatment none); the Fe axis is therefore not captured by any label. Wild type in both media is control. Carbon source sorbitol (sugar alcohol) -> other_sugar.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "approximately 0.4"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "in N-C- minimal medium supplemented with 20 mM sorbitol and 20 mM NH4Cl aerobically at 37°C water bath, 250rpm"
+  },
+  "base_medium": {
+   "v": "other_minimal",
+   "b": "stated",
+   "q": "in N-C- minimal medium supplemented with 20 mM sorbitol and 20 mM NH4Cl aerobically at 37°C water bath, 250rpm"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "in N-C- minimal medium supplemented with 20 mM sorbitol and 20 mM NH4Cl aerobically at 37°C water bath, 250rpm"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "in N-C- minimal medium supplemented with 20 mM sorbitol and 20 mM NH4Cl aerobically at 37°C water bath, 250rpm"
+  },
+  "carbon_source": {
+   "v": "other_sugar",
+   "b": "stated",
+   "q": "in N-C- minimal medium supplemented with 20 mM sorbitol and 20 mM NH4Cl aerobically at 37°C water bath, 250rpm"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "in N-C- minimal medium supplemented with 20 mM sorbitol and 20 mM NH4Cl aerobically at 37°C water bath, 250rpm"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "in N-C- minimal medium supplemented with 20 mM sorbitol and 20 mM NH4Cl aerobically at 37°C water bath, 250rpm"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "we compared by high-resolution RNAseq the transcriptomes of a wild-type E. coli K-12 strain and its Fur deletion derivative grown in minimal medium with or without supplementation of iron."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "we compared by high-resolution RNAseq the transcriptomes of a wild-type E. coli K-12 strain and its Fur deletion derivative grown in minimal medium with or without supplementation of iron."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "we compared by high-resolution RNAseq the transcriptomes of a wild-type E. coli K-12 strain and its Fur deletion derivative grown in minimal medium with or without supplementation of iron."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "a wild-type E. coli K-12 strain and its Fur deletion derivative"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Total RNA was extract by RNAiso plus (Takara) and PureLink RNA Mini Kit (Invitrogen)."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "we compared by high-resolution RNAseq the transcriptomes of a wild-type E. coli K-12 strain and its Fur deletion derivative grown in minimal medium with or without supplementation of iron."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^Wild Type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "NCM3722",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^delta_fur$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "fur",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "CY405",
+     "b": "stated",
+     "q": "CY405"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,116 @@
+{
+ "gse": "GSE232784",
+ "notes": "Wild type MG1655 in M9 galactose vs M9 glucose; carbon source is a medium property, all samples untreated controls. Extract protocol text mixes in ChIP-exo steps; candidates are the RNA-seq samples (rRNA depletion + KAPA stranded kit).",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "E. coli K-12 MG1655 wild type strains was grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% galactose and glucose."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "E. coli K-12 MG1655 wild type strains was grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% galactose and glucose."
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "E. coli K-12 MG1655 wild type strains was grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% galactose and glucose."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "E. coli K-12 MG1655 wild type strains was grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% galactose and glucose."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "E. coli K-12 MG1655 wild type strains was grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 0.2% galactose and glucose."
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "mid-log"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K-12 MG1655"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "wild type"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "wild type"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Wild type E. coli MG1655 cells were cultured in M9 minimal media with 0.2% galactose and glucose upto mid-log phase"
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "Wild type E. coli MG1655 cells were cultured in M9 minimal media with 0.2% galactose and glucose upto mid-log phase"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Wild type E. coli MG1655 cells were cultured in M9 minimal media with 0.2% galactose and glucose upto mid-log phase"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Wild type E. coli MG1655 cells were cultured in M9 minimal media with 0.2% galactose and glucose upto mid-log phase"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Wild type E. coli MG1655 cells were cultured in M9 minimal media with 0.2% galactose and glucose upto mid-log phase"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "The ribosomal RNAs were removed from isolated total RNA using riboPooL Probes"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "The ribosomal RNAs were removed from isolated total RNA using riboPooL Probes"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "galactose",
+   "set": {
+    "carbon_source": {
+     "v": "other_sugar",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "glucose",
+   "set": {
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

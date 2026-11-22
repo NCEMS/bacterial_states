@@ -1,0 +1,127 @@
+{
+ "gse": "GSE166974",
+ "notes": "RSLA1 (n/a) is the untransformed control. Plasmid PABP is pBAD-based but arabinose induction is not stated -> inducer_added left out for that sample. OD 0.5 (design) vs 0.6 (protocol); both give mid_exponential in LB. Shaking not stated. WT re-read: genotype_class reference -> wild_type, untransformed MG1655 is unmodified.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K-12 MG1655"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "grown at 37°C in nutrient rich, Luria Bertani broth until OD600 = 0.6"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Luria Bertani broth"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "nutrient rich, Luria Bertani broth"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "nutrient rich, Luria Bertani broth"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "All bacterial strains were grown at 37°C"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "E.coli K-12 MG 1655 cells were transformed with pBAD PABP for plasmid based PABP expression."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "E.coli K-12 MG 1655 cells were transformed with pBAD PABP for plasmid based PABP expression."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "E.coli K-12 MG 1655 cells were transformed with pBAD PABP for plasmid based PABP expression."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "E.coli K-12 MG 1655 cells were transformed with pBAD PABP for plasmid based PABP expression."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Sure Select Strand-Specific RNA Library Prep Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "ribo-depletion using RiboMinus Bacterial Kit (Invitrogen)"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "E.coli K-12 MG 1655 cells were transformed with pBAD PABP for plasmid based PABP expression."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:transformed with",
+   "regex": "^n/a$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    },
+    "inducer_added": {
+     "v": false,
+     "b": "study_default",
+     "q": "E.coli K-12 MG 1655 cells were transformed with pBAD PABP for plasmid based PABP expression."
+    }
+   }
+  },
+  {
+   "field": "ch:transformed with",
+   "regex": "PABP",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": "transexpressed mammalian nuclear poly(a) binding protein"
+    },
+    "perturbed_genes": {
+     "v": "PABP",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:transformed with",
+   "regex": "^Chromosomal PABP$",
+   "set": {
+    "inducer_added": {
+     "v": false,
+     "b": "study_default",
+     "q": "Chromosomal integration of PABP was achieved using λ phage."
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

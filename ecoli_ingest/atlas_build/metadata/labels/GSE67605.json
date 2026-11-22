@@ -1,0 +1,73 @@
+{
+ "gse": "GSE67605",
+ "notes": "MAPS: MS2-affinity purified RNA (IP_or_pulldown), not standard RNA-seq. Growth phase left out: both samples say 'exponential and stationary phases'. is_control left out: DsrA without MS2 is the pulldown control, but both samples are the same mutant and arabinose-induced. Temperature not stated.",
+ "default": {
+  "assay_class": {
+   "v": "IP_or_pulldown",
+   "b": "stated",
+   "q": "RNA was eluted from the column with 1 mL of buffer A containing 15 mM maltose"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "100 mL LB medium"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "100 mL LB medium"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "100 mL LB medium"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "genotype_class": {
+   "v": "multiple",
+   "b": "inferred",
+   "q": "rne131 delta dsrA"
+  },
+  "perturbed_genes": {
+   "v": "rne;dsrA",
+   "b": "stated",
+   "q": "rne131 delta dsrA"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "rne131 delta dsrA"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "0.1% arabinose was added to induce the expression of MS2-DsrA/DsrA during 10 min"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Identification of RNAs co-purified with MS2-DsrA in a rne131 ΔdsrA strain"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Identification of RNAs co-purified with MS2-DsrA in a rne131 ΔdsrA strain"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Identification of RNAs co-purified with MS2-DsrA in a rne131 ΔdsrA strain"
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

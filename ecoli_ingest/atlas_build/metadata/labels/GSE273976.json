@@ -1,0 +1,36 @@
+{
+  "gse": "GSE273976",
+  "notes": "TopoI depletion via mf-lon degron (topA-PDT3A) = knockdown. CRISPRi + plasmid TopoI (WT or Gly5/G703P/Y704A) set labelled genotype multiple (degron + CRISPRi knockdown of chromosomal topA plus plasmid expression of WT or mutant TopoI). AtC and arabinose are inducers, not treatments. Control = mf-lon WT with AtC (reference genotype carrying the protease, induced like the test strain). Phase only for the CRISPRi set (final OD 0.5 in LB); first set (4 h post induction after dilution, no OD) left without phase.",
+  "default": {
+    "base_medium": {"v": "LB", "b": "stated", "q": "Bacteria were grown in rich medium,LB, at 30°C with agitation."},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "Bacteria were grown in rich medium,LB, at 30°C with agitation."},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "Bacteria were grown in rich medium,LB, at 30°C with agitation."},
+    "growth_temperature": {"v": 30, "b": "stated", "q": "Bacteria were grown in rich medium,LB, at 30°C with agitation."},
+    "culture_mode": {"v": "batch_shaken", "b": "inferred", "q": "Bacteria were grown in rich medium,LB, at 30°C with agitation."},
+    "oxygen": {"v": "aerobic", "b": "inferred", "q": "Bacteria were grown in rich medium,LB, at 30°C with agitation."},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "MG1655pro lacZ::PLtetO-mf-lon"},
+    "strain_name": {"v": "MG1655pro", "b": "stated", "q": "MG1655pro lacZ::PLtetO-mf-lon"},
+    "treatment": {"v": "none", "b": "study_default", "q": "In order to study transcriptional changes when TopoI is partially depleted"},
+    "inducer_added": {"v": true, "b": "stated", "q": "were induced for 4h with 50ng/mL AtC"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "In order to study transcriptional changes when TopoI is partially depleted"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "an E. coli strain encoding a TopoI degradable by a Lon protease system from Mesoplasma florum was engineered and RNA-seq analysis was performed"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "using an rRNA depletion kit and the Prokaryotic Directional mRNA Library Preparation Kit"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "using an rRNA depletion kit"},
+    "is_control": {"v": false, "b": "study_default", "q": "RNA-seq analysis was performed (mf-lon WT, 4h P.I. (AtC) and mf-lon TopA-PDT, 4h P.I. (AtC))"},
+    "perturbed_genes": {"v": "topA", "b": "stated", "q": "MG1655pro lacZ::PLtetO-mf-lon topA-PDT3A"},
+    "global_regulator_perturbed": {"v": false, "b": "inferred", "q": "MG1655pro lacZ::PLtetO-mf-lon topA-PDT3A"}
+  },
+  "rules": [
+    {"field": "ch:genotype", "regex": "mf-lon$",
+     "set": {"genotype_class": {"v": "reference", "b": "stated", "q": ""},
+             "is_control": {"v": true, "b": "stated", "q": "mf-lon WT, 4h P.I. (AtC)"},
+             "perturbed_genes": {"v": null, "b": "stated", "q": ""}}},
+    {"field": "ch:genotype", "regex": "topA-PDT3A$",
+     "set": {"genotype_class": {"v": "knockdown", "b": "stated", "q": "an E. coli strain encoding a TopoI degradable by a Lon protease system"}}},
+    {"field": "ch:genotype", "regex": "pGB2-Para-TopoI",
+     "set": {"genotype_class": {"v": "multiple", "b": "stated", "q": "a strain with TopoI depletion and CRISPR inhibition expressing TopoI variants"},
+             "inducer_added": {"v": true, "b": "stated", "q": "AtC 50ng/mL (1h30) + arabinose 0.2% (3h)"},
+             "growth_phase": {"v": "mid_exponential", "b": "inferred", "q": "(Final OD 0.5)"}}}
+  ],
+  "samples": {}
+}

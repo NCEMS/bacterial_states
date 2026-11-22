@@ -1,0 +1,129 @@
+{
+ "gse": "GSE169499",
+ "notes": "All samples acid-stressed (pH 2.5 LB, 2 h) after growth to OD 0.6 in LB; no untreated sample, so is_control left out (wild type is the comparison baseline but is treated). Phase mid_exponential inferred from OD 0.6 in LB, kept because sampling is at 2 h. Complemented strains (hns KO + plasmid hns wt) set genotype_class multiple; K121Q/K121R complements point_mutation. Unsure: whether an inducer was used for the complementing plasmids (not stated, left out). TruSeq RNA kit named, rRNA removal not stated (left out).",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli K-12"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "E. coli strains were cultured in LB medium at 37℃ until OD 0.6"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "E. coli strains were cultured in LB medium at 37℃ until OD 0.6"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "E. coli strains were cultured in LB medium at 37℃ until OD 0.6"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "E. coli strains were cultured in LB medium at 37℃ until OD 0.6"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "E. coli strains were cultured in LB medium at 37℃ until OD 0.6"
+  },
+  "treatment": {
+   "v": "acid",
+   "b": "stated",
+   "q": "acid stress (pH2.5) for two hours"
+  },
+  "exposure": {
+   "v": "short",
+   "b": "inferred",
+   "q": "acid stress (pH2.5) for two hours"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was harvested using Trizol reagent."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "The goals of this study are to compare the difference transcriptome of Wild Type, H-NS KO and cover mutated H-NS by RNA-seq"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "The goals of this study are to compare the difference transcriptome of Wild Type, H-NS KO and cover mutated H-NS by RNA-seq"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^wildtype$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "H-NS KO",
+   "set": {
+    "perturbed_genes": {
+     "v": "hns",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^H-NS KO strain$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "covering wt",
+   "set": {
+    "genotype_class": {
+     "v": "multiple",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "covering mutated",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

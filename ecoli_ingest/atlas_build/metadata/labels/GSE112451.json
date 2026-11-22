@@ -1,0 +1,103 @@
+{
+ "gse": "GSE112451",
+ "notes": "Reviewed 2026-11-15: mating mixture with P. putida / RP4: treatment conjugation (user decision) | Mixed culture of E. coli K-12 LE392, P. putida KT2440 and the RP4 plasmid incubated in PBS (no nutrients) with 0, 0.02, 20 or 2000 ug/L triclosan for 2 h at 25 °C without shaking: mixed_organism true. PBS gives base_medium other; medium_class and carbon_source left out. Growth phase not given. Which host carries RP4 is not stated, so genotype_class reference rests on 'Mixed wild-type strains'.",
+ "default": {
+  "base_medium": {
+   "v": "other",
+   "b": "study_default",
+   "q": "cultured in triplicate in 10 mL PBS containing 0, 0.02, 20 and 2000 μg/L triclosan for 2h, at 25 °C, without shaking"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "cultured in triplicate in 10 mL PBS containing 0, 0.02, 20 and 2000 μg/L triclosan for 2h, at 25 °C, without shaking"
+  },
+  "culture_mode": {
+   "v": "static_liquid",
+   "b": "stated",
+   "q": "cultured in triplicate in 10 mL PBS containing 0, 0.02, 20 and 2000 μg/L triclosan for 2h, at 25 °C, without shaking"
+  },
+  "growth_temperature": {
+   "v": 25,
+   "b": "stated",
+   "q": "for 2h, at 25 °C, without shaking"
+  },
+  "mixed_organism": {
+   "v": true,
+   "b": "stated",
+   "q": "E. coli bacteria + P. putida bacteria + IncPα plasmid"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "stated",
+   "q": "Mixed wild-type strains E. coli K-12 LE392, P. putida KT2440 and IncPα RP4 plasmid"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "Mixed wild-type strains E. coli K-12 LE392, P. putida KT2440 and IncPα RP4 plasmid"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E. coli K12 LE392"
+  },
+  "strain_name": {
+   "v": "LE392",
+   "b": "stated",
+   "q": "E. coli K12 LE392"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Total RNA was extracted from the mutants using the QIAGEN miRNeasy Mini Kit"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Bacterial mRNA profiles of E. coli K-12 LE392  in response to 0, 0.02, 20 and 2000 μg/L triclosan for 2 h"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Bacterial mRNA profiles of E. coli K-12 LE392  in response to 0, 0.02, 20 and 2000 μg/L triclosan for 2 h"
+  },
+  "treatment": {
+   "v": "envelope_solvent_biocide;conjugation",
+   "b": "stated",
+   "q": "in response to 0, 0.02, 20 and 2000 μg/L triclosan for 2 h"
+  },
+  "exposure": {
+   "v": "short",
+   "b": "stated",
+   "q": "in response to 0, 0.02, 20 and 2000 μg/L triclosan for 2 h"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "in response to 0, 0.02, 20 and 2000 μg/L triclosan for 2 h"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^Con ",
+   "set": {
+    "treatment": {
+     "v": "conjugation",
+     "b": "study_default",
+     "q": "E. coli bacteria + P. putida bacteria + IncPα plasmid"
+    },
+    "exposure": {
+     "v": null
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

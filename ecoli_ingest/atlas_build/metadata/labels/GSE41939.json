@@ -1,0 +1,121 @@
+{
+ "gse": "GSE41939",
+ "notes": "Bicyclomycin (Rho inhibitor) labelled abx_transcription; it blocks Rho-dependent termination rather than arresting transcription, so transcription_arrested false. Exposure duration not given. culture_mode left out (gas-sparged Roux bottles or shaking flasks, not said which per sample). WT re-read: wild-type MG1655, genotype_class wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "MOPS",
+   "b": "stated",
+   "q": "Cells were grown in MOPS minimal medium with 0.2% glucose at 37 oC in gas-sparged Roux bottles or shaking flasks to mid-log phase (OD600 ~ 0.3-0.4)."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "Cells were grown in MOPS minimal medium with 0.2% glucose at 37 oC in gas-sparged Roux bottles or shaking flasks to mid-log phase (OD600 ~ 0.3-0.4)."
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "Cells were grown in MOPS minimal medium with 0.2% glucose at 37 oC in gas-sparged Roux bottles or shaking flasks to mid-log phase (OD600 ~ 0.3-0.4)."
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "Cells were grown in MOPS minimal medium with 0.2% glucose at 37 oC in gas-sparged Roux bottles or shaking flasks to mid-log phase (OD600 ~ 0.3-0.4)."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Cells were grown in MOPS minimal medium with 0.2% glucose at 37 oC in gas-sparged Roux bottles or shaking flasks to mid-log phase (OD600 ~ 0.3-0.4)."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Cells were grown in MOPS minimal medium with 0.2% glucose at 37 oC in gas-sparged Roux bottles or shaking flasks to mid-log phase (OD600 ~ 0.3-0.4)."
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Cells were grown in MOPS minimal medium with 0.2% glucose at 37 oC in gas-sparged Roux bottles or shaking flasks to mid-log phase (OD600 ~ 0.3-0.4)."
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "wild-type"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "wild-type"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq experiments were performed on ribosome-depleted RNA from cells treated with 20 ug/ml bicyclomycin or untreated cells."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq experiments were performed on ribosome-depleted RNA from cells treated with 20 ug/ml bicyclomycin or untreated cells."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq experiments were performed on ribosome-depleted RNA from cells treated with 20 ug/ml bicyclomycin or untreated cells."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "RNA-seq experiments were performed on ribosome-depleted RNA from cells treated with 20 ug/ml bicyclomycin or untreated cells."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "16S and 23S Ribosomal RNA was depleted prior to construction of RNAseq libraries using MICROBExpress reagents."
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^MG1655 \\d$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "RNA-Seq MG1655 cells"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "RNA-Seq MG1655 cells"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "bicyclomycin",
+   "set": {
+    "treatment": {
+     "v": "abx_transcription",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

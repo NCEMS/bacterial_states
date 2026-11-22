@@ -1,0 +1,131 @@
+{
+ "gse": "GSE171533",
+ "notes": "Reviewed 2026-11-15: restored to total_rnaseq (user decision; prescreen QC shows an ordinary library: 85% CDS, 2% adapter-trimmed) | Not standard RNA-seq: these are the RNA (mRNA-seq) arm of a ribosome-profiling (ARTseq / RIBO-seq) experiment, so assay_class other. All samples got 100 ug/ml chloramphenicol for 3 min before harvest (ribo-profiling harvest step); labelled as treatment abx_translation acute for all, and the wild type is still marked as the genotype control. Strain name not given beyond K-12.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "E. coli cells were subcultured from an overnight culture and grown in 100 mL LB media (37˚C with shaking) to an approximate OD600 absorbance of .6."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "E. coli cells were subcultured from an overnight culture and grown in 100 mL LB media (37˚C with shaking) to an approximate OD600 absorbance of .6."
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "study_default",
+   "q": "E. coli cells were subcultured from an overnight culture and grown in 100 mL LB media (37˚C with shaking) to an approximate OD600 absorbance of .6."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "E. coli cells were subcultured from an overnight culture and grown in 100 mL LB media (37˚C with shaking) to an approximate OD600 absorbance of .6."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "E. coli cells were subcultured from an overnight culture and grown in 100 mL LB media (37˚C with shaking) to an approximate OD600 absorbance of .6."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "E. coli cells were subcultured from an overnight culture and grown in 100 mL LB media (37˚C with shaking) to an approximate OD600 absorbance of .6."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "study_default",
+   "q": "E. coli cells were subcultured from an overnight culture and grown in 100 mL LB media (37˚C with shaking) to an approximate OD600 absorbance of .6."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of differential gene expression between a r-protein uL22 mutant and wild type E. coli."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of differential gene expression between a r-protein uL22 mutant and wild type E. coli."
+  },
+  "treatment": {
+   "v": "abx_translation",
+   "b": "study_default",
+   "q": "All samples were then treated with 100 µg/mL chloramphenicol and allowed to grow for three mintues."
+  },
+  "exposure": {
+   "v": "acute",
+   "b": "inferred",
+   "q": "All samples were then treated with 100 µg/mL chloramphenicol and allowed to grow for three mintues."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli K-12"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "inferred",
+   "q": "Performed by TB-SEQ, Inc. using the ARTseq™ and Epicentre's Ribo-Zero™ kits"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Epicentre's Ribo-Zero™ kits"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of differential gene expression between a r-protein uL22 mutant and wild type E. coli."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of differential gene expression between a r-protein uL22 mutant and wild type E. coli."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^rplV wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "AAA90GAC",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rplV",
+     "b": "stated",
+     "q": "rlpV AAA90GAC"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,23 @@
+{
+  "gse": "GSE126248",
+  "notes": "All strains are MG1655 carrying the heterologous Csp231I RM system (WT p18, C+R- p24, C-R+ p30) plus a protective MTase plasmid; no plasmid-free strain, so is_control left out (p18 is the comparison baseline but not a reference genotype). Temperature and shaking not given.",
+  "default": {
+    "growth_phase": {"v": "mid_exponential", "b": "stated", "q": "At about mid log phase the cells were harvested"},
+    "base_medium": {"v": "LB", "b": "stated", "q": "LB medium culture"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "LB medium culture"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "LB medium culture"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "K-12 substr. MG1655"},
+    "strain_name": {"v": "MG1655", "b": "stated", "q": "K-12 substr. MG1655"},
+    "genotype_class": {"v": "heterologous_expression", "b": "stated", "q": "Cultures of E. coli MG1655 carrying pMCsp231 with additional protective MTase gene on ACYC177 derivative, and with plasmid with WT RM (p18)"},
+    "perturbed_genes": {"v": "Csp231I RM system (C;R;M)", "b": "stated", "q": "R-M system Csp231I WT"},
+    "global_regulator_perturbed": {"v": false, "b": "stated", "q": "R-M system Csp231I WT"},
+    "treatment": {"v": "none", "b": "study_default", "q": "Cultures of E. coli MG1655 carrying following plasmids: pMCsp231 (additional protective MTase gene on ACYC177 derivative), and plasmid with RMs of interest: WT (p18) and two variants"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "Cultures of E. coli MG1655 carrying following plasmids: pMCsp231 (additional protective MTase gene on ACYC177 derivative), and plasmid with RMs of interest: WT (p18) and two variants"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "Cultures of E. coli MG1655 carrying following plasmids: pMCsp231 (additional protective MTase gene on ACYC177 derivative), and plasmid with RMs of interest: WT (p18) and two variants"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "Cultures of E. coli MG1655 carrying following plasmids"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "Total RNA was extracted with RiboPure (Ambion) in two biological replicates."},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "RNA libraries were rRNA depleted using Ribo-Zero rRNA Removal Kit (Bacteria)"}
+  },
+  "rules": [],
+  "samples": {}
+}

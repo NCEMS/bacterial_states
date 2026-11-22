@@ -1,0 +1,106 @@
+{
+ "gse": "GSE48199",
+ "notes": "EHEC EDL933, two candidates: tenfold diluted LB (reference medium) and bacteria washed off living radish sprouts. Phase 'late logarthmic, early stationary phase' -> transition for both (radish text also says transition from exponential to stationary). Radish: culture_mode in_host (plant surface), treatment left out (biotic condition, no fitting class certain), base_medium left out, mixed_organism left out (bacteria washed off plant; plant RNA carry-over possible). Temperature and aeration of LB culture not stated. Library made with TruSeq smallRNA kit on rRNA-depleted total RNA; no size selection of short RNA described -> total_rnaseq. WT re-read: unmodified isolate EDL933 is wild_type. | 2026-11-20: a broth below full strength is neither rich nor minimal, so medium_class is left empty for it (base_medium kept). The LB sample is tenfold diluted LB.",
+ "default": {
+  "growth_phase": {
+   "v": "transition",
+   "b": "stated",
+   "q": "late logarthmic, early stationary phase"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "EDL933"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "EDL933"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "we applied strand-specific RNA-sequencing of strain E. coli EDL933 under 11 different biotic and abiotic conditions"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "we applied strand-specific RNA-sequencing of strain E. coli EDL933 under 11 different biotic and abiotic conditions"
+  },
+  "strain_group": {
+   "v": "EHEC_STEC",
+   "b": "stated",
+   "q": "enterohemorrhagic Escherichia coli O157:H7 EDL933 (EHEC)"
+  },
+  "strain_name": {
+   "v": "EDL933",
+   "b": "stated",
+   "q": "EDL933"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA was removed with the Ribominus kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA was removed with the Ribominus kit"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Tenfold diluted lysogeny broth was used as reference medium."
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^LB medium",
+   "set": {
+    "base_medium": {
+     "v": "LB",
+     "b": "stated",
+     "q": "Tenfold diluted lysogeny broth was used as reference medium."
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": "Tenfold diluted lysogeny broth"
+    },
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "Tenfold diluted lysogeny broth was used as reference medium."
+    },
+    "mixed_organism": {
+     "v": false,
+     "b": "stated",
+     "q": "Tenfold diluted lysogeny broth was used as reference medium."
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "Tenfold diluted lysogeny broth was used as reference medium."
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^radish sprouts",
+   "set": {
+    "culture_mode": {
+     "v": "in_host",
+     "b": "stated",
+     "q": "surface of living radish sprouts"
+    },
+    "growth_phase": {
+     "v": "transition",
+     "b": "stated",
+     "q": "After 120 hours, the transition from exponential to stationary phase could be determined."
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

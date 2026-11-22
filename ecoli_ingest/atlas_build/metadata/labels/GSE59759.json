@@ -1,0 +1,111 @@
+{
+ "gse": "GSE59759",
+ "notes": "All WT BW25113 in a phosphate-salts minimal medium (not named M9) with four carbon sources; every sample is an untreated reference condition, so all are controls. Culture vessel not stated; rRNA removal not described.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Cells were grown to mid-log phase"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "mid-log phase aerobically"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "aerobically at 37°C"
+  },
+  "base_medium": {
+   "v": "other_minimal",
+   "b": "study_default",
+   "q": "Cells were grown to mid-log phase aerobically at 37°C with a carbon-source supplemented minimal media"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "Cells were grown to mid-log phase aerobically at 37°C with a carbon-source supplemented minimal media"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "Cells were grown to mid-log phase aerobically at 37°C with a carbon-source supplemented minimal media"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "WT"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "WT"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Growth of E. coli on 4 different carbon sources was analyzed in biological duplicates."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Growth of E. coli on 4 different carbon sources was analyzed in biological duplicates."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Growth of E. coli on 4 different carbon sources was analyzed in biological duplicates."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Growth of E. coli on 4 different carbon sources was analyzed in biological duplicates."
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "Growth of E. coli on 4 different carbon sources was analyzed in biological duplicates."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12 BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "K-12 BW25113"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Total RNA was extracted using the RNeasy Plus Mini kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:carbon source",
+   "regex": "Glucose",
+   "set": {
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:carbon source",
+   "regex": "Acetate|Fumarate|Pyruvate",
+   "set": {
+    "carbon_source": {
+     "v": "organic_acid",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

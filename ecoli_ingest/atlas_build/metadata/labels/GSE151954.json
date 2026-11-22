@@ -1,0 +1,96 @@
+{
+ "gse": "GSE151954",
+ "notes": "Lysozyme-coated silver nanoparticles labelled metal_excess (study attributes the effect to released silver ions). Medium and culture vessel not given. Untreated samples at 5 and 30 min are both controls.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli K12 substr. MG1655 (MTCC 1302)"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli K12 substr. MG1655 (MTCC 1302)"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "whole transcriptome profiling of E. coli K12 was done"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "whole transcriptome profiling of E. coli K12 was done by exposing it to the MIC75 concentration of L-Ag NPs for 5 and 30 min."
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Mid-log phase"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "min. at 37 °C"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "RNeasy Mini Kit (Qiagen, USA) Illumina RNA-seq library preparation protocol"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA sequencing was carried out for E. coli K12 (MTCC 1302) exposing it to the MIC75 concentration of L-Ag NPs for 5 and 30 min."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA sequencing was carried out for E. coli K12 (MTCC 1302) exposing it to the MIC75 concentration of L-Ag NPs for 5 and 30 min."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA sequencing was carried out for E. coli K12 (MTCC 1302) exposing it to the MIC75 concentration of L-Ag NPs for 5 and 30 min."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^No treatment",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^L-Ag NPs treatment",
+   "set": {
+    "treatment": {
+     "v": "metal_excess",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

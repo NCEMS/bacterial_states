@@ -1,0 +1,216 @@
+{
+ "gse": "GSE77325",
+ "notes": "Reviewed 2026-11-15: carbon-limited chemostat samples are nutrient_limited_growth; they stay the study baseline | Four unmodified strains (MG1655, commensal IAI1, environmental TW11588 clade IV, TW09308 clade V) in chemostat, batch and starvation (chemostat medium flow stopped 4 h). All strains treated as reference genotype (no engineered changes); chemostat and batch samples are controls, starvation samples are carbon_starvation. Batch growth_phase left out: 'collected when reaching steady-state' is no phase word. Starvation samples: culture_mode and phase left out (stopped chemostat vessel, neither true chemostat nor flask batch). Oxygen only for shaken batch cultures; chemostat aeration not described.",
+ "default": {
+  "base_medium": {
+   "v": "other_minimal",
+   "b": "stated",
+   "q": "A minimal growth medium as described in the study by Ihssen and Egli (2004) was used for all experiments."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "A minimal growth medium as described in the study by Ihssen and Egli (2004) was used for all experiments."
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "A minimal growth medium as described in the study by Ihssen and Egli (2004) was used for all experiments."
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "half-filled with medium (0.5 g glucose per l)"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "incubated at 37 °C in a temperature controlled water bath"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "study_default",
+   "q": "Four E.coli strains, laboratory strain K12 (MG1655),  a commensal model strain (IAI1), a soil-isolated strain (TW11588-Clade IV), and a freshwater-isolated strain (TW09308—Clade V) were used."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Four E.coli strains, laboratory strain K12 (MG1655),  a commensal model strain (IAI1), a soil-isolated strain (TW11588-Clade IV), and a freshwater-isolated strain (TW09308—Clade V) were used."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Each strain was grown on a minimal growth medium (Ihssen and Egli, 2004) in three treatment modes: chemostat, batch, and starvation."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Each strain was grown on a minimal growth medium (Ihssen and Egli, 2004) in three treatment modes: chemostat, batch, and starvation."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Each strain was grown on a minimal growth medium (Ihssen and Egli, 2004) in three treatment modes: chemostat, batch, and starvation."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Messenger RNA was enriched using the RiboMinus Bacteria Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Messenger RNA was enriched using the RiboMinus Bacteria Kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "MG1655",
+   "set": {
+    "strain_group": {
+     "v": "K-12",
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI1$",
+   "set": {
+    "strain_group": {
+     "v": "natural_isolate",
+     "b": "stated",
+     "q": "a typical commensal (enteric) strain"
+    },
+    "strain_name": {
+     "v": "IAI1",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^TW11588$",
+   "set": {
+    "strain_group": {
+     "v": "natural_isolate",
+     "b": "stated",
+     "q": "a soil-isolated strain (TW11588-Clade IV)"
+    },
+    "strain_name": {
+     "v": "TW11588",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^TW09308$",
+   "set": {
+    "strain_group": {
+     "v": "natural_isolate",
+     "b": "stated",
+     "q": "a freshwater-isolated strain (TW09308—Clade V)"
+    },
+    "strain_name": {
+     "v": "TW09308",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^chemostat growth$",
+   "set": {
+    "culture_mode": {
+     "v": "chemostat",
+     "b": "stated",
+     "q": ""
+    },
+    "growth_phase": {
+     "v": "not_applicable",
+     "b": "inferred",
+     "q": ""
+    },
+    "treatment": {
+     "v": "nutrient_limited_growth",
+     "b": "stated",
+     "q": "carbon-limited growth"
+    },
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "carbon-limited growth"
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^batch growth$",
+   "set": {
+    "culture_mode": {
+     "v": "batch_shaken",
+     "b": "stated",
+     "q": "batch cultures (1000 ml Erlenmeyer flasks containing 100 ml of pre-warmed medium (1 g glucose per l); 37 °C; 250 r.p.m.))"
+    },
+    "oxygen": {
+     "v": "aerobic",
+     "b": "inferred",
+     "q": "batch cultures (1000 ml Erlenmeyer flasks containing 100 ml of pre-warmed medium (1 g glucose per l); 37 °C; 250 r.p.m.))"
+    },
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": "pre-warmed medium (1 g glucose per l)"
+    },
+    "treatment": {
+     "v": "none",
+     "b": "study_default",
+     "q": "Each strain was grown on a minimal growth medium (Ihssen and Egli, 2004) in three treatment modes: chemostat, batch, and starvation."
+    },
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^starvation growth$",
+   "set": {
+    "treatment": {
+     "v": "carbon_starvation",
+     "b": "inferred",
+     "q": "For starvation experiments the medium flow was stopped during steady-state and bacteria were collected after 4 h."
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "For starvation experiments the medium flow was stopped during steady-state and bacteria were collected after 4 h."
+    },
+    "is_control": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

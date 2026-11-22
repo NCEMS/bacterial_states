@@ -1,0 +1,182 @@
+{
+ "gse": "GSE240474",
+ "notes": "CONFLICT: the Δmfd '0 min' sample has ch:treatment '6 mg/L, gentamicin' while its title says 0 min (before addition); treatment/exposure left out for it. RNA-seq libraries were made with a non-routine method shared with the 3'-end-seq (Avraham et al. multiplexed protocol); these are the samples titled RNA-seq, taken as total_rnaseq, rRNA removal not stated. Phase inferred from OD600 ~0.25 in LB at gentamicin addition; all samples within 110 min keep it.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Luria-Bertani (LB) broth"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Luria-Bertani (LB) broth"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Luria-Bertani (LB) broth"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "All cultures were carried out at 37 °C with shaking at 200 rpm."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "All cultures were carried out at 37 °C with shaking at 200 rpm."
+  },
+  "culture_mode": {
+   "v": "batch_microplate",
+   "b": "stated",
+   "q": "grown in a 48-well plate in a microplate reader"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "When subcultures reached an OD600 of ~ 0.25, 10 μL gentamicin (Selleck, S4030) was supplemented to make a final concentration of 6 mg/L."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "To investigate the secondary effect of gentamicin treatment"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "To investigate the secondary effect of gentamicin treatment"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "To investigate the secondary effect of gentamicin treatment"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E. coli K12 BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "E. coli K12 BW25113"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "inferred",
+   "q": "To prepare RNA-seq library, here we did not follow routine RNA-seq library construction method"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "To investigate the secondary effect of gentamicin treatment"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^wildtype$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "deleted mfd",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "mfd",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^None$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "gentamicin",
+   "set": {
+    "treatment": {
+     "v": "abx_translation",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "Gentamicin, (6|13|20) min",
+   "set": {
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "Gentamicin, (40|60|74|110) min",
+   "set": {
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^0 min, RNA-seq, Δmfd",
+   "set": {
+    "treatment": {
+     "v": null,
+     "b": "",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^0 min, replicate",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

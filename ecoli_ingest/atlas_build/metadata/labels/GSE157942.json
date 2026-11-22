@@ -1,0 +1,30 @@
+{"gse": "GSE157942",
+ "notes": "Parent DSM01 (called wildtype, itself lacking adhE, pta, ldhA, frdA) is the reference; SBA01 is its evolved descendant. Acetate vs glucose is a carbon-source (medium) difference, treatment none. Library kit is TruSeq Stranded mRNA and molecule says polyA RNA, so rrna_removal polyA as stated. Temperature, aeration and strain background not given; perturbed genes of the parent left empty.",
+ "default": {
+  "base_medium": {"v": "M9", "b": "stated", "q": "SBA01 and DSM01 were growed in 3g/L M9 sodium acetate meida and 5g/L M9 glucose"},
+  "medium_class": {"v": "defined_minimal", "b": "inferred", "q": "SBA01 and DSM01 were growed in 3g/L M9 sodium acetate meida and 5g/L M9 glucose"},
+  "amino_acids_supplied": {"v": false, "b": "inferred", "q": "SBA01 and DSM01 were growed in 3g/L M9 sodium acetate meida and 5g/L M9 glucose"},
+  "growth_phase": {"v": "mid_exponential", "b": "study_default", "q": "Total RNA for RNA-seq was extracted from log phase cultures"},
+  "treatment": {"v": "none", "b": "study_default", "q": "mRNA sequencing of E.coli strain SBA01 growing under the M9 glucose and M9 acetate and DSM01 growing under the M9 glucose, triplicated."},
+  "assay_class": {"v": "total_rnaseq", "b": "study_default", "q": "Libraries were prepared according to Illumina's instructions accompanying the TruSeq Stranded mRNA Library PrepKit."},
+  "rrna_removal": {"v": "polyA", "b": "stated", "q": "polyA RNA"},
+  "inducer_added": {"v": false, "b": "study_default", "q": "mRNA sequencing of E.coli strain SBA01 growing under the M9 glucose and M9 acetate and DSM01 growing under the M9 glucose, triplicated."},
+  "transcription_arrested": {"v": false, "b": "study_default", "q": "mRNA sequencing of E.coli strain SBA01 growing under the M9 glucose and M9 acetate and DSM01 growing under the M9 glucose, triplicated."},
+  "mixed_organism": {"v": false, "b": "study_default", "q": "mRNA sequencing of E.coli strain SBA01 growing under the M9 glucose and M9 acetate and DSM01 growing under the M9 glucose, triplicated."}
+ },
+ "rules": [
+  {"field": "ch:strain", "regex": "^DSM01$", "set": {
+    "strain_name": {"v": "DSM01", "b": "stated", "q": ""},
+    "genotype_class": {"v": "reference", "b": "stated", "q": "wildtype Escherichia coli DSM01"},
+    "global_regulator_perturbed": {"v": false, "b": "stated", "q": "wildtype Escherichia coli DSM01"},
+    "is_control": {"v": true, "b": "stated", "q": "wildtype Escherichia coli DSM01"}}},
+  {"field": "ch:strain", "regex": "^SBA01$", "set": {
+    "strain_name": {"v": "SBA01", "b": "stated", "q": ""},
+    "genotype_class": {"v": "evolved_isolate", "b": "stated", "q": "evolved Escherichia coli DSM01 (SBA01)"},
+    "is_control": {"v": false, "b": "stated", "q": "evolved Escherichia coli DSM01 (SBA01)"}}},
+  {"field": "source_name", "regex": "glucose M9", "set": {
+    "carbon_source": {"v": "glucose", "b": "stated", "q": ""}}},
+  {"field": "source_name", "regex": "sodium acetate M9", "set": {
+    "carbon_source": {"v": "organic_acid", "b": "stated", "q": ""}}}
+ ],
+ "samples": {}}

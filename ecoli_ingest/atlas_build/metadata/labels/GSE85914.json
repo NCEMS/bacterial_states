@@ -1,0 +1,172 @@
+{
+ "gse": "GSE85914",
+ "notes": "Suppressor strains (primary deletion plus unknown spontaneous suppressor mutations) labelled evolved_isolate with the primary deleted gene in perturbed_genes. Aeration/vessel not stated. rRNA removal not stated.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "cells were grown in M9 glucose (0.4% w/v)"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "cells were grown in M9 glucose (0.4% w/v)"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "cells were grown in M9 glucose (0.4% w/v)"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "cells were grown in M9 glucose (0.4% w/v)"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "all strains were grown in triplicate to an equivalent OD in mid-logarithmic phase"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "assess steady-state transcript levels in a set of E. coli mutants"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "assess steady-state transcript levels in a set of E. coli mutants"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "assess steady-state transcript levels in a set of E. coli mutants"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "assess steady-state transcript levels in a set of E. coli mutants"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "BW25113"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "total RNA was isolated for analysis by RNA-seq"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "compare these transcript levels to corresponding synthetic rescue strains (i.e. spontaneous suppressor strains in which slow growth is rescued to wild-type levels)"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "ppk, dgk, zwf, entC, and dapF null strains"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^WT- Keio",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "parent",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "suppressor",
+   "set": {
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "zwf",
+   "set": {
+    "perturbed_genes": {
+     "v": "zwf",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "ppk",
+   "set": {
+    "perturbed_genes": {
+     "v": "ppk",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "dapF",
+   "set": {
+    "perturbed_genes": {
+     "v": "dapF",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "entC",
+   "set": {
+    "perturbed_genes": {
+     "v": "entC",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "dgk",
+   "set": {
+    "perturbed_genes": {
+     "v": "dgk",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

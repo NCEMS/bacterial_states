@@ -1,0 +1,118 @@
+{
+ "gse": "GSE298248",
+ "notes": "Reviewed 2026-11-15: filter-mating samples: treatment conjugation (user decision) | Recipient cells after 15/30/60 min filter mating on LB + 1 mM MgCl2 plates with pESBL or F donors, then donor elimination by EDTA hypo-osmotic shock. Conjugation fits no treatment class, so treatment/exposure left out for conjugation samples; mock conjugation = control (treatment none). Strain backgrounds (bEYY numbers) not described; strain_group left out. Genotype: bEYY1100 = recipient compared with delta-uvrD (reference); mock pESBL strain bEYY2743 genotype not described (left out, but marked control as the mock). Donor species not stated and donor RNA may remain, so mixed_organism left out. Growth phase of the mating mix not given; culture_mode agar_surface (filter on LB plate).",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "placed in a filter membrane in a LB plate supplemented with 1 mM MgCl2"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "placed in a filter membrane in a LB plate supplemented with 1 mM MgCl2"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "placed in a filter membrane in a LB plate supplemented with 1 mM MgCl2"
+  },
+  "culture_mode": {
+   "v": "agar_surface",
+   "b": "stated",
+   "q": "Donor and recipient growing cells were mixed and placed in a filter membrane in a LB plate supplemented with 1 mM MgCl2."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Cells were incubated at 37 ᵒC for 30 and 60 minutes."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq of recipient cells after 30 minutes or 60 minutes conjugation of pESBL and F plasmid"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq of recipient cells after 30 minutes or 60 minutes conjugation of pESBL and F plasmid"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was extracted with Monarch Total RNA Miniprep Kit (New England Biolabs, NEB)"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq of recipient cells after 30 minutes or 60 minutes conjugation of pESBL and F plasmid"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "^bEYY1100$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "inferred",
+     "q": "We also showed gene expression program is altered in different recipient cells in which plasmid establishment is perturbed."
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": "bEYY1100"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "ΔuvrD",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "uvrD",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^Mock",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(?!Mock)",
+   "set": {
+    "treatment": {
+     "v": "conjugation",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,174 @@
+{
+ "gse": "GSE315070",
+ "notes": "Reference genotype = the isogenic parental strain MG1655 Δrnb Δrnr (study compares against it); its 0 min samples are the controls. Rifampicin 0.5 mg/mL to halt RNA synthesis (RNA decay time course 2-16 min). ERCC synthetic RNA spike-ins (not another organism's cells), mixed_organism false.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "cultured in 2 L flasks containing 400 mL of M9 supplemented with 0.2 % glucose and 0.4 % CAA at 37 ºC and 200 rpm"
+  },
+  "medium_class": {
+   "v": "minimal_plus_hydrolysate",
+   "b": "inferred",
+   "q": "cultured in 2 L flasks containing 400 mL of M9 supplemented with 0.2 % glucose and 0.4 % CAA at 37 ºC and 200 rpm"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "cultured in 2 L flasks containing 400 mL of M9 supplemented with 0.2 % glucose and 0.4 % CAA at 37 ºC and 200 rpm"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "cultured in 2 L flasks containing 400 mL of M9 supplemented with 0.2 % glucose and 0.4 % CAA at 37 ºC and 200 rpm"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "cultured in 2 L flasks containing 400 mL of M9 supplemented with 0.2 % glucose and 0.4 % CAA at 37 ºC and 200 rpm"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "cultured in 2 L flasks containing 400 mL of M9 supplemented with 0.2 % glucose and 0.4 % CAA at 37 ºC and 200 rpm"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "cultured in 2 L flasks containing 400 mL of M9 supplemented with 0.2 % glucose and 0.4 % CAA at 37 ºC and 200 rpm"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "We treated exponentially growing cultures"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K12 MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "We treated exponentially growing cultures of E. coli Δrnb Δrnr and E. coli Δrnb Δrnr Δfbp with rifampicin to halt RNA synthesis."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "inferred",
+   "q": "ERCC ExFold RNA Spike-In Mix (Thermo Fisher Scientific, Cat. No. 4456739) was added to each sample"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribosomal RNA was depleted using the RiboMinus Bacteria 2.0 Transcriptome Isolation Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA was depleted using the RiboMinus Bacteria 2.0 Transcriptome Isolation Kit"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "a time point zero was used as a control before treatment"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^deletion-rnb deletion-rnr$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": "the isogenic parental strain, E. coli Δrnb Δrnr"
+    },
+    "perturbed_genes": {
+     "v": "rnb;rnr",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "deletion-fbp",
+   "set": {
+    "genotype_class": {
+     "v": "multiple",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "fbp;rnb;rnr",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^none$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "transcription_arrested": {
+     "v": false,
+     "b": "stated",
+     "q": "a time point zero was used as a control before treatment"
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^rifampicin$",
+   "set": {
+    "treatment": {
+     "v": "abx_transcription",
+     "b": "stated",
+     "q": ""
+    },
+    "transcription_arrested": {
+     "v": true,
+     "b": "stated",
+     "q": "with rifampicin to halt RNA synthesis"
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^E. coli Δrnb Δrnr, 0 min",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "a time point zero was used as a control before treatment"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

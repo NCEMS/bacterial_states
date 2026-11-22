@@ -1,0 +1,58 @@
+{
+  "gse": "GSE189181",
+  "notes": "CONFLICT: GSM5695811 title says pnp (E_coli_pnp_3end_seq_MOPS_comp) but ch:genotype says wildtype and ch:strain K-12 MG1655; genotype labels and is_control left out for it. Most libraries are 3' end sequencing or Rend-seq (end_mapping); 3end_seq of sucrose gradient fractions also set end_mapping (both gradient fraction and end library). Only *_RNA_seq_* titles are total_rnaseq. Samples without exp/stat in the title get mid_exponential as study default (protocol: exponential harvest at OD600 <= 0.3; summary: steady-state growth); 'stat' samples = early stationary (shortly after plateau) -> transition. LB carbon source not given. No shaking/aeration described, so oxygen and culture_mode left out. rRNA removal not stated.",
+  "default": {
+    "growth_temperature": {"v": 37, "b": "study_default", "q": "~10 doublings at 37°C prior to harvest"},
+    "growth_phase": {"v": "mid_exponential", "b": "study_default", "q": "To harvest cells in exponential growth, cells were backdiluted from overnight cultures into the respective growth media to enable ~10 doublings at 37°C prior to harvest at an OD600 smaller or equal to 0.3"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "K-12 MG1655"},
+    "strain_name": {"v": "MG1655", "b": "stated", "q": "K-12 MG1655"},
+    "genotype_class": {"v": "reference", "b": "stated", "q": "wildtype"},
+    "global_regulator_perturbed": {"v": false, "b": "stated", "q": "wildtype"},
+    "treatment": {"v": "none", "b": "study_default", "q": "After 15 min treated and untreated cells were harvested for total RNA analysis."},
+    "is_control": {"v": true, "b": "stated", "q": "wildtype"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "Here we quantitatively map the 3’ status of cellular RNAs in Escherichia coli during steady-state growth"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "Here we quantitatively map the 3’ status of cellular RNAs in Escherichia coli during steady-state growth"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "Here we quantitatively map the 3’ status of cellular RNAs in Escherichia coli during steady-state growth"},
+    "assay_class": {"v": "end_mapping", "b": "stated", "q": "For 3’ end sequencing the Rend-seq protocol was modified in a way that 3’ end ligation (5'_App/CTGTAGGCACCATCAAT/3ddC_3') was done preceding fragmentation for 2min."}
+  },
+  "rules": [
+    {"field": "title", "regex": "_RNA_seq_", "set": {"assay_class": {"v": "total_rnaseq", "b": "stated", "q": "RNA-seq for E. coli Δpnp, Δrnb, ΔpcnB and MG1655 wildtype was executed as described in (Parker et al., Cell Systems 2020)."}}},
+    {"field": "title", "regex": "_Rend_seq_", "set": {"assay_class": {"v": "end_mapping", "b": "stated", "q": "Rend-seq libraries were prepared as described in (Lalanne et al., Cell 2018) with 25s RNA fragmentation."}}},
+    {"field": "title", "regex": "_MOPS_comp", "set": {
+      "base_medium": {"v": "MOPS", "b": "stated", "q": "MOPS Complete"},
+      "medium_class": {"v": "defined_rich", "b": "inferred", "q": "MOPS Complete or MOPS Minimal media supplemented with 0.2% Glucose"},
+      "amino_acids_supplied": {"v": true, "b": "inferred", "q": "MOPS Complete"},
+      "carbon_source": {"v": "glucose", "b": "stated", "q": "MOPS Complete or MOPS Minimal media supplemented with 0.2% Glucose"}}},
+    {"field": "title", "regex": "_MOPS_min", "set": {
+      "base_medium": {"v": "MOPS", "b": "stated", "q": "MOPS Minimal"},
+      "medium_class": {"v": "defined_minimal", "b": "inferred", "q": "MOPS Complete or MOPS Minimal media supplemented with 0.2% Glucose"},
+      "amino_acids_supplied": {"v": false, "b": "inferred", "q": "MOPS Minimal"},
+      "carbon_source": {"v": "glucose", "b": "stated", "q": "MOPS Complete or MOPS Minimal media supplemented with 0.2% Glucose"}}},
+    {"field": "title", "regex": "_LB", "set": {
+      "base_medium": {"v": "LB", "b": "stated", "q": "E. coli cells were grown in LB, MOPS Complete or MOPS Minimal media"},
+      "medium_class": {"v": "complex", "b": "inferred", "q": "E. coli cells were grown in LB, MOPS Complete or MOPS Minimal media"},
+      "amino_acids_supplied": {"v": true, "b": "inferred", "q": "E. coli cells were grown in LB, MOPS Complete or MOPS Minimal media"}}},
+    {"field": "title", "regex": "_stat$", "set": {"growth_phase": {"v": "transition", "b": "stated", "q": "To harvest cells in early stationary growth, cells were harvested shortly after growth had plateaued"}}},
+    {"field": "title", "regex": "_exp", "set": {"growth_phase": {"v": "mid_exponential", "b": "stated", "q": "To harvest cells in exponential growth"}}},
+    {"field": "ch:strain", "regex": "NCM3722", "set": {"strain_name": {"v": "NCM3722", "b": "stated", "q": ""}}},
+    {"field": "ch:strain", "regex": "pnp::kan", "set": {
+      "genotype_class": {"v": "deletion", "b": "stated", "q": ""}, "perturbed_genes": {"v": "pnp", "b": "stated", "q": ""},
+      "is_control": {"v": false, "b": "stated", "q": ""}}},
+    {"field": "ch:strain", "regex": "pcnB::kan", "set": {
+      "genotype_class": {"v": "deletion", "b": "stated", "q": ""}, "perturbed_genes": {"v": "pcnB", "b": "stated", "q": ""},
+      "is_control": {"v": false, "b": "stated", "q": ""}}},
+    {"field": "ch:strain", "regex": "rnb::kan", "set": {
+      "genotype_class": {"v": "deletion", "b": "stated", "q": ""}, "perturbed_genes": {"v": "rnb", "b": "stated", "q": ""},
+      "is_control": {"v": false, "b": "stated", "q": ""}}},
+    {"field": "ch:strain", "regex": "rpoC-flag", "set": {
+      "genotype_class": {"v": "reference", "b": "inferred", "q": ""}}},
+    {"field": "title", "regex": "postKasu", "set": {
+      "treatment": {"v": "abx_translation", "b": "stated", "q": "For Kasugamycin treatment, Kasugamycin was added at a final concentration of 1mg/ml to cells at OD600 0.22 grown in MOPS Complete media."},
+      "exposure": {"v": "acute", "b": "stated", "q": "After 15 min treated and untreated cells were harvested for total RNA analysis."},
+      "growth_phase": {"v": "mid_exponential", "b": "inferred", "q": "to cells at OD600 0.22 grown in MOPS Complete media"},
+      "is_control": {"v": false, "b": "stated", "q": ""}}}
+  ],
+  "samples": {
+    "GSM5695811": {"genotype_class": {"v": null}, "global_regulator_perturbed": {"v": null}, "is_control": {"v": null}}
+  }
+}

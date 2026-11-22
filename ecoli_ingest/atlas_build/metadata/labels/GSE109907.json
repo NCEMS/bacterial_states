@@ -1,0 +1,86 @@
+{
+ "gse": "GSE109907",
+ "notes": "mRNA arm of a ribosome-profiling study -> assay_class other (settled rule). All samples tellurite-treated (no untreated control in candidates), so is_control left out; tellurite mapped to metal_excess; duration not given. EF4 gene name given as in text (no locus name). Medium, phase, temperature not given.",
+ "default": {
+  "assay_class": {
+   "v": "other",
+   "b": "stated",
+   "q": "We use the ribosome profiling protocol to understand why EF4 confers resistance to tellurite"
+  },
+  "treatment": {
+   "v": "metal_excess",
+   "b": "stated",
+   "q": "0.2 μg/ml tellurite treatment"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "BW25113 (WT) and JW2553 (ΔEF4)"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Ribosome footprints and mRNAs from BW25113 (WT) and JW2553 (ΔEF4) strains that were treated with potassium tellurite"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Ribosome footprints and mRNAs from BW25113 (WT) and JW2553 (ΔEF4) strains that were treated with potassium tellurite"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Ribosome footprints and mRNAs from BW25113 (WT) and JW2553 (ΔEF4) strains that were treated with potassium tellurite"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "BW25113",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^mutant$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "JW2553 (ΔEF4)"
+    },
+    "perturbed_genes": {
+     "v": "EF4",
+     "b": "stated",
+     "q": "JW2553 (ΔEF4)"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": "JW2553 (ΔEF4)"
+    },
+    "strain_name": {
+     "v": "JW2553",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

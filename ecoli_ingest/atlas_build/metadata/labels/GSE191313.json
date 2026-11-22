@@ -1,0 +1,352 @@
+{
+ "gse": "GSE191313",
+ "notes": "Reviewed 2026-11-15: targeting antisense PNAs are a knockdown of the target gene (user decision); scrambled PNA stays reference; perturbed gene is named in ch:treatment | UPEC 536 in MHB, 15 min exposure to 5 uM KFF-conjugated antisense PNAs (other_chemical, acute; scrambled PNA also treated, not a control); water solvent controls are is_control. growth_phase left empty: cells grown to OD 0.5 then diluted 1:100 to ~1e6 cfu/mL just before treatment. PNA targets (incl. csrA, rpoD) are not genetic changes: genotype_class reference, no perturbed_genes. WT re-read: UPEC 536 used unmodified (water and scrambled-PNA samples), default set to wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "Mueller-Hinton",
+   "b": "stated",
+   "q": "cultured in non-cation adjusted Mueller-Hinton Broth"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "cultured in non-cation adjusted Mueller-Hinton Broth"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "cultured in non-cation adjusted Mueller-Hinton Broth"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "stated",
+   "q": "with aeration at 37°C and 220 rpm shaking"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "with aeration at 37°C and 220 rpm shaking"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "After incubating the samples for 15 min at 37 °C"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "536 (UPEC)"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "536 (UPEC)"
+  },
+  "strain_group": {
+   "v": "UPEC",
+   "b": "stated",
+   "q": "536 (UPEC)"
+  },
+  "strain_name": {
+   "v": "536",
+   "b": "stated",
+   "q": "536 (UPEC)"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "100 µL of 20x PPNA stock solutions were added to reach a final concentration of 5 µM"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "100 µL of 20x PPNA stock solutions were added to reach a final concentration of 5 µM"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "536 (UPEC)"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "including the depletion of ribosomal RNA (RiboCop-META kit, Lexogen)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "including the depletion of ribosomal RNA (RiboCop-META kit, Lexogen)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "PNA",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^Water-treated$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:condition",
+   "regex": "^UPEC with acpP PNA$",
+   "set": {
+    "genotype_class": {
+     "v": "knockdown",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "acpP",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:condition",
+   "regex": "^UPEC with csrA PNA$",
+   "set": {
+    "genotype_class": {
+     "v": "knockdown",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "csrA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:condition",
+   "regex": "^UPEC with dnaB PNA$",
+   "set": {
+    "genotype_class": {
+     "v": "knockdown",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "dnaB",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:condition",
+   "regex": "^UPEC with ftsZ PNA$",
+   "set": {
+    "genotype_class": {
+     "v": "knockdown",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "ftsZ",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:condition",
+   "regex": "^UPEC with ispH PNA$",
+   "set": {
+    "genotype_class": {
+     "v": "knockdown",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "ispH",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:condition",
+   "regex": "^UPEC with nusG PNA$",
+   "set": {
+    "genotype_class": {
+     "v": "knockdown",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "nusG",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:condition",
+   "regex": "^UPEC with pyrH PNA$",
+   "set": {
+    "genotype_class": {
+     "v": "knockdown",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "pyrH",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:condition",
+   "regex": "^UPEC with rplS PNA$",
+   "set": {
+    "genotype_class": {
+     "v": "knockdown",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rplS",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:condition",
+   "regex": "^UPEC with rpoD PNA$",
+   "set": {
+    "genotype_class": {
+     "v": "knockdown",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rpoD",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:condition",
+   "regex": "^UPEC with rpsH PNA$",
+   "set": {
+    "genotype_class": {
+     "v": "knockdown",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rpsH",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:condition",
+   "regex": "^UPEC with ydiC PNA$",
+   "set": {
+    "genotype_class": {
+     "v": "knockdown",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "ydiC",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,88 @@
+{
+ "gse": "GSE54405",
+ "notes": "The treatment protocol describes rifampicin treatment, but it is not said which samples got it (likely the ChIP part of the superseries); these two RNA-seq replicates carry no per-sample treatment, so treatment, is_control and transcription_arrested are left out.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9 minimal media supplemented 0.2% glucose"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "M9 minimal media supplemented 0.2% glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "M9 minimal media supplemented 0.2% glucose"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "M9 minimal media supplemented 0.2% glucose"
+  },
+  "growth_temperature": {
+   "v": 30,
+   "b": "stated",
+   "q": "Cultures were diluted 1:100 into fresh minimal medium and then cultured at 30 ℃ to mid-exponential phase (OD600 nm ~ 0.6)."
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Cultures were diluted 1:100 into fresh minimal medium and then cultured at 30 ℃ to mid-exponential phase (OD600 nm ~ 0.6)."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "grown at 30 ℃ with constant agitation overnight"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "grown at 30 ℃ with constant agitation overnight"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E. coli K12 strain MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "E. coli K12 strain MG1655"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "E. coli K12 strain MG1655"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "E. coli K12 strain MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Directional RNA-seq was generated in duplicates by using Illumina MiSeq"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Glycerol stocks of E. coli K12 strain MG1655 were inoculated into M9 minimal media"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA was removed using ribo-zeroTM magnetic kit for bacteria"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA was removed using ribo-zeroTM magnetic kit for bacteria"
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

@@ -1,0 +1,122 @@
+{
+ "gse": "GSE197541",
+ "notes": "Spatially sorted biofilm layers (microfluidic chip, medium not stated) vs planktonic time course in M63B1 in a shaken 48-well plate reader (carbon source not stated). Planktonic samples are the submitters' reference (is_control true), biofilm false. Planktonic growth_phase: 25.28 h and 28.08 h late_stationary by the >=12 h batch rule (inferred; ODs not given). 7.62-22.05 h left out: slow growth in minimal medium in a microplate, sampled 'when reaching desired OD600' over 28 h, so time alone does not show that the 12.95 h and 22.05 h cultures had stopped growing (decided 2026-11-20). Growth temperature not stated for the chip or the plate (37 C only for the LB subculture). miniBac-seq is a custom low-input total RNA library method, rRNA handling not stated. WT re-read: BW25113 used unmodified.",
+ "default": {
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "We profiled the spatial transcriptome of five E. coli k12 BW25113 biofilms"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "We profiled the spatial transcriptome of five E. coli k12 BW25113 biofilms"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Then we used the same strain   to profile the temporal transcriptomes of the planktonic culture as a reference for comparison"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E. coli k12 BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "E. coli k12 BW25113"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Then we used the same strain   to profile the temporal transcriptomes of the planktonic culture as a reference for comparison"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Then we used the same strain   to profile the temporal transcriptomes of the planktonic culture as a reference for comparison"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "We profiled the spatial transcriptome of five E. coli k12 BW25113 biofilms"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "miniBac-seq (RNA-seq) method was applied to capture the transcriptome of each bin"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:growth mode",
+   "regex": "^biofilm$",
+   "set": {
+    "culture_mode": {
+     "v": "biofilm",
+     "b": "stated",
+     "q": ""
+    },
+    "growth_phase": {
+     "v": "not_applicable",
+     "b": "inferred",
+     "q": "bacteria would be loaded into microfluidic chip to grow a semicircular biofilm"
+    },
+    "is_control": {
+     "v": false,
+     "b": "study_default",
+     "q": "the planktonic culture as a reference for comparison"
+    }
+   }
+  },
+  {
+   "field": "ch:growth mode",
+   "regex": "^planktonic$",
+   "set": {
+    "culture_mode": {
+     "v": "batch_microplate",
+     "b": "stated",
+     "q": "Such subculture was next inoculated into 300 uL M63B1 broth in 48-well plate. The 48-well plate were loaded into a microplate reader system with 220 rpm shaking"
+    },
+    "oxygen": {
+     "v": "aerobic",
+     "b": "inferred",
+     "q": "loaded into a microplate reader system with 220 rpm shaking"
+    },
+    "base_medium": {
+     "v": "M63",
+     "b": "stated",
+     "q": "300 uL M63B1 broth in 48-well plate"
+    },
+    "medium_class": {
+     "v": "defined_minimal",
+     "b": "inferred",
+     "q": "300 uL M63B1 broth in 48-well plate"
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": "300 uL M63B1 broth in 48-well plate"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "the planktonic culture as a reference for comparison"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^planktonic_(25_28|28_08)h",
+   "set": {
+    "growth_phase": {
+     "v": "late_stationary",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,112 @@
+{
+ "gse": "GSE229290",
+ "notes": "tRNA-seq: 60-100 nt RNA gel-purified, partially hydrolysed, 19-35 nt fragments made into small RNA libraries -> assay_class small_rna. The '23' construct (Ara_23/Glu_23) is not described anywhere, so genotype labels and is_control are left out for those samples; is_control left out for the whole study because the reference construct cannot be identified. PtuAB genotype_class left out: the text does not say whether PtuAB is native or foreign to the host. Arabinose (induce) / glucose (repress) are inducer settings, not treatments. growth_phase from ch:condition 'early stationary' -> transition.",
+ "default": {
+  "growth_phase": {
+   "v": "transition",
+   "b": "stated",
+   "q": "early stationary (OD600 = 1.0)"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "cultured for 2h at 37°C with shaking at 200 rpm"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "inoculated into 10 ml LB supplemented with chloramphenicol"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "inoculated into 10 ml LB supplemented with chloramphenicol"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "inoculated into 10 ml LB supplemented with chloramphenicol"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "cultured for 2h at 37°C with shaking at 200 rpm"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "cultured for 2h at 37°C with shaking at 200 rpm"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "0.2% Arabinose and 0.2% Glucose were used to induce and repress the PtuAB expression, respectively."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "0.2% Arabinose and 0.2% Glucose were used to induce and repress the PtuAB expression, respectively."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "An overnight culture of E. coli DH10B harboring plasmid with PtuAB"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K12"
+  },
+  "strain_name": {
+   "v": "DH10B",
+   "b": "stated",
+   "q": "DH10B"
+  },
+  "assay_class": {
+   "v": "small_rna",
+   "b": "stated",
+   "q": "Fragments of 19-35nt for partially hydrolyzed and re-phosphorylated tRNA were converted to small RNA sequencing libraries"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "arabino",
+   "set": {
+    "inducer_added": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "glucose",
+   "set": {
+    "inducer_added": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "PtuAB",
+   "set": {
+    "perturbed_genes": {
+     "v": "ptuA;ptuB",
+     "b": "stated",
+     "q": "PtuAB was cloned under an arabinose inducible promoter pBAD."
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": "PtuAB was cloned under an arabinose inducible promoter pBAD."
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

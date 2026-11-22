@@ -1,0 +1,142 @@
+{
+ "gse": "GSE133289",
+ "notes": "serB.wt taken as the negative-control construct named in the design (not explicit per sample); its genotype class is left out because the host is presumably a DserB/DserC auxotroph background that the text does not name per sample. Variants: plasmid-expressed point-mutated E. coli nanE/pdxJ -> native_overexpression. Inducer not described.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "study_default",
+   "q": "minimal M9-glucose medium"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "minimal M9-glucose medium"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "minimal M9-glucose medium"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "study_default",
+   "q": "minimal M9-glucose medium"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "study_default",
+   "q": "shaken at 30° C"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "shaken at 30° C"
+  },
+  "growth_temperature": {
+   "v": 30,
+   "b": "study_default",
+   "q": "shaken at 30° C until the culture reached an optical density of 0.5"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "shaken at 30° C until the culture reached an optical density of 0.5"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Comparison of the expression pattern of cells expressing modified (ba)8-barrel proteins to cells expressing a negative control"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparison of the expression pattern of cells expressing modified (ba)8-barrel proteins to cells expressing a negative control"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparison of the expression pattern of cells expressing modified (ba)8-barrel proteins to cells expressing a negative control"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "strain BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "strain BW25113"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "stranded RNA-Seq with rRNA depletion"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "study_default",
+   "q": "Ribosomal RNA was depleted using a Ribo-Zero rRNA Removal Kit Bacteria (Illumina)"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparison of the expression pattern of cells expressing modified (ba)8-barrel proteins to cells expressing a negative control"
+  }
+ },
+ "rules": [
+  {
+   "field": "source_name",
+   "regex": "^nanE",
+   "set": {
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "inferred",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "nanE",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "^pDxJ",
+   "set": {
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "inferred",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "pdxJ",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "^serB\\.wt",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "study_default",
+     "q": "cells expressing a negative control"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,31 @@
+{
+  "gse": "GSE213531",
+  "notes": "BW25113 biofilm grown ~36 h in a microfluidic chamber in M63B1 at 37 C; periphery cells FACS-sorted. PpyrLBI_high/low are cells sorted by a pyrLBI promoter reporter (taken as a reporter strain, reference genotype, controls); delta sapD is a deletion. Library method miniBac-seq (custom low-input method, details only in the paper): assay_class total_rnaseq is assumed from 'total RNA' and should be checked. M63B1 carbon source not stated. rRNA removal not stated.",
+  "default": {
+    "base_medium": {"v": "M63", "b": "stated", "q": "loaded into microfluidic sytem cultured at 37 ℃ with M63B1"},
+    "medium_class": {"v": "defined_minimal", "b": "inferred", "q": "cultured at 37 ℃ with M63B1"},
+    "amino_acids_supplied": {"v": false, "b": "inferred", "q": "cultured at 37 ℃ with M63B1"},
+    "growth_temperature": {"v": 37, "b": "stated", "q": "loaded into microfluidic sytem cultured at 37 ℃ with M63B1"},
+    "culture_mode": {"v": "biofilm", "b": "stated", "q": "After around 36 hours cultivation, the biofilm reached 1000 um radius."},
+    "growth_phase": {"v": "not_applicable", "b": "inferred", "q": "cells in biofilm were extracted from microfluidic system for FACS sorting"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "BW25113"},
+    "strain_name": {"v": "BW25113", "b": "stated", "q": "BW25113"},
+    "treatment": {"v": "none", "b": "study_default", "q": "After around 36 hours cultivation, the biofilm reached 1000 um radius."},
+    "inducer_added": {"v": false, "b": "study_default", "q": "After around 36 hours cultivation, the biofilm reached 1000 um radius."},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "After around 36 hours cultivation, the biofilm reached 1000 um radius."},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "Escherichia coli K-12"},
+    "assay_class": {"v": "total_rnaseq", "b": "study_default", "q": "miniBac-seq, a customized bacterial RNA-seq library construction method"}
+  },
+  "rules": [
+    {"field": "ch:genotype/variation", "regex": "sapD", "set": {
+      "genotype_class": {"v": "deletion", "b": "stated", "q": ""},
+      "perturbed_genes": {"v": "sapD", "b": "stated", "q": ""},
+      "global_regulator_perturbed": {"v": false, "b": "inferred", "q": ""},
+      "is_control": {"v": false, "b": "inferred", "q": ""}}},
+    {"field": "ch:genotype/variation", "regex": "^PpyrLBI_", "set": {
+      "genotype_class": {"v": "reference", "b": "inferred", "q": ""},
+      "global_regulator_perturbed": {"v": false, "b": "inferred", "q": ""},
+      "is_control": {"v": true, "b": "inferred", "q": ""}}}
+  ],
+  "samples": {}
+}

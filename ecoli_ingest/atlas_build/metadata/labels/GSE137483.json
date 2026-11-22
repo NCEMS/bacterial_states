@@ -1,0 +1,106 @@
+{
+ "gse": "GSE137483",
+ "notes": "Treatment = growth in urine of cranberry-extract-treated volunteers (other_chemical, 2 h = short). Phase: text says mid-logarithmic after 2 h, while the stop-solution step mentions 'OD600 of 1'; kept the stated phase word. Shaking of the 2 h culture not stated; culture_mode left out. rRNA removal not stated.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "These cultures were incubated at 37 °C for 2 h to reach the mid-logarithmic phase."
+  },
+  "base_medium": {
+   "v": "urine",
+   "b": "stated",
+   "q": "1 mL of the urine grown bacterial suspension was transferred to 200 mL of pooled human urine"
+  },
+  "medium_class": {
+   "v": "natural_fluid",
+   "b": "inferred",
+   "q": "1 mL of the urine grown bacterial suspension was transferred to 200 mL of pooled human urine"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "These cultures were incubated at 37 °C for 2 h to reach the mid-logarithmic phase."
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "strain UTI89"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of the transcriptome of uropathogenic E. coli after 2 h incubation in urine of cranberry extract-treated human volunteers (one replicate) in comparison to 2 h incubation in urine of the same volunteers before cranberry treatment (one replicate)."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of the transcriptome of uropathogenic E. coli after 2 h incubation in urine of cranberry extract-treated human volunteers (one replicate) in comparison to 2 h incubation in urine of the same volunteers before cranberry treatment (one replicate)."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of the transcriptome of uropathogenic E. coli after 2 h incubation in urine of cranberry extract-treated human volunteers (one replicate) in comparison to 2 h incubation in urine of the same volunteers before cranberry treatment (one replicate)."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of the transcriptome of uropathogenic E. coli after 2 h incubation in urine of cranberry extract-treated human volunteers (one replicate) in comparison to 2 h incubation in urine of the same volunteers before cranberry treatment (one replicate)."
+  },
+  "strain_group": {
+   "v": "UPEC",
+   "b": "stated",
+   "q": "uropathogenic Escherichia coli"
+  },
+  "strain_name": {
+   "v": "UTI89",
+   "b": "stated",
+   "q": "strain UTI89"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "10 µg of isolated total RNA were used for DNA digestion"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:agent",
+   "regex": "^untreated$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:agent",
+   "regex": "^cranberry-treated$",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "short",
+     "b": "inferred",
+     "q": "Examination of the transcriptome of uropathogenic E. coli after 2 h incubation in urine of cranberry extract-treated human volunteers (one replicate) in comparison to 2 h incubation in urine of the same volunteers before cranberry treatment (one replicate)."
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

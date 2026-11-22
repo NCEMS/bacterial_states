@@ -1,0 +1,116 @@
+{
+ "gse": "GSE109932",
+ "notes": "Nissle 1917 in LB, 16 h static in 24-well plates with or without stx phage extract; phase stationary inferred from 16 h batch. mixed_organism left out for phage samples (phage extract added). Aeration and rRNA removal not stated. WT re-read: Nissle 1917 used unmodified -> wild_type.",
+ "default": {
+  "growth_phase": {
+   "v": "stationary",
+   "b": "inferred",
+   "q": "The plates were incubated in a static manner for 16 h of time at 37 °C."
+  },
+  "culture_mode": {
+   "v": "static_liquid",
+   "b": "stated",
+   "q": "The plates were incubated in a static manner for 16 h of time at 37 °C."
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "were added to final volume of 1 ml LB medium in a 24 well plate"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "were added to final volume of 1 ml LB medium in a 24 well plate"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "were added to final volume of 1 ml LB medium in a 24 well plate"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "The plates were incubated in a static manner for 16 h of time at 37 °C."
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "Total EcN bacterial RNA was isolated from 3 ml cultures after 16 h of a static incubation period with or without stx phages."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total EcN bacterial RNA was isolated from 3 ml cultures after 16 h of a static incubation period with or without stx phages."
+  },
+  "strain_group": {
+   "v": "probiotic",
+   "b": "stated",
+   "q": "The probiotic Escherichia coli strain Nissle 1917"
+  },
+  "strain_name": {
+   "v": "Nissle 1917",
+   "b": "stated",
+   "q": "Nissle 1917"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total EcN bacterial RNA was isolated"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total EcN bacterial RNA was isolated from 3 ml cultures after 16 h of a static incubation period with or without stx phages."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total EcN bacterial RNA was isolated from 3 ml cultures after 16 h of a static incubation period with or without stx phages."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:tissue",
+   "regex": "^Escherichia coli without stx phages$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "mixed_organism": {
+     "v": false,
+     "b": "study_default",
+     "q": "Total EcN bacterial RNA was isolated from 3 ml cultures after 16 h of a static incubation period with or without stx phages."
+    }
+   }
+  },
+  {
+   "field": "ch:tissue",
+   "regex": "^Escherichia coli with stx phages$",
+   "set": {
+    "treatment": {
+     "v": "phage",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "stated",
+     "q": "The plates were incubated in a static manner for 16 h of time at 37 °C."
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

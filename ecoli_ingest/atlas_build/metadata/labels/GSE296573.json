@@ -1,0 +1,120 @@
+{
+ "gse": "GSE296573",
+ "notes": "EHEC 86-24 in low-glucose DMEM to late log, aerobic; methanol vehicle = control. Serotonin and indole -> other_chemical (serotonin is a host hormone but not a host_factor class item per scheme; unsure). Temperature not stated. DMEM without serum stated -> defined_rich. | 2026-11-20: late_exponential merged into transition (the value was dropped from the scheme: submitters' 'late log' and 'early stationary' cannot be ordered against each other).",
+ "default": {
+  "strain_group": {
+   "v": "EHEC_STEC",
+   "b": "stated",
+   "q": "enterohemorrhagic Escherichia coli (EHEC)"
+  },
+  "strain_name": {
+   "v": "86-24",
+   "b": "stated",
+   "q": "EHEC strain 86 24"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "WT"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "WT"
+  },
+  "base_medium": {
+   "v": "cell_culture",
+   "b": "stated",
+   "q": "low-glucose DMEM"
+  },
+  "medium_class": {
+   "v": "defined_rich",
+   "b": "inferred",
+   "q": "low-glucose DMEM"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "low-glucose DMEM"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "inferred",
+   "q": "low-glucose DMEM"
+  },
+  "growth_phase": {
+   "v": "transition",
+   "b": "stated",
+   "q": "until late log phase under aerobic conditions"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "until late log phase under aerobic conditions"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT EHEC was grown with 10 µM serotonin, 500 µM indole or both of them together"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT EHEC was grown with 10 µM serotonin, 500 µM indole or both of them together"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT EHEC was grown with 10 µM serotonin, 500 µM indole or both of them together"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Stranded Total RNA Prep Ligation with Ribo-Zero Plus kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Stranded Total RNA Prep Ligation with Ribo-Zero Plus kit"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "grown in low-glucose DMEM until late log phase with either methanol as vehicle, 10 µM serotonin, 500 µM indole or both of them together"
+  },
+  "treatment": {
+   "v": "other_chemical",
+   "b": "stated",
+   "q": "grown in low-glucose DMEM until late log phase with either methanol as vehicle, 10 µM serotonin, 500 µM indole or both of them together"
+  },
+  "exposure": {
+   "v": "adapted",
+   "b": "inferred",
+   "q": "WT EHEC was grown with 10 µM serotonin, 500 µM indole or both of them together in low-glucose DMEM until late log phase"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^Methanol$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,162 @@
+{
+ "gse": "GSE126710",
+ "notes": "Lysogens carry an integrated Stx2 prophage (foreign genes; inserted in wrbA or argW): genotype_class heterologous_expression, uncertain (could be 'multiple' given the insertion-site disruption). WT re-read: naive MG1655 is wild_type.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "exponentially growing cells"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Overnight cultures were diluted till OD600 of 0.005 in LB medium (10 g/L tryptone, 5 g/L yeast extract, 5 g/L NaCl) and cells were grown at 37oC, 180 rpm to an OD600 of 0.4 - 0.6."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Overnight cultures were diluted till OD600 of 0.005 in LB medium (10 g/L tryptone, 5 g/L yeast extract, 5 g/L NaCl) and cells were grown at 37oC, 180 rpm to an OD600 of 0.4 - 0.6."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Overnight cultures were diluted till OD600 of 0.005 in LB medium (10 g/L tryptone, 5 g/L yeast extract, 5 g/L NaCl) and cells were grown at 37oC, 180 rpm to an OD600 of 0.4 - 0.6."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Overnight cultures were diluted till OD600 of 0.005 in LB medium (10 g/L tryptone, 5 g/L yeast extract, 5 g/L NaCl) and cells were grown at 37oC, 180 rpm to an OD600 of 0.4 - 0.6."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Overnight cultures were diluted till OD600 of 0.005 in LB medium (10 g/L tryptone, 5 g/L yeast extract, 5 g/L NaCl) and cells were grown at 37oC, 180 rpm to an OD600 of 0.4 - 0.6."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Overnight cultures were diluted till OD600 of 0.005 in LB medium (10 g/L tryptone, 5 g/L yeast extract, 5 g/L NaCl) and cells were grown at 37oC, 180 rpm to an OD600 of 0.4 - 0.6."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "ch:strain background**: MG1655"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "we compared the transcriptome of naïve MG1655 and the lysogens carrying the Stx2 phage"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "we compared the transcriptome of naïve MG1655 and the lysogens carrying the Stx2 phage"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "we compared the transcriptome of naïve MG1655 and the lysogens carrying the Stx2 phage"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "we compared the transcriptome of naïve MG1655 and the lysogens carrying the Stx2 phage"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "we compared the transcriptome of naïve MG1655 and the lysogens carrying the Stx2 phage"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "gDNA free, rRNA-depleted total RNA"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "The RNA preparations were further treated with RiboZero (Illumina)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^naive \\(wild type\\)$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^phageO104",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "inferred",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "Stx2 prophage phiO104;wrbA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655::φO104",
+     "b": "stated",
+     "q": "MG1655::φO104"
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^phagePA8",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "inferred",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "Stx2 prophage phiPA8;argW",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655_φPA8",
+     "b": "stated",
+     "q": "MG1655_φPA8"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,111 @@
+{
+ "gse": "GSE328962",
+ "notes": "Temperature, aeration and rRNA removal not given. WT re-read: MG1655 baseline is unmodified wild type.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Luria–Bertani (LB) medium"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Luria–Bertani (LB) medium"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Luria–Bertani (LB) medium"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "grown to mid exponetial phase"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Triplicate biological samples of Escherichia coli strain MG1655 and an isogenic hsdM mutant were grown to mid exponetial phase in Luria–Bertani (LB) medium."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Triplicate biological samples of Escherichia coli strain MG1655 and an isogenic hsdM mutant were grown to mid exponetial phase in Luria–Bertani (LB) medium."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Triplicate biological samples of Escherichia coli strain MG1655 and an isogenic hsdM mutant were grown to mid exponetial phase in Luria–Bertani (LB) medium."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Triplicate biological samples of Escherichia coli strain MG1655 and an isogenic hsdM mutant were grown to mid exponetial phase in Luria–Bertani (LB) medium."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "RNA-seq analysis of wildtype Escherichia coli MG1655 versus a strain with knockout of the hsdM gene"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^MG1655_",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": "wildtype Escherichia coli MG1655"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^hsdMko_",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "knockout of the hsdM gene"
+    },
+    "perturbed_genes": {
+     "v": "hsdM",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

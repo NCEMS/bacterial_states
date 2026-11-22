@@ -1,0 +1,96 @@
+{
+ "gse": "GSE160284",
+ "notes": "Water and acetone samples are vehicle controls (treatment none, is_control true). Essential oil labelled other_chemical; duration, phase, temperature and aeration not given. Library made with poly-T bead mRNA purification (rrna_removal polyA) although the organism is a bacterium; kept as total_rnaseq. ATCC8739 (source human feces) left without strain_group. WT re-read: plain ATCC8739, genotype_class wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "cultured in Luria-Bertani (1% sodium chloride, 1% peptone, and 0.5% yeast extract)"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "cultured in Luria-Bertani (1% sodium chloride, 1% peptone, and 0.5% yeast extract)"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "cultured in Luria-Bertani (1% sodium chloride, 1% peptone, and 0.5% yeast extract)"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "E. coli ATCC8739, provided by the Strain Preservation Center"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptome sequencing of RNA under five different treatments in E. coli"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptome sequencing of RNA under five different treatments in E. coli"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptome sequencing of RNA under five different treatments in E. coli"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptome sequencing of RNA under five different treatments in E. coli"
+  },
+  "strain_name": {
+   "v": "ATCC8739",
+   "b": "stated",
+   "q": "E. coli ATCC8739"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "mRNA was purified from total RNA using poly-T oligo-attached magnetic beads"
+  },
+  "rrna_removal": {
+   "v": "polyA",
+   "b": "stated",
+   "q": "mRNA was purified from total RNA using poly-T oligo-attached magnetic beads"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:agent",
+   "regex": "treated with (acetone|water)$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "By analyzing the transcriptomics of E. coli treated with water, acetone, and Cinnamomum camphora essential oil"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:agent",
+   "regex": "camphor essential oil",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

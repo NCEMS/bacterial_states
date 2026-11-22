@@ -1,0 +1,26 @@
+{"gse": "GSE150034",
+ "notes": "RNA-seq arm of a ribosome-profiling study (libraries as McGlincy and Ingolia 2017), so assay_class other per settled rule. Medium not named ('medium'); A600 ~0.4 lies in both the complex and minimal ranges, so mid_exponential inferred. Apidaecin (translation-termination inhibiting peptide) put under abx_translation.",
+ "default": {
+  "strain_group": {"v": "B", "b": "stated", "q": "BL21"},
+  "strain_name": {"v": "BL21", "b": "stated", "q": "BL21"},
+  "genotype_class": {"v": "reference", "b": "study_default", "q": "Ribosome profiling and RNA-seq were performed on Escherichia coli dosed with apidaecin and compared to non-treated cells"},
+  "global_regulator_perturbed": {"v": false, "b": "study_default", "q": "Ribosome profiling and RNA-seq were performed on Escherichia coli dosed with apidaecin and compared to non-treated cells"},
+  "growth_temperature": {"v": 37, "b": "stated", "q": "grown at 37°C in flasks until reaching density of A600 ~ 0.4"},
+  "growth_phase": {"v": "mid_exponential", "b": "inferred", "q": "grown at 37°C in flasks until reaching density of A600 ~ 0.4"},
+  "culture_mode": {"v": "batch_shaken", "b": "inferred", "q": "Incubation with shaking continued for 5 min."},
+  "oxygen": {"v": "aerobic", "b": "inferred", "q": "Incubation with shaking continued for 5 min."},
+  "assay_class": {"v": "other", "b": "stated", "q": "Libraries were prepared as described in McGlincy and Ingolia, 2017"},
+  "inducer_added": {"v": false, "b": "study_default", "q": "Ribosome profiling and RNA-seq were performed on Escherichia coli dosed with apidaecin and compared to non-treated cells"},
+  "transcription_arrested": {"v": false, "b": "study_default", "q": "Ribosome profiling and RNA-seq were performed on Escherichia coli dosed with apidaecin and compared to non-treated cells"},
+  "mixed_organism": {"v": false, "b": "study_default", "q": "Ribosome profiling and RNA-seq were performed on Escherichia coli dosed with apidaecin and compared to non-treated cells"}
+ },
+ "rules": [
+  {"field": "ch:treatment", "regex": "^Apidaecin$", "set": {
+    "treatment": {"v": "abx_translation", "b": "stated", "q": ""},
+    "exposure": {"v": "acute", "b": "inferred", "q": "final concentration of 12 µM and incubation with shaking continued for 5 min"},
+    "is_control": {"v": false, "b": "stated", "q": ""}}},
+  {"field": "ch:treatment", "regex": "Control \\(untreated\\)", "set": {
+    "treatment": {"v": "none", "b": "stated", "q": ""},
+    "is_control": {"v": true, "b": "stated", "q": ""}}}
+ ],
+ "samples": {}}

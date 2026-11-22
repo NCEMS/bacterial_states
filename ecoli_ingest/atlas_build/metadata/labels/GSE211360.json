@@ -1,0 +1,111 @@
+{
+ "gse": "GSE211360",
+ "notes": "MG1655 carrying the RGB-S reporter plasmid (reference); 2-propanol 2% treated cells FACS-sorted into reporter subpopulations; untreated control. Duration of stress before sorting not given (no exposure); growth_phase left empty (sampling time after OD 0.2 start not given). Assay 'mini-transcriptome' of sorted cells with total RNA kit, kept total_rnaseq.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "5 ml LB+kan broth"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "5 ml LB+kan broth"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "5 ml LB+kan broth"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "incubated overnight in 180 rpm shaker at 37 °C"
+  },
+  "culture_mode": {
+   "v": "batch_microplate",
+   "b": "inferred",
+   "q": "which had a final cell density of OD600 0.2 and 1X stressor concentration"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "study_default",
+   "q": "red, green, and blue fluorescent proteins in a single vector system"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "red, green, and blue fluorescent proteins in a single vector system"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "str. K12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "str. K12 substr. MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "sensor E. coli treated with 2-propanol 2 %"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "sensor E. coli treated with 2-propanol 2 %"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "sensor E. coli treated with 2-propanol 2 %"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Zymo-Seq RiboFree® Total RNA Library Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Zymo-Seq RiboFree® Total RNA Library Kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^no-treatment$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "LB containing no stressor as the control culture"
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "2-propanol",
+   "set": {
+    "treatment": {
+     "v": "envelope_solvent_biocide",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,178 @@
+{
+ "gse": "GSE68762",
+ "notes": "Reviewed 2026-11-15: mRNA-seq arm of a ribosome-profiling protocol (fragmented, gel size-selected RNA); excluded by user decision. | Only the mRNA-Seq samples are candidates (RPF samples not shown). mRNA samples labelled total_rnaseq (rRNA-depleted, alkaline-fragmented mRNA), but libraries were size-selected as in Guo 2010 with a 25-nt spike-in, so fragments may be short (unsure). MM = M9-type phosphate salts + glucose -> other_minimal. Heat (47 °C 7 min) and osmotic (0.3 M NaCl 20 min) are acute shifts from mid-log cells, so pre-shift phase kept (inferred). Unstressed LB and MM samples are controls. Oxygen/culture mode not stated.",
+ "default": {
+  "strain_name": {
+   "v": "MC4100",
+   "b": "stated",
+   "q": "E. coli MC4100 strain was cultured at 37°C"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MC4100"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "E. coli MC4100 strain was cultured at 37°C"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "cultured at 37°C to mid-log phase (OD600 ~ 0.3 or 0.4)"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "study_default",
+   "q": "We present a global analysis of the response of Escherichia coli to acute heat and osmotic stress"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "We present a global analysis of the response of Escherichia coli to acute heat and osmotic stress"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "We present a global analysis of the response of Escherichia coli to acute heat and osmotic stress"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "We present a global analysis of the response of Escherichia coli to acute heat and osmotic stress"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "We present a global analysis of the response of Escherichia coli to acute heat and osmotic stress"
+  },
+  "assay_class": {
+   "v": "other",
+   "b": "inferred",
+   "q": "mixed with equal volume of 2x alkaline fragmentation solution"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "mRNAs were enriched by removal of 16S and 23S rRNAs"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "no"
+  },
+  "is_control": {
+   "v": true,
+   "b": "stated",
+   "q": "no"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:growth media",
+   "regex": "^LB$",
+   "set": {
+    "base_medium": {
+     "v": "LB",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "complex",
+     "b": "inferred",
+     "q": "LB"
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": "LB"
+    }
+   }
+  },
+  {
+   "field": "ch:growth media",
+   "regex": "^MM medium",
+   "set": {
+    "base_medium": {
+     "v": "other_minimal",
+     "b": "stated",
+     "q": "MM medium (12.8 g/l Na2HPO4×7H2O, 3 g/l KH2PO4, 1 g/l NH4Cl, 2 mM MgSO4, 0.1 mM CaCl2, 0.4% glucose)"
+    },
+    "medium_class": {
+     "v": "defined_minimal",
+     "b": "inferred",
+     "q": "MM medium (12.8 g/l Na2HPO4×7H2O, 3 g/l KH2PO4, 1 g/l NH4Cl, 2 mM MgSO4, 0.1 mM CaCl2, 0.4% glucose)"
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": "MM medium (12.8 g/l Na2HPO4×7H2O, 3 g/l KH2PO4, 1 g/l NH4Cl, 2 mM MgSO4, 0.1 mM CaCl2, 0.4% glucose)"
+    },
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": "MM medium (12.8 g/l Na2HPO4×7H2O, 3 g/l KH2PO4, 1 g/l NH4Cl, 2 mM MgSO4, 0.1 mM CaCl2, 0.4% glucose)"
+    }
+   }
+  },
+  {
+   "field": "ch:type of stress",
+   "regex": "^heat",
+   "set": {
+    "treatment": {
+     "v": "heat",
+     "b": "stated",
+     "q": "heat stress 7 min 47°C"
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": "heat stress 7 min 47°C"
+    },
+    "growth_temperature": {
+     "v": 47,
+     "b": "stated",
+     "q": "heat stress 7 min 47°C"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": "heat stress 7 min 47°C"
+    },
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": "cultured at 37°C to mid-log phase (OD600 ~ 0.3 or 0.4)"
+    }
+   }
+  },
+  {
+   "field": "ch:type of stress",
+   "regex": "^osmotic",
+   "set": {
+    "treatment": {
+     "v": "hyperosmotic",
+     "b": "stated",
+     "q": "osmotic stress 20min"
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": "osmotic stress 20min"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": "osmotic stress 20min"
+    },
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": "cultured at 37°C to mid-log phase (OD600 ~ 0.3 or 0.4)"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

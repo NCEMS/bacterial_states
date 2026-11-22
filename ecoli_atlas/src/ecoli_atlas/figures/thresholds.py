@@ -1,8 +1,8 @@
-"""Operating points: balanced accuracy vs threshold on out-of-fold scores (notebook cell 25).
+"""Operating points: balanced accuracy against the threshold on the out-of-fold probabilities.
 
-The out-of-fold scores need one refit per fold and factor (the saved bundle holds only the final
-encoders), so they are computed once, cached as ``oof_scores.csv`` in the output directory and
-reused unless ``--force-retrain`` is given."""
+The out-of-fold scores are those of `train --cv` (``cv_predictions.tsv``: every sample scored by a
+model that was fitted without its study). A bundle that has no such file gets them from one more
+run of the study folds, kept as ``cv_predictions.tsv`` in the figure directory."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -10,76 +10,69 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from ..config import FactorHParams
-from ..metrics import tune_threshold
-from ..train_factor import factor_oof_scores
+from ..config import HEADS
+from ..metrics import classification_metrics
 from .plotting import savefig
+from .split_balance import TITLES
 
-OOF_FILE = "oof_scores.csv"
-
-
-def compute_oof(ctx, log=None) -> pd.DataFrame:
-    """Refit every factor encoder on each fold and score the held-out fold (long table)."""
-    log = log or ctx.log
-    frames = []
-    for f in ctx.factors:
-        hp = ctx.cfg.factor_hparams.get(f)
-        if hp is None:
-            log(f"[{f}] no hyper-parameters in the manifest; refitting folds with defaults {FactorHParams()}")
-            hp = FactorHParams()
-        log(f"[{f}] refitting {ctx.cfg.n_folds} fold models ({ctx.cfg.factor_epochs} epochs each) on {ctx.device}")
-        rows, p = factor_oof_scores(ctx.data, f, hp, ctx.cfg, ctx.device)
-        if not len(rows):
-            log(f"[{f}] no out-of-fold rows (no labelled validation fold)")
-            continue
-        codes = ctx.codes(f)[rows]
-        frames.append(pd.DataFrame({"factor": f, "row": rows, "sample": ctx.meta.index.values[rows],
-                                    "y_bin": (codes == ctx.data.factors[f].pos_idx).astype(int), "p_pos": p}))
-    cols = ["factor", "row", "sample", "y_bin", "p_pos"]
-    return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame(columns=cols)
+CV_FILE = "cv_predictions.tsv"
+GRID = np.round(np.arange(0.02, 0.981, 0.01), 2)
+CALL_THRESHOLD = 0.5
 
 
-def save_oof(oof: pd.DataFrame, out_dir) -> Path:
-    p = Path(out_dir) / OOF_FILE
-    oof.to_csv(p, index=False)
-    return p
+def load_cv_predictions(*dirs) -> tuple:
+    """The first ``cv_predictions.tsv`` found in ``dirs``: (frame, path), or (None, None)."""
+    for d in dirs:
+        p = Path(d) / CV_FILE
+        if p.exists():
+            return pd.read_csv(p, sep="\t", index_col=0, dtype={"sample": str}), p
+    return None, None
 
 
-def load_oof(out_dir) -> pd.DataFrame | None:
-    p = Path(out_dir) / OOF_FILE
-    return pd.read_csv(p) if p.exists() else None
+def oof_scores(cv: pd.DataFrame, head: str) -> tuple:
+    """(y, p) of the samples the out-of-fold metrics are made of: reference samples with a scored label."""
+    neg, pos = HEADS[head]
+    yes = lambda s: s.astype(str).str.strip().str.lower().isin(("true", "1"))       # noqa: E731
+    sub = cv[yes(cv["reference"]) & yes(cv[f"{head}_scored"]) & cv[f"p_{pos}"].notna()]
+    return (sub[f"{head}_label"] == pos).to_numpy().astype(int), sub[f"p_{pos}"].to_numpy(dtype=float)
 
 
-def fig_threshold_curves(ctx, out_dir, formats, oof: pd.DataFrame) -> dict:
+def cv_metrics(cv: pd.DataFrame) -> dict:
+    """As the manifest's ``cv_metrics``: every head at 0.5 on its out-of-fold scores."""
+    out = {}
+    for h in HEADS:
+        y, p = oof_scores(cv, h)
+        if len(y) and len(np.unique(y)) == 2:
+            out[h] = classification_metrics(y, p, CALL_THRESHOLD)
+    return out
+
+
+def fig_threshold_curves(cv: pd.DataFrame, out_dir, formats) -> dict:
     import matplotlib.pyplot as plt
-    from sklearn.metrics import balanced_accuracy_score, roc_auc_score
-    grid = np.asarray(ctx.cfg.thresh_grid, dtype=float)
-    factors = [f for f in ctx.factors if (oof["factor"] == f).any()]
-    fig, axes = plt.subplots(1, max(len(factors), 1), figsize=(5 * max(len(factors), 1), 3.6))
+    from sklearn.metrics import balanced_accuracy_score
+    metrics = cv_metrics(cv)
+    heads = list(metrics)
+    fig, axes = plt.subplots(1, max(len(heads), 1), figsize=(5.5 * max(len(heads), 1), 4))
     axes = np.atleast_1d(axes)
     result = {}
-    for ax, f in zip(axes, factors):
-        sub = oof[oof["factor"] == f]
-        y_bin, p = sub["y_bin"].values.astype(int), sub["p_pos"].values.astype(float)
-        curve = [balanced_accuracy_score(y_bin, (p >= t).astype(int)) for t in grid]
-        thr_new, ba_new, at_edge = tune_threshold(y_bin, p, grid)
-        thr_saved = ctx.bundle.factors[f].threshold
-        auroc = float(roc_auc_score(y_bin, p)) if len(np.unique(y_bin)) > 1 else float("nan")
-        ax.plot(grid, curve, color="#1f77b4")
-        if thr_saved is not None:
-            ax.axvline(thr_saved, color="crimson", ls="--", lw=1, label=f"saved thr={thr_saved:.3f}")
-        if thr_saved is None or abs(thr_new - thr_saved) > 1e-9:
-            ax.axvline(thr_new, color="0.4", ls=":", lw=1, label=f"refit thr={thr_new:.3f}")
-        ax.set_title(f, fontsize=10)
-        ax.set_xlabel("threshold on P(positive)")
-        ax.set_ylabel("balanced accuracy")
+    for ax, h in zip(axes, heads):
+        y, p = oof_scores(cv, h)
+        curve = np.array([balanced_accuracy_score(y, (p >= t).astype(int)) for t in GRID])
+        best = int(np.argmax(curve))
+        ax.plot(GRID, curve, color="#1f77b4")
+        ax.axvline(CALL_THRESHOLD, color="crimson", ls="--", lw=1, label=f"call at {CALL_THRESHOLD}")
+        if abs(GRID[best] - CALL_THRESHOLD) > 1e-9:
+            ax.axvline(GRID[best], color="0.4", ls=":", lw=1.2, label=f"best {GRID[best]:.2f}")
+        ax.set_title(f"{TITLES[h]} (n={len(y)}, AUROC={metrics[h]['auroc']:.2f})", fontsize=11)
+        ax.set_xlabel(f"threshold on P({HEADS[h][1]})", fontsize=11)
+        ax.set_ylabel("balanced accuracy", fontsize=11)
+        ax.tick_params(labelsize=10)
+        ax.set_ylim(0.45, 1.0)
         ax.grid(alpha=0.2)
-        ax.legend(fontsize=8)
-        result[f] = {"n": int(len(sub)), "threshold_saved": thr_saved, "threshold_refit": float(thr_new),
-                     "balanced_acc_refit": float(ba_new), "auroc_refit": auroc, "refit_at_grid_boundary": bool(at_edge),
-                     "balanced_acc_at_saved_threshold": (float(balanced_accuracy_score(y_bin, (p >= thr_saved).astype(int)))
-                                                         if thr_saved is not None else None)}
-    for ax in axes[len(factors):]:
+        ax.legend(fontsize=9, loc="lower center")
+        result[h] = metrics[h] | {"best_threshold": float(GRID[best]), "balanced_acc_at_best": float(curve[best]),
+                                  "best_at_grid_boundary": bool(best in (0, len(GRID) - 1))}
+    for ax in axes[len(heads):]:
         ax.axis("off")
     fig.tight_layout()
     savefig(fig, out_dir, "fig_threshold_curves", formats)

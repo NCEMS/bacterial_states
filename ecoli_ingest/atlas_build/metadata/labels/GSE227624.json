@@ -1,0 +1,192 @@
+{
+ "gse": "GSE227624",
+ "notes": "MG1655 BOP27 and RNAP point mutants (rpoA/rpoB/rpoC, none in the global-regulator list) in M9 4 g/L glucose; some with methionine (nutrient supplement, treatment none; amino_acids_supplied left out), 42 C (heat, adapted, assumed grown at 42 C), or octanoic acid (other_chemical: uncertain, the text does not say whether it is a stressor or a carbon source). No phase, OD or temperature for the standard condition given. Controls: wt M9 and wt M9 + methionine. WT re-read: wt MG1655 BOP27 (the RNAP mutants' parent, not itself modified) -> wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9 4 g/L glucose"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "M9 4 g/L glucose"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "M9 4 g/L glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "M9 4 g/L glucose"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-sequencing of RNAP single mutation strains"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-sequencing of RNAP single mutation strains"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-sequencing of RNAP single mutation strains"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli K-12"
+  },
+  "strain_name": {
+   "v": "MG1655 BOP27",
+   "b": "stated",
+   "q": "MG1655 substrain BOP27"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Sequencing libraries were created using a Kapa Biosystems RNA HyperPrep per vendor protocol."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RNA-sequencing of RNAP single mutation strains"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-sequencing of RNAP single mutation strains"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^wt$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^rpo[ABC] ",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^rpoA ",
+   "set": {
+    "perturbed_genes": {
+     "v": "rpoA",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^rpoB ",
+   "set": {
+    "perturbed_genes": {
+     "v": "rpoB",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^rpoC ",
+   "set": {
+    "perturbed_genes": {
+     "v": "rpoC",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "methionine",
+   "set": {
+    "amino_acids_supplied": {
+     "v": null,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "42 Celsius",
+   "set": {
+    "treatment": {
+     "v": "heat",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": ""
+    },
+    "growth_temperature": {
+     "v": 42,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "octanoic acid",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

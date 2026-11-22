@@ -1,0 +1,175 @@
+{
+ "gse": "GSE276254",
+ "notes": "BTP-001 (beta-clamp targeting antimicrobial peptide) labelled abx_other; R11 cell-penetrating peptide labelled other_chemical. Untreated control samples at every time point and the '1 min pre-treatment' samples of the BTP-001 cultures are untreated controls. Phase mid_exponential for all: design states treatments at OD 0.2 'to ensure exponential growth during the entire sampling period'. Temperature not given. WT re-read: unmodified MG1655 (genotype Wild type) set to wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "Mueller-Hinton",
+   "b": "stated",
+   "q": "E. coli was grown in cation-adjusted Mueller-Hinton broth in 1 1L Applikon bioreactors as batch culitvation."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "E. coli was grown in cation-adjusted Mueller-Hinton broth"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "E. coli was grown in cation-adjusted Mueller-Hinton broth"
+  },
+  "culture_mode": {
+   "v": "batch_bioreactor",
+   "b": "stated",
+   "q": "1 1L Applikon bioreactors as batch culitvation"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "Stirring was adjusted between 200 and 600 rpm to maintain a dissolved oxygen concentration above 40%."
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "All treatments were given at OD600 = 0.2 to ensure exponential growth during the entire sampling period."
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "Wild type"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "Wild type"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K12 MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "we conducted RNA-sequencing (RNA-seq) of E. coli MG1655 treated with 2 doses of the novel antibiotic peptide BTP-001 and 1 dose of the cell penetrating peptide R11"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "we conducted RNA-sequencing (RNA-seq) of E. coli MG1655 treated with 2 doses of the novel antibiotic peptide BTP-001 and 1 dose of the cell penetrating peptide R11"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "we conducted RNA-sequencing (RNA-seq) of E. coli MG1655 treated with 2 doses of the novel antibiotic peptide BTP-001"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "QIAseq FastSelect 5S/16S/23S kit (Qiagen) for rRNA removal and the QIAseq stranded RNA Lib kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "QIAseq FastSelect 5S/16S/23S kit (Qiagen) for rRNA removal"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^Untreated control",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^BTP-001",
+   "set": {
+    "treatment": {
+     "v": "abx_other",
+     "b": "stated",
+     "q": "the novel antibiotic peptide BTP-001"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^R11 ",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": "1 dose of the cell penetrating peptide R11"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(BTP-001|R11) .* (1|10|25) min post-treatment",
+   "set": {
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(BTP-001|R11) .* (50|75|120) min post-treatment",
+   "set": {
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "pre-treatment",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

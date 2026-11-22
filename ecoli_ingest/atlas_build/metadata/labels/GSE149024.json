@@ -1,0 +1,29 @@
+{
+  "gse": "GSE149024",
+  "notes": "All strains grown at 30°C then shifted to 44°C for 1 h (to inactivate rnpA49): treatment heat, exposure short, growth_temperature 44 for every sample; wild type is the study's reference (is_control true) despite the shift. Phase mid_exponential from 'maintained in exponential growth'. rnpA49 read as a temperature-sensitive point allele (inferred). Strain name not given (reads mapped to MG1655 genome), strain fields left out. ERCC spike-ins are synthetic RNAs, so mixed_organism false. Each GEO sample may hold merged replicate reads per the design text.",
+  "default": {
+    "base_medium": {"v": "LB", "b": "stated", "q": "Bacterial strains were grown in a shaking water-bath shaker in Luria broth"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "Bacterial strains were grown in a shaking water-bath shaker in Luria broth"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "Bacterial strains were grown in a shaking water-bath shaker in Luria broth"},
+    "culture_mode": {"v": "batch_shaken", "b": "stated", "q": "Bacterial strains were grown in a shaking water-bath shaker in Luria broth"},
+    "oxygen": {"v": "aerobic", "b": "inferred", "q": "Bacterial strains were grown in a shaking water-bath shaker in Luria broth"},
+    "growth_phase": {"v": "mid_exponential", "b": "stated", "q": "The cultures were maintained in exponential growth by dilutions with pre-warmed Luria broth."},
+    "growth_temperature": {"v": 44, "b": "stated", "q": "1 hr growth at 44°C"},
+    "treatment": {"v": "heat", "b": "stated", "q": "then shifted to 44oC for one hour to inactivate the mutant RNase P (rnpA49)"},
+    "exposure": {"v": "short", "b": "stated", "q": "1 hr growth at 44°C"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "RNA-seq experiments were conducted on RNAs isolated from wild type, DpcnB, rnpA49 and DpcnB rnpA49 strains of E. coli."},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "RNA-seq experiments were conducted on RNAs isolated from wild type, DpcnB, rnpA49 and DpcnB rnpA49 strains of E. coli."},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "ERCC (External RNA Control Consortium) RNAs were spiked into the RNA-seq libraries in known amounts"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "species specific rRNA-probes were hybridized to the total RNA in order to remove ribosomal RNA from the samples"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "species specific rRNA-probes were hybridized to the total RNA in order to remove ribosomal RNA from the samples"},
+    "global_regulator_perturbed": {"v": false, "b": "inferred", "q": "RNA-seq experiments were conducted on RNAs isolated from wild type, DpcnB, rnpA49 and DpcnB rnpA49 strains of E. coli."},
+    "is_control": {"v": false, "b": "stated", "q": "RNA-seq experiments were conducted on RNAs isolated from wild type, DpcnB, rnpA49 and DpcnB rnpA49 strains of E. coli."}
+  },
+  "rules": [
+    {"field": "ch:genotype", "regex": "^Wild type$", "set": {"genotype_class": {"v": "wild_type", "b": "stated", "q": ""}, "is_control": {"v": true, "b": "stated", "q": ""}}},
+    {"field": "ch:genotype", "regex": "^rnpA49$", "set": {"genotype_class": {"v": "point_mutation", "b": "inferred", "q": "to inactivate the mutant RNase P (rnpA49)"}, "perturbed_genes": {"v": "rnpA", "b": "stated", "q": ""}}},
+    {"field": "ch:genotype", "regex": "^DpcnB$", "set": {"genotype_class": {"v": "deletion", "b": "stated", "q": ""}, "perturbed_genes": {"v": "pcnB", "b": "stated", "q": ""}}},
+    {"field": "ch:genotype", "regex": "^rnpA49 DpcnB$", "set": {"genotype_class": {"v": "multiple", "b": "stated", "q": ""}, "perturbed_genes": {"v": "rnpA;pcnB", "b": "stated", "q": ""}}}
+  ],
+  "samples": {}
+}

@@ -1,0 +1,24 @@
+{
+  "gse": "GSE79278",
+  "notes": "MAPS: MS2-affinity purified RNA eluates, small RNA library kit -> IP_or_pulldown for both samples (the non-MS2 3'ETSleuZ control is also a column eluate). Growth phase not set: the study pools/mentions both exponential (OD 0.5) and stationary (OD 1.3) harvests without saying which sample is which. Both samples express an arabinose-induced 3'ETSleuZ construct (native sequence); genotype_class native_overexpression is a judgement.",
+  "default": {
+    "assay_class": {"v": "IP_or_pulldown", "b": "stated", "q": "The soluble fraction was subjected to affinity chromatography."},
+    "base_medium": {"v": "LB", "b": "stated", "q": "100 mL LB medium"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "100 mL LB medium"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "100 mL LB medium"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "MG1655"},
+    "strain_name": {"v": "MG1655", "b": "stated", "q": "MG1655"},
+    "inducer_added": {"v": true, "b": "stated", "q": "0.1% arabinose was added to induce the expression of MS2-3'ETSleuZ/3'ETSleuZ during 10 min."},
+    "genotype_class": {"v": "native_overexpression", "b": "inferred", "q": "0.1% arabinose was added to induce the expression of MS2-3'ETSleuZ/3'ETSleuZ during 10 min."},
+    "perturbed_genes": {"v": "leuZ 3'ETS", "b": "stated", "q": "3'ETSleuZ (without MS2) was used as control"},
+    "global_regulator_perturbed": {"v": false, "b": "inferred", "q": "3'ETSleuZ (without MS2) was used as control"},
+    "treatment": {"v": "none", "b": "study_default", "q": "Identification of sRNAs co-purified with MS2-3'ETSleuZ. 3'ETSleuZ (without MS2) was used as control"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "Identification of sRNAs co-purified with MS2-3'ETSleuZ. 3'ETSleuZ (without MS2) was used as control"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "Identification of sRNAs co-purified with MS2-3'ETSleuZ. 3'ETSleuZ (without MS2) was used as control"},
+    "is_control": {"v": false, "b": "stated", "q": "Identification of sRNAs co-purified with MS2-3'ETSleuZ. 3'ETSleuZ (without MS2) was used as control"}
+  },
+  "rules": [
+    {"field": "title", "regex": "^3ETSleuZ$", "set": {"is_control": {"v": true, "b": "stated", "q": "3'ETSleuZ (without MS2) was used as control"}}}
+  ],
+  "samples": {}
+}

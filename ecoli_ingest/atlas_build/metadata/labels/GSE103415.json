@@ -1,0 +1,131 @@
+{
+ "gse": "GSE103415",
+ "notes": "Harvested at OD600 1 in modified M9 + casamino acids: above the exponential OD range, no phase word -> growth_phase left out.",
+ "default": {
+  "strain_group": {
+   "v": "EPEC",
+   "b": "stated",
+   "q": "enteropathogenic Escherichia coli (EPEC) strain E2348/69"
+  },
+  "strain_name": {
+   "v": "E2348/69",
+   "b": "stated",
+   "q": "E2348/69"
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "modified M9 medium"
+  },
+  "medium_class": {
+   "v": "minimal_plus_hydrolysate",
+   "b": "inferred",
+   "q": "supplemented with 0.2 % glucose (w/v) and 0.05 % (w/v) casamino acids"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "supplemented with 0.2 % glucose (w/v) and 0.05 % (w/v) casamino acids"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "supplemented with 0.2 % glucose (w/v) and 0.05 % (w/v) casamino acids"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Bacterial cells were grown until an OD600 of 1 was reached at 37°C, 160 rpm."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Bacterial cells were grown until an OD600 of 1 was reached at 37°C, 160 rpm."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Bacterial cells were grown until an OD600 of 1 was reached at 37°C, 160 rpm."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Isolation of mRNA using Ribo-Zero Removal Kits (Bacteria)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Isolation of mRNA using Ribo-Zero Removal Kits (Bacteria)"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RNA of enterophatogenic E.coli csrA deletion strain and wildtype"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA of enterophatogenic E.coli csrA deletion strain and wildtype"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA of enterophatogenic E.coli csrA deletion strain and wildtype"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA of enterophatogenic E.coli csrA deletion strain and wildtype"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^csrA knockout$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "csrA",
+     "b": "stated",
+     "q": "csrA knockout"
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": "csrA knockout"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

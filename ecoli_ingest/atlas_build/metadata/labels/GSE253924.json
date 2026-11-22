@@ -1,0 +1,121 @@
+{
+ "gse": "GSE253924",
+ "notes": "Culture mode/aeration not described. Plain LB growth, no treatment.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Isogenic E. coli LF82 and rpoD V445D mutant were grown to a cell density of OD600 ~0.4-0.5 in LB broth at 37o C."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Isogenic E. coli LF82 and rpoD V445D mutant were grown to a cell density of OD600 ~0.4-0.5 in LB broth at 37o C."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Isogenic E. coli LF82 and rpoD V445D mutant were grown to a cell density of OD600 ~0.4-0.5 in LB broth at 37o C."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Isogenic E. coli LF82 and rpoD V445D mutant were grown to a cell density of OD600 ~0.4-0.5 in LB broth at 37o C."
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "Isogenic E. coli LF82 and rpoD V445D mutant were grown to a cell density of OD600 ~0.4-0.5 in LB broth at 37o C."
+  },
+  "strain_group": {
+   "v": "AIEC",
+   "b": "stated",
+   "q": "LF82, an adherent invasive Escherichia coli (AIEC) pathobiont"
+  },
+  "strain_name": {
+   "v": "LF82",
+   "b": "stated",
+   "q": "Escherichia coli LF82"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "isogenic LF82 WT and rpoD V445D mutant were created"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "isogenic LF82 WT and rpoD V445D mutant were created"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "isogenic LF82 WT and rpoD V445D mutant were created"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "isogenic LF82 WT and rpoD V445D mutant were created"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA subtraction was performed with the bacterial RiboMinus Kit (Ambion)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA subtraction was performed with the bacterial RiboMinus Kit (Ambion)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "RpoD V445D",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rpoD",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

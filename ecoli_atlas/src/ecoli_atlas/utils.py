@@ -45,7 +45,7 @@ def l2norm(x: np.ndarray, eps: float = 1e-12) -> np.ndarray:
 
 
 def spearman_vec(X: np.ndarray, y: np.ndarray) -> np.ndarray:
-    """Spearman correlation of every column of X with y."""
+    """Spearman correlation of every column of X with y (NaN for a constant column)."""
     from scipy.stats import rankdata
     rx = rankdata(np.asarray(X, dtype=float), axis=0)
     ry = rankdata(np.asarray(y, dtype=float))

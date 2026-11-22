@@ -1,0 +1,1435 @@
+{
+ "gse": "GSE126081",
+ "notes": "Strain collection, all in LB to OD ~0.2 (mid_exponential inferred). Unmodified strains taken as reference genotype and controls (plain growth, no treatment). Strains named <gene>-<letter> (metL-D, ptsI-E, ...) and Perfeito-Clone-*, TA014/TA464 look like engineered or evolved derivatives but the text does not say what they are: genotype_class, is_control and global_regulator_perturbed left out for them. strain_group only for well-known names (K-12 lab strains, CFT073/EC958 UPEC, H10407 ETEC, ECOR natural isolates); others (IAI, NILS, ZG, ATCC, HS, ED1a, APEC01, UTI 83972 ...) left empty. Temperature and aeration not stated. WT re-read: the named lab strains and isolates are unmodified, so wild_type; the unexplained derivatives stay unlabelled.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Samples were grown in LB media until an O.D. concentration of about 0.2"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Samples were grown in LB media until an O.D. concentration of about 0.2"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Samples were grown in LB media until an O.D. concentration of about 0.2"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "Samples were grown in LB media until an O.D. concentration of about 0.2"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "we have measured transcript levels in an Escherichia coli strains collection"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "we have measured transcript levels in an Escherichia coli strains collection"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "we have measured transcript levels in an Escherichia coli strains collection"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "we have measured transcript levels in an Escherichia coli strains collection"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "we have measured transcript levels in an Escherichia coli strains collection"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "we have measured transcript levels in an Escherichia coli strains collection"
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "we have measured transcript levels in an Escherichia coli strains collection"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Samples were subject ro rRNA depletion prior to library preparation"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Samples were subject ro rRNA depletion prior to library preparation"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "^1069A$",
+   "set": {
+    "strain_name": {
+     "v": "1069A",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^1069B$",
+   "set": {
+    "strain_name": {
+     "v": "1069B",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^11346$",
+   "set": {
+    "strain_name": {
+     "v": "11346",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^606$",
+   "set": {
+    "strain_name": {
+     "v": "606",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^607$",
+   "set": {
+    "strain_name": {
+     "v": "607",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^APEC01$",
+   "set": {
+    "strain_name": {
+     "v": "APEC01",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^ATCC\\ 11775$",
+   "set": {
+    "strain_name": {
+     "v": "ATCC 11775",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^ATCC\\ 700728$",
+   "set": {
+    "strain_name": {
+     "v": "ATCC 700728",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^B367$",
+   "set": {
+    "strain_name": {
+     "v": "B367",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^BW25113$",
+   "set": {
+    "strain_name": {
+     "v": "BW25113",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^CFT073$",
+   "set": {
+    "strain_name": {
+     "v": "CFT073",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^DE\\-COMM\\-4021$",
+   "set": {
+    "strain_name": {
+     "v": "DE-COMM-4021",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^DE\\-COMM\\-5105$",
+   "set": {
+    "strain_name": {
+     "v": "DE-COMM-5105",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^DH1\\ \\(E381\\)$",
+   "set": {
+    "strain_name": {
+     "v": "DH1 (E381)",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^EC958$",
+   "set": {
+    "strain_name": {
+     "v": "EC958",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^ECOR\\-04$",
+   "set": {
+    "strain_name": {
+     "v": "ECOR-04",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^ECOR\\-04a$",
+   "set": {
+    "strain_name": {
+     "v": "ECOR-04a",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^ECOR\\-07x$",
+   "set": {
+    "strain_name": {
+     "v": "ECOR-07x",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^ECOR\\-09$",
+   "set": {
+    "strain_name": {
+     "v": "ECOR-09",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^ECOR\\-11$",
+   "set": {
+    "strain_name": {
+     "v": "ECOR-11",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^ECOR\\-12$",
+   "set": {
+    "strain_name": {
+     "v": "ECOR-12",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^ECOR\\-28$",
+   "set": {
+    "strain_name": {
+     "v": "ECOR-28",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^ECOR\\-39$",
+   "set": {
+    "strain_name": {
+     "v": "ECOR-39",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^ECOR\\-52$",
+   "set": {
+    "strain_name": {
+     "v": "ECOR-52",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^ECOR\\-53a$",
+   "set": {
+    "strain_name": {
+     "v": "ECOR-53a",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^ECOR\\-63$",
+   "set": {
+    "strain_name": {
+     "v": "ECOR-63",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^ECOR\\-66x$",
+   "set": {
+    "strain_name": {
+     "v": "ECOR-66x",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^ECOR\\-68x$",
+   "set": {
+    "strain_name": {
+     "v": "ECOR-68x",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^ECOR\\-70$",
+   "set": {
+    "strain_name": {
+     "v": "ECOR-70",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^ECOR\\-71x$",
+   "set": {
+    "strain_name": {
+     "v": "ECOR-71x",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^ED1a$",
+   "set": {
+    "strain_name": {
+     "v": "ED1a",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^H10407$",
+   "set": {
+    "strain_name": {
+     "v": "H10407",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^HM\\-365$",
+   "set": {
+    "strain_name": {
+     "v": "HM-365",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^HM605$",
+   "set": {
+    "strain_name": {
+     "v": "HM605",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^HS$",
+   "set": {
+    "strain_name": {
+     "v": "HS",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI01$",
+   "set": {
+    "strain_name": {
+     "v": "IAI01",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI08$",
+   "set": {
+    "strain_name": {
+     "v": "IAI08",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI09$",
+   "set": {
+    "strain_name": {
+     "v": "IAI09",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI13$",
+   "set": {
+    "strain_name": {
+     "v": "IAI13",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI14$",
+   "set": {
+    "strain_name": {
+     "v": "IAI14",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI16$",
+   "set": {
+    "strain_name": {
+     "v": "IAI16",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI21$",
+   "set": {
+    "strain_name": {
+     "v": "IAI21",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI22$",
+   "set": {
+    "strain_name": {
+     "v": "IAI22",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI33$",
+   "set": {
+    "strain_name": {
+     "v": "IAI33",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI34$",
+   "set": {
+    "strain_name": {
+     "v": "IAI34",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI35$",
+   "set": {
+    "strain_name": {
+     "v": "IAI35",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI36$",
+   "set": {
+    "strain_name": {
+     "v": "IAI36",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI39$",
+   "set": {
+    "strain_name": {
+     "v": "IAI39",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI40$",
+   "set": {
+    "strain_name": {
+     "v": "IAI40",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI43$",
+   "set": {
+    "strain_name": {
+     "v": "IAI43",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI44$",
+   "set": {
+    "strain_name": {
+     "v": "IAI44",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI46$",
+   "set": {
+    "strain_name": {
+     "v": "IAI46",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI47$",
+   "set": {
+    "strain_name": {
+     "v": "IAI47",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI48$",
+   "set": {
+    "strain_name": {
+     "v": "IAI48",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI49$",
+   "set": {
+    "strain_name": {
+     "v": "IAI49",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI50$",
+   "set": {
+    "strain_name": {
+     "v": "IAI50",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI51$",
+   "set": {
+    "strain_name": {
+     "v": "IAI51",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI53$",
+   "set": {
+    "strain_name": {
+     "v": "IAI53",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI54$",
+   "set": {
+    "strain_name": {
+     "v": "IAI54",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI55$",
+   "set": {
+    "strain_name": {
+     "v": "IAI55",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI56$",
+   "set": {
+    "strain_name": {
+     "v": "IAI56",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI61$",
+   "set": {
+    "strain_name": {
+     "v": "IAI61",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI63$",
+   "set": {
+    "strain_name": {
+     "v": "IAI63",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI65$",
+   "set": {
+    "strain_name": {
+     "v": "IAI65",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI66$",
+   "set": {
+    "strain_name": {
+     "v": "IAI66",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI67$",
+   "set": {
+    "strain_name": {
+     "v": "IAI67",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI68$",
+   "set": {
+    "strain_name": {
+     "v": "IAI68",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI70$",
+   "set": {
+    "strain_name": {
+     "v": "IAI70",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI72$",
+   "set": {
+    "strain_name": {
+     "v": "IAI72",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI74$",
+   "set": {
+    "strain_name": {
+     "v": "IAI74",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI75$",
+   "set": {
+    "strain_name": {
+     "v": "IAI75",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI76$",
+   "set": {
+    "strain_name": {
+     "v": "IAI76",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI77$",
+   "set": {
+    "strain_name": {
+     "v": "IAI77",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI78$",
+   "set": {
+    "strain_name": {
+     "v": "IAI78",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI79$",
+   "set": {
+    "strain_name": {
+     "v": "IAI79",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI80$",
+   "set": {
+    "strain_name": {
+     "v": "IAI80",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI81$",
+   "set": {
+    "strain_name": {
+     "v": "IAI81",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^IAI82$",
+   "set": {
+    "strain_name": {
+     "v": "IAI82",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^MC4100$",
+   "set": {
+    "strain_name": {
+     "v": "MC4100",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^MG1655$",
+   "set": {
+    "strain_name": {
+     "v": "MG1655",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^NILS\\ 18$",
+   "set": {
+    "strain_name": {
+     "v": "NILS 18",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^NILS\\ 19$",
+   "set": {
+    "strain_name": {
+     "v": "NILS 19",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^NILS\\ 31$",
+   "set": {
+    "strain_name": {
+     "v": "NILS 31",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^NILS\\ 34$",
+   "set": {
+    "strain_name": {
+     "v": "NILS 34",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^NILS\\ 38$",
+   "set": {
+    "strain_name": {
+     "v": "NILS 38",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^NILS\\ 39$",
+   "set": {
+    "strain_name": {
+     "v": "NILS 39",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^NILS\\ 40$",
+   "set": {
+    "strain_name": {
+     "v": "NILS 40",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^NILS\\ 43$",
+   "set": {
+    "strain_name": {
+     "v": "NILS 43",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^Perfeito\\-Clone\\-10$",
+   "set": {
+    "strain_name": {
+     "v": "Perfeito-Clone-10",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^Perfeito\\-Clone\\-3$",
+   "set": {
+    "strain_name": {
+     "v": "Perfeito-Clone-3",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^Perfeito\\-Clone\\-9$",
+   "set": {
+    "strain_name": {
+     "v": "Perfeito-Clone-9",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^S17$",
+   "set": {
+    "strain_name": {
+     "v": "S17",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^SCI\\-07$",
+   "set": {
+    "strain_name": {
+     "v": "SCI-07",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^TA014$",
+   "set": {
+    "strain_name": {
+     "v": "TA014",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^TA464$",
+   "set": {
+    "strain_name": {
+     "v": "TA464",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^UTI\\ 83972$",
+   "set": {
+    "strain_name": {
+     "v": "UTI 83972",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^ZG\\-36\\.1$",
+   "set": {
+    "strain_name": {
+     "v": "ZG-36.1",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^ZG\\-36\\.8$",
+   "set": {
+    "strain_name": {
+     "v": "ZG-36.8",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^ZG\\-39\\.1$",
+   "set": {
+    "strain_name": {
+     "v": "ZG-39.1",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^ZG\\-9\\.1$",
+   "set": {
+    "strain_name": {
+     "v": "ZG-9.1",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^argB\\-C$",
+   "set": {
+    "strain_name": {
+     "v": "argB-C",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^carA\\-D$",
+   "set": {
+    "strain_name": {
+     "v": "carA-D",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^gltA\\-C$",
+   "set": {
+    "strain_name": {
+     "v": "gltA-C",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^gltA\\-E$",
+   "set": {
+    "strain_name": {
+     "v": "gltA-E",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^hisH\\-D$",
+   "set": {
+    "strain_name": {
+     "v": "hisH-D",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^hisH\\-E$",
+   "set": {
+    "strain_name": {
+     "v": "hisH-E",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^ilvE\\-D$",
+   "set": {
+    "strain_name": {
+     "v": "ilvE-D",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^metL\\-D$",
+   "set": {
+    "strain_name": {
+     "v": "metL-D",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^metR\\-A$",
+   "set": {
+    "strain_name": {
+     "v": "metR-A",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^metR\\-E$",
+   "set": {
+    "strain_name": {
+     "v": "metR-E",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^proB\\-C$",
+   "set": {
+    "strain_name": {
+     "v": "proB-C",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^ptsI\\-D$",
+   "set": {
+    "strain_name": {
+     "v": "ptsI-D",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^ptsI\\-E$",
+   "set": {
+    "strain_name": {
+     "v": "ptsI-E",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^serB\\-D$",
+   "set": {
+    "strain_name": {
+     "v": "serB-D",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^serB\\-E$",
+   "set": {
+    "strain_name": {
+     "v": "serB-E",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^thrA\\-B$",
+   "set": {
+    "strain_name": {
+     "v": "thrA-B",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^tyrA\\-D$",
+   "set": {
+    "strain_name": {
+     "v": "tyrA-D",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^(MG1655|MC4100|BW25113|DH1\\ \\(E381\\))$",
+   "set": {
+    "strain_group": {
+     "v": "K-12",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^(CFT073|EC958)$",
+   "set": {
+    "strain_group": {
+     "v": "UPEC",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^(H10407)$",
+   "set": {
+    "strain_group": {
+     "v": "ETEC",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^ECOR-",
+   "set": {
+    "strain_group": {
+     "v": "natural_isolate",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^[a-z]{3}[A-Z]-[A-Z]$",
+   "set": {
+    "genotype_class": {
+     "v": null
+    },
+    "is_control": {
+     "v": null
+    },
+    "global_regulator_perturbed": {
+     "v": null
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^(Perfeito-Clone-|TA\\d)",
+   "set": {
+    "genotype_class": {
+     "v": null
+    },
+    "is_control": {
+     "v": null
+    },
+    "global_regulator_perturbed": {
+     "v": null
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,198 @@
+{
+ "gse": "GSE161708",
+ "notes": "MMS (30 min) = dna_damage, acute. The MMS+alpha-KG samples get dna_damage only; 25 mM alpha-ketoglutarate is a medium supplement. Treated samples keep the pre-treatment early_exponential phase (30 min). Temperature and shaking taken from the treatment protocol. Whether untreated samples also had alpha-KG is unclear.",
+ "default": {
+  "growth_phase": {
+   "v": "early_exponential",
+   "b": "stated",
+   "q": "Bacteria were grown to early exponential phase (OD600nm=0.3) in LB medium"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "0.35% [v/v] MMS, 30 min, 37*C, 200rpm"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Bacteria were grown to early exponential phase (OD600nm=0.3) in LB medium"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Bacteria were grown to early exponential phase (OD600nm=0.3) in LB medium"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Bacteria were grown to early exponential phase (OD600nm=0.3) in LB medium"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "0.35% [v/v] MMS, 30 min, 37*C, 200rpm"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "study_default",
+   "q": "0.35% [v/v] MMS, 30 min, 37*C, 200rpm"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "refrece sample is the WT (BW25113) trated and untreated"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "refrece sample is the WT (BW25113) trated and untreated"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "refrece sample is the WT (BW25113) trated and untreated"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "BW25113"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "total RNA purification kit from Norgen Biotek Corp followed by Ribo-zero bacteria"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "followed by Ribo-zero bacteria"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "refrece sample is the WT (BW25113) trated and untreated"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "^BW25113$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^\\[delta\\]fum",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^\\[delta\\]fumA$",
+   "set": {
+    "perturbed_genes": {
+     "v": "fumA",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^\\[delta\\]fumB$",
+   "set": {
+    "perturbed_genes": {
+     "v": "fumB",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^\\[delta\\]fumAB$",
+   "set": {
+    "perturbed_genes": {
+     "v": "fumA;fumB",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^\\[delta\\]fumACB$",
+   "set": {
+    "perturbed_genes": {
+     "v": "fumA;fumC;fumB",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^untreated$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "methylmethansulfonate",
+   "set": {
+    "treatment": {
+     "v": "dna_damage",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": "0.35% [v/v] MMS, 30 min, 37*C, 200rpm"
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "^BW25113 \\(WT\\)-\\d$",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

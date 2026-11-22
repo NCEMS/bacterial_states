@@ -4,9 +4,11 @@
 #   conda activate ecoli_atlas
 #   pip install -e "./ecoli_atlas[dev]"
 #
-# PyTorch here is the CPU build, which is enough for `embed` and `compare` and for small training
-# runs. For full training on a GPU node replace the pytorch line with the build matching your CUDA
-# driver, e.g. `pytorch-gpu` from conda-forge or the official pytorch channel instructions.
+# PyTorch here is the CPU build, which is enough for `embed` and for a single training run (minutes
+# on 8 threads). For seed sweeps and cross-validation on a GPU node, put a CUDA build into the same
+# environment instead:
+#   pip install --force-reinstall torch --index-url https://download.pytorch.org/whl/cu126
+# (it brings its own CUDA libraries; only the node's NVIDIA driver is used).
 name: ecoli_atlas
 channels:
   - conda-forge
@@ -17,10 +19,8 @@ dependencies:
   - pandas>=2.2
   - scipy>=1.13
   - scikit-learn>=1.5
-  - pytorch-cpu>=2.4   # CPU build; for a GPU node use `pytorch` with a cuda build instead
+  - pytorch-cpu>=2.4   # CPU build; see above for a GPU node
   - pyyaml
-  - optuna>=4          # hyper-parameter tuning (`train --tune`)
-  - umap-learn>=0.5.7  # `compare --umap`, figures
-  - matplotlib>=3.8
+  - matplotlib>=3.8    # `figures`
   - seaborn>=0.13
   - pytest

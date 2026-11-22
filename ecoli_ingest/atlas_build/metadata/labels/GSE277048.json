@@ -1,0 +1,90 @@
+{
+ "gse": "GSE277048",
+ "notes": "All libraries are biotin-streptavidin pulldowns of probe-crosslinked RNA from extracted RNA (assay IP_or_pulldown, flag for exclusion). The probe/DMSO was applied to RNA extracts in vitro, not to cells, so treatment none for all; is_control follows the submitters (DMSO = control). Strain CS1562 genotype listed (rpoS amber, tolC::Tn10) -> multiple; strain_group not stated. OD600 0.8 in LB -> no phase.",
+ "default": {
+  "strain_name": {
+   "v": "CS1562",
+   "b": "stated",
+   "q": "CS1562"
+  },
+  "genotype_class": {
+   "v": "multiple",
+   "b": "stated",
+   "q": "LAM-; rpoS396(Am); tolC6::mini-Tn10; rph-1"
+  },
+  "perturbed_genes": {
+   "v": "rpoS;tolC",
+   "b": "stated",
+   "q": "rpoS396(Am); tolC6::mini-Tn10"
+  },
+  "global_regulator_perturbed": {
+   "v": true,
+   "b": "stated",
+   "q": "rpoS396(Am)"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "cultured at 37 °C in liquid Luria Broth (LB) medium"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "liquid Luria Broth (LB) medium"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "liquid Luria Broth (LB) medium"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Bacteria were cultured at 37 °C"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Isolated RNA was used to incubate TMP photoaffinity probe or DMSO in folding buffer"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptome-wide profiling of interactions of the TMP photoaffinity probe with E. Coli RNA extracts"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptome-wide profiling of interactions of the TMP photoaffinity probe with E. Coli RNA extracts"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptome-wide profiling of interactions of the TMP photoaffinity probe with E. Coli RNA extracts"
+  },
+  "assay_class": {
+   "v": "IP_or_pulldown",
+   "b": "stated",
+   "q": "RNA was isolated after biotin-streptavidin bead pulldown using 50 mM DTT"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptome-wide profiling of interactions of the TMP photoaffinity probe with E. Coli RNA extracts"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^control$",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,111 @@
+{
+ "gse": "GSE144940",
+ "notes": "AzG (azido nucleoside analog for metabolic RNA labelling) treated cells sequenced as ordinary total RNA (no pulldown): total_rnaseq, treatment other_chemical. Time from AzG addition to harvest not given: exposure and growth_phase left out (OD600 0.3 only at treatment). Shaking stated for the LB growth; assumed to carry to the diluted culture (inferred). Carbon: glucose plus tryptone.",
+ "default": {
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Escherichia coli strains K12 were grown in LB at 37℃ with shaking at 220rpm. Overnight cultures were diluted 1:100 into nucleoside-free medium [M9+0.4% (wt / vol) glucose+ 10 g / L tryptone ]."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Escherichia coli strains K12 were grown in LB at 37℃ with shaking at 220rpm. Overnight cultures were diluted 1:100 into nucleoside-free medium [M9+0.4% (wt / vol) glucose+ 10 g / L tryptone ]."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Escherichia coli strains K12 were grown in LB at 37℃ with shaking at 220rpm. Overnight cultures were diluted 1:100 into nucleoside-free medium [M9+0.4% (wt / vol) glucose+ 10 g / L tryptone ]."
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "Escherichia coli strains K12 were grown in LB at 37℃ with shaking at 220rpm. Overnight cultures were diluted 1:100 into nucleoside-free medium [M9+0.4% (wt / vol) glucose+ 10 g / L tryptone ]."
+  },
+  "medium_class": {
+   "v": "minimal_plus_hydrolysate",
+   "b": "inferred",
+   "q": "Escherichia coli strains K12 were grown in LB at 37℃ with shaking at 220rpm. Overnight cultures were diluted 1:100 into nucleoside-free medium [M9+0.4% (wt / vol) glucose+ 10 g / L tryptone ]."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Escherichia coli strains K12 were grown in LB at 37℃ with shaking at 220rpm. Overnight cultures were diluted 1:100 into nucleoside-free medium [M9+0.4% (wt / vol) glucose+ 10 g / L tryptone ]."
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "Escherichia coli strains K12 were grown in LB at 37℃ with shaking at 220rpm. Overnight cultures were diluted 1:100 into nucleoside-free medium [M9+0.4% (wt / vol) glucose+ 10 g / L tryptone ]."
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "Escherichia coli strains K12"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Three biological replicates of E.coli K12 treated with or without AzG analysed."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Three biological replicates of E.coli K12 treated with or without AzG analysed."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Three biological replicates of E.coli K12 treated with or without AzG analysed."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Three biological replicates of E.coli K12 treated with or without AzG analysed."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli strains K12"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was exracted using TRIzol Reagent"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^Blank",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^AzG",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

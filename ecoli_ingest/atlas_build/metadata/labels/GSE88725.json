@@ -1,0 +1,189 @@
+{
+ "gse": "GSE88725",
+ "notes": "Reviewed 2026-11-15: mRNA-seq arm of a ribosome-profiling protocol (fragmented, gel size-selected RNA); excluded by user decision. | Only the total RNA (mRNA-seq) samples are candidates; ribosome profiling samples are not shown. RNA was alkaline-fragmented and size-selected but no size given, kept total_rnaseq. Harvest at OD420 0.4-0.6 (not OD600): no growth phase. MOPS complete taken as defined_rich.",
+ "default": {
+  "base_medium": {
+   "v": "MOPS",
+   "b": "stated",
+   "q": "All strains were grown shaking at 37°C  in 200mL cultures of MOPS complete-glucose liquid media"
+  },
+  "medium_class": {
+   "v": "defined_rich",
+   "b": "inferred",
+   "q": "All strains were grown shaking at 37°C  in 200mL cultures of MOPS complete-glucose liquid media"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "All strains were grown shaking at 37°C  in 200mL cultures of MOPS complete-glucose liquid media"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "All strains were grown shaking at 37°C  in 200mL cultures of MOPS complete-glucose liquid media"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "All strains were grown shaking at 37°C  in 200mL cultures of MOPS complete-glucose liquid media"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "All strains were grown shaking at 37°C  in 200mL cultures of MOPS complete-glucose liquid media"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "grown shaking at 37°C  in 200mL cultures of MOPS complete-glucose liquid media (unless otherwise annotated) in 1L flasks"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Samples of WT, ∆RF3, RF2B, and RF2B∆RF3 were analyzed by ribosome profiling and RNA-seq."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Samples of WT, ∆RF3, RF2B, and RF2B∆RF3 were analyzed by ribosome profiling and RNA-seq."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Samples of WT, ∆RF3, RF2B, and RF2B∆RF3 were analyzed by ribosome profiling and RNA-seq."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Samples of WT, ∆RF3, RF2B, and RF2B∆RF3 were analyzed by ribosome profiling and RNA-seq."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K12 MG1655"
+  },
+  "assay_class": {
+   "v": "other",
+   "b": "inferred",
+   "q": "A Linker-1 adapter (IDT) was ligated onto the 3' end of size selected RNA fragments, either ribosome footprints or fragmented total RNA."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Small RNA and ribosomal RNA subtraction was performed in total RNA samples using MEGAClear (ThermoFisher) and MicrobExpress (ThermoFisher) kits."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Samples of WT, ∆RF3, RF2B, and RF2B∆RF3 were analyzed by ribosome profiling and RNA-seq."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "Samples of WT, ∆RF3, RF2B, and RF2B∆RF3 were analyzed by ribosome profiling and RNA-seq."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "^K12 MG1655$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "deltaprfC",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "prfC",
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655 deltaprfC",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "prfB-Bstrain allele$",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "prfB",
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655 prfB-Bstrain allele",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "prfB-Bstrain allele deltaprfC",
+   "set": {
+    "genotype_class": {
+     "v": "multiple",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "prfB;prfC",
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655 prfB-Bstrain allele deltaprfC",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "description",
+   "regex": "MOPS minimal",
+   "set": {
+    "medium_class": {
+     "v": "defined_minimal",
+     "b": "stated",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

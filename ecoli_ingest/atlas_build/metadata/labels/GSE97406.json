@@ -1,0 +1,24 @@
+{
+  "gse": "GSE97406",
+  "notes": "All strains overexpress CRP (WT, K100Q, K100R or AR1-/AR2-); WT CRP -> native_overexpression, variants -> multiple (overexpressed point-mutant crp). is_control left out: the submitters call the AR1-/AR2- strain the negative control, but the reference comparison is WT CRP; neither is an unperturbed reference genotype. 'Late exponential/Early stationary (OD ~1.8)' -> transition. Tryptone broth (not Terrific Broth) -> base_medium other, complex. inducer_added left out (how overexpression is driven not stated).",
+  "default": {
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "Total RNA obtained from E.coli strains overexpressing WT CRP or a K100 variant"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "rRNA depletion, fragmentation, reverse transcription"},
+    "base_medium": {"v": "other", "b": "stated", "q": "Tryptone broth buffered to pH 7 supplemented with 22 mM glucose"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "Tryptone broth buffered to pH 7 supplemented with 22 mM glucose"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "Tryptone broth buffered to pH 7 supplemented with 22 mM glucose"},
+    "carbon_source": {"v": "glucose", "b": "stated", "q": "Tryptone broth buffered to pH 7 supplemented with 22 mM glucose"},
+    "growth_phase": {"v": "transition", "b": "stated", "q": "Late exponential/Early stationary (OD ~1.8)"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "K-12"},
+    "perturbed_genes": {"v": "crp", "b": "stated", "q": "E.coli strains overexpressing WT CRP or a K100 variant (K100Q or K100R)"},
+    "global_regulator_perturbed": {"v": true, "b": "inferred", "q": "E.coli strains overexpressing WT CRP or a K100 variant (K100Q or K100R)"},
+    "genotype_class": {"v": "multiple", "b": "inferred", "q": "E.coli strains overexpressing WT CRP or a K100 variant (K100Q or K100R)"},
+    "treatment": {"v": "none", "b": "study_default", "q": "Cells were grown in TB7 supplemented with 22 mM glucose until OD600 ~1.8."},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "Cells were grown in TB7 supplemented with 22 mM glucose until OD600 ~1.8."},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "Cells were grown in TB7 supplemented with 22 mM glucose until OD600 ~1.8."}
+  },
+  "rules": [
+    {"field": "ch:genotype/variation", "regex": "^WT$", "set": {"genotype_class": {"v": "native_overexpression", "b": "stated", "q": "E.coli strains overexpressing WT CRP"}}}
+  ],
+  "samples": {}
+}

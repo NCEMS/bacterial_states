@@ -1,0 +1,126 @@
+{
+ "gse": "GSE166046",
+ "notes": "rpsA delta56 is an in-frame deletion of two C-terminal domains -> deletion. Sonication fragmentation + adapter ligation is ordinary library prep -> total_rnaseq. WT re-read: WT MG1655 is unmodified, genotype_class wild_type.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "until DO600 = 0.4"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "grown in LB at 37°C under constant agitation"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "The bacteria were grown in LB"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "The bacteria were grown in LB"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "The bacteria were grown in LB"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "under constant agitation"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown in LB at 37°C"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Total RNA-seq analysis of WT and rpsA∆56 mutant strains."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total RNA-seq analysis of WT and rpsA∆56 mutant strains."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total RNA-seq analysis of WT and rpsA∆56 mutant strains."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total RNA-seq analysis of WT and rpsA∆56 mutant strains."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "Total RNA-seq analysis of WT and rpsA∆56 mutant strains."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA-seq analysis of WT and rpsA∆56 mutant strains."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "The rRNA-depleted RNA samples (RiboZero)"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total RNA-seq analysis of WT and rpsA∆56 mutant strains."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "rpsA",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "the last two C-terminal OB-fold domains of r-protein S1 have been deleted"
+    },
+    "perturbed_genes": {
+     "v": "rpsA",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

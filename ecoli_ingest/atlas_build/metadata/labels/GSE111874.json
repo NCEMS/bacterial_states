@@ -1,0 +1,176 @@
+{
+ "gse": "GSE111874",
+ "notes": "Matched ChIP-seq/RNA-seq; only RNA-seq samples are candidates. The shared treatment_protocol (1% formaldehyde cross-linking) is the ChIP step; RNA was harvested with RNAProtect, so treatment is set to none. Minimal+LIV (three added amino acids) fits neither defined_minimal nor defined_rich cleanly: medium_class and amino_acids_supplied left out for those samples. Oxygen and culture mode (shaking) not described. WT re-read: wild-type samples of the plain standard strain set to wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "MOPS",
+   "b": "stated",
+   "q": "MOPS minimal media + glycerol"
+  },
+  "carbon_source": {
+   "v": "glycerol",
+   "b": "stated",
+   "q": "MOPS minimal media + glycerol"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown in liquid culture at 37C until harvest"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K12 MG1655"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Profiles of Lrp binding and global transcription levels determined under nine conditions with duplicates in WT and Lrp::kanR strains"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Profiles of Lrp binding and global transcription levels determined under nine conditions with duplicates in WT and Lrp::kanR strains"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Profiles of Lrp binding and global transcription levels determined under nine conditions with duplicates in WT and Lrp::kanR strains"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Profiles of Lrp binding and global transcription levels determined under nine conditions with duplicates in WT and Lrp::kanR strains"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA depletion was performed according to the Illumina Ribo-Zero rRNA Removal Kit for Bacteria"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA depletion was performed according to the Illumina Ribo-Zero rRNA Removal Kit for Bacteria"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:media",
+   "regex": "^MOPS minimal media \\+ glycerol$",
+   "set": {
+    "medium_class": {
+     "v": "defined_minimal",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:media",
+   "regex": "MOPS rich defined media",
+   "set": {
+    "medium_class": {
+     "v": "defined_rich",
+     "b": "stated",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:time of harvest",
+   "regex": "^logarithmic phase$",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:time of harvest",
+   "regex": "^transition point$",
+   "set": {
+    "growth_phase": {
+     "v": "transition",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:time of harvest",
+   "regex": "^stationary phase$",
+   "set": {
+    "growth_phase": {
+     "v": "stationary",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^Lrp::kanR$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "lrp",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

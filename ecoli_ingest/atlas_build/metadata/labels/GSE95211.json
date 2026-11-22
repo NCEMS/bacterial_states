@@ -1,0 +1,27 @@
+{
+  "gse": "GSE95211",
+  "notes": "Rend-seq (end-enriched RNA-seq, 15-45 nt fragments size-selected) -> end_mapping for all three samples; exclude. WT library additionally 5'-monophosphate exonuclease treated. Carbon source of MOPS complete not stated. WT and rnb grown at 30C, pnp at 37C (different growth_protocol texts). OD590 0.3 -> mid_exponential inferred.",
+  "default": {
+    "assay_class": {"v": "end_mapping", "b": "stated", "q": "Using end-enriched RNA-sequencing (Rend-seq) with single-nucleotide resolution"},
+    "base_medium": {"v": "MOPS", "b": "stated", "q": "MOPS complete (Teknova) with full supplement (Neidhart et al., 1974)."},
+    "medium_class": {"v": "defined_rich", "b": "inferred", "q": "MOPS complete (Teknova) with full supplement (Neidhart et al., 1974)."},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "MOPS complete (Teknova) with full supplement (Neidhart et al., 1974)."},
+    "culture_mode": {"v": "batch_shaken", "b": "inferred", "q": "The culture was kept in a 125 mL flask"},
+    "oxygen": {"v": "aerobic", "b": "inferred", "q": "with aeration (200 rpm) until OD590 reached 0.3."},
+    "growth_phase": {"v": "mid_exponential", "b": "inferred", "q": "with aeration (200 rpm) until OD590 reached 0.3."},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "Escherichia coli str. K-12 substr. MG1655"},
+    "strain_name": {"v": "MG1655", "b": "stated", "q": "Escherichia coli str. K-12 substr. MG1655"},
+    "treatment": {"v": "none", "b": "study_default", "q": "Eighteen Rend-seq data sets (Esherichia coli, Bacillus subtilis, Vibrio natriegens, and Caulobacter crescentus, including mutants and different library preparations)."},
+    "inducer_added": {"v": false, "b": "study_default", "q": "Eighteen Rend-seq data sets (Esherichia coli, Bacillus subtilis, Vibrio natriegens, and Caulobacter crescentus, including mutants and different library preparations)."},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "Eighteen Rend-seq data sets (Esherichia coli, Bacillus subtilis, Vibrio natriegens, and Caulobacter crescentus, including mutants and different library preparations)."},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "Eighteen Rend-seq data sets (Esherichia coli, Bacillus subtilis, Vibrio natriegens, and Caulobacter crescentus, including mutants and different library preparations)."},
+    "global_regulator_perturbed": {"v": false, "b": "inferred", "q": "including mutants and different library preparations"},
+    "growth_temperature": {"v": 30, "b": "stated", "q": "The culture was kept in a 125 mL flask at 30C with aeration (200 rpm) until OD590 reached 0.3."}
+  },
+  "rules": [
+    {"field": "ch:strain", "regex": "^K-12 MG1655$", "set": {"genotype_class": {"v": "reference", "b": "stated", "q": ""}, "is_control": {"v": true, "b": "stated", "q": ""}}},
+    {"field": "ch:strain", "regex": "pnp::kan", "set": {"genotype_class": {"v": "deletion", "b": "stated", "q": ""}, "perturbed_genes": {"v": "pnp", "b": "stated", "q": ""}, "is_control": {"v": false, "b": "stated", "q": ""}, "rrna_removal": {"v": "depletion", "b": "stated", "q": "Ribosomal RNA was depleted using the MICROBExpress kit (Thermo Fisher)."}, "growth_temperature": {"v": 37, "b": "stated", "q": "The culture was kept in a 125 mL flask at 37C with aeration (200 rpm) until OD590 reached 0.3."}}},
+    {"field": "ch:strain", "regex": "rnb::kan", "set": {"genotype_class": {"v": "deletion", "b": "stated", "q": ""}, "perturbed_genes": {"v": "rnb", "b": "stated", "q": ""}, "is_control": {"v": false, "b": "stated", "q": ""}, "rrna_removal": {"v": "depletion", "b": "stated", "q": "Ribosomal RNA was depleted using the MICROBExpress kit (Thermo Fisher)."}}}
+  ],
+  "samples": {}
+}

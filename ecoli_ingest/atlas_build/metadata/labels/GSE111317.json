@@ -1,0 +1,122 @@
+{
+ "gse": "GSE111317",
+ "notes": "Nitrogen-starved samples (grown in N-deficient Gutnick medium) get treatment nitrogen_starvation (adapted); peptide-treated ones other_chemical;nitrogen_starvation (80 min -> short). Only the nitrogen-rich untreated samples are controls; the DMSO vehicle samples are the comparison baseline for the peptides but are themselves nitrogen-starved, so is_control false (debatable). growth_phase: OD 0.5 minimal + harvest 80 min later -> mid_exponential for nitrogen-rich only; left out for starved cells (likely not growing). Peptide concentration given as 10 mM in fields vs 10 µM in protocol. Carbon source not stated.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "MG1655 E. coli were grown in Gutnick minimal media to induce nitrogen starvation."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "MG1655 E. coli were grown in Gutnick minimal media to induce nitrogen starvation."
+  },
+  "base_medium": {
+   "v": "other_minimal",
+   "b": "stated",
+   "q": "Gutnick minimal media"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "Gutnick minimal media"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "Gutnick minimal media"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "RNA libraries were prepared for sequencing using standard Illumina protocols"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli grown in nitrogen-deficient media and treated with different sigma-54-based stapled peptides"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli grown in nitrogen-deficient media and treated with different sigma-54-based stapled peptides"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli grown in nitrogen-deficient media and treated with different sigma-54-based stapled peptides"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli grown in nitrogen-deficient media and treated with different sigma-54-based stapled peptides"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:nitrogen condition",
+   "regex": "^nitrogen-starved$",
+   "set": {
+    "treatment": {
+     "v": "nitrogen_starvation",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "stated",
+     "q": "MG1655 E. coli were grown in Gutnick minimal media to induce nitrogen starvation."
+    }
+   }
+  },
+  {
+   "field": "ch:nitrogen condition",
+   "regex": "^nitrogen-rich$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": "At OD­600 0.5, cells were treated with 10 µM stapled peptide."
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "Ss54|s54-WT",
+   "set": {
+    "treatment": {
+     "v": "other_chemical;nitrogen_starvation",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": "RNA was stabilized after 80 minutes after treatment"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

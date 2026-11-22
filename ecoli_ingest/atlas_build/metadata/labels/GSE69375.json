@@ -1,0 +1,143 @@
+{
+ "gse": "GSE69375",
+ "notes": "Only the two plasmid mutants are candidates (wild-type E2348/69 samples not in the candidate set), so is_control false for all. JPN15 lacks the EAF plasmid (perturbed_genes 'EAF plasmid'). DMEM (no serum mentioned) -> cell_culture/defined_rich; its carbon source not stated. OD 0.5 -> mid_exponential inferred only in LB (rule covers complex/minimal media).",
+ "default": {
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "were incubated with shaking (225 rpm) at 37˚C"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "were incubated with shaking (225 rpm) at 37˚C"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "were incubated with shaking (225 rpm) at 37˚C"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "inoculated 1:100 into 250 ml of fresh LB or DMEM"
+  },
+  "genotype_class": {
+   "v": "deletion",
+   "b": "stated",
+   "q": "its plasmid mutants containing a deletion of perABC, or missing the entire EAF plasmid (strain JPN15)"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "a deletion of perABC, or missing the entire EAF plasmid"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "during growth in laboratory media and conditions that have been previously demonstrated to induce expression of EPEC virulence factors"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA sequencing was performed on the EPEC prototype strain E2348/69 and its plasmid mutants"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA sequencing was performed on the EPEC prototype strain E2348/69 and its plasmid mutants"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA sequencing was performed on the EPEC prototype strain E2348/69 and its plasmid mutants"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA sequencing was performed on the EPEC prototype strain E2348/69 and its plasmid mutants"
+  },
+  "strain_group": {
+   "v": "EPEC",
+   "b": "stated",
+   "q": "the EPEC prototype strain E2348/69"
+  },
+  "strain_name": {
+   "v": "E2348/69",
+   "b": "stated",
+   "q": "Escherichia coli O127:H6 str. E2348/69"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "inferred",
+   "q": "RNA libraries were prepared for sequencing using standard Illumina protocols"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "_LB_",
+   "set": {
+    "base_medium": {
+     "v": "LB",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "complex",
+     "b": "inferred",
+     "q": ""
+    },
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": "to a final optical density (OD600) of approximately 0.5"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "_DMEM_",
+   "set": {
+    "base_medium": {
+     "v": "cell_culture",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "defined_rich",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "perABC",
+   "set": {
+    "perturbed_genes": {
+     "v": "perABC",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "JPN15",
+   "set": {
+    "perturbed_genes": {
+     "v": "EAF plasmid",
+     "b": "stated",
+     "q": "missing the entire EAF plasmid (strain JPN15)"
+    },
+    "strain_name": {
+     "v": "JPN15",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,31 @@
+{
+  "gse": "GSE181687",
+  "notes": "Growth-phase time course of one strain (DY330 topA-SPA, an epitope-tagged strain, so genotype_class reference). strain_group K-12 inferred from the strain name DY330 (not stated in the text). Kanamycin only in the starter (selection), not a treatment. No reference condition named, so is_control left out. Libraries made without rRNA depletion.",
+  "default": {
+    "base_medium": {"v": "LB", "b": "stated", "q": "growing in LB medium at different time-points after starter culture inoculation"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "growing in LB medium at different time-points after starter culture inoculation"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "growing in LB medium at different time-points after starter culture inoculation"},
+    "culture_mode": {"v": "batch_shaken", "b": "inferred", "q": "0.5 mL of the starter culture was inoculated in 50 mL of fresh LB and the culture was cultivated at 37C with shaking 180 rpm."},
+    "oxygen": {"v": "aerobic", "b": "inferred", "q": "0.5 mL of the starter culture was inoculated in 50 mL of fresh LB and the culture was cultivated at 37C with shaking 180 rpm."},
+    "growth_temperature": {"v": 37, "b": "stated", "q": "0.5 mL of the starter culture was inoculated in 50 mL of fresh LB and the culture was cultivated at 37C with shaking 180 rpm."},
+    "genotype_class": {"v": "reference", "b": "inferred", "q": "DY330 topA-SPA"},
+    "global_regulator_perturbed": {"v": false, "b": "inferred", "q": "DY330 topA-SPA"},
+    "strain_group": {"v": "K-12", "b": "inferred", "q": "DY330 topA-SPA"},
+    "strain_name": {"v": "DY330", "b": "stated", "q": "DY330 topA-SPA"},
+    "treatment": {"v": "none", "b": "study_default", "q": "To quantify the transcription level of genes for Escherichia coli DY330 in different growth phases a series of RNA-Seq experiments was performed."},
+    "inducer_added": {"v": false, "b": "study_default", "q": "To quantify the transcription level of genes for Escherichia coli DY330 in different growth phases a series of RNA-Seq experiments was performed."},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "To quantify the transcription level of genes for Escherichia coli DY330 in different growth phases a series of RNA-Seq experiments was performed."},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "To quantify the transcription level of genes for Escherichia coli DY330 in different growth phases a series of RNA-Seq experiments was performed."},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "Sequencing libraries were prepared without rRNA depletion using NEBNext Ultra II Directional RNA Library kit (NEB)"},
+    "rrna_removal": {"v": "none", "b": "stated", "q": "Sequencing libraries were prepared without rRNA depletion using NEBNext Ultra II Directional RNA Library kit (NEB)"}
+  },
+  "rules": [
+    {"field": "ch:growth phase", "regex": "^Exponential phase$",
+     "set": {"growth_phase": {"v": "mid_exponential", "b": "stated", "q": ""}}},
+    {"field": "ch:growth phase", "regex": "^Exponential-to-stationary phase transition$",
+     "set": {"growth_phase": {"v": "transition", "b": "stated", "q": ""}}},
+    {"field": "ch:growth phase", "regex": "^Stationary phase$",
+     "set": {"growth_phase": {"v": "stationary", "b": "stated", "q": ""}}}
+  ],
+  "samples": {}
+}

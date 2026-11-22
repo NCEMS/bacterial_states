@@ -85,12 +85,18 @@ def check_resources(cfg: dict, resources: Path | None, rundir: Path) -> list[Che
             out.append(Check("vg short-read minimizer (k=15)", WARN,
                              "absent; samples with reads < 50 bp will fail at vg giraffe"))
 
-    for key, label in (("annotation_gff", "annotation GFF (featureCounts)"),
-                       ("annotation_source_gff", "annotation GFF (RefSeq source, for gene products)"),
-                       ("annotation_bed", "annotation BED")):
+    for key, label in (("annotation_gff", "counting annotation GFF (featureCounts)"),
+                       ("annotation_bed", "counting annotation BED (RSeQC)")):
         p = resource_path(cfg, key, resources, rundir)
         if p is not None:
             out.append(Check(label, OK if _exists(p) else FAIL, str(p)))
+    # in the core bundle since resources-v2; a resources directory from resources-v1 lacks it
+    p = resource_path(cfg, "genome_fasta", resources, rundir)
+    if p is not None:
+        out.append(Check("reference genome FASTA (GC bias)", OK if _exists(p) else WARN,
+                         str(p) if _exists(p) else f"absent ({p}); the QC records will have no GC bias, "
+                         "which the atlas model needs to embed the samples; "
+                         "`ecoli_ingest download core` gets it"))
 
     if runconfig.centrifuge_enabled(cfg):
         cf = resource_path(cfg, "centrifuge_index_path", resources, rundir)
@@ -102,9 +108,10 @@ def check_resources(cfg: dict, resources: Path | None, rundir: Path) -> list[Che
                              "or skip Centrifuge with `centrifuge: false` in config.yaml"))
     else:
         out.append(Check("centrifuge index", OK, "not needed (centrifuge: false)"))
-        if cfg.get("centrifuge_min_percentage") is not None:
-            out.append(Check("centrifuge gate", WARN,
-                             "centrifuge_min_percentage is ignored because centrifuge: false"))
+    old = [k for k in ("centrifuge_organism", "centrifuge_min_percentage") if k in cfg]
+    if old:
+        out.append(Check("centrifuge gate", WARN, f"{', '.join(old)} ignored: the Centrifuge gate is now the "
+                         "species gate (species_gate, species_thresholds)"))
     return out
 
 

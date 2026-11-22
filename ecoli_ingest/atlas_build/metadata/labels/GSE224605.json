@@ -1,0 +1,137 @@
+{
+ "gse": "GSE224605",
+ "notes": "NAD captureSeq (chemo-enzymatic capture of 5'-NAD-RNA; ADRPC+ and ADRPC- capture libraries): all samples assay_class IP_or_pulldown, not standard RNA-seq. Growth in LB at 24 C to exponential phase for every sample; the low temperature is the study's standard condition and not presented as a treatment, so treatment none. rRNA removal not stated.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "grown in LB medium at 24°C till exponential growth phase"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "grown in LB medium at 24°C"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "grown in LB medium at 24°C"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "grown in LB medium at 24°C"
+  },
+  "growth_temperature": {
+   "v": 24,
+   "b": "stated",
+   "q": "grown in LB medium at 24°C"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "5'-NAD-RNA identification in E. coli BW25113 wt, nudC KO and csdA KO strains."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "5'-NAD-RNA identification in E. coli BW25113 wt, nudC KO and csdA KO strains."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "5'-NAD-RNA identification in E. coli BW25113 wt, nudC KO and csdA KO strains."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "5'-NAD-RNA identification in E. coli BW25113 wt, nudC KO and csdA KO strains."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E. coli K-12 background strain BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "E. coli K-12 background strain BW25113"
+  },
+  "assay_class": {
+   "v": "IP_or_pulldown",
+   "b": "stated",
+   "q": "NAD captureSeq libraries were prepared according to the modified protocol provided by (Winz et al. 2017)."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "5'-NAD-RNA identification in E. coli BW25113 wt, nudC KO and csdA KO strains."
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "BW25113 wt",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "nudC KO",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "nudC",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "csdA KO",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "csdA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

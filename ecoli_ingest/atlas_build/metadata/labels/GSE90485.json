@@ -1,0 +1,23 @@
+{
+  "gse": "GSE90485",
+  "notes": "Cells derived from BW27785 carrying Clostridium botulinum Rho (Cb-Rho); blue colonies = prion-containing, pale = prion-lacking. Same genotype in all samples, difference is the prion state. Labelled heterologous_expression (Cb-Rho in E. coli, per summary); expression construct and inducer not described, so inducer_added left out. is_control left out: pale cells are the comparator but not a reference genotype. Phase from 'Log-phase cultures' (stated) although grown 5 h from a colony. strain_group K-12 inferred from parent BW27785.",
+  "default": {
+    "base_medium": {"v": "LB", "b": "stated", "q": "Log-phase cultures (LB broth, Miller formulation)"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "Log-phase cultures (LB broth, Miller formulation)"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "Log-phase cultures (LB broth, Miller formulation)"},
+    "growth_phase": {"v": "mid_exponential", "b": "stated", "q": "Log-phase cultures (LB broth, Miller formulation) inoculated with either blue or pale colonies were grown for 5 hr at 37 degrees celsius."},
+    "growth_temperature": {"v": 37, "b": "stated", "q": "were grown for 5 hr at 37 degrees celsius"},
+    "strain_group": {"v": "K-12", "b": "inferred", "q": "BW27785"},
+    "strain_name": {"v": "BW27785", "b": "stated", "q": "BW27785"},
+    "genotype_class": {"v": "heterologous_expression", "b": "study_default", "q": "we show that its cPrD enables Cb-Rho to access alternative conformations in bacteria"},
+    "perturbed_genes": {"v": "Cb-rho", "b": "study_default", "q": "transcription terminator Rho of Clostridium botulinum (Cb-Rho)"},
+    "global_regulator_perturbed": {"v": false, "b": "inferred", "q": "transcription terminator Rho of Clostridium botulinum (Cb-Rho)"},
+    "treatment": {"v": "none", "b": "study_default", "q": "Transcription profiling of cells descended from two blue (prion-containing) colonies and three pale (prion-lacking) colonies"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "Transcription profiling of cells descended from two blue (prion-containing) colonies and three pale (prion-lacking) colonies"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "Transcription profiling of cells descended from two blue (prion-containing) colonies and three pale (prion-lacking) colonies"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "Purified total RNA was depleted of rRNA using a Ribo-Zero (Bacteria) rRNA Removal Kit (Illumina)."},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "Purified total RNA was depleted of rRNA using a Ribo-Zero (Bacteria) rRNA Removal Kit (Illumina)."}
+  },
+  "rules": [],
+  "samples": {}
+}

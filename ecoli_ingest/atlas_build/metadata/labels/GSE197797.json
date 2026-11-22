@@ -1,0 +1,138 @@
+{
+ "gse": "GSE197797",
+ "notes": "STEC 86-24 and EAEC 042 grown in DMEM to OD 0.3, then 3 h in M9 (control) or culture supernatant of C. werkmanii / E. albertii (other_chemical, adapted since 3 h). No phase after 3 h incubation. Supernatant medium labelled base_medium other; M9 carbon source not given so medium_class left empty. WT re-read: STEC 86-24 and EAEC 042 used unmodified -> wild_type.",
+ "default": {
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "resuspended with M9 media (control), supernatant from Citrobacter werkmanii (CW) or supernatant from Escherichia albertii (EA) and incubated for 3 h at 37 ºC and 150 rpm"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "resuspended with M9 media (control), supernatant from Citrobacter werkmanii (CW) or supernatant from Escherichia albertii (EA) and incubated for 3 h at 37 ºC and 150 rpm"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "resuspended with M9 media (control), supernatant from Citrobacter werkmanii (CW) or supernatant from Escherichia albertii (EA) and incubated for 3 h at 37 ºC and 150 rpm"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "Evaluate changes in gene expression for STEC and EAEC after an incubation with supernantant"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Evaluate changes in gene expression for STEC and EAEC after an incubation with supernantant"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Evaluate changes in gene expression for STEC and EAEC after an incubation with supernantant"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Evaluate changes in gene expression for STEC and EAEC after an incubation with supernantant"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Evaluate changes in gene expression for STEC and EAEC after an incubation with supernantant"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribo-Zero rRNA Removal Kit (Bacteria)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribo-Zero rRNA Removal Kit (Bacteria)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "^86-24$",
+   "set": {
+    "strain_group": {
+     "v": "EHEC_STEC",
+     "b": "stated",
+     "q": "Shiga toxin-producing Escherichia coli"
+    },
+    "strain_name": {
+     "v": "86-24",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^042$",
+   "set": {
+    "strain_group": {
+     "v": "EAEC",
+     "b": "stated",
+     "q": "Enteroaggregative Escherichia coli"
+    },
+    "strain_name": {
+     "v": "042",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "M9 media \\(control\\)",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "base_medium": {
+     "v": "M9",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "supernatant",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "stated",
+     "q": "resuspended with M9 media (control), supernatant from Citrobacter werkmanii (CW) or supernatant from Escherichia albertii (EA) and incubated for 3 h at 37 ºC and 150 rpm"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "base_medium": {
+     "v": "other",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

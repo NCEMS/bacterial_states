@@ -1,0 +1,133 @@
+{
+ "gse": "GSE147272",
+ "notes": "Microgravity simulated in a rotary cell culture system (RCCS); MG = other_physical, NG (vertical rotation) = control. Exposure left out (not stated that cells were grown in the RCCS from inoculation, though implied). Culture mode (RCCS rotating vessel) and oxygen not stated. Exponential samples at OD 0.6-0.8 in M9, stated phase word wins.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "study_default",
+   "q": "M9 minimal media with glucose, 37°C"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "M9 minimal media with glucose, 37°C"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "M9 minimal media with glucose, 37°C"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "study_default",
+   "q": "M9 minimal media with glucose, 37°C"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "study_default",
+   "q": "M9 minimal media with glucose, 37°C"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "wildtype"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "wildtype"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Culture condition: MG and normal gravity (NG) condition, in duplicate"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Culture condition: MG and normal gravity (NG) condition, in duplicate"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Culture condition: MG and normal gravity (NG) condition, in duplicate"
+  },
+  "strain_group": {
+   "v": "probiotic",
+   "b": "stated",
+   "q": "probiotic E. coli Nissle 1917 strain"
+  },
+  "strain_name": {
+   "v": "Nissle 1917",
+   "b": "stated",
+   "q": "Nissle 1917"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA without ribosomal RNA"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "the ribosomal RNAs were removed from the total RNA using the Ribo-Zero rRNA Removal Kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:growth phase",
+   "regex": "^exponential$",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:growth phase",
+   "regex": "^stationary$",
+   "set": {
+    "growth_phase": {
+     "v": "stationary",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^MG$",
+   "set": {
+    "treatment": {
+     "v": "other_physical",
+     "b": "stated",
+     "q": "MG condition can be simulated by rotary cell culture system"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "normal gravity",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

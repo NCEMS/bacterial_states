@@ -1,0 +1,75 @@
+{
+ "gse": "GSE248909",
+ "notes": "Reviewed 2026-11-15: 1:1 mating mixtures: treatment conjugation (user decision) | Mating mixtures of donor E. coli K-12 LE392 and recipient E. coli BL21(DE3) incubated in PBS at 25 C with polystyrene (PS) micro/nanoplastics; mixed strains, so strain_group left out and mixed_organism true (two strains). Exposure left out: design says 2 hours, treatment protocol says 8 h. Medium during sampling is PBS (no growth medium label); growth phase unknown. 'Control 01' carries the ROS scavenger only, so it is treated (other_chemical) and not a control.",
+ "default": {
+  "growth_temperature": {
+   "v": 25,
+   "b": "stated",
+   "q": "at a 1:1 ratio in PBS, and  incubation in triplicate for 8 h"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "stated",
+   "q": "wild-type E. coli K-12 LE392"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "wild-type E. coli K-12 LE392"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "The group without adding PS was the control group."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "The group without adding PS was the control group."
+  },
+  "mixed_organism": {
+   "v": true,
+   "b": "stated",
+   "q": "Mixed the donor (E. coli K-12 LE392) and intrageneric recipient or intergeneric recipient at a 1:1 ratio in PBS"
+  },
+  "strain_name": {
+   "v": "LE392 x BL21(DE3)",
+   "b": "stated",
+   "q": "E. coli K-12 LE392"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was extracted using the Trizol method"
+  },
+  "treatment": {
+   "v": "other_chemical;conjugation",
+   "b": "stated",
+   "q": "in response to 0.1 mg/L 20 nm PS"
+  },
+  "is_control": {
+   "v": false,
+   "b": "stated",
+   "q": "The group without adding PS was the control group."
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^Control 00$",
+   "set": {
+    "treatment": {
+     "v": "conjugation",
+     "b": "study_default",
+     "q": "Mixed the donor (E. coli K-12 LE392) and intrageneric recipient or intergeneric recipient at a 1:1 ratio in PBS"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

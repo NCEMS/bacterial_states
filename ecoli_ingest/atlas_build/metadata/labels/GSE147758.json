@@ -1,0 +1,161 @@
+{
+ "gse": "GSE147758",
+ "notes": "Reviewed 2026-11-15: starvation for a nutrient without its own class is other_starvation (user decision) | Thymidine starvation (shift into medium without thymidine, 30 min) has no matching starvation class; labeled medium_or_oxygen_shift. Wash-and-return controls and log samples are untreated; parental log and parental control both controls. Phase: log samples stated, washed/starved 30 min after shift from log cells inferred mid_exponential. Base medium not named. GSM4445427 has source_name 7B-log but title/treatment say control (both untreated log, labels unaffected).",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "MDS42 background"
+  },
+  "growth_temperature": {
+   "v": 30,
+   "b": "stated",
+   "q": "grown for 2h at 30°C"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Three samples were taken for each strain: a high thymidine sample 2h into growth, a sample 30 minutes into thymidine starvation, and a control was washed twice"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Three samples were taken for each strain: a high thymidine sample 2h into growth, a sample 30 minutes into thymidine starvation, and a control was washed twice"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Three samples were taken for each strain: a high thymidine sample 2h into growth, a sample 30 minutes into thymidine starvation, and a control was washed twice"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Indexed libraries were prepared from the resulting RNA using the NEBNext Ultra Directional RNA Library Prep Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA was removed from these samples using the Ribo-Zero rRNA Removal Kit (Illumina)"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "evolved and parental strains in the MDS42 background"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^Evolved",
+   "set": {
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MDS42 evolved 7B",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^Parental",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MDS42",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "in log phase",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": ""
+    },
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "control for starved",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": ""
+    },
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "thymidine starvation",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": ""
+    },
+    "treatment": {
+     "v": "other_starvation",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^Parental (log|control)",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^Parental Starved",
+   "set": {
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

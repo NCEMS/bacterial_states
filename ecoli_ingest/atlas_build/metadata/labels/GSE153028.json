@@ -1,0 +1,112 @@
+{
+ "gse": "GSE153028",
+ "notes": "Part 2: BL21(DE3), C41(DE3), C43(DE3) each with empty pACYCDuet-1, induced with IPTG for 2 h after mid-log. BL21(DE3)EV+IPTG is the control (induced empty vector, parental strain). Sampled 2 h after induction: growth_phase left out. How C41/C43 differ from the parent is not described: genotype_class left out for them. No shaking or rRNA removal described.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Triplicate samples were grown overnight at 37 °C and used to inoculate 25mL Luria broth (LB) cultures and grown to mid-log phase (0.4-0.6)."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Triplicate samples were grown overnight at 37 °C and used to inoculate 25mL Luria broth (LB) cultures and grown to mid-log phase (0.4-0.6)."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Triplicate samples were grown overnight at 37 °C and used to inoculate 25mL Luria broth (LB) cultures and grown to mid-log phase (0.4-0.6)."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "strain grown at 37C in luria broth to mid log phase then induced with IPTG for 2 hours"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "No treatment"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "strain grown at 37C in luria broth to mid log phase then induced with IPTG for 2 hours"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "assessed  the differential expression of E. coli strains C41(DE3) and C43(DE3) compared to BL21(DE3)"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "assessed  the differential expression of E. coli strains C41(DE3) and C43(DE3) compared to BL21(DE3)"
+  },
+  "strain_group": {
+   "v": "B",
+   "b": "inferred",
+   "q": "C41(DE3) and C43(DE3) strains in comparison to their parental strain BL21(DE3)"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "total RNA was purified using RNeasy Kit (QIAGEN) RNA libraries were prepared for sequencing using standard MiGen protocols"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "differential gene expression of C41(DE3) and C43(DE3) strains in comparison to their parental strain BL21(DE3)"
+  }
+ },
+ "rules": [
+  {
+   "field": "source_name",
+   "regex": "^BL21\\(DE3\\)EV",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": "parental strain BL21(DE3)"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "BL21(DE3)",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "^C41\\(DE3\\)EV",
+   "set": {
+    "strain_name": {
+     "v": "C41(DE3)",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "^C43\\(DE3\\)EV",
+   "set": {
+    "strain_name": {
+     "v": "C43(DE3)",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

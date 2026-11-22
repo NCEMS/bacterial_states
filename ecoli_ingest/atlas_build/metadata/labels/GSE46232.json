@@ -1,0 +1,93 @@
+{
+ "gse": "GSE46232",
+ "notes": "Single E. coli sample (S. coelicolor sample not a candidate); no control. Library is FRT-seq of MICROBExpress-enriched RNA; series mentions differential RNA-seq but this sample's description reads as ordinary strand-specific RNA-seq, so total_rnaseq (somewhat unsure). WT re-read: BW25113 wild-type reference strain is wild_type.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Mid-exponential growth"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "stated",
+   "q": "in a 250 mL Erlenmeyer flask at 37°C with shaking (250 rpm)"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "was cultivated in 100 mL of LB broth"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "was cultivated in 100 mL of LB broth"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "was cultivated in 100 mL of LB broth"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "in a 250 mL Erlenmeyer flask at 37°C with shaking (250 rpm)"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "at 37°C with shaking (250 rpm) to an O.D.600nm of 0.6"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "BW25113; wild-type reference strain"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "BW25113; wild-type reference strain"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "S. coelicolor and E. coli reference strains were grown in batch culture with shaking."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "S. coelicolor and E. coli reference strains were grown in batch culture with shaking."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "S. coelicolor and E. coli reference strains were grown in batch culture with shaking."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli K12 strain BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "BW25113; wild-type reference strain"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "inferred",
+   "q": "FRT-seq: amplification-free, strand-specific transcriptome sequencing"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Samples were enriched for mRNA using MICROBExpress™-Bacteria beads"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "The E. coli sample was extracted during mid-exponential growth"
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

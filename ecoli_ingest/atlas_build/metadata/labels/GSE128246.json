@@ -1,0 +1,96 @@
+{
+ "gse": "GSE128246",
+ "notes": "Reviewed 2026-11-15: mating mixture with P. putida: treatment conjugation (user decision) | Mixed culture of E. coli LE392 with P. putida KT2440 (mixed_organism true) held 2 h in PBS at 25 °C without shaking after LB growth; base_medium left out (PBS, not a growth medium). AgNPs and Ag ion both labelled metal_excess (AgNP could also be other_chemical). Phase not given. rRNA removal not described.",
+ "default": {
+  "genotype_class": {
+   "v": "reference",
+   "b": "stated",
+   "q": "Mixed wild-type strains E. coli K-12 LE392, P. putida KT2440 and IncPα RP4 plasmid were cultured in triplicate in 10 mL PBS containing 0 and 1 μg/L AgNPs or Ag ion for 2h, at 25 °C, without shaking"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "Mixed wild-type strains E. coli K-12 LE392, P. putida KT2440 and IncPα RP4 plasmid were cultured in triplicate in 10 mL PBS containing 0 and 1 μg/L AgNPs or Ag ion for 2h, at 25 °C, without shaking"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Mixed wild-type strains E. coli K-12 LE392, P. putida KT2440 and IncPα RP4 plasmid were cultured in triplicate in 10 mL PBS containing 0 and 1 μg/L AgNPs or Ag ion for 2h, at 25 °C, without shaking"
+  },
+  "strain_name": {
+   "v": "LE392",
+   "b": "stated",
+   "q": "ch:e coli substr**: LE392"
+  },
+  "growth_temperature": {
+   "v": 25,
+   "b": "stated",
+   "q": "Mixed wild-type strains E. coli K-12 LE392, P. putida KT2440 and IncPα RP4 plasmid were cultured in triplicate in 10 mL PBS containing 0 and 1 μg/L AgNPs or Ag ion for 2h, at 25 °C, without shaking"
+  },
+  "culture_mode": {
+   "v": "static_liquid",
+   "b": "stated",
+   "q": "Mixed wild-type strains E. coli K-12 LE392, P. putida KT2440 and IncPα RP4 plasmid were cultured in triplicate in 10 mL PBS containing 0 and 1 μg/L AgNPs or Ag ion for 2h, at 25 °C, without shaking"
+  },
+  "mixed_organism": {
+   "v": true,
+   "b": "stated",
+   "q": "Mixed wild-type strains E. coli K-12 LE392, P. putida KT2440 and IncPα RP4 plasmid were cultured in triplicate in 10 mL PBS containing 0 and 1 μg/L AgNPs or Ag ion for 2h, at 25 °C, without shaking"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Mixed wild-type strains E. coli K-12 LE392, P. putida KT2440 and IncPα RP4 plasmid were cultured in triplicate in 10 mL PBS containing 0 and 1 μg/L AgNPs or Ag ion for 2h, at 25 °C, without shaking"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Mixed wild-type strains E. coli K-12 LE392, P. putida KT2440 and IncPα RP4 plasmid were cultured in triplicate in 10 mL PBS containing 0 and 1 μg/L AgNPs or Ag ion for 2h, at 25 °C, without shaking"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "RNA libraries were prepared for sequencing using standard Illumina protocols"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^control$",
+   "set": {
+    "treatment": {
+     "v": "conjugation",
+     "b": "study_default",
+     "q": "Mixed wild-type strains E. coli K-12 LE392, P. putida KT2440 and IncPα RP4 plasmid were cultured in triplicate in 10 mL PBS containing 0 and 1 μg/L AgNPs or Ag ion for 2h, at 25 °C, without shaking"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "AgNPs|Ag ion",
+   "set": {
+    "treatment": {
+     "v": "metal_excess;conjugation",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": "Mixed wild-type strains E. coli K-12 LE392, P. putida KT2440 and IncPα RP4 plasmid were cultured in triplicate in 10 mL PBS containing 0 and 1 μg/L AgNPs or Ag ion for 2h, at 25 °C, without shaking"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,48 @@
+{
+  "gse": "GSE241658",
+  "notes": "In-host samples (glnG mutant from mouse cecal mucus): in_host, not_applicable, mixed_organism true, no treatment. In vitro MOPS glucose with 10 mM (high N) or 3 mM NH4Cl (low N, 'N-lim'). Low-N exponential = medium property (treatment none); low-N stationary (30 min after entry, nitrogen presumably exhausted) = nitrogen_starvation, acute. WT untreated in vitro samples (low-N exponential, high-N stationary) are controls. StrR marker ignored.",
+  "default": {
+    "genotype_class": {"v": "reference", "b": "stated", "q": "E. coli MG1655 StrR wild type"},
+    "global_regulator_perturbed": {"v": false, "b": "stated", "q": "E. coli MG1655 StrR wild type"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "E. coli MG1655 StrR wild type"},
+    "strain_name": {"v": "MG1655 StrR", "b": "stated", "q": "E. coli MG1655 StrR wild type"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "were cultured in MOPS minimal medium containing high or low nitrogen"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "were cultured in MOPS minimal medium containing high or low nitrogen"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "RNA libraries were prepared using the TruSeq Stranded Total RNA Library Prep kit."},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "ribo-depletion with the Illumina Ribo-Zero Plus rRNA Depletion Kit"},
+    "is_control": {"v": false, "b": "study_default", "q": "the differential expression of genes related to uptake and degradation of nitrogenous compounds in E. coli colonizing the mouse intestine as compared to E. coli grown in minimal medium in vitro"}
+  },
+  "rules": [
+    {"field": "ch:genotype", "regex": "deltaglnG", "set": {
+      "genotype_class": {"v": "deletion", "b": "stated", "q": ""},
+      "perturbed_genes": {"v": "glnG", "b": "stated", "q": ""},
+      "global_regulator_perturbed": {"v": true, "b": "stated", "q": ""},
+      "strain_name": {"v": "MG1655 StrR deltaglnG CamR", "b": "stated", "q": "E. coli MG1655 ∆glnG StrR CamR"}}},
+    {"field": "source_name", "regex": "mouse mucus", "set": {
+      "culture_mode": {"v": "in_host", "b": "stated", "q": ""},
+      "growth_phase": {"v": "not_applicable", "b": "inferred", "q": ""},
+      "mixed_organism": {"v": true, "b": "stated", "q": "extracted the total RNA from mouse cecal mucus"},
+      "base_medium": {"v": "gut_content", "b": "stated", "q": ""},
+      "medium_class": {"v": "natural_fluid", "b": "inferred", "q": ""}}},
+    {"field": "source_name", "regex": "invitro culture", "set": {
+      "mixed_organism": {"v": false, "b": "stated", "q": ""},
+      "culture_mode": {"v": "batch_shaken", "b": "inferred", "q": "at 37°C  and agitation at 200 rpm"},
+      "oxygen": {"v": "aerobic", "b": "inferred", "q": "at 37°C  and agitation at 200 rpm"},
+      "growth_temperature": {"v": 37, "b": "stated", "q": "at 37°C  and agitation at 200 rpm"},
+      "base_medium": {"v": "MOPS", "b": "stated", "q": "grown on MOPS minimal medium with 0.2% glucose as sole carbon source"},
+      "medium_class": {"v": "defined_minimal", "b": "inferred", "q": "grown on MOPS minimal medium with 0.2% glucose as sole carbon source"},
+      "amino_acids_supplied": {"v": false, "b": "inferred", "q": "grown on MOPS minimal medium with 0.2% glucose as sole carbon source"},
+      "carbon_source": {"v": "glucose", "b": "stated", "q": "grown on MOPS minimal medium with 0.2% glucose as sole carbon source"},
+      "treatment": {"v": "none", "b": "study_default", "q": "were cultured in MOPS minimal medium containing high or low nitrogen"}}},
+    {"field": "description", "regex": "exponential phase", "set": {
+      "growth_phase": {"v": "mid_exponential", "b": "stated", "q": "culture samples were harvested during logarithmic phase (OD600=0.4-0.6)"}}},
+    {"field": "description", "regex": "stationary phase", "set": {
+      "growth_phase": {"v": "stationary", "b": "stated", "q": "culture samples were harvested 30 minutes after the culture entered the stationary phase"}}},
+    {"field": "description", "regex": "stationary phase .*low nitrogen", "set": {
+      "treatment": {"v": "nitrogen_starvation", "b": "inferred", "q": "culture samples were harvested 30 minutes after the culture entered the stationary phase"},
+      "exposure": {"v": "acute", "b": "inferred", "q": "culture samples were harvested 30 minutes after the culture entered the stationary phase"}}},
+    {"field": "title", "regex": "^MG1655 invitro (N-lim E|S) phase", "set": {
+      "is_control": {"v": true, "b": "stated", "q": ""}}}
+  ],
+  "samples": {}
+}

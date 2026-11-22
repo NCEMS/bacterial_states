@@ -1,0 +1,116 @@
+{
+ "gse": "GSE132637",
+ "notes": "MS8345 pathotype not given in the text, strain_group left empty. PBT2 (ionophore) classed other_chemical; present during growth to OD 0.5 (adapted). culture_mode not stated. WT re-read: reference -> wild_type, strain MS8345 used unmodified.",
+ "default": {
+  "base_medium": {
+   "v": "Mueller-Hinton",
+   "b": "stated",
+   "q": "Bacteria were grown in cation-adjusted Mueller-Hinton broth (CA-MHB)"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "cation-adjusted Mueller-Hinton broth (CA-MHB)"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "cation-adjusted Mueller-Hinton broth (CA-MHB)"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "at 37°C under aerobic conditions"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "at 37°C under aerobic conditions"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "bacteria were grown to OD600 of 0.5 in CA-MHB"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "MS8345"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "2 sample conditions were analyzed"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "1) bacterial treatment with cation-adjusted Muller Hinton broth (CA-MHB; reference sample); or 2)  CA-MHB+PBT2"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "1) bacterial treatment with cation-adjusted Muller Hinton broth (CA-MHB; reference sample); or 2)  CA-MHB+PBT2"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "1) bacterial treatment with cation-adjusted Muller Hinton broth (CA-MHB; reference sample); or 2)  CA-MHB+PBT2"
+  },
+  "strain_name": {
+   "v": "MS8345",
+   "b": "stated",
+   "q": "MS8345"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "The cDNA library was prepared using a Ribo-zero stranded protocol"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA was depleted with Ribo Zero"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "Control",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "PBT2",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "stated",
+     "q": "grown to  OD600 of 0.5 in CA-MHB in the presence or absence of PBT2"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

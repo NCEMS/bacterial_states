@@ -1,0 +1,35 @@
+{
+  "gse": "GSE224889",
+  "notes": "Parent is the glucose-adapted (GMOS) MG1655 ALE strain, used as reference/control. KO strains are deletions; ALE descendants of the KOs labelled evolved_isolate with the deleted genes listed. The medium of the RNA-seq cultures is not stated (only that the parent was adapted to glucose minimal media), so medium/carbon/temperature/oxygen left out; 'batch' culture type stated but shaking not described, so culture_mode left out.",
+  "default": {
+    "growth_phase": {"v": "mid_exponential", "b": "stated", "q": "Total RNA was extracted from mid-log phase culture for RNA-Seq library preparation."},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "E. coli K-12 MG1655 strains subjected to adaptive laboratory evolution"},
+    "strain_name": {"v": "MG1655 glucose-adapted ALE strain", "b": "stated", "q": "a strain of E. coli K-12 MG1655 that had already been previously adapted for growth on glucose minimal media"},
+    "treatment": {"v": "none", "b": "study_default", "q": "RNA-seq profiles of the original glucose-adapted strain, the 2 deletion strains, and 4 laboratory-evolved strains from each deletion are included in duplicate."},
+    "inducer_added": {"v": false, "b": "study_default", "q": "RNA-seq profiles of the original glucose-adapted strain, the 2 deletion strains, and 4 laboratory-evolved strains from each deletion are included in duplicate."},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "RNA-seq profiles of the original glucose-adapted strain, the 2 deletion strains, and 4 laboratory-evolved strains from each deletion are included in duplicate."},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "RNA-seq profiles of the original glucose-adapted strain, the 2 deletion strains, and 4 laboratory-evolved strains from each deletion are included in duplicate."},
+    "global_regulator_perturbed": {"v": false, "b": "study_default", "q": "Either isochorismate synthase (menF) or isochorismate synthase AND chorismate lyase (ubiC) was deleted"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "The ribosomal RNA was removed using an Illumina Ribo-Zero rRNA removal kit for Gram-negative bacteria."},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "The ribosomal RNA was removed using an Illumina Ribo-Zero rRNA removal kit for Gram-negative bacteria."},
+    "is_control": {"v": false, "b": "study_default", "q": "RNA-seq profiles of the original glucose-adapted strain, the 2 deletion strains, and 4 laboratory-evolved strains from each deletion are included in duplicate."}
+  },
+  "rules": [
+    {"field": "ch:strain", "regex": "^Glucose media optimized strain$", "set": {
+      "genotype_class": {"v": "reference", "b": "stated", "q": ""},
+      "is_control": {"v": true, "b": "stated", "q": "the original glucose-adapted strain"}}},
+    {"field": "ch:strain", "regex": "^GMOS menF KO$", "set": {
+      "genotype_class": {"v": "deletion", "b": "stated", "q": ""},
+      "perturbed_genes": {"v": "menF", "b": "stated", "q": ""}}},
+    {"field": "ch:strain", "regex": "^GMOS menF/ubiC KO$", "set": {
+      "genotype_class": {"v": "deletion", "b": "stated", "q": ""},
+      "perturbed_genes": {"v": "menF;ubiC", "b": "stated", "q": ""}}},
+    {"field": "ch:strain", "regex": "^GMOS menF KO, adapted$", "set": {
+      "genotype_class": {"v": "evolved_isolate", "b": "stated", "q": ""},
+      "perturbed_genes": {"v": "menF", "b": "stated", "q": ""}}},
+    {"field": "ch:strain", "regex": "^GMOS menF/ubiC KO adapted$", "set": {
+      "genotype_class": {"v": "evolved_isolate", "b": "stated", "q": ""},
+      "perturbed_genes": {"v": "menF;ubiC", "b": "stated", "q": ""}}}
+  ],
+  "samples": {}
+}

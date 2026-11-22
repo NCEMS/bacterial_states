@@ -1,4 +1,4 @@
-"""Discriminant axes and paired tests shared by the case studies (notebook cell 46)."""
+"""Discriminant axes and paired tests shared by the case studies."""
 from __future__ import annotations
 
 import numpy as np
@@ -70,3 +70,8 @@ def paired_axis_test(Ec: np.ndarray, y: np.ndarray, groups: np.ndarray, n_perm: 
     null = np.array(null)
     return {"axis_oof": oof, "n_pairs": n_pairs, "correct": correct, "p_sign": p_sign, "p_wilcoxon": p_w,
             "null_median": float(np.median(null)), "p_perm": float((null >= correct).mean()), "n_perm": int(n_perm)}
+
+
+def perm_p_text(test: dict) -> str:
+    """'p=0.012', or 'p<0.001' when no permutation reached the observed count."""
+    return f"p<{1 / test['n_perm']:.3g}" if test["p_perm"] == 0 else f"p={test['p_perm']:.3g}"

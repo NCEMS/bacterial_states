@@ -1,0 +1,116 @@
+{
+ "gse": "GSE110854",
+ "notes": "BW25113 grown in LB with 0 or 12.5 ug/mL ciclopirox from inoculation to OD600 1.0 (above the mid_exponential OD range, no phase word: growth_phase left out). Ciclopirox (antifungal) labelled other_chemical. rrna_removal not stated (TruSeq RNA kit named, selection not described).",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "study_default",
+   "q": "Growth in LB media to OD600=1.0 at 37C"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Growth in LB media to OD600=1.0 at 37C"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Growth in LB media to OD600=1.0 at 37C"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "study_default",
+   "q": "Growth in LB media to OD600=1.0 at 37C"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "the bacterial cells were grown in this media with vigorous shaking"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "the bacterial cells were grown in this media with vigorous shaking"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "wild type"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "wild type"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "BW25113"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Illumina TruSeq RNA Sample Prep Kit (Cat#FC-122-1001) was used for the construction of sequencing libraries."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA profiles of ciclopirox treatment with or without sublethal concentration in wild type (WT)"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA profiles of ciclopirox treatment with or without sublethal concentration in wild type (WT)"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA profiles of ciclopirox treatment with or without sublethal concentration in wild type (WT)"
+  }
+ },
+ "rules": [
+  {
+   "field": "source_name",
+   "regex": "absence of ciclopirox",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "presence of 12.5",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "Ciclopirox (0 or 12.5 ug/mL) in LB media was prepared and the bacterial cells were grown in this media"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

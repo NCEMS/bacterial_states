@@ -1,0 +1,17 @@
+{
+  "gse": "GSE96551",
+  "notes": "Butanol-producing BW25113 derivative EB216 (reference) vs pykA deletion EB222, fermentation time course 6/12/24/48 h. Medium, temperature, oxygen, culture mode and growth phase not given (no phase assigned to time points). inducer_added left out: whether the butanol pathway is induced is not said. WT at each time point is a control (study says so).",
+  "default": {
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "Total RNAs were isolated using TRIzol reagent"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "BW25113"},
+    "treatment": {"v": "none", "b": "study_default", "q": "The total RNA of strain EB216 and EB216-∆pykA (EB222) was isolated in different time points in the fermentation process at 6 h, 12 h, 24 h, and 48 h."},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "The total RNA of strain EB216 and EB216-∆pykA (EB222) was isolated in different time points in the fermentation process at 6 h, 12 h, 24 h, and 48 h."},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "The total RNA of strain EB216 and EB216-∆pykA (EB222) was isolated in different time points in the fermentation process at 6 h, 12 h, 24 h, and 48 h."},
+    "global_regulator_perturbed": {"v": false, "b": "inferred", "q": "differentially expressed genes caused by pykA inactivation"}
+  },
+  "rules": [
+    {"field": "title", "regex": "^WT_", "set": {"genotype_class": {"v": "reference", "b": "stated", "q": "Samples of strain EB216 were used as control samples for strain EB216-∆pykA at the respective time."}, "strain_name": {"v": "EB216", "b": "stated", "q": "The total RNA of strain EB216 and EB216-∆pykA (EB222)"}, "is_control": {"v": true, "b": "stated", "q": "Samples of strain EB216 were used as control samples for strain EB216-∆pykA at the respective time."}}},
+    {"field": "title", "regex": "^MT_", "set": {"genotype_class": {"v": "deletion", "b": "stated", "q": "The total RNA of strain EB216 and EB216-∆pykA (EB222)"}, "perturbed_genes": {"v": "pykA", "b": "stated", "q": "The total RNA of strain EB216 and EB216-∆pykA (EB222)"}, "strain_name": {"v": "EB222", "b": "stated", "q": "The total RNA of strain EB216 and EB216-∆pykA (EB222)"}, "is_control": {"v": false, "b": "stated", "q": "Samples of strain EB216 were used as control samples for strain EB216-∆pykA at the respective time."}}}
+  ],
+  "samples": {}
+}

@@ -1,6 +1,5 @@
-"""Everything the notebook has in memory after training, rebuilt from the saved bundle without
-retraining: aligned training data (with the recorded split), the z-scored input made with the
-bundle's saved statistics, and the embedding / factor blocks / class probabilities of every sample."""
+"""What the model figures and the case studies read: the training tables put through a trained
+bundle, as `ecoli_atlas evaluate` does (same preprocessing, same split)."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -9,108 +8,93 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from ..artifacts import MANIFEST_FILE, ModelBundle, load_splits
-from ..config import TrainConfig
-from ..data import TrainingData, build_training_data
-from ..embed import EmbedResult, embed_zscored
-from ..preprocess import align_to_genes
+from ..artifacts import ModelBundle
+from ..config import HEADS, TrainConfig
+from ..data import TrainingData
+from ..train import encode
+
+EMBEDDING_FILE = "embedding.tsv"
 
 
 @dataclass
 class FigureContext:
-    data: TrainingData
     bundle: ModelBundle
+    data: TrainingData
     cfg: TrainConfig
-    Z: np.ndarray                 # samples x model genes, z-scored with the bundle's saved statistics
-    res: EmbedResult              # embedding (final), blocks (raw factor blocks), proba
-    seed: int
     device: object
-    zscore_max_dev: float | None  # max |data.X - Z| when the gene lists coincide
-    gene_coverage: float
-    log: object = field(default=lambda *_: None, repr=False)
-    _logcpm: np.ndarray | None = field(default=None, repr=False)
+    z: np.ndarray                   # the embedding, samples x dimensions
+    probs: dict                     # head -> probability of its positive class
+    scores: dict                    # head -> log-odds of its positive class
+    gene_names: list                # one label per model feature: the symbol, or the feature id where a symbol repeats
+    log: object = print
+    _cache: dict = field(default_factory=dict)
+
+    @classmethod
+    def build(cls, bundle: ModelBundle, data: TrainingData, device, symbols: pd.Series | None = None, log=print) -> "FigureContext":
+        enc = encode(bundle.model, data.X, data.C, device)
+        ids = list(data.fs.ids)
+        names = ids
+        if symbols is not None:
+            sym = symbols.reindex(ids).fillna("").astype(str)
+            repeated = sym.duplicated(keep=False) | (sym == "")
+            names = list(np.where(repeated, ids, sym))
+        return cls(bundle, data, bundle.config, device, enc["z"], enc["probs"], enc["scores"], names, log)
 
     @property
     def meta(self) -> pd.DataFrame:
         return self.data.meta
 
     @property
-    def genes(self) -> list:
-        return self.data.genes
+    def ids(self) -> list:
+        return self.data.ids
 
     @property
-    def factors(self) -> list:
-        return self.bundle.factor_order
+    def split(self) -> np.ndarray:
+        return self.data.split
 
     @property
-    def embedding(self) -> np.ndarray:
-        return self.res.embedding.values
+    def gse(self) -> np.ndarray:
+        return self.data.splits["gse"].astype(str).to_numpy()
 
     @property
-    def logcpm(self) -> np.ndarray:
-        if self._logcpm is None:
-            self._logcpm = np.log1p(self.data.cpm)
-        return self._logcpm
+    def seed(self) -> int:
+        return int(self.cfg.seed)
 
     @property
-    def concat_blocks(self) -> np.ndarray:
-        return np.concatenate([self.res.blocks[f] for f in self.factors], axis=1)
+    def heads(self) -> list:
+        return list(HEADS)
 
-    def positive_index(self, factor: str) -> int:
-        fa = self.bundle.factors[factor]
-        if fa.positive_class in fa.classes:
-            return fa.classes.index(fa.positive_class)
-        return int(self.bundle.prep.get("positive_class_index", {}).get(factor, 1))
+    @property
+    def blocks(self) -> dict:
+        """block name -> its columns of the embedding (``embedding_blocks`` of the manifest)."""
+        return {b["block"]: self.z[:, b["start"]:b["end"]] for b in self.bundle.manifest["embedding_blocks"]}
 
-    def proba_positive(self, factor: str) -> np.ndarray:
-        return self.res.proba[factor][:, self.positive_index(factor)]
+    @property
+    def logx(self) -> np.ndarray:
+        """log2 normalised expression, samples x model features."""
+        if "logx" not in self._cache:
+            self._cache["logx"] = self.data.X.numpy() * self.data.zscore.sd + self.data.zscore.mu
+        return self._cache["logx"]
 
-    def classes(self, factor: str) -> list:
-        return list(self.bundle.factors[factor].classes)
+    def labels(self, head: str) -> np.ndarray:
+        """Class name of every sample for a head (None where it has no label)."""
+        return self.data.labels[head].astype("object").where(self.data.labels[head].notna(), None).to_numpy()
 
-    def labels_str(self, factor: str) -> pd.Series:
-        """Collapsed labels of a factor as strings (NaN where unlabelled), aligned to the bundle's class names."""
-        s = self.meta[factor + "_c"]
-        return pd.Series([None if pd.isna(v) else str(v) for v in s], index=s.index, dtype=object)
+    def column(self, name: str) -> np.ndarray:
+        """A metadata column as stripped text ('' everywhere when the table has no such column)."""
+        if name not in self.meta.columns:
+            return np.full(len(self.ids), "", dtype=object)
+        return self.meta[name].astype(str).str.strip().to_numpy(dtype=object)
 
-    def codes(self, factor: str) -> np.ndarray:
-        return self.data.factors[factor].codes
-
-
-def _manifest_config(models_dir: Path, seed: int | None, log) -> TrainConfig:
-    mf = models_dir / MANIFEST_FILE
-    if mf.exists():
-        cfg = TrainConfig.from_manifest(mf)
-    else:
-        log(f"warning: {mf} not found; using default training configuration")
-        cfg = TrainConfig()
-    if seed is not None:
-        cfg.seed = int(seed)
-    return cfg
-
-
-def build_context(counts: pd.DataFrame, meta_raw: pd.DataFrame, feat: pd.DataFrame, models_dir: str | Path,
-                  device="cpu", seed: int | None = None, log=None) -> FigureContext:
-    """counts: genes x samples; meta_raw: metadata_revised.csv layout; feat: NCBI feature table."""
-    log = log or (lambda *_: None)
-    models_dir = Path(models_dir)
-    bundle = ModelBundle.load(models_dir, device)
-    cfg = _manifest_config(models_dir, seed, log)
-    cfg.factors = tuple(bundle.factor_order)
-    splits = load_splits(models_dir)
-    if splits is None:
-        log(f"warning: {models_dir / 'splits.csv'} not found; the study split is searched again (slow, may differ)")
-    data = build_training_data(counts, meta_raw, feat, cfg, splits=splits, log=log)
-
-    cpm_df = pd.DataFrame(data.cpm, index=data.meta.index, columns=data.genes)
-    aligned, cov = align_to_genes(cpm_df, bundle.genes)
-    Z = bundle.zscore.apply(aligned.values.astype(np.float64))
-    zdev = float(np.max(np.abs(data.X.numpy() - Z))) if list(data.genes) == list(bundle.genes) else None
-    if zdev is None:
-        log(f"warning: training-table genes differ from the bundle ({cov.n_present}/{cov.n_model_genes} model genes present)")
-    else:
-        log(f"z-score with the saved statistics: max deviation from a fresh fit {zdev:.2e}")
-    res = embed_zscored(Z, list(data.meta.index), bundle)
-    log(f"embedded {len(res.embedding)} samples -> {res.embedding.shape[1]} dims with {models_dir}")
-    return FigureContext(data=data, bundle=bundle, cfg=cfg, Z=Z, res=res, seed=cfg.seed, device=device,
-                         zscore_max_dev=zdev, gene_coverage=cov.fraction, log=log)
+    def embedding_check(self, models_dir) -> dict:
+        """Largest difference between the embedding made here and the bundle's ``embedding.tsv``."""
+        path = Path(models_dir) / EMBEDDING_FILE
+        if not path.exists():
+            return {"skipped": f"no {EMBEDDING_FILE} in the bundle"}
+        saved = pd.read_csv(path, sep="\t", index_col=0)
+        saved.index = saved.index.astype(str)
+        missing = sorted(set(self.ids) - set(saved.index))
+        if missing or saved.shape[1] != self.z.shape[1]:
+            return {"skipped": f"{EMBEDDING_FILE} does not match the tables ({len(missing)} samples missing, {saved.shape[1]} columns)"}
+        diff = np.abs(saved.loc[self.ids].to_numpy() - self.z)
+        return {"n_samples": int(len(self.ids)), "max_abs_diff": float(diff.max()), "mean_abs_diff": float(diff.mean())}

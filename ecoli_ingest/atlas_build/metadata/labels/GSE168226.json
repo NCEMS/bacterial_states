@@ -1,0 +1,35 @@
+{
+ "gse": "GSE168226",
+ "notes": "Summary and design 'undetermined'. Strains BL21(DE3) Star, S-AB and SfB-ABCFPfA, all '_mfLon'; the engineered strains and mfLon are not explained, so genotype, control, medium and treatment labels left out. Only strain for the BL21(DE3) samples and the assay class are set.",
+ "default": {
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "inferred",
+   "q": "RNA was harvested using Trizol reagent RNA libraries were prepared for sequencing using standard Illumina protocols"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Ecoli cells"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "BL21",
+   "set": {
+    "strain_group": {
+     "v": "B",
+     "b": "stated",
+     "q": "BL21(DE3)"
+    },
+    "strain_name": {
+     "v": "BL21(DE3) Star",
+     "b": "stated",
+     "q": "BL21(DE3) Star_mfLon"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

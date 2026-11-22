@@ -1,0 +1,159 @@
+{
+ "gse": "GSE117303",
+ "notes": "Knockout strains are Keio deletions that were additionally adapted (evolved) for growth on glucose: genotype_class multiple (deletion + evolved). Kanamycin is Keio-marker selection, not a treatment. culture_mode not stated (flasks, shaking not described). WT re-read: Unmodified BW25113 wild type -> wild_type.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "All samples were grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 2 g/L D-glucose"
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "All samples were grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 2 g/L D-glucose"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "All samples were grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 2 g/L D-glucose"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "All samples were grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 2 g/L D-glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "All samples were grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 2 g/L D-glucose"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "All samples were grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 2 g/L D-glucose"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "All samples were grown to mid-log phase aerobically at 37°C in M9 minimal media supplemented with 2 g/L D-glucose"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "Escherichia coli BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "Escherichia coli BW25113"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Differentially expressed genes were examined comparing gene-deletion strains to the wild type strain."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Differentially expressed genes were examined comparing gene-deletion strains to the wild type strain."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Differentially expressed genes were examined comparing gene-deletion strains to the wild type strain."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Differentially expressed genes were examined comparing gene-deletion strains to the wild type strain."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribosomal RNA (rRNA) was removed utilizing Ribo-Zero rRNA removal kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA (rRNA) was removed utilizing Ribo-Zero rRNA removal kit"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Differentially expressed genes were examined comparing gene-deletion strains to the wild type strain."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "knockout",
+   "set": {
+    "genotype_class": {
+     "v": "multiple",
+     "b": "stated",
+     "q": "RNAseq was performed on various Keio collection gene-deletion populations and clones adapted for growth on D-glucose."
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^thrA knockout",
+   "set": {
+    "perturbed_genes": {
+     "v": "thrA",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^serB knockout",
+   "set": {
+    "perturbed_genes": {
+     "v": "serB",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^ptsI knockout",
+   "set": {
+    "perturbed_genes": {
+     "v": "ptsI",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

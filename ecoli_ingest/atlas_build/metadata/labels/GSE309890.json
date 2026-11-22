@@ -1,0 +1,96 @@
+{
+ "gse": "GSE309890",
+ "notes": "WTevo = 40-day sertraline-evolved lines; controls = lines passaged 40 days in TSB without sertraline (labelled reference/control). Not stated whether sertraline was present at harvest, so treatment left out for WTevo. No growth phase, OD or aeration given. Strain labels removed 2026-11-20: GEO states K-12 MG1655, but the counts show about 500 MG1655 genes without reads in every sample and 1-2.5% of reads off the MG1655 reference; the same pattern as in GSE275262 and GSE343594 (79% of the missing genes shared). The strain is not MG1655 and is not identified, so strain_group and strain_name are left empty.",
+ "default": {
+  "base_medium": {
+   "v": "TSB",
+   "b": "stated",
+   "q": "E. coli K12 MG1655 was grown in tryptic soy broth at 37 °C"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "tryptic soy broth"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "tryptic soy broth"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "study_default",
+   "q": "grown in tryptic soy broth at 37 °C"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiling of Escherichia coli MG1655 after 40 days of adaptive evolution under 40 mg/L sertraline"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiling of Escherichia coli MG1655 after 40 days of adaptive evolution under 40 mg/L sertraline"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiling of Escherichia coli MG1655 after 40 days of adaptive evolution under 40 mg/L sertraline"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "ribosomal RNA was removed from total RNA"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "ribosomal RNA was removed from total RNA"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^control$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "TSB passages without sertraline served as controls."
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "TSB passages without sertraline served as controls."
+    },
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": "TSB passages without sertraline served as controls."
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": "TSB passages without sertraline served as controls."
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "adaptive evolution",
+   "set": {
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

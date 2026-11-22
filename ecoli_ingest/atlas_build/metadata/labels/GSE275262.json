@@ -1,0 +1,95 @@
+{
+ "gse": "GSE275262",
+ "notes": "Experimental evolution under intermittent AgNP exposure; day 0 = ancestor (control), days 9 and 14 = evolved populations (evolved_isolate). The text does not say whether the sequenced day 9/14 cells were in AgNP exposure or in the recovery phase at harvest, so treatment and exposure are left out for them; no phase or OD given at harvest. Mutated genes not named, so perturbed_genes / global_regulator_perturbed left out for evolved samples. Strain labels removed 2026-11-20: GEO states K-12 MG1655, but the counts show about 500 MG1655 genes without reads in every sample and 1-2.5% of reads off the MG1655 reference; the same pattern as in GSE309890 and GSE343594 (79% of the missing genes shared). The strain is not MG1655 and is not identified, so strain_group and strain_name are left empty.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "cells were cultured in LB medium at 37 °C under 180 rpm in the dark."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "cells were cultured in LB medium at 37 °C under 180 rpm in the dark."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "cells were cultured in LB medium at 37 °C under 180 rpm in the dark."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "cells were cultured in LB medium at 37 °C under 180 rpm in the dark."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "cells were cultured in LB medium at 37 °C under 180 rpm in the dark."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "cells were cultured in LB medium at 37 °C under 180 rpm in the dark."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli K12 MG1655  was subjected to 14 days of evolution under intermittent exposure to high concentrations of AgNPs. RNA-seq was performed on cells from days 0, 9, and 14."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli K12 MG1655  was subjected to 14 days of evolution under intermittent exposure to high concentrations of AgNPs. RNA-seq was performed on cells from days 0, 9, and 14."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq was performed on cells from days 0, 9, and 14."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "The total ribonucleic acid (RNA) was extracted using the TRIzol reagent"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq was performed on cells from days 0, 9, and 14."
+  },
+  "genotype_class": {
+   "v": "evolved_isolate",
+   "b": "stated",
+   "q": "was subjected to 14 days of evolution under intermittent exposure to high concentrations of AgNPs"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "Day0$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": "WT"
+    },
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": "AgNP evolution, Day0"
+    },
+    "treatment": {
+     "v": "none",
+     "b": "inferred",
+     "q": "AgNP evolution, Day0"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": "WT"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

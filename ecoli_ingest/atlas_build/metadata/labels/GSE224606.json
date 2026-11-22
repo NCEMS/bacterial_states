@@ -1,0 +1,121 @@
+{
+ "gse": "GSE224606",
+ "notes": "Library: ZnCl2-fragmented rRNA-depleted RNA (100-400 nt) made with the NEXTflex Small RNA kit in its no-size-selection mode, finished library gel-purified up to 500 nt: ordinary fragmentation + kit, kept as total_rnaseq.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Bacteria cultures were grown in LB medium at 24°C till exponential growth phase"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "grown in LB medium"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "grown in LB medium"
+  },
+  "growth_temperature": {
+   "v": 24,
+   "b": "stated",
+   "q": "grown in LB medium at 24°C"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "till exponential growth phase"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Comparative gene expression profiling analysis of RNA-seq data for E. coli BW25113 wt and nudC KO strains."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparative gene expression profiling analysis of RNA-seq data for E. coli BW25113 wt and nudC KO strains."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparative gene expression profiling analysis of RNA-seq data for E. coli BW25113 wt and nudC KO strains."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparative gene expression profiling analysis of RNA-seq data for E. coli BW25113 wt and nudC KO strains."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E. coli K-12 background strain BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "E. coli K-12 background strain BW25113"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "inferred",
+   "q": "rRNAs were depleted using RiboMinus Bacteria 2.0 Transcriptome Isolation Kit (Invitrogen). The remaining RNA was fragmented into approximately 100-400 nt long pieces in ZnCl2 buffer"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNAs were depleted using RiboMinus Bacteria 2.0 Transcriptome Isolation Kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "wt",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "nudC KO",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "{delta}nudC767::kan"
+    },
+    "perturbed_genes": {
+     "v": "nudC",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

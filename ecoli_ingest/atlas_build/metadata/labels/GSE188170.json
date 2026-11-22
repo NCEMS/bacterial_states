@@ -1,0 +1,131 @@
+{
+ "gse": "GSE188170",
+ "notes": "UPEC clinical isolate HM7 in M9 glucose, iron limited (2,2'-dipyridyl from dilution) vs iron replete (36 uM FeCl3, control). WT re-read: Clinical isolate HM7 used unmodified -> wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9 medium with 0.4% glucose"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "M9 medium with 0.4% glucose"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "M9 medium with 0.4% glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "M9 medium with 0.4% glucose"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "shaking at 37°C"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "shaking at 37°C"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "shaking at 37°C"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "grown to mid-log phase (0.4-0.6 OD600)"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "The differential gene expression clinical UPEC isolate HM7 under iron limited conditions"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "The differential gene expression clinical UPEC isolate HM7 under iron limited conditions"
+  },
+  "strain_group": {
+   "v": "UPEC",
+   "b": "stated",
+   "q": "clinical UPEC isolate HM7"
+  },
+  "strain_name": {
+   "v": "HM7",
+   "b": "stated",
+   "q": "HM7"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "under iron limited conditions  (3 biological replicates) compared to iron replete conditions"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "under iron limited conditions  (3 biological replicates) compared to iron replete conditions"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "under iron limited conditions  (3 biological replicates) compared to iron replete conditions"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Libraries were prepared using NEBNext Ultra II Directional RNA Library Prep Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Bacterial rRNA was removed with the RiboMinus Transcriptome Isolation Kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "iron_limited",
+   "set": {
+    "treatment": {
+     "v": "metal_limitation",
+     "b": "stated",
+     "q": "HM7 under iron limited conditions"
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "Overnight cultures were diluted 1:100 in M9 medium with 0.4% glucose supplemented with either 36 μM FeCl3 (Sigma), or 150 μM 2,2’ Dipyridyl"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "iron_replete",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "compared to iron replete conditions"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "compared to iron replete conditions"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

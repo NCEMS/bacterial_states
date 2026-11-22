@@ -1,0 +1,143 @@
+{
+ "gse": "GSE298132",
+ "notes": "Library protocol: alkaline-fragmented RNA, 3' linker ligation, size excision of ligated products (footprint-style protocol) for both the mRNA-seq and total RNA-seq arms: assay_class other. Rifampicin time course 0.5-10 min: abx_transcription, acute, transcription_arrested; t0 untreated samples are controls. Carbon source of EZ Rich not stated.",
+ "default": {
+  "base_medium": {
+   "v": "MOPS",
+   "b": "stated",
+   "q": "MOPS EZ Rich Defined Medium (Teknova, M2105)"
+  },
+  "medium_class": {
+   "v": "defined_rich",
+   "b": "inferred",
+   "q": "MOPS EZ Rich Defined Medium (Teknova, M2105)"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "MOPS EZ Rich Defined Medium (Teknova, M2105)"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown in MOPS EZ Rich Defined Medium (Teknova, M2105) at 37°C"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "grown to mid-log phase (OD600 ~ 0.3)"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "stated",
+   "q": "E. coli wild-type cells (MG1655)"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "E. coli wild-type cells (MG1655)"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "E. coli wild-type cells (MG1655)"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Rif-seq of E. coli MG1655 wild-type cells in MOPS rich defined media at 37˚C"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Rif-seq of E. coli MG1655 wild-type cells in MOPS rich defined media at 37˚C"
+  },
+  "assay_class": {
+   "v": "other",
+   "b": "stated",
+   "q": "ligation to 3’ linker oligos (sequences provided in the publication) using T4 RNA ligase 2 truncated KQ (New England Biolabs, M0373) at 16°C overnight. The ligated products from different samples were pooled and purified by size excision."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^Untreated$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "transcription_arrested": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "rifampicin",
+   "set": {
+    "treatment": {
+     "v": "abx_transcription",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    },
+    "transcription_arrested": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": "grown to mid-log phase (OD600 ~ 0.3)"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "mRNA-seq$",
+   "set": {
+    "rrna_removal": {
+     "v": "depletion",
+     "b": "stated",
+     "q": "For samples requiring mRNA enrichment, ribosomal RNAs were removed with Ribo-Zero rRNA depletion kit"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "total RNA-seq$",
+   "set": {
+    "rrna_removal": {
+     "v": "none",
+     "b": "inferred",
+     "q": "For samples requiring mRNA enrichment, ribosomal RNAs were removed with Ribo-Zero rRNA depletion kit"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

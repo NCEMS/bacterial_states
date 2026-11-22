@@ -1,0 +1,208 @@
+{
+ "gse": "GSE308804",
+ "notes": "ATCC 25922 has no pathotype in the text, strain_group left out. 5dR (5-deoxyribose) and glucose are carbon sources (medium property, treatment none); WT in each carbon source is a control. MinGlu/PluGlu samples (20/40 min in M9 without/with glucose): pre-shift culture not described, so no phase; MinGlu = carbon_starvation, PluGlu = medium_or_oxygen_shift (unsure, could be a glucose re-addition reference). No shaking described, culture_mode left out.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "E. coli cultures were incubated at aerobically at 37 C in M9 media supplemented with specific carbon sources until mid-exponential growth was reached."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "E. coli cultures were incubated at aerobically at 37 C in M9 media supplemented with specific carbon sources until mid-exponential growth was reached."
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "E. coli cultures were incubated at aerobically at 37 C in M9 media supplemented with specific carbon sources until mid-exponential growth was reached."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "E. coli cultures were incubated at aerobically at 37 C in M9 media supplemented with specific carbon sources until mid-exponential growth was reached."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "E. coli cultures were incubated at aerobically at 37 C in M9 media supplemented with specific carbon sources until mid-exponential growth was reached."
+  },
+  "strain_name": {
+   "v": "ATCC 25922",
+   "b": "stated",
+   "q": "ATCC 25922"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-Seq analysis of wild-type E. coli versus DmtnR strains"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-Seq analysis of wild-type E. coli versus DmtnR strains"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-Seq analysis of wild-type E. coli versus DmtnR strains"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Illumina Stranted Total RNA Prep, Ligation with Ribo-Zero Plus"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Illumina Stranted Total RNA Prep, Ligation with Ribo-Zero Plus"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-Seq analysis of wild-type E. coli versus DmtnR strains"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^Wildtype$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^dmtnR$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "mtnR",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^M9 with 5dR$",
+   "set": {
+    "carbon_source": {
+     "v": "other_sugar",
+     "b": "stated",
+     "q": ""
+    },
+    "treatment": {
+     "v": "none",
+     "b": "inferred",
+     "q": ""
+    },
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": "E. coli cultures were incubated at aerobically at 37 C in M9 media supplemented with specific carbon sources until mid-exponential growth was reached."
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^M9 with glucose$",
+   "set": {
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": ""
+    },
+    "treatment": {
+     "v": "none",
+     "b": "inferred",
+     "q": ""
+    },
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": "E. coli cultures were incubated at aerobically at 37 C in M9 media supplemented with specific carbon sources until mid-exponential growth was reached."
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^E. coli ATCC25922 grown in M9 media with (5-deoxyribose|glucose) replicate",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^M9 without glucose added$",
+   "set": {
+    "treatment": {
+     "v": "carbon_starvation",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^M9 with glucose added$",
+   "set": {
+    "treatment": {
+     "v": "medium_or_oxygen_shift",
+     "b": "inferred",
+     "q": ""
+    },
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "for 20 minutes",
+   "set": {
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "for 40 minutes",
+   "set": {
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

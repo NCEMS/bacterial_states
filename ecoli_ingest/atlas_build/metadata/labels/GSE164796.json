@@ -1,0 +1,265 @@
+{
+ "gse": "GSE164796",
+ "notes": "Two sets. (1) WT and NAP mutants in M9 Rich Defined Media + glucose, logarithmic; no temperature/aeration/rRNA-removal info. ch:strain reads 'K12 MG1656..MG1665' (apparent numbering typo); strain_name MG1655 from organism field. 'ihfA::Kan infB::Chlor' recorded as written (infB likely ihfB, not corrected). (2) WT carbon-shift series in M9: Glu #1 (first glucose growth, control), then shifted into KDG (5-keto-D-gluconic acid) and back into glucose (Glu #2); KDG and Glu #2 labelled medium_or_oxygen_shift, exposure left out (duration not given). No shaking stated, so oxygen/culture_mode left out. WT re-read: wild type MG1655 samples set to wild_type.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K12 MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "molecule**: total RNA"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "logarithmic phase"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "IPOD-HR, ChIP-seq, RNA-seq of E. coli nucleoid associated protein deletions"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "IPOD-HR, ChIP-seq, RNA-seq of E. coli nucleoid associated protein deletions"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "IPOD-HR, ChIP-seq, RNA-seq of E. coli nucleoid associated protein deletions"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "IPOD-HR, ChIP-seq, RNA-seq of E. coli nucleoid associated protein deletions"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "IPOD-HR, ChIP-seq, RNA-seq of E. coli nucleoid associated protein deletions"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:media",
+   "regex": "RDM",
+   "set": {
+    "base_medium": {
+     "v": "M9",
+     "b": "stated",
+     "q": "M9 Rich Defined Media (RDM) + glucose"
+    },
+    "medium_class": {
+     "v": "defined_rich",
+     "b": "inferred",
+     "q": "M9 Rich Defined Media (RDM) + glucose"
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": "M9 Rich Defined Media (RDM) + glucose"
+    },
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": "M9 Rich Defined Media (RDM) + glucose"
+    }
+   }
+  },
+  {
+   "field": "ch:media",
+   "regex": "M9 minimal",
+   "set": {
+    "base_medium": {
+     "v": "M9",
+     "b": "stated",
+     "q": "M9 minimal media + glucose"
+    },
+    "medium_class": {
+     "v": "defined_minimal",
+     "b": "inferred",
+     "q": "M9 minimal media + glucose"
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": "M9 minimal media + glucose"
+    },
+    "growth_temperature": {
+     "v": 37,
+     "b": "stated",
+     "q": "fresh, prewarmed M9 minimal medium including 0.2% glucose at 37°C"
+    },
+    "rrna_removal": {
+     "v": "depletion",
+     "b": "stated",
+     "q": "rRNA depletion was performed using the bacterial rRNA depletion kit"
+    },
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": "wild type"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": "wild type"
+    }
+   }
+  },
+  {
+   "field": "ch:media",
+   "regex": "minimal media \\+ glucose",
+   "set": {
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": "M9 minimal media + glucose"
+    }
+   }
+  },
+  {
+   "field": "ch:media",
+   "regex": "KDG",
+   "set": {
+    "carbon_source": {
+     "v": "organic_acid",
+     "b": "inferred",
+     "q": "M9 ninimal medium including 0.2% 5-keto D-gluconic acid"
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "fis",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "fis",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "hfq",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "hfq",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "stpa",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "stpA;hns",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "ihfA",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "ihfA;infB",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^WT RDM|Glu #1",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "Glu #2|KDG",
+   "set": {
+    "treatment": {
+     "v": "medium_or_oxygen_shift",
+     "b": "stated",
+     "q": "Remaining cells were diluted to an OD of ~0.1 in M9 ninimal medium including 0.2% 5-keto D-gluconic acid"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,114 @@
+{
+ "gse": "GSE171970",
+ "notes": "No growth protocol: medium, phase, temperature, oxygen and UV dose/time unknown. mfd(-) not described as deletion vs other inactivation, so genotype_class left out for mfd samples (perturbed_genes mfd set).",
+ "default": {
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcription profiles of WT and mfd(-) E. coli with and without UV damage exposure (2 replicates)."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcription profiles of WT and mfd(-) E. coli with and without UV damage exposure (2 replicates)."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "rRNA was removed using Ribominus (Thermo Fisher). Libraries were prepared using NEBNext Ultra II Directional RNA Library Prep Kit."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA was removed using Ribominus (Thermo Fisher)"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcription profiles of WT and mfd(-) E. coli with and without UV damage exposure (2 replicates)."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcription profiles of WT and mfd(-) E. coli with and without UV damage exposure (2 replicates)."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^mfd",
+   "set": {
+    "perturbed_genes": {
+     "v": "mfd",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^\\(-\\)UV$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^\\(\\+\\)UV$",
+   "set": {
+    "treatment": {
+     "v": "dna_damage",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^WT_minus_UV",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,93 @@
+{
+ "gse": "GSE116453",
+ "notes": "Single sample of ATCC 8739 in nutrient broth, 16 h shaken culture (overnight -> stationary inferred). strain_group left out (ATCC 8739 not placed by the text).",
+ "default": {
+  "growth_phase": {
+   "v": "stationary",
+   "b": "inferred",
+   "q": "The culture was grown in a 37 °C shaker for 16 h."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "The culture was grown in a 37 °C shaker for 16 h."
+  },
+  "base_medium": {
+   "v": "other",
+   "b": "stated",
+   "q": "inoculated in 20 ml NB broth"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "inoculated in 20 ml NB broth"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "inoculated in 20 ml NB broth"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "The culture was grown in a 37 °C shaker for 16 h."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "The culture was grown in a 37 °C shaker for 16 h."
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "ATCC 8739"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq of Escherichia coli strain 3"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "We conducted RNA-seq analysis for E.coli lines of E3C to study the relationship between mutation and gene expression."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "We conducted RNA-seq analysis for E.coli lines of E3C to study the relationship between mutation and gene expression."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "We conducted RNA-seq analysis for E.coli lines of E3C to study the relationship between mutation and gene expression."
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "The culture was grown in a 37 °C shaker for 16 h."
+  },
+  "strain_name": {
+   "v": "ATCC 8739",
+   "b": "stated",
+   "q": "ATCC 8739"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA was removed from total RNA using Ribo-Zero rRNA Removal Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA was removed from total RNA using Ribo-Zero rRNA Removal Kit"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Bacteria from a single colony were inoculated in 20 ml NB broth"
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

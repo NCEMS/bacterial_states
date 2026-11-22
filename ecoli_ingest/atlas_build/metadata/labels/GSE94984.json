@@ -1,0 +1,88 @@
+{
+ "gse": "GSE94984",
+ "notes": "Single condition, no control. Library prep line 'Truseq Small RNA ligation' may cover the RNA-seq libraries too, but no size selection is described for them; kept total_rnaseq (unsure). Strain EDL933 unmodified taken as reference.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "LB medium, 180 rpm shaking, at 37°C, between exponential and stationary phase"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "LB medium, 180 rpm shaking, at 37°C, between exponential and stationary phase"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "LB medium, 180 rpm shaking, at 37°C, between exponential and stationary phase"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "LB medium, 180 rpm shaking, at 37°C, between exponential and stationary phase"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "LB medium, 180 rpm shaking, at 37°C, between exponential and stationary phase"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "LB medium, 180 rpm shaking, at 37°C, between exponential and stationary phase"
+  },
+  "growth_phase": {
+   "v": "transition",
+   "b": "stated",
+   "q": "biomass collected in the transition between exponential to stationary phase"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "EHEC grown in LB medium"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparison of RNAseq with RIBOseq data from EHEC grown in LB medium"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Comparison of RNAseq with RIBOseq data from EHEC grown in LB medium"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparison of RNAseq with RIBOseq data from EHEC grown in LB medium"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparison of RNAseq with RIBOseq data from EHEC grown in LB medium"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparison of RNAseq with RIBOseq data from EHEC grown in LB medium"
+  },
+  "strain_group": {
+   "v": "EHEC_STEC",
+   "b": "stated",
+   "q": "Escherichia coli O157:H7 str. EDL933"
+  },
+  "strain_name": {
+   "v": "EDL933",
+   "b": "stated",
+   "q": "Escherichia coli O157:H7 str. EDL933"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Trizol for RNAseq"
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

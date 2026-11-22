@@ -1,0 +1,166 @@
+{
+ "gse": "GSE117939",
+ "notes": "INTERFACE assay: libraries of plasmid-expressed antisense RNA constructs made with the NEBNext Small RNA kit, no fragmentation, Pippin size selection 120-310 nt -> assay_class other (not standard RNA-seq). gI intron arm: uninduced = control. sRNA arm: WT vs delta hfq, all arabinose-induced; WT sRNA-library samples carry the asRNA library and are induced, so is_control left out for them. Culture mode/oxygen/temperature not stated.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "study_default",
+   "q": "20 mL LB cultures"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "20 mL LB cultures"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "20 mL LB cultures"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "sampled in exponential growth phase (OD~0.7)"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Evaluation of regional accessibility profiles of a library of sRNAs in E. coli"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Evaluation of regional accessibility profiles of a library of sRNAs in E. coli"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Evaluation of regional accessibility profiles of a library of sRNAs in E. coli"
+  },
+  "assay_class": {
+   "v": "other",
+   "b": "stated",
+   "q": "Sequencing facility additionally performed a Pippin Prep (Sage Science) to select for transcript sizes between 120 and 310 nucleotides."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "MG1655",
+   "set": {
+    "strain_name": {
+     "v": "MG1655",
+     "b": "stated",
+     "q": ""
+    },
+    "strain_group": {
+     "v": "K-12",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "BW25113",
+   "set": {
+    "strain_name": {
+     "v": "BW25113",
+     "b": "stated",
+     "q": ""
+    },
+    "strain_group": {
+     "v": "K-12",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "Hfq",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "hfq",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "uninduced",
+   "set": {
+    "inducer_added": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "gI intron induced",
+   "set": {
+    "inducer_added": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "sRNA library",
+   "set": {
+    "inducer_added": {
+     "v": true,
+     "b": "study_default",
+     "q": "arabinose only (0.8% w/v final conc) for sRNA samples"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

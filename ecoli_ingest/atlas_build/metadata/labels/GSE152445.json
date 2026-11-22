@@ -1,0 +1,126 @@
+{
+ "gse": "GSE152445",
+ "notes": "Growth protocol describes only an overnight LB culture with no dilution before the 20 min ciprofloxacin treatment, so growth_phase stationary is inferred (overnight rule) for all samples; uncertain whether the culture was really treated undiluted.",
+ "default": {
+  "growth_phase": {
+   "v": "stationary",
+   "b": "inferred",
+   "q": "E. coli K12 strain MG1655 was grown in 250 mL flasks with Luria-Bertani (LB) medium in a shaking incubator at 37 ℃ and 250 rpm overnight."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "E. coli K12 strain MG1655 was grown in 250 mL flasks with Luria-Bertani (LB) medium in a shaking incubator at 37 ℃ and 250 rpm overnight."
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "E. coli K12 strain MG1655 was grown in 250 mL flasks with Luria-Bertani (LB) medium in a shaking incubator at 37 ℃ and 250 rpm overnight."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "E. coli K12 strain MG1655 was grown in 250 mL flasks with Luria-Bertani (LB) medium in a shaking incubator at 37 ℃ and 250 rpm overnight."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "E. coli K12 strain MG1655 was grown in 250 mL flasks with Luria-Bertani (LB) medium in a shaking incubator at 37 ℃ and 250 rpm overnight."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "E. coli K12 strain MG1655 was grown in 250 mL flasks with Luria-Bertani (LB) medium in a shaking incubator at 37 ℃ and 250 rpm overnight."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "E. coli K12 strain MG1655 was grown in 250 mL flasks with Luria-Bertani (LB) medium in a shaking incubator at 37 ℃ and 250 rpm overnight."
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "E. coli K12 strain MG1655 and strains treated with 2 μg/mL ciprofloxacin"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli K12 strain MG1655 and strains treated with 2 μg/mL ciprofloxacin"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli K12 strain MG1655 and strains treated with 2 μg/mL ciprofloxacin"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli K12 strain MG1655 and strains treated with 2 μg/mL ciprofloxacin"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli K12 strain MG1655 and strains treated with 2 μg/mL ciprofloxacin"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E. coli K12 strain MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "E. coli K12 strain MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "RNA samples were treated using Epicentre Ribo-zero rRNA Removal Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "RNA samples were treated using Epicentre Ribo-zero rRNA Removal Kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^untreated$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "ciprofloxacin",
+   "set": {
+    "treatment": {
+     "v": "abx_dna_gyrase",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,106 @@
+{
+ "gse": "GSE152879",
+ "notes": "Both samples carry the GapR-3xFLAG plasmid; uninduced is the control (genotype heterologous_expression for both). Library method only referenced (Culviner and Laub 2018), assay_class total_rnaseq as study default; rRNA removal not stated. ch:media for induced reads '25 ng/uL' vs 25 ng/mL in protocol (typo).",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "ML3286 (MG1655 pKVS45-GapR-3xFLAG)",
+   "b": "stated",
+   "q": "ML3286 (MG1655 pKVS45-GapR-3xFLAG)"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Strains were grown in LB"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Strains were grown in LB"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Strains were grown in LB"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "exponential phase"
+  },
+  "genotype_class": {
+   "v": "heterologous_expression",
+   "b": "stated",
+   "q": "ML3286 (MG1655 pKVS45-GapR-3xFLAG)"
+  },
+  "perturbed_genes": {
+   "v": "gapR",
+   "b": "stated",
+   "q": "pKVS45-GapR-3xFLAG"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "pKVS45-GapR-3xFLAG"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "E. coli RNA-seq +/- GapR-3xFLAG expression"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli RNA-seq +/- GapR-3xFLAG expression"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli RNA-seq +/- GapR-3xFLAG expression"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Sequencing libraries were processed as previously reported (Culviner and Laub, 2018)."
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "uninduced",
+   "set": {
+    "inducer_added": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "induced with aTc",
+   "set": {
+    "inducer_added": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

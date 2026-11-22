@@ -1,0 +1,204 @@
+{
+ "gse": "GSE182695",
+ "notes": "CONFLICT: GSM5534797/98 title and ch:genotype say yiaU mutant but source_name says Lexp_ycaN; genotype labels left out for them. GSM5534795/96 (ygfI): title has 'LL' (late log?) but source_name says Exp_ and protocol lists ygfI among the OD 0.9 samples; growth_phase left out. Exp_ = OD 0.9 'exponential' -> mid_exponential; Lexp_ = OD 2.2 'late-exponential'. Glucose only stated in titles of GSM5534783-88 (M9_Glc); carbon source left out for others. Single amino acid (L-Thr) supplement -> amino_acids_supplied false. Temperature and culture vessel not given. WT re-read: unmodified baseline strain relabelled wild_type. | 2026-11-20: late_exponential merged into transition (the value was dropped from the scheme: submitters' 'late log' and 'early stationary' cannot be ordered against each other).",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "RNA sequencing data were generated under aerobic exponential growth conditions in M9 medium  supplemented with 6mM L-threonine."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "RNA sequencing data were generated under aerobic exponential growth conditions in M9 medium  supplemented with 6mM L-threonine."
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "RNA sequencing data were generated under aerobic exponential growth conditions in M9 medium  supplemented with 6mM L-threonine."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "RNA sequencing data were generated under aerobic exponential growth conditions in M9 medium  supplemented with 6mM L-threonine."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "The wild type BW25113 strain was grown as a control for the isogenic mutant strain."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "The wild type BW25113 strain was grown as a control for the isogenic mutant strain."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RNA sequencing data were generated under aerobic exponential growth conditions in M9 medium  supplemented with 6mM L-threonine."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "Escherichia coli BW25113"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Ribosomal RNA removed RNA prepared from cell cultures of Escherichia coli at the exponential phase"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA removed RNA prepared from cell cultures of Escherichia coli at the exponential phase"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "The wild type BW25113 strain was grown as a control for the isogenic mutant strain."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "The wild type BW25113 strain was grown as a control for the isogenic mutant strain."
+  }
+ },
+ "rules": [
+  {
+   "field": "source_name",
+   "regex": "^Exp_",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "^Lexp_",
+   "set": {
+    "growth_phase": {
+     "v": "transition",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "_Glc_",
+   "set": {
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^(ybdO|ybeF|ybhD|ycaN|ygfI) mutant$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "transcriptional analysis (RNA-seq deletion mutants)"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^ybdO",
+   "set": {
+    "perturbed_genes": {
+     "v": "ybdO",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^ybeF",
+   "set": {
+    "perturbed_genes": {
+     "v": "ybeF",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^ybhD",
+   "set": {
+    "perturbed_genes": {
+     "v": "ybhD",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^ycaN",
+   "set": {
+    "perturbed_genes": {
+     "v": "ycaN",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^ygfI",
+   "set": {
+    "perturbed_genes": {
+     "v": "ygfI",
+     "b": "stated",
+     "q": ""
+    },
+    "growth_phase": {
+     "v": null,
+     "b": "",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

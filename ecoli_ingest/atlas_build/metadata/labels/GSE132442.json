@@ -1,0 +1,139 @@
+{
+ "gse": "GSE132442",
+ "notes": "CONFLICT: GSM3863780 has title '42c_ale1' (evolved line) but ch:genotype 'WT'; genotype_class, is_control, global_regulator_perturbed left out for it. All samples grown at 42 C throughout (heat, adapted); the WT parent at 42 C is the comparison baseline and is marked is_control true although the growth condition counts as heat treatment. Evolved mutations not given, so perturbed_genes and global_regulator_perturbed left out for evolved lines. rRNA removal not stated.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Cells were grown to mid-log phase aerobically at 42°C on M9 Supplemented with 4g/L D-Glucose"
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "Cells were grown to mid-log phase aerobically at 42°C on M9 Supplemented with 4g/L D-Glucose"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "Cells were grown to mid-log phase aerobically at 42°C on M9 Supplemented with 4g/L D-Glucose"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "Cells were grown to mid-log phase aerobically at 42°C on M9 Supplemented with 4g/L D-Glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "Cells were grown to mid-log phase aerobically at 42°C on M9 Supplemented with 4g/L D-Glucose"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "Cells were grown to mid-log phase aerobically at 42°C on M9 Supplemented with 4g/L D-Glucose"
+  },
+  "growth_temperature": {
+   "v": 42,
+   "b": "stated",
+   "q": "Cells were grown to mid-log phase aerobically at 42°C on M9 Supplemented with 4g/L D-Glucose"
+  },
+  "treatment": {
+   "v": "heat",
+   "b": "stated",
+   "q": "mRNA sequencing was performed on E. coli evolved at 42C on M9 Minimal Media with Glucose"
+  },
+  "exposure": {
+   "v": "adapted",
+   "b": "inferred",
+   "q": "Cells were grown to mid-log phase aerobically at 42°C on M9 Supplemented with 4g/L D-Glucose"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Growth of evolved E. coli was characterized under the same conditions as the evolution and compared to the wild type parent strain"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Growth of evolved E. coli was characterized under the same conditions as the evolution and compared to the wild type parent strain"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Growth of evolved E. coli was characterized under the same conditions as the evolution and compared to the wild type parent strain"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was extracted using the RNeasy Plus Mini kit"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Growth of evolved E. coli was characterized under the same conditions as the evolution and compared to the wild type parent strain"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^Evolved$",
+   "set": {
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {
+  "GSM3863780": {
+   "genotype_class": {
+    "v": null,
+    "b": "",
+    "q": ""
+   },
+   "is_control": {
+    "v": null,
+    "b": "",
+    "q": ""
+   },
+   "global_regulator_perturbed": {
+    "v": null,
+    "b": "",
+    "q": ""
+   }
+  }
+ }
+}

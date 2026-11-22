@@ -1,0 +1,161 @@
+{
+ "gse": "GSE201666",
+ "notes": "MG1655 wild type with 5 antidepressants (2 h, 25 C, 120 rpm) and an unnamed 'Mutant' with antibiotics (tetracycline, ciprofloxacin, amoxicillin, chloramphenicol). Mutant genotype not described: genotype_class/perturbed genes left out; mutant controls are not reference-genotype so is_control false. Growth protocol says LB at 30 C but the treatment protocol says 25 C for the WT 2 h exposure; WT samples given 25 C, mutant samples (protocol not described) left without temperature, exposure and culture mode. No growth phase given. WT re-read: MG1655 WT -> wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "liquid LB culture at 30 °C"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "liquid LB culture at 30 °C"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "liquid LB culture at 30 °C"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA response under the exposure of five antidepressants"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA response under the exposure of five antidepressants"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA response under the exposure of five antidepressants"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was extracted using the QIAGEN miRNeasy Mini Kit"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "The group without dosing antidepressants was the control group."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "growth_temperature": {
+     "v": 25,
+     "b": "stated",
+     "q": "cultured in triplicate in 50 mg/L of each antidepressant for 2 hours, at 25 °C, with shaking 120 rpm"
+    },
+    "culture_mode": {
+     "v": "batch_shaken",
+     "b": "stated",
+     "q": "at 25 °C, with shaking 120 rpm"
+    },
+    "oxygen": {
+     "v": "aerobic",
+     "b": "inferred",
+     "q": "at 25 °C, with shaking 120 rpm"
+    }
+   }
+  },
+  {
+   "field": "ch:agent",
+   "regex": "^control$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:agent",
+   "regex": "(Ser|Dul|Bup|Esc|Ago)$",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": "in response to 50 mg/L of antidepressants for 2 hours"
+    }
+   }
+  },
+  {
+   "field": "ch:agent",
+   "regex": "(Tet|Chl)$",
+   "set": {
+    "treatment": {
+     "v": "abx_translation",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:agent",
+   "regex": "Cip$",
+   "set": {
+    "treatment": {
+     "v": "abx_dna_gyrase",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:agent",
+   "regex": "Amo$",
+   "set": {
+    "treatment": {
+     "v": "abx_cell_wall",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^WTcontrol",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

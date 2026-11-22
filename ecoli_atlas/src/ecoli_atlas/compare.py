@@ -1,14 +1,16 @@
-"""`ecoli_atlas compare`: place new samples relative to the atlas (the embedded baseline corpus).
+"""`ecoli_atlas compare`: place new samples relative to the atlas (the samples a bundle was trained on).
 
-Inputs are the ``final_embedding.csv`` of the new samples and an atlas directory holding
-``final_embedding.csv`` plus, optionally, ``sample_predictions.csv``, ``atlas_metadata.csv`` and
-``embedding_block_layout.csv``.
+Inputs are the output directory of `ecoli_atlas embed` for the new samples (``embedding.tsv``,
+``predictions.tsv``) and the model bundle, whose ``embedding.tsv`` / ``predictions.tsv`` are the atlas.
+The atlas sample metadata (``metadata_v2.tsv``) is optional and adds descriptive columns to the
+neighbours.
 
 Outputs
-  neighbors.tsv  one row per (query, rank): atlas sample, distance, and its metadata / predicted labels
-  summary.tsv    one row per query: nearest atlas sample, dominant study, per-factor kNN vote and
-                 agreement with the encoder prediction, per-block neighbour distance, novelty score
-  umap_*.csv     optional 2-D UMAP fitted on the atlas with the queries projected onto it
+  neighbors.tsv  one row per (query, rank): atlas sample, distance, and its metadata / calls
+  summary.tsv    one row per query: nearest atlas sample, dominant study, the vote of the neighbours
+                 on every call and its agreement with the model's own call, per-block neighbour
+                 distance, novelty score
+  umap_*.tsv     optional 2-D UMAP fitted on the atlas with the queries projected onto it
   query_distances.tsv  distances between the new samples themselves (same metric / blocks)
 
 With sample metadata (``--metadata``) its columns are added to summary.tsv, and ``--group-by``
@@ -26,34 +28,66 @@ import pandas as pd
 from sklearn.metrics import pairwise_distances
 from sklearn.neighbors import NearestNeighbors
 
-EMBEDDING_FILE = "final_embedding.csv"
-PREDICTIONS_FILE = "sample_predictions.csv"
-METADATA_FILE = "atlas_metadata.csv"
-LAYOUT_FILE = "embedding_block_layout.csv"
-MANIFEST_FILE = "atlas_manifest.json"
-NEIGHBOR_META_COLS = ("gse", "strain", "strain_background", "is_lab_strain", "medium_type", "base_medium",
-                      "growth_phase", "carbon_source", "oxygen", "stress")
-DEFAULT_FACTORS = ("growth_phase", "medium_type", "is_lab_strain")
+from .config import HEADS
+
+EMBEDDING_FILE = "embedding.tsv"
+PREDICTIONS_FILE = "predictions.tsv"
+MANIFEST_FILE = "manifest.json"
+# columns of the atlas sample metadata shown beside every neighbour
+NEIGHBOR_META_COLS = ("gse",) + tuple(HEADS) + ("strain_name", "strain_group", "medium_type", "base_medium", "growth_phase", "carbon_source",
+                      "oxygen", "treatment", "genotype_class")
+DEFAULT_FACTORS = tuple(HEADS)
 
 
-def layout_from_columns(columns) -> pd.DataFrame:
-    """Recover the block layout from column names like ``growth_phase[0]``."""
-    rows, start = [], 0
-    current, width = None, 0
-    for c in list(columns) + [None]:
-        name = c.split("[", 1)[0] if c else None
-        if name != current:
-            if current is not None:
-                rows.append({"block": current, "kind": "residual" if current == "residual" else "factor",
-                             "start": start, "end": start + width, "width": width})
-                start += width
-            current, width = name, 0
-        width += 1
+def read_sample_table(path: str | Path) -> pd.DataFrame:
+    """A table of samples (first column = sample id), comma- or tab-separated, as text."""
+    path = Path(path)
+    with open(path, encoding="utf-8") as fh:
+        first = fh.readline()
+    df = pd.read_csv(path, sep="\t" if "\t" in first else ",", dtype=str, keep_default_na=False)
+    df = df.set_index(df.columns[0])
+    df.index = df.index.astype(str).str.strip()
+    return df.replace("", np.nan)
+
+
+def calls_frame(predictions: pd.DataFrame) -> pd.DataFrame:
+    """The calls of a ``predictions.tsv`` (of a bundle or of `embed`) in one layout: per head
+    ``<head>_pred`` (the class called at 0.5) and ``<head>_prob_<positive class>``."""
+    out = pd.DataFrame(index=predictions.index.astype(str))
+    for h, (neg, pos) in HEADS.items():
+        if f"p_{pos}" not in predictions.columns:
+            continue
+        p = pd.to_numeric(predictions[f"p_{pos}"], errors="coerce").to_numpy()
+        out[f"{h}_pred"] = np.where(np.isnan(p), None, np.where(p >= 0.5, pos, neg))
+        out[f"{h}_prob_{pos}"] = p
+    return out
+
+
+def layout_from_manifest(manifest: dict) -> pd.DataFrame:
+    rows = [{"block": b["block"], "kind": "residual" if b["block"] == "residual" else "factor", "start": int(b["start"]),
+             "end": int(b["end"]), "width": int(b["end"]) - int(b["start"])} for b in manifest["embedding_blocks"]]
     return pd.DataFrame(rows)
+
+
+def read_embedding(path: str | Path) -> pd.DataFrame:
+    """``embedding.tsv`` of a bundle or of `embed` (a directory holding one is accepted)."""
+    p = Path(path)
+    emb = pd.read_csv(p / EMBEDDING_FILE if p.is_dir() else p, sep="\t", index_col=0)
+    emb.index = emb.index.astype(str)
+    return emb
 
 
 @dataclass
 class Atlas:
+    """The embedded training corpus of a bundle.
+
+    embedding    samples x embedding dimensions
+    predictions  the model's calls (``calls_frame``)
+    metadata     ``gse``, the curated label of every call under the head's name (``phase``,
+                 ``medium``, ``lab_strain``; missing where a sample has none) and, when the atlas
+                 sample metadata was given, its columns
+    layout       block, start, end of the embedding blocks
+    """
     embedding: pd.DataFrame
     predictions: pd.DataFrame | None
     metadata: pd.DataFrame | None
@@ -62,23 +96,21 @@ class Atlas:
     source: Path | None = None
 
     @classmethod
-    def load(cls, path: str | Path) -> "Atlas":
-        p = Path(path)
-        emb_file = p if p.is_file() else p / EMBEDDING_FILE
-        d = emb_file.parent
-        emb = pd.read_csv(emb_file, index_col=0)
-        emb.index = emb.index.astype(str)
-        preds = pd.read_csv(d / PREDICTIONS_FILE, index_col=0) if (d / PREDICTIONS_FILE).exists() else None
-        meta = pd.read_csv(d / METADATA_FILE, index_col=0, low_memory=False) if (d / METADATA_FILE).exists() else None
-        if preds is not None:
-            preds.index = preds.index.astype(str)
-        if meta is not None:
-            meta.index = meta.index.astype(str)
-        layout = pd.read_csv(d / LAYOUT_FILE) if (d / LAYOUT_FILE).exists() else layout_from_columns(emb.columns)
-        if "width" not in layout.columns:
-            layout["width"] = layout["end"] - layout["start"]
-        manifest = json.loads((d / MANIFEST_FILE).read_text()) if (d / MANIFEST_FILE).exists() else None
-        return cls(emb, preds, meta, layout, manifest, d)
+    def load(cls, path: str | Path, metadata: str | Path | None = None) -> "Atlas":
+        d = Path(path)
+        emb = read_embedding(d)
+        manifest = json.loads((d / MANIFEST_FILE).read_text())
+        raw = pd.read_csv(d / PREDICTIONS_FILE, sep="\t", index_col=0, dtype={"gse": str})
+        raw.index = raw.index.astype(str)
+        raw = raw.reindex(emb.index)
+        meta = pd.DataFrame({"gse": raw["gse"]}, index=emb.index)
+        for h in HEADS:
+            if f"{h}_label" in raw.columns:
+                meta[h] = raw[f"{h}_label"].astype(object).where(raw[f"{h}_label"].notna(), None)
+        if metadata is not None:
+            extra = read_sample_table(metadata).reindex(emb.index)
+            meta = meta.join(extra[[c for c in extra.columns if c not in meta.columns and c != "GSE"]])
+        return cls(emb, calls_frame(raw), meta, layout_from_manifest(manifest), manifest, d)
 
     @property
     def studies(self) -> np.ndarray | None:
@@ -101,7 +133,7 @@ class Atlas:
         return cols
 
     def label_source(self, factor: str) -> pd.Series | None:
-        """Atlas labels for a factor: curated metadata when present, else the encoder prediction."""
+        """Atlas labels of a call: the curated labels when the atlas has any, else the model's calls."""
         if self.metadata is not None and factor in self.metadata.columns:
             s = self.metadata.reindex(self.embedding.index)[factor]
             if s.notna().any():
@@ -456,8 +488,8 @@ def compare(query: pd.DataFrame, atlas: Atlas, out_dir: str | Path, k: int = 15,
     a_xy = q_xy = None
     if do_umap:
         a_xy, q_xy = umap_project(atlas, query, seed, blocks)
-        a_xy.to_csv(out / "umap_atlas.csv")
-        q_xy.to_csv(out / "umap_query.csv")
+        a_xy.to_csv(out / "umap_atlas.tsv", sep="\t")
+        q_xy.to_csv(out / "umap_query.tsv", sep="\t")
         try:
             import matplotlib
             matplotlib.use("Agg")

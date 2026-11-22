@@ -1,0 +1,128 @@
+{
+ "gse": "GSE43408",
+ "notes": "LL37 expression from pHerd30T in Top10, aerobic and anaerobic LB. Controls: GSM1217967 titled empty vector 'pHerd30T CK', GSM1217969 titled 'pHerd30T-LL37 CK' (plasmid uninduced?) while both fields say 'no LL37 expression (control)'; genotype_class and inducer_added left out for controls. Anaerobic set to anaerobic_fermentation (no acceptor named). Top10 taken as K-12.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "37C in LB medium under aerobic and anaerobic condition"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "37C in LB medium"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "37C in LB medium"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "37C in LB medium"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "One of samples is E.coli which expressed LL37 as induction in each group, another sample is E.coli with no LL37 expression"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "one group is under aerobic condition, the other group is under anaerobic condition"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "E.coli Top 10"
+  },
+  "strain_name": {
+   "v": "Top10",
+   "b": "stated",
+   "q": "E.coli Top 10"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "mRNA of prokaryotes is enriched just by removing rRNAs from the total RNA"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribo-Zero rRNATM Removal kit"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "4 samples, two groups, one group is under aerobic condition, the other group is under anaerobic condition."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:growth condition",
+   "regex": "^aerobic",
+   "set": {
+    "oxygen": {
+     "v": "aerobic",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:growth condition",
+   "regex": "anaerobic",
+   "set": {
+    "oxygen": {
+     "v": "anaerobic_fermentation",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "control",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "induced",
+   "set": {
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "LL37",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "inducer_added": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

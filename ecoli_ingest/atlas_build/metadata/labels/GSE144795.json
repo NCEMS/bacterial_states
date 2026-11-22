@@ -1,0 +1,111 @@
+{
+ "gse": "GSE144795",
+ "notes": "Serotonin (host neurotransmitter) present from the start -> host_factor, adapted; water vehicle sample is the control. Temperature, aeration, rRNA removal not stated. | 2026-11-20: late_exponential merged into transition (the value was dropped from the scheme: submitters' 'late log' and 'early stationary' cannot be ordered against each other).",
+ "default": {
+  "base_medium": {
+   "v": "cell_culture",
+   "b": "study_default",
+   "q": "grown in low gluocse DMEM  until late log phase"
+  },
+  "medium_class": {
+   "v": "defined_rich",
+   "b": "inferred",
+   "q": "low gluocse DMEM"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "low gluocse DMEM"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "study_default",
+   "q": "low gluocse DMEM"
+  },
+  "growth_phase": {
+   "v": "transition",
+   "b": "stated",
+   "q": "grown until late log phase"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "WT"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT EHEC were grown until late log phase in low gluocse DMEM in the presence and absence of 10µM serotonin."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT EHEC were grown until late log phase in low gluocse DMEM in the presence and absence of 10µM serotonin."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT EHEC were grown until late log phase in low gluocse DMEM in the presence and absence of 10µM serotonin."
+  },
+  "strain_group": {
+   "v": "EHEC_STEC",
+   "b": "stated",
+   "q": "EHEC strain 86 24"
+  },
+  "strain_name": {
+   "v": "86-24",
+   "b": "stated",
+   "q": "EHEC strain 86 24"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "RNA libraries were prepared using Illumina’s ScriptSeq Complete Kit (Bacteria)"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA seq experiment was perfomed in the presence and absence of 10µM serotonin"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^water$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^serotonin",
+   "set": {
+    "treatment": {
+     "v": "host_factor",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "10µM of serotonin hydrochloride or only water in a dilution ratio of 1:1000 was added to the low gluocse DMEM before starting the experiment"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

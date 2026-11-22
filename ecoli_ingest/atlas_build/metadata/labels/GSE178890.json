@@ -1,0 +1,33 @@
+{
+ "gse": "GSE178890",
+ "notes": "4 E. coli ATCC 25922 samples, groups EC and ECH; the text never says which group got the NDI-10 ligand (or what H means), growth and treatment only 'as described in the attached article'. treatment, is_control, medium, phase left out. strain_group left out (pathotype/isolate origin not stated).",
+ "default": {
+  "strain_name": {
+   "v": "ATCC 25922",
+   "b": "stated",
+   "q": "ATCC_25922"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "ATCC_25922"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "4 samples Ecoli and 4 samples Saureus no replicates"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "4 samples Ecoli and 4 samples Saureus no replicates"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Standard library preparation protocol as describe in attached article"
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

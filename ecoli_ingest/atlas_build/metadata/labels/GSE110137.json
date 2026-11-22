@@ -1,0 +1,183 @@
+{
+ "gse": "GSE110137",
+ "notes": "Antibiotic panel, ~25 min at sublethal dose, DMSO = control. Treatment classes from ch:moa: lipoprotein-targeting AZ-LolCDE/globomycin -> abx_cell_wall as the moa field says; B-01 'new hit' -> abx_other; nitroxolin 'DNA replication inhibitor' (not a quinolone) -> abx_other; nitrofurantoin -> abx_other;dna_damage. iso-sensitest medium: base_medium other, medium_class left out (composition not given). Phase mid_exponential inferred from OD ~0.2 at sampling. Temperature/aeration not stated. WT re-read: plain BW25113, no plasmid or marker -> wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "other",
+   "b": "stated",
+   "q": "bacteria were grown in iso-sensitest medium"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "bacteria were treated with different antibiotics for ~ 25 min till  ~OD 0.2  in 2 ml tubes"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "BW25113"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "BW25113"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA profiles of E.coli treated with different antibiotics at sublethal concentration"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA profiles of E.coli treated with different antibiotics at sublethal concentration"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA profiles of E.coli treated with different antibiotics at sublethal concentration"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA profiles of E.coli treated with different antibiotics at sublethal concentration"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "bacterial ribosomal RNA was depleted using the Ribo-Zero Magnetic Kit Bacteria"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "bacterial ribosomal RNA was depleted using the Ribo-Zero Magnetic Kit Bacteria"
+  },
+  "exposure": {
+   "v": "acute",
+   "b": "stated",
+   "q": "~ 25 min"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA profiles of E.coli treated with different antibiotics at sublethal concentration"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:moa",
+   "regex": "^cell wall synthesis inhibitor",
+   "set": {
+    "treatment": {
+     "v": "abx_cell_wall",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:moa",
+   "regex": "^Protein synthesis$",
+   "set": {
+    "treatment": {
+     "v": "abx_translation",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "^(Ciprofloxacin|Levofloxacin|Norfloxacin)$",
+   "set": {
+    "treatment": {
+     "v": "abx_dna_gyrase",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "^Nitroxolin$",
+   "set": {
+    "treatment": {
+     "v": "abx_other",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "^Nitrofurantoin$",
+   "set": {
+    "treatment": {
+     "v": "abx_other;dna_damage",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:moa",
+   "regex": "^Membrane perturbation$",
+   "set": {
+    "treatment": {
+     "v": "abx_membrane",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:moa",
+   "regex": "^Folic Acid synthesis inhibitor$",
+   "set": {
+    "treatment": {
+     "v": "abx_folate",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:moa",
+   "regex": "^new hit$",
+   "set": {
+    "treatment": {
+     "v": "abx_other",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "^DMSO$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,36 @@
+{
+  "gse": "GSE199248",
+  "notes": "NEB 5-alpha LacIq with plasmid-borne antibiotic resistance genes (NDM-1, CAT-I, aadB; wild-type allele or single-codon variants), IPTG-induced, no antibiotics. Submitters' controls: uninduced WT allele (heterologous gene present but not induced; genotype_class heterologous_expression, inducer false) and the induced deletion construct ('Delta Gene', treated as empty-vector reference). Base medium unnamed ('media containing ... 2% w/v glucose'), so medium labels left out. 'exponential growth phase' stated in the design.",
+  "default": {
+    "culture_mode": {"v": "batch_shaken", "b": "stated", "q": "incubated at 37°C with shaking until 330 minutes had passed since first inducing the cultures"},
+    "oxygen": {"v": "aerobic", "b": "inferred", "q": "incubated at 37°C with shaking"},
+    "growth_temperature": {"v": 37, "b": "stated", "q": "incubated at 37°C with shaking"},
+    "growth_phase": {"v": "mid_exponential", "b": "stated", "q": "to ensure the cells were still in exponential growth phase based on OD measurements"},
+    "genotype_class": {"v": "heterologous_expression", "b": "stated", "q": "cells expressing single-codon substitutions in the antibiotic resistance genes NDM-1, CAT-I, or aadB"},
+    "global_regulator_perturbed": {"v": false, "b": "inferred", "q": "cells expressing single-codon substitutions in the antibiotic resistance genes NDM-1, CAT-I, or aadB"},
+    "inducer_added": {"v": true, "b": "stated", "q": "At time zero, IPTG was added to a concentration of 1 mM"},
+    "treatment": {"v": "none", "b": "study_default", "q": "in the absence of antibiotics"},
+    "strain_group": {"v": "K-12", "b": "inferred", "q": "NEB 5-alpha LacIq"},
+    "strain_name": {"v": "NEB 5-alpha LacIq", "b": "stated", "q": "NEB 5-alpha LacIq"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "compare the gene expression profiles of cells expressing single-codon substitutions in the antibiotic resistance genes NDM-1, CAT-I, or aadB in the absence of antibiotics"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "compare the gene expression profiles of cells expressing single-codon substitutions in the antibiotic resistance genes NDM-1, CAT-I, or aadB in the absence of antibiotics"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "mRNA enrichment was completed using the MICROBExpress Bacterial mRNA Enrichment Kit"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "MICROBExpress Bacterial mRNA Enrichment Kit"},
+    "is_control": {"v": false, "b": "study_default", "q": "Controls consisted of cells with the wildtype allele that were not induced with IPTG as well as cells harboring a Δ antibiotic resistance gene deletion that were induced with IPTG"}
+  },
+  "rules": [
+    {"field": "ch:genotype", "regex": "CAT-I",
+     "set": {"perturbed_genes": {"v": "CAT-I", "b": "stated", "q": ""}}},
+    {"field": "ch:genotype", "regex": "NDM-1",
+     "set": {"perturbed_genes": {"v": "NDM-1", "b": "stated", "q": ""}}},
+    {"field": "ch:genotype", "regex": "AadB",
+     "set": {"perturbed_genes": {"v": "aadB", "b": "stated", "q": ""}}},
+    {"field": "ch:genotype", "regex": "^Uninduced WT",
+     "set": {"inducer_added": {"v": false, "b": "stated", "q": ""},
+             "is_control": {"v": true, "b": "stated", "q": "Controls consisted of cells with the wildtype allele that were not induced with IPTG"}}},
+    {"field": "ch:genotype", "regex": "^Delta Gene$",
+     "set": {"genotype_class": {"v": "reference", "b": "inferred", "q": "cells harboring a Δ antibiotic resistance gene deletion that were induced with IPTG"},
+             "is_control": {"v": true, "b": "stated", "q": "cells harboring a Δ antibiotic resistance gene deletion that were induced with IPTG"}}}
+  ],
+  "samples": {}
+}

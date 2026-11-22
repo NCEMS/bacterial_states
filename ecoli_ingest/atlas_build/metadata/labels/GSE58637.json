@@ -1,0 +1,143 @@
+{
+ "gse": "GSE58637",
+ "notes": "Vector vs pMicL / pMicL-S, IPTG time course (0-20 min). GSM1430425-32 libraries are 25-40 bp size-selected mRNA fragments -> assay_class other; GSM1415867-70 use the same shared size-selection protocol but no size is given, so assay_class left out. growth_phase left out (OD ~0.3 measured at 420 nm, no phase word). inducer_added left out for t0 samples (time 0 of induction). Vector (empty vector, reference) samples at every time point set as controls.",
+ "default": {
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "stated",
+   "q": "Bacteria were grown at 30C with shaking (~200 rpm)"
+  },
+  "base_medium": {
+   "v": "MOPS",
+   "b": "stated",
+   "q": "fully supplemented MOPS glucose media"
+  },
+  "medium_class": {
+   "v": "defined_rich",
+   "b": "inferred",
+   "q": "in fully supplemented MOPS glucose media (Teknova)"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "in fully supplemented MOPS glucose media (Teknova)"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "fully supplemented MOPS glucose media"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Bacteria were grown at 30C with shaking (~200 rpm)"
+  },
+  "growth_temperature": {
+   "v": 30,
+   "b": "stated",
+   "q": "Bacteria were grown at 30C with shaking (~200 rpm)"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "samples were gathered at the indicated time (in min) after induction of either vector (WT), long (MicL), and short (MicL-S) forms of MicL"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "samples were gathered at the indicated time (in min) after induction of either vector (WT), long (MicL), and short (MicL-S) forms of MicL"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "At OD ~0.3, cultures were induced with 1mM IPTG for the appropriate length of time."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "samples were gathered at the indicated time (in min) after induction of either vector (WT), long (MicL), and short (MicL-S) forms of MicL"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "samples were gathered at the indicated time (in min) after induction of either vector (WT), long (MicL), and short (MicL-S) forms of MicL"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "(Vector|WT) t",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "MicL(-S)? t",
+   "set": {
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "inferred",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "micL",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": " t0$",
+   "set": {
+    "inducer_added": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "description",
+   "regex": "size selected 25-40bp",
+   "set": {
+    "assay_class": {
+     "v": "other",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

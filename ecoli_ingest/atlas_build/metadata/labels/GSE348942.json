@@ -1,0 +1,176 @@
+{
+ "gse": "GSE348942",
+ "notes": "strain_group left out (C3000 / ATCC 15597; name alone does not settle K-12 vs C). Mock-infected samples are controls at every time. Phase mid_exponential inferred from OD 0.5 in LB for samples up to 45 min; 180 min left out. Infected: mixed_organism true (host and phage RNA). 0 min infected counted as phage-treated, acute. WT re-read: standard strain C3000 (ATCC 15597), its native F plasmid not a modification, set to wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "E. coli C3000 (ATCC 15597) was cultured in LB medium at 37C with shaking at 200 rpm until the culture reached an optical density at 600 nm (OD600) of 0.5."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "E. coli C3000 (ATCC 15597) was cultured in LB medium at 37C with shaking at 200 rpm until the culture reached an optical density at 600 nm (OD600) of 0.5."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "E. coli C3000 (ATCC 15597) was cultured in LB medium at 37C with shaking at 200 rpm until the culture reached an optical density at 600 nm (OD600) of 0.5."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "E. coli C3000 (ATCC 15597) was cultured in LB medium at 37C with shaking at 200 rpm until the culture reached an optical density at 600 nm (OD600) of 0.5."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "E. coli C3000 (ATCC 15597) was cultured in LB medium at 37C with shaking at 200 rpm until the culture reached an optical density at 600 nm (OD600) of 0.5."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "E. coli C3000 (ATCC 15597) was cultured in LB medium at 37C with shaking at 200 rpm until the culture reached an optical density at 600 nm (OD600) of 0.5."
+  },
+  "strain_name": {
+   "v": "C3000 (ATCC 15597)",
+   "b": "stated",
+   "q": "C3000 (ATCC 15597)"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "C3000 (ATCC 15597)"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "either infected with MS2 bacteriophage (ATCC 15597-B1) at a multiplicity of infection (MOI) of 10 or mock-infected with LB medium"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "either infected with MS2 bacteriophage (ATCC 15597-B1) at a multiplicity of infection (MOI) of 10 or mock-infected with LB medium"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "either infected with MS2 bacteriophage (ATCC 15597-B1) at a multiplicity of infection (MOI) of 10 or mock-infected with LB medium"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "500 ng of total RNA was used for rRNA depletion with the NEBNext rRNA Depletion Kit (Bacteria)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "500 ng of total RNA was used for rRNA depletion with the NEBNext rRNA Depletion Kit (Bacteria)"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "E. coli C3000 (ATCC 15597) was cultured in LB medium at 37C with shaking at 200 rpm until the culture reached an optical density at 600 nm (OD600) of 0.5."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:infection",
+   "regex": "^mock",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "mixed_organism": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:infection",
+   "regex": "^MS2",
+   "set": {
+    "treatment": {
+     "v": "phage",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "mixed_organism": {
+     "v": true,
+     "b": "stated",
+     "q": "Total RNA containing both host and phage RNA"
+    }
+   }
+  },
+  {
+   "field": "ch:time post-infection",
+   "regex": "^180 min$",
+   "set": {
+    "growth_phase": {
+     "v": null,
+     "b": "",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:time post-infection",
+   "regex": "^(0|5|10|15) min$",
+   "set": {
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:time post-infection",
+   "regex": "^45 min$",
+   "set": {
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:time post-infection",
+   "regex": "^180 min$",
+   "set": {
+    "exposure": {
+     "v": "adapted",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:infection",
+   "regex": "^mock",
+   "set": {
+    "exposure": {
+     "v": null,
+     "b": "",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

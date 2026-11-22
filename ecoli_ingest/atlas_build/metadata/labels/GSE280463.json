@@ -1,0 +1,63 @@
+{
+ "gse": "GSE280463",
+ "notes": "Both samples are dRNA-seq (5'-end) libraries, TEX-treated and TEX-untreated: assay_class end_mapping. Medium is 'modified R (MR) medium containing D-tagatose'; composition and whether tagatose is the sole carbon source are not given, so medium_class and carbon_source left out. No rRNA removal described; rrna_removal left out.",
+ "default": {
+  "base_medium": {
+   "v": "other",
+   "b": "stated",
+   "q": "modified R (MR) medium containing D-tagatose"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Sample from the exponential phase"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "stated",
+   "q": "WT"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "WT"
+  },
+  "strain_group": {
+   "v": "probiotic",
+   "b": "stated",
+   "q": "Escherichia coli Nissle 1917"
+  },
+  "strain_name": {
+   "v": "Nissle 1917",
+   "b": "stated",
+   "q": "Escherichia coli Nissle 1917"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Sample from the exponential phase of modified R (MR) medium containing D-tagatose were collected for total RNA extraction."
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "Sample from the exponential phase of modified R (MR) medium containing D-tagatose were collected for total RNA extraction."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Sample from the exponential phase of modified R (MR) medium containing D-tagatose were collected for total RNA extraction."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Sample from the exponential phase of modified R (MR) medium containing D-tagatose were collected for total RNA extraction."
+  },
+  "assay_class": {
+   "v": "end_mapping",
+   "b": "stated",
+   "q": "differential RNA sequencing (dRNA-seq)"
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

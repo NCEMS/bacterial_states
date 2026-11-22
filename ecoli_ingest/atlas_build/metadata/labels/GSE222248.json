@@ -1,0 +1,154 @@
+{
+ "gse": "GSE222248",
+ "notes": "MG1655 WT vs rpoD D445V, LB, mid log (OD 0.5-0.6) at 37 or 23 C. Growth at 23 C labelled treatment cold, exposure adapted (grown at that temperature; the field calls it a treatment). WT 37 C = control. Shaking not stated, oxygen left out. 'RNA was isolated at 5 post-infection' in the summary is a stray phrase; no infection in the design. WT re-read: reference -> wild_type, MG1655 WT, no construct.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "grown at 37C or 23C to mid log phase (OD600 ~ 0.5-0.6)"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "E. coli was grown in LB broth at 37C or 23C"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "E. coli was grown in LB broth at 37C or 23C"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "E. coli was grown in LB broth at 37C or 23C"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Isogenic E. coli MG1655 and D445V mutant were grown to a cell density of OD600 ~0.5-0.6 in LB broth at either 37oC or 23oC."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Isogenic E. coli MG1655 and D445V mutant were grown to a cell density of OD600 ~0.5-0.6 in LB broth at either 37oC or 23oC."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Isogenic E. coli MG1655 and D445V mutant were grown to a cell density of OD600 ~0.5-0.6 in LB broth at either 37oC or 23oC."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Isogenic E. coli MG1655 and D445V mutant"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA subtraction was performed with the bacterial RiboMinus Kit (Ambion)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA subtraction was performed with the bacterial RiboMinus Kit (Ambion)"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Isogenic E. coli MG1655 and D445V mutant were grown to a cell density of OD600 ~0.5-0.6 in LB broth at either 37oC or 23oC."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "D445V",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rpoD",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "37oC",
+   "set": {
+    "growth_temperature": {
+     "v": 37,
+     "b": "stated",
+     "q": ""
+    },
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "23oC",
+   "set": {
+    "growth_temperature": {
+     "v": 23,
+     "b": "stated",
+     "q": ""
+    },
+    "treatment": {
+     "v": "cold",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^WT Culture  37oC",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

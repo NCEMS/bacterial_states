@@ -1,0 +1,175 @@
+{
+ "gse": "GSE194037",
+ "notes": "M9 + 0.4% glucose + amino acids + vitamins (amino acid mix not specified, so medium_class left out). Cold shock to 15 C sampled at 20/80/180 min (the 0 min and unshifted-control samples are not candidates); novobiocin 50 ng/ul for 120 min. novo_0ng = control; its sampling time is not given explicitly, so growth_phase left out for it. growth_temperature not stated for the non-cold cultures (only the overnight at 30 C), left out. 180 min cold samples get no phase (>2 h). WT re-read: MG1655 used unmodified -> wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "diluted into fresh M9 media, supplemented with 0.4 % glucose, amino acids, and vitamin solutions"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "stated",
+   "q": "supplemented with 0.4 % glucose, amino acids, and vitamin solutions"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "supplemented with 0.4 % glucose"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "allowed to grow with aeration until reaching the mid-exponential phase of growth (OD of 0.3)"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "allowed to grow with aeration"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "Examination of genome-wide responses over time (optimal and CS temperature) and under the effects of Novobicion"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of genome-wide responses over time (optimal and CS temperature) and under the effects of Novobicion"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of genome-wide responses over time (optimal and CS temperature) and under the effects of Novobicion"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of genome-wide responses over time (optimal and CS temperature) and under the effects of Novobicion"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of genome-wide responses over time (optimal and CS temperature) and under the effects of Novobicion"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was extracted using RNeasy kit (Qiagen). RNA-seq libraries were constructed according to the Illumina's protocol."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of genome-wide responses over time (optimal and CS temperature) and under the effects of Novobicion"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^novo_0ng$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^novo_50ng$",
+   "set": {
+    "treatment": {
+     "v": "abx_dna_gyrase",
+     "b": "stated",
+     "q": "For RNA-seq measurements under Gyrase inhibition, the antibiotic Novobiocin was added"
+    },
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": "the cells were only collected 120 minutes after the treatment"
+    },
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": "until reaching the mid-exponential phase of growth (OD of 0.3)"
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^T_cold",
+   "set": {
+    "treatment": {
+     "v": "cold",
+     "b": "stated",
+     "q": "the temperature was shifted to 15 °C"
+    },
+    "growth_temperature": {
+     "v": 15,
+     "b": "stated",
+     "q": "the temperature was shifted to 15 °C"
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^T_cold_20min$",
+   "set": {
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    },
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": "until reaching the mid-exponential phase of growth (OD of 0.3)"
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^T_cold_80min$",
+   "set": {
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": ""
+    },
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": "until reaching the mid-exponential phase of growth (OD of 0.3)"
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^T_cold_180min$",
+   "set": {
+    "exposure": {
+     "v": "adapted",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

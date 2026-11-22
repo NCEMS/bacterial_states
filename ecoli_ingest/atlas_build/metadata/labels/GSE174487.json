@@ -1,0 +1,169 @@
+{
+ "gse": "GSE174487",
+ "notes": "Background strain is MG1655(crl-) for all; empty pZE vector samples are the controls. GSM5315777 (pBR-lacI-FliX-S, 0 mM IPTG) is called a 'control library' by the submitters but carries the FliX-S construct: genotype native_overexpression, inducer false, is_control left out. rRNA removal not stated.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "Bacterial strains were grown at 37˚C, shaking at 250 rpm, in LB rich medium and samples were collected at OD~0.2."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Bacterial strains were grown at 37˚C, shaking at 250 rpm, in LB rich medium and samples were collected at OD~0.2."
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Bacterial strains were grown at 37˚C, shaking at 250 rpm, in LB rich medium and samples were collected at OD~0.2."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Bacterial strains were grown at 37˚C, shaking at 250 rpm, in LB rich medium and samples were collected at OD~0.2."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Bacterial strains were grown at 37˚C, shaking at 250 rpm, in LB rich medium and samples were collected at OD~0.2."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Bacterial strains were grown at 37˚C, shaking at 250 rpm, in LB rich medium and samples were collected at OD~0.2."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Bacterial strains were grown at 37˚C, shaking at 250 rpm, in LB rich medium and samples were collected at OD~0.2."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total RNA sequencing of E. coli strains carrying a control vector or overexpressing MotR* or FliX-S"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total RNA sequencing of E. coli strains carrying a control vector or overexpressing MotR* or FliX-S"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Total RNA sequencing of E. coli strains carrying a control vector or overexpressing MotR* or FliX-S"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655(crl-)"
+  },
+  "strain_name": {
+   "v": "MG1655 crl-",
+   "b": "stated",
+   "q": "MG1655(crl-)"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Standard TRIzol protocol was used for total RNA extraction."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total RNA sequencing of E. coli strains carrying a control vector or overexpressing MotR* or FliX-S"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total RNA sequencing of E. coli strains carrying a control vector or overexpressing MotR* or FliX-S"
+  }
+ },
+ "rules": [
+  {
+   "field": "source_name",
+   "regex": "\\+ pZE$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "FliX",
+   "set": {
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "fliX",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "MotR",
+   "set": {
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "motR",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:growth",
+   "regex": "^1 Mm IPTG",
+   "set": {
+    "inducer_added": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:growth",
+   "regex": "^0 Mm IPTG",
+   "set": {
+    "is_control": {
+     "v": null,
+     "b": "",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

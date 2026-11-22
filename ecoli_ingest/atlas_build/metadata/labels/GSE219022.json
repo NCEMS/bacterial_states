@@ -1,0 +1,116 @@
+{
+ "gse": "GSE219022",
+ "notes": "Candidates are the mRNA (total RNA, rRNA-depleted, NEBNext Ultra II Directional kit) arm of a ribosome-profiling study; library built with a standard kit, no footprint-style gel size selection, so total_rnaseq. Unsure: user rule excludes 'the mRNA-seq arm of a ribosome-profiling protocol'; set total_rnaseq because the protocol is a standard kit. Temperature not given. Phase kept as mid-exponential (sampled 30 min after acidification of OD 0.5 exponential cells).",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "aerobically grown to exponential phase in 200 ml of unbuffered LB media (pH 7.6)"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "aerobically grown to exponential phase in 200 ml of unbuffered LB media (pH 7.6)"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "aerobically grown to exponential phase in 200 ml of unbuffered LB media (pH 7.6)"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "aerobically grown to exponential phase in 200 ml of unbuffered LB media (pH 7.6)"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "aerobically grown to exponential phase in 200 ml of unbuffered LB media (pH 7.6)"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "WT"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "WT"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparison of genome-wide mRNA levels and translational activity at pH 7.6, 5.8 and 4.4 in LB medium."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparison of genome-wide mRNA levels and translational activity at pH 7.6, 5.8 and 4.4 in LB medium."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparison of genome-wide mRNA levels and translational activity at pH 7.6, 5.8 and 4.4 in LB medium."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "inferred",
+   "q": "cDNA libraries were prepared using the NEBNext Ultra II Directional RNA Library Prep Kit for Illumina (NEB)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA depletion was performed using the NEBNext rRNA Depletion Kit for bacteria"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "pH 7\\.6",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "30 further min at pH 7.6 under non-stress conditions"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "pH (5\\.8|4\\.4)",
+   "set": {
+    "treatment": {
+     "v": "acid",
+     "b": "stated",
+     "q": "5M hydrochloric acid was directly added to growing cultutes to adjust pH values to either pH 5.8, or pH 4.4."
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": "cultures were either grown for 30 further min at pH 7.6 under non-stress conditions, 30 min at pH 5.8, or first 15 min at pH 5.8 and then shifted again for 15 min to pH 4.4"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

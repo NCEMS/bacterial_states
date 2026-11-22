@@ -1,0 +1,192 @@
+{
+ "gse": "GSE343594",
+ "notes": "Reviewed 2026-11-15: co-culture samples carry treatment coculture (user decision) | A samples ('AgMPs parallel sample') read as E. coli monoculture with AgNPs (titles of cocultures say coculture). AgNPs labelled envelope_solvent_biocide;metal_excess (summary calls them envelope-targeting), Ag+ metal_excess; both adapted (repeated exposure over 9 days of serial transfer). CK = untreated monoculture = control. Coculture samples mixed_organism true. Sampling time within the 24 h transfer cycle not given -> no phase. Stranded mRNA kit: rrna_removal left out. WT re-read: genotype wt, no plasmid or marker described -> wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "TSB",
+   "b": "stated",
+   "q": "Strains were grown in TSB medium"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Strains were grown in TSB medium"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Strains were grown in TSB medium"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "All cultures were kept in 96-well deep plates at 37 °C with shaking at 160 rpm."
+  },
+  "culture_mode": {
+   "v": "batch_microplate",
+   "b": "stated",
+   "q": "All cultures were kept in 96-well deep plates at 37 °C with shaking at 160 rpm."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "All cultures were kept in 96-well deep plates at 37 °C with shaking at 160 rpm."
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "wt"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "wt"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "with three different treatments: (1) no additive, (2) 0.5 mg/L AgNPs, and (3) 0.5 mg/L Ag+."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "with three different treatments: (1) no additive, (2) 0.5 mg/L AgNPs, and (3) 0.5 mg/L Ag+."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was extracted from E. coli samples"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "with three different treatments: (1) no additive, (2) 0.5 mg/L AgNPs, and (3) 0.5 mg/L Ag+."
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^AgMPs",
+   "set": {
+    "treatment": {
+     "v": "envelope_solvent_biocide;metal_excess",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "Every 24 h, 1% of the culture was transferred to fresh medium under the same conditions"
+    },
+    "mixed_organism": {
+     "v": false,
+     "b": "inferred",
+     "q": "Monocultures of E. coli and S. aureus were also cultivated separately"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^coculture",
+   "set": {
+    "mixed_organism": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "culture_mode": {
+     "v": "batch_microplate",
+     "b": "stated",
+     "q": "All cultures were kept in 96-well deep plates at 37 °C with shaking at 160 rpm."
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^coculture with S.aureus parallel",
+   "set": {
+    "treatment": {
+     "v": "coculture",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "Ag\\+ treatment",
+   "set": {
+    "treatment": {
+     "v": "metal_excess",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "Every 24 h, 1% of the culture was transferred to fresh medium under the same conditions"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "AgNPs treatment",
+   "set": {
+    "treatment": {
+     "v": "envelope_solvent_biocide;metal_excess",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "Every 24 h, 1% of the culture was transferred to fresh medium under the same conditions"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^CK",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "(1) no additive"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "mixed_organism": {
+     "v": false,
+     "b": "inferred",
+     "q": "Monocultures of E. coli and S. aureus were also cultivated separately"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^coculture.*Ag\\+ treatment",
+   "set": {
+    "treatment": {
+     "v": "metal_excess;coculture",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^coculture.*AgNPs treatment",
+   "set": {
+    "treatment": {
+     "v": "envelope_solvent_biocide;metal_excess;coculture",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

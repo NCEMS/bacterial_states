@@ -1,0 +1,81 @@
+{
+ "gse": "GSE226031",
+ "notes": "Strain '8099', group not stated. Violet phosphorene nanosheets (membrane penetration + oxidative stress) for 3 h labelled other_chemical;oxidative. No medium, temperature or phase information.",
+ "default": {
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "Violet Phosphorene"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Violet Phosphorene"
+  },
+  "strain_name": {
+   "v": "8099",
+   "b": "stated",
+   "q": "8099"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Violet Phosphorene"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Violet Phosphorene"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Violet Phosphorene"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "inferred",
+   "q": "RNA libraries for RNA-seq were prepared using NEBNext® Ultra™ Directional RNA Library Prep Kit for Illumina®"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:agent",
+   "regex": "^control$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:agent",
+   "regex": "violet phosphorene",
+   "set": {
+    "treatment": {
+     "v": "other_chemical;oxidative",
+     "b": "stated",
+     "q": "via oxidative stress combined with cell membrane penetration by VPNS"
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "stated",
+     "q": "3h"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,101 @@
+{
+ "gse": "GSE66519",
+ "notes": "MAPS: RNA co-purified with MS2-RyhB on an MS2-MBP amylose column -> IP_or_pulldown, not standard RNA-seq. Strain rne131 deltaryhB with arabinose-induced plasmid RyhB (untagged RyhB = control). Growth temperature and rRNA removal not stated.",
+ "default": {
+  "assay_class": {
+   "v": "IP_or_pulldown",
+   "b": "stated",
+   "q": "Identification of RNAs co-purified with MS2-RyhB in a rne131 ΔryhB strain."
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "exponential phase (OD600nm=0.5)"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "The bacterial strains were grown in 100mL of LB medium to an OD600nm of 0.5"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "The bacterial strains were grown in 100mL of LB medium to an OD600nm of 0.5"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "The bacterial strains were grown in 100mL of LB medium to an OD600nm of 0.5"
+  },
+  "genotype_class": {
+   "v": "multiple",
+   "b": "stated",
+   "q": "MG1655 rne131 delta-ryhB"
+  },
+  "perturbed_genes": {
+   "v": "rne;ryhB",
+   "b": "stated",
+   "q": "MG1655 rne131 delta-ryhB"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "MG1655 rne131 delta-ryhB"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "0.1% arabinose was added to induce the expression of MS2-RyhB/RyhB during 10 min."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RyhB (without MS2) was used as control"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "0.1% arabinose was added to induce the expression of MS2-RyhB/RyhB during 10 min."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Identification of RNAs co-purified with MS2-RyhB in a rne131 ΔryhB strain."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655 rne131 delta-ryhB"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655 rne131 delta-ryhB"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^RyhB$",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "RyhB (without MS2) was used as control"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^MS2-RyhB$",
+   "set": {
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": "RyhB (without MS2) was used as control"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -21,8 +21,8 @@ colnames(counts) <- basename(colnames(counts))
 colnames(counts) <- sub("_sort.bam$", "", colnames(counts))
 sample_table <- read.delim(sample_metadata_path)
 rownames(sample_table) <- sample_table$sample_id
-counts <- counts[, rownames(sample_table)]
-counts <- counts[rowSums(counts) > 0, ]
+counts <- counts[, rownames(sample_table), drop = FALSE]   # drop = FALSE: a run with one sample
+counts <- counts[rowSums(counts) > 0, , drop = FALSE]
 
 sample_table$condition <- factor(sample_table$condition)
 if ("condition2" %in% colnames(sample_table)) {
@@ -127,8 +127,8 @@ if (length(deseq2_contrasts) > 0) {
     res <- results(dds, contrast = c(factor_name, test_level, ref_level))
   
     res_df <- as.data.frame(res) %>%
-      rownames_to_column("Gene_Symbol") %>%
-      mutate(Gene_Symbol = trimws(as.character(Gene_Symbol))) %>%
+      rownames_to_column("Feature_ID") %>%
+      mutate(Feature_ID = trimws(as.character(Feature_ID))) %>%
       arrange(padj)
   
     file_name <- paste0(ref_level, "_vs_", test_level, "_deseq_results.tsv")

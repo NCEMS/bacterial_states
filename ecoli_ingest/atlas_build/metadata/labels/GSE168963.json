@@ -1,0 +1,106 @@
+{
+ "gse": "GSE168963",
+ "notes": "Phase conflict: 'log phase' together with '16hrs' overnight growth, so growth_phase left out. Nature of the slyA mutation (deletion/insertion/point) not given: genotype_class left out for mutants. Culture vessel/shaking and rRNA removal not described.",
+ "default": {
+  "base_medium": {
+   "v": "other",
+   "b": "stated",
+   "q": "grown to log phase (16hrs) overnight in Nutrient broth at 37 degree celcius"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "overnight in Nutrient broth"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "overnight in Nutrient broth"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "in Nutrient broth at 37 degree celcius"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "no treatment"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of Gene expresison profiles of SlyA mutant and WT strains of Escherichia Coli BW25113"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of Gene expresison profiles of SlyA mutant and WT strains of Escherichia Coli BW25113"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of Gene expresison profiles of SlyA mutant and WT strains of Escherichia Coli BW25113"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Total RNA was extracted using the RNeasy minikit (Qiagen)"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "BW25113"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^Wild Type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^slyA Mutant$",
+   "set": {
+    "perturbed_genes": {
+     "v": "slyA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

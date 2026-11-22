@@ -1,178 +1,165 @@
-"""Saving and loading a trained model bundle.
+"""The model bundle: what `train` writes and `embed` / `evaluate` read.
 
-Layout of a models directory (identical to what the original notebook wrote, so old bundles load):
+    model.pt            weights (a state dict of tensors)
+    preprocessing.pt    tensors: reference profile, z-score and covariate statistics, feature means, and the
+                        low end of every feature's expression for the missing-gene calls
+    manifest.json       features, covariates, hyper-parameters, split settings, metrics, versions
+    splits.csv          study, split and fold of every training-table sample
 
-    <factor>_encoder.pt   {"state_dict", "arch", "factor", "classes", "threshold", "positive_class"}
-    residual_ae.pt        {"state_dict", "arch"}
-    preprocessing.pt      {"genes", "zscore_mu", "zscore_sd", "tb_mu", "tb_sd", "factor_order",
-                           "factor_emb_dims", "res_dim", "top_emb_dim", "block_layout", "factor_classes",
-                           "factor_class_dtype", "factor_thresholds", "positive_class_index", "seed", ...}
-    manifest.json         human-readable record of hyper-parameters, metrics and environment
-    splits.csv            study-level train / test assignment used for training
-
-New bundles store arrays as tensors so that ``torch.load(weights_only=True)`` works; old bundles
-contain numpy arrays and are loaded with the unsafe fallback.
+Both .pt files hold tensors only, so ``torch.load(weights_only=True)`` reads them.
 """
 from __future__ import annotations
 
+import datetime
 import json
-from dataclasses import dataclass, field
+import platform
+from dataclasses import asdict, dataclass
 from pathlib import Path
 
 import numpy as np
-import pandas as pd
 import torch
 
-from .models import FactorEncoder, ResidualAE
+from . import __version__
+from .config import HEADS, HParams, TrainConfig
+from .data import label_weights, CovariateScaler, TrainingData
+from .features import FeatureSet
+from .models import build_model
+from .technical import GC_BINS
+
+
+def dna_penalty_report(data, cfg) -> dict:
+    """The DNA penalty of a fit: its weight and the number of replicate groups it used (0: left out)."""
+    from .train import replicate_sampler
+    reps = replicate_sampler(data, data.tr_rows) if cfg.dna_penalty_w > 0 else None
+    return {"weight": float(cfg.dna_penalty_w), "replicate_groups": 0 if reps is None else len(reps), "applied": reps is not None}
 from .preprocess import ZScore
 
-SCHEMA_VERSION = 1
-PREPROCESSING_FILE = "preprocessing.pt"
-RESIDUAL_FILE = "residual_ae.pt"
-MANIFEST_FILE = "manifest.json"
-SPLITS_FILE = "splits.csv"
+SCHEMA_VERSION = 2
+MODEL_FILE, PREPROCESSING_FILE, MANIFEST_FILE, SPLITS_FILE = "model.pt", "preprocessing.pt", "manifest.json", "splits.csv"
 
 
-def encoder_file(factor: str) -> str:
-    return f"{factor}_encoder.pt"
+def embedding_blocks(hp: HParams, fit: str) -> list:
+    """Which columns of the embedding belong to which block (0-based, end exclusive)."""
+    if fit == "unstructured":
+        return [{"block": "z", "start": 0, "end": hp.z_dim}]
+    out, start = [], 0
+    for name, dim in [(h, hp.block_dims[h]) for h in HEADS] + [("residual", hp.res_dim)]:
+        out.append({"block": name, "start": start, "end": start + dim})
+        start += dim
+    return out
 
 
-def _load_pt(path: Path):
-    try:
-        return torch.load(path, map_location="cpu", weights_only=True)
-    except Exception:  # legacy bundles hold numpy objects
-        return torch.load(path, map_location="cpu", weights_only=False)
-
-
-def _as_array(v) -> np.ndarray:
-    if torch.is_tensor(v):
-        v = v.numpy()
-    return np.asarray(v, dtype=np.float32).reshape(-1)
-
-
-def _cpu_state(m: torch.nn.Module) -> dict:
-    return {k: v.detach().cpu() for k, v in m.state_dict().items()}
-
-
-@dataclass
-class FactorArtifact:
-    name: str
-    model: FactorEncoder
-    classes: list
-    threshold: float | None = None
-    positive_class: str | None = None
-
-    @property
-    def emb_dim(self) -> int:
-        return self.model.arch()["emb_dim"]
+def environment(device) -> dict:
+    import pandas
+    import scipy
+    import sklearn
+    return {"python": platform.python_version(), "numpy": np.__version__, "pandas": pandas.__version__,
+            "scipy": scipy.__version__, "scikit-learn": sklearn.__version__, "torch": torch.__version__, "device": str(device)}
 
 
 @dataclass
 class ModelBundle:
-    factors: dict               # factor name -> FactorArtifact, in factor_order
-    residual: ResidualAE
-    prep: dict                  # contents of preprocessing.pt with arrays as numpy
-    manifest: dict | None = None
-    source_dir: Path | None = None
-    device: torch.device = field(default_factory=lambda: torch.device("cpu"))
-
-    # ---- convenience accessors -------------------------------------------------------------
-    @property
-    def genes(self) -> list:
-        return list(self.prep["genes"])
+    model: torch.nn.Module
+    fs: FeatureSet
+    zscore: ZScore
+    scaler: CovariateScaler
+    ref_log: np.ndarray
+    manifest: dict
+    low: np.ndarray | None = None      # low end of every feature's normalised count; None = a bundle without missing-gene calls
+    low_pool: np.ndarray | None = None # the same for counts summed over a group of samples; None = no pooled calls
 
     @property
-    def factor_order(self) -> list:
-        return list(self.prep["factor_order"])
+    def config(self) -> TrainConfig:
+        cfg = TrainConfig.from_dict(self.manifest["config"])
+        for key in ("dna_decoder", "dna_inputs", "gc_offset", "clean_inputs", "qc_module", "gc_size_factors"):   # bundles made before these
+            if key not in self.manifest["config"]:
+                setattr(cfg, key, False)
+        if "encoder_covariates" not in self.manifest["config"]:    # bundles made before: the encoder saw the covariates
+            cfg.encoder_covariates = True
+        if "dna_penalty_w" not in self.manifest["config"]:         # ... and were trained without the DNA penalty
+            cfg.dna_penalty_w = 0.0
+        if "covariates" not in self.manifest["config"]:    # a bundle made before the choice: the covariates it was trained with
+            cfg.covariates = tuple(self.manifest["covariates"]["names"])
+        return cfg
 
-    @property
-    def block_layout(self) -> list:
-        return list(self.prep["block_layout"])
-
-    @property
-    def zscore(self) -> ZScore:
-        return ZScore(self.prep["zscore_mu"], self.prep["zscore_sd"])
-
-    @property
-    def tb_mu(self) -> np.ndarray:
-        return self.prep["tb_mu"]
-
-    @property
-    def tb_sd(self) -> np.ndarray:
-        return self.prep["tb_sd"]
-
-    @property
-    def embedding_dim(self) -> int:
-        return int(self.block_layout[-1]["end"])
-
-    def embedding_columns(self) -> list:
-        cols = []
-        for b in self.block_layout:
-            prefix = "residual" if b["kind"] == "residual" else b["block"]
-            cols += [f"{prefix}[{i}]" for i in range(b["end"] - b["start"])]
-        return cols
-
-    def layout_frame(self) -> pd.DataFrame:
-        df = pd.DataFrame(self.block_layout)[["block", "kind", "start", "end"]].copy()
-        df["width"] = df["end"] - df["start"]
-        return df
-
-    def to(self, device) -> "ModelBundle":
-        self.device = torch.device(device)
-        for fa in self.factors.values():
-            fa.model.to(self.device).eval()
-        self.residual.to(self.device).eval()
-        return self
-
-    # ---- persistence ------------------------------------------------------------------------
     @classmethod
-    def load(cls, models_dir: str | Path, device="cpu") -> "ModelBundle":
-        d = Path(models_dir)
-        prep = dict(_load_pt(d / PREPROCESSING_FILE))
-        for k in ("zscore_mu", "zscore_sd", "tb_mu", "tb_sd"):
-            prep[k] = _as_array(prep[k])
-        prep["genes"] = [str(g) for g in prep["genes"]]
-        factors = {}
-        for f in prep["factor_order"]:
-            ck = _load_pt(d / encoder_file(f))
-            m = FactorEncoder.from_arch(ck["arch"])
-            m.load_state_dict(ck["state_dict"])
-            thr = ck.get("threshold")
-            factors[f] = FactorArtifact(f, m, [str(c) for c in ck["classes"]],
-                                        None if thr is None else float(thr), ck.get("positive_class"))
-        ck = _load_pt(d / RESIDUAL_FILE)
-        residual = ResidualAE.from_arch(ck["arch"])
-        residual.load_state_dict(ck["state_dict"])
-        manifest = None
-        if (d / MANIFEST_FILE).exists():
-            with open(d / MANIFEST_FILE, encoding="utf-8") as fh:
-                manifest = json.load(fh)
-        bundle = cls(factors, residual, prep, manifest, d)
-        return bundle.to(device)
-
-    def save(self, models_dir: str | Path, splits: pd.DataFrame | None = None) -> Path:
-        d = Path(models_dir)
-        d.mkdir(parents=True, exist_ok=True)
-        for f in self.factor_order:
-            fa = self.factors[f]
-            torch.save({"state_dict": _cpu_state(fa.model), "arch": fa.model.arch(), "factor": f,
-                        "classes": list(fa.classes),
-                        "threshold": None if fa.threshold is None else float(fa.threshold),
-                        "positive_class": fa.positive_class}, d / encoder_file(f))
-        torch.save({"state_dict": _cpu_state(self.residual), "arch": self.residual.arch()}, d / RESIDUAL_FILE)
-        prep = dict(self.prep)
-        for k in ("zscore_mu", "zscore_sd", "tb_mu", "tb_sd"):
-            prep[k] = torch.tensor(np.asarray(prep[k], dtype=np.float32))
-        prep["schema_version"] = SCHEMA_VERSION
-        torch.save(prep, d / PREPROCESSING_FILE)
-        if self.manifest is not None:
-            with open(d / MANIFEST_FILE, "w", encoding="utf-8") as fh:
-                json.dump(self.manifest, fh, indent=2, default=str)
-        if splits is not None:
-            splits.to_csv(d / SPLITS_FILE)
-        return d
+    def load(cls, path: str | Path, device="cpu") -> "ModelBundle":
+        path = Path(path)
+        with open(path / MANIFEST_FILE, encoding="utf-8") as fh:
+            manifest = json.load(fh)
+        if manifest.get("schema_version") != SCHEMA_VERSION:
+            raise ValueError(f"{path}: bundle schema {manifest.get('schema_version')!r}, this version reads {SCHEMA_VERSION}")
+        if {h: tuple(c) for h, c in (manifest.get("heads") or {}).items()} != {h: tuple(c) for h, c in HEADS.items()}:
+            raise ValueError(f"{path}: the bundle was trained for the calls {manifest.get('heads')}, this version makes {dict(HEADS)} "
+                             "(a bundle with other calls needs the code it was trained with)")
+        pre = torch.load(path / PREPROCESSING_FILE, map_location="cpu", weights_only=True)
+        fs = FeatureSet.from_dict(manifest["features"])
+        cov = manifest["covariates"]
+        hp = HParams(**manifest["config"]["hparams"])
+        model = build_model(manifest["config"].get("fit", "two_stage"), fs.n, len(cov["names"]), hp,
+                            phase_head=manifest["config"].get("phase_head", "binary"), dna=bool(manifest["config"].get("dna_decoder", False)),
+                            gc=bool(manifest["config"].get("gc_offset", False)),
+                            enc_cov=bool(manifest["config"].get("encoder_covariates", True)),
+                            gc_bins=len(GC_BINS) if (manifest.get("gc_term") or {}).get("profile") == "window300" else 0)
+        model.load_state_dict(torch.load(path / MODEL_FILE, map_location="cpu", weights_only=True))
+        model.to(device).eval()
+        return cls(model, fs, ZScore(pre["z_mu"].numpy(), pre["z_sd"].numpy()),
+                   CovariateScaler(cov["names"], cov["numeric"], pre["cov_mu"].numpy(), pre["cov_sd"].numpy()),
+                   pre["ref_log"].numpy().astype(np.float64), manifest,
+                   pre["missing_low"].numpy().astype(np.float64) if "missing_low" in pre else None,
+                   pre["missing_low_pool"].numpy().astype(np.float64) if "missing_low_pool" in pre else None)
 
 
-def load_splits(models_dir: str | Path) -> pd.DataFrame | None:
-    p = Path(models_dir) / SPLITS_FILE
-    return pd.read_csv(p, index_col=0) if p.exists() else None
+def save_bundle(path: str | Path, model, data: TrainingData, cfg: TrainConfig, device, seed: int,
+                metrics: dict | None = None, extra: dict | None = None) -> dict:
+    path = Path(path)
+    path.mkdir(parents=True, exist_ok=True)
+    torch.save({k: v.detach().cpu() for k, v in model.state_dict().items()}, path / MODEL_FILE)
+    torch.save({"ref_log": torch.tensor(data.ref_log), "z_mu": torch.tensor(data.zscore.mu), "z_sd": torch.tensor(data.zscore.sd),
+                "cov_mu": torch.tensor(data.scaler.mu), "cov_sd": torch.tensor(data.scaler.sd),
+                "log_mean": torch.tensor(data.log_mean)}
+               | ({} if data.low is None else {"missing_low": torch.tensor(data.low)})
+               | ({} if data.low_pool is None else {"missing_low_pool": torch.tensor(data.low_pool)}), path / PREPROCESSING_FILE)
+    data.splits.to_csv(path / SPLITS_FILE)
+    split = data.split
+    manifest = {
+        "schema_version": SCHEMA_VERSION, "ecoli_atlas_version": __version__,
+        "created_utc": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "seed": int(seed),
+        "heads": {h: list(c) for h, c in HEADS.items()},
+        "embedding_dim": cfg.hparams.z_dim,
+        "fit": cfg.fit,
+        "phase_head": cfg.phase_head,
+        "fit_classes": {h: list(c) for h, c in data.fit_classes.items()},
+        "embedding_blocks": embedding_blocks(cfg.hparams, cfg.fit),
+        "n_samples": {"training_pool": int((split == 1).sum()), "training_reference": int(data.reference[split == 1].sum()),
+                      "test": int((split == 3).sum()), "projected_only": int((split == 0).sum())},
+        "n_studies": {"training_pool": int(data.splits.loc[split == 1, "gse"].nunique()),
+                      "test": int(data.splits.loc[split == 3, "gse"].nunique())},
+        "n_labelled_training": {h: {c: int((data.y_fit[h][data.tr_rows] == i).sum()) for i, c in enumerate(data.fit_classes[h])} for h in HEADS},
+        "study_cap": int(data.study_cap),
+        "missing_genes": {"called": data.low is not None, "antisense_veto": bool(data.extra.get("antisense_veto", False)),
+                          "pooled": data.low_pool is not None,
+                          "median_per_sample": float(np.median(data.M.sum(dim=1).numpy())) if data.M is not None else 0.0,
+                          "samples_with_100_or_more": int((data.M.sum(dim=1) >= 100).sum()) if data.M is not None else 0},
+        "label_caps": {h: {data.fit_classes[h][c]: k for c, k in label_weights(data.y_fit[h], data.gse_codes, data.tr_rows, cfg.label_cap)[1].items()} for h in HEADS},
+        "dna": {"decoder": bool(cfg.dna_decoder), "inputs": bool(cfg.dna_inputs),
+                "scale": float(torch.exp(model.log_dna_scale.detach())) if hasattr(model, "log_dna_scale") else None,
+                "samples_with_dna": int(data.extra.get("dna_samples", 0)), "genome_length": data.fs.genome_length},
+        "gc_term": {"on": hasattr(model, "gc_term"),
+                    "scale": float(model.gc_term.scale.detach()) if hasattr(model, "gc_term") else None,
+                    "profile": ("window300" if model.gc_term.n_bins else "gene") if hasattr(model, "gc_term") else None},
+        "dna_penalty": dna_penalty_report(data, cfg),
+        "encoder_inputs": {"gc_cleaned": bool(cfg.clean_inputs), "gc_cleaned_samples": int(data.extra.get("gc_cleaned", 0)),
+                           "gc_profile": data.extra["feature_gc"].kind if cfg.clean_inputs else None,
+                           "covariates": bool(cfg.encoder_covariates)},
+        "features": data.fs.to_dict(),
+        "covariates": {"names": data.scaler.names, "numeric": data.scaler.numeric},
+        "config": cfg.to_dict() | {"hparams": asdict(cfg.hparams)},
+        "test_metrics": metrics or {},
+        "environment": environment(device),
+        "files": [MODEL_FILE, PREPROCESSING_FILE, SPLITS_FILE],
+    } | (extra or {})
+    with open(path / MANIFEST_FILE, "w", encoding="utf-8") as fh:
+        json.dump(manifest, fh, indent=2, default=str)
+    return manifest

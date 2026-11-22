@@ -1,0 +1,140 @@
+{
+ "gse": "GSE59397",
+ "notes": "Ethanologen GLBRCE1: engineered, but the digest does not say from which strain or which genes, so strain_group, genotype_class and global_regulator_perturbed left out. Media are hydrolysates (base_medium other); composition/carbon source not given. SynH (no inhibitors) is the control in each phase; SynH_LT (added lignotoxins) and ACSH (real hydrolysate with its native inhibitors) set to other_chemical adapted; ACSH also differs from SynH as a medium. No growth temperature given.",
+ "default": {
+  "strain_name": {
+   "v": "GLBRCE1",
+   "b": "stated",
+   "q": "GLBRCE1"
+  },
+  "culture_mode": {
+   "v": "batch_bioreactor",
+   "b": "stated",
+   "q": "Fermentations were carried out in 3 L bioreactors"
+  },
+  "oxygen": {
+   "v": "anaerobic_fermentation",
+   "b": "stated",
+   "q": "during fermentation to ethanol of synthetic hydrolysates containing or lacking the inhibitors"
+  },
+  "base_medium": {
+   "v": "other",
+   "b": "stated",
+   "q": "grown in 3 media, AFEX corn stover hydrolysate (ACSH), synthetic hydrolysate (SynH) and syntetic hydrolysate with added lignotoxins (SynH_LT)"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "grown in 3 media, AFEX corn stover hydrolysate (ACSH), synthetic hydrolysate (SynH) and syntetic hydrolysate with added lignotoxins (SynH_LT)"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "grown in 3 media, AFEX corn stover hydrolysate (ACSH), synthetic hydrolysate (SynH) and syntetic hydrolysate with added lignotoxins (SynH_LT)"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "grown in 3 media, AFEX corn stover hydrolysate (ACSH), synthetic hydrolysate (SynH) and syntetic hydrolysate with added lignotoxins (SynH_LT)"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA (2ug) was subjected to rRNA depletion using Ribozero rRNA removal kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA depletion using Ribozero rRNA removal kit"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "synthetic hydrolysates containing or lacking the inhibitors"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:medium",
+   "regex": "^SynH$",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "synthetic hydrolysates containing or lacking the inhibitors"
+    },
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "synthetic hydrolysates containing or lacking the inhibitors"
+    }
+   }
+  },
+  {
+   "field": "ch:medium",
+   "regex": "^SynH_LT$",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": "syntetic hydrolysate with added lignotoxins (SynH_LT)"
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "cultures were diluted into ACSH or SynH with initial OD at 0.2, grown anaerobically overnight, and then inoculated into bioreactors"
+    }
+   }
+  },
+  {
+   "field": "ch:medium",
+   "regex": "^ACSH$",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": "the inhibitors normally present in ACSH"
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "cultures were diluted into ACSH or SynH with initial OD at 0.2, grown anaerobically overnight, and then inoculated into bioreactors"
+    }
+   }
+  },
+  {
+   "field": "ch:growth phase",
+   "regex": "^Exp$",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": "exponential (Exp)"
+    }
+   }
+  },
+  {
+   "field": "ch:growth phase",
+   "regex": "^Trans$",
+   "set": {
+    "growth_phase": {
+     "v": "transition",
+     "b": "stated",
+     "q": "transitional (Trans)"
+    }
+   }
+  },
+  {
+   "field": "ch:growth phase",
+   "regex": "^Stat1$",
+   "set": {
+    "growth_phase": {
+     "v": "stationary",
+     "b": "stated",
+     "q": "stationary (Stat1)"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

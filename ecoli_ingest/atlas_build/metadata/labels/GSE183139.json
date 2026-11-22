@@ -1,0 +1,23 @@
+{
+  "gse": "GSE183139",
+  "notes": "MG1655 diluted from a 30 C overnight culture to OD 0.05 in fresh LB at 37 C and sampled at 0, 20, 80 and 180 min. No phase word or OD at sampling, so growth_phase left out (0 min is right after dilution from overnight cells). No treatment and no named reference condition, so is_control left out. rRNA removal not described; assay_class total_rnaseq is a study_default.",
+  "default": {
+    "base_medium": {"v": "LB", "b": "stated", "q": "diluted to optical density (O.D600) of 0.05 in fresh LB medium and incubated at 37 ºC with a 250 rpm agitation"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "diluted to optical density (O.D600) of 0.05 in fresh LB medium and incubated at 37 ºC with a 250 rpm agitation"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "diluted to optical density (O.D600) of 0.05 in fresh LB medium and incubated at 37 ºC with a 250 rpm agitation"},
+    "culture_mode": {"v": "batch_shaken", "b": "inferred", "q": "diluted to optical density (O.D600) of 0.05 in fresh LB medium and incubated at 37 ºC with a 250 rpm agitation"},
+    "oxygen": {"v": "aerobic", "b": "inferred", "q": "diluted to optical density (O.D600) of 0.05 in fresh LB medium and incubated at 37 ºC with a 250 rpm agitation"},
+    "growth_temperature": {"v": 37, "b": "stated", "q": "diluted to optical density (O.D600) of 0.05 in fresh LB medium and incubated at 37 ºC with a 250 rpm agitation"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "E.coli MG1655"},
+    "strain_name": {"v": "MG1655", "b": "stated", "q": "E.coli MG1655"},
+    "genotype_class": {"v": "reference", "b": "study_default", "q": "Cells from 3 independent biological replicates of MG1655 in LB medium at different time moments"},
+    "global_regulator_perturbed": {"v": false, "b": "study_default", "q": "Cells from 3 independent biological replicates of MG1655 in LB medium at different time moments"},
+    "treatment": {"v": "none", "b": "study_default", "q": "Cells from 3 independent biological replicates of MG1655 in LB medium at different time moments"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "RNA-seq was performed over time at (0, 20,80 and 180 min)."},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "RNA-seq was performed over time at (0, 20,80 and 180 min)."},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "Cells from 3 independent biological replicates of MG1655 in LB medium at different time moments"},
+    "assay_class": {"v": "total_rnaseq", "b": "study_default", "q": "Total RNA was extracted using RNeasy kit (Qiagen). RNA-seq libraries were constructed according to the Illumina's protocol."}
+  },
+  "rules": [],
+  "samples": {}
+}

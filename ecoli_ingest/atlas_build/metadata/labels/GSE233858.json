@@ -1,0 +1,96 @@
+{
+ "gse": "GSE233858",
+ "notes": "E. coli ATCC 25922 in LB at 37 C, untreated vs Schisandrin A (other_chemical; concentration and exposure time not given). Strain group not stated. No phase information. rRNA removal for SMARTer mRNA-Seq kit not stated.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Escherichia coli grows in LB medium at 37 ℃"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Escherichia coli grows in LB medium at 37 ℃"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Escherichia coli grows in LB medium at 37 ℃"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Escherichia coli grows in LB medium at 37 ℃"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "This study investigated the antibacterial effect of Schisandrin A on Escherichia coli."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "This study investigated the antibacterial effect of Schisandrin A on Escherichia coli."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "This study investigated the antibacterial effect of Schisandrin A on Escherichia coli."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "This study investigated the antibacterial effect of Schisandrin A on Escherichia coli."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "This study investigated the antibacterial effect of Schisandrin A on Escherichia coli."
+  },
+  "strain_name": {
+   "v": "ATCC 25922",
+   "b": "stated",
+   "q": "ATCC25922"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "RNA libraries for RNA-seq were preparded using SMARTER mRNA-Seq Library Prep Kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "non-treatment",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "Schisandrin",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

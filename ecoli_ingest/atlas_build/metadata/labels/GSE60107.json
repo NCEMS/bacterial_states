@@ -1,0 +1,148 @@
+{
+ "gse": "GSE60107",
+ "notes": "Wild type vs three exoribonuclease deletions in LB+thymine, exponential phase. rRNA removal not stated. WT re-read: Unmodified MG1693 wild-type -> wild_type.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Exponential Phase"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "with shaking at 200 rpm in Luria-Bertani (LB) medium"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Luria-Bertani (LB) medium supplemented with thymine"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Luria-Bertani (LB) medium"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Luria-Bertani (LB) medium"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "with shaking at 200 rpm"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown to exponential phase (OD600~0.3) at 37ºC"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "We compared each of the mutant transcriptome with the wild-type"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-Seq of E. coli K-12 MG1693 wild-type(wt) and three exoribonucleases mutants"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-Seq of E. coli K-12 MG1693 wild-type(wt) and three exoribonucleases mutants"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-Seq of E. coli K-12 MG1693 wild-type(wt) and three exoribonucleases mutants"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K12-MG1693"
+  },
+  "strain_name": {
+   "v": "MG1693",
+   "b": "stated",
+   "q": "K12-MG1693"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "we sequenced the total RNA (RNA-Seq)"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "We compared each of the mutant transcriptome with the wild-type"
+  },
+  "genotype_class": {
+   "v": "deletion",
+   "b": "stated",
+   "q": "mutants for each of the exoribonucleases (∆rnb, ∆rnr and ∆pnp)"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "mutants for each of the exoribonucleases (∆rnb, ∆rnr and ∆pnp)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^Wild-type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "RNase II mutant",
+   "set": {
+    "perturbed_genes": {
+     "v": "rnb",
+     "b": "stated",
+     "q": "∆rnb_RNA-Seq"
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "RNase R mutant",
+   "set": {
+    "perturbed_genes": {
+     "v": "rnr",
+     "b": "stated",
+     "q": "∆rnr_RNA-Seq"
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "PNPase mutant",
+   "set": {
+    "perturbed_genes": {
+     "v": "pnp",
+     "b": "stated",
+     "q": "∆pnp_RNA-Seq"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

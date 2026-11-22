@@ -1,0 +1,116 @@
+{
+ "gse": "GSE108190",
+ "notes": "Fluoxetine-induced resistant mutants (evolved isolates) vs original MG1655. Treatment protocol says the original strain was also cultured with 100 mg/L fluoxetine for 8 h, but its ch:agent is 'control'; treatment/exposure left out for the wild-type samples (taken as the control baseline). Mutants: other_chemical, adapted (8 h). No phase given (8 h culture). rRNA removal not stated.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "liquid LB culture at 37 °C"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "liquid LB culture at 37 °C"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "liquid LB culture at 37 °C"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "liquid LB culture at 37 °C"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "resistant strains as well as the original strain E. coli K-12 MG1655 were cultured in  triplicate in 10 mL liquid LB with 100 mg/L fluoxetine at 37 °C for 8 h, shaken at 150 rpm."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "resistant strains as well as the original strain E. coli K-12 MG1655 were cultured in  triplicate in 10 mL liquid LB with 100 mg/L fluoxetine at 37 °C for 8 h, shaken at 150 rpm."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K-12 MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "RNA libraries were prepared for sequencing using standard Illumina protocols"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Bacterial mRNA profiles of original E. coli K-12 MG1655 and fluoxetine induced E. coli mutants"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Bacterial mRNA profiles of original E. coli K-12 MG1655 and fluoxetine induced E. coli mutants"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Bacterial mRNA profiles of original E. coli K-12 MG1655 and fluoxetine induced E. coli mutants"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:resistance",
+   "regex": "^wild-type$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "control"
+    }
+   }
+  },
+  {
+   "field": "ch:resistance",
+   "regex": "resistant mutant",
+   "set": {
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": "100 mg/L fluoxetine"
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "stated",
+     "q": "with 100 mg/L fluoxetine at 37 °C for 8 h"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

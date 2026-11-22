@@ -1,0 +1,123 @@
+{
+ "gse": "GSE33671",
+ "notes": "Selective ribosome profiling: AP samples are TF affinity-purified ribosome footprints (IP_or_pulldown), Total samples are ribosome footprints. All samples one genotype (MC4100 delta-tig with pTig-TEV-Avi, IPTG), no control; genotype_class left out (deletion complemented by plasmid-borne tagged tig, unclear class). DSP1/DSP2 got 2 min chloramphenicol before harvest (harvest step, labelled abx_translation acute); filtration samples treatment none. rrna_removal only where 'rRNA subtracted' is stated. Oxygen/culture mode not stated.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "mid-log phase"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "diluted to an OD600 of 0.02 in LB media"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "in LB media supplemented with 100 µg/ml of carbenicillin"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "in LB media supplemented with 100 µg/ml of carbenicillin"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown at 37°C until reaching an OD600 of 0.45"
+  },
+  "perturbed_genes": {
+   "v": "tig",
+   "b": "stated",
+   "q": "MC4100 ∆tig::kan pTig-TEV-Avi"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "MC4100 ∆tig::kan pTig-TEV-Avi"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "40 µg/ml biotin, and 70 µM IPTG"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "analysis of the interactions between nascent chains and the molecular chaperone Trigger Factor"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "MC4100"
+  },
+  "strain_name": {
+   "v": "MC4100",
+   "b": "stated",
+   "q": "MC4100"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of translation in the Gram-negative bacterium Escherichia coli"
+  }
+ },
+ "rules": [
+  {
+   "field": "source_name",
+   "regex": "Total footprints",
+   "set": {
+    "assay_class": {
+     "v": "ribosome_footprints",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "Affinity purified",
+   "set": {
+    "assay_class": {
+     "v": "IP_or_pulldown",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "chloramphenicol pre-treatment",
+   "set": {
+    "treatment": {
+     "v": "abx_translation",
+     "b": "stated",
+     "q": "The culture was incubated with 100 µg/ml of chloramphenicol for 2 min"
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "inferred",
+     "q": "incubated with 100 µg/ml of chloramphenicol for 2 min"
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "rapid filtration",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "Cells were flash frozen in liquid nitrogen after the media was rapidly filtered"
+    },
+    "rrna_removal": {
+     "v": "depletion",
+     "b": "stated",
+     "q": "The resulting cDNA was circulizarized, rRNA subtracted, and PCR amplified"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

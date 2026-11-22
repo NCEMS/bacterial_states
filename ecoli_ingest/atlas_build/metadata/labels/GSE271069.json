@@ -1,0 +1,188 @@
+{
+ "gse": "GSE271069",
+ "notes": "Reviewed 2026-11-15: the RNA-seq samples were not treated; the rifampicin/crosslinking protocol in GEO belongs to the RNAP ChIP and IPOD-HR samples (stated by the user). Untreated wild type in each medium and timepoint: controls | The shared treatment_protocol (rifampicin 10 min + formaldehyde crosslinking) is the IPOD/ChIP protocol but is attached to these RNA-seq samples too; unclear whether RNA-seq cells got rifampicin, so treatment, transcription_arrested and is_control left out. Time-point codes mapped to the growth_protocol list by order (Glu: L, S1, S2 = mid-log, stationary, late stationary; Cas: P1-P3, S1, S2 = 2.5 h, 4.5 h, 6.33 h, 10 h, 18 h). Cas P1 left without phase: described as 'early stationary' at OD 0.1 after 2.5 h (contradictory). Minimal medium base not named; rRNA removal not stated. WT re-read: MG1655 WT -> wild_type. | 2026-11-20: late_exponential merged into transition (the value was dropped from the scheme: submitters' 'late log' and 'early stationary' cannot be ordered against each other).",
+ "default": {
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "grown shaking at 37°C"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "grown shaking at 37°C"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown shaking at 37°C"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "WT"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "WT"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E. coli K-12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "E. coli K-12 MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "minimal media with either glucose or casamino acids as the sole carbon sources"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "minimal media with either glucose or casamino acids as the sole carbon sources"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "RNA-seq samples were prepared using an Epicentre ScriptSeq v2 kit"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "We harvested samples from several timepoints in each case and performed RNA-seq, RNA polymerase ChIP-seq, and in vivo protein occupancy display (IPOD) experiments."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "We harvested samples from several timepoints in each case and performed RNA-seq, RNA polymerase ChIP-seq, and in vivo protein occupancy display (IPOD) experiments."
+  },
+  "is_control": {
+   "v": true,
+   "b": "inferred",
+   "q": "We harvested samples from several timepoints in each case and performed RNA-seq, RNA polymerase ChIP-seq, and in vivo protein occupancy display (IPOD) experiments."
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^GLU",
+   "set": {
+    "medium_class": {
+     "v": "defined_minimal",
+     "b": "inferred",
+     "q": "minimal media with either glucose or casamino acids as the sole carbon sources"
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": "minimal media with either glucose or casamino acids as the sole carbon sources"
+    },
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": "minimal media with either glucose or casamino acids as the sole carbon sources"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^CAS",
+   "set": {
+    "medium_class": {
+     "v": "minimal_plus_hydrolysate",
+     "b": "inferred",
+     "q": "minimal media with either glucose or casamino acids as the sole carbon sources"
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": "minimal media with either glucose or casamino acids as the sole carbon sources"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "GLU condition, timepoint L,",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": "6 hours for mid-logarithmic (OD600 ~0.25)"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "GLU condition, timepoint S1,",
+   "set": {
+    "growth_phase": {
+     "v": "stationary",
+     "b": "inferred",
+     "q": "10 hours for stationary (OD600 ~1.7)"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "GLU condition, timepoint S2,",
+   "set": {
+    "growth_phase": {
+     "v": "late_stationary",
+     "b": "inferred",
+     "q": "18 hours for late stationary"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "CAS condition, timepoint P2,",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": "4.5 hours for mid-logarithmic (OD600 ~0.5)"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "CAS condition, timepoint P3,",
+   "set": {
+    "growth_phase": {
+     "v": "transition",
+     "b": "inferred",
+     "q": "6.33 hours for late logarithmic (OD600 ~1.4)"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "CAS condition, timepoint S1,",
+   "set": {
+    "growth_phase": {
+     "v": "stationary",
+     "b": "inferred",
+     "q": "10 hours for stationary (OD600 ~4)"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "CAS condition, timepoint S2,",
+   "set": {
+    "growth_phase": {
+     "v": "late_stationary",
+     "b": "inferred",
+     "q": "18 hours for late stationary (OD600 ~5.5"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

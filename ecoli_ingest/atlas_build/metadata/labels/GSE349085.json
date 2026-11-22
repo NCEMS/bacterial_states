@@ -1,0 +1,116 @@
+{
+ "gse": "GSE349085",
+ "notes": "Isolates are clonal survivors of MS2 challenge, regrown from frozen stocks in plain LB for RNA-seq -> evolved_isolate. The text says rebounding populations carry MS2 RNA, so whether the isolate cultures still carry phage is unclear: treatment and mixed_organism left out for isolates. Harvest OD/phase not given. Strain C3000 (ATCC 15597) taken as E. coli C. WT re-read: uninfected parent C3000 controls -> wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "individual colonies were used to initiate liquid cultures in LB at 37C with shaking"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "individual colonies were used to initiate liquid cultures in LB at 37C with shaking"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "individual colonies were used to initiate liquid cultures in LB at 37C with shaking"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "individual colonies were used to initiate liquid cultures in LB at 37C with shaking"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "individual colonies were used to initiate liquid cultures in LB at 37C with shaking"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "individual colonies were used to initiate liquid cultures in LB at 37C with shaking"
+  },
+  "strain_group": {
+   "v": "C",
+   "b": "inferred",
+   "q": "C3000 (ATCC 15597)"
+  },
+  "strain_name": {
+   "v": "C3000",
+   "b": "stated",
+   "q": "C3000 (ATCC 15597)"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Twelve phage-exposed isolates were profiled by bulk RNA-seq"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Twelve phage-exposed isolates were profiled by bulk RNA-seq"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was rRNA-depleted and used for strand-specific library preparation."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Total RNA was rRNA-depleted and used for strand-specific library preparation."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "together with three uninfected C3000 control replicates (c1-c3)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:isolate",
+   "regex": "^none",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "inferred",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "mock-infected with LB"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "mixed_organism": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:isolate",
+   "regex": "^i\\d+$",
+   "set": {
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "stated",
+     "q": "single colonies surviving overnight on the phage-containing plates were established as clonal isolates"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

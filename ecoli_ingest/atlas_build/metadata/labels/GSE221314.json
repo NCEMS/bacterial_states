@@ -1,0 +1,29 @@
+{
+  "gse": "GSE221314",
+  "notes": "All samples are paraquat-tolerance ALE isolates; the unevolved parent GLU4 (0_0) is not in this series, so no reference-genotype control and is_control is left out. Mutations are only on aledb, so perturbed_genes and global_regulator_perturbed are left out. Paraquat for 20 min added at OD 0.5 in M9 glucose (mid_exponential inferred, acute).",
+  "default": {
+    "base_medium": {"v": "M9", "b": "stated", "q": "Strains were grown overnight in M9 minimal media with 0.4% w/v glucose as a carbon source"},
+    "medium_class": {"v": "defined_minimal", "b": "inferred", "q": "M9 minimal media with 0.4% w/v glucose as a carbon source"},
+    "amino_acids_supplied": {"v": false, "b": "inferred", "q": "M9 minimal media with 0.4% w/v glucose as a carbon source"},
+    "carbon_source": {"v": "glucose", "b": "stated", "q": "M9 minimal media with 0.4% w/v glucose as a carbon source"},
+    "growth_phase": {"v": "mid_exponential", "b": "inferred", "q": "Cultures were aerated with a stir bar at 1100 rpm in a water bath maintained at 37°C until OD reached 0.5"},
+    "culture_mode": {"v": "batch_shaken", "b": "inferred", "q": "Cultures were aerated with a stir bar at 1100 rpm"},
+    "oxygen": {"v": "aerobic", "b": "inferred", "q": "Cultures were aerated with a stir bar at 1100 rpm"},
+    "growth_temperature": {"v": 37, "b": "stated", "q": "in a water bath maintained at 37°C"},
+    "genotype_class": {"v": "evolved_isolate", "b": "stated", "q": "We then evolved it with increasing PQ concentrations over 33 days in triplicate"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "a strain of E. coli MG1655 which was media-adapted using ALE"},
+    "strain_name": {"v": "MG1655 GLU4-derived paraquat ALE isolate", "b": "stated", "q": "We started with GLU4 (0_0), a strain of E. coli MG1655 which was media-adapted using ALE"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "exposed to 0, 250, or 750 uM paraquat for 20 minutes prior to RNA collection"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "exposed to 0, 250, or 750 uM paraquat for 20 minutes prior to RNA collection"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "exposed to 0, 250, or 750 uM paraquat for 20 minutes prior to RNA collection"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "rRNA was depleted using the Ribo-Zero rRNA Removal Kit for gram negative bacteria"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "rRNA was depleted using the Ribo-Zero rRNA Removal Kit for gram negative bacteria"}
+  },
+  "rules": [
+    {"field": "ch:treatment", "regex": "^0 uM paraquat$", "set": {"treatment": {"v": "none", "b": "stated", "q": ""}}},
+    {"field": "ch:treatment", "regex": "^(250|750) uM paraquat$", "set": {
+      "treatment": {"v": "oxidative", "b": "stated", "q": "the redox cycling compound paraquat, which produces reactive oxygen species (ROS)"},
+      "exposure": {"v": "acute", "b": "stated", "q": "After 20 minutes, samples were harvested for transcriptomics."}}}
+  ],
+  "samples": {}
+}

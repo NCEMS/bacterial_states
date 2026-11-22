@@ -1,0 +1,106 @@
+{
+ "gse": "GSE121595",
+ "notes": "Vector (AK250_vec) vs RydC overexpression, 10 min induction. Vector samples are labelled 'rydC -/-' and the digest does not say whether AK250 carries a rydC deletion, so genotype_class left out for them; they are the comparison baseline (is_control true). inducer_added true for all from the shared growth protocol (inducer not named). No phase given.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "study_default",
+   "q": "Cells were grown in LB broth at 37 degrees Celsius for 1 hour 30 min and then RNA extracted after 10 min of RydC induction"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Cells were grown in LB broth at 37 degrees Celsius for 1 hour 30 min and then RNA extracted after 10 min of RydC induction"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Cells were grown in LB broth at 37 degrees Celsius for 1 hour 30 min and then RNA extracted after 10 min of RydC induction"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "study_default",
+   "q": "Cells were grown in LB broth at 37 degrees Celsius for 1 hour 30 min and then RNA extracted after 10 min of RydC induction"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "study_default",
+   "q": "Cells were grown in LB broth at 37 degrees Celsius for 1 hour 30 min and then RNA extracted after 10 min of RydC induction"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "We had two conditions: 1) No expression of the small RNA RydC and 2) Overexpression of the small RNA RydC"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "We had two conditions: 1) No expression of the small RNA RydC and 2) Overexpression of the small RNA RydC"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "We had two conditions: 1) No expression of the small RNA RydC and 2) Overexpression of the small RNA RydC"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "AK250",
+   "b": "stated",
+   "q": "AK250_vec_rep1_10min"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "ribosomal RNA removed using the Ribozero Bacteria kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "ribosomal RNA removed using the Ribozero Bacteria kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "source_name",
+   "regex": "^no expression",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "^overexpression",
+   "set": {
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "rydC",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

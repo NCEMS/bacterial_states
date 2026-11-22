@@ -1,19 +1,25 @@
 """Study-level train / test split and cross-validation folds.
 
-Codes: split 0 = projected only (not used for fitting), 1 = training pool, 3 = TEST.
-``*_base`` columns are the assignment over wild-type reference samples; ``split`` / ``cv_fold`` are
-the final assignment after adding non-reference samples to the pool (``cv_fold`` NaN) and removing
-the withheld study.
+TEST and the folds are chosen among the reference samples only (``labels.is_reference``: untreated,
+reference genotype), whole studies at a time:
+
+    reference   the sample is a reference sample
+    split       3 = TEST: reference samples of the TEST studies
+                1 = training pool: all samples of the other studies
+                0 = projected only: withheld studies, and the other samples of the TEST studies
+    cv_fold     1..n for the reference samples of the training pool; empty for its other samples,
+                which are never scored. When a fold is held out, every sample of its studies is
+                left out of the fit (``data.study_fold``)
 """
 from __future__ import annotations
 
 import numpy as np
 import pandas as pd
 
-from .config import TrainConfig
+from .config import HEADS, TrainConfig
 
-BALANCE_VARS = ("growth_phase", "medium_type", "is_lab_strain")
-SPLIT_COLUMNS = ["gse", "split_base", "cv_fold_base", "split", "cv_fold"]
+BALANCE_VARS = tuple(HEADS)
+SPLIT_COLUMNS = ["gse", "reference", "split", "cv_fold"]
 
 
 def _balance_tables(df, gse_idx, n_gses, balance_vars):
@@ -77,9 +83,8 @@ def split_test_only(df, test_frac, seed, n_candidates=500, balance_vars=BALANCE_
 
 
 def kfold_by_study(df, eligible_mask, n_folds, seed, n_candidates=500, balance_vars=BALANCE_VARS,
-                   size_weight=2.0, study_count_weight=8.0, study_balance=1.0, forced_fold_studies=None, log=None):
+                   size_weight=2.0, study_count_weight=8.0, study_balance=1.0, log=None):
     """Greedy assignment of whole studies to folds, best of ``n_candidates`` random orders."""
-    forced_fold_studies = forced_fold_studies or {}
     pool = df.loc[eligible_mask]
     balance_vars = tuple(v for v in balance_vars if v in pool.columns)
     gses = list(pool["gse"].unique())
@@ -90,7 +95,6 @@ def kfold_by_study(df, eligible_mask, n_folds, seed, n_candidates=500, balance_v
     target_frac = 1.0 / n_folds
     target_n = max(n / n_folds, 1.0)
     target_studies = max(n_g / n_folds, 1.0)
-    forced = {gse_pos[g]: k for g, k in forced_fold_studies.items() if g in gse_pos}
     global_props, per_study_counts = _balance_tables(pool, gse_idx, n_g, balance_vars)
 
     def score(fold_of_study):
@@ -115,13 +119,7 @@ def kfold_by_study(df, eligible_mask, n_folds, seed, n_candidates=500, balance_v
         order = order[np.argsort(-sizes[order], kind="stable")]  # largest study first
         fold_of_study = -np.ones(n_g, dtype=int)
         fold_n, fold_s = np.zeros(n_folds), np.zeros(n_folds)
-        for s, k in forced.items():
-            fold_of_study[s] = k
-            fold_n[k] += sizes[s]
-            fold_s[k] += 1
         for s in order:
-            if fold_of_study[s] != -1:
-                continue
             deficit = (fold_n / target_n) + study_balance * (fold_s / target_studies)
             k = int(np.argmin(deficit))
             fold_of_study[s] = k
@@ -139,113 +137,67 @@ def kfold_by_study(df, eligible_mask, n_folds, seed, n_candidates=500, balance_v
     return out
 
 
-def _spread_studies(study_list, fold_map, n_folds, k_per_fold=2):
-    fresh = [g for g in study_list if g not in fold_map]
-    for i, g in enumerate(fresh[:k_per_fold * n_folds]):
-        fold_map[g] = i % n_folds
-
-
-def make_splits(meta: pd.DataFrame, cfg: TrainConfig, log=None) -> pd.DataFrame:
-    """Reproduce the notebook's split construction from harmonised labels (``build_labels`` output).
-    Returns a frame with ``gse, split_base, cv_fold_base`` indexed like ``meta``."""
-    wt_mask = meta["is_wildtype"].values.astype(bool)
-    meta_ref = meta[wt_mask].copy()
-    poc = {cfg.withheld_study} if cfg.withheld_study else set()
-    case = set(cfg.case_studies)
-
-    # spread studies carrying secondary variables across folds
-    forced_fold: dict = {}
-    cs_n = meta_ref.groupby("gse")["carbon_source_c"].apply(lambda s: s.notna().sum())
-    _spread_studies(list(cs_n[cs_n > 0].sort_values(ascending=False).index), forced_fold, cfg.n_folds)
-    if meta_ref["is_lab_strain"].notna().any():
-        ls_min = meta_ref["is_lab_strain"].value_counts().idxmin()
-        ls_n = meta_ref[meta_ref["is_lab_strain"] == ls_min].groupby("gse").size()
-        _spread_studies(list(ls_n.sort_values(ascending=False).index), forced_fold, cfg.n_folds)
-
-    # guarantee every class of every reported factor appears in TEST
-    force_cov: set = set()
-    for v in ["growth_phase", "medium_type", "carbon_source", "is_lab_strain"]:
-        for cls in sorted(meta_ref[v].dropna().unique(), key=str):
-            if any(int((meta_ref.loc[meta_ref["gse"] == g, v] == cls).sum()) > 0 for g in force_cov):
-                continue
-            cnt = meta_ref[meta_ref[v] == cls].groupby("gse").size()
-            if not len(cnt):
-                continue
-            elig = cnt[cnt >= cfg.min_class_n].sort_values()
-            force_cov.add(elig.index[0] if len(elig) else cnt.sort_values(ascending=False).index[0])
-
-    forced_test = sorted((force_cov | case) - poc)
-    if log:
-        n_forced = int(meta["gse"].isin(forced_test).sum())
-        log(f"forced into TEST: {len(forced_test)} studies, {n_forced} samples ({100 * n_forced / len(meta):.1f}%)")
-    forced_fold = {g: k for g, k in forced_fold.items() if g not in set(forced_test)}
-
-    is_test_ref = split_test_only(meta_ref, cfg.test_frac, seed=cfg.seed, n_candidates=cfg.n_candidates,
-                                  balance_vars=BALANCE_VARS, forced_test_studies=forced_test,
-                                  excluded_test_studies=sorted(poc), log=log)
-    test_studies = set(meta_ref.loc[is_test_ref, "gse"])
-    out = pd.DataFrame(index=meta.index)
-    out["gse"] = meta["gse"].values
-    out["split_base"] = np.where(~wt_mask, 0, np.where(meta["gse"].isin(test_studies), 3, 1))
-    out["cv_fold_base"] = kfold_by_study(meta, wt_mask & (out["split_base"].values == 1), cfg.n_folds,
-                                         seed=cfg.seed, n_candidates=cfg.n_candidates, balance_vars=BALANCE_VARS,
-                                         study_balance=cfg.fold_study_weight, forced_fold_studies=forced_fold, log=log)
+def make_splits(gse: pd.Series, labels: pd.DataFrame, reference, cfg: TrainConfig, log=None) -> pd.DataFrame:
+    """Assign every sample (see the module text). About ``test_frac`` of the reference samples
+    (whole studies, with the forced ones) are TEST, the reference samples of the other studies are
+    put in ``n_folds`` study folds; both are balanced on the two head labels. A study with more
+    than the TEST share of the reference samples stays in the training pool."""
+    df = pd.DataFrame({"gse": gse.astype(str).values}, index=gse.index).join(labels[list(BALANCE_VARS)])
+    ref = np.asarray(reference, dtype=bool)
+    withheld = df["gse"].isin(cfg.withheld_studies).to_numpy()
+    work = df.loc[ref & ~withheld]
+    sizes = work["gse"].value_counts()
+    too_large = sorted(sizes.index[sizes > cfg.test_frac * len(work)])
+    forced = sorted(set(cfg.test_studies) & set(sizes.index))
+    is_test = split_test_only(work, cfg.test_frac, seed=cfg.seed, n_candidates=cfg.n_candidates,
+                              forced_test_studies=forced, excluded_test_studies=[g for g in too_large if g not in forced], log=log)
+    in_test_study = df["gse"].isin(set(work.loc[is_test.to_numpy(), "gse"]) | set(cfg.test_studies)).to_numpy()
+    out = pd.DataFrame({"gse": df["gse"], "reference": ref}, index=df.index)
+    out["split"] = np.where(withheld, 0, np.where(in_test_study, np.where(ref, 3, 0), 1))
+    out["cv_fold"] = kfold_by_study(df, ref & (out["split"] == 1).to_numpy(), cfg.n_folds, seed=cfg.seed,
+                                    n_candidates=cfg.n_candidates, study_balance=cfg.fold_study_weight, log=log)
+    check_no_leakage(out, cfg)
     return out
 
 
-def finalize_splits(base: pd.DataFrame, cfg: TrainConfig) -> tuple[pd.DataFrame, np.ndarray]:
-    """From ``split_base`` / ``cv_fold_base`` derive ``split`` / ``cv_fold`` and the z-score fit mask."""
-    out = base.copy()
-    is_poc = out["gse"].astype(str).values == str(cfg.withheld_study) if cfg.withheld_study else np.zeros(len(out), bool)
-    out["split"] = out["split_base"].astype(int)
-    out["cv_fold"] = out["cv_fold_base"].astype(float)
-    zfit = (out["split_base"].values == 1) & ~is_poc
-    out.loc[is_poc, "split"] = 0
-    out.loc[is_poc, "cv_fold"] = np.nan
-    test_studies = set(out.loc[out["split_base"] == 3, "gse"].astype(str))
-    held = test_studies | set(cfg.case_studies)
-    add = (out["split"].values == 0) & ~is_poc & ~out["gse"].astype(str).isin(held).values
-    out.loc[add, "split"] = 1
-    return out, zfit
-
-
 def load_splits(path) -> pd.DataFrame:
-    df = pd.read_csv(path, index_col=0)
+    df = pd.read_csv(path, index_col=0, dtype={0: str})
     df.index = df.index.astype(str).str.strip()
     missing = [c for c in SPLIT_COLUMNS if c not in df.columns]
     if missing:
         raise ValueError(f"{path}: splits file lacks columns {missing}")
+    df["reference"] = df["reference"].astype(str).str.strip().str.lower().isin(("true", "1"))
     return df[SPLIT_COLUMNS]
 
 
-def check_no_leakage(meta: pd.DataFrame, zfit: np.ndarray, cfg: TrainConfig) -> None:
-    from .labels import gsm_accession
-    acc = gsm_accession(meta.index)
-    acc.index = meta.index
-    train = meta["split"] == 1
-    test = meta["split"] == 3
-    train_gses = set(meta.loc[train, "gse"].astype(str))
-    test_gses = set(meta.loc[test, "gse"].astype(str))
+def check_no_leakage(splits: pd.DataFrame, cfg: TrainConfig) -> None:
+    ref = splits["reference"].to_numpy(dtype=bool)
+    train = set(splits.loc[splits["split"] == 1, "gse"].astype(str))
+    test = set(splits.loc[splits["split"] == 3, "gse"].astype(str))
     problems = []
-    if set(acc[train].dropna()) & set(acc[test].dropna()):
-        problems.append("a GSM accession has rows in both TRAIN and TEST")
-    if train_gses & test_gses:
+    if train & test:
         problems.append("a study is in both TRAIN and TEST")
-    if int((zfit & meta["gse"].astype(str).isin(test_gses).values).sum()):
-        problems.append("z-score statistics would use TEST studies")
-    if cfg.withheld_study and int(((meta["split"] != 0) & (meta["gse"].astype(str) == cfg.withheld_study)).sum()):
-        problems.append("withheld study reappeared in a split")
-    if set(cfg.case_studies) & train_gses:
-        problems.append("a case-study GSE is in TRAIN")
+    if (train | test) & set(cfg.withheld_studies):
+        problems.append("a withheld study is in a split")
+    if set(cfg.test_studies) & train:
+        problems.append("a forced TEST study is in TRAIN")
+    if (~ref & (splits["split"] == 3).to_numpy()).any():
+        problems.append("a sample that is not a reference sample is in TEST")
+    pool = splits[(splits["split"] == 1).to_numpy() & ref]
+    if pool["cv_fold"].isna().any() or (pool.groupby("gse")["cv_fold"].nunique() > 1).any():
+        problems.append("a reference sample of the training pool has no fold, or a study is in two folds")
+    if splits.loc[~ref | (splits["split"] != 1).to_numpy(), "cv_fold"].notna().any():
+        problems.append("a sample outside the reference samples of the training pool has a fold")
     if problems:
         raise ValueError("split leakage: " + "; ".join(problems))
 
 
-def bucket_labels(meta: pd.DataFrame) -> pd.Series:
-    lab = pd.Series(np.nan, index=meta.index, dtype="object")
-    lab[meta["split"] == 3] = "test"
-    pool = (meta["split"] == 1).values
-    fold = meta["cv_fold"]
-    lab[pool & fold.notna().values] = "fold" + fold[pool & fold.notna().values].astype(int).astype(str)
-    lab[pool & fold.isna().values] = "train(aug)"
+def bucket_labels(splits: pd.DataFrame) -> pd.Series:
+    """'fold1'..'foldN' / 'test' per reference sample of the split; 'train_only' for the other
+    samples of the training pool and 'projected' for the samples in no split."""
+    lab = pd.Series("projected", index=splits.index, dtype="object")
+    lab[splits["split"] == 3] = "test"
+    lab[splits["split"] == 1] = "train_only"
+    fold = (splits["split"] == 1).to_numpy() & splits["cv_fold"].notna().to_numpy()
+    lab[fold] = "fold" + splits.loc[fold, "cv_fold"].astype(int).astype(str)
     return lab

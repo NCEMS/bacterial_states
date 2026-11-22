@@ -1,0 +1,186 @@
+{
+ "gse": "GSE156143",
+ "notes": "NCM3722 in N-C- minimal medium with 7 carbon sources (each WT condition is a control), plus crp/cyaA mutant CY104 in Glc. OD600 ~0.4 in minimal medium -> mid_exponential inferred. 'Lac' (lactose or lactate) and 'Suc' (succinate or sucrose) are not spelled out: carbon_source left out for them; Ace=acetate, G6P=glucose-6-phosphate, Gly=glycerol, Sor=sorbitol read from the abbreviations.",
+ "default": {
+  "base_medium": {
+   "v": "other_minimal",
+   "b": "stated",
+   "q": "in N-C- minimal medium plus NH4Cl and one specific carbon source aerobically at 37°C water bath, 250rpm"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "in N-C- minimal medium plus NH4Cl and one specific carbon source aerobically at 37°C water bath, 250rpm"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "in N-C- minimal medium plus NH4Cl and one specific carbon source aerobically at 37°C water bath, 250rpm"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "in N-C- minimal medium plus NH4Cl and one specific carbon source aerobically at 37°C water bath, 250rpm"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "in N-C- minimal medium plus NH4Cl and one specific carbon source aerobically at 37°C water bath, 250rpm"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "in N-C- minimal medium plus NH4Cl and one specific carbon source aerobically at 37°C water bath, 250rpm"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "OD600≈0.4"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "no treatment"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of the gene expression when E. coli NCM3722 grew in 7 different carbon sources"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of the gene expression when E. coli NCM3722 grew in 7 different carbon sources"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of the gene expression when E. coli NCM3722 grew in 7 different carbon sources"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "E. coli NCM3722"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Total RNA was extract by RNAiso plus (Takara) and PureLink RNA Mini Kit (Invitrogen)."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^Wild Type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "NCM3722",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "crp",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "KOcrp&cyaA"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "crp;cyaA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "CY104",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:culture",
+   "regex": " in Ace ",
+   "set": {
+    "carbon_source": {
+     "v": "organic_acid",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:culture",
+   "regex": " in G6P ",
+   "set": {
+    "carbon_source": {
+     "v": "other_sugar",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:culture",
+   "regex": " in Glc ",
+   "set": {
+    "carbon_source": {
+     "v": "glucose",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:culture",
+   "regex": " in Gly ",
+   "set": {
+    "carbon_source": {
+     "v": "glycerol",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:culture",
+   "regex": " in Sor ",
+   "set": {
+    "carbon_source": {
+     "v": "other_sugar",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

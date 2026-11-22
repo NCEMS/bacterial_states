@@ -1,0 +1,32 @@
+{
+  "gse": "GSE116435",
+  "notes": "MG1655 with empty pHM4T (control), pSdsR or pSdsR(45-103), all induced with 1 mM IPTG for 10 min at OD600 1.5-1.7 (3 h post-inoculation; no phase word, medium not named: growth_phase and medium left out). The description field (processed-file names) of GSM3231587/GSM3231588 is swapped relative to their title, source_name and genotype field, which agree; labels follow those. sdsR overexpression from plasmid = native_overexpression.",
+  "default": {
+    "growth_temperature": {"v": 37, "b": "stated", "q": "were grown at 37℃ to an OD600 of 1.5~1.7"},
+    "inducer_added": {"v": true, "b": "stated", "q": "induced with 1mM IPTG for 10 min before the cell harvest"},
+    "treatment": {"v": "none", "b": "study_default", "q": "E. coli cells containing pHM4T, pSdsR, or pSdsR(45-103) were grown at 37℃ to an OD600 of 1.5~1.7."},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "E. coli cells containing pHM4T, pSdsR, or pSdsR(45-103) were grown at 37℃ to an OD600 of 1.5~1.7."},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "E. coli cells containing pHM4T, pSdsR, or pSdsR(45-103) were grown at 37℃ to an OD600 of 1.5~1.7."},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "Escherichia coli str. K-12 substr. MG1655"},
+    "strain_name": {"v": "MG1655", "b": "stated", "q": "Escherichia coli str. K-12 substr. MG1655"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "The Ribo-Zero rRNA removal kit (Epicentre) was used for ribosomal RNA depletion"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "The Ribo-Zero rRNA removal kit (Epicentre) was used for ribosomal RNA depletion"}
+  },
+  "rules": [
+    {"field": "source_name", "regex": "^E. coli_pHM4T$",
+     "set": {"genotype_class": {"v": "reference", "b": "stated", "q": ""},
+             "global_regulator_perturbed": {"v": false, "b": "stated", "q": ""},
+             "is_control": {"v": true, "b": "stated", "q": ""}}},
+    {"field": "source_name", "regex": "^E. coli_pSdsR$",
+     "set": {"genotype_class": {"v": "native_overexpression", "b": "stated", "q": ""},
+             "perturbed_genes": {"v": "sdsR", "b": "stated", "q": ""},
+             "global_regulator_perturbed": {"v": false, "b": "inferred", "q": ""},
+             "is_control": {"v": false, "b": "stated", "q": ""}}},
+    {"field": "source_name", "regex": "^E. coli_p\\(45-103\\)$",
+     "set": {"genotype_class": {"v": "native_overexpression", "b": "stated", "q": ""},
+             "perturbed_genes": {"v": "sdsR (nt 45-103)", "b": "stated", "q": ""},
+             "global_regulator_perturbed": {"v": false, "b": "inferred", "q": ""},
+             "is_control": {"v": false, "b": "stated", "q": ""}}}
+  ],
+  "samples": {}
+}

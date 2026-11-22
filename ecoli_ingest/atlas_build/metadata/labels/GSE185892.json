@@ -1,0 +1,133 @@
+{
+ "gse": "GSE185892",
+ "notes": "symE overexpression from pBAD24 vs empty vector, arabinose induction 0/30/90 min. All empty-vector samples are controls (empty vector may be induced). Phase mid_exponential inferred from OD600 0.5 in M9; 30 and 90 min kept (<2 h). Carbon source of M9 not stated; no shaking or temperature stated.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "grown overnight in M9 media containing carbenicillin"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "grown overnight in M9 media containing carbenicillin"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "grown overnight in M9 media containing carbenicillin"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "Cultures were then grown to OD600 0.5 and 0-minute time point samples were collected"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E. coli MG1655 PCP18-araE"
+  },
+  "strain_name": {
+   "v": "MG1655 PCP18-araE",
+   "b": "stated",
+   "q": "MG1655 PCP18-araE"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "comparing read density across transcripts from +symE and empty vector samples"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "comparing read density across transcripts from +symE and empty vector samples after 0, 30 and 90 minutes of induction"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "comparing read density across transcripts from +symE and empty vector samples"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "RNA with rRNA subtracted"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "RNA with rRNA subtracted"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:plasmid",
+   "regex": "empty",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:plasmid",
+   "regex": "symE",
+   "set": {
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "symE",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:induction",
+   "regex": "^0 minutes",
+   "set": {
+    "inducer_added": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:induction",
+   "regex": "^(30|90) minutes",
+   "set": {
+    "inducer_added": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

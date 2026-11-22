@@ -1,0 +1,86 @@
+{
+ "gse": "GSE104303",
+ "notes": "Reviewed 2026-11-15: excluded on prescreen QC (98% of reads adapter-trimmed, 8% on CDS: short-fragment library of a ribosome-profiling series); user decision. | Only the 5 mRNA-seq samples are candidates (ribosome profiling samples of the series not shown). No growth medium, phase, temperature or culture details in the digest; those labels left out. Whether luciferase expression was induced is not stated, so inducer_added left out. Library: rRNA-depleted, MEGAclear-cleaned, alkaline-fragmented total mRNA, treated as total_rnaseq. Luciferase variants (synonymous codon changes) classed heterologous_expression; empty pACYC177 is the stated control.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K-12 MG1655"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Cells containing pACYC177 plasmid serve as the control samples expressing no Firefly Luciferase."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Using ribosome profiling and protein quantitation, we show that synonymous changes to Firefly Luciferase (Luc) mRNA have a direct effect on its translation efficiency."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Cells containing pACYC177 plasmid serve as the control samples expressing no Firefly Luciferase."
+  },
+  "assay_class": {
+   "v": "other",
+   "b": "inferred",
+   "q": "Total mRNA was extracted using the hot acid phenol chloroform reaction"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "The ribosomal RNA was removed using the MicrobExpress kit (ThermoFisher cat. no. AM1905)"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "synonymous changes to Firefly Luciferase (Luc) mRNA have a direct effect on its translation efficiency"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:insert",
+   "regex": "^N/A$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": "Cells containing pACYC177 plasmid serve as the control samples expressing no Firefly Luciferase."
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "Cells containing pACYC177 plasmid serve as the control samples expressing no Firefly Luciferase."
+    }
+   }
+  },
+  {
+   "field": "ch:insert",
+   "regex": "Luciferase$",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "luc",
+     "b": "stated",
+     "q": "Firefly Luciferase (Luc)"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

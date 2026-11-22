@@ -1,0 +1,127 @@
+{
+ "gse": "GSE122921",
+ "notes": "Medium not given (base_medium, medium_class left out). 3 h and 8 h post-inoculation with no phase word -> growth_phase left out. WT at both time points are controls. Promoter -10 mutations = point_mutation. WT re-read: Unmodified MG1655 wild type -> wild_type.",
+ "default": {
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "were grown at 37℃ for 3 h and 8 h post-inoculation"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli cells (wild type, ryeA promoter mutant, and sdsR promoter mutant) were grown at 37℃ for 3 h and 8 h post-inoculation"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli cells (wild type, ryeA promoter mutant, and sdsR promoter mutant) were grown at 37℃ for 3 h and 8 h post-inoculation"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "E. coli cells (wild type, ryeA promoter mutant, and sdsR promoter mutant) were grown at 37℃ for 3 h and 8 h post-inoculation"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "The Ribo-Zero rRNA removal kit (Epicentre) was used for ribosomal RNA depletion"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "The Ribo-Zero rRNA removal kit (Epicentre) was used for ribosomal RNA depletion"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli cells (wild type, ryeA promoter mutant, and sdsR promoter mutant) were grown at 37℃ for 3 h and 8 h post-inoculation"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype/variation",
+   "regex": "^wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "ryeA -10",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "ryeA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "sdsR -10",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "sdsR",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

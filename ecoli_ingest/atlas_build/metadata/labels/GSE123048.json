@@ -1,0 +1,90 @@
+{
+ "gse": "GSE123048",
+ "notes": "Total RNA-seq arm of an Hfq CLASH study; strain carries HIS6-TEV-3xFLAG-tagged Hfq (tagged strain -> reference). Cells of the density series were UV cross-linked before harvest; not counted as a treatment (seconds before harvest), but uncertain whether the RNA-seq cells were cross-linked. Only OD 0.4 gets a phase (inferred mid_exponential); OD >= 0.8 in LB left empty. Temperature and aeration not stated.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Escherichia coli grown in LB"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Escherichia coli grown in LB"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Escherichia coli grown in LB"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "stated",
+   "q": "Cells expressing HIS6-TEV-3xFLAG tagged Hfq"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "Cells expressing HIS6-TEV-3xFLAG tagged Hfq"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "ch:strain**: MG1655"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Cells expressing HIS6-TEV-3xFLAG tagged Hfq were grown in LB medium from early exponential phase to stationary phase."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Cells expressing HIS6-TEV-3xFLAG tagged Hfq were grown in LB medium from early exponential phase to stationary phase."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Cells expressing HIS6-TEV-3xFLAG tagged Hfq were grown in LB medium from early exponential phase to stationary phase."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "for each density, we generated two replicates of rRNA-depleted total RNA sequencing data"
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "Cells expressing HIS6-TEV-3xFLAG tagged Hfq were grown in LB medium from early exponential phase to stationary phase."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "for each density, we generated two replicates of rRNA-depleted total RNA sequencing data"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "for each density, we generated two replicates of rRNA-depleted total RNA sequencing data"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:optical density",
+   "regex": "^OD 0\\.4$",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

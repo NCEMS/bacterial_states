@@ -1,0 +1,111 @@
+{
+ "gse": "GSE197379",
+ "notes": "EHEC O157:H7 Sakai in MEM-HEPES + 0.1% glucose + ferric nitrate (cell-culture medium, no serum -> defined_rich). Bicyclomycin (Rho inhibitor) 15 min at OD600 0.6 classed abx_transcription; it does not arrest transcription. OD600 0.6 in MEM is outside the inference ranges, so growth_phase left out. Temperature, aeration not stated. WT re-read: genotype_class reference -> wild_type, unmodified Sakai strain.",
+ "default": {
+  "base_medium": {
+   "v": "cell_culture",
+   "b": "stated",
+   "q": "MEM-HEPES supplemented with 0.1% glucose and 250 nM ferric nitrate"
+  },
+  "medium_class": {
+   "v": "defined_rich",
+   "b": "inferred",
+   "q": "MEM-HEPES supplemented with 0.1% glucose and 250 nM ferric nitrate"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "MEM-HEPES supplemented with 0.1% glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "MEM-HEPES supplemented with 0.1% glucose"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "Escherichia coli str. O157:H7 str. Sakai"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "cultures were split into two, with half being treated with 50 μg/mL of bicyclomycin"
+  },
+  "strain_group": {
+   "v": "EHEC_STEC",
+   "b": "stated",
+   "q": "Enterohaemorrhagic E. coli (EHEC)"
+  },
+  "strain_name": {
+   "v": "O157:H7 Sakai",
+   "b": "stated",
+   "q": "Escherichia coli str. O157:H7 str. Sakai"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "cultures were split into two, with half being treated with 50 μg/mL of bicyclomycin"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "cultures were split into two, with half being treated with 50 μg/mL of bicyclomycin"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "cultures were split into two, with half being treated with 50 μg/mL of bicyclomycin"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "RNA was depleted with Zymo-seq RiboFree Total RNA kit before library prep"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "RNA was depleted with Zymo-seq RiboFree Total RNA kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^bicylomycin treated",
+   "set": {
+    "treatment": {
+     "v": "abx_transcription",
+     "b": "stated",
+     "q": "half being treated with 50 μg/mL of bicyclomycin"
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": "bicylomycin treated (15 minutes)"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^untreated",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,196 @@
+{
+ "gse": "GSE221825",
+ "notes": "C-6019 is not described anywhere (summary names only three strains): genotype labels left out for it. LD broth taken as a complex broth, base_medium other. Rifampicin 4 min = transcription arrest; phase 'exponential phase (OD600=0.8)' stated in every source_name, including the rifampicin samples. WT re-read: wt pnp+ C-1a is wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "other",
+   "b": "study_default",
+   "q": "Growth in LD broth with aeration"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Growth in LD broth with aeration"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Growth in LD broth with aeration"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Growth in LD broth with aeration"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown at 37 C, exponential phase"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "exponential phase (OD600=0.8)"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "before and 4 minutes after the addition of rifampicin to inhibit transcription"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparative RNA stability analysis of RNA-seq data for C-1a cells and its derivatives C-5691 and C-6001"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Library prepared with TruSeq Stranded Total RNA with Illumina Ribo-Zero Plus Sample Prep kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribo-Zero Plus"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "studied the transcriptomes of 3 strains, namely the wt pnp+ (C-1a), the mutant with pnp ORF deletion (C-5691)"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "Tzero",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "transcription_arrested": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "T4_",
+   "set": {
+    "treatment": {
+     "v": "abx_transcription",
+     "b": "stated",
+     "q": "addition of 0.4 mg/ml rifampicin and 4 min incubation"
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": "T=4 min after rifampicin addition"
+    },
+    "transcription_arrested": {
+     "v": true,
+     "b": "stated",
+     "q": "addition of rifampicin to inhibit transcription"
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^C-1a$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": "the wt pnp+ (C-1a)"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": "the wt pnp+ (C-1a)"
+    },
+    "strain_name": {
+     "v": "C-1a",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^C-5691$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "the mutant with pnp ORF deletion (C-5691)"
+    },
+    "perturbed_genes": {
+     "v": "pnp",
+     "b": "stated",
+     "q": "the mutant with pnp ORF deletion (C-5691)"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": "the mutant with pnp ORF deletion (C-5691)"
+    },
+    "strain_name": {
+     "v": "C-5691",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^C-6001$",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": "the strain with the substitution of the bacterial ORF with the human one (C-6001)"
+    },
+    "perturbed_genes": {
+     "v": "pnp;human PNPase",
+     "b": "stated",
+     "q": "the strain with the substitution of the bacterial ORF with the human one (C-6001)"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": "the strain with the substitution of the bacterial ORF with the human one (C-6001)"
+    },
+    "strain_name": {
+     "v": "C-6001",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^C-6019$",
+   "set": {
+    "strain_name": {
+     "v": "C-6019",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^A[123]-Tzero",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

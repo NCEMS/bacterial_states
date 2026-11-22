@@ -1,0 +1,35 @@
+{
+  "gse": "GSE78756",
+  "notes": "Comparison of seven wild-type laboratory/biotech strains, aerobic vs anaerobic, no treatment. No strain is named as the reference, so is_control left out. genotype_class reference given to every strain as an unmodified collection strain (BL21(DE3) carries DE3 and DH5a is a lab mutant, but the study does not perturb them). Crooks: strain_group not stated, left out. Anaerobic cultures in sealed bottles with glucose and no electron acceptor named -> anaerobic_fermentation (inferred). Aerobic samples in shaken flasks.",
+  "default": {
+    "base_medium": {"v": "M9", "b": "stated", "q": "All strains were cultured in M9 minimal medium"},
+    "medium_class": {"v": "defined_minimal", "b": "inferred", "q": "All strains were cultured in M9 minimal medium"},
+    "amino_acids_supplied": {"v": false, "b": "inferred", "q": "trace elements, Wolf’s vitamin solution (2) and glucose (2 g L-1)"},
+    "carbon_source": {"v": "glucose", "b": "stated", "q": "7 different strains of E. coli were grown in glucose M9 minimal media aerobically and anaerobically."},
+    "growth_phase": {"v": "mid_exponential", "b": "stated", "q": "grown to an OD600 of 0.6 (exponential phase)"},
+    "culture_mode": {"v": "batch_shaken", "b": "stated", "q": "in a shaking incubator at 37°C and 250 rpm"},
+    "growth_temperature": {"v": 37, "b": "stated", "q": "in a shaking incubator at 37°C and 250 rpm"},
+    "genotype_class": {"v": "reference", "b": "inferred", "q": "In this study, strain-specific differences are quantified in seven widely-used applied biotechnology strains of E. coli"},
+    "global_regulator_perturbed": {"v": false, "b": "inferred", "q": "In this study, strain-specific differences are quantified in seven widely-used applied biotechnology strains of E. coli"},
+    "treatment": {"v": "none", "b": "study_default", "q": "7 different strains of E. coli were grown in glucose M9 minimal media aerobically and anaerobically."},
+    "inducer_added": {"v": false, "b": "study_default", "q": "7 different strains of E. coli were grown in glucose M9 minimal media aerobically and anaerobically."},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "7 different strains of E. coli were grown in glucose M9 minimal media aerobically and anaerobically."},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "7 different strains of E. coli were grown in glucose M9 minimal media aerobically and anaerobically."},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "Total RNA was extracted using RNeasy Mini kit"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "The 23S and 16S rRNAs were removed by subtractive hybridization using the MICROBExpress kit"}
+  },
+  "rules": [
+    {"field": "title", "regex": "_aero$", "set": {"oxygen": {"v": "aerobic", "b": "stated", "q": "Cells were harvested from aerobic and anaerobic cultures"}}},
+    {"field": "title", "regex": "_anaero$", "set": {"oxygen": {"v": "anaerobic_fermentation", "b": "inferred", "q": "Anoxic M9 minimal media with glucose was obtained by flushing solution with oxygen free nitrogen (95%)."},
+      "culture_mode": {"v": "batch_shaken", "b": "stated", "q": "300 ml oxygen-free sealed bottles containing 50 ml glucose-M9 minimal media in a shaking incubator"}}},
+    {"field": "ch:strain", "regex": "^W3110$", "set": {"strain_group": {"v": "K-12", "b": "stated", "q": "Escherichia coli str. K-12 substr. W3110"}, "strain_name": {"v": "W3110", "b": "stated", "q": ""}}},
+    {"field": "ch:strain", "regex": "^MG1655$", "set": {"strain_group": {"v": "K-12", "b": "stated", "q": "Escherichia coli str. K-12 substr. MG1655"}, "strain_name": {"v": "MG1655", "b": "stated", "q": ""}}},
+    {"field": "ch:strain", "regex": "^DH5a$", "set": {"strain_group": {"v": "K-12", "b": "inferred", "q": "E. coli DH5α (DSMZ 6897)"}, "strain_name": {"v": "DH5alpha", "b": "stated", "q": "E. coli DH5α (DSMZ 6897)"}}},
+    {"field": "ch:strain", "regex": "^BL21\\(DE3\\)$", "set": {"strain_group": {"v": "B", "b": "inferred", "q": "E. coli BL21 (DE3)"}, "strain_name": {"v": "BL21(DE3)", "b": "stated", "q": ""},
+      "rrna_removal": {"v": "depletion", "b": "stated", "q": "ribosomal depletion on total RNA isolated from the E. coli BL21 (DE3) was performed using RiboZero (Gram Negative Bacteria) kit"}}},
+    {"field": "ch:strain", "regex": "^W$", "set": {"strain_group": {"v": "W", "b": "stated", "q": "Escherichia coli W"}, "strain_name": {"v": "W", "b": "stated", "q": ""}}},
+    {"field": "ch:strain", "regex": "^C$", "set": {"strain_group": {"v": "C", "b": "stated", "q": "Escherichia coli C"}, "strain_name": {"v": "C", "b": "stated", "q": ""}}},
+    {"field": "ch:strain", "regex": "^Crooks$", "set": {"strain_name": {"v": "Crooks", "b": "stated", "q": ""}}}
+  ],
+  "samples": {}
+}

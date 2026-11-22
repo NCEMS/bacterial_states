@@ -1,0 +1,91 @@
+{
+ "gse": "GSE199389",
+ "notes": "MG1655 wild type vs CRP-E182D point mutant, both grown with 20 g/L sodium acetate (inhibitor). The submitters call the acetate-grown wild type the control, but it is not untreated, so is_control is left out. Acetate stress classed other_chemical (not acid: sodium salt, pH not given). Base medium, temperature, aeration not stated. WT re-read: Unmodified MG1655 wild type -> wild_type.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "The samples were collected during the mid-logarithmic phase"
+  },
+  "treatment": {
+   "v": "other_chemical",
+   "b": "stated",
+   "q": "was grown in the presence of 20 g/L sodium acetate"
+  },
+  "exposure": {
+   "v": "adapted",
+   "b": "stated",
+   "q": "was grown in the presence of 20 g/L sodium acetate"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "The wild-type strain MG1655 grown with 20 g/L sodium acetate was used as control."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "The wild-type strain MG1655 grown with 20 g/L sodium acetate was used as control."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "The wild-type strain MG1655 grown with 20 g/L sodium acetate was used as control."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was extracted using the RNeasy Mini Kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "E182D",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "crp",
+     "b": "stated",
+     "q": "Mutant strain CRP-E182D"
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": "Mutant strain CRP-E182D"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

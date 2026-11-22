@@ -1,0 +1,121 @@
+{
+ "gse": "GSE102385",
+ "notes": "RNA arm of a ribosome-profiling study: RNA fragmented and size selected 20-40 nt on PAGE -> assay_class other. All samples got chloramphenicol 2 min before harvest (profiling protocol); labelled abx_translation/acute, wild type kept as the comparison baseline (is_control true). csrA::kan is a transposon insertion, labelled deletion. Temperature and aeration not given.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Strains were grown in LB media to mid-exponential phase (OD600 = 0.5)"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Strains were grown in LB media"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Strains were grown in LB media"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Strains were grown in LB media"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K12 MG1655"
+  },
+  "assay_class": {
+   "v": "other",
+   "b": "stated",
+   "q": "RNA was then fragmented with heat and alkalinity and size selected between 20 and 40 bases with denaturing PAGE"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA was subtracted with the Ribozero Gram Negative Kit (Illumina)"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "5 biological replicates of ribosome protected fragments and paired RNA samples from wild type and csrA::kan mutant strains were analyzed"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "5 biological replicates of ribosome protected fragments and paired RNA samples from wild type and csrA::kan mutant strains were analyzed"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "5 biological replicates of ribosome protected fragments and paired RNA samples from wild type and csrA::kan mutant strains were analyzed"
+  },
+  "treatment": {
+   "v": "abx_translation",
+   "b": "stated",
+   "q": "Samples were treated with 100ug/ml choramphenicol for 2 minutes"
+  },
+  "exposure": {
+   "v": "acute",
+   "b": "stated",
+   "q": "Samples were treated with 100ug/ml choramphenicol for 2 minutes"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "csrA::kan",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "csrA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

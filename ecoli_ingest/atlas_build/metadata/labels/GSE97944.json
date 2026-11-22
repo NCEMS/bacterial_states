@@ -1,0 +1,149 @@
+{
+ "gse": "GSE97944",
+ "notes": "Wild type and evolved isolates on M9 with one of four carbon sources, aerobic exponential. Wild type on each carbon source is a control. Evolved isolates: mutations not given, so perturbed_genes and global_regulator_perturbed left out. Temperature and culture mode not stated.",
+ "default": {
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was isolated and purified using Qiagen’s RNeasy mini kit column"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA (rRNA) was removed using Epicentre’s Ribo-Zero rRNA removal kit for Gram-negative bacteria."
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9 minimal medium"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "M9 minimal medium"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "M9 minimal medium"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "Cells were grown under conditions of aerobic, exponential phase growth"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Cells were grown under conditions of aerobic, exponential phase growth"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Expression profiling of wild-type and evolved strains grown on M9 minimal medium with either glucose, glycerol, xylose, or acetate as the sole carbon source."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Expression profiling of wild-type and evolved strains grown on M9 minimal medium with either glucose, glycerol, xylose, or acetate as the sole carbon source."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Expression profiling of wild-type and evolved strains grown on M9 minimal medium with either glucose, glycerol, xylose, or acetate as the sole carbon source."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Expression profiling of wild-type and evolved strains grown on M9 minimal medium with either glucose, glycerol, xylose, or acetate as the sole carbon source."
+  },
+  "genotype_class": {
+   "v": "evolved_isolate",
+   "b": "stated",
+   "q": "Expression profiling of wild-type and evolved strains"
+  },
+  "is_control": {
+   "v": false,
+   "b": "stated",
+   "q": "Expression profiling of wild-type and evolved strains"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "^wild-type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:growth carbon source",
+   "regex": "^glucose$",
+   "set": {
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:growth carbon source",
+   "regex": "^glycerol$",
+   "set": {
+    "carbon_source": {
+     "v": "glycerol",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:growth carbon source",
+   "regex": "^xylose$",
+   "set": {
+    "carbon_source": {
+     "v": "other_sugar",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:growth carbon source",
+   "regex": "^acetate$",
+   "set": {
+    "carbon_source": {
+     "v": "organic_acid",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

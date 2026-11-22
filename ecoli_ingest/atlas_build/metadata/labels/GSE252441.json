@@ -1,0 +1,138 @@
+{
+ "gse": "GSE252441",
+ "notes": "CNMA added at OD 0.1 in LB (below the OD range of the inference rule), so no growth phase. CNMA delivered from DMSO stock; controls are untreated at 30 and 60 min, both treated as controls.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Escherichia coli MG1655 cultured in fresh LB, aerobically with shaking at 37\u00b0C"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Escherichia coli MG1655 cultured in fresh LB, aerobically with shaking at 37\u00b0C"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Escherichia coli MG1655 cultured in fresh LB, aerobically with shaking at 37\u00b0C"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Escherichia coli MG1655 cultured in fresh LB, aerobically with shaking at 37\u00b0C"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "Escherichia coli MG1655 cultured in fresh LB, aerobically with shaking at 37\u00b0C"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Escherichia coli MG1655 cultured in fresh LB, aerobically with shaking at 37\u00b0C"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "WT"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "WT"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "we analyzed the transcriptome changes in cells treated with sub-inhibitory concentration (0.25xMIC)"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "we analyzed the transcriptome changes in cells treated with sub-inhibitory concentration (0.25xMIC)"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "we analyzed the transcriptome changes in cells treated with sub-inhibitory concentration (0.25xMIC)"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "TruSeq total RNA stranded with NebNext Ribodepletion kit (bacteria)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "TruSeq total RNA stranded with NebNext Ribodepletion kit (bacteria)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^none$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "untreated cultures where used as a control"
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "CNMA",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": "untreated cultures where used as a control"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "CNMA, 30min",
+   "set": {
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "CNMA, 60min",
+   "set": {
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

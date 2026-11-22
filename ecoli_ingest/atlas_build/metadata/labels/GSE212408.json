@@ -1,0 +1,95 @@
+{
+ "gse": "GSE212408",
+ "notes": "SEC-seq: MG1655 in LB to OD 2.0 (early stationary), lysate fractionated by size exclusion chromatography. Fractions 01-20 are column fractions (assay other, exclude); only the cleared-lysate sample (Fraction_00L) is whole-cell RNA, labelled total_rnaseq with no rRNA removal (library by fragmentation and adapter ligation). All samples come from the same untreated wild-type culture, so all are controls. WT re-read: unmodified baseline strain relabelled wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "100-fold diluted in 100 ml of fresh LB medium, grown to an OD600 of 2.0"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "fresh LB medium"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "fresh LB medium"
+  },
+  "growth_phase": {
+   "v": "transition",
+   "b": "stated",
+   "q": "Early stationary (OD 2.0)"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "wild type"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "wild type"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Overnight cultures of E. coli MG1655 were 100-fold diluted in 100 ml of fresh LB medium, grown to an OD600 of 2.0"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Overnight cultures of E. coli MG1655 were 100-fold diluted in 100 ml of fresh LB medium, grown to an OD600 of 2.0"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Overnight cultures of E. coli MG1655 were 100-fold diluted in 100 ml of fresh LB medium, grown to an OD600 of 2.0"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Applying SEC-seq to Escherichia coli"
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "Overnight cultures of E. coli MG1655 were 100-fold diluted in 100 ml of fresh LB medium, grown to an OD600 of 2.0"
+  },
+  "assay_class": {
+   "v": "other",
+   "b": "stated",
+   "q": "Each fraction was automatically collected using fraction collector F9-R at 4°C."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^cleared lysate$",
+   "set": {
+    "assay_class": {
+     "v": "total_rnaseq",
+     "b": "stated",
+     "q": "the lysate RNA was extracted by TRIzol method"
+    },
+    "rrna_removal": {
+     "v": "none",
+     "b": "inferred",
+     "q": "RNA samples were fragmented, ligated with 3’ adapter, and reverse-transcribed"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,24 @@
+{
+  "gse": "GSE191271",
+  "notes": "Total RNA from BL21(DE3) expressing heterologous SPARTA complexes (pColADuet-1). assay_class left out: the only library protocol given is 'Small RNA-Seq libraries were prepared by GenomeScan' (shared with the complex-bound small RNA samples), so it is unclear whether these total-RNA samples were sequenced as standard or as small-RNA libraries. Inducer not stated. No control sample.",
+  "default": {
+    "base_medium": {"v": "LB", "b": "stated", "q": "37C in LB, expression from pColADuet-1 vector"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "37C in LB"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "37C in LB"},
+    "growth_temperature": {"v": 37, "b": "stated", "q": "37C in LB"},
+    "genotype_class": {"v": "heterologous_expression", "b": "stated", "q": "heterologously expressed in E. coli"},
+    "global_regulator_perturbed": {"v": false, "b": "inferred", "q": "heterologously expressed in E. coli"},
+    "treatment": {"v": "none", "b": "study_default", "q": "Total and small RNAseq data of total RNA from cells expressing SPARTA"},
+    "strain_group": {"v": "B", "b": "stated", "q": "BL21 DE3"},
+    "strain_name": {"v": "BL21(DE3)", "b": "stated", "q": "Escherichia coli BL21(DE3)"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "Total and small RNAseq data of total RNA from cells expressing SPARTA"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "Total and small RNAseq data of total RNA from cells expressing SPARTA"}
+  },
+  "rules": [
+    {"field": "title", "regex": "CrtSPARTA",
+     "set": {"perturbed_genes": {"v": "CrtSPARTA", "b": "stated", "q": "Crenatolea thermophila SPARTA complex"}}},
+    {"field": "title", "regex": "MapSPARTA",
+     "set": {"perturbed_genes": {"v": "MapSPARTA", "b": "stated", "q": "Maribacter polysporae SPARTA"}}}
+  ],
+  "samples": {}
+}

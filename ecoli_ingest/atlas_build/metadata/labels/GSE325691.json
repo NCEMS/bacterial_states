@@ -1,0 +1,161 @@
+{
+ "gse": "GSE325691",
+ "notes": "Active HSI#6 labelled abx_membrane (summary: membrane-targeting antibacterial, aligned with membrane-active antibiotics); inactive analogue labelled other_chemical (not a vehicle), so not a control. EPEC has no DMSO sample, so all EPEC samples are is_control false. Temperature and aeration not stated. molecule field says polyA RNA but protocol uses bacterial rRNA depletion (rrna_removal depletion). WT re-read: unmodified BW25113 and EPEC E2348/69 set to wild_type (the BW25113 dtolC strain is only in the WGS part).",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "bacteria were grown in LB from glycerol stock then diluted in LB and growth started until mid-log phase."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "diluted in LB"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "diluted in LB"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "diluted in LB and growth started until mid-log phase"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "RNA-seq profiling of E.coli BW25113 and Enteropathogenic E.coli treated with new antimirobials (active and inactive and DMSO)"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiling of E.coli BW25113 and Enteropathogenic E.coli treated with new antimirobials (active and inactive and DMSO)"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiling of E.coli BW25113 and Enteropathogenic E.coli treated with new antimirobials (active and inactive and DMSO)"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiling of E.coli BW25113 and Enteropathogenic E.coli treated with new antimirobials (active and inactive and DMSO)"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq profiling of E.coli BW25113 and Enteropathogenic E.coli treated with new antimirobials (active and inactive and DMSO)"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "bacteria were treated with DMSO, Active or Inactive analogues."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribosomal RNA was depleted using the NEBNext rRNA Depletion Kit v2 (Bacteria)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA was depleted using the NEBNext rRNA Depletion Kit v2 (Bacteria)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:cell line",
+   "regex": "^BW25113$",
+   "set": {
+    "strain_group": {
+     "v": "K-12",
+     "b": "stated",
+     "q": "Escherichia coli K-12"
+    },
+    "strain_name": {
+     "v": "BW25113",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:cell line",
+   "regex": "EPEC",
+   "set": {
+    "strain_group": {
+     "v": "EPEC",
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "E2348/69",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "DMSO",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^Inactive",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^Active",
+   "set": {
+    "treatment": {
+     "v": "abx_membrane",
+     "b": "stated",
+     "q": "a membrane-targeting antibacterial"
+    }
+   }
+  },
+  {
+   "field": "ch:time",
+   "regex": "^(5|15|30) min$",
+   "set": {
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:time",
+   "regex": "^(60|120) min$",
+   "set": {
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

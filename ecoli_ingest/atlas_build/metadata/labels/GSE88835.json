@@ -1,0 +1,110 @@
+{
+ "gse": "GSE88835",
+ "notes": "All cells carry the synthetic circuit (heterologous_expression; circuit genes not named, so no perturbed_genes / global_regulator_perturbed). No inducer state 1 (IPTG-/aTc-/Ara-) taken as the control in each vessel. Harvest after 5 h without OD: no growth phase. Inducers are not treatments.",
+ "default": {
+  "base_medium": {
+   "v": "MOPS",
+   "b": "stated",
+   "q": "MOPS EZ Rich Defined Medium (Teknova, CA, M2105) with 0.2% glycerol carbon source"
+  },
+  "medium_class": {
+   "v": "defined_rich",
+   "b": "inferred",
+   "q": "MOPS EZ Rich Defined Medium (Teknova, CA, M2105) with 0.2% glycerol carbon source"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "MOPS EZ Rich Defined Medium (Teknova, CA, M2105) with 0.2% glycerol carbon source"
+  },
+  "carbon_source": {
+   "v": "glycerol",
+   "b": "stated",
+   "q": "MOPS EZ Rich Defined Medium (Teknova, CA, M2105) with 0.2% glycerol carbon source"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Culture tubes and Erlenmeyer flasks were then grown in an Innova 44 shaker (Eppendorf, CT) at 37 °C and 250 rpm for five hours."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Culture tubes and Erlenmeyer flasks were then grown in an Innova 44 shaker (Eppendorf, CT) at 37 °C and 250 rpm for five hours."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Culture tubes and Erlenmeyer flasks were then grown in an Innova 44 shaker (Eppendorf, CT) at 37 °C and 250 rpm for five hours."
+  },
+  "genotype_class": {
+   "v": "heterologous_expression",
+   "b": "study_default",
+   "q": "cells harboring the circuit are grown in two conditions"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Examination of 8 different inducer combinations for 2 grown conditions (culture tubes and Erlenmeyer flasks)"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of 8 different inducer combinations for 2 grown conditions (culture tubes and Erlenmeyer flasks)"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of 8 different inducer combinations for 2 grown conditions (culture tubes and Erlenmeyer flasks)"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "NEB 10-beta"
+  },
+  "strain_name": {
+   "v": "NEB 10-beta",
+   "b": "stated",
+   "q": "NEB 10-beta"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Strand specific RNAtag-seq libraries were created"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribo-Zero rRNA Removal Kit for bacteria (Illumina) was used to deplete rRNA"
+  },
+  "inducer_added": {
+   "v": true,
+   "b": "stated",
+   "q": "Eight inducer combinations were used that cover the presence or absence of 0.5 mM IPTG, 10 ng/mL aTc, and 5 mM L-arabinose."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Examination of 8 different inducer combinations for 2 grown conditions (culture tubes and Erlenmeyer flasks)"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "\\(IPTG-/aTc-/Ara-\\)",
+   "set": {
+    "inducer_added": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

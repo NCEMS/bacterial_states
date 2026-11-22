@@ -1,0 +1,30 @@
+{
+  "gse": "GSE21341",
+  "notes": "Rifampicin mRNA-lifetime time course; candidates are time 0 (taken at rifampicin addition, treated as untreated control) and 2 min. M9 + glucose + vitamins + amino acids: amino acid mix not described as complete, medium_class left out. No OD or phase given; no aeration stated.",
+  "default": {
+    "base_medium": {"v": "M9", "b": "stated", "q": "grown at 30C in M9 media supplemented with 0.4% glucose, vitamins and amino acids"},
+    "amino_acids_supplied": {"v": true, "b": "stated", "q": "M9 media supplemented with 0.4% glucose, vitamins and amino acids"},
+    "carbon_source": {"v": "glucose", "b": "stated", "q": "M9 media supplemented with 0.4% glucose"},
+    "growth_temperature": {"v": 30, "b": "stated", "q": "was grown at 30C"},
+    "genotype_class": {"v": "reference", "b": "study_default", "q": "DY330 (W3110)"},
+    "global_regulator_perturbed": {"v": false, "b": "study_default", "q": "DY330 (W3110)"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "DY330 (W3110)"},
+    "strain_name": {"v": "DY330", "b": "stated", "q": "DY330 (W3110)"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "Comparison of mRNA abundance over time, after the addition of transcription inhibitor, rifampicin."},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "Comparison of mRNA abundance over time, after the addition of transcription inhibitor, rifampicin."},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "rRNA was first removed using MICROBExpress"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "rRNA was first removed using MICROBExpress"}
+  },
+  "rules": [
+    {"field": "ch:treatment group", "regex": "time point 0$",
+     "set": {"treatment": {"v": "none", "b": "stated", "q": "At time point 0, rifampicin was added"},
+             "transcription_arrested": {"v": false, "b": "stated", "q": "At time point 0, rifampicin was added"},
+             "is_control": {"v": true, "b": "stated", "q": "time point 0"}}},
+    {"field": "ch:treatment group", "regex": "time point 2$",
+     "set": {"treatment": {"v": "abx_transcription", "b": "stated", "q": "after the addition of transcription inhibitor, rifampicin"},
+             "exposure": {"v": "acute", "b": "stated", "q": "Samples were collected at 0, 2, 4, 6, and 8 minutes."},
+             "transcription_arrested": {"v": true, "b": "stated", "q": "after the addition of transcription inhibitor, rifampicin"},
+             "is_control": {"v": false, "b": "stated", "q": "rifampicin time point 2"}}}
+  ],
+  "samples": {}
+}

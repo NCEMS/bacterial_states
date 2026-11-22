@@ -1,0 +1,117 @@
+{
+ "gse": "GSE346981",
+ "notes": "Clofarabine (nucleotide analogue) -> other_chemical; time of addition not given, exposure left out. DMEM without serum -> cell_culture / defined_rich. OD 0.2 -> mid_exponential inferred (all OD 0.2 samples); OD 1.0 no phase. Aeration not stated. WT re-read: wild-type EPEC E2348/69 set to wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "cell_culture",
+   "b": "stated",
+   "q": "cultured in DMEM at 37°C to OD600 = 0.2 (acute phase) or OD600 = 1.0 (operational recovery phase)."
+  },
+  "medium_class": {
+   "v": "defined_rich",
+   "b": "inferred",
+   "q": "cultured in DMEM at 37°C to OD600 = 0.2 (acute phase) or OD600 = 1.0 (operational recovery phase)."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "cultured in DMEM at 37°C to OD600 = 0.2 (acute phase) or OD600 = 1.0 (operational recovery phase)."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "cultured in DMEM at 37°C to OD600 = 0.2 (acute phase) or OD600 = 1.0 (operational recovery phase)."
+  },
+  "strain_group": {
+   "v": "EPEC",
+   "b": "stated",
+   "q": "Enteropathogenic E. coli (EPEC E2348/69)"
+  },
+  "strain_name": {
+   "v": "E2348/69",
+   "b": "stated",
+   "q": "Enteropathogenic E. coli (EPEC E2348/69)"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "Wild type (E2348/69)"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "Wild type (E2348/69)"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "under untreated (control) and 10 µM clofarabine-treated conditions at two growth phases"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "under untreated (control) and 10 µM clofarabine-treated conditions at two growth phases"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "under untreated (control) and 10 µM clofarabine-treated conditions at two growth phases"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Prokaryotic RNA-seq library preparation with rRNA depletion (Novogene)."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Prokaryotic RNA-seq library preparation with rRNA depletion (Novogene)."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:growth phase",
+   "regex": "OD600 = 0\\.2$",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^none$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "Clofarabine",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

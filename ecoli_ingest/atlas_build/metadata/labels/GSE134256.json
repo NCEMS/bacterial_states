@@ -1,0 +1,172 @@
+{
+ "gse": "GSE134256",
+ "notes": "10 samples (titles *_ribo) are ribosome profiling (MNase footprints) -> assay_class ribosome_footprints. GLU4 wild type has no named lineage in the text, so strain_group left empty. Temperature and aeration not stated. Phase inferred from OD 0.3 in M9; paraquat samples 20 min later keep it.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "study_default",
+   "q": "M9 minimal media with 0.4% glucose"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "M9 minimal media with 0.4% glucose"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "M9 minimal media with 0.4% glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "study_default",
+   "q": "M9 minimal media with 0.4% glucose w/v as a carbon source"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "At A600 OD = 0.3 paraquat was added"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptomics was performed on 2 end point strains and WT with and without addition of paraquat."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptomics was performed on 2 end point strains and WT with and without addition of paraquat."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptomics was performed on 2 end point strains and WT with and without addition of paraquat."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "without paraquat"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptomics was performed on 2 end point strains and WT with and without addition of paraquat."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Ribosomal RNA was depleted using Illumina's Ribo-Zero rRNA removal kit and libraries were constructed using KAPA RNA-Seq Library Preparation kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "study_default",
+   "q": "Ribosomal RNA was depleted using Illumina's Ribo-Zero rRNA removal kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:stressor",
+   "regex": "Paraquat",
+   "set": {
+    "treatment": {
+     "v": "oxidative",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": "Cells were harvested 20mins after addition of paraquat"
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^GLU4$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": "GLU4 is the wild type strain"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": "GLU4 is the wild type strain"
+    },
+    "strain_name": {
+     "v": "GLU4",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^(PQ1|PQ2|MP)$",
+   "set": {
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "stated",
+     "q": "PQ1 and PQ2 are end-point strains from an adaptive laboratory evolution (ALE)"
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^PQ1$",
+   "set": {
+    "strain_name": {
+     "v": "PQ1",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^PQ2$",
+   "set": {
+    "strain_name": {
+     "v": "PQ2",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^MP$",
+   "set": {
+    "strain_name": {
+     "v": "MP",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "^GLU4_without paraquat$",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "_ribo$",
+   "set": {
+    "assay_class": {
+     "v": "ribosome_footprints",
+     "b": "stated",
+     "q": "MNase was used to shear RNA leaving behind ribosome protected regions."
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

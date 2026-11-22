@@ -116,7 +116,12 @@ def _parse_ena_report(text: str, run: str) -> dict:
     rows = [r for r in csv.DictReader(io.StringIO(text), delimiter="\t") if r.get("run_accession") == run]
     if not rows:
         raise AccessionError(f"ENA has no read_run record for {run}")
-    row = rows[0]
+    return ena_files_from_row(rows[0], run)
+
+
+def ena_files_from_row(row: dict, run: str) -> dict:
+    """Layout and FASTQ files of one run from the fields of an ENA read_run record
+    (``fastq_ftp``, ``fastq_md5``, ``fastq_bytes``, ``library_layout``, ``read_count``)."""
     urls = [u for u in (row.get("fastq_ftp") or "").split(";") if u]
     spots = (row.get("read_count") or "").strip()
     spots = int(spots) if spots.isdigit() else None
@@ -452,6 +457,147 @@ def fetch_run(run: str, out_dir: str, mates=("1", "2"), method: str = "auto", en
     return "ena"
 
 
+# --------------------------------------------------------------------------- read subsample
+
+def stream_head(url: str, out: str, max_reads: int, log=None, attempts: int = 4, timeout: float = 120,
+                backoff: float = 5.0) -> int:
+    """Write the first ``max_reads`` records of a remote ``.fastq.gz`` to ``out`` (uncompressed)
+    and return the number written. The connection is closed as soon as enough has arrived, so
+    only the start of the file is transferred."""
+    import zlib
+    want = 4 * max_reads
+    last: Exception | None = None
+    for i in range(attempts):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+            _log(log, f"reading first {max_reads} reads of {url}" + (f" (attempt {i + 1})" if i else ""))
+            lines = 0
+            with urllib.request.urlopen(req, timeout=timeout) as resp, open(out + ".part", "wb") as fh:
+                z = zlib.decompressobj(16 + zlib.MAX_WBITS)
+                buf = b""
+                while lines < want:
+                    chunk = resp.read(1 << 18)
+                    if not chunk:
+                        break
+                    while chunk and lines < want:
+                        data = z.decompress(chunk)
+                        chunk = b""
+                        if z.eof:                      # a file made of several gzip members
+                            chunk = z.unused_data
+                            z = zlib.decompressobj(16 + zlib.MAX_WBITS)
+                        buf += data
+                        cut = buf.rfind(b"\n") + 1
+                        block, buf = buf[:cut], buf[cut:]
+                        n = block.count(b"\n")
+                        if lines + n > want:
+                            keep = want - lines
+                            pos = -1
+                            for _ in range(keep):
+                                pos = block.index(b"\n", pos + 1)
+                            block, n = block[:pos + 1], keep
+                        fh.write(block)
+                        lines += n
+            lines -= lines % 4 if lines < want else 0
+            if lines % 4:
+                raise DownloadError(f"{url}: stream ended inside a FASTQ record")
+            if lines == 0:
+                raise DownloadError(f"{url}: no reads received")
+            os.replace(out + ".part", out)
+            return lines // 4
+        except (DownloadError, urllib.error.URLError, TimeoutError, OSError, zlib.error) as e:
+            last = e
+            if os.path.exists(out + ".part"):
+                os.remove(out + ".part")
+            _log(log, f"  failed: {e}")
+            if isinstance(e, urllib.error.HTTPError) and 400 <= e.code < 500 and e.code not in RETRY_HTTP:
+                break
+            if i + 1 < attempts:
+                time.sleep(backoff * 2 ** i)
+    raise DownloadError(f"reading {url} failed: {last}")
+
+
+def _truncate_fastq(path: str, n_reads: int) -> None:
+    """Cut a FASTQ file down to its first ``n_reads`` records."""
+    with open(path, "rb") as fh, open(path + ".cut", "wb") as out:
+        for i, line in enumerate(fh):
+            if i >= 4 * n_reads:
+                break
+            out.write(line)
+    os.replace(path + ".cut", path)
+
+
+def fetch_subsample(run: str, out_dir: str, mates=("1", "2"), max_spots: int = 200_000, skip_spots: int = 0,
+                    method: str = "auto", ena_files: dict | None = None, log=None) -> tuple[str, dict]:
+    """Write up to ``max_spots`` reads of a run to ``<out_dir>/<run>_<mate>.fastq`` (uncompressed)
+    without fetching the whole run. Returns ``(source, {mate: n_reads})``.
+
+    ``sra-tools``: ``fastq-dump -N/-X`` streams spots ``skip_spots+1 .. skip_spots+max_spots``
+    from the SRA. ``ena``: the first ``max_spots`` records of each ENA FASTQ file (``skip_spots``
+    does not apply). ``auto`` tries sra-tools when ``fastq-dump`` is on PATH, then ENA. Both mates
+    are cut to the same number of reads."""
+    method = check_method(method)
+    mates = tuple(str(m) for m in mates)
+    os.makedirs(out_dir, exist_ok=True)
+    out = {m: os.path.join(out_dir, f"{run}_{m}.fastq") for m in mates}
+    errors = []
+    if method in ("auto", "sra-tools"):
+        if not shutil.which("fastq-dump"):
+            errors.append("fastq-dump not on PATH")
+            if method == "sra-tools":
+                raise DownloadError(f"{run}: fastq-dump not on PATH")
+        else:
+            tmp = os.path.join(out_dir, f".sub_{run}")
+            shutil.rmtree(tmp, ignore_errors=True)
+            os.makedirs(tmp)
+            try:
+                _run_tool(["fastq-dump", "-N", str(skip_spots + 1), "-X", str(skip_spots + max_spots), "--split-3",
+                           "--skip-technical", "--defline-seq", "@$ac.$si $sn/$ri", "--defline-qual", "+",
+                           "-O", tmp, run], log)
+                paired = {m: os.path.join(tmp, f"{run}_{m}.fastq") for m in ("1", "2")}
+                single = os.path.join(tmp, f"{run}.fastq")
+                sources = paired if all(os.path.exists(p) for p in paired.values()) else (
+                    {"1": single} if os.path.exists(single) else {})
+                absent = [m for m in mates if m not in sources]
+                if absent:
+                    raise DownloadError(f"{run}: fastq-dump wrote no file for mate {', '.join(absent)}")
+                for m in mates:
+                    os.replace(sources[m], out[m])
+                counts = _equalize(out)
+                if not min(counts.values()):
+                    raise DownloadError(f"{run}: fastq-dump returned no reads")
+                return "sra-tools", counts
+            except (DownloadError, OSError) as e:
+                errors.append(f"sra-tools: {e}")
+                _log(log, f"  sra-tools failed for {run}: {e}")
+                if method == "sra-tools":
+                    raise DownloadError(f"{run}: {e}")
+            finally:
+                shutil.rmtree(tmp, ignore_errors=True)
+    no_ena = [m for m in mates if not (ena_files or {}).get(m, {}).get("url")]
+    if no_ena:
+        raise DownloadError(f"{run}: ENA has no FASTQ file for mate(s) {', '.join(no_ena)}"
+                            + (f" ({'; '.join(errors)})" if errors else ""))
+    try:
+        for m in mates:
+            stream_head(ena_files[m]["url"], out[m], max_spots, log=log)
+    except DownloadError as e:
+        raise DownloadError(f"{run}: {'; '.join(errors + ['ENA: ' + str(e)])}")
+    return "ena", _equalize(out)
+
+
+def _equalize(files: dict) -> dict:
+    """Count the reads of each mate file and cut all of them to the smallest count."""
+    counts = {}
+    for m, path in files.items():
+        with open(path, "rb") as fh:
+            counts[m] = sum(chunk.count(b"\n") for chunk in iter(lambda: fh.read(1 << 22), b"")) // 4
+    n = min(counts.values())
+    for m, path in files.items():
+        if counts[m] != n:
+            _truncate_fastq(path, n)
+    return {m: n for m in files}
+
+
 # --------------------------------------------------------------------------- CLI
 
 def main(argv=None) -> int:
@@ -470,6 +616,9 @@ def main(argv=None) -> int:
     f.add_argument("--ena", default=None, help='JSON {"1": {"url":..., "md5":..., "bytes":...}, "2": {...}}')
     f.add_argument("--spots", default=None, help="expected reads per mate (ENA read_count), if known")
     f.add_argument("--threads", type=int, default=4)
+    f.add_argument("--max-spots", type=int, default=None,
+                   help="fetch only this many reads (uncompressed <run>_<mate>.fastq), without the whole run")
+    f.add_argument("--skip-spots", type=int, default=0, help="with --max-spots and sra-tools: spots to skip first")
     r = sub.add_parser("resolve", help="print the runs and files for accessions (JSON)")
     r.add_argument("accessions", nargs="+")
     r.add_argument("--cache-dir", required=True)
@@ -480,6 +629,12 @@ def main(argv=None) -> int:
             download(args.url, args.out, md5=md5, size=args.bytes, log=sys.stderr)
         elif args.cmd == "fetch":
             spots = int(args.spots) if args.spots and str(args.spots).isdigit() and int(args.spots) > 0 else None
+            if args.max_spots:
+                source, counts = fetch_subsample(args.run, args.out_dir, tuple(m for m in args.mates.split(",") if m),
+                                                 args.max_spots, args.skip_spots, args.method,
+                                                 json.loads(args.ena) if args.ena else None, log=sys.stderr)
+                print(f"{args.run}: {counts} reads from {source}", file=sys.stderr)
+                return 0
             source = fetch_run(args.run, args.out_dir, tuple(m for m in args.mates.split(",") if m), args.method,
                                json.loads(args.ena) if args.ena else None, args.threads, spots, log=sys.stderr)
             print(f"{args.run}: fetched from {source}", file=sys.stderr)

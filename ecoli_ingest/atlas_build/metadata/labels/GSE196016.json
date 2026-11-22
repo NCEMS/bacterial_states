@@ -1,0 +1,33 @@
+{
+  "gse": "GSE196016",
+  "notes": "PAQS-seq: tRNA modification sequencing (periodate treatment, ligation of RNA, gel cut of 20-300 nt inserts), so assay_class other for all E. coli samples. Stresses are 10 min in LB at A600 0.4: DIP (iron chelation) metal_limitation, H2O2 oxidative, alpha-methyl glucoside-6-phosphate other_chemical. Ecoli_minusIO4/plusIO4 and Ecoli_none are untreated (mock) controls. Temperature not stated. rRNA removal not stated.",
+  "default": {
+    "base_medium": {"v": "LB", "b": "stated", "q": "E. coli MG1655 cells were grown in LB to a A600 of 0.4"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "grown in LB to a A600 of 0.4"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "grown in LB to a A600 of 0.4"},
+    "growth_phase": {"v": "mid_exponential", "b": "stated", "q": "RNA was extracted from E. coli MG1655 cells grown in LB until mid-log growth"},
+    "genotype_class": {"v": "reference", "b": "study_default", "q": "Each culture was split into 4, and subjected to 1 of 3 stresses or a control"},
+    "global_regulator_perturbed": {"v": false, "b": "study_default", "q": "Each culture was split into 4, and subjected to 1 of 3 stresses or a control"},
+    "strain_group": {"v": "K-12", "b": "inferred", "q": "MG1655"},
+    "strain_name": {"v": "MG1655", "b": "stated", "q": "MG1655"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "Each culture was split into 4, and subjected to 1 of 3 stresses or a control"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "Each culture was split into 4, and subjected to 1 of 3 stresses or a control"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "RNA extracted from E. coli cells was used to prepare libraries with and without periodate treatment"},
+    "assay_class": {"v": "other", "b": "stated", "q": "lanes were cut for inserts between 20ng and 300nt"},
+    "treatment": {"v": "none", "b": "stated", "q": "RNA was extracted from E. coli MG1655 cells grown in LB until mid-log growth"},
+    "is_control": {"v": true, "b": "stated", "q": "Mock treated cells, 25 mL, were left to grow for 10 min"}
+  },
+  "rules": [
+    {"field": "title", "regex": "_(DIP|aMG|H2O2)_",
+     "set": {"is_control": {"v": false, "b": "stated", "q": ""},
+             "exposure": {"v": "acute", "b": "stated", "q": "for 10 minutes"},
+             "growth_phase": {"v": "mid_exponential", "b": "inferred", "q": "grown in LB until mid-log growth then treated"}}},
+    {"field": "title", "regex": "_DIP_",
+     "set": {"treatment": {"v": "metal_limitation", "b": "stated", "q": "Iron depletion stress was done by adding to 25 mL cells 2,2’-dipyridl (DIP) to 250 µM final concentration for 10 min"}}},
+    {"field": "title", "regex": "_aMG_",
+     "set": {"treatment": {"v": "other_chemical", "b": "stated", "q": "Glucose phosphate stress was done by adding to 25 mL cells α-methyl glucoside-6-phosphate (αMG) to a final concentration of 1 mM for 10 min"}}},
+    {"field": "title", "regex": "_H2O2_",
+     "set": {"treatment": {"v": "oxidative", "b": "stated", "q": "Hydrogen peroxide stress was done by adding H2O2 to 25 mL cells to a final concentration of 0.5% for 10 min"}}}
+  ],
+  "samples": {}
+}

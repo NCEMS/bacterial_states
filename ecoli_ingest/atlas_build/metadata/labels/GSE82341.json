@@ -1,0 +1,95 @@
+{
+ "gse": "GSE82341",
+ "notes": "AES-1: E. coli ATCC 4157 in Medium E + glucose, gentamicin (25-75 ug/ml among candidates) added 19 h after start, fixed 30 h later; Space (microgravity) vs Earth ground controls. All candidates are gentamicin-treated, so no untreated control (is_control left out). Space samples: treatment abx_translation;other_physical (microgravity). Growth phase left out (49 h static culture, sampled 30 h after drug addition, no phase word); culture mode/oxygen not described (FPA hardware). strain_group of ATCC 4157 not given. rRNA removed with Ribo-Zero Gold (Yeast) kit as written. WT re-read: ATCC 4157 unmodified -> wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "other_minimal",
+   "b": "stated",
+   "q": "Medium E as described in Vogel & Bonner (1956) supplemented with 5 g/L glucose"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "Medium E as described in Vogel & Bonner (1956) supplemented with 5 g/L glucose"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "Medium E as described in Vogel & Bonner (1956) supplemented with 5 g/L glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "Medium E as described in Vogel & Bonner (1956) supplemented with 5 g/L glucose"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "study_default",
+   "q": "Temperature was increased to 37C and 23 hours later, the experiment was started"
+  },
+  "strain_name": {
+   "v": "ATCC 4157",
+   "b": "stated",
+   "q": "ATCC 4157"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "E. coli ATTC 4157 was cultured and challenged with Gentamicin Sulfate (between 0 and 150 ug/mL) on board the International Space Station while maintaining matched ground (1g) controls"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli ATTC 4157 was cultured and challenged with Gentamicin Sulfate (between 0 and 150 ug/mL) on board the International Space Station while maintaining matched ground (1g) controls"
+  },
+  "treatment": {
+   "v": "abx_translation",
+   "b": "stated",
+   "q": "Nineteen hours after experiment start, antibiotic (Gentamicin Sulfate (MP Biomedical, Cat No. 1676045, Santa Ana, CA, USA)) was introducing into the cultures."
+  },
+  "exposure": {
+   "v": "adapted",
+   "b": "inferred",
+   "q": "Thirty hours later, samples were fixed in RNA Later II"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli ATTC 4157 was cultured and challenged with Gentamicin Sulfate (between 0 and 150 ug/mL) on board the International Space Station while maintaining matched ground (1g) controls"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli ATTC 4157 was cultured and challenged with Gentamicin Sulfate (between 0 and 150 ug/mL) on board the International Space Station while maintaining matched ground (1g) controls"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli ATTC 4157 was cultured and challenged with Gentamicin Sulfate (between 0 and 150 ug/mL) on board the International Space Station while maintaining matched ground (1g) controls"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribosomal RNA (rRNA) was removed using Ribo-Zero™ Gold (Yeast) kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA (rRNA) was removed using Ribo-Zero™ Gold (Yeast) kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:location",
+   "regex": "^Space$",
+   "set": {
+    "treatment": {
+     "v": "abx_translation;other_physical",
+     "b": "stated",
+     "q": "cultured and challenged with Gentamicin Sulfate (between 0 and 150 ug/mL) on board the International Space Station"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

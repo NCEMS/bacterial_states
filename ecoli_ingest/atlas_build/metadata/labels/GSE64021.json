@@ -1,0 +1,288 @@
+{
+ "gse": "GSE64021",
+ "notes": "Directional RNA-seq of fragmented rRNA-depleted RNA (small-RNA kit adapters, no size selection) -> total_rnaseq. Shift samples come from LB OD 1.0 cells ('Middle log phase'); phase kept (inferred) for samples up to 2 h after resuspension, later ones empty. Temperature, vessel and aeration of MOPS / M-C / M-P resuspensions not stated (HS: 48 C, 250 rpm). MOPS and LB samples are untreated WT references -> controls. WT re-read: MG1655 used unmodified.",
+ "default": {
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "Escherichia coli K12 strain MG1655"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Escherichia coli K12 strain MG1655"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli K12 strain MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli K12 strain MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "transcriptomes and proteomes of E. coli at multiple time points in five culture conditions"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "transcriptomes and proteomes of E. coli at multiple time points in five culture conditions"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "transcriptomes and proteomes of E. coli at multiple time points in five culture conditions"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "To preserve short inserts from small RNAs we omitted the size selection step"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNAs were depleted from the total RNA using a MICROBExpress kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^LB",
+   "set": {
+    "base_medium": {
+     "v": "LB",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "complex",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    },
+    "growth_temperature": {
+     "v": 37,
+     "b": "stated",
+     "q": "cultured at 37 oC and 250 rpm"
+    },
+    "culture_mode": {
+     "v": "batch_shaken",
+     "b": "inferred",
+     "q": "cultured at 37°C and 250 rpm"
+    },
+    "oxygen": {
+     "v": "aerobic",
+     "b": "inferred",
+     "q": "cultured at 37°C and 250 rpm"
+    },
+    "treatment": {
+     "v": "none",
+     "b": "study_default",
+     "q": "For the LB culture, samples were collected when the cell suspension OD610 reached to 0.5, 1.0 and 3."
+    },
+    "is_control": {
+     "v": true,
+     "b": "study_default",
+     "q": "For the LB culture, samples were collected when the cell suspension OD610 reached to 0.5, 1.0 and 3."
+    }
+   }
+  },
+  {
+   "field": "description",
+   "regex": "Early log",
+   "set": {
+    "growth_phase": {
+     "v": "early_exponential",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "description",
+   "regex": "Middle log",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "description",
+   "regex": "stationary phase",
+   "set": {
+    "growth_phase": {
+     "v": "stationary",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(HS|MOPS|M-C|M-P)",
+   "set": {
+    "base_medium": {
+     "v": "MOPS",
+     "b": "stated",
+     "q": "the cell pellets were resuspended in the same volume of MOPS medium (100ml of 10X MOPS mixture, 880ml of sterile H2O, 10ml (0.132M) KH2PO4 and 10ml of 20% glucose, Teknova, Hollister, CA)"
+    },
+    "medium_class": {
+     "v": "defined_minimal",
+     "b": "inferred",
+     "q": "the cell pellets were resuspended in the same volume of MOPS medium (100ml of 10X MOPS mixture, 880ml of sterile H2O, 10ml (0.132M) KH2PO4 and 10ml of 20% glucose, Teknova, Hollister, CA)"
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": "the cell pellets were resuspended in the same volume of MOPS medium (100ml of 10X MOPS mixture, 880ml of sterile H2O, 10ml (0.132M) KH2PO4 and 10ml of 20% glucose, Teknova, Hollister, CA)"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(HS|MOPS|M-P)",
+   "set": {
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": "the cell pellets were resuspended in the same volume of MOPS medium (100ml of 10X MOPS mixture, 880ml of sterile H2O, 10ml (0.132M) KH2PO4 and 10ml of 20% glucose, Teknova, Hollister, CA)"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^MOPS",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "study_default",
+     "q": "the cell pellets were resuspended in the same volume of MOPS medium (100ml of 10X MOPS mixture, 880ml of sterile H2O, 10ml (0.132M) KH2PO4 and 10ml of 20% glucose, Teknova, Hollister, CA)"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^HS",
+   "set": {
+    "treatment": {
+     "v": "heat",
+     "b": "stated",
+     "q": ""
+    },
+    "growth_temperature": {
+     "v": 48,
+     "b": "stated",
+     "q": "incubated at 48°C and 250 rpm"
+    },
+    "culture_mode": {
+     "v": "batch_shaken",
+     "b": "inferred",
+     "q": "incubated at 48°C and 250 rpm"
+    },
+    "oxygen": {
+     "v": "aerobic",
+     "b": "inferred",
+     "q": "incubated at 48°C and 250 rpm"
+    },
+    "is_control": {
+     "v": false,
+     "b": "study_default",
+     "q": "the cell pellets were resuspended in the same volume of MOPS medium (100ml of 10X MOPS mixture, 880ml of sterile H2O, 10ml (0.132M) KH2PO4 and 10ml of 20% glucose, Teknova, Hollister, CA)"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^M-C",
+   "set": {
+    "treatment": {
+     "v": "carbon_starvation",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "study_default",
+     "q": "For carbon-starvation treatment (M-C), the cell pellets were resuspended in the MOPS medium without glucose."
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^M-P",
+   "set": {
+    "treatment": {
+     "v": "phosphate_starvation",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "study_default",
+     "q": "For phosphorus-starvation treatment (M-P), the cell pellets were resuspended in the MOPS medium without KH2PO4."
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^HS (15|30)min",
+   "set": {
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(HS|M-C|M-P) [12]h",
+   "set": {
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(HS|M-C|M-P) [46]h",
+   "set": {
+    "exposure": {
+     "v": "adapted",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^(HS (15|30)min|HS [12]h|MOPS [12]h|M-C [12]h|M-P [12]h)",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": "Middle log phasein the rich medium Luria broth (LB)"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

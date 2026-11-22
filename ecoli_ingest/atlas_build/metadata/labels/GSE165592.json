@@ -1,0 +1,169 @@
+{
+ "gse": "GSE165592",
+ "notes": "RNA-seq arm of a ribosome profiling study: total RNA was MNase-digested and 15-45 nt fragments PAGE-purified -> assay_class other (size-selected fragments, not total_rnaseq). Two sub-designs: pClpPX samples in LB + arabinose (inducer true, degron = knockdown), pTrm5 samples in MOPS complete synthetic + glucose (Trm5 repressed, inducer false; trmD_KO = deletion). OD 0.1-0.3 -> mid_exponential inferred. Shaking not described.",
+ "default": {
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "a 500 mL culture was grown from OD600 = 0.1 to 0.3 at 37 C"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "study the effects of loss of the tRNA methylase TrmD either by 1) a degron strategy using ClpXP or 2) a knockout strain"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "study the effects of loss of the tRNA methylase TrmD either by 1) a degron strategy using ClpXP or 2) a knockout strain"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "study the effects of loss of the tRNA methylase TrmD either by 1) a degron strategy using ClpXP or 2) a knockout strain"
+  },
+  "assay_class": {
+   "v": "other",
+   "b": "stated",
+   "q": "Ribosome footprints and total RNA fragments 15-45 nt in length were PAGE purified"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "a 500 mL culture was grown from OD600 = 0.1 to 0.3 at 37 C"
+  },
+  "is_control": {
+   "v": false,
+   "b": "stated",
+   "q": "study the effects of loss of the tRNA methylase TrmD either by 1) a degron strategy using ClpXP or 2) a knockout strain"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "study the effects of loss of the tRNA methylase TrmD"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:plasmids",
+   "regex": "^pClpPX$",
+   "set": {
+    "base_medium": {
+     "v": "LB",
+     "b": "stated",
+     "q": "diluted into fresh LB + Ara media three times to induce ClpPX expression"
+    },
+    "medium_class": {
+     "v": "complex",
+     "b": "inferred",
+     "q": "diluted into fresh LB + Ara media three times to induce ClpPX expression"
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": "diluted into fresh LB + Ara media three times to induce ClpPX expression"
+    },
+    "inducer_added": {
+     "v": true,
+     "b": "stated",
+     "q": "diluted into fresh LB + Ara media three times to induce ClpPX expression"
+    }
+   }
+  },
+  {
+   "field": "ch:plasmids",
+   "regex": "^pTrm5$",
+   "set": {
+    "base_medium": {
+     "v": "MOPS",
+     "b": "stated",
+     "q": "diluted into fresh MOPS complete synthetic media + Glc media to repress Trm5 expression"
+    },
+    "medium_class": {
+     "v": "defined_rich",
+     "b": "inferred",
+     "q": "diluted into fresh MOPS complete synthetic media + Glc media to repress Trm5 expression"
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": "diluted into fresh MOPS complete synthetic media + Glc media to repress Trm5 expression"
+    },
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": "diluted into fresh MOPS complete synthetic media + Glc media to repress Trm5 expression"
+    },
+    "inducer_added": {
+     "v": false,
+     "b": "stated",
+     "q": "diluted into fresh MOPS complete synthetic media + Glc media to repress Trm5 expression"
+    },
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": "a 300 mL culture was grown from OD600 = 0.1 to 0.3 at 37 C"
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^trmD_(control|WT)$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^trmD_degron",
+   "set": {
+    "genotype_class": {
+     "v": "knockdown",
+     "b": "stated",
+     "q": "a degron strategy using ClpXP"
+    },
+    "perturbed_genes": {
+     "v": "trmD",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^trmD_KO$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "a knockout strain where Trm5 is expressed initially and then repressed"
+    },
+    "perturbed_genes": {
+     "v": "trmD",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

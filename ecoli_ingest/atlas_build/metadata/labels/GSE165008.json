@@ -1,0 +1,133 @@
+{
+ "gse": "GSE165008",
+ "notes": "Medium not given. 24 h shaken culture -> stationary (inferred).",
+ "default": {
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "24 h at 37oC under shaking."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "24 h at 37oC under shaking."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "24 h at 37oC under shaking."
+  },
+  "growth_phase": {
+   "v": "stationary",
+   "b": "inferred",
+   "q": "24 h at 37oC under shaking."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "E. coli K12 MG1655 mutants versus wild-type."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli K12 MG1655 mutants versus wild-type."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli K12 MG1655 mutants versus wild-type."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli K12 MG1655 mutants versus wild-type."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribosomal RNA molecules were depleted using the Ribo-Zero rRNA Removal Kit for bacteria (Illumina)."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA molecules were depleted using the Ribo-Zero rRNA Removal Kit for bacteria (Illumina)."
+  },
+  "genotype_class": {
+   "v": "deletion",
+   "b": "stated",
+   "q": "E. coli K12 MG1655 mutants versus wild-type."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "lacking genes known to induce the Rtc RNA repair system, such as gor, mazF and srmB"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli K12 MG1655 mutants versus wild-type."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "wild-type",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "gor",
+   "set": {
+    "perturbed_genes": {
+     "v": "gor",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "mazF",
+   "set": {
+    "perturbed_genes": {
+     "v": "mazF",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "srmB",
+   "set": {
+    "perturbed_genes": {
+     "v": "srmB",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

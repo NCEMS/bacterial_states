@@ -1,0 +1,181 @@
+{
+ "gse": "GSE142656",
+ "notes": "Phase 'mid-log' stated once for the study and kept for the 5-min antibiotic samples. Two LB samples (no perturbation) and two M9 negative controls are controls.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "study_default",
+   "q": "Cells were harvested at mid-log phase after outgrowth from a back-diluted overnight culture. E. coli and B. subtilis were grown at 37°C"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Cells were harvested at mid-log phase after outgrowth from a back-diluted overnight culture. E. coli and B. subtilis were grown at 37°C"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "MG1655"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "The second experiment compared the quantification of change in gene expression following treatment of E. coli with rifampicin and chloramphenicol"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "The second experiment compared the quantification of change in gene expression following treatment of E. coli with rifampicin and chloramphenicol"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "The second experiment compared the quantification of change in gene expression following treatment of E. coli with rifampicin and chloramphenicol"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA subtracted total RNA"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "The second experiment compared the quantification of change in gene expression following treatment of E. coli with rifampicin and chloramphenicol"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:media",
+   "regex": "^LB$",
+   "set": {
+    "base_medium": {
+     "v": "LB",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "complex",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:media",
+   "regex": "^M9 media",
+   "set": {
+    "base_medium": {
+     "v": "M9",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "minimal_plus_hydrolysate",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "carbon_source": {
+     "v": "mixed",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:perturbation",
+   "regex": "^(none|Negative control)",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:perturbation",
+   "regex": "^Rifampicin",
+   "set": {
+    "treatment": {
+     "v": "abx_transcription",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:perturbation",
+   "regex": "^Chloramphenicol",
+   "set": {
+    "treatment": {
+     "v": "abx_translation",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:rrna depletion",
+   "regex": "^(custom|Ribo-Zero)",
+   "set": {
+    "rrna_removal": {
+     "v": "depletion",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:rrna depletion",
+   "regex": "^none",
+   "set": {
+    "rrna_removal": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

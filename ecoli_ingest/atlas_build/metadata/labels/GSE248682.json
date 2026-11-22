@@ -1,0 +1,101 @@
+{
+ "gse": "GSE248682",
+ "notes": "Reviewed 2026-11-15: title/protocol conflict on the library type settled from prescreen QC (88% of reads on CDS, 4% adapter-trimmed, 100 nt reads: an ordinary RNA-seq library, not a nascent-RNA pulldown); total_rnaseq. | CONFLICT: titles and the design call these samples ordinary RNA-seq, but the extract_protocol given for them describes the 5'TNET-seq pull-down of nascent RNA (Ni-NTA, 8-100 nt gel fraction); assay_class left out. Strain W3110 rpoC-6xHis (tagged, treated as reference). Shaking not stated. All samples are plain growth of the reference strain (controls).",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "diluted in 250 ml LB medium"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "diluted in 250 ml LB medium"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "diluted in 250 ml LB medium"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "incubate at 37 ºC to mid-log phase"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "stated",
+   "q": "W3110 rpoC-6xHis"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "W3110 rpoC-6xHis"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. W3110"
+  },
+  "strain_name": {
+   "v": "W3110 rpoC-6xHis",
+   "b": "stated",
+   "q": "W3110 rpoC-6xHis"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RNA-seq was performed using the same strains and conditions to monitor the changes of gene transcription."
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "collected at log phase and stationary phase"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "collected at log phase and stationary phase"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "collected at log phase and stationary phase"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "collected at log phase and stationary phase"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "inferred",
+   "q": "W3110 rpoC-6xHis"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^Log phase",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": "to mid-log phase (OD600 = 0.5)"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^Sta phase",
+   "set": {
+    "growth_phase": {
+     "v": "stationary",
+     "b": "stated",
+     "q": "or stationary phase (OD600 = 2.0)"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

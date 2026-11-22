@@ -1,0 +1,143 @@
+{
+ "gse": "GSE144942",
+ "notes": "All samples were labelled with 100 uM AzG for 10 min (metabolic label, not counted as a treatment). AIR samples are the streptavidin-enriched newly transcribed RNA: nascent_or_labelled. carbon_source left out (glucose plus tryptone). rRNA removal not described.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "Overnight cultures were diluted 1:100 into nucleoside-free medium [M9+0.4% (wt/vol) glucose+ 10g/L tryptone ]."
+  },
+  "medium_class": {
+   "v": "minimal_plus_hydrolysate",
+   "b": "inferred",
+   "q": "Overnight cultures were diluted 1:100 into nucleoside-free medium [M9+0.4% (wt/vol) glucose+ 10g/L tryptone ]."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Overnight cultures were diluted 1:100 into nucleoside-free medium [M9+0.4% (wt/vol) glucose+ 10g/L tryptone ]."
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "Overnight cultured bacteria were diluted 1:100 into fresh media and grown to an OD600 of approximately 0.3."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "with shaking at 220 rpm"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "with shaking at 220 rpm"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "Escherichia coli strains K12 were grown in LB"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Escherichia coli strains K12 were grown in LB"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "The bacteria were incubated with 100 μM AzG and separated into two groups. One of them was cultured at 37 ℃ as negative control, the other was cultured at 42 ℃ to imitate heat shock."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "The bacteria were incubated with 100 μM AzG and separated into two groups. One of them was cultured at 37 ℃ as negative control, the other was cultured at 42 ℃ to imitate heat shock."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "The bacteria were incubated with 100 μM AzG and separated into two groups. One of them was cultured at 37 ℃ as negative control, the other was cultured at 42 ℃ to imitate heat shock."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K12"
+  },
+  "strain_name": {
+   "v": "K12",
+   "b": "stated",
+   "q": "K12"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:temperature treatment",
+   "regex": "^37C$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "The bacteria were incubated with 100 μM AzG and separated into two groups. One of them was cultured at 37 ℃ as negative control, the other was cultured at 42 ℃ to imitate heat shock."
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "The bacteria were incubated with 100 μM AzG and separated into two groups. One of them was cultured at 37 ℃ as negative control, the other was cultured at 42 ℃ to imitate heat shock."
+    },
+    "growth_temperature": {
+     "v": 37,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:temperature treatment",
+   "regex": "^42C",
+   "set": {
+    "treatment": {
+     "v": "heat",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": "The bacteria were incubated with 100 μM AzG and separated into two groups. One of them was cultured at 37 ℃ as negative control, the other was cultured at 42 ℃ to imitate heat shock."
+    },
+    "growth_temperature": {
+     "v": 42,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:sample type",
+   "regex": "^total RNA$",
+   "set": {
+    "assay_class": {
+     "v": "total_rnaseq",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:sample type",
+   "regex": "^immunoprecipitated RNA$",
+   "set": {
+    "assay_class": {
+     "v": "nascent_or_labelled",
+     "b": "stated",
+     "q": "the newly transcribed RNA  were isolated by streptavidin beads and subjected to RNA-seq"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

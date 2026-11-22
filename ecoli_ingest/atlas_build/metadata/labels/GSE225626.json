@@ -1,0 +1,106 @@
+{
+ "gse": "GSE225626",
+ "notes": "Mutant only called 'mutant'/'EPECrnr' (type of mutation not given) and the complement carries pRnr: genotype_class left out for both. Temperature, phase and aeration of the DMEM cultures not given. SMARTer mRNA-Seq kit on total RNA taken as total_rnaseq; rRNA removal not stated.",
+ "default": {
+  "base_medium": {
+   "v": "cell_culture",
+   "b": "stated",
+   "q": "For RNAseq, bacterial strains were cultured in Dulbecco’s modified Eagle’s medium with 0.4% glucose (DMEM high glucose)"
+  },
+  "medium_class": {
+   "v": "defined_rich",
+   "b": "inferred",
+   "q": "For RNAseq, bacterial strains were cultured in Dulbecco’s modified Eagle’s medium with 0.4% glucose (DMEM high glucose)"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "For RNAseq, bacterial strains were cultured in Dulbecco’s modified Eagle’s medium with 0.4% glucose (DMEM high glucose)"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "Dulbecco’s modified Eagle’s medium with 0.4% glucose"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RNA was extracted from EPEC E2348/69 derivatives (WT EPEC, EPECrnr, and EPECrnr(pRnr) grown in DMEM-HG"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA was extracted from EPEC E2348/69 derivatives (WT EPEC, EPECrnr, and EPECrnr(pRnr) grown in DMEM-HG"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA was extracted from EPEC E2348/69 derivatives (WT EPEC, EPECrnr, and EPECrnr(pRnr) grown in DMEM-HG"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA was extracted from EPEC E2348/69 derivatives (WT EPEC, EPECrnr, and EPECrnr(pRnr) grown in DMEM-HG"
+  },
+  "strain_group": {
+   "v": "EPEC",
+   "b": "stated",
+   "q": "prototype EPEC strain E2348-69"
+  },
+  "strain_name": {
+   "v": "E2348/69",
+   "b": "stated",
+   "q": "EPEC E2348/69"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "inferred",
+   "q": "1.3 ug of total RNA was used for the construction of sequencing libraries"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^(mutant|complement)$",
+   "set": {
+    "perturbed_genes": {
+     "v": "rnr",
+     "b": "stated",
+     "q": "WT EPEC, EPECrnr, and EPECrnr(pRnr)"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": "WT EPEC, EPECrnr, and EPECrnr(pRnr)"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

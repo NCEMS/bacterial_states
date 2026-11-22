@@ -1,0 +1,159 @@
+{
+ "gse": "GSE202549",
+ "notes": "MG1655 wild type and delta-cyaA grown in LB with 0-4 mM extracellular cAMP (cAMP classed other_chemical, adapted: grown with it). Wild type untreated is the control; delta-cyaA 0 mM is the submitters' fold-change baseline but not the reference genotype. WT re-read: wild-type MG1655 is wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Cells were grown in LB, with or without cAMP, at 37 degrees Celsius at 180rpm."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Cells were grown in LB, with or without cAMP"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Cells were grown in LB, with or without cAMP"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "at 37 degrees Celsius at 180rpm"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "at 37 degrees Celsius at 180rpm"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "at 37 degrees Celsius at 180rpm"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "log phase"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K-12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "K-12 MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "We treated delta-cyaA E.coli cells, that cannot make intracellular cAMP, with 10 different concentrations of extracellular cAMP"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "We treated delta-cyaA E.coli cells, that cannot make intracellular cAMP, with 10 different concentrations of extracellular cAMP"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "We treated delta-cyaA E.coli cells, that cannot make intracellular cAMP, with 10 different concentrations of extracellular cAMP"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "To enrich for mRNA 16S and 23S rRNA were depleted using Ambion Microbe Express Riboclean-up kits"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "16S and 23S rRNA were depleted using Ambion Microbe Express Riboclean-up kits"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "compared to the 0mM delta-cyaA mutant state"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^wild-type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^delta-cyaA$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "cyaA",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^no treatment$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "mM cAMP",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "stated",
+     "q": "Cells were grown in LB, with or without cAMP"
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^wild-type E\\.coli",
+   "set": {
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

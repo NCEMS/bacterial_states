@@ -1,0 +1,141 @@
+{
+ "gse": "GSE65244",
+ "notes": "Growth-curve time course (60-420 min) in an LB fermenter; no OD or phase words, so growth_phase left out. Wild type at each time point is a control. CSH50 taken as K-12.",
+ "default": {
+  "strain_name": {
+   "v": "CSH50",
+   "b": "stated",
+   "q": "CSH50"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "CSH50"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "LB medium, 37°C, airated, constant pH 7.5"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "LB medium, 37°C, airated, constant pH 7.5"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "LB medium, 37°C, airated, constant pH 7.5"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "LB medium, 37°C, airated, constant pH 7.5"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "LB medium, 37°C, airated, constant pH 7.5"
+  },
+  "culture_mode": {
+   "v": "batch_bioreactor",
+   "b": "stated",
+   "q": "grown in LB in a fermenter"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Temporal gene expression data taken at 60, 120, 180 300 (wt only) and 420 min under controlled growth conditions"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Temporal gene expression data taken at 60, 120, 180 300 (wt only) and 420 min under controlled growth conditions"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Temporal gene expression data taken at 60, 120, 180 300 (wt only) and 420 min under controlled growth conditions"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Temporal gene expression data taken at 60, 120, 180 300 (wt only) and 420 min under controlled growth conditions"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "RNA extraction Kit GATC"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "stated",
+   "q": "wildtype"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "wildtype"
+  },
+  "is_control": {
+   "v": true,
+   "b": "stated",
+   "q": "wildtype"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^delta-fis$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "delta-fis"
+    },
+    "perturbed_genes": {
+     "v": "fis",
+     "b": "stated",
+     "q": "delta-fis"
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": "delta-fis"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": "delta-fis"
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^delta-hns$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "delta-hns"
+    },
+    "perturbed_genes": {
+     "v": "hns",
+     "b": "stated",
+     "q": "delta-hns"
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": "delta-hns"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": "delta-hns"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

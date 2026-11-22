@@ -1,0 +1,18 @@
+{
+  "gse": "GSE96573",
+  "notes": "All samples are E. coli infected with T7 (wild type, codon-recoded gene 10, evolved recoded), 1/5/9 min post-infection; no uninfected sample, so is_control left out. Host strain, medium, temperature and growth phase not given. mixed_organism set true because libraries contain T7 phage RNA alongside host RNA (uncertain whether phage counts as a second organism). Host genotype is unchanged across samples (reference); T7 genotype differences are not host perturbations.",
+  "default": {
+    "treatment": {"v": "phage", "b": "stated", "q": "mRNA profiles of T7-infected E. coli from three different strains of T7"},
+    "genotype_class": {"v": "reference", "b": "study_default", "q": "mRNA profiles of T7-infected E. coli from three different strains of T7, across three distinct time points post-infection"},
+    "global_regulator_perturbed": {"v": false, "b": "study_default", "q": "mRNA profiles of T7-infected E. coli from three different strains of T7, across three distinct time points post-infection"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "mRNA profiles of T7-infected E. coli from three different strains of T7, across three distinct time points post-infection"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "mRNA profiles of T7-infected E. coli from three different strains of T7, across three distinct time points post-infection"},
+    "mixed_organism": {"v": true, "b": "inferred", "q": "mRNA profiles of T7-infected E. coli"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "Fragmentation and reverse transcription of RNA with random primers"}
+  },
+  "rules": [
+    {"field": "ch:time", "regex": "^(1|5|9) min post-infection$",
+     "set": {"exposure": {"v": "acute", "b": "inferred", "q": ""}}}
+  ],
+  "samples": {}
+}

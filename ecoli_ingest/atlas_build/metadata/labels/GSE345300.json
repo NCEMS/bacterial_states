@@ -1,0 +1,126 @@
+{
+ "gse": "GSE345300",
+ "notes": "Strains evolved by 14-day cyclic nanoparticle exposure, then grown in LB; whether NPs were present at sampling and the harvest phase are not stated, so treatment/exposure/growth_phase are left out for evolved strains. ppk knockout in the AgNP-evolved strain -> multiple; global_regulator_perturbed left out for evolved strains (unknown mutations). WT re-read: Ewt control is WT MG1655 without NP exposure -> wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Strains were grown in LB medium at 37  °C with shaking at 180 rpm in the dark."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Strains were grown in LB medium at 37  °C with shaking at 180 rpm in the dark."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Strains were grown in LB medium at 37  °C with shaking at 180 rpm in the dark."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Strains were grown in LB medium at 37  °C with shaking at 180 rpm in the dark."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Strains were grown in LB medium at 37  °C with shaking at 180 rpm in the dark."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Strains were grown in LB medium at 37  °C with shaking at 180 rpm in the dark."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli MG1655"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "After 14 days of exposure to different NPs, the strains were named"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "After 14 days of exposure to different NPs, the strains were named"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "After 14 days of exposure to different NPs, the strains were named"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribosomal RNA was depleted from the total RNA, followed by RNA fragmentation."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA was depleted from the total RNA, followed by RNA fragmentation."
+  },
+  "genotype_class": {
+   "v": "evolved_isolate",
+   "b": "stated",
+   "q": "After 14 days of exposure to different NPs, the strains were named"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Ewt represents the untreated control with no NP exposure."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^control$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": "Ewt represents the untreated control with no NP exposure."
+    },
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": "Ewt represents the untreated control with no NP exposure."
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "Ewt represents the untreated control with no NP exposure."
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": "Ewt represents the untreated control with no NP exposure."
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "ppk gene knockout",
+   "set": {
+    "genotype_class": {
+     "v": "multiple",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "ppk",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

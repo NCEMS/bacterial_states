@@ -1,0 +1,128 @@
+{
+ "gse": "GSE55199",
+ "notes": "All 22 are dRNA-seq 5'-end libraries (-/+ TEX, poly(A)-tailed, TAP, 5' adapter ligation, oligo-dT RT): assay_class end_mapping. Several reference conditions (LB exp, LB stat, M63 exp), all controls. Growth temperature after dilution and aeration not stated; left out.",
+ "default": {
+  "genotype_class": {
+   "v": "reference",
+   "b": "stated",
+   "q": "MG1655 wild type strain"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "MG1655 wild type strain"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "we collected two independent biological replicates (B1 and B2 samples) from MG1655 wild type strain grown to exponential (OD 600 ~0.4) or stationary phase (OD 600 ~2.0) in LB medium"
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "we collected two independent biological replicates (B1 and B2 samples) from MG1655 wild type strain grown to exponential (OD 600 ~0.4) or stationary phase (OD 600 ~2.0) in LB medium"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "we collected two independent biological replicates (B1 and B2 samples) from MG1655 wild type strain grown to exponential (OD 600 ~0.4) or stationary phase (OD 600 ~2.0) in LB medium"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "we collected two independent biological replicates (B1 and B2 samples) from MG1655 wild type strain grown to exponential (OD 600 ~0.4) or stationary phase (OD 600 ~2.0) in LB medium"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "we collected two independent biological replicates (B1 and B2 samples) from MG1655 wild type strain grown to exponential (OD 600 ~0.4) or stationary phase (OD 600 ~2.0) in LB medium"
+  },
+  "assay_class": {
+   "v": "end_mapping",
+   "b": "stated",
+   "q": "For all six samples, total RNA was extracted and subjected to differential RNA-seq (dRNA-seq) library preparation for primary transcriptome analysis"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:growth phase",
+   "regex": "^exponential$",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:growth phase",
+   "regex": "^stationary$",
+   "set": {
+    "growth_phase": {
+     "v": "stationary",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:medium",
+   "regex": "^LB$",
+   "set": {
+    "base_medium": {
+     "v": "LB",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "complex",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:medium",
+   "regex": "^M63$",
+   "set": {
+    "base_medium": {
+     "v": "M63",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "defined_minimal",
+     "b": "inferred",
+     "q": "M63 minimal glucose medium"
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": "M63 minimal glucose medium"
+    },
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": "M63 minimal glucose medium"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

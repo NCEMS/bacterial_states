@@ -1,0 +1,43 @@
+{
+ "gse": "GSE123854",
+ "notes": "T7 infection time course (5-25 min, all acute); no uninfected control, so is_control left out. Host strain, medium and phase not given. Phage RNA is in the libraries (organism E. coli + phage T7): mixed_organism true (uncertain whether phage counts). rRNA removal not described.",
+ "default": {
+  "treatment": {
+   "v": "phage",
+   "b": "stated",
+   "q": "E. coli were infected with wildtype T7 at 25C and sampled for RNA-sequencing at 5, 10, 15, and 25 minutes."
+  },
+  "exposure": {
+   "v": "acute",
+   "b": "inferred",
+   "q": "E. coli were infected with wildtype T7 at 25C and sampled for RNA-sequencing at 5, 10, 15, and 25 minutes."
+  },
+  "growth_temperature": {
+   "v": 25,
+   "b": "stated",
+   "q": "E. coli were infected with wildtype T7 at 25C and sampled for RNA-sequencing at 5, 10, 15, and 25 minutes."
+  },
+  "mixed_organism": {
+   "v": true,
+   "b": "stated",
+   "q": "Escherichia coli Escherichia phage T7"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli were infected with wildtype T7 at 25C and sampled for RNA-sequencing at 5, 10, 15, and 25 minutes."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli were infected with wildtype T7 at 25C and sampled for RNA-sequencing at 5, 10, 15, and 25 minutes."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Fragmentation and reverse transcription of RNA with random primers was carried out using the NEB First Strand Synthesis Module"
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

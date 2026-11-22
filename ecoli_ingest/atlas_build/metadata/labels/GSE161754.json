@@ -1,0 +1,37 @@
+{"gse": "GSE161754",
+ "notes": "Rifampicin time course (0-30 min) in MG1655 carrying pBR322-toxIN or empty pBR322. 0 min samples taken as the untreated baseline (treatment none, transcription not yet arrested); empty-vector 0 min is the control. toxIN origin not stated in the text, so genotype_class left empty for +toxIN (perturbed_genes toxI;toxN). Phase mid_exponential inferred from OD ~0.35/0.2 and sampling <=30 min after rifampicin. Temperature at sampling 30 C.",
+ "default": {
+  "strain_group": {"v": "K-12", "b": "stated", "q": "Escherichia coli str. K-12 substr. MG1655"},
+  "strain_name": {"v": "MG1655", "b": "stated", "q": "Escherichia coli str. K-12 substr. MG1655"},
+  "base_medium": {"v": "M9", "b": "stated", "q": "M9 media supplemented with 0.1% casamino acids, 0.4% glycerol, 0.4% glucose, 2 mM MgSO4, and 0.1 mM CaCl2"},
+  "medium_class": {"v": "minimal_plus_hydrolysate", "b": "inferred", "q": "M9 media supplemented with 0.1% casamino acids, 0.4% glycerol, 0.4% glucose, 2 mM MgSO4, and 0.1 mM CaCl2"},
+  "amino_acids_supplied": {"v": true, "b": "inferred", "q": "M9 media supplemented with 0.1% casamino acids, 0.4% glycerol, 0.4% glucose, 2 mM MgSO4, and 0.1 mM CaCl2"},
+  "carbon_source": {"v": "mixed", "b": "inferred", "q": "M9 media supplemented with 0.1% casamino acids, 0.4% glycerol, 0.4% glucose, 2 mM MgSO4, and 0.1 mM CaCl2"},
+  "growth_temperature": {"v": 30, "b": "stated", "q": "Cultures were back-diluted to OD600 = 0.2 and grown at 30 °C for 30 min before being treated with rifampicin at 300 μg/mL."},
+  "growth_phase": {"v": "mid_exponential", "b": "inferred", "q": "Cultures were back-diluted to OD600 = 0.2 and grown at 30 °C for 30 min before being treated with rifampicin at 300 μg/mL."},
+  "culture_mode": {"v": "batch_shaken", "b": "inferred", "q": "grown 3-4 hours to an OD600 of ~0.35 at 37°C in an orbital shaker at 200 RPM"},
+  "oxygen": {"v": "aerobic", "b": "inferred", "q": "grown 3-4 hours to an OD600 of ~0.35 at 37°C in an orbital shaker at 200 RPM"},
+  "treatment": {"v": "abx_transcription", "b": "stated", "q": "treated with rifampicin at 300 μg/mL"},
+  "exposure": {"v": "acute", "b": "stated", "q": "cells 0,2.5,5,10,20, and 30 min post-rifampicin treatment"},
+  "transcription_arrested": {"v": true, "b": "inferred", "q": "treated with rifampicin at 300 μg/mL"},
+  "is_control": {"v": false, "b": "study_default", "q": "Two replicates each of +toxIN (pBR322-toxIN) and -toxIN (pBR322 empty vector) cells 0,2.5,5,10,20, and 30 min post-rifampicin treatment."},
+  "inducer_added": {"v": false, "b": "study_default", "q": "Two replicates each of +toxIN (pBR322-toxIN) and -toxIN (pBR322 empty vector) cells 0,2.5,5,10,20, and 30 min post-rifampicin treatment."},
+  "mixed_organism": {"v": false, "b": "study_default", "q": "Two replicates each of +toxIN (pBR322-toxIN) and -toxIN (pBR322 empty vector) cells 0,2.5,5,10,20, and 30 min post-rifampicin treatment."},
+  "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "samples were treated with bacterial Ribo-Zero kit (Illumina) or MicrobEXPRESS (ThermoFisher)"},
+  "rrna_removal": {"v": "depletion", "b": "stated", "q": "samples were treated with bacterial Ribo-Zero kit (Illumina) or MicrobEXPRESS (ThermoFisher)"}
+ },
+ "rules": [
+  {"field": "ch:plasmid", "regex": "^pBR322 empty vector$", "set": {
+    "genotype_class": {"v": "reference", "b": "stated", "q": ""},
+    "global_regulator_perturbed": {"v": false, "b": "stated", "q": ""}}},
+  {"field": "ch:plasmid", "regex": "^pBR322-toxIN$", "set": {
+    "perturbed_genes": {"v": "toxI;toxN", "b": "stated", "q": ""},
+    "global_regulator_perturbed": {"v": false, "b": "stated", "q": ""}}},
+  {"field": "ch:time post-addition of rifampicin", "regex": "^0$", "set": {
+    "treatment": {"v": "none", "b": "inferred", "q": ""},
+    "exposure": {"v": null},
+    "transcription_arrested": {"v": false, "b": "inferred", "q": ""}}},
+  {"field": "title", "regex": "^minus_toxIN_0min", "set": {
+    "is_control": {"v": true, "b": "inferred", "q": ""}}}
+ ],
+ "samples": {}}

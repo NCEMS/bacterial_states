@@ -1,0 +1,156 @@
+{
+ "gse": "GSE262812",
+ "notes": "P1vir infection (MOI 10) of MG1655 wild type and delta-hfq, sampled 0/10/20 min; growth protocol mentions 'dksA strains' but all samples are hfq or wild type (typo assumed). '0 min after phage added' counted as phage-treated, acute. Phage RNA present in infected samples, so mixed_organism left out there; false for uninfected. Phase mid_exponential inferred from OD 0.2 in LB (samples <= 20 min after infection). WT re-read: MG1655 wild type -> wild_type.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "cultured in LB broth containing 10 mM CaCl2 at 37°C with shaking to OD600 = 0.2"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "cultured in LB broth containing 10 mM CaCl2 at 37°C with shaking to OD600 = 0.2"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "cultured in LB broth containing 10 mM CaCl2 at 37°C with shaking to OD600 = 0.2"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "cultured in LB broth containing 10 mM CaCl2 at 37°C with shaking to OD600 = 0.2"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "cultured in LB broth containing 10 mM CaCl2 at 37°C with shaking to OD600 = 0.2"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "cultured in LB broth containing 10 mM CaCl2 at 37°C with shaking to OD600 = 0.2"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "cultured in LB broth containing 10 mM CaCl2 at 37°C with shaking to OD600 = 0.2"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total RNA sequencing was performed to assess the changes in gene expression pattern at  0, 10 and 20 min of P1vir infection"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total RNA sequencing was performed to assess the changes in gene expression pattern at  0, 10 and 20 min of P1vir infection"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655 wild type"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Library prepared with TruSeq Stranded Total RNA Sample Prep Kit (Illumina)."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Bacterial Ribosome Reduction"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "MG1655 wild type"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "MG1655 wild type"
+  },
+  "strain_name": {
+   "v": "MG1655 (CF7968)",
+   "b": "stated",
+   "q": "CF7968 / 299"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "untreated"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "stated",
+   "q": "0 min - no phage added"
+  },
+  "is_control": {
+   "v": true,
+   "b": "stated",
+   "q": "0 min - no phage added"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain type",
+   "regex": "∆hfq",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "hfq",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655 hfq (299hfq)",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "infected with P1vir",
+   "set": {
+    "treatment": {
+     "v": "phage",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "inferred",
+     "q": "Samples of 500 µl were withdrawn after 0, 10, and 20 min of the P1vir infection"
+    },
+    "mixed_organism": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

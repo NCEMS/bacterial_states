@@ -1,0 +1,33 @@
+{
+  "gse": "GSE44928",
+  "notes": "Continuous fermenter (dilution rate 0.7/h) -> chemostat, phase not_applicable. IPTG 0.1 mM in all samples incl. wild type. pck is native to E. coli -> native_overexpression. Extract protocol mentions C. glutamicum (copy-paste). rRNA removal not stated (NuGEN Ovation).",
+  "default": {
+    "growth_phase": {"v": "not_applicable", "b": "inferred", "q": "Flow rate was 1.162ml/min(dilution rate 0,7/h)"},
+    "culture_mode": {"v": "chemostat", "b": "inferred", "q": "Flow rate was 1.162ml/min(dilution rate 0,7/h)"},
+    "base_medium": {"v": "LB", "b": "stated", "q": "100 ml LB medium supplemented with 3 g/L glucose"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "100 ml LB medium supplemented with 3 g/L glucose"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "100 ml LB medium supplemented with 3 g/L glucose"},
+    "carbon_source": {"v": "glucose", "b": "stated", "q": "LB medium supplemented with 3 g/L glucose"},
+    "oxygen": {"v": "aerobic", "b": "inferred", "q": "operated at 37 °C and 250 rpm with aeration (200 mL/min)"},
+    "growth_temperature": {"v": 37, "b": "stated", "q": "operated at 37 °C"},
+    "inducer_added": {"v": true, "b": "stated", "q": "0.1 mM IPTG"},
+    "treatment": {"v": "none", "b": "study_default", "q": "RNA-seq data of BL21(DE3) vs. BL21(DE3)_Pck_over under glucose LB"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "RNA-seq data of BL21(DE3) vs. BL21(DE3)_Pck_over under glucose LB"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "RNA-seq data of BL21(DE3) vs. BL21(DE3)_Pck_over under glucose LB"},
+    "strain_group": {"v": "B", "b": "stated", "q": "BL21(DE3)"},
+    "strain_name": {"v": "BL21(DE3)", "b": "stated", "q": "BL21(DE3)"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "Ovation® Prokaryotic RNA-Seq System"}
+  },
+  "rules": [
+    {"field": "ch:genotype", "regex": "^wild-type$",
+     "set": {"genotype_class": {"v": "reference", "b": "stated", "q": ""},
+             "global_regulator_perturbed": {"v": false, "b": "stated", "q": ""},
+             "is_control": {"v": true, "b": "stated", "q": ""}}},
+    {"field": "ch:genotype", "regex": "Pck over-expressed",
+     "set": {"genotype_class": {"v": "native_overexpression", "b": "stated", "q": ""},
+             "perturbed_genes": {"v": "pck", "b": "stated", "q": ""},
+             "global_regulator_perturbed": {"v": false, "b": "stated", "q": ""},
+             "is_control": {"v": false, "b": "stated", "q": ""}}}
+  ],
+  "samples": {}
+}

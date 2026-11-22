@@ -1,0 +1,32 @@
+{
+  "gse": "GSE152619",
+  "notes": "Life-cycle time course of one strain in LB; phases from the overall design. 72 h is called 'death phase' (not a scheme value): late_stationary inferred from the >24 h rule. No reference time point is named, so is_control left out. Temperature and aeration not stated. PFM2 is the study's only strain, taken as reference genotype. | 2026-11-20: 144 h and 192 h (the submitters' 'long-term stationary phase') moved to long_term_stationary; 72 h ('death phase') stays late_stationary. | 2026-11-20: late_exponential merged into transition (the value was dropped from the scheme: submitters' 'late log' and 'early stationary' cannot be ordered against each other).",
+  "default": {
+    "base_medium": {"v": "LB", "b": "stated", "q": "LB Lenox"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "LB Lenox"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "LB Lenox"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "PFM2 (MG1655 derivative)"},
+    "strain_name": {"v": "PFM2", "b": "stated", "q": "PFM2 (MG1655 derivative)"},
+    "genotype_class": {"v": "reference", "b": "study_default", "q": "Analysis of 3 replicates of the transcriptome of E. coli at 6 time points throughout the life cycle."},
+    "global_regulator_perturbed": {"v": false, "b": "study_default", "q": "Analysis of 3 replicates of the transcriptome of E. coli at 6 time points throughout the life cycle."},
+    "treatment": {"v": "none", "b": "study_default", "q": "Analysis of 3 replicates of the transcriptome of E. coli at 6 time points throughout the life cycle."},
+    "inducer_added": {"v": false, "b": "study_default", "q": "Analysis of 3 replicates of the transcriptome of E. coli at 6 time points throughout the life cycle."},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "Analysis of 3 replicates of the transcriptome of E. coli at 6 time points throughout the life cycle."},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "Analysis of 3 replicates of the transcriptome of E. coli at 6 time points throughout the life cycle."},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "Illumina Ribo-zero and RNA library kit"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "Illumina Ribo-zero and RNA library kit"}
+  },
+  "rules": [
+    {"field": "ch:time incubated", "regex": "^4 hours$",
+     "set": {"growth_phase": {"v": "mid_exponential", "b": "stated", "q": "4 hours (log phase)"}}},
+    {"field": "ch:time incubated", "regex": "^8 hours$",
+     "set": {"growth_phase": {"v": "transition", "b": "stated", "q": "8 hours (late-log phase)"}}},
+    {"field": "ch:time incubated", "regex": "^24 hours$",
+     "set": {"growth_phase": {"v": "stationary", "b": "stated", "q": "24 hours (stationary phase)"}}},
+    {"field": "ch:time incubated", "regex": "^72 hours$",
+     "set": {"growth_phase": {"v": "late_stationary", "b": "inferred", "q": "72 hours (death phase)"}}},
+    {"field": "ch:time incubated", "regex": "^(144|192) hours$",
+     "set": {"growth_phase": {"v": "long_term_stationary", "b": "stated", "q": "144 hours (long-term stationary phase), 192 hours (long-term stationary phase)"}}}
+  ],
+  "samples": {}
+}

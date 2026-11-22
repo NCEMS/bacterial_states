@@ -132,8 +132,7 @@ def plot_umap_groups(atlas_xy: pd.DataFrame, query_xy: pd.DataFrame, color=None,
 
 
 def _prob_columns(predictions: pd.DataFrame, factors) -> dict:
-    """Per factor, the probability column to show: the last class in sorted order (for the usual
-    two-class factors that is `stationary`, `defined`, `True`)."""
+    """Per call, its probability column (of the positive class: `stationary`, `minimal`, `lab`)."""
     out = {}
     for f in factors:
         cols = sorted(c for c in predictions.columns if c.startswith(f"{f}_prob_"))

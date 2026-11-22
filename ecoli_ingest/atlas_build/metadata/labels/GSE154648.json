@@ -1,0 +1,96 @@
+{
+ "gse": "GSE154648",
+ "notes": "Candidates are the bacteria-alone controls of a dual RNA-seq infection study: LF82 1 h and 6 h in DMEM (static, 37 °C, 5% CO2) and LF82 'in stationary' (medium and temperature not given). Treated as plain growth controls (treatment none); whether DMEM was a shift from the stationary culture is not stated. DMEM serum content not stated, medium_class left out. rRNA depletion text mentions human rRNAs.",
+ "default": {
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "infected by WT LF82"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "infected by WT LF82"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Control experiments were performed with macrophages alone and bacteria alone cultivated for 1 h and 6 h in DMEM medium at 37°C and 5% CO2 without agitation."
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "Control experiments were performed with macrophages alone and bacteria alone cultivated for 1 h and 6 h in DMEM medium at 37°C and 5% CO2 without agitation."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Control experiments were performed with macrophages alone and bacteria alone cultivated for 1 h and 6 h in DMEM medium at 37°C and 5% CO2 without agitation."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Control experiments were performed with macrophages alone and bacteria alone cultivated for 1 h and 6 h in DMEM medium at 37°C and 5% CO2 without agitation."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "stated",
+   "q": "Control experiments were performed with macrophages alone and bacteria alone cultivated for 1 h and 6 h in DMEM medium at 37°C and 5% CO2 without agitation."
+  },
+  "strain_group": {
+   "v": "AIEC",
+   "b": "stated",
+   "q": "AIEC LF82 bacteria"
+  },
+  "strain_name": {
+   "v": "LF82",
+   "b": "stated",
+   "q": "LF82"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "strand-specific libraries were constructed using the TruSeq Stranded Total RNA kit (Illumina)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNAs were depleted using the Ribo-Zero kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "in growth medium",
+   "set": {
+    "culture_mode": {
+     "v": "static_liquid",
+     "b": "stated",
+     "q": "Control experiments were performed with macrophages alone and bacteria alone cultivated for 1 h and 6 h in DMEM medium at 37°C and 5% CO2 without agitation."
+    },
+    "base_medium": {
+     "v": "cell_culture",
+     "b": "stated",
+     "q": "Control experiments were performed with macrophages alone and bacteria alone cultivated for 1 h and 6 h in DMEM medium at 37°C and 5% CO2 without agitation."
+    },
+    "growth_temperature": {
+     "v": 37,
+     "b": "stated",
+     "q": "Control experiments were performed with macrophages alone and bacteria alone cultivated for 1 h and 6 h in DMEM medium at 37°C and 5% CO2 without agitation."
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "in stationary",
+   "set": {
+    "growth_phase": {
+     "v": "stationary",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

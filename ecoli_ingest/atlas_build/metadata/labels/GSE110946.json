@@ -1,0 +1,121 @@
+{
+ "gse": "GSE110946",
+ "notes": "dCas9/gRNA knockdown of IS1, IS5, IS3, IS150 vs mock-silencing plasmid (controls). OD540 = 1 in minimal medium, above the inferable range -> no growth phase. Chloramphenicol is plasmid selection. Aeration not stated. No inducer mentioned.",
+ "default": {
+  "base_medium": {
+   "v": "other_minimal",
+   "b": "stated",
+   "q": "The six parallel cultures were grown at 37 oC in Mineral Salts minimal medium (Hall, Mol Biol Evol 15:1) supplemented with 0.2 % glucose and Chloramphenicol to an OD540 value of 1."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "The six parallel cultures were grown at 37 oC in Mineral Salts minimal medium (Hall, Mol Biol Evol 15:1) supplemented with 0.2 % glucose and Chloramphenicol to an OD540 value of 1."
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "The six parallel cultures were grown at 37 oC in Mineral Salts minimal medium (Hall, Mol Biol Evol 15:1) supplemented with 0.2 % glucose and Chloramphenicol to an OD540 value of 1."
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "The six parallel cultures were grown at 37 oC in Mineral Salts minimal medium (Hall, Mol Biol Evol 15:1) supplemented with 0.2 % glucose and Chloramphenicol to an OD540 value of 1."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "The six parallel cultures were grown at 37 oC in Mineral Salts minimal medium (Hall, Mol Biol Evol 15:1) supplemented with 0.2 % glucose and Chloramphenicol to an OD540 value of 1."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "The transcriptome of three samples were analyzed originating from the IS-knockdown strain. Three controls were also analyzed from cells carrying a mock-silencing plasmid."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "The transcriptome of three samples were analyzed originating from the IS-knockdown strain. Three controls were also analyzed from cells carrying a mock-silencing plasmid."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "The transcriptome of three samples were analyzed originating from the IS-knockdown strain. Three controls were also analyzed from cells carrying a mock-silencing plasmid."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "The transcriptome of three samples were analyzed originating from the IS-knockdown strain. Three controls were also analyzed from cells carrying a mock-silencing plasmid."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "the ribosomal RNA depleted using RiboZero Magnetic Kit for Gram-negative bacteria"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "the ribosomal RNA depleted using RiboZero Magnetic Kit for Gram-negative bacteria"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype/variation",
+   "regex": "pCRISP_ISF",
+   "set": {
+    "genotype_class": {
+     "v": "knockdown",
+     "b": "stated",
+     "q": "IS-knockdown"
+    },
+    "perturbed_genes": {
+     "v": "IS1;IS5;IS3;IS150",
+     "b": "stated",
+     "q": "simultaneously bind to the left end of IS1, IS5, IS3 and IS150"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype/variation",
+   "regex": "pCRISPath",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": "mock-silencing plasmid"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

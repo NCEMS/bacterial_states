@@ -1,0 +1,150 @@
+{
+ "gse": "GSE108846",
+ "notes": "Unmodified commensal stool isolates (CF patients and healthy children) grown in M9 glycerol or glucose; no treatment, so every sample is a control (plain growth of an unmodified strain) and genotype_class reference. strain_group natural_isolate (no pathotype given). Shaking not described, so oxygen/culture_mode left out. MICROBExpress mRNA enrichment = rRNA depletion.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Cultures were harvested at mid-exponential phase"
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "diluted 1:100 in either M9 minimal media with glycerol or glucose for the pre-cultures"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "diluted 1:100 in either M9 minimal media with glycerol or glucose for the pre-cultures"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "diluted 1:100 in either M9 minimal media with glycerol or glucose for the pre-cultures"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Experiments were performed at 37°C"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "study_default",
+   "q": "Since the different isolates are not isogenic mutants"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Since the different isolates are not isogenic mutants"
+  },
+  "strain_group": {
+   "v": "natural_isolate",
+   "b": "stated",
+   "q": "E. coli strain isolated from CF patient stool"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "were treated with the Ambion MICROBExpress Bacterial mRNA Enrichment Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "were treated with the Ambion MICROBExpress Bacterial mRNA Enrichment Kit"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq analysis was performed to analyze the transcriptomes of CF and control E. coli when grown on glycerol (GlyMM) or glucose (GluMM) as the sole carbon source."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq analysis was performed to analyze the transcriptomes of CF and control E. coli when grown on glycerol (GlyMM) or glucose (GluMM) as the sole carbon source."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq analysis was performed to analyze the transcriptomes of CF and control E. coli when grown on glycerol (GlyMM) or glucose (GluMM) as the sole carbon source."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RNA-seq analysis was performed to analyze the transcriptomes of CF and control E. coli when grown on glycerol (GlyMM) or glucose (GluMM) as the sole carbon source."
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "transcriptome analysis on GluMM served to establish baseline gene expression for each of these genetically distinct strains"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:carbon source",
+   "regex": "^Glycerol$",
+   "set": {
+    "carbon_source": {
+     "v": "glycerol",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:carbon source",
+   "regex": "^Glucose$",
+   "set": {
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^CF104\\.3\\.3_",
+   "set": {
+    "strain_name": {
+     "v": "CF104.3.3",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^CF108\\.4B_",
+   "set": {
+    "strain_name": {
+     "v": "CF108.4B",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^CON206\\.3A_",
+   "set": {
+    "strain_name": {
+     "v": "CON206.3A",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^CON208\\.3A_",
+   "set": {
+    "strain_name": {
+     "v": "CON208.3A",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

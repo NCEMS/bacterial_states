@@ -1,0 +1,111 @@
+{
+ "gse": "GSE158461",
+ "notes": "Ancestral vs 150-day evolved MG1655 carrying plasmid RP4, both grown in non-selective LB; ancestor = control. Harvest density/phase not given. Evolution was under sub-MIC antibiotic but sampled cultures were untreated.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "all the RP4-carrying strains were cultured in LB broth at 37℃, shaking at 200 RPM"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "all the RP4-carrying strains were cultured in LB broth at 37℃, shaking at 200 RPM"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "all the RP4-carrying strains were cultured in LB broth at 37℃, shaking at 200 RPM"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "all the RP4-carrying strains were cultured in LB broth at 37℃, shaking at 200 RPM"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "all the RP4-carrying strains were cultured in LB broth at 37℃, shaking at 200 RPM"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "all the RP4-carrying strains were cultured in LB broth at 37℃, shaking at 200 RPM"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "all the RP4-carrying strains were cultured in non-selective LB"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Bacterial mRNA profiles of 150-day evolved RP4-carrying strains (E:H:p) and ancestral RP4-carrying strains (A:H:p)"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Bacterial mRNA profiles of 150-day evolved RP4-carrying strains (E:H:p) and ancestral RP4-carrying strains (A:H:p)"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Bacterial mRNA profiles of 150-day evolved RP4-carrying strains (E:H:p) and ancestral RP4-carrying strains (A:H:p)"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli K-12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655 (RP4)",
+   "b": "stated",
+   "q": "Escherichia coli K-12 MG1655 and plasmid RP4"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "NEBNext Ultra II RNA Library Prep Kit for Illumina was used with 3 ug of total RNA"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^ancestral",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^evolved",
+   "set": {
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

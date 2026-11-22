@@ -1,0 +1,118 @@
+{
+ "gse": "GSE46118",
+ "notes": "CRAC (UV crosslinking + anti-FLAG/Ni-NTA purification of Hfq-RNA, RNase-trimmed fragments): all samples incl. untagged controls are IP_or_pulldown. OD 0.8, no phase word -> no phase. UV crosslinking is part of the assay, treatment left out; is_control left out (tagged vs untagged is an assay control). Summary says 'LE media' for K-12, field says LB; used LB.",
+ "default": {
+  "assay_class": {
+   "v": "IP_or_pulldown",
+   "b": "stated",
+   "q": "Hfq.RNA complexes were purified over M2 anti-FLAG resin, trimmed with RNase A/T1 and repurified under denaturing conditions using Ni-NTA resin"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown to and OD600 of ~0.8 at 37 degrees C"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "inferred",
+   "q": "His-FLAG tagged Hfq and untagged controls were cultured to an OD of 0.8"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "His-FLAG tagged Hfq and untagged controls were cultured to an OD of 0.8"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "His-FLAG tagged Hfq and untagged controls were cultured to an OD of 0.8 and crosslinked with UV-C"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "His-FLAG tagged Hfq and untagged controls were cultured to an OD of 0.8 and crosslinked with UV-C"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "His-FLAG tagged Hfq and untagged controls were cultured to an OD of 0.8 and crosslinked with UV-C"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "Sakai",
+   "set": {
+    "strain_group": {
+     "v": "EHEC_STEC",
+     "b": "stated",
+     "q": "Escherichia coli O157:H7 str. Sakai"
+    },
+    "strain_name": {
+     "v": "Sakai",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "K-12",
+   "set": {
+    "strain_group": {
+     "v": "K-12",
+     "b": "stated",
+     "q": ""
+    },
+    "strain_name": {
+     "v": "MG1655",
+     "b": "stated",
+     "q": "Escherichia coli str. K-12 substr. MG1655"
+    }
+   }
+  },
+  {
+   "field": "ch:media",
+   "regex": "MEM-HEPES",
+   "set": {
+    "base_medium": {
+     "v": "cell_culture",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "defined_rich",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:media",
+   "regex": "^LB$",
+   "set": {
+    "base_medium": {
+     "v": "LB",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "complex",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

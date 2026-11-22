@@ -1,0 +1,403 @@
+{
+ "gse": "GSE235964",
+ "notes": "Strain panel (ECOR, recent UPEC isolates, W3110) with no growth conditions given; each strain growing untreated is a control (study is all controls), genotype reference. NPEC ECOR strains -> natural_isolate, UPEC -> UPEC, W3110 -> K-12. Medium, phase, temperature unknown.",
+ "default": {
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Strains of urinary tract associated E. coli both recent isolates and from the ECOR collection and non pathogenic E. coli strains were analyzed."
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "Strains of urinary tract associated E. coli both recent isolates and from the ECOR collection and non pathogenic E. coli strains were analyzed."
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "Strains of urinary tract associated E. coli both recent isolates and from the ECOR collection and non pathogenic E. coli strains were analyzed."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Strains of urinary tract associated E. coli both recent isolates and from the ECOR collection and non pathogenic E. coli strains were analyzed."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Strains of urinary tract associated E. coli both recent isolates and from the ECOR collection and non pathogenic E. coli strains were analyzed."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Strains of urinary tract associated E. coli both recent isolates and from the ECOR collection and non pathogenic E. coli strains were analyzed."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Strains of urinary tract associated E. coli both recent isolates and from the ECOR collection and non pathogenic E. coli strains were analyzed."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Lexogen RiboCop rRNA depletion kit for Bacteria followed by Illumina Truseq Stranded mRNA library prep kit."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Lexogen RiboCop rRNA depletion kit for Bacteria"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:cell type",
+   "regex": "^NPEC$",
+   "set": {
+    "strain_group": {
+     "v": "natural_isolate",
+     "b": "stated",
+     "q": "non pathogenic E. coli strains"
+    }
+   }
+  },
+  {
+   "field": "ch:cell type",
+   "regex": "^UPEC$",
+   "set": {
+    "strain_group": {
+     "v": "UPEC",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:cell line",
+   "regex": "^W3110$",
+   "set": {
+    "strain_group": {
+     "v": "K-12",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {
+  "GSM7512432": {
+   "strain_name": {
+    "v": "W3110",
+    "b": "stated",
+    "q": "W3110"
+   }
+  },
+  "GSM7512433": {
+   "strain_name": {
+    "v": "W3110",
+    "b": "stated",
+    "q": "W3110"
+   }
+  },
+  "GSM7512434": {
+   "strain_name": {
+    "v": "W3110",
+    "b": "stated",
+    "q": "W3110"
+   }
+  },
+  "GSM7512435": {
+   "strain_name": {
+    "v": "ECOR4",
+    "b": "stated",
+    "q": "ECOR4"
+   }
+  },
+  "GSM7512436": {
+   "strain_name": {
+    "v": "ECOR6",
+    "b": "stated",
+    "q": "ECOR6"
+   }
+  },
+  "GSM7512437": {
+   "strain_name": {
+    "v": "ECOR8",
+    "b": "stated",
+    "q": "ECOR8"
+   }
+  },
+  "GSM7512438": {
+   "strain_name": {
+    "v": "ECOR16",
+    "b": "stated",
+    "q": "ECOR16"
+   }
+  },
+  "GSM7512439": {
+   "strain_name": {
+    "v": "ECOR23",
+    "b": "stated",
+    "q": "ECOR23"
+   }
+  },
+  "GSM7512440": {
+   "strain_name": {
+    "v": "ECOR11",
+    "b": "stated",
+    "q": "ECOR11"
+   }
+  },
+  "GSM7512441": {
+   "strain_name": {
+    "v": "ECOR14",
+    "b": "stated",
+    "q": "ECOR14"
+   }
+  },
+  "GSM7512442": {
+   "strain_name": {
+    "v": "PNK006",
+    "b": "stated",
+    "q": "PNK006"
+   }
+  },
+  "GSM7512443": {
+   "strain_name": {
+    "v": "PNK006",
+    "b": "stated",
+    "q": "PNK006"
+   }
+  },
+  "GSM7512444": {
+   "strain_name": {
+    "v": "PNK006",
+    "b": "stated",
+    "q": "PNK006"
+   }
+  },
+  "GSM7512445": {
+   "strain_name": {
+    "v": "ECOR44",
+    "b": "stated",
+    "q": "ECOR44"
+   }
+  },
+  "GSM7512446": {
+   "strain_name": {
+    "v": "ECOR47",
+    "b": "stated",
+    "q": "ECOR47"
+   }
+  },
+  "GSM7512447": {
+   "strain_name": {
+    "v": "ECOR49",
+    "b": "stated",
+    "q": "ECOR49"
+   }
+  },
+  "GSM7512448": {
+   "strain_name": {
+    "v": "ECOR48",
+    "b": "stated",
+    "q": "ECOR48"
+   }
+  },
+  "GSM7512449": {
+   "strain_name": {
+    "v": "ECOR50",
+    "b": "stated",
+    "q": "ECOR50"
+   }
+  },
+  "GSM7512450": {
+   "strain_name": {
+    "v": "PNK004",
+    "b": "stated",
+    "q": "PNK004"
+   }
+  },
+  "GSM7512451": {
+   "strain_name": {
+    "v": "PNK004",
+    "b": "stated",
+    "q": "PNK004"
+   }
+  },
+  "GSM7512452": {
+   "strain_name": {
+    "v": "PNK004",
+    "b": "stated",
+    "q": "PNK004"
+   }
+  },
+  "GSM7512453": {
+   "strain_name": {
+    "v": "ECOR51",
+    "b": "stated",
+    "q": "ECOR51"
+   }
+  },
+  "GSM7512454": {
+   "strain_name": {
+    "v": "ECOR52",
+    "b": "stated",
+    "q": "ECOR52"
+   }
+  },
+  "GSM7512455": {
+   "strain_name": {
+    "v": "ECOR53",
+    "b": "stated",
+    "q": "ECOR53"
+   }
+  },
+  "GSM7512456": {
+   "strain_name": {
+    "v": "ECOR54",
+    "b": "stated",
+    "q": "ECOR54"
+   }
+  },
+  "GSM7512457": {
+   "strain_name": {
+    "v": "ECOR61",
+    "b": "stated",
+    "q": "ECOR61"
+   }
+  },
+  "GSM7512458": {
+   "strain_name": {
+    "v": "ECOR66",
+    "b": "stated",
+    "q": "ECOR66"
+   }
+  },
+  "GSM7512459": {
+   "strain_name": {
+    "v": "ECOR55",
+    "b": "stated",
+    "q": "ECOR55"
+   }
+  },
+  "GSM7512460": {
+   "strain_name": {
+    "v": "ECOR56",
+    "b": "stated",
+    "q": "ECOR56"
+   }
+  },
+  "GSM7512461": {
+   "strain_name": {
+    "v": "ECOR60",
+    "b": "stated",
+    "q": "ECOR60"
+   }
+  },
+  "GSM7512462": {
+   "strain_name": {
+    "v": "ECOR62",
+    "b": "stated",
+    "q": "ECOR62"
+   }
+  },
+  "GSM7512463": {
+   "strain_name": {
+    "v": "ECOR64",
+    "b": "stated",
+    "q": "ECOR64"
+   }
+  },
+  "GSM7512464": {
+   "strain_name": {
+    "v": "UTI89",
+    "b": "stated",
+    "q": "UTI89"
+   }
+  },
+  "GSM7512465": {
+   "strain_name": {
+    "v": "UTI89",
+    "b": "stated",
+    "q": "UTI89"
+   }
+  },
+  "GSM7512466": {
+   "strain_name": {
+    "v": "UTI89",
+    "b": "stated",
+    "q": "UTI89"
+   }
+  },
+  "GSM7512467": {
+   "strain_name": {
+    "v": "CFT073",
+    "b": "stated",
+    "q": "CFT073"
+   }
+  },
+  "GSM7512468": {
+   "strain_name": {
+    "v": "CFT073",
+    "b": "stated",
+    "q": "CFT073"
+   }
+  },
+  "GSM7512469": {
+   "strain_name": {
+    "v": "CFT073",
+    "b": "stated",
+    "q": "CFT073"
+   }
+  },
+  "GSM7512470": {
+   "strain_name": {
+    "v": "KE4",
+    "b": "stated",
+    "q": "KE4"
+   }
+  },
+  "GSM7512471": {
+   "strain_name": {
+    "v": "KE21",
+    "b": "stated",
+    "q": "KE21"
+   }
+  },
+  "GSM7512472": {
+   "strain_name": {
+    "v": "KE24",
+    "b": "stated",
+    "q": "KE24"
+   }
+  },
+  "GSM7512473": {
+   "strain_name": {
+    "v": "KE25",
+    "b": "stated",
+    "q": "KE25"
+   }
+  },
+  "GSM7512474": {
+   "strain_name": {
+    "v": "KE26",
+    "b": "stated",
+    "q": "KE26"
+   }
+  },
+  "GSM7512475": {
+   "strain_name": {
+    "v": "LRPF007",
+    "b": "stated",
+    "q": "LRPF007"
+   }
+  },
+  "GSM7512476": {
+   "strain_name": {
+    "v": "LRPF62",
+    "b": "stated",
+    "q": "LRPF62"
+   }
+  }
+ }
+}

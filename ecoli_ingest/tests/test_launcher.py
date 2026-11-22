@@ -183,8 +183,9 @@ def test_container_image_legacy_layout(tmp_path):
 def test_centrifuge_on_unless_switched_off():
     assert runconfig.centrifuge_enabled({})                                  # old configs keep running it
     assert not runconfig.centrifuge_enabled({"centrifuge": False})
-    assert not runconfig.centrifuge_gate_enabled({"centrifuge": False, "centrifuge_min_percentage": 30})
-    assert not runconfig.centrifuge_gate_enabled({})                          # no threshold, no gate
+    assert not runconfig.centrifuge_gate_enabled({"centrifuge": False, "species_gate": True})
+    assert runconfig.centrifuge_gate_enabled({})                              # the species gate is on with Centrifuge
+    assert not runconfig.centrifuge_gate_enabled({"species_gate": False})
 
 
 def _centrifuge_checks(cfg, tmp_path):
@@ -206,7 +207,7 @@ def test_checks_centrifuge_index(tmp_path):
     assert off["centrifuge index"].status == checks.OK and "not needed" in off["centrifuge index"].detail
     assert "centrifuge gate" not in off
     gated = _centrifuge_checks({"centrifuge": False, "centrifuge_min_percentage": 30}, tmp_path)
-    assert gated["centrifuge gate"].status == checks.WARN
+    assert gated["centrifuge gate"].status == checks.WARN and "species gate" in gated["centrifuge gate"].detail
 
 
 def test_init_without_centrifuge(tmp_path):

@@ -1,0 +1,126 @@
+{
+ "gse": "GSE165438",
+ "notes": "Two natural MG1655 substrains; CY562 (no IS insertion at flhDC) taken as reference/control. CY570 carries an IS5-family insertion upstream of flhD: genotype_class left out (natural substrain variant, no class fits cleanly), perturbed_genes flhD.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "Batch culture at 37°C, OD600≈0.4"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "stated",
+   "q": "Batch culture at 37°C, OD600≈0.4"
+  },
+  "base_medium": {
+   "v": "other_minimal",
+   "b": "stated",
+   "q": "in N-C- minimal medium supplemented with 22 mM glucose and 20 mM NH4Cl"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "in N-C- minimal medium supplemented with 22 mM glucose and 20 mM NH4Cl"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "in N-C- minimal medium supplemented with 22 mM glucose and 20 mM NH4Cl"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "supplemented with 22 mM glucose"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "stated",
+   "q": "aerobically at 37°C water bath, 250rpm"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "aerobically at 37°C water bath"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "no treatment"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Determination of gene expression in E. coli K-12 MG1655 substrains CY562 and CY570."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Determination of gene expression in E. coli K-12 MG1655 substrains CY562 and CY570."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Determination of gene expression in E. coli K-12 MG1655 substrains CY562 and CY570."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was extract by RNAiso plus (Takara) and PureLink RNA Mini Kit (Invitrogen)."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "Determination of gene expression in E. coli K-12 MG1655 substrains CY562 and CY570."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Determination of gene expression in E. coli K-12 MG1655 substrains CY562 and CY570."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "^CY562$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "inferred",
+     "q": "CY562 had no insertion at the promoter region of flhDC"
+    },
+    "strain_name": {
+     "v": "MG1655 CY562",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^CY570$",
+   "set": {
+    "strain_name": {
+     "v": "MG1655 CY570",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "flhD",
+     "b": "stated",
+     "q": "IS-element (IS5 family) insertion at -298 to -1496 of flhD"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

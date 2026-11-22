@@ -1,0 +1,121 @@
+{
+ "gse": "GSE234536",
+ "notes": "MG1655 grown five days in LB at 37 C, 180 rpm, with or without 0.5 mM ZnSO4 (metal_excess, adapted). Growth phase left out: 'grown for five days' could mean serial passaging, harvest density not given. 1 control, 2 zinc samples. WT re-read: WT MG1655, genotype_class wild_type.",
+ "default": {
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "grown for five days in Lysogeny Broth at 37C with shaking at 180rpm"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "grown for five days in Lysogeny Broth at 37C with shaking at 180rpm"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "grown for five days in Lysogeny Broth at 37C with shaking at 180rpm"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "grown for five days in Lysogeny Broth at 37C with shaking at 180rpm"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "with shaking at 180rpm"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown for five days in Lysogeny Broth at 37C"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "WT"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "WT"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq was then performed on 2 zinc pre-exposed samples and 1 non pre-exposed sample at the end of the pre-exposure time period."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq was then performed on 2 zinc pre-exposed samples and 1 non pre-exposed sample at the end of the pre-exposure time period."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq was then performed on 2 zinc pre-exposed samples and 1 non pre-exposed sample at the end of the pre-exposure time period."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "E. coli MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Illumina’s Standard Total RNA Prep ligation with Ribo-Zero Plus kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribo-Zero Plus kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^0\\.5mM Zinc",
+   "set": {
+    "treatment": {
+     "v": "metal_excess",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "stated",
+     "q": "Zinc pre-exposure was maintained for five days"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^0mM Zinc",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

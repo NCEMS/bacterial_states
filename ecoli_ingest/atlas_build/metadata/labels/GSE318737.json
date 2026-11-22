@@ -1,0 +1,185 @@
+{
+ "gse": "GSE318737",
+ "notes": "All samples are norvaline-treated (no untreated samples), so is_control left out. Norvaline (non-proteinogenic amino acid) -> other_chemical. Phase only for 1.5 h samples (pre-treatment log phase kept up to 2 h). rrna_removal not stated.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "were grown in M9 minimal medium with 0.4% glucose at 37 °C until log-phase (OD600 0.5)."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "were grown in M9 minimal medium with 0.4% glucose at 37 °C until log-phase (OD600 0.5)."
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "were grown in M9 minimal medium with 0.4% glucose at 37 °C until log-phase (OD600 0.5)."
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "were grown in M9 minimal medium with 0.4% glucose at 37 °C until log-phase (OD600 0.5)."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Bacteria were treated with 0.5 mM L-norvaline at 37 °C, 180 rpm for 1 1/2 h, 3 h, 6 h and 24 h."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Bacteria were treated with 0.5 mM L-norvaline at 37 °C, 180 rpm for 1 1/2 h, 3 h, 6 h and 24 h."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Bacteria were treated with 0.5 mM L-norvaline at 37 °C, 180 rpm for 1 1/2 h, 3 h, 6 h and 24 h."
+  },
+  "treatment": {
+   "v": "other_chemical",
+   "b": "stated",
+   "q": "Bacteria were treated with 0.5 mM L-norvaline at 37 °C, 180 rpm for 1 1/2 h, 3 h, 6 h and 24 h."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "BW25113"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptomic analyses of AN3365-resistant E. coli mutants challenged with norvaline"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptomic analyses of AN3365-resistant E. coli mutants challenged with norvaline"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Transcriptomic analyses of AN3365-resistant E. coli mutants challenged with norvaline"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Subsequently, total RNA was extracted using the RNeasy mini kit (Qiagen)"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "WT rep",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": " M4 rep",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": "M4 (leuS T247N)"
+    },
+    "perturbed_genes": {
+     "v": "leuS",
+     "b": "stated",
+     "q": "M4 (leuS T247N)"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": " M5 rep",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": "M5 (leuS V326E)"
+    },
+    "perturbed_genes": {
+     "v": "leuS",
+     "b": "stated",
+     "q": "M5 (leuS V326E)"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": " M6 rep",
+   "set": {
+    "genotype_class": {
+     "v": "point_mutation",
+     "b": "stated",
+     "q": "M6 (leuS R416L)"
+    },
+    "perturbed_genes": {
+     "v": "leuS",
+     "b": "stated",
+     "q": "M6 (leuS R416L)"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": ", 1\\.5 h$",
+   "set": {
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": ""
+    },
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "inferred",
+     "q": "were grown in M9 minimal medium with 0.4% glucose at 37 °C until log-phase (OD600 0.5)."
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": ", (3|6|24) h$",
+   "set": {
+    "exposure": {
+     "v": "adapted",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

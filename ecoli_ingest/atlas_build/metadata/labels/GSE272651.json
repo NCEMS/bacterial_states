@@ -1,0 +1,100 @@
+{
+ "gse": "GSE272651",
+ "notes": "Not standard: rifampicin RNA-stability time course (0-7 min after rifampicin), all samples with DNP added at the same time; no untreated control. T0 samples: transcription_arrested left out (taken at the moment of rifampicin addition), treatment DNP only. OD 0.8 in M9 succinate is above the inference range, so no phase. Temperature/shaking not stated. WT re-read: unmodified MG1655, so wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "cells were washed with M9-succinate (85 mM of succinate), and used to inoculate Erlenmeyer flasks with M9-succinate at OD600nm= 0.1. At OD600nm= 0.8, rifampicin (0.5 g/L) was added"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "cells were washed with M9-succinate (85 mM of succinate), and used to inoculate Erlenmeyer flasks with M9-succinate at OD600nm= 0.1. At OD600nm= 0.8, rifampicin (0.5 g/L) was added"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "cells were washed with M9-succinate (85 mM of succinate), and used to inoculate Erlenmeyer flasks with M9-succinate at OD600nm= 0.1. At OD600nm= 0.8, rifampicin (0.5 g/L) was added"
+  },
+  "carbon_source": {
+   "v": "organic_acid",
+   "b": "inferred",
+   "q": "cells were washed with M9-succinate (85 mM of succinate), and used to inoculate Erlenmeyer flasks with M9-succinate at OD600nm= 0.1. At OD600nm= 0.8, rifampicin (0.5 g/L) was added"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "MG1655"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "treatment": {
+   "v": "other_chemical;abx_transcription",
+   "b": "stated",
+   "q": "Cells were treated with either 0.7 or 2 mM 2,4-dinitrophenol (DNP). Rifampicin and DNP were added simultaneously."
+  },
+  "exposure": {
+   "v": "acute",
+   "b": "stated",
+   "q": "Cells were treated with either 0.7 or 2 mM 2,4-dinitrophenol (DNP). Rifampicin and DNP were added simultaneously."
+  },
+  "transcription_arrested": {
+   "v": true,
+   "b": "stated",
+   "q": "cells were washed with M9-succinate (85 mM of succinate), and used to inoculate Erlenmeyer flasks with M9-succinate at OD600nm= 0.1. At OD600nm= 0.8, rifampicin (0.5 g/L) was added"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Cells were treated with either 0.7 or 2 mM 2,4-dinitrophenol (DNP). Rifampicin and DNP were added simultaneously."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Cells were treated with either 0.7 or 2 mM 2,4-dinitrophenol (DNP). Rifampicin and DNP were added simultaneously."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was ribodepeleted using the riboPOOLs kit (Illumina)."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Total RNA was ribodepeleted using the riboPOOLs kit (Illumina)."
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "_T0$",
+   "set": {
+    "treatment": {
+     "v": "other_chemical",
+     "b": "stated",
+     "q": "Cells were treated with either 0.7 or 2 mM 2,4-dinitrophenol (DNP). Rifampicin and DNP were added simultaneously."
+    },
+    "transcription_arrested": {
+     "v": null,
+     "b": "",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

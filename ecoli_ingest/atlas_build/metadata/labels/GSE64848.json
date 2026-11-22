@@ -1,0 +1,181 @@
+{
+ "gse": "GSE64848",
+ "notes": "Crp_delAr1 / delAr2 / delAr1delAr2 are deletions of Crp activating regions (partial-gene changes): genotype_class left out for them (neither a clean deletion nor stated point mutation); perturbed_genes crp. 'O2' in every title read as aerobic. Growth temperature not stated. WT in each carbon source = controls. WT re-read: wt MG1655 is wild_type.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Cells were grown in shake flasks to mid-exponential phase under either aerobic or anaerobic conditions depending on the sample."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "stated",
+   "q": "Cells were grown in shake flasks to mid-exponential phase under either aerobic or anaerobic conditions depending on the sample."
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9 minimal media supplement with either glucose, fructose, or glycerol as the sole carbon source was used depending on the sample."
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "M9 minimal media supplement with either glucose, fructose, or glycerol as the sole carbon source was used depending on the sample."
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "M9 minimal media supplement with either glucose, fructose, or glycerol as the sole carbon source was used depending on the sample."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "M9 minimal media supplement with either glucose, fructose, or glycerol as the sole carbon source was used depending on the sample."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "M9 minimal media supplement with either glucose, fructose, or glycerol as the sole carbon source was used depending on the sample."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "M9 minimal media supplement with either glucose, fructose, or glycerol as the sole carbon source was used depending on the sample."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "M9 minimal media supplement with either glucose, fructose, or glycerol as the sole carbon source was used depending on the sample."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E. coli K12 MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "E. coli K12 MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was depleted of ribosomal RNAs using Epicentre’s RiboZero rRNA removal kit."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Total RNA was depleted of ribosomal RNAs using Epicentre’s RiboZero rRNA removal kit."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "M9 minimal media supplement with either glucose, fructose, or glycerol as the sole carbon source was used depending on the sample."
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "_O2_",
+   "set": {
+    "oxygen": {
+     "v": "aerobic",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "_glucose_",
+   "set": {
+    "carbon_source": {
+     "v": "glucose",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "_fructose_",
+   "set": {
+    "carbon_source": {
+     "v": "other_sugar",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "_glycerol_",
+   "set": {
+    "carbon_source": {
+     "v": "glycerol",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^wt$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^delta Crp$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "crp",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^Crp_delAr",
+   "set": {
+    "perturbed_genes": {
+     "v": "crp",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

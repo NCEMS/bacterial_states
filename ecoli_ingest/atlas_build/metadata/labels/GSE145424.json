@@ -1,0 +1,168 @@
+{
+ "gse": "GSE145424",
+ "notes": "Anaerobic MOPS glucose, OD 0.25 -> mid_exponential inferred; sparged N2/CO2 with glucose and no stated acceptor -> fermentation inferred. Temperature and vessel not stated. fur;ryhB double deletion labeled deletion. WT re-read: wild-type samples of the plain standard strain set to wild_type.",
+ "default": {
+  "strain_group": {
+   "v": "UPEC",
+   "b": "stated",
+   "q": "inuropathogenic E. coli strain CFT073"
+  },
+  "strain_name": {
+   "v": "CFT073",
+   "b": "stated",
+   "q": "Escherichia coli CFT073"
+  },
+  "base_medium": {
+   "v": "MOPS",
+   "b": "stated",
+   "q": "MOPS minimal media (pH 7.4) 0.2% glucose"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "MOPS minimal media (pH 7.4) 0.2% glucose"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "MOPS minimal media (pH 7.4) 0.2% glucose"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "MOPS minimal media (pH 7.4) 0.2% glucose"
+  },
+  "oxygen": {
+   "v": "anaerobic_fermentation",
+   "b": "inferred",
+   "q": "grown anaerobically in MOPS minimal media supplemented with 0.2% glucose sparged with a gas mix of 95% N2 and 5% CO2"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "grown to OD600 of 0.25"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "Four RNA-seq samples each with three biological replicates were analyzed (WT, deltaFur, deltaRhyB, deltaFur_deltaRhyB)"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Four RNA-seq samples each with three biological replicates were analyzed (WT, deltaFur, deltaRhyB, deltaFur_deltaRhyB)"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Four RNA-seq samples each with three biological replicates were analyzed (WT, deltaFur, deltaRhyB, deltaFur_deltaRhyB)"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Four RNA-seq samples each with three biological replicates were analyzed (WT, deltaFur, deltaRhyB, deltaFur_deltaRhyB)"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Strand–specific RNA-sequencing libraries were prepared using NEBNext Ultra RNA Library Prep Kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Depletion of rRNA was performed using Ribozero rRNA removal kit (Bacteria probe)"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Four RNA-seq samples each with three biological replicates were analyzed (WT, deltaFur, deltaRhyB, deltaFur_deltaRhyB)"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "WT RNA",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "delta Fur RNA",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "fur",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "CFT073 delta RyhB",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "ryhB",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "^DFurDRyhB",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "fur;ryhB",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -26,7 +26,7 @@ def _fake_resources(root):
         (root / (paths.RESOURCE_FILES["vg_index"] + suffix)).write_bytes(b"")
     for suffix in paths.CENTRIFUGE_SUFFIXES:
         (root / (paths.RESOURCE_FILES["centrifuge_index_path"] + suffix)).write_bytes(b"")
-    for key in ("annotation_gff", "annotation_source_gff", "annotation_bed"):
+    for key in ("annotation_gff", "annotation_bed"):
         (root / paths.RESOURCE_FILES[key]).write_bytes(b"")
 
 
@@ -113,11 +113,29 @@ def test_dry_run_passes_sra_method_and_rejects_unknown(rundir):
     assert res.returncode != 0 and "sra_method" in res.stderr + res.stdout
 
 
-def test_dry_run_fastp_adapter_detection_is_optional(rundir):
-    res = _dry_run(rundir, quiet=False)                          # default off, as for the atlas training counts
-    assert res.returncode == 0, res.stdout + res.stderr
-    assert "fastp -i" in res.stdout and "--detect_adapter_for_pe" not in res.stdout
-    (rundir / "config.yaml").write_text(CONFIG_PAIRED + "fastp_detect_adapter_for_pe: true\n")
+def test_dry_run_fastp_adapter_detection_is_always_on(rundir):
     res = _dry_run(rundir, quiet=False)
     assert res.returncode == 0, res.stdout + res.stderr
+    assert res.stdout.count("fastp -i") == 3
     assert res.stdout.count("--detect_adapter_for_pe") == 3      # one per sample
+    (rundir / "config.yaml").write_text(CONFIG_PAIRED + "fastp_detect_adapter_for_pe: false\n")
+    res = _dry_run(rundir, quiet=False)                          # the old key no longer switches it off
+    assert res.returncode == 0, res.stdout + res.stderr
+    assert res.stdout.count("--detect_adapter_for_pe") == 3
+    assert "fastp_detect_adapter_for_pe` is ignored" in res.stdout + res.stderr
+
+
+def test_dry_run_rejects_unstranded_mode(rundir):
+    (rundir / "config.yaml").write_text(CONFIG_PAIRED + 'strandedness: "unstranded"\n')
+    res = _dry_run(rundir)
+    assert res.returncode != 0 and "strandedness" in res.stderr + res.stdout
+
+
+def test_alignments_are_temporary_only_on_request(rundir):
+    text = paths.snakefile().read_text()
+    assert 'temp(f"{results_dir}/{{sample}}/vg/{{sample}}.gam")' in text      # always removed once used
+    assert 'alignment(f"{results_dir}/{{sample}}/vg/{{sample}}_sort.bam")' in text
+    for extra in ("", "keep_alignments: false\n"):
+        (rundir / "config.yaml").write_text(CONFIG_PAIRED + extra)
+        res = _dry_run(rundir)
+        assert res.returncode == 0, res.stdout + res.stderr

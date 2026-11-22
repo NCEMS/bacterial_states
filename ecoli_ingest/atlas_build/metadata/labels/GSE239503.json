@@ -1,0 +1,63 @@
+{
+ "gse": "GSE239503",
+ "notes": "Single bulk RNA-seq sample of WT MG1655 in exponential phase (title '3h'); medium and conditions not given. rRNA removal method of the 'Total RNA-seq (H/M/R)' kit not stated.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "exponential growth phase"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "stated",
+   "q": "WT"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "WT"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "we performed gene experssion profiling analysis using data obtained from RNA-seq of exponential growth phase E.coli"
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "we performed gene experssion profiling analysis using data obtained from RNA-seq of exponential growth phase E.coli"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "we performed gene experssion profiling analysis using data obtained from RNA-seq of exponential growth phase E.coli"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "we performed gene experssion profiling analysis using data obtained from RNA-seq of exponential growth phase E.coli"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "we performed gene experssion profiling analysis using data obtained from RNA-seq of exponential growth phase E.coli"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "1μg of total RNA was used for construction of sequencing libraries"
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

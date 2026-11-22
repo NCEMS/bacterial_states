@@ -1,0 +1,32 @@
+{
+  "gse": "GSE299716",
+  "notes": "Strain PHL628: the digest gives no genotype or strain lineage, so genotype_class, global_regulator_perturbed and strain_group are left out. Medium taken from the design (LB +/- 0.5% L-arabinose); the growth protocol sentence mentioning M9, rhamnose and glucose contradicts it and is ignored. Arabinose is a medium supplement (treatment none); is_control follows the submitters' 'control' (0% arabinose) field. 28 C growth is recorded as growth_temperature only, not as a cold treatment. Planktonic cells after 48 h batch -> late_stationary (inferred); culture mode of the planktonic fraction and oxygen not described. | 2026-11-20: planktonic cells set to growth_phase not_applicable instead of late_stationary: they are the free-swimming fraction of a 48 h biofilm culture (culture mode not described), not a batch culture in a growth phase.",
+  "default": {
+    "base_medium": {"v": "LB", "b": "stated", "q": "PHL628 E. coli cells were grown in rich (LB) media supplemented with either L-arabinose at 0.5% (w/w) or no sugar"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "grown in rich (LB) media"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "grown in rich (LB) media"},
+    "strain_name": {"v": "PHL628", "b": "stated", "q": "PHL628"},
+    "treatment": {"v": "none", "b": "study_default", "q": "grown in rich (LB) media supplemented with either L-arabinose at 0.5% (w/w) or no sugar (0%, LB samples)"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "grown in rich (LB) media supplemented with either L-arabinose at 0.5% (w/w) or no sugar (0%, LB samples)"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "grown in rich (LB) media supplemented with either L-arabinose at 0.5% (w/w) or no sugar (0%, LB samples)"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "grown in rich (LB) media supplemented with either L-arabinose at 0.5% (w/w) or no sugar (0%, LB samples)"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "rRNA removal by using Ribo-Zero Plus rRNA Depletion Kit (Illumina)"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "rRNA removal by using Ribo-Zero Plus rRNA Depletion Kit (Illumina)"}
+  },
+  "rules": [
+    {"field": "ch:temperature", "regex": "^28",
+     "set": {"growth_temperature": {"v": 28, "b": "stated", "q": ""}}},
+    {"field": "ch:temperature", "regex": "^37",
+     "set": {"growth_temperature": {"v": 37, "b": "stated", "q": ""}}},
+    {"field": "ch:cell type", "regex": "^biofilm",
+     "set": {"culture_mode": {"v": "biofilm", "b": "stated", "q": ""},
+             "growth_phase": {"v": "not_applicable", "b": "inferred", "q": ""}}},
+    {"field": "ch:cell type", "regex": "^planktonic",
+     "set": {"growth_phase": {"v": "not_applicable", "b": "inferred", "q": "Cells were grown at 28 or 37 C for 48 h and harvested as biofilm cells or planktonic (swimming) cells."}}},
+    {"field": "ch:treatment", "regex": "^control$",
+     "set": {"is_control": {"v": true, "b": "stated", "q": ""}}},
+    {"field": "ch:treatment", "regex": "^arabinose$",
+     "set": {"is_control": {"v": false, "b": "stated", "q": ""}}}
+  ],
+  "samples": {}
+}

@@ -1,0 +1,126 @@
+{
+ "gse": "GSE142755",
+ "notes": "Minimal medium A: carbon source not given. H2A (mammalian histone) -> host_factor, 30 min -> acute.",
+ "default": {
+  "base_medium": {
+   "v": "other_minimal",
+   "b": "study_default",
+   "q": "cultured to mid-exponential phase in minimal medium A"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "minimal medium A"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "minimal medium A"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "study_default",
+   "q": "at 37 degrees C in shaker at 225 rpm"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "in shaker at 225 rpm"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "study_default",
+   "q": "at 37 degrees C in shaker at 225 rpm"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Mid-exponential culture"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "RNAseq analysis of MG1655 in response to calf thymus H2A treatment."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNAseq analysis of MG1655 in response to calf thymus H2A treatment."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "4 experimental groups: untreated, 10 μg/mL H2A, 50 μg/mL H2A, and 100 μg/mL H2A."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "4 experimental groups: untreated, 10 μg/mL H2A, 50 μg/mL H2A, and 100 μg/mL H2A."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "4 experimental groups: untreated, 10 μg/mL H2A, 50 μg/mL H2A, and 100 μg/mL H2A."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Hot phenol DNase, Illumina RiboZero, NEBNext Ultra Directional Library kit."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "study_default",
+   "q": "Hot phenol DNase, Illumina RiboZero, NEBNext Ultra Directional Library kit."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "4 experimental groups: untreated, 10 μg/mL H2A, 50 μg/mL H2A, and 100 μg/mL H2A."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^Untreated$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "Untreated samples serve as controls."
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^H2A",
+   "set": {
+    "treatment": {
+     "v": "host_factor",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": "harvested after 30 minutes"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

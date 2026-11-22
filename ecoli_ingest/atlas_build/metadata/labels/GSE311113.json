@@ -1,0 +1,157 @@
+{
+ "gse": "GSE311113",
+ "notes": "MEM-HEPES without serum -> cell_culture / defined_rich. Complemented strain: genotype field 'hnrS1-2 pZE12::hnrS' vs title 'hnrS triple deletion pZE12::hnrS'; both are deletion + plasmid hnrS, labelled multiple (no label depends on 1-2 vs 1-3). No inducer mentioned for pZE12. WT re-read: Unmodified EHEC Sakai WT -> wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "cell_culture",
+   "b": "stated",
+   "q": "E. coli str. Sakai and isogenic strains grown in MEM-HEPES (Sigma M7278) supplemented with 0.1% glucose and 250 nM Fe(NO3)3 at 37°C with shaking until OD600 0.8"
+  },
+  "medium_class": {
+   "v": "defined_rich",
+   "b": "inferred",
+   "q": "E. coli str. Sakai and isogenic strains grown in MEM-HEPES (Sigma M7278) supplemented with 0.1% glucose and 250 nM Fe(NO3)3 at 37°C with shaking until OD600 0.8"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "E. coli str. Sakai and isogenic strains grown in MEM-HEPES (Sigma M7278) supplemented with 0.1% glucose and 250 nM Fe(NO3)3 at 37°C with shaking until OD600 0.8"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "E. coli str. Sakai and isogenic strains grown in MEM-HEPES (Sigma M7278) supplemented with 0.1% glucose and 250 nM Fe(NO3)3 at 37°C with shaking until OD600 0.8"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "E. coli str. Sakai and isogenic strains grown in MEM-HEPES (Sigma M7278) supplemented with 0.1% glucose and 250 nM Fe(NO3)3 at 37°C with shaking until OD600 0.8"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "E. coli str. Sakai and isogenic strains grown in MEM-HEPES (Sigma M7278) supplemented with 0.1% glucose and 250 nM Fe(NO3)3 at 37°C with shaking until OD600 0.8"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "E. coli str. Sakai and isogenic strains grown in MEM-HEPES (Sigma M7278) supplemented with 0.1% glucose and 250 nM Fe(NO3)3 at 37°C with shaking until OD600 0.8"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "mid-exponential phase (OD0.8) in supplemented MEM-HEPES media"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "No treatment"
+  },
+  "strain_group": {
+   "v": "EHEC_STEC",
+   "b": "stated",
+   "q": "Escherichia coli O157:H7 str. Sakai"
+  },
+  "strain_name": {
+   "v": "Sakai",
+   "b": "stated",
+   "q": "Escherichia coli O157:H7 str. Sakai"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total RNA-seq on wild type EHEC str. Sakai, an isogenic triple deletion of hnrS (EcOnc10, EcOnc11, EcOnc12), and the complemented deletion strain (pZE12::hnrS)"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total RNA-seq on wild type EHEC str. Sakai, an isogenic triple deletion of hnrS (EcOnc10, EcOnc11, EcOnc12), and the complemented deletion strain (pZE12::hnrS)"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total RNA-seq on wild type EHEC str. Sakai, an isogenic triple deletion of hnrS (EcOnc10, EcOnc11, EcOnc12), and the complemented deletion strain (pZE12::hnrS)"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "ribosomal RNA was removed from total RNA"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "ribosomal RNA was removed from total RNA"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total RNA-seq on wild type EHEC str. Sakai, an isogenic triple deletion of hnrS (EcOnc10, EcOnc11, EcOnc12), and the complemented deletion strain (pZE12::hnrS)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^WT$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^hnrS1-3$",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "EHEC hnrS triple deletion"
+    },
+    "perturbed_genes": {
+     "v": "hnrS",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "pZE12::hnrS",
+   "set": {
+    "genotype_class": {
+     "v": "multiple",
+     "b": "stated",
+     "q": "the complemented deletion strain (pZE12::hnrS)"
+    },
+    "perturbed_genes": {
+     "v": "hnrS",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,193 @@
+{
+ "gse": "GSE107093",
+ "notes": "Both host strains carry a genomic GFP cassette (reporter at a neutral site -> reference). Empty plasmids (pSB1C3, pLys, pD864; induced) and plasmid-free strains are controls. H3/M1/Lux constructs = heterologous_expression (summary: burden of heterologous gene expression); LacZ construct labelled native_overexpression of lacZ. Plasmid-free 'None' samples have no inducer in their treatment field -> inducer_added false. Growth phase left out (no OD at sampling). 'defined supplemented M9' composition not given -> medium_class/amino acids/carbon left out.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "E. coli DH10B/MG1655"
+  },
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "defined supplemented M9 medium"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "incubated at 37°C with orbital shaking at 1,000 rpm for 1 h"
+  },
+  "culture_mode": {
+   "v": "batch_microplate",
+   "b": "stated",
+   "q": "200 μl of each sample were then transferred in 8 wells of a 96-well plate (Costar)"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "incubated at 37°C with orbital shaking at 1,000 rpm for 1 h"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Enrichment of mRNA was performed using MicrobExpress rRNA removal kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Enrichment of mRNA was performed using MicrobExpress rRNA removal kit"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "were transformed with 4 synthetic constructs and their empty plasmids"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "were transformed with 4 synthetic constructs and their empty plasmids"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "were transformed with 4 synthetic constructs and their empty plasmids"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "were transformed with 4 synthetic constructs and their empty plasmids"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "were transformed with 4 synthetic constructs and their empty plasmids"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:strain",
+   "regex": "^DH10BGFP$",
+   "set": {
+    "strain_name": {
+     "v": "DH10B",
+     "b": "stated",
+     "q": "DH10BGFP"
+    }
+   }
+  },
+  {
+   "field": "ch:strain",
+   "regex": "^MG1655GFP$",
+   "set": {
+    "strain_name": {
+     "v": "MG1655",
+     "b": "stated",
+     "q": "MG1655GFP"
+    }
+   }
+  },
+  {
+   "field": "ch:synthetic circuit",
+   "regex": "^None$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:synthetic circuit",
+   "regex": "^H3$",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "H3",
+     "b": "stated",
+     "q": "H3"
+    }
+   }
+  },
+  {
+   "field": "ch:synthetic circuit",
+   "regex": "^M1$",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "M1",
+     "b": "stated",
+     "q": "M1"
+    }
+   }
+  },
+  {
+   "field": "ch:synthetic circuit",
+   "regex": "^Lux$",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "lux",
+     "b": "stated",
+     "q": "Lux"
+    }
+   }
+  },
+  {
+   "field": "ch:synthetic circuit",
+   "regex": "^LACZ$",
+   "set": {
+    "genotype_class": {
+     "v": "native_overexpression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "lacZ",
+     "b": "stated",
+     "q": "LACZ"
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "after induction",
+   "set": {
+    "inducer_added": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^\\d+ min$",
+   "set": {
+    "inducer_added": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,102 @@
+{
+ "gse": "GSE300593",
+ "notes": "Control = K-12 with empty plasmid (summary: 'empty plasmid control'). molecule field says 'polyA RNA' but no selection step is described; rrna_removal left out. Medium, phase, temperature, induction not given.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli K-12"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RNA-seq of E.coli K-12 carrying mcr-1 or mcr-3 resistant gene"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq of E.coli K-12 carrying mcr-1 or mcr-3 resistant gene"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq of E.coli K-12 carrying mcr-1 or mcr-3 resistant gene"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Library is constructed by NEBNext Ultra II Directional RNA Library Prep Kit for Illumina."
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "We found that the fitness of mcr-3-bearing E. coli and empty plasmid control was comparable"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^control$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": "We found that the fitness of mcr-3-bearing E. coli and empty plasmid control was comparable"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": "We found that the fitness of mcr-3-bearing E. coli and empty plasmid control was comparable"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "We found that the fitness of mcr-3-bearing E. coli and empty plasmid control was comparable"
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^mcr-1$",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "mcr-1",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^mcr-3$",
+   "set": {
+    "genotype_class": {
+     "v": "heterologous_expression",
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": "mcr-3",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

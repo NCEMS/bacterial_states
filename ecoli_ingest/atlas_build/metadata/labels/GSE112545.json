@@ -1,0 +1,110 @@
+{
+ "gse": "GSE112545",
+ "notes": "Every sample is ciprofloxacin-treated (1 h); the submitters' 'Control' is cipro alone, so no untreated control exists and is_control is left out. ET2DA samples: abx_dna_gyrase;other_chemical. Organism field says MG1655 but strain stated as BW25113. WT re-read: reference -> wild_type, BW25113 used unmodified. Lane split (noted 2026-11-21): the 8 samples are the 4 sequencing lanes of 2 libraries (titles S1_L001 to S2_L004); the counts of the lanes of one library agree to sampling noise. 2 independent samples, not 8; study_flag lane_split.",
+ "default": {
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "E. coli BW25113"
+  },
+  "strain_name": {
+   "v": "BW25113",
+   "b": "stated",
+   "q": "E. coli BW25113"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "Exponential phase E. coli BW25113 was exposed to 1 µg/mL of ciprofloxacin with and without 500 µM of ethyl trans-2-decenoate (ET2DA) for 1 h."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Exponential phase E. coli BW25113 was exposed to 1 µg/mL of ciprofloxacin"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Exponential phase E. coli BW25113 was exposed to 1 µg/mL of ciprofloxacin"
+  },
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Overnight culture of E. coli BW25113 was diluted 100 times with LB medium and incubated at 37°C with shaking (220 rpm) until OD = 0.5."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Overnight culture of E. coli BW25113 was diluted 100 times with LB medium and incubated at 37°C with shaking (220 rpm) until OD = 0.5."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Overnight culture of E. coli BW25113 was diluted 100 times with LB medium and incubated at 37°C with shaking (220 rpm) until OD = 0.5."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Overnight culture of E. coli BW25113 was diluted 100 times with LB medium and incubated at 37°C with shaking (220 rpm) until OD = 0.5."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "Overnight culture of E. coli BW25113 was diluted 100 times with LB medium and incubated at 37°C with shaking (220 rpm) until OD = 0.5."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "Overnight culture of E. coli BW25113 was diluted 100 times with LB medium and incubated at 37°C with shaking (220 rpm) until OD = 0.5."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was isolated and rRNA was depleted."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribo-Zero rRNA removal Kit (Illumina, San Diego, CA) was used to remove ribosomal RNA"
+  },
+  "treatment": {
+   "v": "abx_dna_gyrase",
+   "b": "stated",
+   "q": "1 ug/mL of ciprofloxacin"
+  },
+  "exposure": {
+   "v": "short",
+   "b": "stated",
+   "q": "1 hour"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "exposed to 1 µg/mL of ciprofloxacin with and without 500 µM of ethyl trans-2-decenoate (ET2DA) for 1 h"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "exposed to 1 µg/mL of ciprofloxacin with and without 500 µM of ethyl trans-2-decenoate (ET2DA) for 1 h"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "exposed to 1 µg/mL of ciprofloxacin with and without 500 µM of ethyl trans-2-decenoate (ET2DA) for 1 h"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:fatty acid treatment",
+   "regex": "ET2DA",
+   "set": {
+    "treatment": {
+     "v": "abx_dna_gyrase;other_chemical",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

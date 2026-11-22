@@ -1,0 +1,132 @@
+{
+ "gse": "GSE296794",
+ "notes": "Samples GSM8977011-022 (no 'totalRNA_noIP' in title) are taken to be the Hfq co-IP (RIP-seq) libraries -> IP_or_pulldown (inferred; ch:antibody says 'none' for all, unsure); GSM8977023-034 are total RNA without IP. Libraries use the RIL-seq protocol (Melamed 2018). Hfq-FLAG (tagged) = reference. OD600 1.0 in LB -> no phase. Strain not named. rRNA removal not stated. WT re-read: untagged WT -> wild_type; Hfq-FLAG stays reference.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "cultured in LB (Lennox) at 37 °C with agitation"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "LB (Lennox)"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "LB (Lennox)"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "The strains were cultured in LB (Lennox) at 37 °C with agitation."
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "The strains were cultured in LB (Lennox) at 37 °C with agitation."
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "The strains were cultured in LB (Lennox) at 37 °C with agitation."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RNAseq profiling of Hfq mutants K31A, D9A, R16A and Y25D and corresponding wild-types."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNAseq profiling of Hfq mutants K31A, D9A, R16A and Y25D and corresponding wild-types."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNAseq profiling of Hfq mutants K31A, D9A, R16A and Y25D and corresponding wild-types."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNAseq profiling of Hfq mutants K31A, D9A, R16A and Y25D and corresponding wild-types."
+  },
+  "assay_class": {
+   "v": "IP_or_pulldown",
+   "b": "inferred",
+   "q": "The isolation of total RNA and Hfq co-IP RNA was performed as previously described"
+  },
+  "genotype_class": {
+   "v": "point_mutation",
+   "b": "stated",
+   "q": "point mutations in chromomally-encoded Flag-tagged Hfq"
+  },
+  "global_regulator_perturbed": {
+   "v": true,
+   "b": "stated",
+   "q": "point mutations in chromomally-encoded Flag-tagged Hfq"
+  },
+  "perturbed_genes": {
+   "v": "hfq",
+   "b": "stated",
+   "q": "point mutations in chromomally-encoded Flag-tagged Hfq"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNAseq profiling of Hfq mutants K31A, D9A, R16A and Y25D and corresponding wild-types."
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "totalRNA, noIP",
+   "set": {
+    "assay_class": {
+     "v": "total_rnaseq",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "^(WT_Untagged_Hfq|Hfq-FLAG)$",
+   "set": {
+    "genotype_class": {
+     "v": "reference",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "perturbed_genes": {
+     "v": null,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "^WT_Untagged_Hfq$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

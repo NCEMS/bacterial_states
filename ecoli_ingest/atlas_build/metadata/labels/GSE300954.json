@@ -1,0 +1,133 @@
+{
+ "gse": "GSE300954",
+ "notes": "ABU isolate 83972; strain_group left out (no pathotype word; asymptomatic bacteriuria isolate). lsr-complemented strain (attB::lsr) has no fitting genotype class (gene added back to a strain lacking it), genotype_class left out, perturbed_genes lsr. 'Stationary phase' samples: titles say stationary, design says 'during the transition to the stationary phase' -> growth_phase left out for those. Each WT phase is a control.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Both strains were cultivated in LB"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Both strains were cultivated in LB"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Both strains were cultivated in LB"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "diluted to a final optical density OD600 = 0.02 in 200 mL LB and incubated at 37 degrees Celsius and 180 rpm"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "diluted to a final optical density OD600 = 0.02 in 200 mL LB and incubated at 37 degrees Celsius and 180 rpm"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "diluted to a final optical density OD600 = 0.02 in 200 mL LB and incubated at 37 degrees Celsius and 180 rpm"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "RNA-seq analysis of wild type strain and the lsr-complemented variant 83972 attB::lsr"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNA-seq analysis of wild type strain and the lsr-complemented variant 83972 attB::lsr"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "samples were taken in the lag phase, during mid-exponential growth, and during the transition to the stationary phase"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Total RNA was isolated from three biological replicates of each strain and time point"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Total RNA was isolated from three biological replicates"
+  },
+  "strain_name": {
+   "v": "83972",
+   "b": "stated",
+   "q": "strain 83972"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^Wild type",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "^lsr-complemented",
+   "set": {
+    "perturbed_genes": {
+     "v": "lsr",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "lag phase",
+   "set": {
+    "growth_phase": {
+     "v": "lag",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "logarithmic phase",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

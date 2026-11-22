@@ -1,0 +1,108 @@
+{
+ "gse": "GSE322789",
+ "notes": "No growth protocol (medium, phase, temperature, duration unknown). Sulfasalazine labelled abx_folate (sulfonamide; study frames all as folate pathway disruption). Sulfapyridine+5-ASA: abx_folate;other_chemical. WT re-read: plain EHEC 86-24, genotype_class wild_type.",
+ "default": {
+  "strain_group": {
+   "v": "EHEC_STEC",
+   "b": "stated",
+   "q": "enterohemorrhagic Escherichia coli"
+  },
+  "strain_name": {
+   "v": "86-24",
+   "b": "stated",
+   "q": "86-24"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "86-24"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNAseq profiling of enterohemorrhagic Escherichia coli treated with DMSO (vehicle), sulfapyridine, sulfapyridine+5-aminosalicylique acid or sulfasalazine (5µM)"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNAseq profiling of enterohemorrhagic Escherichia coli treated with DMSO (vehicle), sulfapyridine, sulfapyridine+5-aminosalicylique acid or sulfasalazine (5µM)"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNAseq profiling of enterohemorrhagic Escherichia coli treated with DMSO (vehicle), sulfapyridine, sulfapyridine+5-aminosalicylique acid or sulfasalazine (5µM)"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNAseq profiling of enterohemorrhagic Escherichia coli treated with DMSO (vehicle), sulfapyridine, sulfapyridine+5-aminosalicylique acid or sulfasalazine (5µM)"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Stranded Total RNA Prep Ligation with Ribo-Zero Plus kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribo-Zero Plus kit"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "RNAseq profiling of enterohemorrhagic Escherichia coli treated with DMSO (vehicle), sulfapyridine, sulfapyridine+5-aminosalicylique acid or sulfasalazine (5µM)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^Vehicle$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^Sulfapyridine$",
+   "set": {
+    "treatment": {
+     "v": "abx_folate",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^SulfapyridineAminosalycilate$",
+   "set": {
+    "treatment": {
+     "v": "abx_folate;other_chemical",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "^Sulfasalazine$",
+   "set": {
+    "treatment": {
+     "v": "abx_folate",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

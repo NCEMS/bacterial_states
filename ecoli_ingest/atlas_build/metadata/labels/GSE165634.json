@@ -1,0 +1,143 @@
+{
+ "gse": "GSE165634",
+ "notes": "Reviewed 2026-11-15: in-host samples carry culture_mode in_host and no treatment, as in the other in-host studies. | EAEC 55989 in vitro exponential (OD ~0.5) and stationary (OD ~5) cultures plus colon contents of monocolonized mice. In vitro medium not stated (LB only mentioned for the gavage inoculum), so medium labels left out for in vitro. Colon samples: in_host, treatment host_factor/adapted (3 days in gut) is my reading of in-host growth; mixed_organism true (bacterial/intestinal cells). Both in vitro phases are untreated reference conditions -> controls. WT re-read: reference -> wild_type, isolate 55989 used unmodified.",
+ "default": {
+  "strain_group": {
+   "v": "EAEC",
+   "b": "stated",
+   "q": "enteroaggregative Escherichia coli human isolate"
+  },
+  "strain_name": {
+   "v": "55989",
+   "b": "stated",
+   "q": "Strain 55989"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "enteroaggregative Escherichia coli human isolate"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparison of E.coli 55989 strain mRNA profiles in vitro and in vivo"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "The rRNA-depleted RNA were obtained by using the RiboZerorRNA depletion kit"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "The rRNA-depleted RNA were obtained by using the RiboZerorRNA depletion kit"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparison of E.coli 55989 strain mRNA profiles in vitro and in vivo"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Comparison of E.coli 55989 strain mRNA profiles in vitro and in vivo"
+  }
+ },
+ "rules": [
+  {
+   "field": "source_name",
+   "regex": "in vivo",
+   "set": {
+    "culture_mode": {
+     "v": "in_host",
+     "b": "stated",
+     "q": "bacterial cells grown in vivo (colon samples from monocolonized C3H mice)"
+    },
+    "growth_phase": {
+     "v": "not_applicable",
+     "b": "inferred",
+     "q": "bacterial cells grown in vivo (colon samples from monocolonized C3H mice)"
+    },
+    "base_medium": {
+     "v": "gut_content",
+     "b": "inferred",
+     "q": "colon samples from monocolonized C3H mice"
+    },
+    "medium_class": {
+     "v": "natural_fluid",
+     "b": "inferred",
+     "q": "colon samples from monocolonized C3H mice"
+    },
+    "mixed_organism": {
+     "v": true,
+     "b": "stated",
+     "q": "bacterial cells/intestinal cells"
+    },
+    "is_control": {
+     "v": false,
+     "b": "study_default",
+     "q": "Comparisons included exponential growth vs stationary growth; exponential vs colon and stationary vs colon."
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "culture",
+   "set": {
+    "culture_mode": {
+     "v": "batch_shaken",
+     "b": "inferred",
+     "q": "Strain 55989 was grown overnight at 37C with shaking in 4 different replicates."
+    },
+    "oxygen": {
+     "v": "aerobic",
+     "b": "inferred",
+     "q": "Strain 55989 was grown overnight at 37C with shaking in 4 different replicates."
+    },
+    "growth_temperature": {
+     "v": 37,
+     "b": "stated",
+     "q": "Strain 55989 was grown overnight at 37C with shaking in 4 different replicates."
+    },
+    "mixed_organism": {
+     "v": false,
+     "b": "stated",
+     "q": "bacterial cells grown in"
+    },
+    "treatment": {
+     "v": "none",
+     "b": "study_default",
+     "q": "Comparisons included exponential growth vs stationary growth; exponential vs colon and stationary vs colon."
+    },
+    "is_control": {
+     "v": true,
+     "b": "study_default",
+     "q": "Comparisons included exponential growth vs stationary growth; exponential vs colon and stationary vs colon."
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "exponential",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": "bacterial cells grown in exponential culture"
+    }
+   }
+  },
+  {
+   "field": "source_name",
+   "regex": "stationary",
+   "set": {
+    "growth_phase": {
+     "v": "stationary",
+     "b": "stated",
+     "q": "bacterial cells grown in stationary culture"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

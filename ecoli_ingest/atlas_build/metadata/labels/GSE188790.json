@@ -1,0 +1,28 @@
+{
+  "gse": "GSE188790",
+  "notes": "Unaged vs 10-day aged (evolved) PFM2 populations, regrown 4 h in LB Lenox; 'log phase growth' from summary. Aged populations = evolved_isolate; their mutated genes are only putative (sspA etc.), so perturbed_genes and global_regulator_perturbed left out for them. Temperature and aeration not stated.",
+  "default": {
+    "base_medium": {"v": "LB", "b": "stated", "q": "LB Lenox"},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "LB Lenox"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "LB Lenox"},
+    "growth_phase": {"v": "mid_exponential", "b": "study_default", "q": "we examined transcriptional differences during log phase growth in unaged cells compared to those that had been aged for 10-days and regrown"},
+    "treatment": {"v": "none", "b": "study_default", "q": "we examined transcriptional differences during log phase growth in unaged cells compared to those that had been aged for 10-days and regrown"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "PFM2 (MG1655 derivative)"},
+    "strain_name": {"v": "PFM2", "b": "stated", "q": "PFM2 (MG1655 derivative)"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "transcriptome of E. coli in populations that are unaged (grown overnight) and aged (incubated for 10 days, then frozen and regrown)"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "transcriptome of E. coli in populations that are unaged (grown overnight) and aged (incubated for 10 days, then frozen and regrown)"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "transcriptome of E. coli in populations that are unaged (grown overnight) and aged (incubated for 10 days, then frozen and regrown)"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "Illumina Ribo-zero and RNA library kit"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "Illumina Ribo-zero"}
+  },
+  "rules": [
+    {"field": "title", "regex": "^Unaged",
+     "set": {"genotype_class": {"v": "reference", "b": "stated", "q": "unaged (grown overnight)"},
+             "global_regulator_perturbed": {"v": false, "b": "stated", "q": "unaged (grown overnight)"},
+             "is_control": {"v": true, "b": "stated", "q": "unaged (grown overnight)"}}},
+    {"field": "title", "regex": "^Aged",
+     "set": {"genotype_class": {"v": "evolved_isolate", "b": "stated", "q": "aged (incubated for 10 days, then frozen and regrown)"},
+             "is_control": {"v": false, "b": "stated", "q": "aged (incubated for 10 days, then frozen and regrown)"}}}
+  ],
+  "samples": {}
+}

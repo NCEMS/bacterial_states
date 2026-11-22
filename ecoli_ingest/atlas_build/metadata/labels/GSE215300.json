@@ -1,0 +1,158 @@
+{
+ "gse": "GSE215300",
+ "notes": "Only the Ultra directional (standard total RNA) libraries are candidates; Cappable-Seq samples not shown. The description 'treated culture total RNA non treated with antibiotic' for treated samples reads as copy-paste (the RNA was not treated), not a conflict with title/condition. Rifampicin samples marked transcription_arrested. WT re-read: unmodified K-12 MG1655 -> wild_type.",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "Escherichia coli K-12 was grown on Luria broth at 37°C without antibiotics up to the logarithmic phase."
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Escherichia coli K-12 was grown on Luria broth at 37°C without antibiotics up to the logarithmic phase."
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Escherichia coli K-12 was grown on Luria broth at 37°C without antibiotics up to the logarithmic phase."
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "Escherichia coli K-12 was grown on Luria broth at 37°C without antibiotics up to the logarithmic phase."
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Escherichia coli K-12 was grown on Luria broth at 37°C without antibiotics up to the logarithmic phase."
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "Escherichia coli K-12 was grown on Luria broth at 37°C without antibiotics up to the logarithmic phase."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Escherichia coli K-12 was grown on Luria broth at 37°C without antibiotics up to the logarithmic phase."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Mapping of transcription start sites (TSS) of Escherichia coli K-12 treated with various antibiotics."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Mapping of transcription start sites (TSS) of Escherichia coli K-12 treated with various antibiotics."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Mapping of transcription start sites (TSS) of Escherichia coli K-12 treated with various antibiotics."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "The Ultra directional libraries was prepared using NEBNext® Ultra™ Directional RNA Library Prep Kit"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:condition",
+   "regex": "^control$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:condition",
+   "regex": "novobiocin",
+   "set": {
+    "treatment": {
+     "v": "abx_dna_gyrase",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": "novobiocin (100 mg / L, 20 min.)"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:condition",
+   "regex": "rifampicin",
+   "set": {
+    "treatment": {
+     "v": "abx_transcription",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": "rifampicin (50 mg / L, 30 min.)"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "transcription_arrested": {
+     "v": true,
+     "b": "inferred",
+     "q": "rifampicin (50 mg / L, 30 min.)"
+    }
+   }
+  },
+  {
+   "field": "ch:condition",
+   "regex": "tetracycline",
+   "set": {
+    "treatment": {
+     "v": "abx_translation",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": "tetracycline (20 mg / L, 30 min.)"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

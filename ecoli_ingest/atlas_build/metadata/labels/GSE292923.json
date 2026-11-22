@@ -1,0 +1,38 @@
+{
+  "gse": "GSE292923",
+  "notes": "BW25113 WT and delta-purA, before (0 min) and 90 min after 5x MIC ciprofloxacin in LB, exponential phase (OD 0.3). 90 min samples keep mid_exponential (inferred, under 2 h after treatment). Control = WT 0 min.",
+  "default": {
+    "base_medium": {"v": "LB", "b": "stated", "q": "were diluted 100-fold into fresh LB medium, and were grown to exponential phase (OD600 = 0.3) at 37 °C with shaking."},
+    "medium_class": {"v": "complex", "b": "inferred", "q": "fresh LB medium"},
+    "amino_acids_supplied": {"v": true, "b": "inferred", "q": "fresh LB medium"},
+    "growth_temperature": {"v": 37, "b": "stated", "q": "grown to exponential phase (OD600 = 0.3) at 37 °C with shaking."},
+    "culture_mode": {"v": "batch_shaken", "b": "inferred", "q": "at 37 °C with shaking."},
+    "oxygen": {"v": "aerobic", "b": "inferred", "q": "at 37 °C with shaking."},
+    "growth_phase": {"v": "mid_exponential", "b": "stated", "q": "grown to exponential phase (OD600 = 0.3)"},
+    "strain_group": {"v": "K-12", "b": "stated", "q": "WT (BW25113)"},
+    "strain_name": {"v": "BW25113", "b": "stated", "q": "WT (BW25113)"},
+    "inducer_added": {"v": false, "b": "study_default", "q": "to compare the transcriptional profiles of wild-type and ΔpurA mutant strains before and after ciprofloxacin treatment"},
+    "transcription_arrested": {"v": false, "b": "study_default", "q": "to compare the transcriptional profiles of wild-type and ΔpurA mutant strains before and after ciprofloxacin treatment"},
+    "mixed_organism": {"v": false, "b": "study_default", "q": "to compare the transcriptional profiles of wild-type and ΔpurA mutant strains before and after ciprofloxacin treatment"},
+    "assay_class": {"v": "total_rnaseq", "b": "stated", "q": "rRNAs were removed by the Ribo-zero kit to enrich mRNAs"},
+    "rrna_removal": {"v": "depletion", "b": "stated", "q": "rRNAs were removed by the Ribo-zero kit to enrich mRNAs"},
+    "global_regulator_perturbed": {"v": false, "b": "inferred", "q": "purA deletion"},
+    "is_control": {"v": false, "b": "study_default", "q": "to compare the transcriptional profiles of wild-type and ΔpurA mutant strains before and after ciprofloxacin treatment"}
+  },
+  "rules": [
+    {"field": "ch:genotype", "regex": "^WT",
+     "set": {"genotype_class": {"v": "reference", "b": "stated", "q": ""}}},
+    {"field": "ch:genotype", "regex": "purA deletion",
+     "set": {"genotype_class": {"v": "deletion", "b": "stated", "q": ""},
+             "perturbed_genes": {"v": "purA", "b": "stated", "q": ""}}},
+    {"field": "ch:treatment", "regex": "^No treatment$",
+     "set": {"treatment": {"v": "none", "b": "stated", "q": ""}}},
+    {"field": "ch:treatment", "regex": "ciprofloxacin for 90 min",
+     "set": {"treatment": {"v": "abx_dna_gyrase", "b": "stated", "q": ""},
+             "exposure": {"v": "short", "b": "stated", "q": ""},
+             "growth_phase": {"v": "mid_exponential", "b": "inferred", "q": "These exponentially growing cultures were treated with 0.1 μg/ml (5 MIC) ciprofloxacin."}}},
+    {"field": "title", "regex": "^WT 0 min$",
+     "set": {"is_control": {"v": true, "b": "stated", "q": "The cultures immediately before ciprofloxacin treatment were used as a control (time 0)."}}}
+  ],
+  "samples": {}
+}

@@ -1,0 +1,101 @@
+{
+ "gse": "GSE273456",
+ "notes": "ST131 bacteremia isolate MB1860; pathotype not named in the text, so strain_group left empty. ETP-exposed passaged populations may carry blaCTX-M-15 amplifications (summary), so genotype_class only for passage controls (ch:genotype says WT for all). Ertapenem -> abx_cell_wall, adapted (daily passaging under drug). Text gives 0.06 (1X MIC) and 0.03 ug/mL for the same arm. Passage controls on both platforms are controls. No rRNA removal stated.",
+ "default": {
+  "strain_name": {
+   "v": "MB1860",
+   "b": "stated",
+   "q": "ST131 C2/H30Rx isolate, MB1860"
+  },
+  "base_medium": {
+   "v": "Mueller-Hinton",
+   "b": "stated",
+   "q": "Overnight cultures were standardized to 0.5 MacFarland in MHB and grown up to 0.5 OD600"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "Overnight cultures were standardized to 0.5 MacFarland in MHB and grown up to 0.5 OD600"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "Overnight cultures were standardized to 0.5 MacFarland in MHB and grown up to 0.5 OD600"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "Overnight cultures were standardized to 0.5 MacFarland in MHB and grown up to 0.5 OD600"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "RNA was extracted using the QIAGEN RNeasy Mini Kit using manufacturer’s instructions. Illumina Nextera"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Passage controls w/o ETP exposure were used for comparison."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Passage controls w/o ETP exposure were used for comparison."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "Passage controls w/o ETP exposure were used for comparison."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "Passage controls w/o ETP exposure were used for comparison."
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:treatment",
+   "regex": "^No ETP$",
+   "set": {
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": "Passage controls w/o ETP exposure were used for comparison."
+    },
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": "WT"
+    }
+   }
+  },
+  {
+   "field": "ch:treatment",
+   "regex": "ug/mL ETP",
+   "set": {
+    "treatment": {
+     "v": "abx_cell_wall",
+     "b": "stated",
+     "q": ""
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "1X ETP MIC (0.06 ug/mL) exposed daily populations were treated with 0.03 ug/mL ETP whereas passage controls had no ETP exposure"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": "Passage controls w/o ETP exposure were used for comparison."
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,100 @@
+{
+ "gse": "GSE303520",
+ "notes": "Ancestor dmenF dubiC (titles without 'e') vs evolved lines A-D ('e' prefix; design mentions 'evolution media'). The ancestor is itself a double deletion of MG1655, so it is labelled deletion and is_control is left out for all samples. Minimal medium type not named (other_minimal). Culture mode/aeration not stated.",
+ "default": {
+  "base_medium": {
+   "v": "other_minimal",
+   "b": "study_default",
+   "q": "minimal media supplemented with glucose (4g/L) as the carbon source"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "inferred",
+   "q": "minimal media supplemented with glucose (4g/L) as the carbon source"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "minimal media supplemented with glucose (4g/L) as the carbon source"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "glucose (4g/L) as the carbon source"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "study_default",
+   "q": "The strains were grown at 37C"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Total RNA was extracted from the mid-log phase culture for RNA-seq library preparation."
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "The strains were grown at 37C in two biological replicates for each strain."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "The strains were grown at 37C in two biological replicates for each strain."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "The strains were grown at 37C in two biological replicates for each strain."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Growth of Isochorismate synthase and Chorismate pyruvate-lyase  deficient E. coli MG1655"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "K12"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "study_default",
+   "q": "Total RNA was extracted from the mid-log phase culture for RNA-seq library preparation."
+  },
+  "genotype_class": {
+   "v": "deletion",
+   "b": "stated",
+   "q": "Isochorismate synthase and Chorismate pyruvate-lyase  deficient E. coli MG1655"
+  },
+  "perturbed_genes": {
+   "v": "menF;ubiC",
+   "b": "stated",
+   "q": "ΔmenFΔubiC"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "inferred",
+   "q": "ΔmenFΔubiC"
+  }
+ },
+ "rules": [
+  {
+   "field": "title",
+   "regex": "^eΔ",
+   "set": {
+    "genotype_class": {
+     "v": "evolved_isolate",
+     "b": "inferred",
+     "q": "was performed in their respective evolution media"
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

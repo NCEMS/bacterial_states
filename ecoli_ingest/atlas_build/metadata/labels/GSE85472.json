@@ -1,0 +1,106 @@
+{
+ "gse": "GSE85472",
+ "notes": "Two media, wild type only; each medium's samples counted as controls. 'M9 + amino acids' taken as a defined amino acid mix (defined_rich, inferred). Carbon source, aeration and culture vessel not stated.",
+ "default": {
+  "base_medium": {
+   "v": "M9",
+   "b": "stated",
+   "q": "M9 minimal"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "inferred",
+   "q": "Cells were harvested at OD 0.4."
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "E. coli K-12 MG1655 Transcriptome Quantification"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "E. coli K-12 MG1655 Transcriptome Quantification"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "To parameterize our computational model of E. coli, we measured gene expression in key conditions."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "we measured gene expression in key conditions"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "we measured gene expression in key conditions"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "we measured gene expression in key conditions"
+  },
+  "is_control": {
+   "v": true,
+   "b": "study_default",
+   "q": "we measured gene expression in key conditions"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "MG1655"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "TruSeq Stranded Total RNA Sample Preparation guide"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA was depleted using Epicentre Ribo-Zero rRNA Removal Kits"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:growth medium",
+   "regex": "^M9 minimal$",
+   "set": {
+    "medium_class": {
+     "v": "defined_minimal",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": false,
+     "b": "inferred",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:growth medium",
+   "regex": "amino acids",
+   "set": {
+    "medium_class": {
+     "v": "defined_rich",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

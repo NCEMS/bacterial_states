@@ -1,0 +1,128 @@
+{
+ "gse": "GSE329458",
+ "notes": "MS medium composition not given: medium_class/amino acids left out. Double knockout labelled deletion (both are deletions). WT re-read: Nissle 1917 wild type is unmodified -> wild_type.",
+ "default": {
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "Bacterial cells were harvested at the exponential growth phase when cultures reached OD600 = 0.6."
+  },
+  "base_medium": {
+   "v": "other",
+   "b": "stated",
+   "q": "Cells were cultured in MS medium"
+  },
+  "strain_group": {
+   "v": "probiotic",
+   "b": "stated",
+   "q": "Escherichia coli Nissle 1917"
+  },
+  "strain_name": {
+   "v": "Nissle 1917",
+   "b": "stated",
+   "q": "Escherichia coli Nissle 1917"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "No chemical treatment was applied. The experimental variable was genotype"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "No chemical treatment was applied. The experimental variable was genotype"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "No chemical treatment was applied. The experimental variable was genotype"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "No chemical treatment was applied. The experimental variable was genotype"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Ribosomal RNA was removed from total RNA using a Ribo-Zero Magnetic kit."
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Ribosomal RNA was removed from total RNA using a Ribo-Zero Magnetic kit."
+  },
+  "genotype_class": {
+   "v": "deletion",
+   "b": "stated",
+   "q": "three knockout mutants of global transcriptional regulators"
+  },
+  "global_regulator_perturbed": {
+   "v": true,
+   "b": "stated",
+   "q": "three knockout mutants of global transcriptional regulators"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "to compare Escherichia coli Nissle 1917 wild-type strain with three knockout mutants"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:genotype",
+   "regex": "^wild type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^delta_cra$",
+   "set": {
+    "perturbed_genes": {
+     "v": "cra",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^delta_crp$",
+   "set": {
+    "perturbed_genes": {
+     "v": "crp",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^delta_cra_delta_crp$",
+   "set": {
+    "perturbed_genes": {
+     "v": "cra;crp",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

@@ -1,0 +1,121 @@
+{
+ "gse": "GSE152966",
+ "notes": "Reviewed 2026-11-15: serum exposure labelled host_factor only, as in the sister studies GSE152967/8/9. | Sepsis-pathogen strain B36: RPMI mid-log (control) vs 2 h exposure to pooled sera. Serum exposure labelled host_factor;medium_or_oxygen_shift, exposure short (2 h). No pathotype or isolate source given beyond 'sepsis pathogens': strain_group left out. Culture vessel/aeration not given (only a website).",
+ "default": {
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "37C"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "This submission pertains to strain B36."
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "12 samples, 2 conditions, 6 biological replicates per condition."
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "12 samples, 2 conditions, 6 biological replicates per condition."
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "12 samples, 2 conditions, 6 biological replicates per condition."
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Bacteria in growth media"
+  },
+  "strain_name": {
+   "v": "B36",
+   "b": "stated",
+   "q": "This submission pertains to strain B36."
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "Bacterial rRNA depletion with Illumina Ribo-Zero rRNA Removal Kit (Bacteria)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "Bacterial rRNA depletion with Illumina Ribo-Zero rRNA Removal Kit (Bacteria)"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:growth media",
+   "regex": "^RPMI$",
+   "set": {
+    "base_medium": {
+     "v": "cell_culture",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "defined_rich",
+     "b": "inferred",
+     "q": ""
+    },
+    "amino_acids_supplied": {
+     "v": true,
+     "b": "inferred",
+     "q": ""
+    },
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": "Mid log phase"
+    },
+    "treatment": {
+     "v": "none",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:growth media",
+   "regex": "^Pooled sera$",
+   "set": {
+    "base_medium": {
+     "v": "serum_blood",
+     "b": "stated",
+     "q": ""
+    },
+    "medium_class": {
+     "v": "natural_fluid",
+     "b": "inferred",
+     "q": ""
+    },
+    "treatment": {
+     "v": "host_factor",
+     "b": "stated",
+     "q": "2 hrs exposure to sera"
+    },
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": "2 hrs exposure to sera"
+    },
+    "is_control": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

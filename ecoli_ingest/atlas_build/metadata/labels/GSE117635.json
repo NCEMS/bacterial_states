@@ -1,0 +1,182 @@
+{
+ "gse": "GSE117635",
+ "notes": "Only one WT sample (stationary); exponential phase present only for the rnb rnr double mutant. LB + thymine (supplement, MG1693 is the thymine-requiring strain). rRNA removal not described (libraries made by Vertis).",
+ "default": {
+  "base_medium": {
+   "v": "LB",
+   "b": "stated",
+   "q": "grown to exponential phase (OD600~0.5) or stationary phase (16h growth) at 37ºC, with shaking at 200 rpm in Luria-Bertani (LB) medium supplemented with thymine"
+  },
+  "medium_class": {
+   "v": "complex",
+   "b": "inferred",
+   "q": "grown to exponential phase (OD600~0.5) or stationary phase (16h growth) at 37ºC, with shaking at 200 rpm in Luria-Bertani (LB) medium supplemented with thymine"
+  },
+  "amino_acids_supplied": {
+   "v": true,
+   "b": "inferred",
+   "q": "grown to exponential phase (OD600~0.5) or stationary phase (16h growth) at 37ºC, with shaking at 200 rpm in Luria-Bertani (LB) medium supplemented with thymine"
+  },
+  "oxygen": {
+   "v": "aerobic",
+   "b": "inferred",
+   "q": "grown to exponential phase (OD600~0.5) or stationary phase (16h growth) at 37ºC, with shaking at 200 rpm in Luria-Bertani (LB) medium supplemented with thymine"
+  },
+  "culture_mode": {
+   "v": "batch_shaken",
+   "b": "inferred",
+   "q": "grown to exponential phase (OD600~0.5) or stationary phase (16h growth) at 37ºC, with shaking at 200 rpm in Luria-Bertani (LB) medium supplemented with thymine"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "grown to exponential phase (OD600~0.5) or stationary phase (16h growth) at 37ºC, with shaking at 200 rpm in Luria-Bertani (LB) medium supplemented with thymine"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "inferred",
+   "q": "K12-MG1693"
+  },
+  "strain_name": {
+   "v": "MG1693",
+   "b": "stated",
+   "q": "K12-MG1693"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "study_default",
+   "q": "We analysed the whole transcriptome of exponential and stationary phases from the WT and mutants lacking these exoribonucleases"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "We analysed the whole transcriptome of exponential and stationary phases from the WT and mutants lacking these exoribonucleases"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "We analysed the whole transcriptome of exponential and stationary phases from the WT and mutants lacking these exoribonucleases"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "We analysed the whole transcriptome of exponential and stationary phases from the WT and mutants lacking these exoribonucleases"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "molecule**: total RNA"
+  },
+  "is_control": {
+   "v": false,
+   "b": "study_default",
+   "q": "We analysed the whole transcriptome of exponential and stationary phases from the WT and mutants lacking these exoribonucleases"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:growth phase",
+   "regex": "(?i)^stationary",
+   "set": {
+    "growth_phase": {
+     "v": "stationary",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:growth phase",
+   "regex": "(?i)^exponential",
+   "set": {
+    "growth_phase": {
+     "v": "mid_exponential",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^Wild-type$",
+   "set": {
+    "genotype_class": {
+     "v": "wild_type",
+     "b": "stated",
+     "q": ""
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "mutant",
+   "set": {
+    "genotype_class": {
+     "v": "deletion",
+     "b": "stated",
+     "q": "mutants lacking these exoribonucleases (Δpnp, Δrnr, Δrnb, and ΔrnbΔrnr)"
+    },
+    "global_regulator_perturbed": {
+     "v": false,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^RNase II mutant$",
+   "set": {
+    "perturbed_genes": {
+     "v": "rnb",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^RNase R mutant$",
+   "set": {
+    "perturbed_genes": {
+     "v": "rnr",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "^PNPase mutant$",
+   "set": {
+    "perturbed_genes": {
+     "v": "pnp",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:genotype",
+   "regex": "double mutant",
+   "set": {
+    "perturbed_genes": {
+     "v": "rnb;rnr",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}

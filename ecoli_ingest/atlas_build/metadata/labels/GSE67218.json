@@ -1,0 +1,68 @@
+{
+ "gse": "GSE67218",
+ "notes": "CONFLICT: title/summary say LB, but the growth protocol says the overnight LB culture was diluted 1:100 into fresh minimal medium before growth to OD 0.6; base_medium, medium_class, amino_acids_supplied left out. Single condition, no control. Oxygen not stated for the main culture (agitation only mentioned for the overnight).",
+ "default": {
+  "strain_name": {
+   "v": "MG1655",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "Escherichia coli str. K-12 substr. MG1655"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "cultured at 37 ℃ to mid-exponential phase"
+  },
+  "growth_phase": {
+   "v": "mid_exponential",
+   "b": "stated",
+   "q": "mid-exponential phase (OD600 nm ~ 0.6)"
+  },
+  "genotype_class": {
+   "v": "wild_type",
+   "b": "inferred",
+   "q": "Glycerol stocks of E. coli K12 strain MG1655"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "Glycerol stocks of E. coli K12 strain MG1655"
+  },
+  "treatment": {
+   "v": "none",
+   "b": "stated",
+   "q": "No treatment"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "No treatment"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "No treatment"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "Directional RNA-seq (dUTP method by TruSeq®) were generated  in duplicates"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "rRNA was removed using ribo-zeroTM magnetic kit for bacteria"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "rRNA was removed using ribo-zeroTM magnetic kit for bacteria"
+  }
+ },
+ "rules": [],
+ "samples": {}
+}

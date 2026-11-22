@@ -1,0 +1,153 @@
+{
+ "gse": "GSE90743",
+ "notes": "Reviewed 2026-11-15: ammonia-limited reference steady state is nutrient_limited_growth | Ammonia-limited chemostat; steady-state STR reference samples (before PFR addition) are controls with treatment none. All STR-PFR samples labelled nitrogen_starvation (repeated ammonia depletion in the PFR); exposure from process time after PFR addition (<=30 min acute, <=2 h short, longer adapted). STR vs PFR port not encoded in labels. Aeration not stated.",
+ "default": {
+  "culture_mode": {
+   "v": "chemostat",
+   "b": "stated",
+   "q": "The STR-PFR was operated as a chemostat with ammonia as the growth-limiting substrate."
+  },
+  "growth_phase": {
+   "v": "not_applicable",
+   "b": "inferred",
+   "q": "The STR-PFR was operated as a chemostat with ammonia as the growth-limiting substrate."
+  },
+  "base_medium": {
+   "v": "other_minimal",
+   "b": "stated",
+   "q": "minimal medium containing (per liter) 19.0 g glucose, 1.0 g NaH2PO4.· 2 H2O, 2.6 g K2HPO4, 3.8 g (NH4)2SO4"
+  },
+  "medium_class": {
+   "v": "defined_minimal",
+   "b": "stated",
+   "q": "minimal medium containing (per liter) 19.0 g glucose"
+  },
+  "amino_acids_supplied": {
+   "v": false,
+   "b": "inferred",
+   "q": "minimal medium containing (per liter) 19.0 g glucose, 1.0 g NaH2PO4.· 2 H2O, 2.6 g K2HPO4, 3.8 g (NH4)2SO4"
+  },
+  "carbon_source": {
+   "v": "glucose",
+   "b": "stated",
+   "q": "minimal medium containing (per liter) 19.0 g glucose"
+  },
+  "growth_temperature": {
+   "v": 37,
+   "b": "stated",
+   "q": "in defined medium at pH7 and 37°C"
+  },
+  "strain_group": {
+   "v": "K-12",
+   "b": "stated",
+   "q": "E. coli K12 substrain W3110"
+  },
+  "strain_name": {
+   "v": "W3110",
+   "b": "stated",
+   "q": "E. coli K12 substrain W3110"
+  },
+  "genotype_class": {
+   "v": "reference",
+   "b": "study_default",
+   "q": "mRNA time profiles of E. coli K12 W3110 ammonia-limited chemostat STR-PFR culture"
+  },
+  "global_regulator_perturbed": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA time profiles of E. coli K12 W3110 ammonia-limited chemostat STR-PFR culture"
+  },
+  "inducer_added": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA time profiles of E. coli K12 W3110 ammonia-limited chemostat STR-PFR culture"
+  },
+  "transcription_arrested": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA time profiles of E. coli K12 W3110 ammonia-limited chemostat STR-PFR culture"
+  },
+  "mixed_organism": {
+   "v": false,
+   "b": "study_default",
+   "q": "mRNA time profiles of E. coli K12 W3110 ammonia-limited chemostat STR-PFR culture"
+  },
+  "assay_class": {
+   "v": "total_rnaseq",
+   "b": "stated",
+   "q": "ribosomal RNA was depleted from 1 μg of total RNA using the Ribo-ZeroTM Magnetic Kit (Bacteria)"
+  },
+  "rrna_removal": {
+   "v": "depletion",
+   "b": "stated",
+   "q": "ribosomal RNA was depleted from 1 μg of total RNA using the Ribo-ZeroTM Magnetic Kit (Bacteria)"
+  },
+  "treatment": {
+   "v": "nitrogen_starvation",
+   "b": "stated",
+   "q": "Here, we focused on fluctuating ammonia supply"
+  },
+  "is_control": {
+   "v": false,
+   "b": "stated",
+   "q": "59 samples derived from STR or different PFR sample ports over process time including three samples derived from the reference steady state before PFR addition"
+  }
+ },
+ "rules": [
+  {
+   "field": "ch:time",
+   "regex": "^(5|10|25)min$",
+   "set": {
+    "exposure": {
+     "v": "acute",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:time",
+   "regex": "^(45|75|120)min$",
+   "set": {
+    "exposure": {
+     "v": "short",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "ch:time",
+   "regex": "^(210min|330min|25h|26h|28h)$",
+   "set": {
+    "exposure": {
+     "v": "adapted",
+     "b": "stated",
+     "q": ""
+    }
+   }
+  },
+  {
+   "field": "title",
+   "regex": "reference",
+   "set": {
+    "treatment": {
+     "v": "nutrient_limited_growth",
+     "b": "inferred",
+     "q": "three samples derived from the reference steady state before PFR addition"
+    },
+    "exposure": {
+     "v": "adapted",
+     "b": "inferred",
+     "q": "three samples derived from the reference steady state before PFR addition"
+    },
+    "is_control": {
+     "v": true,
+     "b": "stated",
+     "q": ""
+    }
+   }
+  }
+ ],
+ "samples": {}
+}
