@@ -10,9 +10,9 @@
 #
 #   sbatch ecoli_atlas/scripts/slurm_train.sh                       # one model, seed 77
 #   SEEDS=1,2,3,4,5,6,7,8 CV=1 sbatch ecoli_atlas/scripts/slurm_train.sh    # seed sweep ranked on out-of-fold scores
-#   FIT=one-pass OUT=outputs/models_v2_one_pass SPLITS=outputs/models_v2/splits.csv sbatch ecoli_atlas/scripts/slurm_train.sh
+#   FIT=one-pass OUT=outputs/models_one_pass SPLITS=outputs/models/splits.csv sbatch ecoli_atlas/scripts/slurm_train.sh
 #                                                         # another way of fitting, on the same split
-#   MASK=0 OUT=outputs/models_v2_unmasked ... sbatch ...  # without the missing-gene calls (zeros of absent genes are fitted)
+#   MASK=0 OUT=outputs/models_unmasked ... sbatch ...  # without the missing-gene calls (zeros of absent genes are fitted)
 #
 # Run from the repository root. Name an x86 GPU type in --gpus (v100s, v100, a100, l40s): the conda
 # environment does not run on ARM GPU nodes. The pip build of torch in the `ecoli_atlas` environment
@@ -21,7 +21,7 @@ set -euo pipefail
 
 DATA=${ECOLI_ATLAS_DATA:-atlas_data}
 FEATURES=${FEATURES:-resources/annotation/GCF_000005845.2_ASM584v2_counting_v2.features.tsv}
-OUT=${OUT:-outputs/models_v2}
+OUT=${OUT:-outputs/models}
 REPO=${REPO:-$PWD}
 
 set +u; conda activate ecoli_atlas; set -u

@@ -108,24 +108,24 @@ T="--counts atlas_data/atlas_v2_counts.tsv --metadata atlas_data/metadata_v2.tsv
    --features resources/annotation/GCF_000005845.2_ASM584v2_counting_v2.features.tsv"
 
 # the study split only (splits.csv), then the figures of the data
-ecoli_atlas train $T --out outputs/models_v2 --split-only
-ecoli_atlas figures --metadata atlas_data/metadata_v2.tsv --splits outputs/models_v2 --out outputs/figures_v2
+ecoli_atlas train $T --out outputs/models --split-only
+ecoli_atlas figures --metadata atlas_data/metadata_v2.tsv --splits outputs/models --out outputs/figures
 
 # train on that split and evaluate on the held-out studies
-ecoli_atlas train $T --out outputs/models_v2 --splits outputs/models_v2/splits.csv [--device cuda]
-ecoli_atlas train $T --out outputs/models_v2 --splits outputs/models_v2/splits.csv --seeds 1,2,3,4 --cv
+ecoli_atlas train $T --out outputs/models --splits outputs/models/splits.csv [--device cuda]
+ecoli_atlas train $T --out outputs/models --splits outputs/models/splits.csv --seeds 1,2,3,4 --cv
 
 # evaluate a bundle again; embed new samples
-ecoli_atlas evaluate $T --models outputs/models_v2 --out outputs/models_v2_eval
-ecoli_atlas embed --ingest-results my_run --models outputs/models_v2 --out embedded     # an inGEST run directory
+ecoli_atlas evaluate $T --models outputs/models --out outputs/models_eval
+ecoli_atlas embed --ingest-results my_run --models outputs/models --out embedded     # an inGEST run directory
 ecoli_atlas prepare --ingest-results my_run --out prepared [--metadata my_samples.tsv]   # the same tables, to look at or join
 ecoli_atlas embed --counts prepared/counts.tsv --qc prepared/qc.tsv --antisense prepared/antisense_counts.tsv \
-    --models outputs/models_v2 --out embedded
+    --models outputs/models --out embedded
 
 # new samples against the atlas; studies of the atlas against the rest of it
-ecoli_atlas compare --embeddings embedded --models outputs/models_v2 --out compared \
+ecoli_atlas compare --embeddings embedded --models outputs/models --out compared \
     [--atlas-metadata atlas_data/metadata_v2.tsv] [--metadata prepared/samples.tsv --group-by time_h --order-by time_h] [--umap]
-ecoli_atlas neighbors GSE224463 --models outputs/models_v2 --out neighbors [--metadata atlas_data/metadata_v2.tsv] [--umap]
+ecoli_atlas neighbors GSE224463 --models outputs/models --out neighbors [--metadata atlas_data/metadata_v2.tsv] [--umap]
 ```
 
 ### Ways of fitting (`train --fit`)
@@ -141,7 +141,7 @@ one `splits.csv` can be compared directly. The manifest records `fit` and `embed
 
 ```bash
 for FIT in two-stage one-pass unstructured; do
-  ecoli_atlas train $T --fit $FIT --out outputs/models_v2_${FIT//-/_} --splits outputs/models_v2/splits.csv \
+  ecoli_atlas train $T --fit $FIT --out outputs/models_${FIT//-/_} --splits outputs/models/splits.csv \
       --seeds 1,2,3,4,5,6,7,8 --cv --device cuda
 done
 ```
@@ -168,7 +168,7 @@ done
   alike. The seeds are still ranked on the mean out-of-fold AUROC.
 
 ```bash
-ecoli_atlas train $T --phase-head ordinal --out outputs/models_v2_ordinal --splits outputs/models_v2/splits.csv --seeds 1,2,3,4 --cv
+ecoli_atlas train $T --phase-head ordinal --out outputs/models_ordinal --splits outputs/models/splits.csv --seeds 1,2,3,4 --cv
 ```
 
 ### Phase-order term (`train --phase-order-weight`)
@@ -197,8 +197,8 @@ series within a study and then over studies. `seed_sweep.tsv` gets `test_series_
 (withheld), GSE67402 and GSE226643 (TEST).
 
 ```bash
-ecoli_atlas train $T --time-series atlas_data/time_courses.tsv --phase-order-weight 0.3 --out outputs/models_v2_order_w0.3 \
-    --splits outputs/models_v2/splits.csv --seeds 1,2,3,4,5,6,7,8 --cv
+ecoli_atlas train $T --time-series atlas_data/time_courses.tsv --phase-order-weight 0.3 --out outputs/models_order_w0.3 \
+    --splits outputs/models/splits.csv --seeds 1,2,3,4,5,6,7,8 --cv
 ```
 
 ### Split
@@ -448,7 +448,7 @@ With `--models` and the three tables, also the figures of the earlier model's pa
 model (`--only` selects by the names below):
 
 ```bash
-ecoli_atlas figures $T --models outputs/models_v2 --out outputs/figures_v2 [--only NAMES] [--strict]
+ecoli_atlas figures $T --models outputs/models --out outputs/figures [--only NAMES] [--strict]
 ```
 
 | Name | Files | What it shows |
@@ -471,7 +471,7 @@ with the manifest's `cv_metrics` but are not expected to be identical on another
 ### `casestudy`
 
 ```bash
-ecoli_atlas casestudy {uti,oxygen,glu-cas,all} $T --models outputs/models_v2 --out outputs/figures_v2
+ecoli_atlas casestudy {uti,oxygen,glu-cas,all} $T --models outputs/models --out outputs/figures
 ```
 
 The case studies of the earlier model, on this model's embedding. Each writes its figures, its
@@ -497,11 +497,11 @@ Takes a bundle's embedding and one or more ordered axes (a metadata column and i
 order) and gives every sample a position on each axis.
 
 ```bash
-ecoli_atlas axes --models outputs/models_v2 --metadata atlas_data/metadata_v2.tsv \
+ecoli_atlas axes --models outputs/models --metadata atlas_data/metadata_v2.tsv \
     --axis phase:growth_phase:lag,early_exponential,mid_exponential,transition,stationary,late_stationary,long_term_stationary \
     --where treated=false --where standard_rnaseq=true --holdout lag --holdout late_stationary --holdout long_term_stationary \
     --axis medium:medium_class:complex,defined_rich,minimal_plus_hydrolysate,defined_minimal \
-    --series time_courses.tsv --out outputs/axes_v2
+    --series time_courses.tsv --out outputs/axes
 ```
 
 - **Ordinal score:** a proportional-odds model, one linear score of the embedding with a threshold
@@ -541,8 +541,8 @@ and the groups of co-transcribed genes, whose change moves the head's score from
 the high class.
 
 ```bash
-ecoli_atlas drivers $T --models outputs/models_v2_phase_ordinal --out outputs/drivers_v2_ordinal   # all seeds of the sweep
-ecoli_atlas drivers $T --models outputs/models_v2 --head medium --out outputs/drivers_v2_medium
+ecoli_atlas drivers $T --models outputs/models_ordinal --out outputs/drivers_ordinal   # all seeds of the sweep
+ecoli_atlas drivers $T --models outputs/models --head medium --out outputs/drivers_medium
 ```
 
 - **Method:** integrated gradients of the head's score (`phase_logit` for the phase head) along the
@@ -595,5 +595,5 @@ not run on ARM GPU nodes.
 ```bash
 sbatch ecoli_atlas/scripts/slurm_train.sh
 SEEDS=1,2,3,4,5,6,7,8 CV=1 sbatch ecoli_atlas/scripts/slurm_train.sh
-FIT=one-pass OUT=outputs/models_v2_one_pass SPLITS=outputs/models_v2/splits.csv sbatch ecoli_atlas/scripts/slurm_train.sh
+FIT=one-pass OUT=outputs/models_one_pass SPLITS=outputs/models/splits.csv sbatch ecoli_atlas/scripts/slurm_train.sh
 ```

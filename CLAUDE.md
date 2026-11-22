@@ -31,11 +31,9 @@ Never `git add` any of these (all in `.gitignore`): `resources/`, `old_resources
 | `resources/{vg,annotation,centrifuge,container}` | inGEST reference bundle (13 GB) | downloaded; `resources/container/rnaseq_vg.sif` is the image |
 | `atlas_data/` | `atlas_v2_counts.tsv`, `atlas_v2_antisense_counts.tsv`, `atlas_v2_samples.tsv` (from `collect_results.py`), `metadata_v2.tsv`, `sample_qc.tsv` | training inputs of the model on this branch. `merged_count_table.txt`, `metadata_revised.csv` and the NCBI feature table there are the v1 inputs (used by `main`) |
 | `work/atlas_full/results/<batch>/` | the atlas recount: 102 batches plus re-runs (`PE_R01`) | source of the three `atlas_v2_*` tables and of the `full_*` columns |
-| `outputs/models_v2/`, `outputs/figures_v2/` | bundle and composition figures of the model on this branch | written by `ecoli_atlas train` / `figures` |
-| `outputs/models/`, `outputs/atlas/` | the v1 Colab-trained bundle (+ `manifest.json`, `splits.csv`) and the atlas built from it; not readable by this branch's code | **the originals: never overwrite or commit.** They are published as `ecoli_atlas_models_v1.tar.gz` in the `resources-v1` release. Refits go to `outputs/models_repro*/` via `ecoli_atlas train --seeds ...` (on `main`); accept a refit when the original's TEST metrics lie within the sweep's spread (`verify-models` → `old_within_new_seed_spread`) |
-| `outputs/models_repro/`, `outputs/atlas_repro/` | first GPU refit (seed 77) and its atlas | kept for comparison |
-| `outputs/predictions/final_embedding.csv` | baseline atlas embeddings (3342 samples) | source of the future `outputs/atlas/` bundle |
-| `outputs/figures/`, `outputs/factor_gene_correlations.txt` | Colab reference figures / GSEA gene list | **never overwrite.** Mixed sessions: the stored notebook outputs for cells 25/31/33 and `fig_study_leakage.pdf` come from a later retrained run, not from `outputs/models`. Regenerated figures go to `outputs/figures_repro/` (`ecoli_atlas figures ... --out outputs/figures_repro`) |
+| `outputs/models/`, `outputs/figures/`, `outputs/axes_examples/` | bundle, figures and example axes of the model on this branch (unversioned paths: the package does not label directories with v1 / v2; only downloaded release packages carry a version) | written by `ecoli_atlas train` / `figures` / `scripts/axes_examples.sh`. Sweeps go to their own `outputs/models_<name>/` |
+| `outputs/v1_originals/` | the v1 originals, moved there on 2026-11-22 (user decision) to free their paths: `models/`, `atlas/` (Colab-trained bundle and its atlas; published as `ecoli_atlas_models_v1.tar.gz` in the `resources-v1` release), `figures/` (Colab reference figures, mixed sessions), `predictions/` (`final_embedding.csv`, 3342 samples), `factor_gene_correlations.txt` (GSEA list) | **never overwrite or commit**; not readable by this branch's code. `main` still expects them at `outputs/models` etc. |
+| `outputs/models_repro*/`, `outputs/atlas_repro/`, `outputs/figures_repro/` | v1 refits and reproductions made on `main` | kept for comparison |
 | `work/neighbors_*/` | `ecoli_atlas neighbors` runs (oxygen studies, withheld GSE224463) | scratch |
 | `examples/<GSE>_<name>/` | worked examples; only `config.yaml`, `samples.csv`, `README.md` are tracked, everything a run writes there (`sra/`, `results/`, `atlas/`, logs) is ignored | run directories with `results_dir: "results"` |
 | `work/experiment3/` | the tutorial run (4 samples) used for verification | a run directory; results in `experiment3_results/` |
@@ -66,9 +64,9 @@ pytest ecoli_atlas/tests                # in ecoli_atlas;  pytest ecoli_ingest/t
 cd work/experiment3 && ecoli_ingest check && ecoli_ingest run -n        # tutorial run dir
 T="--counts atlas_data/atlas_v2_counts.tsv --metadata atlas_data/metadata_v2.tsv --qc atlas_data/sample_qc.tsv \
    --features resources/annotation/GCF_000005845.2_ASM584v2_counting_v2.features.tsv"
-ecoli_atlas train $T --out outputs/models_v2 --split-only                      # splits.csv only
-ecoli_atlas figures --metadata atlas_data/metadata_v2.tsv --splits outputs/models_v2 --out outputs/figures_v2
-ecoli_atlas train $T --out outputs/models_v2 --splits outputs/models_v2/splits.csv --device cpu --threads 8
+ecoli_atlas train $T --out outputs/models --split-only                      # splits.csv only
+ecoli_atlas figures --metadata atlas_data/metadata_v2.tsv --splits outputs/models --out outputs/figures
+ecoli_atlas train $T --out outputs/models --splits outputs/models/splits.csv --device cpu --threads 8
 ```
 
 Temporary files go in the session scratchpad or under `work/`, never in the package directories.
@@ -82,7 +80,7 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   (`build/Singularity.def` installs it). `workflow/envs/rnaseq_vg.yaml` is the legacy image env.
 - **Branch `ingest-update` is a main revision of inGEST counting** (see `docs/counting.md`); it
   stays off `main` until adopted, and there is no backward compatibility with the old counting.
-  Its counts do not match the published atlas model: make counts for `outputs/models` on `main`.
+  Its counts do not match the published v1 atlas model: make counts for that model (`outputs/v1_originals/models`) on `main`.
 - Counting annotation: `resources/annotation/GCF_000005845.2_ASM584v2_counting_v2.{gff,bed,
   features.tsv,rfam_merge_report.tsv}`, built by `ecoli_ingest/build/build_annotation.py` from the
   unmodified NCBI GFF and the Rfam hit table (both kept in `work/ingest_update/ncbi/`). Never
@@ -206,7 +204,7 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   `figure_metrics.json` checks the embedding and the TEST metrics against the bundle; `--strict`).
   `ecoli_atlas casestudy` has `uti`, `oxygen` (GSE189154 only: GSE78756 and GSE80451 failed the
   prescreen) and `glu-cas` (GSE271069, now in the training pool, so no longer an outside test).
-  Both write into `outputs/figures_v2/`; never into `outputs/figures` or `outputs/figures_repro`
+  Both write into `outputs/figures/`; never into `outputs/v1_originals/` or `outputs/figures_repro`
   (v1), and never into a bundle (out-of-fold scores made for `threshold_curves` stay beside the
   figures). Run the two test suites in their own envs:
   `pytest ecoli_atlas/tests` (ecoli_atlas), `pytest ecoli_ingest/tests` (ecoli_ingest).
