@@ -343,10 +343,14 @@ it. `embed` repeats the cleaning and needs each sample's GC fit, which the QC re
 decoder's GC term at fixed scale and the genomic-DNA term on top; it is not the default (it kept GC in z across
 samples). The manifest reports the encoder side under `encoder_inputs`.
 
-`train --dna-penalty W` (off by default; under test) adds W x the R2 of each sample's genomic-DNA estimate from the
+`train --dna-penalty W` (default 1 since 2026-11-22; 0 = off) adds W x the R2 of each sample's genomic-DNA estimate from the
 residual block, both centred within biological replicate groups (metadata_v2 `replicate_group`), to the loss: every
 step also encodes up to 256 replicate groups of the training rows. Replicates share their biology, so DNA that the
-residual holds between them is technical; the input cleaning does not reach it (`work/qc_module/NOTES.md`).
+residual holds between them is technical; the input cleaning does not reach it (`work/qc_module/NOTES.md`). On the atlas it took the DNA estimate out of
+z within replicates (R2 0.38 -> -0.03), kept the decoded within-study treatment contrasts (r 0.80) and raised kNN
+agreement (phase / medium / lab strain 0.74 / 0.86 / 0.73 -> 0.78 / 0.89 / 0.86); study clustering within
+conditions shared by several studies fell (0.67 -> 0.60). Without replicate groups in the metadata the term is left
+out; the manifest reports it under `dna_penalty`.
 
 The GC offset is the library's fitted curve averaged over each feature's 300 bp windows, the window the inGEST fit
 uses (log of the mean of exp(b1 x + b2 x^2) over the windows); within replicate groups it explains more of a

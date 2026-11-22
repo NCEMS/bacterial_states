@@ -25,6 +25,13 @@ from .data import label_weights, CovariateScaler, TrainingData
 from .features import FeatureSet
 from .models import build_model
 from .technical import GC_BINS
+
+
+def dna_penalty_report(data, cfg) -> dict:
+    """The DNA penalty of a fit: its weight and the number of replicate groups it used (0: left out)."""
+    from .train import replicate_sampler
+    reps = replicate_sampler(data, data.tr_rows) if cfg.dna_penalty_w > 0 else None
+    return {"weight": float(cfg.dna_penalty_w), "replicate_groups": 0 if reps is None else len(reps), "applied": reps is not None}
 from .preprocess import ZScore
 
 SCHEMA_VERSION = 2
@@ -69,6 +76,8 @@ class ModelBundle:
                 setattr(cfg, key, False)
         if "encoder_covariates" not in self.manifest["config"]:    # bundles made before: the encoder saw the covariates
             cfg.encoder_covariates = True
+        if "dna_penalty_w" not in self.manifest["config"]:         # ... and were trained without the DNA penalty
+            cfg.dna_penalty_w = 0.0
         if "covariates" not in self.manifest["config"]:    # a bundle made before the choice: the covariates it was trained with
             cfg.covariates = tuple(self.manifest["covariates"]["names"])
         return cfg
@@ -140,6 +149,7 @@ def save_bundle(path: str | Path, model, data: TrainingData, cfg: TrainConfig, d
         "gc_term": {"on": hasattr(model, "gc_term"),
                     "scale": float(model.gc_term.scale.detach()) if hasattr(model, "gc_term") else None,
                     "profile": ("window300" if model.gc_term.n_bins else "gene") if hasattr(model, "gc_term") else None},
+        "dna_penalty": dna_penalty_report(data, cfg),
         "encoder_inputs": {"gc_cleaned": bool(cfg.clean_inputs), "gc_cleaned_samples": int(data.extra.get("gc_cleaned", 0)),
                            "gc_profile": data.extra["feature_gc"].kind if cfg.clean_inputs else None,
                            "covariates": bool(cfg.encoder_covariates)},

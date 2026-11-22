@@ -227,8 +227,8 @@ def run_epochs(model, params: list, data: TrainingData, cfg: TrainConfig, device
         weighting = {h: head_weighting(data, h, rows, cfg, device) for h in HEADS}
         y = {h: torch.tensor(v, dtype=torch.long) for h, v in data.y_fit.items()}
     reps = replicate_sampler(data, rows) if cfg.dna_penalty_w > 0 else None
-    if cfg.dna_penalty_w > 0 and reps is None:
-        raise ValueError("dna_penalty_w: fewer than 10 biological replicate groups with a DNA estimate among the training rows")
+    if cfg.dna_penalty_w > 0 and reps is None and log:
+        log("  DNA penalty left out: fewer than 10 biological replicate groups with a DNA estimate among the training rows")
     history = []
     model.train()
     for ep in range(epochs):

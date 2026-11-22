@@ -950,10 +950,14 @@ def test_dna_penalty(atlas_files, tmp_path):
     args = ["train", "--counts", str(atlas_files["counts"]), "--metadata", str(mp), "--qc", str(qp), "--features", str(atlas_files["features"]),
             "--out", str(out), "--epochs", "3", "--device", "cpu", "--test-frac", "0.2", "--dna-penalty", "1.0"]
     assert main(args) == 0
-    assert json.loads((out / "manifest.json").read_text())["config"]["dna_penalty_w"] == 1.0
+    mf = json.loads((out / "manifest.json").read_text())
+    assert mf["config"]["dna_penalty_w"] == 1.0 and mf["dna_penalty"]["applied"] and mf["dna_penalty"]["replicate_groups"] >= 10
     hist = pd.read_csv(out / "history.tsv", sep="\t")
     assert "dna_r2" in hist.columns and hist["dna_r2"].notna().any()
-    # without replicate groups the penalty is refused
-    with pytest.raises(ValueError, match="replicate groups"):
-        main(["train", "--counts", str(atlas_files["counts"]), "--metadata", str(atlas_files["metadata"]), "--qc", str(qp),
-              "--features", str(atlas_files["features"]), "--out", str(tmp_path / "x"), "--epochs", "1", "--device", "cpu", "--dna-penalty", "1.0"])
+    # the penalty is the default; without replicate groups it is left out, and the manifest says so
+    assert TrainConfig().dna_penalty_w == 1.0
+    assert main(["train", "--counts", str(atlas_files["counts"]), "--metadata", str(atlas_files["metadata"]), "--qc", str(qp),
+                 "--features", str(atlas_files["features"]), "--out", str(tmp_path / "x"), "--epochs", "1", "--device", "cpu"]) == 0
+    mx = json.loads((tmp_path / "x" / "manifest.json").read_text())
+    assert mx["dna_penalty"] == {"weight": 1.0, "replicate_groups": 0, "applied": False}
+    assert "dna_r2" not in pd.read_csv(tmp_path / "x" / "history.tsv", sep="\t").columns

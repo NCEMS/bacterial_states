@@ -284,7 +284,11 @@ measured covariates remove ~0.01-0.02 of it). Order:
    subtraction +63% median; expected-DNA or smooth background +21% on genes under 50 reads).
    Removing the 6 DNA directions from z after training takes the leak to 0 and keeps kNN, but the decoded within-study
    treatment contrasts fall from r 0.80 to 0.67 (`bio_checks_k6.txt`): the directions are entangled with biology for
-   the decoder. Trial: `train --dna-penalty W` (within-replicate R2 of DNA from the residual, in the loss).
+   the decoder. `train --dna-penalty W` (within-replicate R2 of DNA from the residual, in the loss) is the DEFAULT, W = 1
+   (2026-11-22, user decision; outputs/models_v2_dnapen_w1): z -> DNA within replicates 0.38 -> -0.03, decoded treatment
+   contrasts r 0.80 kept, kNN phase / medium / lab strain 0.78 / 0.89 / 0.86, matched same-study 0.67 -> 0.60, TEST NLL
+   6.220 (6.206 without). Open: GC between studies within matched conditions came back to R2 0.15 (0.03 without the
+   penalty, 0.30 baseline); within replicates it stays at 0.01.
    Study adversary and twins for batch removal are dropped; read-1-only recounts of paired-end libraries could give
    real layout / fragment-size twins for C4.
 5. A nonlinear covariate branch on c alone (kept out of f(z)), only if the replicate measures show it is needed.
