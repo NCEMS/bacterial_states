@@ -139,6 +139,7 @@ def cmd_train(args) -> int:
         raise SystemExit("--gc-scale applies to the GC term: give --gc-offset too")
     cfg.clean_inputs, cfg.encoder_covariates, cfg.qc_module = args.clean_inputs, args.encoder_covariates, args.qc_module
     cfg.apply_qc_module()
+    cfg.dna_penalty_w = args.dna_penalty
     cfg.phase_order_weight = args.phase_order_weight
     if args.block_dims:
         try:
@@ -696,6 +697,9 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--encoder-covariates", action=argparse.BooleanOptionalAction, default=False,
                     help="give the technical covariates to the residual encoder too (--no-encoder-covariates, expression only, "
                     "is the default)")
+    sp.add_argument("--dna-penalty", type=float, default=0.0,
+                    help="weight of the genomic-DNA penalty on the residual block (0 = off): the R2 of the DNA estimate from "
+                    "the residual within biological replicate groups (metadata_v2 replicate_group), added to the loss")
     sp.add_argument("--qc-module", action="store_true",
                     help="all technical terms in one module: --gc-offset --gc-scale fixed --dna-decoder --clean-inputs "
                     "--no-encoder-covariates")

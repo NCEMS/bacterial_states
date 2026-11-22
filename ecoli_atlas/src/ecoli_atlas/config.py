@@ -167,6 +167,12 @@ class TrainConfig:
     # leaves a per-sample constant, SD 0.04, correlated 0.62 with gc_slope, that only z could fit). False in bundles
     # made before 2026-11-22
     gc_size_factors: bool = True
+    # genomic-DNA penalty on the residual block (0 = off; `work/qc_module/`): each step also encodes the samples of
+    # dna_penalty_groups biological replicate groups (metadata_v2 `replicate_group`) of the training rows and adds
+    # dna_penalty_w x the in-sample R2 of the regression of their DNA estimate on the residual block, both centred within
+    # the groups. Replicates share their biology, so what the residual holds of DNA between them is technical.
+    dna_penalty_w: float = 0.0
+    dna_penalty_groups: int = 256
     qc_module: bool = False
     # training
     block_epochs: int = 40       # of each block encoder

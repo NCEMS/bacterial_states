@@ -76,3 +76,19 @@ def masked_mean(x: torch.Tensor, keep: torch.Tensor, dim=None) -> torch.Tensor:
     if dim is None:
         return (x * k).sum() / k.sum().clamp_min(1.0)
     return (x * k).sum(dim=dim) / k.sum(dim=dim).clamp_min(1.0)
+
+
+def within_group_r2(z: torch.Tensor, y: torch.Tensor, group: torch.Tensor, ridge: float = 1e-3) -> torch.Tensor:
+    """In-sample R2 of the least-squares regression of y on z, both centred within groups (``group``: codes 0..G-1):
+    y'Z (Z'Z + lambda I)^-1 Z'y / y'y with lambda = ridge x mean diagonal of Z'Z. 0 when y does not vary."""
+    G = int(group.max()) + 1
+    n = torch.zeros(G, device=z.device).index_add_(0, group, torch.ones_like(y))
+    zc = z - (torch.zeros(G, z.shape[1], device=z.device, dtype=z.dtype).index_add_(0, group, z) / n[:, None])[group]
+    yc = y - (torch.zeros(G, device=z.device, dtype=y.dtype).index_add_(0, group, y) / n)[group]
+    yy = (yc * yc).sum()
+    if float(yy) <= 0:
+        return z.new_zeros(())
+    A = zc.T @ zc
+    A = A + ridge * A.diagonal().mean().clamp_min(1e-8) * torch.eye(A.shape[0], device=z.device, dtype=z.dtype)
+    b = zc.T @ yc
+    return (b @ torch.linalg.solve(A, b)) / yy

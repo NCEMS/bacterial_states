@@ -422,6 +422,15 @@ def gc_cleaned_counts(Y: np.ndarray, feature_gc, cov: pd.DataFrame, fs: FeatureS
     return Y * np.exp(-off), int((np.isfinite(slope) & np.isfinite(curv)).sum())
 
 
+def replicate_codes(meta: pd.DataFrame) -> np.ndarray:
+    """Code of each sample's biological replicate group (metadata_v2 `replicate_group`), -1 for none or no column."""
+    if "replicate_group" not in meta.columns:
+        return np.full(len(meta), -1, dtype=np.int64)
+    g = meta["replicate_group"].fillna("").astype(str).to_numpy()
+    codes = pd.factorize(np.where(g == "", None, g))[0]
+    return codes.astype(np.int64)
+
+
 def build_training(tables: AtlasTables, fs: FeatureSet, cfg: TrainConfig, splits: pd.DataFrame,
                    fit_rows: np.ndarray | None = None) -> TrainingData:
     """Everything the model needs. ``fit_rows`` (default: the training pool) are the samples the
@@ -492,7 +501,10 @@ def build_training(tables: AtlasTables, fs: FeatureSet, cfg: TrainConfig, splits
                         dna_rho=torch.tensor(rho, dtype=torch.float32) if cfg.dna_decoder else None,
                         dna_len=torch.tensor(dlen, dtype=torch.float32) if cfg.dna_decoder else None,
                         series=series, series_x=series_x, order_pairs=pairs,
-                        extra={"feature_gc": feature_gc, "gc_cleaned": gc_cleaned, "covariates_raw": cov, "antisense_veto": bool(cfg.mask_missing and anti is not None),
+                        extra={"feature_gc": feature_gc, "gc_cleaned": gc_cleaned, "covariates_raw": cov,
+                               "replicate_group": replicate_codes(tables.meta),
+                               "dna_estimate": pd.to_numeric(_qc_value(tables.qc.reindex(ids), "dna_fraction_est") if tables.qc is not None
+                                                             else pd.Series(np.nan, index=ids), errors="coerce").to_numpy(dtype=np.float64), "antisense_veto": bool(cfg.mask_missing and anti is not None),
                                "dna_samples": int((rho > 0).sum())})
 
 

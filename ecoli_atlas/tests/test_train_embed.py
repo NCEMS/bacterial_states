@@ -929,3 +929,31 @@ def test_within_series_order_counts_studies_equally():
     assert o["n_studies"] == 2 and o["n_series"] == 3
     assert o["per_study"]["A"]["share_in_order"] == 0.5 and o["per_study"]["B"]["share_in_order"] == 1.0
     assert o["share_in_order"] == 0.75 and o["spearman"] == pytest.approx(0.5)
+
+
+def test_dna_penalty(atlas_files, tmp_path):
+    from ecoli_atlas.losses import within_group_r2
+    # the in-sample R2 within groups: 1 for y in the span of z, ~0 when y is constant within groups
+    g = torch.tensor(np.repeat(np.arange(20), 3))
+    z = torch.randn(60, 4, generator=torch.Generator().manual_seed(0))
+    assert abs(float(within_group_r2(z, z @ torch.tensor([1.0, -2.0, 0.5, 0.0]), g)) - 1) < 1e-3
+    assert float(within_group_r2(z, torch.repeat_interleave(torch.arange(20.0), 3), g)) == 0.0
+    # training with the penalty: replicate groups in the metadata, DNA estimates in the QC table
+    meta = pd.read_csv(atlas_files["metadata"], sep="\t", dtype=str, keep_default_na=False)
+    meta["replicate_group"] = meta["GSE"] + ":" + (np.arange(len(meta)) // 2 % 5).astype(str)
+    qc = pd.read_csv(atlas_files["qc"], sep="\t", dtype=str, keep_default_na=False)
+    qc["full_dna_fraction_est"] = [f"{x:.4f}" for x in np.random.default_rng(3).uniform(0, 0.05, len(qc))]
+    mp, qp = tmp_path / "metadata.tsv", tmp_path / "qc.tsv"
+    meta.to_csv(mp, sep="\t", index=False)
+    qc.to_csv(qp, sep="\t", index=False)
+    out = tmp_path / "pen"
+    args = ["train", "--counts", str(atlas_files["counts"]), "--metadata", str(mp), "--qc", str(qp), "--features", str(atlas_files["features"]),
+            "--out", str(out), "--epochs", "3", "--device", "cpu", "--test-frac", "0.2", "--dna-penalty", "1.0"]
+    assert main(args) == 0
+    assert json.loads((out / "manifest.json").read_text())["config"]["dna_penalty_w"] == 1.0
+    hist = pd.read_csv(out / "history.tsv", sep="\t")
+    assert "dna_r2" in hist.columns and hist["dna_r2"].notna().any()
+    # without replicate groups the penalty is refused
+    with pytest.raises(ValueError, match="replicate groups"):
+        main(["train", "--counts", str(atlas_files["counts"]), "--metadata", str(atlas_files["metadata"]), "--qc", str(qp),
+              "--features", str(atlas_files["features"]), "--out", str(tmp_path / "x"), "--epochs", "1", "--device", "cpu", "--dna-penalty", "1.0"])

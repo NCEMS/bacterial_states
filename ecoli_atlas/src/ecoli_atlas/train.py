@@ -30,7 +30,7 @@ import torch.nn.functional as F
 from .config import HEADS, TrainConfig
 from .data import AtlasTables, TrainingData, label_weights, prepared, study_fold
 from .features import FeatureSet
-from .losses import class_weights, cos_dist, cross_study_control_pull, kl_normal, masked_mean, nb_nll, within_study_push
+from .losses import class_weights, cos_dist, cross_study_control_pull, kl_normal, masked_mean, nb_nll, within_group_r2, within_study_push
 from .metrics import classification_metrics, within_series_order, within_study_order
 from .models import AtlasModel, OrdinalHead, build_model, count_log_mean
 from .utils import set_seed
@@ -82,6 +82,20 @@ def model_input(data: TrainingData, rt: torch.Tensor, pool: np.ndarray, cfg: Tra
     idx = torch.as_tensor(np.flatnonzero(take))
     x[idx] = x[idx].masked_fill(data.M[donors], 0.0)
     return x
+
+
+def replicate_sampler(data: TrainingData, rows: np.ndarray, max_size: int = 6) -> dict | None:
+    """Replicate groups among ``rows`` with 2+ members that have a DNA estimate: {group code: rows} (at most
+    ``max_size`` rows per group); None when there are fewer than 10 such groups."""
+    code = data.extra.get("replicate_group")
+    dna = data.extra.get("dna_estimate")
+    if code is None or dna is None:
+        return None
+    rows = np.asarray(rows)
+    rows = rows[(code[rows] >= 0) & np.isfinite(dna[rows])]
+    groups = pd.Series(rows).groupby(code[rows]).apply(lambda s: s.to_numpy())
+    groups = {int(k): v for k, v in groups.items() if len(v) >= 2}
+    return groups if len(groups) >= 10 else None
 
 
 def head_weighting(data: TrainingData, head: str, rows: np.ndarray, cfg: TrainConfig, device) -> tuple:
@@ -212,6 +226,9 @@ def run_epochs(model, params: list, data: TrainingData, cfg: TrainConfig, device
     if heads:
         weighting = {h: head_weighting(data, h, rows, cfg, device) for h in HEADS}
         y = {h: torch.tensor(v, dtype=torch.long) for h, v in data.y_fit.items()}
+    reps = replicate_sampler(data, rows) if cfg.dna_penalty_w > 0 else None
+    if cfg.dna_penalty_w > 0 and reps is None:
+        raise ValueError("dna_penalty_w: fewer than 10 biological replicate groups with a DNA estimate among the training rows")
     history = []
     model.train()
     for ep in range(epochs):
@@ -238,6 +255,15 @@ def run_epochs(model, params: list, data: TrainingData, cfg: TrainConfig, device
             terms["push"] = within_study_push(d, g, ident["cond_id"][rt].to(device), ident["is_annot"][rt].to(device), hp.push_margin)
             terms["pull"] = cross_study_control_pull(d, g, ident["ctrl_cond"][rt].to(device), ident["is_ctrl"][rt].to(device))
             loss = loss + hp.push_w * terms["push"] + hp.ctrl_w * terms["pull"]
+            if reps is not None:
+                keys = rng.choice(list(reps), min(cfg.dna_penalty_groups, len(reps)), replace=False)
+                parts = [reps[k] if len(reps[k]) <= 6 else rng.choice(reps[k], 6, replace=False) for k in keys]
+                pr = torch.as_tensor(np.concatenate(parts))
+                pg = torch.as_tensor(np.repeat(np.arange(len(parts)), [len(p) for p in parts]), device=device)
+                zr, _ = model.encode(model_input(data, pr, rows, cfg, rng).to(device), data.C[pr].to(device))
+                dna_y = torch.as_tensor(data.extra["dna_estimate"][pr.numpy()], dtype=zr.dtype, device=device)
+                terms["dna_r2"] = within_group_r2(zr, dna_y, pg)
+                loss = loss + cfg.dna_penalty_w * terms["dna_r2"]
             opt.zero_grad()
             loss.backward()
             torch.nn.utils.clip_grad_norm_(params, GRAD_CLIP)

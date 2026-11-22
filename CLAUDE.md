@@ -282,6 +282,9 @@ measured covariates remove ~0.01-0.02 of it). Order:
    compresses the dynamic range (slope over genes follows expression, rho 0.75, not length), so the mechanistic DNA
    term explains none of it. Taking it off the encoder inputs removes 40-70% but adds replicate noise (antisense
    subtraction +63% median; expected-DNA or smooth background +21% on genes under 50 reads).
+   Removing the 6 DNA directions from z after training takes the leak to 0 and keeps kNN, but the decoded within-study
+   treatment contrasts fall from r 0.80 to 0.67 (`bio_checks_k6.txt`): the directions are entangled with biology for
+   the decoder. Trial: `train --dna-penalty W` (within-replicate R2 of DNA from the residual, in the loss).
    Study adversary and twins for batch removal are dropped; read-1-only recounts of paired-end libraries could give
    real layout / fragment-size twins for C4.
 5. A nonlinear covariate branch on c alone (kept out of f(z)), only if the replicate measures show it is needed.
