@@ -22,7 +22,7 @@ so every table also reports the samples the embedding has never fitted (TEST and
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy as np
 import pandas as pd
@@ -40,20 +40,38 @@ class AxisSpec:
     column: str
     categories: list          # in order
     holdout: tuple = ()       # categories left out of the fits
+    members: dict = field(default_factory=dict)   # category -> the column values it groups (default: the category itself)
 
     @classmethod
     def parse(cls, text: str, holdout=()) -> "AxisSpec":
-        """``name:column:cat1,cat2,...``"""
+        """``name:column:cat1,cat2,...``; a category may group several values of the column as
+        ``label=value1+value2`` (e.g. ``carbon:carbon_source:sugar=glucose+other_sugar,non_sugar=glycerol+organic_acid``)."""
         parts = text.split(":")
         if len(parts) != 3 or not parts[2]:
             raise ValueError(f"axis must be name:column:cat1,cat2,... , not {text!r}")
-        cats = [c.strip() for c in parts[2].split(",") if c.strip()]
-        spec = cls(parts[0].strip(), parts[1].strip(), cats, tuple(h for h in holdout if h in cats))
+        cats, members = [], {}
+        for token in (c.strip() for c in parts[2].split(",") if c.strip()):
+            label, eq, values = token.partition("=")
+            label = label.strip()
+            cats.append(label)
+            if eq:
+                vals = tuple(v.strip() for v in values.split("+") if v.strip())
+                if not vals:
+                    raise ValueError(f"axis {parts[0]}: category {label!r} groups no values")
+                members[label] = vals
+        spec = cls(parts[0].strip(), parts[1].strip(), cats, tuple(h for h in holdout if h in cats), members)
+        values = [v for c in cats for v in spec.values_of(c)]
+        if len(set(values)) != len(values):
+            raise ValueError(f"axis {spec.name}: a column value is in two categories")
         if len(cats) < 2 or len(set(cats)) != len(cats):
             raise ValueError(f"axis {spec.name}: at least two different categories are needed")
         if len(spec.fitted) < 2:
             raise ValueError(f"axis {spec.name}: fewer than two categories are left to fit")
         return spec
+
+    def values_of(self, category: str) -> tuple:
+        """The column values a category stands for."""
+        return self.members.get(category, (category,))
 
     @property
     def fitted(self) -> list:
@@ -330,6 +348,7 @@ def category_frame(meta: pd.DataFrame, splits: pd.DataFrame, spec: AxisSpec, whe
             raise ValueError(f"--where: the metadata has no column {col!r}")
         keep &= meta[col].astype(str).str.strip().isin(values)
     value = meta[spec.column].astype(str).str.strip()
-    cat = value.where(value.isin(spec.categories) & keep, "")
+    label = {v: c for c in spec.categories for v in spec.values_of(c)}
+    cat = value.map(label).fillna("").where(keep, "")
     return pd.DataFrame({"gse": splits["gse"].astype(str).to_numpy(), "split": splits["split"].to_numpy(), "category": cat.to_numpy()},
                         index=meta.index)

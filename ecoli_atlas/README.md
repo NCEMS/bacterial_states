@@ -513,10 +513,19 @@ ecoli_atlas axes --models outputs/models_v2 --metadata atlas_data/metadata_v2.ts
 - `--holdout CATEGORY` leaves a category out of both fits and only scores it: the test of
   extrapolation (late stationary beyond stationary) or interpolation. An end category needs samples
   of at least two studies, otherwise it is refused.
+- A category can group several values of the column: `label=value1+value2`, e.g.
+  `--axis carbon:carbon_source:sugar=glucose+other_sugar,non_sugar=glycerol+organic_acid`. The score table then
+  keeps each sample's own value (`value`) and the summary has the median of every value (`value_medians`), so the
+  values inside a category can be compared along the axis.
 - `--where COLUMN=VALUE` restricts which samples get a category; `--blocks` restricts the embedding
   to named blocks (`phase`, `medium`, `lab_strain`, `residual`).
 - `--series` is a table `sample, series, x[, x_label]` of ordered series (time courses), drawn as
   trajectories of the ordinal score.
+
+The example axes of the paper (growth phase, oxygen, sugar against non-sugar carbon sources and glycerol, the last two in
+defined minimal media) are one script, rerun after every refit:
+`MODELS=<bundle directory> bash ecoli_atlas/scripts/axes_examples.sh` (output: `OUT`, default `outputs/axes_examples`;
+from the repository root, in the `ecoli_atlas` environment; one folder per axis).
 
 Output per axis: `axis_<name>_scores.tsv` (category, role, both scores per sample),
 `axis_<name>_summary.json` (rank correlation; share of within-study sample pairs in the order of

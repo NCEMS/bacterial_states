@@ -609,9 +609,16 @@ def cmd_axes(args) -> int:
             return 1
         scores = res["scores"]
         scores.index.name = "sample"
+        if spec.members:                          # grouped categories: keep the column value of each sample
+            scores.insert(scores.columns.get_loc("category") + 1, "value",
+                          meta[spec.column].astype(str).str.strip().reindex(scores.index).where(scores["category"] != "", ""))
         scores.to_csv(out / f"axis_{spec.name}_scores.tsv", sep="\t", float_format="%.5g")
         summary = summarize(scores, spec) | {"column": spec.column, "blocks": args.blocks, "where": where, "thresholds": res["thresholds"],
                                              "weights": res["weights"], "embedding_columns": list(emb.columns)}
+        if spec.members:
+            summary["members"] = {c: list(spec.values_of(c)) for c in spec.categories}
+            summary["value_medians"] = {m: {v: float(scores.loc[scores["value"] == v, m].median()) for c in spec.categories
+                                            for v in spec.values_of(c) if (scores["value"] == v).any()} for m in ("ordinal", "anchor")}
         _write_json(summary, out / f"axis_{spec.name}_summary.json")
         fig_axis_distributions(scores, spec, res["thresholds"], out, formats)
         if series is not None:
@@ -808,7 +815,8 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--models", required=True, help="bundle directory (embedding.tsv, manifest.json, splits.csv)")
     sp.add_argument("--metadata", required=True)
     sp.add_argument("--axis", action="append", required=True, metavar="NAME:COLUMN:CAT1,CAT2,...",
-                    help="an axis: a metadata column and its values in order; may be given several times")
+                    help="an axis: a metadata column and its values in order; may be given several times. A category may "
+                    "group values as label=value1+value2")
     sp.add_argument("--holdout", action="append", metavar="CATEGORY",
                     help="a category left out of the fits and only scored (extrapolation or interpolation test); repeatable")
     sp.add_argument("--where", action="append", metavar="COLUMN=VALUE[,VALUE]",

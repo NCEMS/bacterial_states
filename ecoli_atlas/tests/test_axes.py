@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from ecoli_atlas.axes import AxisSpec, axis_scores, block_columns, pair_order, study_folds, summarize
+from ecoli_atlas.axes import AxisSpec, axis_scores, block_columns, category_frame, pair_order, study_folds, summarize
 from ecoli_atlas.cli import main
 
 CATS = ["a", "b", "c", "d", "e"]
@@ -36,6 +36,17 @@ def test_axis_spec_parsing():
             AxisSpec.parse(bad)
     with pytest.raises(ValueError, match="fewer than two"):
         AxisSpec.parse("p:c:x,y", holdout=["y"])
+    # grouped categories: label=value1+value2; a value in two categories is refused
+    g = AxisSpec.parse("carbon:carbon_source:sugar=glucose+other_sugar,non_sugar=glycerol+organic_acid,acetate")
+    assert g.categories == ["sugar", "non_sugar", "acetate"] and g.values_of("non_sugar") == ("glycerol", "organic_acid")
+    assert g.values_of("acetate") == ("acetate",)
+    with pytest.raises(ValueError, match="two categories"):
+        AxisSpec.parse("c:col:a=x+y,b=y+z")
+    meta = pd.DataFrame({"carbon_source": ["glucose", "glycerol", "other_sugar", "mixed", "organic_acid"],
+                         "medium_class": ["defined_minimal"] * 4 + ["complex"]}, index=list("abcde"))
+    splits = pd.DataFrame({"gse": ["G1", "G2", "G3", "G4", "G5"], "split": 1}, index=list("abcde"))
+    frame = category_frame(meta, splits, g, {"medium_class": ["defined_minimal"]})
+    assert frame["category"].tolist() == ["sugar", "non_sugar", "sugar", "", ""]
     assert block_columns({"embedding_blocks": [{"block": "phase", "start": 0, "end": 2}, {"block": "residual", "start": 2, "end": 5}]}, "residual", 5) == [2, 3, 4]
     with pytest.raises(ValueError, match="no embedding block"):
         block_columns({"embedding_blocks": []}, "phase", 5)
