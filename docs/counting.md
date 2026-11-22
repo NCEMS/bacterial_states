@@ -1,6 +1,6 @@
 # How inGEST counts reads
 
-This describes the counting on the `ingest-update` branch. It replaces the counting used for the
+This describes the counting of inGEST 2 (`resources-v2`). It replaces the counting used for the
 `resources-v1` atlas and is **not compatible with it** (see the last section).
 
 ## Features

@@ -40,12 +40,16 @@ Never `git add` any of these (all in `.gitignore`): `resources/`, `old_resources
 | `notebooks/` | the two original Colab notebooks | read-only reference; never edit or commit |
 | `raw_data/` | original Drive dump incl. unused files and the Contreras paper data | `Contreras Paper/Paper1_all_samples_counts.tsv` is the inference test case |
 
-Download URLs live in `ecoli_ingest/src/ecoli_ingest/resources.py` (and, on `main`,
-`ecoli_atlas/src/ecoli_atlas/download.py`; this branch has no atlas bundle to download yet). The
-inGEST core bundle and both v1 ATLAS bundles are assets of the GitHub release `resources-v1` (`.../releases/download/resources-v1/<name>`; built in
-`work/release_v1/`; data releases are tagged `resources-vN`, code releases `X.X.X`),
-the Centrifuge index comes from the Centrifuge authors' bucket
-(`genome-idx.s3.amazonaws.com/centrifuge/`), and the container image is still a placeholder (`TBD`).
+Download URLs live in exactly two files: `ecoli_ingest/src/ecoli_ingest/resources.py` and
+`ecoli_atlas/src/ecoli_atlas/download.py`. The inGEST core bundle and both ATLAS bundles are assets of the GitHub
+release `resources-v2` (`.../releases/download/resources-v2/<name>`; data releases are tagged `resources-vN`, code
+releases `X.X.X`). They are built by `release/make_release.py --root . --out work/release_v2` (reproducible bytes;
+the per-file checksums of the core bundle are in `resources.manifest.tsv`, the archive checksums are pinned in
+`download.py`): core = vg index, counting annotation, genome FASTA; training-data = the `atlas_v2_*` tables,
+`metadata_v2*` with its GEO text and evidence, `sample_qc.tsv`, `time_courses.tsv`, `atlas_v2_missing_genes.tsv`
+(= `outputs/models/missing_genes.tsv`); models = `outputs/models/` with every seed. `resources-v1` (built in
+`work/release_v1/`) holds the v1 model and the old annotation. The Centrifuge index comes from the Centrifuge
+authors' bucket (`genome-idx.s3.amazonaws.com/centrifuge/`), and the container image is still a placeholder (`TBD`).
 Bundle file names are `ecoli_ingest_*` / `ecoli_atlas_*` (other microbes may follow).
 
 ## Git
@@ -123,8 +127,8 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   coverage-based estimate (median over bins of the lower strand's depth), calibrated with
   DNA-spiked twins (`atlas_build/twins/make_twins.py`, `work/dna_calibration/`); the antisense fit
   is kept as `dna_fraction_fit` only. `gc_bias` in the record (`gc_bias.py`: GC slope and curvature of the coverage
-  inside genes) needs the reference FASTA `annotation/GCF_000005845.2_ASM584v2_genomic.fna`, optional until the
-  core bundle `resources-v2` ships it (`check` warns; the record then has no `gc_bias`). The atlas model design is on branch `update-atlas`
+  inside genes) needs the reference FASTA `annotation/GCF_000005845.2_ASM584v2_genomic.fna`, in the core bundle since `resources-v2`
+  (`check` warns when it is absent; the record then has no `gc_bias`). The atlas model design is on branch `update-atlas`
   (`work/worktrees/update-atlas`); model code does not go on `ingest-update`.
 - Sample metadata v2 (`docs/metadata_v2.md`): `atlas_build/metadata/` holds the label scheme, one
   curated `labels/<GSE>.json` per study and the scripts; `apply_labels.py` writes

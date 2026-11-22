@@ -144,8 +144,8 @@ atlas should be reported with and without it; `qc_table.py summary` prints both.
 2. `mamba env create -f ecoli_ingest/environment.yaml` (includes sra-tools and pigz), then
    `conda activate ecoli_ingest`.
 3. Copy `resources/vg`, `resources/centrifuge` and the four
-   `resources/annotation/GCF_000005845.2_ASM584v2_counting_v2.*` files. The v2 annotation is not
-   in the `resources-v1` release; alternatively rebuild it with `build/build_annotation.py` from
+   `resources/annotation/GCF_000005845.2_ASM584v2_counting_v2.*` files. The v2 annotation is in
+   the `resources-v2` core bundle; alternatively rebuild it with `build/build_annotation.py` from
    `work/ingest_update/ncbi/`.
 4. Copy `work/atlas_manifest/` or rebuild it (step 1 above; the comparison options need
    `atlas_data/merged_count_table.txt` and `raw_data/quality_control.tsv`).

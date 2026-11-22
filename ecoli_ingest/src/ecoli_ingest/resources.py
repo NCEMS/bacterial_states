@@ -1,6 +1,6 @@
 """Resource bundles: manifest generation/verification and the download stub.
 
-The core bundle is an asset of the GitHub release `resources-v1` of NCEMS/bacterial_states; the Centrifuge
+The core bundle is an asset of the GitHub release `resources-v2` of NCEMS/bacterial_states; the Centrifuge
 index is fetched from its authors' public bucket. Both are checked against the packaged manifest
 after unpacking. The container image (5.3 GB) is over the 2 GB limit for release assets and has no
 download URL yet: for it `download` prints the interim CyVerse instructions. Every URL lives in
@@ -17,7 +17,7 @@ from pathlib import Path
 
 from . import paths
 
-RESOURCES_VERSION = "v1"
+RESOURCES_VERSION = "v2"
 # assets of the GitHub data release `resources-<version>` (code releases are tagged X.X.X)
 RELEASE_URL = f"https://github.com/NCEMS/bacterial_states/releases/download/resources-{RESOURCES_VERSION}"
 
@@ -27,7 +27,7 @@ BUNDLES = {
     "centrifuge": ("centrifuge",),
     "container": ("container",),
 }
-BUNDLE_SIZES = {"core": "173 MB download, 674 MB unpacked", "centrifuge": "5.4 GB download, 6.9 GB unpacked", "container": "~5.3 GB"}
+BUNDLE_SIZES = {"core": "175 MB download, 676 MB unpacked", "centrifuge": "5.4 GB download, 6.9 GB unpacked", "container": "~5.3 GB"}
 BUNDLE_URLS = {
     "core": f"{RELEASE_URL}/ecoli_ingest_core_{RESOURCES_VERSION}.tar.gz",
     # upstream prebuilt index from the Centrifuge authors (Kim et al. 2016; built 2016). The file name

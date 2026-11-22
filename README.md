@@ -26,12 +26,12 @@ fastq ──► Ecoli_inGEST ──► counts ──► Ecoli_ATLAS embed ──
 | What | Snakemake RNA-seq workflow: QC gates, `vg giraffe` pangenome alignment, featureCounts, DESeq2, MultiQC | PyTorch encoder–decoder: train, embed new samples, compare with the atlas |
 | Install | conda env `ecoli_ingest/environment.yaml` + `pip install -e ./ecoli_ingest` (or any Python + Apptainer image) | conda env `ecoli_atlas/environment.yaml` + `pip install -e ./ecoli_atlas` |
 | Command | `ecoli_ingest init / check / run` in your run directory | `ecoli_atlas prepare / embed / compare / train` |
-| Data (downloaded separately) | graph index + annotation (173 MB download, 674 MB unpacked); Centrifuge DB (6.9 GB, optional); container image (5.3 GB, optional) | trained models + atlas embeddings (~20 MB); training data (~56 MB) |
+| Data (downloaded separately) | graph index, counting annotation and genome FASTA (175 MB download, 676 MB unpacked); Centrifuge DB (6.9 GB, optional); container image (5.3 GB, optional) | trained model with its atlas embedding and all 8 seeds (312 MB download); training data with the metadata, its GEO text and the missing-gene calls (100 MB download) |
 | Docs | [ecoli_ingest/README.md](ecoli_ingest/README.md) | [ecoli_atlas/README.md](ecoli_atlas/README.md) |
 
 Both can be installed and used independently. Data bundles are fetched with
 `ecoli_ingest download …` and `ecoli_atlas download …` from the
-[`resources-v1` release](https://github.com/NCEMS/bacterial_states/releases/tag/resources-v1) of this repository (the
+[`resources-v2` release](https://github.com/NCEMS/bacterial_states/releases/tag/resources-v2) of this repository (the
 Centrifuge index comes from its authors; the optional container image is on CyVerse for now).
 
 ## Quick start
@@ -47,10 +47,9 @@ ecoli_ingest check && ecoli_ingest run --cores 12
 
 # Ecoli_ATLAS
 mamba env create -f ecoli_atlas/environment.yaml && conda activate ecoli_atlas && pip install -e ./ecoli_atlas
-ecoli_atlas download models
-ecoli_atlas prepare --ingest-results ~/my_run/tutorial_results --out prepared
-ecoli_atlas embed   --counts prepared/counts.tsv --models outputs/models --out embedded
-ecoli_atlas compare --embeddings embedded/final_embedding.csv --atlas outputs/atlas --out compared
+ecoli_atlas download models                  # into outputs/models
+ecoli_atlas embed   --ingest-results ~/my_run --models outputs/models --out embedded
+ecoli_atlas compare --embeddings embedded --models outputs/models --out compared
 ```
 
 ## Worked examples

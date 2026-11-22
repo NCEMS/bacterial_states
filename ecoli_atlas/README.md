@@ -27,8 +27,8 @@ NLL rose by about one seed SD (`work/phase_dims/NOTES.md`). `train --block-dims`
 - **Alignment terms** (residual stage, on the whole embedding): samples of one study known to
   differ are kept apart; matching control conditions of different studies are drawn together.
 
-This is the first stage of the design. Not yet in the model: batch-corrected counts. The earlier model and its `verify-models` / `download` commands are on
-branch `main`.
+This is the first stage of the design. Not yet in the model: batch-corrected counts. The earlier (v1) model and its
+`verify-models` command are in the `1.0` code release and the `resources-v1` data release.
 
 ## Install
 
@@ -49,6 +49,28 @@ python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_
 ```
 
 Without installing, `bin/ecoli_atlas` runs the CLI from the checkout if the dependencies are present.
+
+## Data bundles
+
+```bash
+ecoli_atlas download models          # outputs/models: the model, its atlas embedding, all seeds
+ecoli_atlas download training-data   # atlas_data: everything needed to retrain the model or check its labels
+ecoli_atlas download all --dry-run   # what would be fetched, and where
+```
+
+Both are assets of the GitHub release
+[`resources-v2`](https://github.com/NCEMS/bacterial_states/releases/tag/resources-v2); each archive's SHA-256 is pinned in
+`download.py` and checked before anything is unpacked. `--dest` unpacks elsewhere; by default the target is under
+`$BS_DATA_ROOT`, or the current directory.
+
+| Bundle | Files | Size |
+|---|---|---|
+| `models` | `models/`: the selected seed (`model.pt`, `preprocessing.pt`, `manifest.json`, `splits.csv`, `evaluation.json`), the atlas it defines (`embedding.tsv`, `predictions.tsv`, `cv_predictions.tsv`, `missing_genes.tsv`), and `seed_1` ... `seed_8` (each a full bundle; `drivers` averages over them) | 312 MB download, 378 MB unpacked |
+| `training-data` | `atlas_v2_counts.tsv`, `atlas_v2_antisense_counts.tsv` (sense and antisense counts, inGEST feature ids x GSM), `metadata_v2.tsv` (labels per sample, with replicate groups), `sample_qc.tsv` (QC values; `in_model` = the model's samples), `time_courses.tsv` (the phase-order term's series), `atlas_v2_missing_genes.tsv` (genes called missing in each sample, `sample` / `feature`), and the metadata's sources: `metadata_v2_studies.tsv` and `metadata_v2_sample_text.tsv` (GEO text), `metadata_v2_evidence.tsv` (the passage behind each label), `metadata_v2_label_scheme.yaml` | 100 MB download, 301 MB unpacked |
+
+The counting annotation (`*_counting_v2.features.tsv`, needed by `train`, `figures` and `casestudy`) is in the inGEST
+core bundle (`ecoli_ingest download core`). The archives are built by `release/make_release.py` (reproducible: the same
+files give the same bytes).
 
 ## Inputs
 
@@ -579,6 +601,13 @@ ecoli_atlas drivers $T --models outputs/models --head medium --out outputs/drive
   expression has a correlation of at least `--unit-r` (0.6) within studies are joined into a unit, a
   stand-in for operons made from the atlas itself, and the attributions of a unit are added up.
   **The unit table is the one to read**; the gene table shows which members a model used.
+- **Studies:** the high class is a sample of studies, and with few of them the choice of studies
+  moves the ranking more than the seed does (phase, 33 stationary studies: seeds give about a
+  quarter of the uncertainty of the unit attributions, studies the rest; medium and lab strain,
+  with 130 and 300 studies, about half each). `--study-boot N` (200) draws the high-class studies
+  again with replacement, on the mean over the seeds, and gives `study_in_top`, `study_same_sign`
+  and `study_sd`. The low-class baseline is held fixed, so the study uncertainty is if anything
+  underestimated. A unit with a `study_in_top` near 1 does not hang on a few studies.
 
 `units_<head>_<low>_to_<high>.tsv` (one row per unit) and `drivers_<head>_<low>_to_<high>.tsv` (one
 row per model feature), strongest first:
@@ -591,6 +620,7 @@ row per model feature), strongest first:
 | `share` | its part of the summed absolute attributions |
 | `direction`, `log2fc` | whether the gene is higher (`up`) or lower (`down`) in the high class in the data, and by how much (mean of the members for a unit) |
 | `n_seeds`, `seeds_same_sign`, `seeds_in_top`, `attribution_sd` | with several seeds, see above |
+| `study_in_top`, `study_same_sign`, `study_sd` | share of the study draws in which the row is among the top rows (`--top-genes`, `--top-units`), share with the sign of `attribution`, spread of `attribution` over the draws |
 | `same_sign` | genes only: share of the high-class samples (studies weighted equally) in which the attribution has that sign |
 | `score_spearman` | genes only: rank correlation of the gene's expression with the score over the samples of both classes |
 
@@ -600,8 +630,9 @@ A negative attribution is a gene whose change pulls the score back towards the l
 
 `drivers_<head>.json` has, per contrast, the sample and study numbers, how concentrated the
 attribution is, the split between units that are up and down, the rank correlation of the unit
-attributions between seeds, and the top units of each kind that hold in at least three of four
-seeds. `fig_units_*` and `fig_drivers_*` show the top `--top` rows of each direction; with several
+attributions between seeds, the top units of each kind that hold in at least three of four
+seeds, and the number of units among the top rows in at least three of four seeds and in at least
+three quarters of the study draws. `fig_units_*` and `fig_drivers_*` show the top `--top` rows of each direction; with several
 seeds a row that does not hold in three of four seeds is drawn pale.
 
 ## On a SLURM cluster

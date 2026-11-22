@@ -24,6 +24,15 @@ def _write_json(obj, path: Path) -> None:
 
 
 # ---------------------------------------------------------------------------------------------
+def cmd_download(args) -> int:
+    from . import download as dl
+    rc = 0
+    bundles = list(dl.BUNDLES) if "all" in args.bundles else args.bundles
+    for b in bundles:
+        rc = max(rc, dl.download(b, Path(args.dest) if args.dest else None, dry_run=args.dry_run))
+    return rc
+
+
 def cmd_prepare(args) -> int:
     from .prepare import prepare
     try:
@@ -714,6 +723,14 @@ def build_parser() -> argparse.ArgumentParser:
                         "is not called missing from a strain")
         sp.add_argument("--time-series", help="time-course table (atlas_data/time_courses.tsv: sample, series, x): time pairs for the "
                         "phase-order term, and the within-series order of the phase score in the evaluation")
+
+    from .download import BUNDLES
+    sp = sub.add_parser("download", help="download the data bundles of the release: training-data (into atlas_data/), "
+                        "models (into outputs/)")
+    sp.add_argument("bundles", nargs="+", choices=sorted(BUNDLES) + ["all"])
+    sp.add_argument("--dest", help="directory to unpack into (default: atlas_data/ or outputs/ under $BS_DATA_ROOT or here)")
+    sp.add_argument("--dry-run", action="store_true", help="print what would be downloaded")
+    sp.set_defaults(func=cmd_download)
 
     sp = sub.add_parser("prepare", help="write the input tables of `embed` (counts, antisense counts, QC) from Ecoli_inGEST results")
     sp.add_argument("--ingest-results", metavar="DIR", help="an inGEST run directory or its results directory")

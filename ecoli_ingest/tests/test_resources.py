@@ -38,7 +38,7 @@ def test_packaged_manifest_is_consistent():
     rels = {r[0] for r in rows}
     for suffix in paths.VG_SUFFIXES:
         assert paths.RESOURCE_FILES["vg_index"] + suffix in rels
-    for key in ("annotation_gff", "annotation_bed"):
+    for key in ("annotation_gff", "annotation_bed", "genome_fasta"):
         assert paths.RESOURCE_FILES[key] in rels
     assert paths.CONTAINER_IMAGE in rels
     assert all(r[3] in resources.BUNDLES for r in rows)
@@ -56,7 +56,7 @@ def test_download_stub_prints_interim_instructions(tmp_path, capsys):
 def test_core_is_a_release_asset():
     import io
     url = resources.BUNDLE_URLS["core"]
-    assert url == "https://github.com/NCEMS/bacterial_states/releases/download/resources-v1/ecoli_ingest_core_v1.tar.gz"
+    assert url == "https://github.com/NCEMS/bacterial_states/releases/download/resources-v2/ecoli_ingest_core_v2.tar.gz"
     buf = io.StringIO()
     assert resources.download("core", Path("unused"), dry_run=True, log=buf) == 0
     assert url in buf.getvalue()
