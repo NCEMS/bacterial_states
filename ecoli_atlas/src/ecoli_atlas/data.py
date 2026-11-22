@@ -433,14 +433,21 @@ def build_training(tables: AtlasTables, fs: FeatureSet, cfg: TrainConfig, splits
     # genomic DNA: Yin are the counts the encoder inputs and size factors are made from
     rho, dlen = dna_density(tables.qc, ids, fs.genome_length) if (cfg.dna_decoder or cfg.dna_inputs) else (np.zeros(len(ids)), np.zeros(len(ids)))
     Yin = np.maximum(Y - dna_reads(rho, dlen, fs.lengths), 0.0) if cfg.dna_inputs else Y
+    # GC: with the GC term or cleaned inputs the size factors come from the GC-cleaned counts (cfg.gc_size_factors)
+    cov = covariate_frame(Y, fam, fs, tables.qc, ids)
+    feature_gc = _feature_gc(cfg, fs)
+    gc_cleaned, Ygc = 0, None
+    if feature_gc is not None:
+        Ygc, gc_cleaned = gc_cleaned_counts(Yin, feature_gc, cov, fs)
+    Ysf = Ygc if (Ygc is not None and cfg.gc_size_factors) else Yin       # what the size factors are made from
     gse = tables.meta["GSE"].astype(str).to_numpy()
     fit_rows = np.where(splits["split"].to_numpy() == 1)[0] if fit_rows is None else np.asarray(fit_rows)
     weights, cap = study_weights(gse, fit_rows, cfg.study_cap)
     rows = fit_rows[splits["reference"].to_numpy(dtype=bool)[fit_rows]]
     if not len(rows):
         raise ValueError("no reference sample among the samples to fit on")
-    ref_log = reference_profile(Yin[rows], fs.is_mrna, weights[rows], cfg.min_gene_presence)
-    s = size_factors(Yin, ref_log)
+    ref_log = reference_profile(Ysf[rows], fs.is_mrna, weights[rows], cfg.min_gene_presence)
+    s = size_factors(Ysf, ref_log)
     low, low_pool, miss = None, None, np.zeros(Y.shape, dtype=bool)
     anti = None if tables.antisense is None else tables.antisense.reindex(fs.ids, fill_value=0).to_numpy(dtype=np.float64).T
     if cfg.mask_missing:
@@ -457,14 +464,8 @@ def build_training(tables: AtlasTables, fs: FeatureSet, cfg: TrainConfig, splits
             low_pool = pooled_low_profile(Y[rows], s[rows], ref_groups, fs.order, quantile=cfg.mask_quantile, **call, **veto(rows))
             groups = call_groups(miss, gse, cfg.mask_pool_min_calls, cfg.mask_pool_jaccard)
             miss = miss | group_calls(Y, s, groups, low_pool, fs.order, **call, **veto(slice(None)))
-        s = size_factors(Yin, ref_log, miss)
-    cov = covariate_frame(Y, fam, fs, tables.qc, ids)
-    feature_gc = _feature_gc(cfg, fs)
-    gc_cleaned = 0
-    if cfg.clean_inputs:
-        Xin, gc_cleaned = gc_cleaned_counts(Yin, feature_gc, cov, fs)
-    else:
-        Xin = Yin
+        s = size_factors(Ysf, ref_log, miss)
+    Xin = Ygc if cfg.clean_inputs else Yin
     logx = log_expression(Xin, s)
     zscore = ZScore.fit(logx[rows], weights[rows], cfg.sd_floor, miss[rows])
     unknown = [c for c in cfg.covariates if c not in cov.columns]
@@ -475,7 +476,7 @@ def build_training(tables: AtlasTables, fs: FeatureSet, cfg: TrainConfig, splits
     w = weights[rows] / weights[rows].sum()
     have = w[:, None] * ~miss[rows]                    # a gene's mean is taken over the samples that have it
     total = have.sum(axis=0)
-    log_mean = np.log(np.maximum((have * (Yin[rows] / s[rows][:, None])).sum(axis=0) / np.where(total > 0, total, 1.0), 1e-3))
+    log_mean = np.log(np.maximum((have * (Ysf[rows] / s[rows][:, None])).sum(axis=0) / np.where(total > 0, total, 1.0), 1e-3))
     assert set(label_codes(labels)) == set(HEADS)
     series, series_x = series_codes(ids, tables.time_series)
     gse_codes = pd.factorize(gse)[0]

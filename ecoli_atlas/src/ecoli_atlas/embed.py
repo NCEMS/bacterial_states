@@ -65,7 +65,12 @@ def embed_counts(bundle: ModelBundle, counts: pd.DataFrame, qc: pd.DataFrame, de
     # genomic DNA, when the bundle was trained with corrected inputs: the expected DNA reads (from the QC table) come off the counts
     rho, dlen = dna_density(qc, ids, bundle.fs.genome_length) if cfg.dna_inputs else (np.zeros(len(ids)), np.zeros(len(ids)))
     Yin = np.maximum(Y - dna_reads(rho, dlen, bundle.fs.lengths), 0.0) if cfg.dna_inputs else Y
-    s = size_factors(Yin, bundle.ref_log)
+    cov = covariate_frame(Y, fam, bundle.fs, qc, ids)
+    # GC-cleaned counts: the encoder inputs (cfg.clean_inputs) and the size factors (cfg.gc_size_factors), as in training
+    gc_sf = cfg.gc_size_factors and (cfg.clean_inputs or cfg.gc_offset)
+    Ygc = gc_cleaned_counts(Yin, bundle_feature_gc(bundle, feature_gc), cov, bundle.fs)[0] if (cfg.clean_inputs or gc_sf) else None
+    Ysf = Ygc if gc_sf else Yin
+    s = size_factors(Ysf, bundle.ref_log)
     miss = np.zeros(Y.shape, dtype=bool)
     if bundle.low is not None and cfg.mask_missing and bundle.fs.order is not None:
         veto = {}
@@ -83,12 +88,8 @@ def embed_counts(bundle: ModelBundle, counts: pd.DataFrame, qc: pd.DataFrame, de
             groups = call_groups(miss, study, cfg.mask_pool_min_calls, cfg.mask_pool_jaccard)
             miss = miss | group_calls(Y, s, groups, bundle.low_pool, bundle.fs.order, min_expected=cfg.mask_min_expected,
                                       low_fraction=cfg.mask_low_fraction, **veto)
-        s = size_factors(Yin, bundle.ref_log, miss)
-    cov = covariate_frame(Y, fam, bundle.fs, qc, ids)
-    if cfg.clean_inputs:                          # the bundle's encoders saw GC-cleaned counts (data.gc_cleaned_counts)
-        Xin, _ = gc_cleaned_counts(Yin, bundle_feature_gc(bundle, feature_gc), cov, bundle.fs)
-    else:
-        Xin = Yin
+        s = size_factors(Ysf, bundle.ref_log, miss)
+    Xin = Ygc if cfg.clean_inputs else Yin
     X = torch.tensor(bundle.zscore.apply(log_expression(Xin, s), miss))
     C = torch.tensor(bundle.scaler.apply(cov))
     enc = encode(bundle.model, X, C, device)

@@ -337,7 +337,9 @@ so neither variant is the default.
 term at fixed scale 1, the genomic-DNA term (`--dna-decoder`), encoder inputs with each library's measured GC
 offset taken off the counts (`--clean-inputs`), and a residual encoder that sees expression only
 (`--no-encoder-covariates`). Each part is also its own flag. The manifest reports the encoder side under
-`encoder_inputs`; `embed` repeats the cleaning (the feature GC content comes from the bundle's GC term, or from
+`encoder_inputs`; with the GC term or cleaned inputs the size factors are made from the GC-cleaned counts, so the
+GC part cannot shift a library's size factor (`gc_size_factors`; bundles made before keep raw-count size factors);
+`embed` repeats the cleaning (the feature GC content comes from the bundle's GC term, or from
 `--feature-gc` / the package table for a bundle with `--clean-inputs` alone).
 
 The GC offset is the library's fitted curve averaged over each feature's 300 bp windows, the window the inGEST fit

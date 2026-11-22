@@ -160,6 +160,11 @@ class TrainConfig:
     # the genomic-DNA term in the decoder, clean inputs, no covariates in the encoder (``apply_qc_module``)
     clean_inputs: bool = False
     encoder_covariates: bool = True
+    # with the GC term or the cleaned inputs: size factors (and the size-factor reference) from the GC-cleaned counts, so
+    # that the GC part cannot shift a library's size factor (a mean-centred offset against a median-of-ratios size factor
+    # leaves a per-sample constant, SD 0.04, correlated 0.62 with gc_slope, that only z could fit). False in bundles
+    # made before 2026-11-22
+    gc_size_factors: bool = True
     qc_module: bool = False
     # training
     block_epochs: int = 40       # of each block encoder

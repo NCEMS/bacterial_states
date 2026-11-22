@@ -267,7 +267,10 @@ measured covariates remove ~0.01-0.02 of it). Order:
    flag). GC offset = the fitted curve averaged over each feature's 300 bp windows (the inGEST fit window; package
    table `reference/feature_gc_counting_v2.tsv` has the window profile; `work/qc_module/gc_fragment.txt`: better than the
    gene-mean GC in every fragment-size stratum, fragment-sized windows add nothing; GC leakage into z is largest in
-   long-fragment libraries, so not the approximation). C3 replicate penalty (within-group cross-covariance of z and c, group sampler); C4 QC augmentation (another
+   long-fragment libraries, so not the approximation). With the GC term or cleaned inputs the size factors come from
+   the GC-cleaned counts (`gc_size_factors`, fixed 2026-11-22): a mean-centred offset against a median-of-ratios size
+   factor left a per-sample constant (SD 0.04, r 0.62 with gc_slope) that only z could fit - a likely reason both
+   GC-term sweeps put more GC into z. The first qc-module sweeps were stopped for it. C3 replicate penalty (within-group cross-covariance of z and c, group sampler); C4 QC augmentation (another
    sample's GC offset, depth and DNA reads applied to the counts; z invariant); C5 a replicate pull, only if needed.
    Study adversary and twins for batch removal are dropped; read-1-only recounts of paired-end libraries could give
    real layout / fragment-size twins for C4.

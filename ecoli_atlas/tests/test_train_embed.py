@@ -779,6 +779,15 @@ def test_qc_module(train_args, atlas_files, tmp_path):
     off = gc_offset(gc, cov["gc_slope"].to_numpy(), cov["gc_curv"].to_numpy(), fs.is_mrna, fs.lengths)
     clean, n = gc_cleaned_counts(base * np.exp(off), gc, cov, fs)
     assert n == 1 and np.allclose(clean, base) and np.allclose(off[1], 0)
+    # size factors from the cleaned counts do not move with the GC bias; from the raw counts they do (median vs mean centring)
+    from ecoli_atlas.preprocess import size_factors
+    rng = np.random.default_rng(2)
+    lib = rng.gamma(2.0, 100.0, size=(1, fs.n))
+    off2 = gc_offset(gc, np.array([0.6]), np.array([-0.3]), fs.is_mrna, fs.lengths)
+    ref = np.log(lib[0] + 0.5)
+    raw = size_factors(lib * np.exp(off2), ref)[0] / size_factors(lib, ref)[0]
+    cl = size_factors(gc_cleaned_counts(lib * np.exp(off2), gc, pd.DataFrame({"gc_slope": [0.6], "gc_curv": [-0.3]}), fs)[0], ref)[0]
+    assert abs(raw - 1) > 1e-3 and np.isclose(cl, size_factors(lib, ref)[0])
     # --qc-module: GC term at scale 1, DNA term, cleaned inputs, an encoder that sees expression only
     gc_path = _feature_gc_table(atlas_files, tmp_path, windows=True)
     out = tmp_path / "qcm"
@@ -786,7 +795,7 @@ def test_qc_module(train_args, atlas_files, tmp_path):
                  "--qc-module", "--feature-gc", str(gc_path)]) == 0
     mf = json.loads((out / "manifest.json").read_text())
     c = mf["config"]
-    assert c["qc_module"] and c["gc_offset"] and c["gc_scale"] == "fixed" and c["dna_decoder"] and c["clean_inputs"]
+    assert c["qc_module"] and c["gc_offset"] and c["gc_scale"] == "fixed" and c["dna_decoder"] and c["clean_inputs"] and c["gc_size_factors"]
     assert not c["encoder_covariates"] and mf["gc_term"]["scale"] == 1.0 and mf["dna"]["decoder"] and mf["gc_term"]["profile"] == "window300"
     assert mf["encoder_inputs"] == {"gc_cleaned": True, "gc_cleaned_samples": mf["encoder_inputs"]["gc_cleaned_samples"],
                                     "gc_profile": "window300", "covariates": False}
@@ -807,6 +816,9 @@ def test_qc_module(train_args, atlas_files, tmp_path):
     cfg = TrainConfig(clean_inputs=True)
     assert cfg.clean_inputs and not cfg.gc_offset and cfg.encoder_covariates
     assert TrainConfig.from_dict({}).encoder_covariates and not TrainConfig.from_dict({}).clean_inputs
+    old = ModelBundle.load(out)
+    old.manifest["config"].pop("gc_size_factors")
+    assert not old.config.gc_size_factors                                   # a bundle made before: raw-count size factors
 
 
 def test_embed_and_prepare_read_an_ingest_run(trained, atlas_files, tmp_path):
