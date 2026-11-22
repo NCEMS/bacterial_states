@@ -30,6 +30,10 @@ correlated within studies are therefore joined into expression units (``expressi
 stand-in for operons made from the atlas itself, and the attributions of a unit are added up. The
 unit table is the one to read: a unit that ranks high in most seeds is a finding, whichever of
 its genes a given model happened to use.
+
+Studies. The high class is a sample of studies, and for a head with few of them (stationary phase:
+about 30) the choice of studies moves the ranking more than the seed does. ``study_bootstrap``
+draws the studies again and reports, per gene and unit, how often it stays among the top rows.
 """
 from __future__ import annotations
 
@@ -92,8 +96,10 @@ def default_contrasts(classes: tuple) -> list:
     return out
 
 
-def gene_drivers(model, data: TrainingData, head: str, low: str, high: str, device, steps: int = 32) -> tuple[pd.DataFrame, dict]:
-    """The driver table of one contrast (one row per model feature, strongest first) and a summary."""
+def gene_drivers(model, data: TrainingData, head: str, low: str, high: str, device, steps: int = 32) -> tuple[pd.DataFrame, dict, np.ndarray]:
+    """The driver table of one contrast (one row per model feature, strongest first), a summary, and
+    the mean attribution of every high-class study (studies x model features, studies in the order
+    of their codes; the table's ``attribution`` is the mean of its rows)."""
     classes = data.fit_classes[head]
     for name in (low, high):
         if name not in classes:
@@ -133,7 +139,41 @@ def gene_drivers(model, data: TrainingData, head: str, low: str, high: str, devi
                "share_of_attribution": {f"top_{k}": float(table["share"].head(k).sum()) for k in (10, 50, 200)},
                "share_of_attribution_towards_high": float(table.loc[pos, "share"].sum()),
                "towards_high_up_vs_down": {d: float(table.loc[pos & (table["direction"] == d), "share"].sum()) for d in ("up", "down")}}
-    return table, summary
+    hi_gse = gse[hi]
+    per_study = np.stack([attr[hi_gse == st].mean(0) for st in np.unique(hi_gse)])
+    return table, summary, per_study
+
+
+def study_bootstrap(per_study: np.ndarray, top: int, n_boot: int = 200, seed: int = 0) -> dict:
+    """Stability of the attributions when the high-class studies are drawn again with replacement
+    (every study counting once, as in the attribution itself). ``per_study`` is studies x rows.
+    Returns per row: ``study_sd``, the spread of the mean attribution over the draws;
+    ``study_in_top``, the share of draws in which the row is among the ``top`` rows by absolute
+    attribution; ``study_same_sign``, the share of draws with the sign of the full mean. The
+    baseline (the low class) is held fixed, so this is the part of the uncertainty that comes from
+    which high-class studies the atlas holds. The draws depend only on ``seed`` and the number of
+    studies, so gene and unit tables of one contrast use the same draws."""
+    J, n = per_study.shape
+    rng = np.random.default_rng(seed)
+    full = per_study.mean(0)
+    top = min(top, n)
+    boot = np.empty((n_boot, n))
+    in_top = np.zeros(n)
+    for b in range(n_boot):
+        w = np.bincount(rng.integers(0, J, J), minlength=J) / J
+        boot[b] = w @ per_study
+        in_top[np.argpartition(-np.abs(boot[b]), top - 1)[:top]] += 1
+    return {"study_sd": boot.std(0, ddof=1) if n_boot > 1 else np.zeros(n), "study_in_top": in_top / n_boot,
+            "study_same_sign": (np.sign(boot) == np.sign(full)[None, :]).mean(0)}
+
+
+def unit_matrix(unit: np.ndarray) -> np.ndarray:
+    """Features x units 0/1 matrix in the unit order of ``np.unique(unit)``; ``A @ G`` adds the
+    attributions of the members of every unit."""
+    _, inv = np.unique(unit, return_inverse=True)
+    G = np.zeros((len(unit), inv.max() + 1))
+    G[np.arange(len(unit)), inv] = 1.0
+    return G
 
 
 def expression_units(feat: pd.DataFrame, ids: list, logx: np.ndarray, gse: np.ndarray, min_r: float = 0.6,

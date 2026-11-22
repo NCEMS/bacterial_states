@@ -226,7 +226,7 @@ def cmd_drivers(args) -> int:
     from .artifacts import MANIFEST_FILE, SPLITS_FILE, ModelBundle
     from .config import HEADS
     from .data import build_training
-    from .drivers import combine_seeds, default_contrasts, expression_units, gene_drivers, unit_table
+    from .drivers import combine_seeds, default_contrasts, expression_units, gene_drivers, study_bootstrap, unit_matrix, unit_table
     from .features import read_feature_table
     from .figures.drivers import fig_drivers
     from .figures.plotting import apply_style
@@ -262,9 +262,10 @@ def cmd_drivers(args) -> int:
         apply_style()
         summaries = []
         for low, high in contrasts:
-            per_gene, per_unit, per_summary = [], [], []
+            per_gene, per_unit, per_summary, per_study = [], [], [], []
             for b in bundles:
-                table, summary = gene_drivers(b.model, data, args.head, low, high, device, steps=args.steps)
+                table, summary, study_attr = gene_drivers(b.model, data, args.head, low, high, device, steps=args.steps)
+                per_study.append(study_attr)
                 for col, name in (("Symbol", "symbol"), ("Type", "type"), ("Product", "product")):
                     if col in feat.columns:
                         table[name] = feat[col].reindex(table["feature"]).fillna("").to_numpy()
@@ -276,6 +277,14 @@ def cmd_drivers(args) -> int:
             units = combine_seeds(per_unit, "unit_id", args.top_units) if len(bundles) > 1 else per_unit[0]
             if len(bundles) > 1:
                 units = units[["unit"] + [c for c in units.columns if c != "unit"]]
+            if args.study_boot > 0:                                  # the seed mean, with the high-class studies drawn again
+                study_attr = np.mean(per_study, axis=0)
+                unit_ids = [data.fs.ids[int(np.where(unit == u)[0][0])] for u in np.unique(unit)]
+                for tbl, key, P, ids, top in ((genes, "feature", study_attr, data.fs.ids, args.top_genes),
+                                              (units, "unit_id", study_attr @ unit_matrix(unit), unit_ids, args.top_units)):
+                    boot = study_bootstrap(P, top, n_boot=args.study_boot)
+                    for col, v in boot.items():
+                        tbl[col] = pd.Series(v, index=ids).reindex(tbl[key]).to_numpy()
             name = f"{args.head}_{low}_to_{high}"
             genes.to_csv(out / f"drivers_{name}.tsv", sep="\t", index=False, float_format="%.5g")
             units.to_csv(out / f"units_{name}.tsv", sep="\t", index=False, float_format="%.5g")
@@ -293,6 +302,9 @@ def cmd_drivers(args) -> int:
                         "top_units_up": list(units.loc[pos & robust & (units["direction"] == "up"), "unit"].head(args.top)),
                         "top_units_down": list(units.loc[pos & robust & (units["direction"] == "down"), "unit"].head(args.top)),
                         "top_units_against": list(units.loc[~pos & robust, "unit"].head(args.top))}
+            if args.study_boot > 0:
+                summary["study_bootstraps"] = args.study_boot
+                summary["units_in_top_of_three_quarters_of_study_bootstraps"] = int((units["study_in_top"] >= 0.75).sum())
             if len(bundles) > 1:
                 summary["units_in_top_of_three_quarters_of_seeds"] = int(robust.sum())
                 by_seed = pd.concat([u.set_index("unit_id")["attribution"] for u in per_unit], axis=1).corr(method="spearman").to_numpy()
@@ -814,6 +826,8 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--top-units", type=int, default=100, help="the same for expression units")
     sp.add_argument("--unit-r", type=float, default=0.6, help="within-study correlation at which neighbouring genes are joined into a unit")
     sp.add_argument("--steps", type=int, default=32, help="points along the path of the integrated gradients")
+    sp.add_argument("--study-boot", type=int, default=200, metavar="N",
+                    help="draws of the high-class studies for the study_sd / study_in_top / study_same_sign columns (0: none)")
     sp.add_argument("--out", required=True)
     sp.add_argument("--formats", default="pdf,png")
     add_device(sp)

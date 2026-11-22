@@ -305,7 +305,8 @@ def test_an_unknown_phase_head_is_refused():
 
 
 def test_drivers_attributions_add_up_and_find_the_phase_genes(trained, train_args, atlas_files, tmp_path):
-    from ecoli_atlas.drivers import combine_seeds, default_contrasts, expression_units, spearman_columns, unit_name
+    from ecoli_atlas.drivers import (combine_seeds, default_contrasts, expression_units, spearman_columns, study_bootstrap,
+                                     unit_matrix, unit_name)
     assert default_contrasts(("a", "b")) == [("a", "b")] and default_contrasts(("a", "b", "c")) == [("a", "c"), ("a", "b"), ("b", "c")]
     rng = np.random.RandomState(0)
     v = rng.rand(30)
@@ -323,9 +324,18 @@ def test_drivers_attributions_add_up_and_find_the_phase_genes(trained, train_arg
     b = pd.DataFrame({"k": list("zyx"), "rank": [1, 2, 3], "attribution": [2.0, 1.0, 1.0]})
     both = combine_seeds([a, b], "k", top=1).set_index("k")
     assert both.loc["x", "attribution"] == 2.0 and both.loc["z", "seeds_same_sign"] == 1 and both["seeds_in_top"].tolist() == [1, 0, 1]
+    # study bootstrap: a row that every study carries stays on top; a row that flips sign between studies does not
+    P = np.column_stack([np.full(12, 5.0), np.tile([1.0, -1.0], 6) + 0.01, rng.randn(12) * 0.01])
+    boot = study_bootstrap(P, top=1, n_boot=50)
+    assert boot["study_in_top"].tolist() == [1.0, 0.0, 0.0] and boot["study_sd"][0] == pytest.approx(0, abs=1e-9) and boot["study_same_sign"][0] == 1
+    assert 0.2 < boot["study_same_sign"][1] < 1.0
+    assert unit_matrix(np.array([0, 0, 2, 3])).tolist() == [[1, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1]]
     out = tmp_path / "drivers"
     assert main(["drivers", *train_args, "--models", str(trained), "--out", str(out), "--device", "cpu", "--formats", "png", "--top", "5"]) == 0
     table = pd.read_csv(out / "drivers_phase_exponential_to_stationary.tsv", sep="\t")
+    units = pd.read_csv(out / "units_phase_exponential_to_stationary.tsv", sep="\t")
+    for t in (table, units):
+        assert t[["study_in_top", "study_same_sign"]].stack().between(0, 1).all() and (t["study_sd"] >= 0).all()
     summary = json.loads((out / "drivers_phase.json").read_text())["contrasts"][0]
     assert summary["sum_of_attributions"] == pytest.approx(summary["score_gap_high_minus_baseline"], rel=0.05)   # completeness
     assert table["share"].sum() == pytest.approx(1.0, abs=1e-3) and table["rank"].tolist() == list(range(1, len(table) + 1))
