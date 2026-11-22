@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ecoli-atlas"
-version = "0.2.0"
+version = "2.0.0"
 description = "Ecoli_ATLAS: a count-based encoder-decoder that embeds E. coli RNA-seq samples in the E. coli expression atlas"
 readme = "README.md"
 requires-python = ">=3.10,<3.13"
