@@ -372,6 +372,11 @@ expression. It is handled by leaving the worst libraries out:
   still embedded.
 - A shallow library reads 0 (below the estimate's detection limit) whatever its DNA content, so
   it passes.
+- **Library depth:** `embed` also writes `cds_reads` (reads on CDS features) and `low_depth` (1 below 200,000, the
+  atlas's depth gate `qc_table.py mark-model --min-cds-reads`; the bundle's `min_cds_reads`) and warns for such samples;
+  it does not refuse them. No atlas sample is that shallow, and their calls are not reliable: exponential libraries of
+  GSE67402 thinned to 200,000 CDS reads, and its total-RNA libraries (about 100,000), were called stationary, while deep
+  atlas samples thinned to 200,000 mostly kept their call (`work/qc_module/depth_checks.txt`).
 
 Two corrections exist in the code and are **off** (`train --dna-decoder`, `--dna-inputs`): an
 additive DNA term in the decoder's count mean (`models.count_log_mean`, expected reads from

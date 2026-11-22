@@ -138,6 +138,11 @@ class TrainConfig:
     # Samples above `max_dna_fraction` are kept out of the model when it is built (qc_table.py mark-model) and flagged by `embed`.
     # The two corrections are off: on the atlas they gave no gain and the input correction harms shallow libraries.
     max_dna_fraction: float = 0.10
+    # the depth gate of the atlas (qc_table.py mark-model --min-cds-reads): no sample with fewer reads on CDS features was
+    # trained on, and `embed` flags samples below it (`low_depth`). Below it the calls are not reliable: exponential
+    # libraries of GSE67402 thinned to 200 k CDS reads, and its total-RNA libraries (~100 k), were called stationary
+    # (`work/qc_module/depth_checks.txt`); deep atlas samples thinned to 200 k mostly kept their call.
+    min_cds_reads: int = 200_000
     covariates: tuple = COVARIATES   # columns of data.covariate_frame given to the residual encoder and the decoder
     # phase-order term of the phase block (stage 1; 0 = off): a pairwise ranking loss on the phase score over pairs of
     # samples whose order along the growth curve is known, inside one study (labels.ORDER_LEVEL) or one culture series

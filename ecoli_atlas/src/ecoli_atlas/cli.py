@@ -364,6 +364,12 @@ def cmd_embed(args) -> int:
         _info(f"warning: {len(high)} sample(s) have a genomic-DNA estimate above {limit:.0%}, the level above which samples were kept out of "
               f"the atlas; their calls and position may be affected: " + ", ".join(f"{s} ({res['samples'].loc[s, 'dna_fraction_est']:.0%})" for s in high[:10])
               + (" ..." if len(high) > 10 else ""))
+    low = res["samples"].index[res["samples"]["low_depth"] == 1]
+    if len(low):
+        gate = bundle.config.min_cds_reads
+        _info(f"warning: {len(low)} sample(s) have fewer than {gate:,} reads on CDS features, the depth below which no sample was part of "
+              f"the atlas; their calls and position are not reliable (shallow libraries can look stationary): "
+              + ", ".join(f"{s} ({res['samples'].loc[s, 'cds_reads']:,})" for s in low[:10]) + (" ..." if len(low) > 10 else ""))
     res["missing"].to_csv(out / "missing_genes.tsv", sep="\t", index=False)
     res["coverage"].to_frame(bundle.fs.ids).to_csv(out / "feature_coverage.tsv", sep="\t")
     written = []

@@ -45,8 +45,8 @@ def embed_counts(bundle: ModelBundle, counts: pd.DataFrame, qc: pd.DataFrame, de
     Returns frames indexed by sample: ``embedding`` (z1..zN), ``predictions`` (probability and call
     of each head), ``samples`` (size factor, reads on mRNA features, number of genes called missing,
     reads taken off the mRNA features as genomic DNA, the DNA estimate and whether it is above the
-    bundle's limit ``max_dna_fraction``),
-    the feature ``coverage``, ``missing`` (one row per sample and gene called missing from its
+    bundle's limit ``max_dna_fraction``, the reads on CDS features and whether they are below the
+    bundle's ``min_cds_reads``, the atlas's depth gate (``low_depth``)), the feature ``coverage``, ``missing`` (one row per sample and gene called missing from its
     strain; such genes enter the encoders as the gene's mean) and ``warnings`` (QC values set to
     the training mean).
     products: ``"corrected"`` and / or ``"decoded"``: counts with the technical part swapped for that of a
@@ -105,6 +105,10 @@ def embed_counts(bundle: ModelBundle, counts: pd.DataFrame, qc: pd.DataFrame, de
     dna = pd.to_numeric(_qc_value(qc.reindex(ids).fillna(""), "dna_fraction_est"), errors="coerce").to_numpy()
     info["dna_fraction_est"] = dna
     info["high_dna"] = (np.nan_to_num(dna) > cfg.max_dna_fraction).astype(int)
+    # reads on CDS features; below the atlas's depth gate the sample is outside the depths the model was trained on
+    cds = np.array([f.startswith("CDS_") for f in bundle.fs.ids])
+    info["cds_reads"] = Y[:, cds].sum(axis=1).round(0).astype(np.int64)
+    info["low_depth"] = (info["cds_reads"] < cfg.min_cds_reads).astype(int)
     rows, cols = np.nonzero(miss)
     missing = pd.DataFrame({"sample": np.array(ids, dtype=object)[rows], "feature": np.array(bundle.fs.ids, dtype=object)[cols]})
     out = {}

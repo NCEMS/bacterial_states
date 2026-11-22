@@ -961,3 +961,18 @@ def test_dna_penalty(atlas_files, tmp_path):
     mx = json.loads((tmp_path / "x" / "manifest.json").read_text())
     assert mx["dna_penalty"] == {"weight": 1.0, "replicate_groups": 0, "applied": False}
     assert "dna_r2" not in pd.read_csv(tmp_path / "x" / "history.tsv", sep="\t").columns
+
+
+def test_embed_flags_low_depth(trained, atlas_files, tmp_path):
+    bundle = ModelBundle.load(trained)
+    counts = read_counts(atlas_files["counts"])
+    qc = pd.read_csv(atlas_files["qc"], sep="\t", dtype=str, keep_default_na=False).set_index("GSM")
+    two = counts[["GSM0000", "GSM0105"]].copy()
+    cds = two.index.str.startswith("CDS_")
+    two["deep"] = two["GSM0000"] * 0
+    two.loc[cds, "deep"] = 4000                                       # 80 CDS features x 4,000 reads = 320,000 reads
+    qc.loc["deep"] = qc.loc["GSM0000"]
+    s = embed_counts(bundle, two, qc)["samples"]
+    assert bundle.config.min_cds_reads == 200_000
+    assert (s["cds_reads"] == two[cds].sum().to_numpy()).all()
+    assert s.loc["deep", "low_depth"] == 0 and (s.loc[["GSM0000", "GSM0105"], "low_depth"] == (s.loc[["GSM0000", "GSM0105"], "cds_reads"] < 200_000)).all()
