@@ -31,5 +31,8 @@ Homepage = "https://github.com/NCEMS/bacterial_states"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+ecoli_atlas = ["reference/*.tsv"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]

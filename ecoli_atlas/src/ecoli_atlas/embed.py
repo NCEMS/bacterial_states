@@ -9,11 +9,13 @@ from .artifacts import ModelBundle
 from .config import HEADS
 from .data import _qc_value, check_qc, covariate_frame, dna_density, dna_reads
 from .preprocess import align_counts, call_groups, group_calls, log_expression, missing_genes, size_factors
+from .technical import feature_gc_for, load_feature_gc, technical_counts
 from .train import encode
 
 
 def embed_counts(bundle: ModelBundle, counts: pd.DataFrame, qc: pd.DataFrame, device="cpu",
-                 min_coverage: float = 0.9, antisense: pd.DataFrame | None = None, studies=None, pool: bool = True) -> dict:
+                 min_coverage: float = 0.9, antisense: pd.DataFrame | None = None, studies=None, pool: bool = True,
+                 products: tuple = (), feature_gc: pd.DataFrame | None = None) -> dict:
     """counts: features x samples (inGEST feature ids). qc: table indexed by sample with the QC values
     (``qc_record.read_qc_records`` of an inGEST run, or the ``full_*`` columns of ``sample_qc.tsv``);
     required, and every sample must have the values ``data.check_qc`` asks for.
@@ -33,6 +35,11 @@ def embed_counts(bundle: ModelBundle, counts: pd.DataFrame, qc: pd.DataFrame, de
     the feature ``coverage``, ``missing`` (one row per sample and gene called missing from its
     strain; such genes enter the encoders as the gene's mean) and ``warnings`` (QC values set to
     the training mean).
+    products: ``"corrected"`` and / or ``"decoded"``: counts with the technical part swapped for that of a
+    reference library (``technical.py``), returned as ``corrected_counts`` / ``decoded_counts`` (features x
+    samples); ``samples`` then has ``gc_offset`` (1 where the sample's GC bias was taken off).
+    ``feature_gc``: GC content of the features (``technical.load_feature_gc``; default the package table for
+    the inGEST counting annotation).
     """
     ids = list(counts.columns)
     Y, fam, coverage = align_counts(counts, bundle.fs)
@@ -80,7 +87,27 @@ def embed_counts(bundle: ModelBundle, counts: pd.DataFrame, qc: pd.DataFrame, de
     info["high_dna"] = (np.nan_to_num(dna) > cfg.max_dna_fraction).astype(int)
     rows, cols = np.nonzero(miss)
     missing = pd.DataFrame({"sample": np.array(ids, dtype=object)[rows], "feature": np.array(bundle.fs.ids, dtype=object)[cols]})
+    out = {}
+    if products:
+        unknown = set(products) - {"corrected", "decoded"}
+        if unknown:
+            raise ValueError(f"unknown count products {sorted(unknown)}")
+        gc = feature_gc_for(bundle.fs, load_feature_gc() if feature_gc is None else feature_gc)
+        q = qc.reindex(ids).fillna("")
+        slope = pd.to_numeric(_qc_value(q, "gc_slope"), errors="coerce").to_numpy(dtype=np.float64)
+        curv = pd.to_numeric(_qc_value(q, "gc_curv"), errors="coerce").to_numpy(dtype=np.float64)
+        has_gc = np.isfinite(slope) & np.isfinite(curv)
+        if not has_gc.all():
+            warnings = warnings + [f"{int((~has_gc).sum())} sample(s) have no GC bias fit in the QC table; their counts keep "
+                                   f"their GC bias: {', '.join(np.array(ids)[~has_gc][:5])}" + (" ..." if (~has_gc).sum() > 5 else "")]
+        res = technical_counts(bundle.model, bundle.fs, bundle.scaler, Yin, C.numpy(), enc["z"], np.log(s), miss, gc, slope, curv,
+                               corrected="corrected" in products, decoded="decoded" in products)
+        for k, v in res.items():
+            frame = pd.DataFrame(v.T, index=bundle.fs.ids, columns=ids)
+            frame.index.name = "Feature_ID"
+            out[f"{k}_counts"] = frame
+        info["gc_offset"] = has_gc.astype(int)
     for df in (emb, pred, info):
         df.index.name = "sample"
     return {"embedding": emb, "predictions": pred, "samples": info, "coverage": coverage, "missing": missing,
-            "warnings": warnings}
+            "warnings": warnings} | out

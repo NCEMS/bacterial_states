@@ -601,6 +601,84 @@ def _fake_ingest_run(atlas_files, run_dir, samples):
     return res
 
 
+def _feature_gc_table(atlas_files, tmp_path):
+    feat = pd.read_csv(atlas_files["features"], sep="\t")
+    gc = 0.4 + 0.2 * np.random.default_rng(0).random(len(feat))
+    path = tmp_path / "feature_gc.tsv"
+    pd.DataFrame({"Feature_ID": feat["Feature_ID"], "Length": feat["Length"], "GC": gc}).to_csv(path, sep="\t", index=False)
+    return path
+
+
+def test_technical_swap_parts(trained):
+    from ecoli_atlas.technical import covariate_shift, gc_offset, reference_covariates, swapped_covariates
+    bundle = ModelBundle.load(trained)
+    sc = bundle.scaler
+    ref = reference_covariates(sc)
+    assert ref[sc.names.index("paired")] == 1 and ref[sc.names.index("fragment_q50")] == 0
+    k = sc.numeric.index("gc_slope")
+    assert ref[sc.names.index("gc_slope")] * sc.sd[k] + sc.mu[k] == pytest.approx(0.0, abs=1e-6)          # no GC bias on the raw scale
+    C = np.random.default_rng(1).normal(size=(3, len(sc.names)))
+    sw = swapped_covariates(C, sc)
+    j = sc.names.index("gc_slope")
+    assert np.array_equal(sw[:, j], C[:, j]) and np.allclose(np.delete(sw, [j, sc.names.index("gc_curv")], 1),
+                                                             np.delete(np.broadcast_to(ref, C.shape), [j, sc.names.index("gc_curv")], 1))
+    assert np.allclose(covariate_shift(bundle.model, sw, sw), 0)
+    # the GC offset takes an injected trend off exactly (curvature 0), up to a constant per sample
+    gc = np.linspace(0.35, 0.65, 50)
+    is_mrna, lengths = np.ones(50, bool), np.full(50, 1000)
+    off = gc_offset(gc, np.array([0.3, 0.0, np.nan]), np.array([0.0, 0.0, 0.1]), is_mrna, lengths)
+    x = (gc - 0.5) * 10
+    assert np.allclose(off[0], 0.3 * (x - x.mean())) and np.allclose(off[1:], 0)      # no fit (NaN): no offset
+
+
+def test_corrected_and_decoded_counts(trained, atlas_files, tmp_path):
+    from ecoli_atlas.technical import load_feature_gc
+    bundle = ModelBundle.load(trained)
+    counts = read_counts(atlas_files["counts"])
+    qc = pd.read_csv(atlas_files["qc"], sep="\t", dtype=str, keep_default_na=False).set_index("GSM")
+    gc_path = _feature_gc_table(atlas_files, tmp_path)
+    table = load_feature_gc(gc_path)
+    # a copy of GSM0000 with a GC trend put into its counts and recorded in its QC row: the same corrected counts
+    base = qc.loc["GSM0000"].copy()
+    base["full_gc_slope"], base["full_gc_curv"] = "0", "0"
+    inj = base.copy()
+    inj["full_gc_slope"] = "0.4"
+    qc2 = qc.copy()
+    qc2.loc["GSM0000"] = base
+    qc2.loc["GSMinj"] = inj
+    x = (table.loc[counts.index, "GC"].to_numpy() - 0.5) * 10
+    two = counts[["GSM0000", "GSM0105"]].astype(float).copy()
+    two["GSMinj"] = counts["GSM0000"].to_numpy() * np.exp(0.4 * x)
+    res = embed_counts(bundle, two, qc2, products=("corrected", "decoded"), feature_gc=table)
+    cor, dec = res["corrected_counts"], res["decoded_counts"]
+    assert list(cor.index) == list(bundle.fs.ids) and list(cor.columns) == ["GSM0000", "GSM0105", "GSMinj"] and dec.shape == cor.shape
+    mrna = np.asarray(bundle.fs.is_mrna)
+    obs = two.reindex(bundle.fs.ids, fill_value=0)
+    assert np.allclose(cor[mrna].sum(), obs[mrna].sum()) and np.allclose(dec[mrna].sum(), obs[mrna].sum())   # each sample's own depth
+    a, b = cor["GSM0000"].to_numpy(), cor["GSMinj"].to_numpy()
+    assert np.allclose(a / a[mrna].sum(), b / b[mrna].sum(), rtol=1e-6)
+    assert (cor.to_numpy()[obs.to_numpy() == 0] == 0).all() and (dec.to_numpy() >= 0).all() and set(res["samples"]["gc_offset"]) == {1}
+    # within a sample the corrected counts keep the observed detail: their log ratio is smooth in GC and the covariate term only
+    r = np.log(cor["GSM0105"].to_numpy()[mrna] + 1) - np.log(obs["GSM0105"].to_numpy()[mrna] + 1)
+    assert np.corrcoef(np.log(cor["GSM0105"].to_numpy()[mrna] + 1), np.log(obs["GSM0105"].to_numpy()[mrna] + 1))[0, 1] > 0.99 and r.std() < 1
+    # a table for another annotation, or none for these features, is refused
+    with pytest.raises(ValueError, match="lacks"):
+        embed_counts(bundle, two, qc2, products=("corrected",))                    # the package table: real inGEST features only
+    with pytest.raises(ValueError, match="lengths"):
+        embed_counts(bundle, two, qc2, products=("corrected",), feature_gc=table.assign(Length=table["Length"] + 1))
+    # (a sample without a GC fit is refused before this by a bundle that takes the GC covariates; with an older bundle it
+    # keeps its GC bias, with a warning: gc_offset gives it no offset, test_technical_swap_parts)
+    # through the CLI
+    out, small = tmp_path / "cli", tmp_path / "two.tsv"
+    counts[["GSM0000", "GSM0105"]].to_csv(small, sep="\t")
+    assert main(["embed", "--counts", str(small), "--qc", str(atlas_files["qc"]), "--models", str(trained),
+                 "--out", str(out), "--device", "cpu", "--corrected-counts", "--decoded-counts", "--feature-gc", str(gc_path)]) == 0
+    written = pd.read_csv(out / "corrected_counts.tsv", sep="\t", index_col=0)
+    assert written.shape == (len(bundle.fs.ids), 2) and (out / "decoded_counts.tsv").exists()
+    assert main(["embed", "--counts", str(small), "--qc", str(atlas_files["qc"]), "--models", str(trained),
+                 "--out", str(tmp_path / "nogc"), "--device", "cpu", "--corrected-counts"]) == 1          # no GC table for these features
+
+
 def test_embed_and_prepare_read_an_ingest_run(trained, atlas_files, tmp_path):
     from ecoli_atlas.data import qc_covariates
     from ecoli_atlas.prepare import prepare

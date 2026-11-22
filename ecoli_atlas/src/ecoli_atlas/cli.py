@@ -333,8 +333,13 @@ def cmd_embed(args) -> int:
         else:
             counts, qc = read_counts(args.counts), read_table(args.qc)
             antisense = read_counts(args.antisense) if args.antisense else None
+        products = tuple(p for p, on in (("corrected", args.corrected_counts), ("decoded", args.decoded_counts)) if on)
+        feature_gc = None
+        if products and args.feature_gc:
+            from .technical import load_feature_gc
+            feature_gc = load_feature_gc(args.feature_gc)
         res = embed_counts(bundle, counts, qc, device, args.min_feature_coverage, antisense,
-                           studies=_studies_arg(args.studies), pool=not args.no_pool)
+                           studies=_studies_arg(args.studies), pool=not args.no_pool, products=products, feature_gc=feature_gc)
     except (ValueError, FileNotFoundError) as exc:
         _info(f"error: {exc}")
         return 1
@@ -355,9 +360,14 @@ def cmd_embed(args) -> int:
               + (" ..." if len(high) > 10 else ""))
     res["missing"].to_csv(out / "missing_genes.tsv", sep="\t", index=False)
     res["coverage"].to_frame(bundle.fs.ids).to_csv(out / "feature_coverage.tsv", sep="\t")
+    written = []
+    for key in ("corrected_counts", "decoded_counts"):
+        if key in res:
+            res[key].to_csv(out / f"{key}.tsv", sep="\t", float_format="%.6g")
+            written.append(f"{key}.tsv")
     _info(f"embedded {len(res['embedding'])} samples ({res['coverage'].fraction:.1%} of the model features present); "
           f"wrote embedding.tsv, predictions.tsv, samples.tsv, missing_genes.tsv, feature_coverage.tsv"
-          + (" and qc.tsv" if args.ingest_results else "") + f" to {out}")
+          + "".join(f", {w}" for w in written) + (" and qc.tsv" if args.ingest_results else "") + f" to {out}")
     return 0
 
 
@@ -719,6 +729,16 @@ def build_parser() -> argparse.ArgumentParser:
                     "the missing-gene calls are pooled within a study. Default: all samples of the table are one study")
     sp.add_argument("--no-pool", action="store_true", help="call the genes missing from a strain for every sample on its own")
     sp.add_argument("--min-feature-coverage", type=float, default=0.9)
+    sp.add_argument("--corrected-counts", action="store_true",
+                    help="write corrected_counts.tsv: the observed counts with the technical part swapped for that of a reference "
+                    "library (paired-end, the atlas's mean technical values, no GC bias): the decoder's covariate term moved to the "
+                    "reference and the GC bias of the library taken off by its measured fit. Batch effects the covariates do not "
+                    "describe stay")
+    sp.add_argument("--decoded-counts", action="store_true",
+                    help="write decoded_counts.tsv: the decoder's expected counts at each sample's embedding with the same swap; "
+                    "denoised, but they lose real within-sample detail through the embedding (a summary, not corrected counts)")
+    sp.add_argument("--feature-gc", help="GC content of the features (Feature_ID, Length, GC; ecoli_atlas/scripts/feature_gc.py); "
+                    "default: the table for the inGEST counting annotation shipped with the package")
     sp.add_argument("--out", required=True)
     add_device(sp)
     sp.set_defaults(func=cmd_embed)

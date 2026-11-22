@@ -237,7 +237,8 @@ noise ceiling of ~0.98 on training studies, 0.71 on the TEST study). Batch remov
 form and technical effects separable from biology (covariates are near-constant within a study, so the term is learned
 from between-study differences; within one strain and condition the between-study share is still ~4x the null, and the
 measured covariates remove ~0.01-0.02 of it). Order:
-1. `embed --corrected-counts` (observed + W (c_ref - c) - GC offset; reference c: paired-end, training means, paired-end
+1. BUILT 2026-11-21 (`technical.py`, `reference/feature_gc_counting_v2.tsv`; GC covariates kept at the sample's own values in the
+   swap so GC is not taken off twice). Still to do: the metrics as a report. `embed --corrected-counts` (observed + W (c_ref - c) - GC offset; reference c: paired-end, training means, paired-end
    mean fragment sizes, gc_slope = gc_curv = 0) and `--decoded-counts` (denoised), with metrics, on the current model, no
    retraining: between-study share of one reference condition (MG1655 / K-12, mid exponential, aerobic, 37 C, M9 glucose
    and LB) against a shuffled-label null; within-study `phase_lfc` and medium contrasts kept; no gene GC / length trend

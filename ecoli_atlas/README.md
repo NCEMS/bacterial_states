@@ -297,6 +297,36 @@ Feature ids must be those of the counting annotation (fails below `--min-feature
 features, number of genes called missing, DNA estimate), `missing_genes.tsv` (the genes called
 missing from a sample's strain, see below) and `feature_coverage.tsv`.
 
+### Corrected and decoded counts (`embed --corrected-counts`, `--decoded-counts`)
+
+Both are tables features x samples, each sample scaled to its own reads on mRNA features, with
+the technical part of the library swapped for that of a reference library: paired-end, the atlas's
+mean technical values and no GC bias (`technical.py`).
+
+- `corrected_counts.tsv`: the **observed** counts with (1) the decoder's covariate term moved from
+  the sample's covariates to the reference (it is additive in the log rate, so this changes exactly
+  what the model learned the covariates do) and (2) the library's GC bias taken off by its own fit
+  (inGEST `gc_bias`: slope and curvature of log coverage on GC inside genes) at every feature's GC
+  content. The GC covariates stay at the sample's values in (1), so GC is not taken off twice. Every
+  sample keeps its own detail.
+- `decoded_counts.tsv`: the decoder's expected counts at the sample's embedding, with the same swap.
+  A denoised summary, not corrected counts: on the atlas they keep within-study stationary against
+  exponential fold changes at r 0.88 against a noise ceiling of about 0.98, and 0.71 on the TEST
+  study. Genes called missing from a strain are 0 here; in the corrected counts they keep their
+  observed count. Genomic-DNA reads are not in the decoder's rate, so they are not in these counts.
+
+What is corrected: the measured technical covariates, and fully the GC bias (on the atlas the
+per-sample GC trend falls from r 0.61 against the library's GC slope to 0.02 with the offset alone).
+What is not: batch effects the covariates do not describe. Within one strain and condition the
+between-study share of the variance is still about four times its no-study-effect value, and the
+covariates remove 0.01-0.02 of it (`work/batch_correction/`). Within-study contrasts are kept
+(r 0.999 against the observed counts).
+
+The GC offset needs each feature's GC content: the package ships it for the inGEST counting
+annotation (`reference/feature_gc_counting_v2.tsv`, made by `scripts/feature_gc.py`); `--feature-gc`
+takes a table for another annotation, and `embed` refuses a table whose features or lengths do not
+match the bundle.
+
 ### Genomic DNA in the library
 
 DNA left in a library adds reads to every feature in proportion to its length, whatever its
