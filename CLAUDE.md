@@ -180,7 +180,7 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   projected only. Cross-validation is study-blind (unlike v1): holding out a fold removes every
   sample of its studies from the fit. The phase call is scored only where `growth_phase_basis` is
   `stated`; inferred phases are fitted on but not scored, and the statistics come from the reference training samples. `GSE224463` is
-  withheld and the four case studies are TEST. `embed` fails below `--min-feature-coverage` (0.9).
+  withheld; the four case studies and GSE67402 (the worked example) are TEST. `embed` fails below `--min-feature-coverage` (0.9).
 - Bundles (`artifacts.py`, `schema_version` 2) store tensors only (`torch.load(weights_only=True)`
   works). Seeds are ranked on out-of-fold scores (`--cv`), never on TEST.
 - Class calls are at probability 0.5.
