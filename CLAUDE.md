@@ -40,7 +40,7 @@ Never `git add` any of these (all in `.gitignore`): `resources/`, `old_resources
 Download URLs live in exactly two files: `ecoli_ingest/src/ecoli_ingest/resources.py` and
 `ecoli_atlas/src/ecoli_atlas/download.py`. The inGEST core bundle and both ATLAS bundles are
 assets of the GitHub release `resources-v1` (`.../releases/download/resources-v1/<name>`; built in
-`work/release_v1/`; data releases are tagged `resources-vN`, code releases `X.X.X`),
+`work/release_v1/`; data releases are tagged `resources-vN`, code releases `vX.Y.Z` (`v1.0.0`)),
 the Centrifuge index comes from the Centrifuge authors' bucket
 (`genome-idx.s3.amazonaws.com/centrifuge/`), and the container image is still a placeholder (`TBD`).
 Bundle file names are `ecoli_ingest_*` / `ecoli_atlas_*` (other microbes may follow).

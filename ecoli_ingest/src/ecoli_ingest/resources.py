@@ -18,7 +18,7 @@ from pathlib import Path
 from . import paths
 
 RESOURCES_VERSION = "v1"
-# assets of the GitHub data release `resources-<version>` (code releases are tagged X.X.X)
+# assets of the GitHub data release `resources-<version>` (code releases are tagged vX.Y.Z)
 RELEASE_URL = f"https://github.com/NCEMS/bacterial_states/releases/download/resources-{RESOURCES_VERSION}"
 
 # bundle name -> top-level directories (relative to the resources dir) that belong to it
