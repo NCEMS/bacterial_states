@@ -15,7 +15,7 @@ import urllib.request
 from pathlib import Path
 
 ATLAS_DATA_VERSION = "v2"
-# assets of the GitHub data release `resources-<version>` (code releases are tagged X.X.X)
+# assets of the GitHub data release `resources-<version>` (code releases are tagged vX.Y.Z)
 RELEASE_URL = f"https://github.com/NCEMS/bacterial_states/releases/download/resources-{ATLAS_DATA_VERSION}"
 ENV_DATA = "ECOLI_ATLAS_DATA"
 ENV_MODELS = "ECOLI_ATLAS_MODELS"

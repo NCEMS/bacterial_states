@@ -43,7 +43,7 @@ Never `git add` any of these (all in `.gitignore`): `resources/`, `old_resources
 Download URLs live in exactly two files: `ecoli_ingest/src/ecoli_ingest/resources.py` and
 `ecoli_atlas/src/ecoli_atlas/download.py`. The inGEST core bundle and both ATLAS bundles are assets of the GitHub
 release `resources-v2` (`.../releases/download/resources-v2/<name>`; data releases are tagged `resources-vN`, code
-releases `X.X.X`). They are built by `release/make_release.py --root . --out work/release_v2` (reproducible bytes;
+releases `vX.Y.Z`, e.g. `v1.0.0`). They are built by `release/make_release.py --root . --out work/release_v2` (reproducible bytes;
 the per-file checksums of the core bundle are in `resources.manifest.tsv`, the archive checksums are pinned in
 `download.py`): core = vg index, counting annotation, genome FASTA; training-data = the `atlas_v2_*` tables,
 `metadata_v2*` with its GEO text and evidence, `sample_qc.tsv`, `time_courses.tsv`, `atlas_v2_missing_genes.tsv`

@@ -28,7 +28,7 @@ NLL rose by about one seed SD (`work/phase_dims/NOTES.md`). `train --block-dims`
   differ are kept apart; matching control conditions of different studies are drawn together.
 
 This is the first stage of the design. Not yet in the model: batch-corrected counts. The earlier (v1) model and its
-`verify-models` command are in the `1.0` code release and the `resources-v1` data release.
+`verify-models` command are in the `v1.0.0` code release and the `resources-v1` data release.
 
 ## Install
 
