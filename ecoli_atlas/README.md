@@ -286,6 +286,11 @@ atlas sample has (read-1 lengths, strand purity, substitution rate, GC slope and
 fragment sizes for paired-end libraries). The GC bias is in records made with the reference
 genome in the inGEST resources (`annotation/GCF_000005845.2_ASM584v2_genomic.fna`). For an older
 run, add the genome and repeat the record step (`ecoli_ingest run -- --forcerun sample_qc`).
+A record made with the genome can still lack the GC bias when the library is too shallow for the fit (fewer than 50
+genes of at least 600 bp at depth 5). `embed --fill-missing-gc study` embeds such samples with the median GC slope
+and curvature of the other samples of their study (`--studies`, else the whole table), `--fill-missing-gc atlas` with
+the training mean; `samples.tsv` says which (`gc_filled`) and `embed` warns. Such libraries are usually also below
+the depth gate (`low_depth`), outside the depths the model was trained on.
 Centrifuge is not needed. For a bundle made before the covariate choice, the older list
 applies, and a run made with `centrifuge: false` gets the atlas mean for the other-genus value, with
 a warning. The
@@ -374,9 +379,10 @@ expression. It is handled by leaving the worst libraries out:
   it passes.
 - **Library depth:** `embed` also writes `cds_reads` (reads on CDS features) and `low_depth` (1 below 200,000, the
   atlas's depth gate `qc_table.py mark-model --min-cds-reads`; the bundle's `min_cds_reads`) and warns for such samples;
-  it does not refuse them. No atlas sample is that shallow, and their calls are not reliable: exponential libraries of
-  GSE67402 thinned to 200,000 CDS reads, and its total-RNA libraries (about 100,000), were called stationary, while deep
-  atlas samples thinned to 200,000 mostly kept their call (`work/qc_module/depth_checks.txt`).
+  it does not refuse them. No atlas sample is that shallow. The model has not learned that shallow means stationary in
+  general (deep atlas samples thinned to 200,000 CDS reads kept their call; within replicate groups depth barely
+  tracks the phase score), but single studies can be fragile: exponential libraries of GSE67402 thinned to 200,000,
+  and its total-RNA libraries (about 100,000), were called stationary (`work/qc_module/depth_checks.txt`).
 
 Two corrections exist in the code and are **off** (`train --dna-decoder`, `--dna-inputs`): an
 additive DNA term in the decoder's count mean (`models.count_log_mean`, expected reads from

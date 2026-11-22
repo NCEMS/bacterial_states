@@ -158,7 +158,8 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   bundle trained with it needs the table again in `evaluate` / `figures` / `embed` to give the same calls.
   Genomic DNA: samples with `dna_fraction_est` above 10% are left out of the model (`mark-model --max-dna-fraction`, `high_dna`) and
   `embed` warns for them (`high_dna` in `samples.tsv`); it does not refuse. Likewise samples below the depth gate of 200,000 CDS reads
-  (`low_depth`, `cds_reads`, config `min_cds_reads`): their calls are not reliable (GSE67402 thinned to 200 k called stationary). The two corrections (`train --dna-decoder`: additive term in the
+  (`low_depth`, `cds_reads`, config `min_cds_reads`): outside the trained depths. No general shallow-means-stationary
+  trend in the atlas (thinned deep samples kept their call), but GSE67402 thinned to 200 k was called stationary. The two corrections (`train --dna-decoder`: additive term in the
   count mean; `--dna-inputs`: expected DNA reads taken off the encoder inputs; `data.dna_density`) are off: tried on 2026-11-21, no gain on
   the atlas and the input correction harms shallow libraries (`outputs/models_v2_dna*`, `work/dna_term/`).
   `ecoli_atlas axes` places samples on ordered axes of an embedding (ordinal and anchor scores, always
@@ -222,7 +223,8 @@ existing `ecoli_ingest` env (`mamba install -n ecoli_ingest -c bioconda sra-tool
 container needs a rebuild to get them.
 
 Next after the DNA term is settled (user, 2026-11-21): how the QC covariates enter the model. The model is not trained
-without QC (user decision: no hiding of covariates in training), and `embed` refuses samples without QC values (done
+without QC (user decision: no hiding of covariates in training), and `embed` refuses samples without QC values (except, on request, a missing GC fit: `embed --fill-missing-gc
+study|atlas`, user decision 2026-11-22, recorded in `gc_filled`) (done
 2026-11-21: `embed --ingest-results RUN_DIR` reads counts, antisense counts and the QC records in one step; `qc_record.py`,
 `data.check_qc`). Covariates are technical only (`config.COVARIATES`, 11 since the instrument flags were dropped;
 `work/qc_blocks/`); the block encoders never see them.

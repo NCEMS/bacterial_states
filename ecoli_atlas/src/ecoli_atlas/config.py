@@ -141,9 +141,10 @@ class TrainConfig:
     # The two corrections are off: on the atlas they gave no gain and the input correction harms shallow libraries.
     max_dna_fraction: float = 0.10
     # the depth gate of the atlas (qc_table.py mark-model --min-cds-reads): no sample with fewer reads on CDS features was
-    # trained on, and `embed` flags samples below it (`low_depth`). Below it the calls are not reliable: exponential
-    # libraries of GSE67402 thinned to 200 k CDS reads, and its total-RNA libraries (~100 k), were called stationary
-    # (`work/qc_module/depth_checks.txt`); deep atlas samples thinned to 200 k mostly kept their call.
+    # trained on, and `embed` flags samples below it (`low_depth`). The model has not learned "shallow = stationary" in
+    # general: deep atlas samples thinned to 200 k CDS reads kept their call (1 of 40 exponential flipped) and depth barely
+    # tracks the phase score within replicate groups (r 0.10); but exponential libraries of GSE67402 thinned to 200 k,
+    # and its total-RNA libraries (~100 k), were called stationary (`work/qc_module/depth_checks.txt`).
     min_cds_reads: int = 200_000
     covariates: tuple = COVARIATES   # columns of data.covariate_frame given to the residual encoder and the decoder
     # phase-order term of the phase block (stage 1; 0 = off): a pairwise ranking loss on the phase score over pairs of

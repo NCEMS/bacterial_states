@@ -976,3 +976,26 @@ def test_embed_flags_low_depth(trained, atlas_files, tmp_path):
     assert bundle.config.min_cds_reads == 200_000
     assert (s["cds_reads"] == two[cds].sum().to_numpy()).all()
     assert s.loc["deep", "low_depth"] == 0 and (s.loc[["GSM0000", "GSM0105"], "low_depth"] == (s.loc[["GSM0000", "GSM0105"], "cds_reads"] < 200_000)).all()
+
+
+def test_embed_fills_missing_gc(trained, atlas_files):
+    from ecoli_atlas.embed import fill_gc_values
+    bundle = ModelBundle.load(trained)
+    counts = read_counts(atlas_files["counts"])
+    qc = pd.read_csv(atlas_files["qc"], sep="\t", dtype=str, keep_default_na=False).set_index("GSM")
+    ids = ["GSM0000", "GSM0001", "GSM0002"]
+    qc.loc["GSM0001", ["full_gc_slope", "full_gc_curv"]] = ""             # a library too shallow for the GC fit
+    with pytest.raises(ValueError, match="gc_slope"):
+        embed_counts(bundle, counts[ids], qc)
+    res = embed_counts(bundle, counts[ids], qc, fill_missing_gc="study")
+    assert res["samples"]["gc_filled"].tolist() == ["", "study", ""] and any("filled with the study median" in w for w in res["warnings"])
+    filled, how = fill_gc_values(qc, ids, "study", bundle.scaler)
+    want = np.median([float(qc.loc[i, "full_gc_slope"]) for i in ("GSM0000", "GSM0002")])
+    assert abs(float(filled.loc["GSM0001", "full_gc_slope"]) - want) < 1e-4 and how["GSM0001"] == "study"
+    filled, _ = fill_gc_values(qc, ids, "atlas", bundle.scaler)
+    k = bundle.scaler.numeric.index("gc_curv")
+    assert abs(float(filled.loc["GSM0001", "full_gc_curv"]) - bundle.scaler.mu[k]) < 1e-4
+    # the samples' own values stay as they are; a study without any GC fit cannot be filled from its study
+    assert filled.loc["GSM0000", "full_gc_slope"] == qc.loc["GSM0000", "full_gc_slope"]
+    with pytest.raises(ValueError, match="no sample of the study"):
+        fill_gc_values(qc, ["GSM0001"], "study", bundle.scaler)

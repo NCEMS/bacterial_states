@@ -345,7 +345,8 @@ def cmd_embed(args) -> int:
             from .technical import load_feature_gc
             feature_gc = load_feature_gc(args.feature_gc)
         res = embed_counts(bundle, counts, qc, device, args.min_feature_coverage, antisense,
-                           studies=_studies_arg(args.studies), pool=not args.no_pool, products=products, feature_gc=feature_gc)
+                           studies=_studies_arg(args.studies), pool=not args.no_pool, products=products, feature_gc=feature_gc,
+                           fill_missing_gc=args.fill_missing_gc)
     except (ValueError, FileNotFoundError) as exc:
         _info(f"error: {exc}")
         return 1
@@ -368,7 +369,7 @@ def cmd_embed(args) -> int:
     if len(low):
         gate = bundle.config.min_cds_reads
         _info(f"warning: {len(low)} sample(s) have fewer than {gate:,} reads on CDS features, the depth below which no sample was part of "
-              f"the atlas; their calls and position are not reliable (shallow libraries can look stationary): "
+              f"the atlas, so they are outside the depths the model was trained on; read their calls and position with care: "
               + ", ".join(f"{s} ({res['samples'].loc[s, 'cds_reads']:,})" for s in low[:10]) + (" ..." if len(low) > 10 else ""))
     res["missing"].to_csv(out / "missing_genes.tsv", sep="\t", index=False)
     res["coverage"].to_frame(bundle.fs.ids).to_csv(out / "feature_coverage.tsv", sep="\t")
@@ -768,6 +769,10 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--studies", help="table sample -> study (first column the sample; column GSE or study, else the second column): "
                     "the missing-gene calls are pooled within a study. Default: all samples of the table are one study")
     sp.add_argument("--no-pool", action="store_true", help="call the genes missing from a strain for every sample on its own")
+    sp.add_argument("--fill-missing-gc", choices=["study", "atlas"],
+                    help="embed samples whose QC record has no GC bias fit (too few deep genes) with the median of their study's "
+                    "samples (study; --studies, else the whole table) or the atlas training mean (atlas), instead of refusing them; "
+                    "samples.tsv says which (gc_filled). Such libraries are usually below the depth gate too")
     sp.add_argument("--min-feature-coverage", type=float, default=0.9)
     sp.add_argument("--corrected-counts", action="store_true",
                     help="write corrected_counts.tsv: the observed counts with the technical part swapped for that of a reference "

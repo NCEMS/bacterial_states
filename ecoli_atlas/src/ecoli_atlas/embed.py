@@ -7,10 +7,47 @@ import torch
 
 from .artifacts import ModelBundle
 from .config import HEADS
-from .data import _qc_value, check_qc, covariate_frame, dna_density, dna_reads, gc_cleaned_counts
+from .data import _qc_value, check_qc, qc_covariates, covariate_frame, dna_density, dna_reads, gc_cleaned_counts
 from .preprocess import align_counts, call_groups, group_calls, log_expression, missing_genes, size_factors
 from .technical import GCProfile, feature_gc_for, load_feature_gc, technical_counts
 from .train import encode
+
+
+GC_FILLS = ("study", "atlas")
+
+
+def fill_gc_values(qc: pd.DataFrame, ids: list, how: str, scaler, studies=None) -> tuple:
+    """Fill the GC bias (gc_slope, gc_curv) of samples whose QC record has none (``embed --fill-missing-gc``): ``study``
+    with the median of the samples of the same study that have it (``studies``; without it the whole table is one
+    study), ``atlas`` with the training mean of the bundle. Returns (QC table with the values filled, Series sample ->
+    how it was filled, '' for the others). A library too shallow for the GC fit (inGEST gc_bias.py: 50 genes at depth 5)
+    is usually also below the depth gate (``low_depth``), outside the depths the model was trained on."""
+    if how not in GC_FILLS:
+        raise ValueError(f"--fill-missing-gc must be one of {GC_FILLS}, not {how!r}")
+    cov = qc_covariates(qc, ids)
+    lacking = [i for i in ids if pd.isna(cov.at[i, "gc_slope"]) or pd.isna(cov.at[i, "gc_curv"])]
+    filled = pd.Series("", index=ids, dtype=object)
+    if not lacking:
+        return qc, filled
+    out = qc.copy()
+    study = pd.Series("all", index=ids, dtype=object) if studies is None else pd.Series(studies).reindex(ids).fillna("all").astype(object)
+    for name in ("gc_slope", "gc_curv"):
+        col = "full_" + name if "full_" + name in out.columns else name
+        if col not in out.columns:
+            out[col] = np.nan
+        out[col] = out[col].astype(object)
+        for i in lacking:
+            if how == "atlas":
+                value = float(scaler.mu[scaler.numeric.index(name)])
+            else:
+                peers = [j for j in ids if study[j] == study[i] and j not in lacking]
+                if not peers:
+                    raise ValueError(f"--fill-missing-gc study: no sample of the study of {i} ({study[i]}) has a GC fit; "
+                                     "use --fill-missing-gc atlas")
+                value = float(cov.loc[peers, name].median())
+            out.at[i, col] = f"{value:.6g}"
+    filled[lacking] = how
+    return out, filled
 
 
 def bundle_feature_gc(bundle: ModelBundle, table: pd.DataFrame | None = None) -> GCProfile:
@@ -29,7 +66,7 @@ def bundle_feature_gc(bundle: ModelBundle, table: pd.DataFrame | None = None) ->
 
 def embed_counts(bundle: ModelBundle, counts: pd.DataFrame, qc: pd.DataFrame, device="cpu",
                  min_coverage: float = 0.9, antisense: pd.DataFrame | None = None, studies=None, pool: bool = True,
-                 products: tuple = (), feature_gc: pd.DataFrame | None = None) -> dict:
+                 products: tuple = (), feature_gc: pd.DataFrame | None = None, fill_missing_gc: str | None = None) -> dict:
     """counts: features x samples (inGEST feature ids). qc: table indexed by sample with the QC values
     (``qc_record.read_qc_records`` of an inGEST run, or the ``full_*`` columns of ``sample_qc.tsv``);
     required, and every sample must have the values ``data.check_qc`` asks for.
@@ -52,6 +89,8 @@ def embed_counts(bundle: ModelBundle, counts: pd.DataFrame, qc: pd.DataFrame, de
     products: ``"corrected"`` and / or ``"decoded"``: counts with the technical part swapped for that of a
     reference library (``technical.py``), returned as ``corrected_counts`` / ``decoded_counts`` (features x
     samples); ``samples`` then has ``gc_offset`` (1 where the sample's GC bias was taken off).
+    ``fill_missing_gc``: ``study`` or ``atlas``: samples without a GC bias fit get one instead of
+    being refused (``fill_gc_values``); ``samples`` then says which (``gc_filled``).
     ``feature_gc``: GC content of the features (``technical.load_feature_gc``; default the package table for
     the inGEST counting annotation).
     """
@@ -60,7 +99,14 @@ def embed_counts(bundle: ModelBundle, counts: pd.DataFrame, qc: pd.DataFrame, de
     if coverage.fraction < min_coverage:
         raise ValueError(f"only {coverage.n_present} of {coverage.n_model_features} model features are in the count table "
                          f"({coverage.fraction:.1%}); the table must use the inGEST feature ids (e.g. CDS_b0002_thrA)")
+    gc_filled = pd.Series("", index=ids, dtype=object)
+    if fill_missing_gc:
+        qc, gc_filled = fill_gc_values(qc, ids, fill_missing_gc, bundle.scaler, studies)
     warnings = check_qc(qc, ids, bundle.scaler.names)
+    if (gc_filled != "").any():
+        warnings = warnings + [f"{int((gc_filled != '').sum())} sample(s) have no GC bias fit; filled with the {fill_missing_gc} "
+                               f"{'median' if fill_missing_gc == 'study' else 'training mean'} (gc_filled in samples.tsv): "
+                               + ", ".join(gc_filled.index[gc_filled != ""][:10])]
     cfg = bundle.config
     # genomic DNA, when the bundle was trained with corrected inputs: the expected DNA reads (from the QC table) come off the counts
     rho, dlen = dna_density(qc, ids, bundle.fs.genome_length) if cfg.dna_inputs else (np.zeros(len(ids)), np.zeros(len(ids)))
@@ -109,6 +155,7 @@ def embed_counts(bundle: ModelBundle, counts: pd.DataFrame, qc: pd.DataFrame, de
     cds = np.array([f.startswith("CDS_") for f in bundle.fs.ids])
     info["cds_reads"] = Y[:, cds].sum(axis=1).round(0).astype(np.int64)
     info["low_depth"] = (info["cds_reads"] < cfg.min_cds_reads).astype(int)
+    info["gc_filled"] = gc_filled.reindex(ids).to_numpy()
     rows, cols = np.nonzero(miss)
     missing = pd.DataFrame({"sample": np.array(ids, dtype=object)[rows], "feature": np.array(bundle.fs.ids, dtype=object)[cols]})
     out = {}
