@@ -25,6 +25,33 @@ def feature_table(tmp_path_factory):
     return path
 
 
+@pytest.fixture(scope="session", autouse=True)
+def package_feature_gc(tmp_path_factory, feature_table):
+    """The encoders' inputs are GC-cleaned by default, which needs the feature GC table of the annotation; the package
+    table is made for the inGEST counting annotation, so for the synthetic one the default table (``load_feature_gc()``)
+    is a synthetic table with a window profile."""
+    from ecoli_atlas import embed, technical
+    feat = pd.read_csv(feature_table, sep="\t")
+    rng = np.random.default_rng(7)
+    gc = 0.42 + 0.16 * rng.random(len(feat))
+    P = np.zeros((len(feat), len(technical.GC_BINS)))
+    for i, g in enumerate(gc):
+        k = np.clip(np.rint((g + rng.normal(0, 0.04, 10) - technical.GC_BINS[0]) / 0.01).astype(int), 0, len(technical.GC_BINS) - 1)
+        P[i] = np.bincount(k, minlength=len(technical.GC_BINS)) / len(k)
+    table = pd.concat([pd.DataFrame({"Feature_ID": feat["Feature_ID"], "Length": feat["Length"], "GC": gc}),
+                       pd.DataFrame(P, columns=list(technical.GC_BIN_COLUMNS))], axis=1).set_index("Feature_ID")
+    original = technical.load_feature_gc
+
+    def load(path=None):
+        return table.copy() if path is None else original(path)
+
+    mp = pytest.MonkeyPatch()
+    mp.setattr(technical, "load_feature_gc", load)
+    mp.setattr(embed, "load_feature_gc", load)
+    yield table
+    mp.undo()
+
+
 @pytest.fixture(scope="session")
 def atlas_files(tmp_path_factory, feature_table):
     """Paths of counts, metadata and QC tables for N_STUDIES studies. Phase raises the first ten

@@ -272,6 +272,16 @@ measured covariates remove ~0.01-0.02 of it). Order:
    factor left a per-sample constant (SD 0.04, r 0.62 with gc_slope) that only z could fit - a likely reason both
    GC-term sweeps put more GC into z. The first qc-module sweeps were stopped for it. C3 replicate penalty (within-group cross-covariance of z and c, group sampler); C4 QC augmentation (another
    sample's GC offset, depth and DNA reads applied to the counts; z invariant); C5 a replicate pull, only if needed.
+   RESULT (2026-11-22 sweeps, user decision): the encoder side alone is the DEFAULT (`clean_inputs` on,
+   `encoder_covariates` off; flags kept both ways): GC in z 0.24 -> 0.03 within replicates, 0.33 -> 0.02 over all
+   samples, TEST NLL 6.206. The decoder additions (`--qc-module`) are not used: they kept GC in z across samples and
+   worsened NLL; corrected counts are the QC-free product. Open: strand purity (genomic DNA) still leaks into z within
+   replicates (0.15-0.17) in every arm. C3-C5 on hold.
+   Strand-purity diagnosis (`work/qc_module/strand_diag.txt`, `strand_fix_check.txt`): it is genomic DNA (z -> DNA
+   estimate R2 0.37, z -> strand purity beyond DNA ~0), 1.4-1.7% of z's within-replicate variance; in the counts DNA
+   compresses the dynamic range (slope over genes follows expression, rho 0.75, not length), so the mechanistic DNA
+   term explains none of it. Taking it off the encoder inputs removes 40-70% but adds replicate noise (antisense
+   subtraction +63% median; expected-DNA or smooth background +21% on genes under 50 reads).
    Study adversary and twins for batch removal are dropped; read-1-only recounts of paired-end libraries could give
    real layout / fragment-size twins for C4.
 5. A nonlinear covariate branch on c alone (kept out of f(z)), only if the replicate measures show it is needed.

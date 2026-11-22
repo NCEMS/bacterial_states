@@ -137,7 +137,7 @@ def cmd_train(args) -> int:
     cfg.gc_offset, cfg.gc_scale, cfg.feature_gc = args.gc_offset, args.gc_scale, args.feature_gc
     if args.gc_scale != "learned" and not args.gc_offset:
         raise SystemExit("--gc-scale applies to the GC term: give --gc-offset too")
-    cfg.clean_inputs, cfg.encoder_covariates, cfg.qc_module = args.clean_inputs, not args.no_encoder_covariates, args.qc_module
+    cfg.clean_inputs, cfg.encoder_covariates, cfg.qc_module = args.clean_inputs, args.encoder_covariates, args.qc_module
     cfg.apply_qc_module()
     cfg.phase_order_weight = args.phase_order_weight
     if args.block_dims:
@@ -690,10 +690,12 @@ def build_parser() -> argparse.ArgumentParser:
                     "measured fit (fixed), so the decoder cannot split the GC effect between the term and the embedding")
     sp.add_argument("--feature-gc", help="with --gc-offset or --clean-inputs: GC content of the features (Feature_ID, Length, GC); "
                     "default: the table for the inGEST counting annotation shipped with the package")
-    sp.add_argument("--clean-inputs", action="store_true",
-                    help="take each library's measured GC offset off the counts the encoders see (off by default)")
-    sp.add_argument("--no-encoder-covariates", action="store_true",
-                    help="the residual encoder sees expression only, not the technical covariates")
+    sp.add_argument("--clean-inputs", action=argparse.BooleanOptionalAction, default=True,
+                    help="take each library's measured GC offset off the counts the encoders see (default); "
+                    "--no-clean-inputs: the raw counts, as before 2026-11-22")
+    sp.add_argument("--encoder-covariates", action=argparse.BooleanOptionalAction, default=False,
+                    help="give the technical covariates to the residual encoder too (--no-encoder-covariates, expression only, "
+                    "is the default)")
     sp.add_argument("--qc-module", action="store_true",
                     help="all technical terms in one module: --gc-offset --gc-scale fixed --dna-decoder --clean-inputs "
                     "--no-encoder-covariates")

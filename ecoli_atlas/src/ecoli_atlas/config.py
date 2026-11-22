@@ -154,12 +154,14 @@ class TrainConfig:
     # fixed: held at 1, the gene-level value of the measured fit, so the decoder cannot split GC between the term and z
     gc_scale: str = "learned"
     feature_gc: str | None = None
-    # encoder side of the QC module (`work/qc_module/`): clean_inputs takes each sample's measured GC offset
-    # (technical.gc_offset) off the counts the encoders see; encoder_covariates False keeps the covariates out of the
-    # residual encoder, which then sees expression only. qc_module sets the whole module: GC term at fixed scale 1,
-    # the genomic-DNA term in the decoder, clean inputs, no covariates in the encoder (``apply_qc_module``)
-    clean_inputs: bool = False
-    encoder_covariates: bool = True
+    # what the encoders see (default since 2026-11-22, user decision; `work/qc_module/NOTES.md`): clean_inputs takes each
+    # sample's measured GC offset (technical.gc_offset) off the counts the encoders see; encoder_covariates False keeps
+    # the covariates out of the residual encoder, which then sees expression only. Together they took GC out of z (R2
+    # 0.24 -> 0.03 within replicates, 0.33 -> 0.02 over all samples) with TEST NLL 6.206 against 6.217. The decoder keeps
+    # its linear covariate term on all covariates. qc_module (not the default) adds the decoder's GC term at fixed scale
+    # and the genomic-DNA term (``apply_qc_module``); it kept GC in z across samples (0.33)
+    clean_inputs: bool = True
+    encoder_covariates: bool = False
     # with the GC term or the cleaned inputs: size factors (and the size-factor reference) from the GC-cleaned counts, so
     # that the GC part cannot shift a library's size factor (a mean-centred offset against a median-of-ratios size factor
     # leaves a per-sample constant, SD 0.04, correlated 0.62 with gc_slope, that only z could fit). False in bundles

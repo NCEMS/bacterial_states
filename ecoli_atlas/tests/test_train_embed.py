@@ -674,8 +674,7 @@ def test_corrected_and_decoded_counts(trained, atlas_files, tmp_path):
     bundle = ModelBundle.load(trained)
     counts = read_counts(atlas_files["counts"])
     qc = pd.read_csv(atlas_files["qc"], sep="\t", dtype=str, keep_default_na=False).set_index("GSM")
-    gc_path = _feature_gc_table(atlas_files, tmp_path)
-    table = load_feature_gc(gc_path)
+    table = load_feature_gc()                       # the table the bundle's inputs were cleaned with (window profile)
     # a copy of GSM0000 with a GC trend put into its counts and recorded in its QC row: the same corrected counts
     base = qc.loc["GSM0000"].copy()
     base["full_gc_slope"], base["full_gc_curv"] = "0", "0"
@@ -684,9 +683,11 @@ def test_corrected_and_decoded_counts(trained, atlas_files, tmp_path):
     qc2 = qc.copy()
     qc2.loc["GSM0000"] = base
     qc2.loc["GSMinj"] = inj
-    x = (table.loc[counts.index, "GC"].to_numpy() - 0.5) * 10
+    from ecoli_atlas.technical import feature_gc_for, gc_offset
+    prof = feature_gc_for(bundle.fs, table)
+    inj_off = pd.Series(gc_offset(prof, np.array([0.4]), np.array([0.0]), bundle.fs.is_mrna, bundle.fs.lengths)[0], index=bundle.fs.ids)
     two = counts[["GSM0000", "GSM0105"]].astype(float).copy()
-    two["GSMinj"] = counts["GSM0000"].to_numpy() * np.exp(0.4 * x)
+    two["GSMinj"] = counts["GSM0000"].to_numpy() * np.exp(inj_off.reindex(counts.index).to_numpy())
     res = embed_counts(bundle, two, qc2, products=("corrected", "decoded"), feature_gc=table)
     cor, dec = res["corrected_counts"], res["decoded_counts"]
     assert list(cor.index) == list(bundle.fs.ids) and list(cor.columns) == ["GSM0000", "GSM0105", "GSMinj"] and dec.shape == cor.shape
@@ -701,20 +702,22 @@ def test_corrected_and_decoded_counts(trained, atlas_files, tmp_path):
     assert np.corrcoef(np.log(cor["GSM0105"].to_numpy()[mrna] + 1), np.log(obs["GSM0105"].to_numpy()[mrna] + 1))[0, 1] > 0.99 and r.std() < 1
     # a table for another annotation, or none for these features, is refused
     with pytest.raises(ValueError, match="lacks"):
-        embed_counts(bundle, two, qc2, products=("corrected",))                    # the package table: real inGEST features only
+        embed_counts(bundle, two, qc2, products=("corrected",), feature_gc=table.iloc[5:])      # features missing
     with pytest.raises(ValueError, match="lengths"):
         embed_counts(bundle, two, qc2, products=("corrected",), feature_gc=table.assign(Length=table["Length"] + 1))
     # (a sample without a GC fit is refused before this by a bundle that takes the GC covariates; with an older bundle it
     # keeps its GC bias, with a warning: gc_offset gives it no offset, test_technical_swap_parts)
     # through the CLI
-    out, small = tmp_path / "cli", tmp_path / "two.tsv"
+    out, small, gc_path = tmp_path / "cli", tmp_path / "two.tsv", tmp_path / "feature_gc_windows.tsv"
+    table.to_csv(gc_path, sep="\t")
     counts[["GSM0000", "GSM0105"]].to_csv(small, sep="\t")
     assert main(["embed", "--counts", str(small), "--qc", str(atlas_files["qc"]), "--models", str(trained),
                  "--out", str(out), "--device", "cpu", "--corrected-counts", "--decoded-counts", "--feature-gc", str(gc_path)]) == 0
     written = pd.read_csv(out / "corrected_counts.tsv", sep="\t", index_col=0)
     assert written.shape == (len(bundle.fs.ids), 2) and (out / "decoded_counts.tsv").exists()
     assert main(["embed", "--counts", str(small), "--qc", str(atlas_files["qc"]), "--models", str(trained),
-                 "--out", str(tmp_path / "nogc"), "--device", "cpu", "--corrected-counts"]) == 1          # no GC table for these features
+                 "--out", str(tmp_path / "nogc"), "--device", "cpu", "--corrected-counts",
+                 "--feature-gc", str(_feature_gc_table(atlas_files, tmp_path))]) == 1   # not the profile the inputs were cleaned with
 
 
 def test_gc_term_in_the_decoder(train_args, atlas_files, tmp_path):
@@ -813,12 +816,13 @@ def test_qc_module(train_args, atlas_files, tmp_path):
     ref = pd.read_csv(out / "embedding.tsv", sep="\t", index_col=0).loc[["GSM0000", "GSM0105"]]
     assert np.allclose(res["embedding"].to_numpy(), ref.to_numpy(), atol=2e-4)
     # the flags one by one; an old bundle reads as an encoder with covariates and uncleaned inputs
-    cfg = TrainConfig(clean_inputs=True)
-    assert cfg.clean_inputs and not cfg.gc_offset and cfg.encoder_covariates
-    assert TrainConfig.from_dict({}).encoder_covariates and not TrainConfig.from_dict({}).clean_inputs
+    cfg = TrainConfig()                                                     # the encoder side is the default, the decoder terms are not
+    assert cfg.clean_inputs and not cfg.encoder_covariates and not cfg.gc_offset and not cfg.dna_decoder
     old = ModelBundle.load(out)
-    old.manifest["config"].pop("gc_size_factors")
-    assert not old.config.gc_size_factors                                   # a bundle made before: raw-count size factors
+    for k in ("gc_size_factors", "clean_inputs", "encoder_covariates"):
+        old.manifest["config"].pop(k)
+    oc = old.config                                                         # a bundle made before: raw inputs and size factors,
+    assert not oc.gc_size_factors and not oc.clean_inputs and oc.encoder_covariates   # an encoder that saw the covariates
 
 
 def test_embed_and_prepare_read_an_ingest_run(trained, atlas_files, tmp_path):

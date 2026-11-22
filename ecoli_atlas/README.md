@@ -333,14 +333,15 @@ value of the measured fit (subtracting it leaves no GC trend in the observed cou
 counts (trend 0.13 against 0.42) but z still carried more GC than with the plain linear term,
 so neither variant is the default.
 
-`train --qc-module` puts all technical terms into one module and closes the encoder against them: the GC
-term at fixed scale 1, the genomic-DNA term (`--dna-decoder`), encoder inputs with each library's measured GC
-offset taken off the counts (`--clean-inputs`), and a residual encoder that sees expression only
-(`--no-encoder-covariates`). Each part is also its own flag. The manifest reports the encoder side under
-`encoder_inputs`; with the GC term or cleaned inputs the size factors are made from the GC-cleaned counts, so the
-GC part cannot shift a library's size factor (`gc_size_factors`; bundles made before keep raw-count size factors);
-`embed` repeats the cleaning (the feature GC content comes from the bundle's GC term, or from
-`--feature-gc` / the package table for a bundle with `--clean-inputs` alone).
+What the encoders see (default since 2026-11-22): counts with each library's measured GC offset taken off
+(`--clean-inputs`; the size factors are then made from these counts too), and a residual encoder that sees expression
+only (`--no-encoder-covariates`). The decoder is unchanged: it predicts the raw counts, with its linear covariate term
+on all covariates. On the atlas this took GC out of the embedding (GC-slope R2 from z 0.24 -> 0.03 within biological
+replicate groups, 0.33 -> 0.02 over all samples) with a slightly better TEST NLL (6.206 against 6.217;
+`work/qc_module/NOTES.md`). `--no-clean-inputs --encoder-covariates` give the earlier model; bundles made before keep
+it. `embed` repeats the cleaning and needs each sample's GC fit, which the QC record has. `train --qc-module` adds the
+decoder's GC term at fixed scale and the genomic-DNA term on top; it is not the default (it kept GC in z across
+samples). The manifest reports the encoder side under `encoder_inputs`.
 
 The GC offset is the library's fitted curve averaged over each feature's 300 bp windows, the window the inGEST fit
 uses (log of the mean of exp(b1 x + b2 x^2) over the windows); within replicate groups it explains more of a
