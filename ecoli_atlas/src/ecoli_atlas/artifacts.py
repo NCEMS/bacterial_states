@@ -24,6 +24,7 @@ from .config import HEADS, HParams, TrainConfig
 from .data import label_weights, CovariateScaler, TrainingData
 from .features import FeatureSet
 from .models import build_model
+from .technical import GC_BINS
 from .preprocess import ZScore
 
 SCHEMA_VERSION = 2
@@ -63,7 +64,7 @@ class ModelBundle:
     @property
     def config(self) -> TrainConfig:
         cfg = TrainConfig.from_dict(self.manifest["config"])
-        for key in ("dna_decoder", "dna_inputs", "gc_offset"):          # a bundle made before the DNA / GC terms has neither
+        for key in ("dna_decoder", "dna_inputs", "gc_offset", "clean_inputs", "qc_module"):   # a bundle made before these has none
             if key not in self.manifest["config"]:
                 setattr(cfg, key, False)
         if "covariates" not in self.manifest["config"]:    # a bundle made before the choice: the covariates it was trained with
@@ -86,7 +87,9 @@ class ModelBundle:
         hp = HParams(**manifest["config"]["hparams"])
         model = build_model(manifest["config"].get("fit", "two_stage"), fs.n, len(cov["names"]), hp,
                             phase_head=manifest["config"].get("phase_head", "binary"), dna=bool(manifest["config"].get("dna_decoder", False)),
-                            gc=bool(manifest["config"].get("gc_offset", False)))
+                            gc=bool(manifest["config"].get("gc_offset", False)),
+                            enc_cov=bool(manifest["config"].get("encoder_covariates", True)),
+                            gc_bins=len(GC_BINS) if (manifest.get("gc_term") or {}).get("profile") == "window300" else 0)
         model.load_state_dict(torch.load(path / MODEL_FILE, map_location="cpu", weights_only=True))
         model.to(device).eval()
         return cls(model, fs, ZScore(pre["z_mu"].numpy(), pre["z_sd"].numpy()),
@@ -133,7 +136,11 @@ def save_bundle(path: str | Path, model, data: TrainingData, cfg: TrainConfig, d
                 "scale": float(torch.exp(model.log_dna_scale.detach())) if hasattr(model, "log_dna_scale") else None,
                 "samples_with_dna": int(data.extra.get("dna_samples", 0)), "genome_length": data.fs.genome_length},
         "gc_term": {"on": hasattr(model, "gc_term"),
-                    "scale": float(model.gc_term.scale.detach()) if hasattr(model, "gc_term") else None},
+                    "scale": float(model.gc_term.scale.detach()) if hasattr(model, "gc_term") else None,
+                    "profile": ("window300" if model.gc_term.n_bins else "gene") if hasattr(model, "gc_term") else None},
+        "encoder_inputs": {"gc_cleaned": bool(cfg.clean_inputs), "gc_cleaned_samples": int(data.extra.get("gc_cleaned", 0)),
+                           "gc_profile": data.extra["feature_gc"].kind if cfg.clean_inputs else None,
+                           "covariates": bool(cfg.encoder_covariates)},
         "features": data.fs.to_dict(),
         "covariates": {"names": data.scaler.names, "numeric": data.scaler.numeric},
         "config": cfg.to_dict() | {"hparams": asdict(cfg.hparams)},

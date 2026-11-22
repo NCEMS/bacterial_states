@@ -601,12 +601,50 @@ def _fake_ingest_run(atlas_files, run_dir, samples):
     return res
 
 
-def _feature_gc_table(atlas_files, tmp_path):
+def _feature_gc_table(atlas_files, tmp_path, windows=False):
+    """A feature GC table for the test annotation; with ``windows`` also a window profile (technical.GC_BIN_COLUMNS):
+    every feature's windows spread over a few bins around its GC."""
+    from ecoli_atlas.technical import GC_BINS, GC_BIN_COLUMNS
     feat = pd.read_csv(atlas_files["features"], sep="\t")
-    gc = 0.4 + 0.2 * np.random.default_rng(0).random(len(feat))
-    path = tmp_path / "feature_gc.tsv"
-    pd.DataFrame({"Feature_ID": feat["Feature_ID"], "Length": feat["Length"], "GC": gc}).to_csv(path, sep="\t", index=False)
+    rng = np.random.default_rng(0)
+    gc = 0.4 + 0.2 * rng.random(len(feat))
+    table = pd.DataFrame({"Feature_ID": feat["Feature_ID"], "Length": feat["Length"], "GC": gc})
+    if windows:
+        P = np.zeros((len(feat), len(GC_BINS)))
+        for i, g in enumerate(gc):
+            k = np.clip(np.rint((g + rng.normal(0, 0.05, 8) - GC_BINS[0]) / 0.01).astype(int), 0, len(GC_BINS) - 1)
+            P[i] = np.bincount(k, minlength=len(GC_BINS)) / len(k)
+        table = pd.concat([table, pd.DataFrame(P, columns=list(GC_BIN_COLUMNS))], axis=1)
+    path = tmp_path / ("feature_gc_windows.tsv" if windows else "feature_gc.tsv")
+    table.to_csv(path, sep="\t", index=False)
     return path
+
+
+def test_window_gc_offset(atlas_files, tmp_path):
+    from ecoli_atlas.features import FeatureSet
+    from ecoli_atlas.models import GCTerm
+    from ecoli_atlas.technical import GC_BINS, feature_gc_for, gc_offset, load_feature_gc
+    fs = FeatureSet.from_table(read_feature_table(atlas_files["features"]))
+    prof = feature_gc_for(fs, load_feature_gc(_feature_gc_table(atlas_files, tmp_path, windows=True)))
+    assert prof.kind == "window300" and np.allclose(prof.P.sum(axis=1), 1)
+    assert feature_gc_for(fs, load_feature_gc(_feature_gc_table(atlas_files, tmp_path))).kind == "gene"
+    slope, curv = np.array([0.3, -0.2, np.nan]), np.array([-0.15, 0.0, 0.1])
+    mrna, lengths = np.asarray(fs.is_mrna), np.asarray(fs.lengths)
+    off = gc_offset(prof, slope, curv, mrna, lengths)
+    # = log of the mean over the windows of exp(b1 x + b2 x^2), centred over mRNA; no fit: 0
+    x, xk = (prof.gc - 0.5) * 10, (GC_BINS - 0.5) * 10
+    xbar = x[mrna & (lengths >= 600)].mean() if (mrna & (lengths >= 600)).any() else x.mean()
+    b1 = slope[0] - 2 * curv[0] * xbar
+    want = np.log((prof.P * np.exp(b1 * xk + curv[0] * xk ** 2)).sum(axis=1))
+    assert np.allclose(off[0], want - want[mrna].mean()) and np.allclose(off[2], 0)
+    # without curvature a window profile changes the offset only through the spread of the windows (Jensen)
+    assert not np.allclose(off[1], gc_offset(prof.gc, slope[1:2], curv[1:2], mrna, lengths)[0])
+    # the decoder's GC term gives the same offset (scaled covariates in, raw fit used)
+    term = GCTerm(fs.n, 2, len(GC_BINS))
+    term.configure(prof.gc, mrna, float(xbar), (0, 1), np.array([0.1, -0.1]), np.array([0.5, 0.2]), prof.P, GC_BINS)
+    c = torch.tensor(np.c_[(slope[:2] - 0.1) / 0.5, (curv[:2] + 0.1) / 0.2], dtype=torch.float32)
+    with torch.no_grad():
+        assert np.allclose(term.offset(c).numpy(), off[:2], atol=1e-4)
 
 
 def test_technical_swap_parts(trained):
@@ -727,6 +765,48 @@ def test_gc_term_in_the_decoder(train_args, atlas_files, tmp_path):
     cfg = TrainConfig(gc_offset=True, covariates=("paired", "strand_purity"))
     with pytest.raises(ValueError, match="gc_slope and gc_curv"):
         _feature_gc(cfg, FeatureSet.from_table(read_feature_table(atlas_files["features"])))
+
+
+def test_qc_module(train_args, atlas_files, tmp_path):
+    from ecoli_atlas.data import gc_cleaned_counts
+    from ecoli_atlas.features import FeatureSet
+    from ecoli_atlas.technical import gc_offset
+    # the cleaned inputs take a sample's measured GC offset off its counts; a sample without a fit is left alone
+    fs = FeatureSet.from_table(read_feature_table(atlas_files["features"]))
+    gc = 0.4 + 0.2 * np.random.default_rng(1).random(fs.n)
+    cov = pd.DataFrame({"gc_slope": [0.3, np.nan], "gc_curv": [-0.1, np.nan]})
+    base = np.full((2, fs.n), 50.0)
+    off = gc_offset(gc, cov["gc_slope"].to_numpy(), cov["gc_curv"].to_numpy(), fs.is_mrna, fs.lengths)
+    clean, n = gc_cleaned_counts(base * np.exp(off), gc, cov, fs)
+    assert n == 1 and np.allclose(clean, base) and np.allclose(off[1], 0)
+    # --qc-module: GC term at scale 1, DNA term, cleaned inputs, an encoder that sees expression only
+    gc_path = _feature_gc_table(atlas_files, tmp_path, windows=True)
+    out = tmp_path / "qcm"
+    assert main(["train", *train_args, "--out", str(out), "--epochs", "4", "--device", "cpu", "--test-frac", "0.2",
+                 "--qc-module", "--feature-gc", str(gc_path)]) == 0
+    mf = json.loads((out / "manifest.json").read_text())
+    c = mf["config"]
+    assert c["qc_module"] and c["gc_offset"] and c["gc_scale"] == "fixed" and c["dna_decoder"] and c["clean_inputs"]
+    assert not c["encoder_covariates"] and mf["gc_term"]["scale"] == 1.0 and mf["dna"]["decoder"] and mf["gc_term"]["profile"] == "window300"
+    assert mf["encoder_inputs"] == {"gc_cleaned": True, "gc_cleaned_samples": mf["encoder_inputs"]["gc_cleaned_samples"],
+                                    "gc_profile": "window300", "covariates": False}
+    assert mf["encoder_inputs"]["gc_cleaned_samples"] > 0
+    bundle = ModelBundle.load(out)
+    assert bundle.model.encoder[0].in_features == bundle.fs.n and not bundle.model.enc_cov and bundle.model.gc_term.n_bins > 0
+    # the residual does not move with the covariates; embed reproduces the training embedding without a feature table
+    x = torch.zeros(1, bundle.fs.n)
+    c0, c1 = torch.zeros(1, len(bundle.scaler.names)), torch.ones(1, len(bundle.scaler.names))
+    with torch.no_grad():
+        assert torch.equal(bundle.model.encode(x, c0)[0], bundle.model.encode(x, c1)[0])
+    counts = read_counts(atlas_files["counts"])
+    qc = pd.read_csv(atlas_files["qc"], sep="\t", dtype=str, keep_default_na=False).set_index("GSM")
+    res = embed_counts(bundle, counts[["GSM0000", "GSM0105"]], qc, products=("decoded",))
+    ref = pd.read_csv(out / "embedding.tsv", sep="\t", index_col=0).loc[["GSM0000", "GSM0105"]]
+    assert np.allclose(res["embedding"].to_numpy(), ref.to_numpy(), atol=2e-4)
+    # the flags one by one; an old bundle reads as an encoder with covariates and uncleaned inputs
+    cfg = TrainConfig(clean_inputs=True)
+    assert cfg.clean_inputs and not cfg.gc_offset and cfg.encoder_covariates
+    assert TrainConfig.from_dict({}).encoder_covariates and not TrainConfig.from_dict({}).clean_inputs
 
 
 def test_embed_and_prepare_read_an_ingest_run(trained, atlas_files, tmp_path):

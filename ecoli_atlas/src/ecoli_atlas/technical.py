@@ -8,8 +8,10 @@ each sample's own reads on mRNA features:
       library: count x exp(W (c_ref - c)); the term is additive in the decoder's log rate, so this
       changes only what the model learned the covariates do;
   (2) the GC bias of the library taken off by its measured fit (inGEST ``gc_bias``: log coverage =
-      b1 x + b2 x^2 inside genes, x = (GC - 0.5) * 10; ``gc_slope`` = b1 + 2 b2 mean(x), ``gc_curv`` = b2)
-      applied to the GC content of every feature. The GC covariates stay at the sample's own values in
+      b1 x + b2 x^2 inside genes, x = (GC - 0.5) * 10 of a 300 bp window; ``gc_slope`` = b1 + 2 b2 mean(x),
+      ``gc_curv`` = b2) applied to every feature: the log of the mean of exp(b1 x + b2 x^2) over the feature's
+      300 bp windows (``gc_offset``; the window share of each GC bin is in the feature GC table), or at the
+      feature's mean GC for a table without windows. The GC covariates stay at the sample's own values in
       (1), so the GC bias is not taken off twice.
   Every sample keeps its own detail; batch effects that the covariates do not describe stay.
 - **decoded counts**: the decoder's expected counts at the sample's embedding, with the same swap: a
@@ -25,6 +27,7 @@ the corrected counts and are 0 in the decoded counts.
 """
 from __future__ import annotations
 
+from dataclasses import dataclass
 from importlib import resources
 
 import numpy as np
@@ -34,6 +37,21 @@ import torch
 GC_COLUMNS = ("gc_slope", "gc_curv")
 FEATURE_GC_FILE = "feature_gc_counting_v2.tsv"
 GC_FIT_MIN_LENGTH = 600          # the GC fit uses genes of at least this length (gc_bias.py); their mean x stands in for mean(x)
+GC_WINDOW, GC_STEP = 300, 50     # the window the inGEST fit uses (gc_bias.WINDOW), and the step between a feature's windows
+GC_BINS = np.round(np.arange(0.20, 0.8001, 0.01), 2)   # GC bins of the window profile (windows outside are put in the end bins)
+GC_BIN_COLUMNS = tuple(f"w{b:.2f}" for b in GC_BINS)
+
+
+@dataclass
+class GCProfile:
+    """GC content of the model features: ``gc`` the share over the feature's span; ``P`` (features x bins) the share
+    of the feature's GC_WINDOW bp windows in each GC bin (``GC_BINS``), or None (gene-level offset only)."""
+    gc: np.ndarray
+    P: np.ndarray | None = None
+
+    @property
+    def kind(self) -> str:
+        return "window300" if self.P is not None else "gene"
 
 
 def load_feature_gc(path=None) -> pd.DataFrame:
@@ -44,8 +62,9 @@ def load_feature_gc(path=None) -> pd.DataFrame:
     return pd.read_csv(path, sep="\t", index_col="Feature_ID")
 
 
-def feature_gc_for(fs, table: pd.DataFrame) -> np.ndarray:
-    """GC content of the model features, checked against the bundle (same features, same lengths)."""
+def feature_gc_for(fs, table: pd.DataFrame) -> GCProfile:
+    """GC content (and window profile, when the table has the bin columns) of the model features, checked against
+    the bundle (same features, same lengths)."""
     lacking = [f for f in fs.ids if f not in table.index]
     if lacking:
         raise ValueError(f"the feature GC table lacks {len(lacking)} model features (e.g. {lacking[:3]}); "
@@ -53,7 +72,11 @@ def feature_gc_for(fs, table: pd.DataFrame) -> np.ndarray:
     t = table.loc[fs.ids]
     if "Length" in t.columns and not np.array_equal(t["Length"].to_numpy(dtype=np.int64), np.asarray(fs.lengths, dtype=np.int64)):
         raise ValueError("the feature GC table does not match the bundle's feature lengths: it was made for another annotation")
-    return t["GC"].to_numpy(dtype=np.float64)
+    P = None
+    if all(c in t.columns for c in GC_BIN_COLUMNS):
+        P = t[list(GC_BIN_COLUMNS)].to_numpy(dtype=np.float64)
+        P = P / np.where(P.sum(axis=1, keepdims=True) > 0, P.sum(axis=1, keepdims=True), 1.0)
+    return GCProfile(t["GC"].to_numpy(dtype=np.float64), P)
 
 
 def reference_covariates(scaler) -> np.ndarray:
@@ -98,18 +121,24 @@ def model_gc_offset(model, C: np.ndarray) -> np.ndarray:
     return model.gc_term(torch.as_tensor(C, dtype=p.dtype, device=p.device)).cpu().numpy().astype(np.float64)
 
 
-def gc_offset(gc: np.ndarray, slope: np.ndarray, curv: np.ndarray, is_mrna: np.ndarray, lengths: np.ndarray) -> np.ndarray:
-    """samples x features: the log-coverage change from each sample's GC fit at every feature's GC content,
-    centred over the mRNA features (a constant per sample goes into the size factor). 0 where the sample
-    has no fit."""
-    x = (np.asarray(gc, dtype=np.float64) - 0.5) * 10
+def gc_offset(gc, slope: np.ndarray, curv: np.ndarray, is_mrna: np.ndarray, lengths: np.ndarray) -> np.ndarray:
+    """samples x features: the log-coverage change from each sample's GC fit, centred over the mRNA features (a
+    constant per sample goes into the size factor); 0 where the sample has no fit. ``gc``: a ``GCProfile`` (with a
+    window profile: log of the mean of exp(b1 x + b2 x^2) over the feature's windows) or the features' GC content
+    (the fit at the feature's mean GC). b1 = gc_slope - 2 gc_curv mean(x), mean(x) over mRNA features >= 600 bp."""
+    prof = gc if isinstance(gc, GCProfile) else GCProfile(np.asarray(gc, dtype=np.float64))
+    x = (prof.gc - 0.5) * 10
     long = np.asarray(is_mrna) & (np.asarray(lengths) >= GC_FIT_MIN_LENGTH)
     xbar = x[long].mean() if long.any() else x.mean()
     slope, curv = np.asarray(slope, dtype=np.float64), np.asarray(curv, dtype=np.float64)
     ok = np.isfinite(slope) & np.isfinite(curv)
     b2 = np.where(ok, curv, 0.0)
     b1 = np.where(ok, slope - 2 * b2 * xbar, 0.0)
-    off = b1[:, None] * x[None, :] + b2[:, None] * x[None, :] ** 2
+    if prof.P is None:
+        off = b1[:, None] * x[None, :] + b2[:, None] * x[None, :] ** 2
+    else:
+        xk = (GC_BINS - 0.5) * 10
+        off = np.log(np.exp(b1[:, None] * xk[None, :] + b2[:, None] * xk[None, :] ** 2) @ prof.P.T)
     return off - off[:, np.asarray(is_mrna)].mean(axis=1, keepdims=True)
 
 

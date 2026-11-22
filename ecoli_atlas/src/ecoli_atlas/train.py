@@ -252,16 +252,24 @@ def run_epochs(model, params: list, data: TrainingData, cfg: TrainConfig, device
     return history
 
 
+def gc_profile_bins(prof) -> int:
+    """Number of GC bins of the GC term's window profile (0 without a profile)."""
+    from .technical import GC_BINS
+    return len(GC_BINS) if prof is not None and getattr(prof, "P", None) is not None else 0
+
+
 def configure_gc_term(model, data: TrainingData) -> None:
     """Set the GC term's feature GC content and the scaling of the two GC covariates (``models.GCTerm``)."""
     from .technical import GC_FIT_MIN_LENGTH
-    gc = data.extra["feature_gc"]
+    from .technical import GC_BINS
+    prof = data.extra["feature_gc"]
+    gc = prof.gc
     names, numeric = list(data.scaler.names), list(data.scaler.numeric)
     x = (gc - 0.5) * 10
     long = np.asarray(data.fs.is_mrna) & (np.asarray(data.fs.lengths) >= GC_FIT_MIN_LENGTH)
     k = [numeric.index(n) for n in ("gc_slope", "gc_curv")]
     model.gc_term.configure(gc, data.fs.is_mrna, float(x[long].mean() if long.any() else x.mean()),
-                            (names.index("gc_slope"), names.index("gc_curv")), data.scaler.mu[k], data.scaler.sd[k])
+                            (names.index("gc_slope"), names.index("gc_curv")), data.scaler.mu[k], data.scaler.sd[k], prof.P, GC_BINS)
 
 
 def fit(data: TrainingData, cfg: TrainConfig, device, rows: np.ndarray | None = None, seed: int | None = None,
@@ -274,7 +282,8 @@ def fit(data: TrainingData, cfg: TrainConfig, device, rows: np.ndarray | None = 
     rows = data.tr_rows if rows is None else np.asarray(rows)
     set_seed(seed)
     model = build_model(cfg.fit, data.fs.n, data.C.shape[1], cfg.hparams, torch.tensor(data.log_mean), cfg.phase_head,
-                        dna=data.dna_rho is not None, gc=cfg.gc_offset).to(device)
+                        dna=data.dna_rho is not None, gc=cfg.gc_offset, enc_cov=cfg.encoder_covariates,
+                        gc_bins=gc_profile_bins(data.extra.get("feature_gc"))).to(device)
     if cfg.gc_offset:
         configure_gc_term(model, data)
         if cfg.gc_scale == "fixed":

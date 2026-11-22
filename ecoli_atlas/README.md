@@ -333,7 +333,17 @@ value of the measured fit (subtracting it leaves no GC trend in the observed cou
 counts (trend 0.13 against 0.42) but z still carried more GC than with the plain linear term,
 so neither variant is the default.
 
-The GC offset needs each feature's GC content: the package ships it for the inGEST counting
+`train --qc-module` puts all technical terms into one module and closes the encoder against them: the GC
+term at fixed scale 1, the genomic-DNA term (`--dna-decoder`), encoder inputs with each library's measured GC
+offset taken off the counts (`--clean-inputs`), and a residual encoder that sees expression only
+(`--no-encoder-covariates`). Each part is also its own flag. The manifest reports the encoder side under
+`encoder_inputs`; `embed` repeats the cleaning (the feature GC content comes from the bundle's GC term, or from
+`--feature-gc` / the package table for a bundle with `--clean-inputs` alone).
+
+The GC offset is the library's fitted curve averaged over each feature's 300 bp windows, the window the inGEST fit
+uses (log of the mean of exp(b1 x + b2 x^2) over the windows); within replicate groups it explains more of a
+sample's deviation than the curve at the feature's mean GC, with a slope close to 1 (`work/qc_module/gc_fragment.txt`;
+windows of the library's own fragment size add nothing). The GC offset needs each feature's GC content and window profile: the package ships it for the inGEST counting
 annotation (`reference/feature_gc_counting_v2.tsv`, made by `scripts/feature_gc.py`); `--feature-gc`
 takes a table for another annotation, and `embed` refuses a table whose features or lengths do not
 match the bundle.

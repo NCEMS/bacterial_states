@@ -256,10 +256,22 @@ measured covariates remove ~0.01-0.02 of it). Order:
    se, se_t50, d1M, d250k (about 1,400 short inGEST runs, the user submits); in training, an invariance loss that
    makes a twin pair share z, so the covariate term is identified inside a sample. Truncation does not cover fragment
    size, depletion kit or prep chemistry.
-4. Invariance penalty on the residual block (adversary predicting QC or study from z, or HSIC / MMD), small weight,
-   tuned on the metrics of step 1 with the block information checked.
-5. A nonlinear covariate branch on c alone (kept out of f(z)), only if step 1 shows it is needed.
-A decoder term that interacts with the embedding and a separate technical block wait for step 1.
+4. Replaced 2026-11-22 by the QC covariate module (user decision: no batch correction between studies; study
+   clustering within a condition is not explained by the QC covariates, `work/batch_correction/`). Goal: all
+   technical variation in one module, so that z carries biology only and true biological replicates agree in the
+   decoded counts. Replicate groups: `metadata_v2.tsv` `replicate_group` / `replicate_basis` / `technical_of` (read
+   from the GEO text, `work/replicates/`; 2,641 groups, 6,916 samples). Measures (`work/qc_module/replicates.py`):
+   z -> QC R2 within replicates (baseline GC slope 0.24, strand purity 0.15, which is mostly genomic DNA), QC share of
+   the decoded replicate spread (0.048; corrected counts 0.026). Steps: C1+C2 BUILT 2026-11-22 (`train --qc-module`
+   = GC term at fixed scale + DNA term + GC-cleaned encoder inputs + no covariates in the encoder; each also as its own
+   flag). GC offset = the fitted curve averaged over each feature's 300 bp windows (the inGEST fit window; package
+   table `reference/feature_gc_counting_v2.tsv` has the window profile; `work/qc_module/gc_fragment.txt`: better than the
+   gene-mean GC in every fragment-size stratum, fragment-sized windows add nothing; GC leakage into z is largest in
+   long-fragment libraries, so not the approximation). C3 replicate penalty (within-group cross-covariance of z and c, group sampler); C4 QC augmentation (another
+   sample's GC offset, depth and DNA reads applied to the counts; z invariant); C5 a replicate pull, only if needed.
+   Study adversary and twins for batch removal are dropped; read-1-only recounts of paired-end libraries could give
+   real layout / fragment-size twins for C4.
+5. A nonlinear covariate branch on c alone (kept out of f(z)), only if the replicate measures show it is needed.
 
 Atlas model, second stage: refinement of the missing-gene calls (decoder mean, coverage), corrected counts,
 hyper-parameter search; the root `README.md` and the two

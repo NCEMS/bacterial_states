@@ -7,10 +7,24 @@ import torch
 
 from .artifacts import ModelBundle
 from .config import HEADS
-from .data import _qc_value, check_qc, covariate_frame, dna_density, dna_reads
+from .data import _qc_value, check_qc, covariate_frame, dna_density, dna_reads, gc_cleaned_counts
 from .preprocess import align_counts, call_groups, group_calls, log_expression, missing_genes, size_factors
-from .technical import feature_gc_for, load_feature_gc, technical_counts
+from .technical import GCProfile, feature_gc_for, load_feature_gc, technical_counts
 from .train import encode
+
+
+def bundle_feature_gc(bundle: ModelBundle, table: pd.DataFrame | None = None) -> GCProfile:
+    """GC content (and window profile) of the bundle's features for its cleaned inputs: from its GC term when it has
+    one, else from ``table`` (default: the bundle's ``feature_gc`` table or the package table,
+    ``technical.load_feature_gc``), which must give the profile the bundle was trained with."""
+    gt = getattr(bundle.model, "gc_term", None)
+    if gt is not None:
+        return GCProfile(gt.x.cpu().numpy().astype(np.float64) / 10 + 0.5, gt.P.cpu().numpy().astype(np.float64) if gt.n_bins else None)
+    prof = feature_gc_for(bundle.fs, load_feature_gc(bundle.config.feature_gc) if table is None else table)
+    want = (bundle.manifest.get("encoder_inputs") or {}).get("gc_profile") or "gene"
+    if prof.kind != want:
+        raise ValueError(f"the bundle's inputs were cleaned with a {want!r} GC profile; the feature GC table gives {prof.kind!r}")
+    return prof
 
 
 def embed_counts(bundle: ModelBundle, counts: pd.DataFrame, qc: pd.DataFrame, device="cpu",
@@ -70,8 +84,13 @@ def embed_counts(bundle: ModelBundle, counts: pd.DataFrame, qc: pd.DataFrame, de
             miss = miss | group_calls(Y, s, groups, bundle.low_pool, bundle.fs.order, min_expected=cfg.mask_min_expected,
                                       low_fraction=cfg.mask_low_fraction, **veto)
         s = size_factors(Yin, bundle.ref_log, miss)
-    X = torch.tensor(bundle.zscore.apply(log_expression(Yin, s), miss))
-    C = torch.tensor(bundle.scaler.apply(covariate_frame(Y, fam, bundle.fs, qc, ids)))
+    cov = covariate_frame(Y, fam, bundle.fs, qc, ids)
+    if cfg.clean_inputs:                          # the bundle's encoders saw GC-cleaned counts (data.gc_cleaned_counts)
+        Xin, _ = gc_cleaned_counts(Yin, bundle_feature_gc(bundle, feature_gc), cov, bundle.fs)
+    else:
+        Xin = Yin
+    X = torch.tensor(bundle.zscore.apply(log_expression(Xin, s), miss))
+    C = torch.tensor(bundle.scaler.apply(cov))
     enc = encode(bundle.model, X, C, device)
     emb = pd.DataFrame(enc["z"], index=ids, columns=[f"z{i + 1}" for i in range(enc["z"].shape[1])])
     pred = pd.DataFrame(index=ids)

@@ -154,6 +154,13 @@ class TrainConfig:
     # fixed: held at 1, the gene-level value of the measured fit, so the decoder cannot split GC between the term and z
     gc_scale: str = "learned"
     feature_gc: str | None = None
+    # encoder side of the QC module (`work/qc_module/`): clean_inputs takes each sample's measured GC offset
+    # (technical.gc_offset) off the counts the encoders see; encoder_covariates False keeps the covariates out of the
+    # residual encoder, which then sees expression only. qc_module sets the whole module: GC term at fixed scale 1,
+    # the genomic-DNA term in the decoder, clean inputs, no covariates in the encoder (``apply_qc_module``)
+    clean_inputs: bool = False
+    encoder_covariates: bool = True
+    qc_module: bool = False
     # training
     block_epochs: int = 40       # of each block encoder
     block_batch: int = 256
@@ -169,6 +176,14 @@ class TrainConfig:
             raise ValueError(f"phase_head must be one of {PHASE_HEADS}, not {self.phase_head!r}")
         if self.gc_scale not in GC_SCALES:
             raise ValueError(f"gc_scale must be one of {GC_SCALES}, not {self.gc_scale!r}")
+        self.apply_qc_module()
+
+    def apply_qc_module(self) -> None:
+        """With ``qc_module``: the decoder's GC term at fixed scale, its genomic-DNA term, GC-cleaned encoder
+        inputs and an encoder without covariates."""
+        if self.qc_module:
+            self.gc_offset, self.gc_scale, self.dna_decoder = True, "fixed", True
+            self.clean_inputs, self.encoder_covariates = True, False
 
     def to_dict(self) -> dict:
         d = asdict(self)

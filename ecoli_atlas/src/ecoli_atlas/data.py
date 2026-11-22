@@ -398,15 +398,28 @@ class TrainingData:
         return np.where((self.split == 1) & (self.splits["cv_fold"].to_numpy() == k))[0]
 
 
-def _feature_gc(cfg: TrainConfig, fs: FeatureSet) -> np.ndarray | None:
-    """GC content of the model features for the decoder's GC term (None without it)."""
-    if not cfg.gc_offset:
+def _feature_gc(cfg: TrainConfig, fs: FeatureSet):
+    """GC content and window profile of the model features (technical.GCProfile) for the decoder's GC term and the
+    GC-cleaned inputs (None without either)."""
+    if not (cfg.gc_offset or cfg.clean_inputs):
         return None
     missing = [c for c in ("gc_slope", "gc_curv") if c not in cfg.covariates]
     if missing:
-        raise ValueError(f"the GC term reads the covariates gc_slope and gc_curv; {missing} are not among this model's covariates")
+        raise ValueError(f"the GC term and the GC-cleaned inputs read the covariates gc_slope and gc_curv; {missing} are not "
+                         "among this model's covariates")
     from .technical import feature_gc_for, load_feature_gc
     return feature_gc_for(fs, load_feature_gc(cfg.feature_gc))
+
+
+def gc_cleaned_counts(Y: np.ndarray, feature_gc, cov: pd.DataFrame, fs: FeatureSet) -> tuple[np.ndarray, int]:
+    """The counts the encoders see with ``clean_inputs``: each sample's measured GC offset (``technical.gc_offset``
+    from its raw gc_slope / gc_curv in ``cov``) taken off, i.e. Y x exp(-offset); samples without a GC fit are
+    left as they are. Returns (counts, number of samples cleaned)."""
+    from .technical import gc_offset
+    slope = pd.to_numeric(cov["gc_slope"], errors="coerce").to_numpy(dtype=np.float64)
+    curv = pd.to_numeric(cov["gc_curv"], errors="coerce").to_numpy(dtype=np.float64)
+    off = gc_offset(feature_gc, slope, curv, fs.is_mrna, fs.lengths)
+    return Y * np.exp(-off), int((np.isfinite(slope) & np.isfinite(curv)).sum())
 
 
 def build_training(tables: AtlasTables, fs: FeatureSet, cfg: TrainConfig, splits: pd.DataFrame,
@@ -445,9 +458,15 @@ def build_training(tables: AtlasTables, fs: FeatureSet, cfg: TrainConfig, splits
             groups = call_groups(miss, gse, cfg.mask_pool_min_calls, cfg.mask_pool_jaccard)
             miss = miss | group_calls(Y, s, groups, low_pool, fs.order, **call, **veto(slice(None)))
         s = size_factors(Yin, ref_log, miss)
-    logx = log_expression(Yin, s)
-    zscore = ZScore.fit(logx[rows], weights[rows], cfg.sd_floor, miss[rows])
     cov = covariate_frame(Y, fam, fs, tables.qc, ids)
+    feature_gc = _feature_gc(cfg, fs)
+    gc_cleaned = 0
+    if cfg.clean_inputs:
+        Xin, gc_cleaned = gc_cleaned_counts(Yin, feature_gc, cov, fs)
+    else:
+        Xin = Yin
+    logx = log_expression(Xin, s)
+    zscore = ZScore.fit(logx[rows], weights[rows], cfg.sd_floor, miss[rows])
     unknown = [c for c in cfg.covariates if c not in cov.columns]
     if unknown:
         raise ValueError(f"unknown covariates {unknown}; known: {list(cov.columns)}")
@@ -472,7 +491,7 @@ def build_training(tables: AtlasTables, fs: FeatureSet, cfg: TrainConfig, splits
                         dna_rho=torch.tensor(rho, dtype=torch.float32) if cfg.dna_decoder else None,
                         dna_len=torch.tensor(dlen, dtype=torch.float32) if cfg.dna_decoder else None,
                         series=series, series_x=series_x, order_pairs=pairs,
-                        extra={"feature_gc": _feature_gc(cfg, fs), "covariates_raw": cov, "antisense_veto": bool(cfg.mask_missing and anti is not None),
+                        extra={"feature_gc": feature_gc, "gc_cleaned": gc_cleaned, "covariates_raw": cov, "antisense_veto": bool(cfg.mask_missing and anti is not None),
                                "dna_samples": int((rho > 0).sum())})
 
 

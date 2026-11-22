@@ -5,6 +5,7 @@
     block encoders   z-scored log expression -> the call's block of the embedding; a linear head on
                      the block gives the class logits
     residual encoder [z-scored log expression, covariates] -> mean and log variance of the residual block
+                     (expression only with ``enc_cov`` False, ``train --no-encoder-covariates``)
     embedding        z = [blocks | residual block]
 
 ``UnstructuredModel`` (fit ``unstructured``): one embedding without blocks.
@@ -96,10 +97,14 @@ class GCTerm(nn.Module):
     covariates; ``keep`` takes them out of the linear covariate term, so the decoder explains GC once.
     The values are set by ``configure`` before training and travel with the weights."""
 
-    def __init__(self, n_features: int, n_cov: int):
+    def __init__(self, n_features: int, n_cov: int, n_bins: int = 0):
         super().__init__()
         self.scale = nn.Parameter(torch.ones(()))
+        self.n_bins = n_bins                                                   # 0: the fit at the feature's mean GC
         self.register_buffer("x", torch.zeros(n_features))
+        if n_bins:                                                             # window profile (technical.GCProfile)
+            self.register_buffer("P", torch.zeros(n_features, n_bins))
+            self.register_buffer("xk", torch.zeros(n_bins))
         self.register_buffer("mrna", torch.ones(n_features, dtype=torch.bool))
         self.register_buffer("xbar", torch.zeros(()))
         self.register_buffer("idx", torch.zeros(2, dtype=torch.long))           # columns of gc_slope, gc_curv in c
@@ -108,8 +113,12 @@ class GCTerm(nn.Module):
         self.register_buffer("keep", torch.ones(n_cov))                        # 0 for the two GC columns
 
     @torch.no_grad()
-    def configure(self, gc: np.ndarray, is_mrna: np.ndarray, xbar: float, idx: tuple, mu: np.ndarray, sd: np.ndarray) -> None:
+    def configure(self, gc, is_mrna: np.ndarray, xbar: float, idx: tuple, mu: np.ndarray, sd: np.ndarray,
+                  P: np.ndarray | None = None, bins: np.ndarray | None = None) -> None:
         self.x.copy_(torch.as_tensor((np.asarray(gc, dtype=np.float64) - 0.5) * 10, dtype=self.x.dtype))
+        if self.n_bins:
+            self.P.copy_(torch.as_tensor(P, dtype=self.P.dtype))
+            self.xk.copy_(torch.as_tensor((np.asarray(bins, dtype=np.float64) - 0.5) * 10, dtype=self.xk.dtype))
         self.mrna.copy_(torch.as_tensor(np.asarray(is_mrna, dtype=bool)))
         self.xbar.fill_(float(xbar))
         self.idx.copy_(torch.as_tensor(idx, dtype=torch.long))
@@ -119,10 +128,15 @@ class GCTerm(nn.Module):
         self.keep[self.idx] = 0.0
 
     def offset(self, c: torch.Tensor) -> torch.Tensor:
-        """The GC offset at scale 1 (samples x features)."""
+        """The GC offset at scale 1 (samples x features): at the feature's mean GC, or with a window profile the
+        log of the mean of exp(b1 x + b2 x^2) over the feature's windows (``technical.gc_offset``)."""
         raw = c[:, self.idx] * self.sd + self.mu
         slope, curv = raw[:, 0:1], raw[:, 1:2]
-        off = (slope - 2 * curv * self.xbar) * self.x + curv * self.x ** 2
+        b1 = slope - 2 * curv * self.xbar
+        if self.n_bins:
+            off = torch.log(torch.exp(b1 * self.xk + curv * self.xk ** 2) @ self.P.T)
+        else:
+            off = b1 * self.x + curv * self.x ** 2
         return off - off[:, self.mrna].mean(dim=1, keepdim=True)
 
     def forward(self, c: torch.Tensor) -> torch.Tensor:
@@ -140,11 +154,11 @@ def covariate_term(model: nn.Module, c: torch.Tensor) -> torch.Tensor:
 
 class AtlasModel(nn.Module):
     def __init__(self, n_features: int, n_cov: int, hp: HParams, log_mean: torch.Tensor | None = None, phase_head: str = "binary",
-                 dna: bool = False, gc: bool = False):
+                 dna: bool = False, gc: bool = False, enc_cov: bool = True, gc_bins: int = 0):
         super().__init__()
         if gc:
-            self.gc_term = GCTerm(n_features, n_cov)
-        self.n_features, self.n_cov, self.hp = n_features, n_cov, hp
+            self.gc_term = GCTerm(n_features, n_cov, gc_bins)
+        self.n_features, self.n_cov, self.hp, self.enc_cov = n_features, n_cov, hp, enc_cov
         if dna:
             self.log_dna_scale = nn.Parameter(torch.zeros(()))        # log of the factor on the expected DNA reads
         self.blocks = nn.ModuleDict({h: BlockEncoder(n_features, hp.block_dims[h], hp, ordinal=h == "phase" and phase_head == "ordinal")
@@ -152,7 +166,7 @@ class AtlasModel(nn.Module):
         d_block = sum(hp.block_dims[h] for h in HEADS)
         self.register_buffer("block_mu", torch.zeros(d_block))
         self.register_buffer("block_sd", torch.ones(d_block))
-        self.encoder = mlp(n_features + n_cov, hp.enc_width, hp.enc_depth, hp.dropout)
+        self.encoder = mlp(n_features + (n_cov if enc_cov else 0), hp.enc_width, hp.enc_depth, hp.dropout)
         self.to_mu = nn.Linear(hp.enc_width, hp.res_dim)
         self.to_logvar = nn.Linear(hp.enc_width, hp.res_dim)
         self.decoder = nn.Sequential(mlp(hp.z_dim, hp.dec_width, hp.dec_depth, hp.dropout), nn.Linear(hp.dec_width, n_features))
@@ -188,8 +202,8 @@ class AtlasModel(nn.Module):
         return b, {h: outs[h][1] for h in HEADS}
 
     def encode(self, x: torch.Tensor, c: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-        """Mean and log variance of the residual block."""
-        h = self.encoder(torch.cat([x, c], dim=1))
+        """Mean and log variance of the residual block (from expression alone without ``enc_cov``)."""
+        h = self.encoder(torch.cat([x, c], dim=1) if self.enc_cov else x)
         return self.to_mu(h), self.to_logvar(h).clamp(-10.0, 5.0)
 
     def decode(self, z: torch.Tensor, c: torch.Tensor) -> torch.Tensor:
@@ -216,14 +230,14 @@ class AtlasModel(nn.Module):
 
 class UnstructuredModel(nn.Module):
     def __init__(self, n_features: int, n_cov: int, hp: HParams, log_mean: torch.Tensor | None = None, phase_head: str = "binary",
-                 dna: bool = False, gc: bool = False):
+                 dna: bool = False, gc: bool = False, enc_cov: bool = True, gc_bins: int = 0):
         super().__init__()
         if gc:
-            self.gc_term = GCTerm(n_features, n_cov)
-        self.n_features, self.n_cov, self.hp = n_features, n_cov, hp
+            self.gc_term = GCTerm(n_features, n_cov, gc_bins)
+        self.n_features, self.n_cov, self.hp, self.enc_cov = n_features, n_cov, hp, enc_cov
         if dna:
             self.log_dna_scale = nn.Parameter(torch.zeros(()))        # log of the factor on the expected DNA reads
-        self.encoder = mlp(n_features + n_cov, hp.enc_width, hp.enc_depth, hp.dropout)
+        self.encoder = mlp(n_features + (n_cov if enc_cov else 0), hp.enc_width, hp.enc_depth, hp.dropout)
         self.to_mu = nn.Linear(hp.enc_width, hp.z_dim)
         self.to_logvar = nn.Linear(hp.enc_width, hp.z_dim)
         self.decoder = nn.Sequential(mlp(hp.z_dim, hp.dec_width, hp.dec_depth, hp.dropout), nn.Linear(hp.dec_width, n_features))
@@ -237,7 +251,7 @@ class UnstructuredModel(nn.Module):
         nn.init.zeros_(self.cov_out.weight)
 
     def encode(self, x: torch.Tensor, c: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-        h = self.encoder(torch.cat([x, c], dim=1))
+        h = self.encoder(torch.cat([x, c], dim=1) if self.enc_cov else x)
         return self.to_mu(h), self.to_logvar(h).clamp(-10.0, 5.0)
 
     def decode(self, z: torch.Tensor, c: torch.Tensor) -> torch.Tensor:
@@ -252,10 +266,12 @@ class UnstructuredModel(nn.Module):
 
 
 def build_model(fit: str, n_features: int, n_cov: int, hp: HParams, log_mean: torch.Tensor | None = None,
-                phase_head: str = "binary", dna: bool = False, gc: bool = False) -> nn.Module:
+                phase_head: str = "binary", dna: bool = False, gc: bool = False, enc_cov: bool = True, gc_bins: int = 0) -> nn.Module:
     """The model of a fit (``config.FITS``) with a phase head (``config.PHASE_HEADS``); ``dna``: with
-    the learned scale of the DNA term (``count_log_mean``); ``gc``: with the GC term (``GCTerm``)."""
-    return (UnstructuredModel if fit == "unstructured" else AtlasModel)(n_features, n_cov, hp, log_mean, phase_head, dna, gc)
+    the learned scale of the DNA term (``count_log_mean``); ``gc``: with the GC term (``GCTerm``); ``enc_cov``:
+    the residual (or unstructured) encoder sees the covariates; ``gc_bins``: GC bins of the GC term's window profile (0: none)."""
+    return (UnstructuredModel if fit == "unstructured" else AtlasModel)(n_features, n_cov, hp, log_mean, phase_head, dna, gc, enc_cov,
+                                                                        gc_bins)
 
 
 def count_log_mean(model: nn.Module, log_rate: torch.Tensor, log_s: torch.Tensor, log_dna: torch.Tensor | None = None) -> torch.Tensor:
