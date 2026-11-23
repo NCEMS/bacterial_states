@@ -58,9 +58,10 @@ deseq2:
 centrifuge: true
 
 # Strand specificity. Only strand-specific libraries are counted: a sample whose reads are not
-# at least `strandedness_min_fraction` on one strand is left out of the count table (see
-# <results>/strandedness.tsv). "auto" calls each sample from its alignments; "forward" or
-# "reverse" states it for every sample of the run. There is no unstranded mode.
+# at least `strandedness_min_fraction` on one strand (0.8, the lowest allowed value) is left out of
+# the count table (see <results>/strandedness.tsv). "auto" calls each sample from its alignments;
+# "forward" or "reverse" states the expected direction for every sample of the run, and a sample
+# that is unstranded or stranded the other way is not counted. There is no unstranded mode.
 strandedness: "auto"
 strandedness_min_fraction: 0.8
 

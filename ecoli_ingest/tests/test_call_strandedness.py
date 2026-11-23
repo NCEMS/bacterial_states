@@ -44,11 +44,19 @@ def test_calls(cs, layout, forward, reverse, expected):
     assert row["call_source"] == "infer_experiment"
 
 
-def test_config_override_and_threshold(cs):
-    text = infer_text("SE", 0.50, 0.49)
+def test_a_stated_direction_is_checked_and_the_threshold_cannot_be_lowered(cs):
+    text = infer_text("SE", 0.50, 0.49)                                  # an unstranded library
     row = cs.call_sample("s", text, mode="reverse")
-    assert row["call"] == "reverse" and row["call_source"] == "config" and row["counted"] == "yes"
-    assert cs.call_sample("s", infer_text("PE", 0.72, 0.27), min_fraction=0.7)["call"] == "forward"
+    assert row["call"] == "unstranded" and row["counted"] == "no" and row["not_counted_reason"] == "unstranded"
+    assert row["call_source"] == "infer_experiment, config reverse"
+    row = cs.call_sample("s", infer_text("PE", 0.97, 0.02), mode="reverse")   # stranded the other way
+    assert row["call"] == "forward" and row["counted"] == "no" and row["not_counted_reason"] == "strand_mismatch"
+    row = cs.call_sample("s", infer_text("PE", 0.02, 0.97), mode="reverse")
+    assert row["call"] == "reverse" and row["counted"] == "yes"
+    for low in (0.7, 0.5):
+        with pytest.raises(ValueError, match="at least 0.8"):
+            cs.call_sample("s", infer_text("PE", 0.72, 0.27), min_fraction=low)
+    assert cs.call_sample("s", infer_text("PE", 0.85, 0.14), min_fraction=0.9)["call"] == "unstranded"   # raising is allowed
     with pytest.raises(ValueError):
         cs.call_sample("s", text, mode="unstranded")
     with pytest.raises(ValueError):
@@ -77,3 +85,11 @@ def test_cli_combine_and_flags(cs, tmp_path):
         "a": ("yes", ""), "b": ("no", "not_ecoli"), "c": ("no", "unstranded")}
     assert cs.counted_samples(str(table)) == ["a"]
     assert {k: v["reason"] for k, v in json.loads(fail.read_text()).items()} == {"b": "not_ecoli", "c": "unstranded"}
+
+
+def test_check_refuses_a_lowered_strand_threshold():
+    from ecoli_ingest.checks import FAIL, OK, check_strandedness
+    assert check_strandedness({}).status == OK
+    assert check_strandedness({"strandedness": "reverse", "strandedness_min_fraction": 0.9}).status == OK
+    assert check_strandedness({"strandedness_min_fraction": 0.6}).status == FAIL
+    assert check_strandedness({"strandedness": "unstranded"}).status == FAIL

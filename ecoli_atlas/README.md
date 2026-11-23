@@ -304,6 +304,11 @@ the QC columns of `sample_qc.tsv`, as `full_<name>` or `<name>`, indexed by samp
 `--antisense` when the bundle was trained with it. `prepare --ingest-results` writes the same four tables
 (`counts.tsv`, `antisense_counts.tsv`, `qc.tsv`, `samples.tsv`).
 
+Only strand-specific libraries are accepted, by `embed`, `prepare` and `train` alike: a sample with
+less than 80% of its reads on one strand (strand purity = the larger of `fraction_forward` and
+`fraction_reverse` of its QC record), or without strand fractions, is refused (`data.check_stranded`,
+the same bar as inGEST, which counts no other libraries).
+
 `embed` refuses a sample without a QC row, or one that lacks a covariate of its bundle that every
 atlas sample has (read-1 lengths, strand purity, substitution rate, GC slope and curvature;
 fragment sizes for paired-end libraries). The GC bias is in records made with the reference
@@ -519,8 +524,7 @@ sample and gene tables and `<name>_metrics.json`; `casestudy_metrics.json` colle
 - `oxygen` (default GSE189154; `--oxygen-studies`): aerobic against anaerobic or microaerobic,
   untreated samples of studies outside the training pool. One discriminant
   (`fig_oxygen_lda_projection`, `fig_oxygen_axis_genes`); the AUROC is given in sample and with
-  every sample scored by an axis fitted without it. GSE78756, the second study of the earlier
-  model's figure, did not pass the prescreen and is not in this atlas.
+  every sample scored by an axis fitted without it.
 - `glu-cas` (GSE271069): glucose against casamino acids, paired by growth phase
   (`fig_glu_cas_axis`, `fig_glu_cas_lda_projection`, `fig_glu_cas_axis_genes`). For the earlier
   model this study was an outside test. It is now in the training pool, and the metrics say so

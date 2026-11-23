@@ -9,6 +9,7 @@ from pathlib import Path
 from . import container, paths, runconfig
 
 OK, WARN, FAIL = "ok", "warn", "FAIL"
+MIN_STRAND_FRACTION = 0.8    # mirrors workflow/scripts/call_strandedness.py MIN_FRACTION: unstranded libraries are never counted
 
 
 @dataclass
@@ -150,9 +151,26 @@ def check_run_dir(cfg: dict, rundir: Path, configfile: Path, mode: str = "never"
                                                "everything single-end and ignores r2"))
     else:
         out.append(Check("read layout", OK, "paired-end" if paired else "single-end"))
+    out.append(check_strandedness(cfg))
     if not cfg.get("deseq2", {}).get("contrasts"):
         out.append(Check("deseq2 contrasts", WARN, "none configured; DESeq2 outputs will be placeholders"))
     return out
+
+
+def check_strandedness(cfg: dict) -> Check:
+    """Only strand-specific libraries are counted; the config can state the direction but not lower the bar."""
+    mode = str(cfg.get("strandedness", "auto")).lower()
+    if mode not in ("auto", "forward", "reverse"):
+        return Check("strandedness", FAIL, f"`strandedness` must be auto, forward or reverse (no unstranded mode), not {mode!r}")
+    try:
+        frac = float(cfg.get("strandedness_min_fraction", MIN_STRAND_FRACTION))
+    except (TypeError, ValueError):
+        return Check("strandedness", FAIL, "`strandedness_min_fraction` is not a number")
+    if not frac >= MIN_STRAND_FRACTION:
+        return Check("strandedness", FAIL, f"`strandedness_min_fraction` is at least {MIN_STRAND_FRACTION} (got {frac}): "
+                                           "unstranded libraries are never counted")
+    return Check("strandedness", OK, f"{mode}, at least {frac:g} of the reads on one strand"
+                 + ("" if mode == "auto" else f"; samples not {mode}-stranded are not counted"))
 
 
 def _check_accessions(cfg: dict, rundir: Path, layouts: dict[str, bool], mode: str = "never") -> list[Check]:

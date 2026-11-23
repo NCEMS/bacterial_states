@@ -215,8 +215,13 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   from the metadata and a `splits.csv`, and with `--models` and the tables the paper figures of v1
   for this model (`figures/context.py` puts the tables through the bundle as `evaluate` does;
   `figure_metrics.json` checks the embedding and the TEST metrics against the bundle; `--strict`).
-  `ecoli_atlas casestudy` has `uti`, `oxygen` (GSE189154 only: GSE78756 and GSE80451 failed the
-  prescreen) and `glu-cas` (GSE271069, now in the training pool, so no longer an outside test).
+  `ecoli_atlas casestudy` has `uti`, `oxygen` (GSE189154 only; GSE78756 and GSE80451 are unstranded, never used) and
+  `glu-cas` (GSE271069, forced into TEST since 2026-11-22; the model trained on it before).
+  **Non-stranded libraries are rejected everywhere** (user rule 2026-11-22): strand purity max(fraction_forward,
+  fraction_reverse) >= 0.8, a bar that cannot be lowered (`call_strandedness.MIN_FRACTION`, `checks.MIN_STRAND_FRACTION`,
+  `data.MIN_STRAND_FRACTION`, `qc_table.MIN_STRAND_FRACTION`, prescreen `--min-strand-fraction`); a `strandedness:
+  forward|reverse` in the inGEST config is checked against the measured fractions (`strand_mismatch`), not trusted;
+  `ecoli_atlas` `embed` / `prepare` / `train` refuse a sample below the bar or without strand fractions.
   Both write into `outputs/figures/`; never into `outputs/v1_originals/` (v1 originals and
   refits), and never into a bundle (out-of-fold scores made for `threshold_curves` stay beside the
   figures). Run the two test suites in their own envs:

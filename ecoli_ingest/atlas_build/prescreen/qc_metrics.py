@@ -241,6 +241,9 @@ DEFAULT_THRESHOLDS = {
 def decide(metrics: dict, thresholds: dict | None = None) -> tuple[str, list[str]]:
     """('pass' | 'fail' | 'incomplete', reasons). A missing metric makes the decision incomplete."""
     t = {**DEFAULT_THRESHOLDS, **(thresholds or {})}
+    if not t["min_strand_fraction"] >= DEFAULT_THRESHOLDS["min_strand_fraction"]:
+        raise ValueError(f"min_strand_fraction is at least {DEFAULT_THRESHOLDS['min_strand_fraction']}: "
+                         "unstranded libraries are never accepted")
     get = lambda k: None if metrics.get(k) in (None, "") else float(metrics[k])  # noqa: E731
     reasons, missing = [], []
     fwd, rev = get("fraction_forward"), get("fraction_reverse")

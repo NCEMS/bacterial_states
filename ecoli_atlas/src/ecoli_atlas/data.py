@@ -130,6 +130,26 @@ def check_qc(qc: pd.DataFrame | None, ids: list, names=None) -> list[str]:
     return []
 
 
+MIN_STRAND_FRACTION = 0.8    # the least share of reads on one strand; the same bar as inGEST's (call_strandedness.MIN_FRACTION)
+
+
+def check_stranded(qc: pd.DataFrame | None, ids: list) -> None:
+    """Refuse (ValueError) samples that are not strand-specific: the atlas holds stranded libraries only, so an
+    unstranded library, or one whose strand fractions are unknown, is never embedded or trained on.
+    Strand purity = max(fraction_forward, fraction_reverse) of the QC record."""
+    if qc is None:
+        raise ValueError("no QC table: the strand specificity of the samples cannot be checked")
+    purity = qc_covariates(qc.reindex(ids), ids)["strand_purity"]
+    unknown = [i for i in ids if pd.isna(purity.get(i))]
+    low = [f"{i} ({purity[i]:.2f})" for i in ids if not pd.isna(purity.get(i)) and purity[i] < MIN_STRAND_FRACTION]
+    if unknown or low:
+        parts = ([f"{len(low)} not strand-specific (less than {MIN_STRAND_FRACTION:g} of the reads on one strand): "
+                  + ", ".join(low[:5]) + (" ..." if len(low) > 5 else "")] if low else []) + \
+                ([f"{len(unknown)} without strand fractions in the QC table: " + ", ".join(unknown[:5])
+                  + (" ..." if len(unknown) > 5 else "")] if unknown else [])
+        raise ValueError("only strand-specific libraries are accepted; " + "; ".join(parts))
+
+
 DNA_DEFAULT_LENGTH = 150.0    # bp added to a feature's length when a sample has no fragment or read length
 
 
@@ -250,6 +270,7 @@ def load_tables(counts_path, metadata_path, qc_path, model: str | None = None, a
     if time_series_path:
         series = read_time_series(time_series_path)
         series = series.loc[[s for s in series.index if s in set(ids)]]
+    check_stranded(qc, ids)
     return AtlasTables(counts[ids], meta.loc[ids], qc.loc[ids], antisense, series)
 
 

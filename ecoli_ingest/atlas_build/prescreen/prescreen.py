@@ -312,7 +312,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--fetch-interval", type=float, default=2.0,
                     help="minimum seconds between the starts of two read downloads, over all jobs (rate limit "
                          "for NCBI / ENA); 0 = no limit")
-    ap.add_argument("--min-strand-fraction", type=float, default=0.8)
+    ap.add_argument("--min-strand-fraction", type=float, default=0.8, help="at least 0.8: unstranded libraries are never accepted")
     ap.add_argument("--status", default="candidate", help="manifest status to screen, or 'any'")
     ap.add_argument("--gsm", nargs="*", default=[], help="only these samples")
     ap.add_argument("--gse", nargs="*", default=[], help="only these studies")
@@ -323,6 +323,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--keep-scratch", action="store_true")
     ap.add_argument("--list", action="store_true", help="print the samples that would be screened and exit")
     args = ap.parse_args(argv)
+    if not args.min_strand_fraction >= 0.8:
+        ap.error("--min-strand-fraction is at least 0.8: unstranded libraries are never accepted")
 
     i, _, n = args.shard.partition("/")
     shard = (int(i), int(n or 1))

@@ -43,6 +43,8 @@ def prepare(results_dir: str | Path | None, counts_file: str | Path | None, meta
     counts = read_counts(counts_file)
     if d is not None:
         qc = read_qc_records(d, list(counts.columns))
+        from .data import check_stranded
+        check_stranded(qc, list(counts.columns))      # only strand-specific libraries (inGEST counts no others)
     source = {sample_id_from_column(c): c for c in raw_cols if sample_id_from_column(c) in counts.columns}
     samples = pd.DataFrame({"sample_id": list(counts.columns),
                             "source_column": [source.get(s, s) for s in counts.columns]}).set_index("sample_id")

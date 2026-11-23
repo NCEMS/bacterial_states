@@ -54,6 +54,7 @@ def write_batch(root, batch, counted, failed=None, not_counted=None, features=FE
         (res / s / "qc").mkdir()
         (res / s / "qc" / f"{s}.qc.json").write_text(json.dumps(
             {"composition": {"by_type": {"CDS": cds_reads if not isinstance(cds_reads, dict) else cds_reads[s], "rRNA": 10}},
+             "strand": {"layout": "PE", "fraction_forward": 0.02, "fraction_reverse": 0.97},
              "species": {"verdict": "ok"}, "pipeline": {"commit": "abc1234"}}))
 
 
@@ -128,7 +129,8 @@ def test_add_full_batches_and_model_gate(tmp_path):
 
 
 def test_model_gate_leaves_out_samples_with_much_genomic_dna():
-    row = {"full_date": "2026-11-21", "full_counted": "yes", "full_not_counted_reason": "", "full_reads_CDS": "500000", "full_dna_fraction_est": "0.12"}
+    row = {"full_date": "2026-11-21", "full_counted": "yes", "full_not_counted_reason": "", "full_reads_CDS": "500000", "full_dna_fraction_est": "0.12",
+           "full_fraction_forward": "0.02", "full_fraction_reverse": "0.97"}
     assert qc_table.model_gate(row, True, 200000) == ""                           # no DNA rule given
     assert qc_table.model_gate(row, True, 200000, 0.10) == "high_dna"
     assert qc_table.model_gate(row | {"full_dna_fraction_est": "0.10"}, True, 200000, 0.10) == ""
@@ -159,3 +161,12 @@ def test_add_full_takes_the_gc_bias_from_the_record_or_fits_it_from_the_coverage
     assert len(calls) == 1 and calls[0].endswith("GSM2.cov100.npz")
     with pytest.raises(SystemExit, match="needs --bed"):
         qc_table.main(["add-full", "--batches", str(root), "--table", table, "--genome", str(tmp_path / "g.fna")])
+
+
+def test_model_gate_refuses_unstranded_libraries():
+    from qc_table import model_gate
+    row = {"full_date": "2026-11-01", "full_counted": "yes", "full_not_counted_reason": "", "full_reads_CDS": "500000",
+           "full_dna_fraction_est": "0.01", "full_fraction_forward": "0.02", "full_fraction_reverse": "0.97"}
+    assert model_gate(row, True, 200000) == ""
+    assert model_gate(row | {"full_fraction_forward": "0.50", "full_fraction_reverse": "0.49"}, True, 200000) == "unstranded"
+    assert model_gate(row | {"full_fraction_forward": ""}, True, 200000) == "no_strand_fractions"

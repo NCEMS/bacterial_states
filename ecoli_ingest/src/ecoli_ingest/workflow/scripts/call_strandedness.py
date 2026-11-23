@@ -8,9 +8,11 @@
     paired-end   "1++,1--,2+-,2-+"  mate 1 on the gene's strand      -> forward
                  "1+-,1-+,2++,2--"  mate 1 on the opposite strand    -> reverse
 
-A library is called forward or reverse when that fraction reaches `--min-fraction` (default 0.8),
-otherwise unstranded. inGEST counts strand-specific libraries only, so an unstranded call means
-the sample is left out of the count table.
+A library is called forward or reverse when that fraction reaches `--min-fraction` (default and
+lowest allowed value 0.8, `MIN_FRACTION`), otherwise unstranded. inGEST counts strand-specific
+libraries only: an unstranded library is never counted. A direction stated in the config
+(`--mode forward|reverse`) is checked against the measured fractions, not trusted: a library that
+is unstranded, or stranded the other way (`strand_mismatch`), is not counted.
 
     call_strandedness.py call --infer S_infer_experiment.txt --sample S --out S_strandedness.tsv
 """
@@ -23,6 +25,14 @@ import re
 import sys
 
 CALLS = ("forward", "reverse", "unstranded")
+MIN_FRACTION = 0.8          # the least share of reads on one strand for a strand-specific library; it cannot be lowered
+
+
+def check_min_fraction(min_fraction: float) -> float:
+    if not min_fraction >= MIN_FRACTION:
+        raise ValueError(f"the strandedness minimum fraction is at least {MIN_FRACTION} (got {min_fraction}): "
+                         "unstranded libraries are never counted")
+    return float(min_fraction)
 FEATURECOUNTS_S = {"forward": "1", "reverse": "2"}
 COLUMNS = ["sample", "layout", "fraction_forward", "fraction_reverse", "fraction_undetermined", "call",
            "call_source", "counted", "not_counted_reason"]
@@ -47,7 +57,8 @@ def parse_infer_experiment(text: str) -> dict:
     raise ValueError("no orientation fractions found (is this infer_experiment.py output?)")
 
 
-def call_strand(forward: float, reverse: float, min_fraction: float = 0.8) -> str:
+def call_strand(forward: float, reverse: float, min_fraction: float = MIN_FRACTION) -> str:
+    check_min_fraction(min_fraction)
     if forward >= min_fraction and forward > reverse:
         return "forward"
     if reverse >= min_fraction and reverse > forward:
@@ -55,18 +66,20 @@ def call_strand(forward: float, reverse: float, min_fraction: float = 0.8) -> st
     return "unstranded"
 
 
-def call_sample(sample: str, text: str, mode: str = "auto", min_fraction: float = 0.8) -> dict:
-    """One row of the strandedness table. `mode` forward/reverse overrides the measured call."""
+def call_sample(sample: str, text: str, mode: str = "auto", min_fraction: float = MIN_FRACTION) -> dict:
+    """One row of the strandedness table. The call is always measured; `mode` forward/reverse states
+    the expected direction, and a library that does not show it is not counted."""
     if mode not in ("auto", "forward", "reverse"):
         raise ValueError(f"strandedness must be auto, forward or reverse, not {mode!r}")
     row = {"sample": sample, **parse_infer_experiment(text)}
-    if mode == "auto":
-        row["call"] = call_strand(row["fraction_forward"], row["fraction_reverse"], min_fraction)
-        row["call_source"] = "infer_experiment"
+    row["call"] = call_strand(row["fraction_forward"], row["fraction_reverse"], min_fraction)
+    row["call_source"] = "infer_experiment" if mode == "auto" else f"infer_experiment, config {mode}"
+    if row["call"] == "unstranded":
+        row["counted"], row["not_counted_reason"] = "no", "unstranded"
+    elif mode != "auto" and row["call"] != mode:
+        row["counted"], row["not_counted_reason"] = "no", "strand_mismatch"
     else:
-        row["call"], row["call_source"] = mode, "config"
-    row["counted"] = "yes" if row["call"] in FEATURECOUNTS_S else "no"
-    row["not_counted_reason"] = "" if row["counted"] == "yes" else "unstranded"
+        row["counted"], row["not_counted_reason"] = "yes", ""
     return row
 
 
@@ -139,7 +152,7 @@ def main(argv: list[str] | None = None) -> int:
     c.add_argument("--infer", required=True, help="infer_experiment.py output")
     c.add_argument("--sample", required=True)
     c.add_argument("--mode", default="auto", choices=("auto", "forward", "reverse"))
-    c.add_argument("--min-fraction", type=float, default=0.8)
+    c.add_argument("--min-fraction", type=float, default=MIN_FRACTION, help=f"at least {MIN_FRACTION}")
     c.add_argument("--out", required=True)
     args = ap.parse_args(argv)
     with open(args.infer, encoding="utf-8") as fh:

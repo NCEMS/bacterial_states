@@ -189,12 +189,13 @@ def add_full_rows(rows: dict, results_dir: str, config: str | None, pipeline: st
     directory counted is not replaced by a result in which it was not counted (a sample re-run in
     a later batch keeps its counted result whatever the order). Returns (samples added, those kept)."""
     names = sample_accessions(config) if config else {}
-    counted, reasons = {}, not_counted_reasons(results_dir)
+    counted, reasons, strand = {}, not_counted_reasons(results_dir), {}
     strand_table = os.path.join(results_dir, "strandedness.tsv")
     if os.path.exists(strand_table):
         with open(strand_table, encoding="utf-8", newline="") as fh:
             for r in csv.DictReader(fh, delimiter="\t"):
                 counted[r["sample"]] = r["counted"]
+                strand[r["sample"]] = r
                 if r.get("not_counted_reason"):
                     reasons[r["sample"]] = r["not_counted_reason"]
     n = 0
@@ -208,6 +209,9 @@ def add_full_rows(rows: dict, results_dir: str, config: str | None, pipeline: st
             continue
         files = full_run_files(results_dir, sample)
         metrics = qc_metrics.collect(files)
+        for k in ("layout", "fraction_forward", "fraction_reverse", "fraction_undetermined"):   # the run's own strand table
+            if metrics.get(k) in (None, "") and strand.get(sample, {}).get(k, "") != "":       # when RSeQC's output is gone
+                metrics[k] = strand[sample][k]
         # species statistics of a full run are in the sample's QC record (workflow rule species_qc)
         record = os.path.join(results_dir, sample, "qc", f"{sample}.qc.json")
         record_data = None
@@ -279,6 +283,9 @@ def add_full_batches(table: str, batches_dir: str, pipeline: str = "", gc: dict 
 TRUE = {"true", "yes", "1"}
 
 
+MIN_STRAND_FRACTION = 0.8    # the bar of inGEST (call_strandedness.MIN_FRACTION) and of ecoli_atlas (data.MIN_STRAND_FRACTION)
+
+
 def model_gate(row: dict, usable: bool, min_cds_reads: int, max_dna_fraction: float | None = None) -> str:
     """Why a sample is not part of the model ('' = it is): the rule of the atlas recount. With
     `max_dna_fraction`, a sample whose genomic-DNA estimate (`full_dna_fraction_est`) is above it is
@@ -289,6 +296,12 @@ def model_gate(row: dict, usable: bool, min_cds_reads: int, max_dna_fraction: fl
         return "no_full_run"
     if row["full_counted"] != "yes":
         return "not_counted:" + (row["full_not_counted_reason"] or "unknown")
+    try:                                            # only strand-specific libraries (inGEST counts no others; checked again)
+        purity = max(float(row["full_fraction_forward"]), float(row["full_fraction_reverse"]))
+    except (KeyError, ValueError):
+        return "no_strand_fractions"
+    if not purity >= MIN_STRAND_FRACTION:
+        return "unstranded"
     try:
         cds = float(row["full_reads_CDS"])
     except ValueError:

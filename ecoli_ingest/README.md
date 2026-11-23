@@ -114,7 +114,7 @@ deseq2:
     - ["condition", "wildtype", "knockout"]   # [factor, reference, test]
 centrifuge: true                  # false: skip Centrifuge entirely (not run, not in MultiQC)
 species_gate: true                # with Centrifuge on: samples that are not E. coli are not counted
-strandedness: "auto"              # or "forward" / "reverse"; unstranded libraries are not counted
+strandedness: "auto"              # or "forward" / "reverse" (checked, not trusted); unstranded libraries are never counted
 fastp_min_kept_percentage: 75.0   # remove to disable the read-filter gate
 ```
 
@@ -198,7 +198,7 @@ Set `results_dir: "results"` in `config.yaml` for a fixed directory name instead
 | `<sample>/qc/<sample>.qc.json` | per-sample QC record: read-length and fragment-size histograms, alignment statistics, read ladder, reads per RNA family and type, antisense and DNA-background values, gene-body profile, species statistics, tool versions ([docs/atlas_qc_inputs.md](../docs/atlas_qc_inputs.md)) |
 | `<sample>/coverage/<sample>.cov100.npz` | read depth per strand in 100 bp bins |
 | `tool_versions.json` | versions of the tools used |
-| `strandedness.tsv` | per sample: read orientation fractions, the call (forward, reverse, unstranded) and whether it was counted |
+| `strandedness.tsv` | per sample: read orientation fractions, the call (forward, reverse, unstranded) and whether it was counted; a library needs at least 80% of its reads on one strand (`strandedness_min_fraction` can be raised, not lowered), and with a stated `strandedness` a library stranded the other way is not counted (`strand_mismatch`) |
 | `counting_method.json` | annotation, featureCounts options and the orientation used for each sample |
 | `deseq2/` | normalized counts, PCA, one `<ref>_vs_<test>_deseq_results.tsv` per contrast |
 | `<sample>/` | per-sample fastp, FastQC, Centrifuge, vg (sorted BAM, `vg stats`), RSeQC, feature overlap. The trimmed reads, Centrifuge's per-read tables and the `.gam` (several GB per sample) are deleted once used; the sorted BAM too with `keep_alignments: false` |
@@ -208,7 +208,7 @@ Set `results_dir: "results"` in `config.yaml` for a fixed directory name instead
 
 How reads are counted (feature set, strandedness, overlapping features) is described in
 [docs/counting.md](../docs/counting.md). Only strand-specific libraries are counted; the tutorial
-data below (GSE73673) is unstranded, so on this branch it stops after `strandedness.tsv`.
+data below (GSE73673) is unstranded, so it stops after `strandedness.tsv`.
 
 **Counts from this branch do not match the published atlas model** (`ecoli_atlas_models_v1`),
 which was trained on counts made with the previous method. Use the `main` branch to make counts

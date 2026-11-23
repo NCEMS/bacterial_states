@@ -7,7 +7,7 @@ import torch
 
 from .artifacts import ModelBundle
 from .config import HEADS
-from .data import _qc_value, check_qc, qc_covariates, covariate_frame, dna_density, dna_reads, gc_cleaned_counts
+from .data import _qc_value, check_qc, check_stranded, qc_covariates, covariate_frame, dna_density, dna_reads, gc_cleaned_counts
 from .preprocess import align_counts, call_groups, group_calls, log_expression, missing_genes, size_factors
 from .technical import GCProfile, feature_gc_for, load_feature_gc, technical_counts
 from .train import encode
@@ -103,6 +103,7 @@ def embed_counts(bundle: ModelBundle, counts: pd.DataFrame, qc: pd.DataFrame, de
     if fill_missing_gc:
         qc, gc_filled = fill_gc_values(qc, ids, fill_missing_gc, bundle.scaler, studies)
     warnings = check_qc(qc, ids, bundle.scaler.names)
+    check_stranded(qc, ids)
     if (gc_filled != "").any():
         warnings = warnings + [f"{int((gc_filled != '').sum())} sample(s) have no GC bias fit; filled with the {fill_missing_gc} "
                                f"{'median' if fill_missing_gc == 'study' else 'training mean'} (gc_filled in samples.tsv): "

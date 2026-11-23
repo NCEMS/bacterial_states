@@ -199,10 +199,12 @@ def test_decide_thresholds_can_be_changed():
     m = {"fraction_forward": 0.75, "fraction_reverse": 0.2, "pct_kept": 93, "mean_length_r1": 42, "pct_aligned": 99,
          "species_reads": 20000, "pct_escherichia_shigella": 45.0, "pct_top_other_genus": 30.0, "centrifuge_reads": 50000}
     assert qc_metrics.decide(m) == ("fail", ["unstranded", "not_ecoli"])
-    assert qc_metrics.decide(m, {"min_strand_fraction": 0.7, "min_pct_escherichia_shigella": 40}) == (
+    with pytest.raises(ValueError, match="at least 0.8"):          # the strand bar cannot be lowered
+        qc_metrics.decide(m, {"min_strand_fraction": 0.7})
+    m = m | {"fraction_forward": 0.85, "fraction_reverse": 0.1}
+    assert qc_metrics.decide(m, {"min_pct_escherichia_shigella": 40}) == (
         "fail", ["mixed_organism"])                    # the other genus is still 12 % of all reads
-    assert qc_metrics.decide(m, {"min_strand_fraction": 0.7, "min_pct_escherichia_shigella": 40,
-                                 "max_pct_foreign_of_all": 20}) == ("pass", [])
+    assert qc_metrics.decide(m, {"min_pct_escherichia_shigella": 40, "max_pct_foreign_of_all": 20}) == ("pass", [])
 
 
 # ------------------------------------------------------------------ sample selection

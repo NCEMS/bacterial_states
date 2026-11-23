@@ -176,7 +176,8 @@ for _old in ("centrifuge_organism", "centrifuge_min_percentage"):
 strandedness_mode = str(config.get("strandedness", "auto")).lower()
 if strandedness_mode not in ("auto", "forward", "reverse"):
     raise ValueError(f"config `strandedness` must be auto, forward or reverse, not {strandedness_mode!r}")
-strandedness_min_fraction = float(config.get("strandedness_min_fraction", 0.8))
+strandedness_min_fraction = call_strandedness.check_min_fraction(float(config.get("strandedness_min_fraction",
+                                                                                   call_strandedness.MIN_FRACTION)))
 if "fastp_detect_adapter_for_pe" in config:
     print("WARNING: config key `fastp_detect_adapter_for_pe` is ignored; paired-end adapter "
           "detection is always on.", file=sys.stderr, flush=True)
