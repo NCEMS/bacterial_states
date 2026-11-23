@@ -20,6 +20,8 @@ dependencies = [
 
 [project.optional-dependencies]
 figures = ["matplotlib>=3.8", "seaborn>=0.13", "gseapy>=1.1"]
+umap = ["umap-learn>=0.5"]
+view = ["plotly>=5", "umap-learn>=0.5"]
 dev = ["pytest>=7"]
 
 [project.scripts]
@@ -33,6 +35,7 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 ecoli_atlas = ["reference/*.tsv", "reference/*.tsv.gz"]
+"ecoli_atlas.viewer" = ["presets.json", "static/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

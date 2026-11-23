@@ -14,7 +14,8 @@ Two independently installable packages in one repo (GitHub `NCEMS/bacterial_stat
   count likelihood, trained on the recounted atlas (`docs/atlas_model_v2.md`, first stage). CLI:
   `prepare`, `train`, `embed`, `evaluate`, `figures` (data composition and the model figures), `casestudy`,
   `axes` (ordered categories as dimensions of the embedding), `drivers`, `compare` (new samples against the
-  atlas of a bundle) and `neighbors` (atlas studies against the rest of it). Everything is on `main`
+  atlas of a bundle), `neighbors` (atlas studies against the rest of it) and `view` (one self-contained HTML page with an
+  interactive 3-D map of a bundle's atlas; `viewer/`, presets in `viewer/presets.json`). Everything is on `main`
   (`update-atlas` and `ingest-update` were merged on 2026-11-22). The v1 package is only in the code release
   `v1.0.0`; see "v1 history" at the end.
 - `bin/ecoli_ingest`, `bin/ecoli_atlas` run either CLI from the checkout without `pip install`.

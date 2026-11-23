@@ -85,7 +85,7 @@ def embed_counts(bundle: ModelBundle, counts: pd.DataFrame, qc: pd.DataFrame, de
     bundle's limit ``max_dna_fraction``, the reads on CDS features and whether they are below the
     bundle's ``min_cds_reads``, the atlas's depth gate (``low_depth``)), the feature ``coverage``, ``missing`` (one row per sample and gene called missing from its
     strain; such genes enter the encoders as the gene's mean) and ``warnings`` (QC values set to
-    the training mean).
+    the training mean), ``covariates`` (the QC and composition covariates before scaling, as the model sees them).
     products: ``"corrected"`` and / or ``"decoded"``: counts with the technical part swapped for that of a
     reference library (``technical.py``), returned as ``corrected_counts`` / ``decoded_counts`` (features x
     samples); ``samples`` then has ``gc_offset`` (1 where the sample's GC bias was taken off).
@@ -180,7 +180,7 @@ def embed_counts(bundle: ModelBundle, counts: pd.DataFrame, qc: pd.DataFrame, de
             frame.index.name = "Feature_ID"
             out[f"{k}_counts"] = frame
         info["gc_offset"] = has_gc.astype(int)
-    for df in (emb, pred, info):
+    for df in (emb, pred, info, cov):
         df.index.name = "sample"
     return {"embedding": emb, "predictions": pred, "samples": info, "coverage": coverage, "missing": missing,
-            "warnings": warnings} | out
+            "warnings": warnings, "covariates": cov} | out
