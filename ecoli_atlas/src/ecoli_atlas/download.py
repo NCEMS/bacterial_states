@@ -44,6 +44,62 @@ BUNDLES = {
 }
 
 
+# Curated gene modules for `drivers --modules` (built into modules.tsv by `ecoli_atlas download modules`). They are not
+# shipped: each source is fetched from its own site. precise1k (SBRG, MIT licence) is pinned to one commit and checked
+# by SHA-256; KEGG is fetched from its REST service (free for academic use, not redistributed), whose content changes
+# with KEGG releases, so the retrieval date is recorded instead of a checksum.
+PRECISE1K_COMMIT = "4829b83ace51ee7980de6950077f1cf8f3746f88"     # SBRG/precise1k, 2023-08-29
+PRECISE1K_RAW = f"https://raw.githubusercontent.com/SBRG/precise1k/{PRECISE1K_COMMIT}"
+MODULE_SOURCES = {
+    "precise1k": {
+        "description": "RegulonDB regulons (gene-level TRN) and the PRECISE-1K iModulons; SBRG/precise1k, MIT licence",
+        "files": {
+            "TRN.csv": (f"{PRECISE1K_RAW}/data/annotation/TRN.csv",
+                        "d91a2caf32807cc03332cf4f52692ac7ff41027f7b9bf58d50e9b999f5a2a462"),
+            "M.csv": (f"{PRECISE1K_RAW}/data/precise1k/M.csv",
+                      "6ad63e36378b9da8e7c5b501cca81a5db7f65872684f4a870428e37380c06afa"),
+            "imodulon_table.csv": (f"{PRECISE1K_RAW}/data/precise1k/imodulon_table.csv",
+                                   "da98e18363014ab64dca198ebf4f5410887e519ba8d98a5bbc88143ac477b063"),
+            "LICENSE": (f"{PRECISE1K_RAW}/LICENSE", "b974c4b7ee69ee9d26e0148b38b4766f3e149c4ec12fc1be3ce1e4e0f8f83014"),
+        },
+    },
+    "kegg": {
+        "description": "KEGG pathways and modules of E. coli K-12 MG1655 (organism eco); KEGG REST, free for academic use",
+        "files": {
+            "list_pathway_eco.txt": ("https://rest.kegg.jp/list/pathway/eco", None),
+            "link_pathway_eco.txt": ("https://rest.kegg.jp/link/pathway/eco", None),
+            "list_module.txt": ("https://rest.kegg.jp/list/module", None),
+            "link_module_eco.txt": ("https://rest.kegg.jp/link/module/eco", None),
+        },
+    },
+}
+
+
+def download_module_sources(dest: Path, sources=tuple(MODULE_SOURCES), log=None) -> dict:
+    """Fetch the module source files into ``dest/<source>/``; a pinned file whose checksum does not match is
+    rejected (ValueError). Returns {source: {file: {url, sha256, retrieved}}} for the manifest."""
+    import datetime
+    log = log or sys.stderr
+    record = {}
+    for src in sources:
+        info = MODULE_SOURCES[src]
+        d = Path(dest) / src
+        d.mkdir(parents=True, exist_ok=True)
+        record[src] = {}
+        for name, (url, sha) in info["files"].items():
+            req = urllib.request.Request(url, headers={"User-Agent": "ecoli-atlas"})
+            with urllib.request.urlopen(req) as resp:
+                data = resp.read()
+            got = hashlib.sha256(data).hexdigest()
+            if sha and got != sha:
+                raise ValueError(f"{src}/{name}: checksum mismatch (got {got}, expected {sha}); nothing was kept")
+            (d / name).write_bytes(data)
+            record[src][name] = {"url": url, "sha256": got,
+                                 "retrieved": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
+            print(f"  {src}/{name}: {len(data):,} bytes" + (" (checksum ok)" if sha else ""), file=log)
+    return record
+
+
 def data_root() -> Path:
     return Path(os.environ.get(ENV_DATA_ROOT, Path.cwd()))
 

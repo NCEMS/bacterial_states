@@ -31,7 +31,10 @@ T="--counts $DATA/atlas_v2_counts.tsv --antisense $DATA/atlas_v2_antisense_count
    --qc $DATA/sample_qc.tsv --time-series $DATA/time_courses.tsv
    --features $ROOT/resources/annotation/GCF_000005845.2_ASM584v2_counting_v2.features.tsv"
 contrast() { python3 -c "import json,sys; s=json.load(open(sys.argv[1])); f=[c for c in s['categories'] if c not in s.get('holdout', [])]; print(f[0] + ':' + f[-1])" "$1"; }
+# curated modules (regulons, iModulons, KEGG) when their table is there: `ecoli_atlas download modules` makes it
+MOD=$DATA/modules/modules.tsv
+if [ -f "$MOD" ]; then MODULES="--modules $MOD"; else MODULES=""; echo "no $MOD (ecoli_atlas download modules): drivers without modules" >&2; fi
 for name in phase oxygen carbon glycerol; do
   summary=axes/$name/axis_${name}_summary.json
-  $EA drivers $T --models "$MODELS" --axis $summary --contrast "$(contrast $summary)" --gsea --out drivers/$name --formats pdf,png
+  $EA drivers $T --models "$MODELS" --axis $summary --contrast "$(contrast $summary)" --gsea $MODULES --out drivers/$name --formats pdf,png
 done

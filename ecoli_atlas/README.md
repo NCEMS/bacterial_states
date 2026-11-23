@@ -68,6 +68,9 @@ Both are assets of the GitHub release
 | `models` | `models/`: the selected seed (`model.pt`, `preprocessing.pt`, `manifest.json`, `splits.csv`, `evaluation.json`), the atlas it defines (`embedding.tsv`, `predictions.tsv`, `cv_predictions.tsv`, `missing_genes.tsv`), and `seed_1` ... `seed_8` (each a full bundle; `drivers` averages over them) | 312 MB download, 378 MB unpacked |
 | `training-data` | `atlas_v2_counts.tsv`, `atlas_v2_antisense_counts.tsv` (sense and antisense counts, inGEST feature ids x GSM), `metadata_v2.tsv` (labels per sample, with replicate groups), `sample_qc.tsv` (QC values; `in_model` = the model's samples), `time_courses.tsv` (the phase-order term's series), `atlas_v2_missing_genes.tsv` (genes called missing in each sample, `sample` / `feature`), and the metadata's sources: `metadata_v2_studies.tsv` and `metadata_v2_sample_text.tsv` (GEO text), `metadata_v2_evidence.tsv` (the passage behind each label), `metadata_v2_label_scheme.yaml` | 100 MB download, 301 MB unpacked |
 
+`ecoli_atlas download modules` fetches the curated gene modules for `drivers --modules` from their own sites (they are
+not shipped) and builds `atlas_data/modules/modules.tsv`; see [Curated gene modules](#curated-gene-modules).
+
 The counting annotation (`*_counting_v2.features.tsv`, needed by `train`, `figures` and `casestudy`) is in the inGEST
 core bundle (`ecoli_ingest download core`). The archives are built by `release/make_release.py` (reproducible: the same
 files give the same bytes).
@@ -683,7 +686,39 @@ python ecoli_atlas/scripts/go_gene_sets.py --gaf ECOLI-mod.gaf.gz --obo go-basic
 ```
 
 `--gene-sets TSV` uses another table of the same columns (`term`, `namespace`, `name`, `genes` as
-comma-separated symbols), e.g. RegulonDB regulons or EcoCyc pathways.
+comma-separated symbols), e.g. the module table of `download modules` below.
+
+### Curated gene modules
+
+`drivers --modules TSV` scores curated gene modules (regulons, iModulons, pathways) with the drivers' attributions,
+for a head or an axis: `modules_<contrast>.tsv`, `fig_modules_<contrast>` and the top modules per source in the JSON
+(`modules`). A module's `net` is the sum of its members' attributions, averaged over the seeds and the high-class
+studies: its part of the score gap (positive = it moves the score towards the high class). It is compared with random
+modules of the same size drawn as whole expression units, so co-transcribed genes are not counted as independent
+(`--module-null`, 10,000 draws): `z_net`, `p_net`, and `fdr_net` (Benjamini-Hochberg within a source). The null is a
+little anti-conservative and heavy-tailed (a few genes carry large attributions), so read `z_net` together with
+`boot_in_top` (the share of study draws in which the module stays among the top modules of its source) and
+`seeds_same_sign`, rather than `fdr_net` alone. `mean_log2fc` and `frac_same_dir` give the members' change in the data;
+`lead_genes` the members with the largest attributions. Modules of 3 to 500 model genes are scored
+(`--module-min`, `--module-max`).
+
+```bash
+ecoli_atlas download modules                       # atlas_data/modules/modules.tsv (818 modules)
+ecoli_atlas drivers $T --models outputs/models --head phase --modules atlas_data/modules/modules.tsv --out work/drivers_phase
+```
+
+`download modules` builds the table from:
+
+| Source | Modules | Fetched from |
+|---|---|---|
+| `regulondb` | RegulonDB regulons of transcription factors and sigma factors (377 modules), with the activated and repressed parts of a regulator that does both | `TRN.csv` of [SBRG/precise1k](https://github.com/SBRG/precise1k) (MIT licence), pinned to one commit and checked by SHA-256 |
+| `imodulon` | PRECISE-1K iModulons (200): the `imodulon_size` genes with the largest weight | `M.csv`, `imodulon_table.csv` of the same commit |
+| `kegg` | KEGG pathways (global maps left out) and modules of E. coli K-12 MG1655 (241) | the KEGG REST service (`rest.kegg.jp`; free for academic use, not to be redistributed; the retrieval date is in the table's header and in `modules_manifest.json`) |
+
+Members are mapped to the counting annotation by locus tag (b-number), else by symbol (`--features`, default the
+annotation under `resources/`). EcoCyc is not fetched (it needs a licence): an EcoCyc export, or any list of gene sets,
+can be given as a table with the same columns (`term`, `namespace`, `name`, `genes` as comma-separated symbols or locus
+tags; the part of `namespace` before its first `_` is the source). The same table works as `--gene-sets` for `--gsea`.
 
 ## On a SLURM cluster
 

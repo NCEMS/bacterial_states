@@ -179,7 +179,12 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   gseapy, two-sided preranked, GO sets in `reference/go_gene_sets_ecocyc.tsv.gz` built by `scripts/go_gene_sets.py` from
   the EcoCyc GAF, genes matched by lower-case symbol) is the `figures` panel `gsea` (between-study ranking of
   `batch_genes`, MG1655 and BW25113) and `drivers --gsea` (genes ranked by signed attribution). The v1 paper's GSEA was
-  R fgsea, one-sided (`outputs/v1_originals/GSEA/runGSEA.ipynb`); its NES and p-values are not comparable with these. The medium call is rich (complex
+  R fgsea, one-sided (`outputs/v1_originals/GSEA/runGSEA.ipynb`); its NES and p-values are not comparable with these.
+  Curated modules (`modules.py`, `drivers --modules TSV`): module net attribution against an operon-aware size-matched
+  null, study bootstrap, seeds; tables from `ecoli_atlas download modules` (regulondb + imodulon from SBRG/precise1k pinned
+  commit with SHA-256, KEGG REST with retrieval date; `download.MODULE_SOURCES`; nothing shipped) into
+  `atlas_data/modules/`. Exploratory origin: `work/module_drivers/`. EcoCyc is left out (licensed, no open URL; user decision
+  2026-11-23): a user's own EcoCyc export can be given as a `--modules` table. The medium call is rich (complex
   broth) against minimal (salts and a carbon source); every medium in between has no label. A study gives at most `study_cap` samples per epoch (default: the size
   of the second-largest study; only GSE206047 is cut), and within one class of a call it counts for at
   most `label_cap` samples (default: the second-largest study of that class; `data.label_weights`). Splits are by whole study and, as in v1, TEST and

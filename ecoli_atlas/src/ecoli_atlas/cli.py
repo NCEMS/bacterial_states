@@ -27,10 +27,51 @@ def _write_json(obj, path: Path) -> None:
 def cmd_download(args) -> int:
     from . import download as dl
     rc = 0
+    if "modules" in args.bundles:
+        rc = _download_modules(args)
+        args.bundles = [b for b in args.bundles if b != "modules"]
+        if not args.bundles:
+            return rc
     bundles = list(dl.BUNDLES) if "all" in args.bundles else args.bundles
     for b in bundles:
         rc = max(rc, dl.download(b, Path(args.dest) if args.dest else None, dry_run=args.dry_run))
     return rc
+
+
+def _download_modules(args) -> int:
+    """`download modules`: fetch the module sources and build modules.tsv (gene symbols of the counting annotation)."""
+    import datetime
+    from . import download as dl
+    from .features import read_feature_table
+    from .modules import MODULES_FILE, build_module_table, write_module_table
+    dest = Path(args.dest) if args.dest else dl.default_data_dir() / "modules"
+    features = Path(args.features) if args.features else (dl.data_root() / "resources" / "annotation"
+                                                          / "GCF_000005845.2_ASM584v2_counting_v2.features.tsv")
+    _info(f"module sources -> {dest}")
+    for src, info in dl.MODULE_SOURCES.items():
+        _info(f"  {src}: {info['description']}")
+    if args.dry_run:
+        return 0
+    if not features.exists():
+        _info(f"error: the counting feature table {features} is needed to map genes (give --features)")
+        return 2
+    try:
+        record = dl.download_module_sources(dest / "sources", log=sys.stderr)
+    except (OSError, ValueError) as e:
+        _info(f"error: {e}")
+        return 1
+    table, stats = build_module_table(dest / "sources", read_feature_table(features))
+    when = datetime.date.today().isoformat()
+    header = [f"curated gene modules for ecoli_atlas drivers --modules; built {when} by `ecoli_atlas download modules`",
+              f"precise1k (RegulonDB regulons, iModulons): SBRG/precise1k commit {dl.PRECISE1K_COMMIT}, MIT licence",
+              f"KEGG pathways and modules: rest.kegg.jp, retrieved {record['kegg']['link_pathway_eco.txt']['retrieved']}; "
+              "free for academic use, do not redistribute"]
+    write_module_table(table, dest / MODULES_FILE, header)
+    _write_json({"sources": record, "stats": stats, "features": str(features)}, dest / "modules_manifest.json")
+    for src, st in stats.items():
+        _info(f"  {src}: {st['modules']} modules, {st['members_matched']}/{st['members_listed']} members matched to the model's genes")
+    _info(f"wrote {len(table)} modules to {dest / MODULES_FILE}")
+    return 0
 
 
 def cmd_prepare(args) -> int:
@@ -274,6 +315,15 @@ def cmd_drivers(args) -> int:
         feat = read_feature_table(args.features)
         logx = data.X.numpy() * data.zscore.sd + data.zscore.mu
         unit = expression_units(feat, data.fs.ids, logx[data.tr_rows], data.splits["gse"].to_numpy()[data.tr_rows], min_r=args.unit_r)
+        if args.modules:                # curated modules: read once, matched to the model features by symbol or locus tag
+            from .modules import membership, read_module_table
+            f_sym = feat["Symbol"].reindex(data.fs.ids).fillna("").astype(str).to_numpy()
+            f_lt = (feat["Locus_Tag"].reindex(data.fs.ids).fillna("").astype(str).to_numpy() if "Locus_Tag" in feat.columns
+                    else np.array([""] * data.fs.n))
+            mod_table, mod_G = membership(read_module_table(args.modules), f_sym, f_lt, args.module_min, args.module_max)
+            if not len(mod_table):
+                raise ValueError(f"{args.modules}: no module has {args.module_min}-{args.module_max} genes of the model")
+            _info(f"{len(mod_table)} modules of {args.modules} with {args.module_min}-{args.module_max} model features")
         n_units = len(np.unique(unit))
         _info(f"{data.fs.n} features in {n_units} expression units ({int((np.bincount(np.unique(unit, return_inverse=True)[1]) > 1).sum())} with more than one gene)")
         out = Path(args.out)
@@ -327,6 +377,15 @@ def cmd_drivers(args) -> int:
                 fig_gsea_bars(res, f"GO terms of the {label} drivers, {low} → {high}", out, f"fig_gsea_{name}", formats, top=args.top,
                               both=True, up_label=f"move the score towards {high}", down_label=f"move the score towards {low}")
                 summary["gsea"] = info
+            if args.modules:                # curated modules scored with the attributions of every seed and study
+                from .figures.modules import fig_modules
+                from .modules import score_modules, summary as module_summary
+                fc = genes.set_index("feature")["log2fc"].reindex(data.fs.ids).to_numpy()
+                mres = score_modules(np.stack(per_study), unit, mod_table, mod_G, f_sym, fc, n_null=args.module_null,
+                                     top_k=args.top_units // 4 or 1)
+                mres.to_csv(out / f"modules_{name}.tsv", sep="\t", index=False, float_format="%.5g")
+                fig_modules(mres, f"Modules of the {label} drivers, {low} → {high}", high, low, out, f"fig_modules_{name}", formats)
+                summary["modules"] = {"table": str(args.modules), "null_draws": args.module_null, "namespaces": module_summary(mres)}
             for k in ("score_gap_high_minus_baseline", "sum_of_attributions"):
                 summary[k] = float(np.mean([s[k] for s in per_summary]))
             pos = units["attribution"] > 0
@@ -787,7 +846,11 @@ def build_parser() -> argparse.ArgumentParser:
     from .download import BUNDLES
     sp = sub.add_parser("download", help="download the data bundles of the release: training-data (into atlas_data/), "
                         "models (into outputs/)")
-    sp.add_argument("bundles", nargs="+", choices=sorted(BUNDLES) + ["all"])
+    sp.add_argument("bundles", nargs="+", choices=sorted(BUNDLES) + ["all", "modules"],
+                    help="training-data, models, all (both), or modules (curated gene modules for drivers --modules: fetched "
+                         "from their sources and built into atlas_data/modules/modules.tsv)")
+    sp.add_argument("--features", help="modules: the counting feature table to map genes to (default: "
+                    "resources/annotation/GCF_000005845.2_ASM584v2_counting_v2.features.tsv)")
     sp.add_argument("--dest", help="directory to unpack into (default: atlas_data/ or outputs/ under $BS_DATA_ROOT or here)")
     sp.add_argument("--dry-run", action="store_true", help="print what would be downloaded")
     sp.set_defaults(func=cmd_download)
@@ -882,6 +945,12 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--axis-score", default="ordinal", choices=["ordinal", "anchor"], help="which score of the axis (ordinal)")
     sp.add_argument("--gsea", action="store_true", help="also the GO-term enrichment of the genes ranked by attribution "
                     "(gsea_<contrast>.tsv, fig_gsea_<contrast>; needs gseapy)")
+    sp.add_argument("--modules", metavar="TSV", help="also score curated gene modules (modules_<contrast>.tsv, "
+                    "fig_modules_<contrast>): a module table from `ecoli_atlas download modules` (regulons, iModulons, KEGG) "
+                    "or any table with term, namespace, name, genes")
+    sp.add_argument("--module-null", type=int, default=10000, metavar="N", help="null draws of the module scores (10000)")
+    sp.add_argument("--module-min", type=int, default=3, help="smallest module scored, in model genes (3)")
+    sp.add_argument("--module-max", type=int, default=500, help="largest module scored, in model genes (500)")
     add_gsea(sp)
     sp.add_argument("--out", required=True)
     sp.add_argument("--formats", default="pdf,png")

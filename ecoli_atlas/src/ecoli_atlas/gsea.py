@@ -40,7 +40,7 @@ def read_gene_sets(path=None, namespaces=NAMESPACES) -> tuple[dict, pd.DataFrame
     for col in ("namespace", "name"):
         if col not in table.columns:
             table[col] = ""
-    if namespaces and (table["namespace"] != "").any():
+    if namespaces and table["namespace"].isin(namespaces).any():      # a GO table; other tables (modules) are kept whole
         table = table[table["namespace"].isin(namespaces)]
     sets = {t: sorted({g.strip().lower() for g in s.split(",") if g.strip()}) for t, s in zip(table["term"], table["genes"])}
     return {t: g for t, g in sets.items() if g}, table.set_index("term")[["namespace", "name"]], header
