@@ -24,7 +24,7 @@ ENV_DATA_ROOT = "BS_DATA_ROOT"
 BUNDLES = {
     "training-data": {
         "url": f"{RELEASE_URL}/ecoli_atlas_training_data_{ATLAS_DATA_VERSION}.tar.gz",
-        "sha256": "a1edcd18a016fbb2cdbb4a407027d5acef01b86c70b9e2ccdd51df6beb4ebbe9",
+        "sha256": "2d1fa16677f2fec09b2d316021b1024188270c5f6d09b3f331db2a503dd03443",
         "size": "100 MB download, 301 MB unpacked",
         "contents": ["atlas_v2_counts.tsv", "atlas_v2_antisense_counts.tsv", "metadata_v2.tsv", "sample_qc.tsv",
                      "time_courses.tsv", "atlas_v2_missing_genes.tsv (genes called missing, per sample)",
@@ -34,7 +34,7 @@ BUNDLES = {
     },
     "models": {
         "url": f"{RELEASE_URL}/ecoli_atlas_models_{ATLAS_DATA_VERSION}.tar.gz",
-        "sha256": "ca953af2624c3e485d9e31af83ff30c90c4094de33937062be9afd5b0c0aae25",
+        "sha256": "195e5177d39843264087cc3b557d4b6b44f5bbc92002794bc8bb7797c7569779",
         "size": "312 MB download, 378 MB unpacked",
         "contents": ["models/ (the selected bundle: model.pt, preprocessing.pt, manifest.json, splits.csv, the atlas's "
                      "embedding.tsv, predictions.tsv, missing_genes.tsv, evaluation.json)",
