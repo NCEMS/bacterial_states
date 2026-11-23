@@ -19,7 +19,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-figures = ["matplotlib>=3.8", "seaborn>=0.13"]
+figures = ["matplotlib>=3.8", "seaborn>=0.13", "gseapy>=1.1"]
 dev = ["pytest>=7"]
 
 [project.scripts]
@@ -32,7 +32,7 @@ Homepage = "https://github.com/NCEMS/bacterial_states"
 where = ["src"]
 
 [tool.setuptools.package-data]
-ecoli_atlas = ["reference/*.tsv"]
+ecoli_atlas = ["reference/*.tsv", "reference/*.tsv.gz"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

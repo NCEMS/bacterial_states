@@ -84,8 +84,10 @@ def fig_pca_batch(ctx, out_dir, formats) -> dict:
     return result
 
 
-def top_batch_genes(M: np.ndarray, genes, gse: np.ndarray, mask: np.ndarray, n_top: int = N_TOP_BATCH, min_mean: float = 1.0):
-    """Between-study SD of the per-study mean within a matched subset (replicate noise averaged out)."""
+def batch_ranking(M: np.ndarray, genes, gse: np.ndarray, mask: np.ndarray, min_mean: float = 1.0):
+    """Every gene with a mean of at least ``min_mean`` in a matched subset, ranked by the between-study
+    SD of its per-study mean (replicate noise averaged out), largest first. Returns (ranking or None
+    when the subset has fewer than 3 samples or 2 studies, samples, studies)."""
     rows = np.where(mask)[0]
     g = gse[rows]
     studies = pd.unique(g)
@@ -94,8 +96,14 @@ def top_batch_genes(M: np.ndarray, genes, gse: np.ndarray, mask: np.ndarray, n_t
     sub = M[rows]
     per_study_mean = np.vstack([sub[g == s].mean(0) for s in studies])
     keep = sub.mean(0) >= min_mean
-    score = pd.Series(np.where(keep, per_study_mean.std(0), 0.0), index=list(genes)).sort_values(ascending=False)
-    return score.head(n_top), len(rows), len(studies)
+    score = pd.Series(per_study_mean.std(0)[keep], index=np.asarray(list(genes), dtype=object)[keep])
+    return score.sort_values(ascending=False), len(rows), len(studies)
+
+
+def top_batch_genes(M: np.ndarray, genes, gse: np.ndarray, mask: np.ndarray, n_top: int = N_TOP_BATCH, min_mean: float = 1.0):
+    """The ``n_top`` genes of ``batch_ranking``."""
+    score, n_rows, n_studies = batch_ranking(M, genes, gse, mask, min_mean)
+    return (None if score is None else score.head(n_top)), n_rows, n_studies
 
 
 def fig_batch_genes(ctx, out_dir, formats) -> dict:

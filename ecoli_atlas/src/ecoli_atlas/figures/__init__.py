@@ -6,5 +6,5 @@ from .split_balance import fig_split_balance
 
 DATA_FIGURES = {"split_balance": fig_split_balance, "corpus_composition": fig_corpus_composition}
 MODEL_FIGURES = ("pca_batch", "batch_genes", "factor_test_eval", "factor_umaps", "factor_gene_correlates", "study_leakage",
-                 "threshold_curves")
+                 "threshold_curves", "gsea")
 FIGURES = DATA_FIGURES          # the name this registry had when there were only the data figures

@@ -226,7 +226,8 @@ def cmd_drivers(args) -> int:
     from .artifacts import MANIFEST_FILE, SPLITS_FILE, ModelBundle
     from .config import HEADS
     from .data import build_training
-    from .drivers import combine_seeds, default_contrasts, expression_units, gene_drivers, study_bootstrap, unit_matrix, unit_table
+    from .drivers import (axis_score, combine_seeds, contrast_drivers, default_contrasts, expression_units, gene_drivers, read_axis,
+                          study_bootstrap, unit_matrix, unit_table)
     from .features import read_feature_table
     from .figures.drivers import fig_drivers
     from .figures.plotting import apply_style
@@ -236,7 +237,16 @@ def cmd_drivers(args) -> int:
     device = pick_device(args.device)
     root = Path(args.models)
     seed_dirs = sorted((d for d in root.glob("seed_*") if (d / MANIFEST_FILE).exists()), key=lambda d: int(d.name.split("_")[1]))
-    paths = seed_dirs if (seed_dirs and not args.one_model) else [root]
+    paths = seed_dirs if (seed_dirs and not args.one_model and not args.axis) else [root]
+    axis = None
+    if args.axis:                    # an axis is fitted on one bundle's embedding: that bundle only, not the seeds beside it
+        try:
+            emb = pd.read_csv(root / "embedding.tsv", sep="\t", index_col=0)
+            emb.index = emb.index.astype(str)
+            axis = read_axis(args.axis, emb, args.axis_score)
+        except (OSError, ValueError, KeyError) as e:
+            _info(f"error: --axis: {e}")
+            return 2
     bundles = [ModelBundle.load(p, device) for p in paths]
     cfg = bundles[0].config
     if any((b.config.fit, b.config.phase_head) != (cfg.fit, cfg.phase_head) for b in bundles):
@@ -245,12 +255,20 @@ def cmd_drivers(args) -> int:
     args.splits = str(paths[0] / SPLITS_FILE)
     tables, _, splits = _training_inputs(args, cfg)
     data = build_training(tables, bundles[0].fs, cfg, splits)           # the same for every seed of a sweep: one split
-    classes = data.fit_classes[args.head]
+    label = f"axis_{axis['name']}" if axis else args.head
+    classes = axis["categories"] if axis else data.fit_classes[args.head]
+    if axis:
+        category = axis["category"].reindex([str(i) for i in data.ids]).fillna("").to_numpy()
+        score = axis_score(axis["weights"], axis["mean"], axis["sd"])
+        _info(f"axis {axis['name']} ({axis['method']} score), fitted categories {classes}")
     _info(f"{len(bundles)} model(s) from {root}" + (" (the seeds of the sweep)" if len(bundles) > 1 else ""))
     try:
         contrasts = [tuple(c.split(":")) for c in args.contrast] if args.contrast else default_contrasts(classes)
         if any(len(c) != 2 for c in contrasts):
             raise ValueError("--contrast takes LOW:HIGH")
+        if axis:
+            for c in {x for pair in contrasts for x in pair} - set(axis["category"]):
+                raise ValueError(f"axis {axis['name']}: no sample has the category {c!r}")
         feat = read_feature_table(args.features)
         logx = data.X.numpy() * data.zscore.sd + data.zscore.mu
         unit = expression_units(feat, data.fs.ids, logx[data.tr_rows], data.splits["gse"].to_numpy()[data.tr_rows], min_r=args.unit_r)
@@ -264,7 +282,11 @@ def cmd_drivers(args) -> int:
         for low, high in contrasts:
             per_gene, per_unit, per_summary, per_study = [], [], [], []
             for b in bundles:
-                table, summary, study_attr = gene_drivers(b.model, data, args.head, low, high, device, steps=args.steps)
+                if axis:
+                    lo, hi = np.where(category == low)[0], np.where(category == high)[0]
+                    table, summary, study_attr = contrast_drivers(b.model, data, score, lo, hi, label, low, high, device, steps=args.steps)
+                else:
+                    table, summary, study_attr = gene_drivers(b.model, data, args.head, low, high, device, steps=args.steps)
                 per_study.append(study_attr)
                 for col, name in (("Symbol", "symbol"), ("Type", "type"), ("Product", "product")):
                     if col in feat.columns:
@@ -285,12 +307,22 @@ def cmd_drivers(args) -> int:
                     boot = study_bootstrap(P, top, n_boot=args.study_boot)
                     for col, v in boot.items():
                         tbl[col] = pd.Series(v, index=ids).reindex(tbl[key]).to_numpy()
-            name = f"{args.head}_{low}_to_{high}"
+            name = f"{label}_{low}_to_{high}"
             genes.to_csv(out / f"drivers_{name}.tsv", sep="\t", index=False, float_format="%.5g")
             units.to_csv(out / f"units_{name}.tsv", sep="\t", index=False, float_format="%.5g")
-            fig_drivers(genes, args.head, low, high, out, formats, top=args.top)
-            fig_drivers(units, args.head, low, high, out, formats, top=args.top, label="unit", name="units")
+            fig_drivers(genes, label, low, high, out, formats, top=args.top)
+            fig_drivers(units, label, low, high, out, formats, top=args.top, label="unit", name="units")
             summary = dict(per_summary[0])
+            if args.gsea:                   # GO terms of the genes ranked by their signed attribution (seed mean)
+                from .figures.gsea import fig_gsea_bars
+                from .gsea import ranking_by_symbol, run as run_gsea
+                sym = genes["symbol"] if "symbol" in genes.columns else genes["feature"]
+                res, info = run_gsea(ranking_by_symbol(genes["attribution"], sym.where(sym != "", "")), args.gene_sets,
+                                     permutations=args.gsea_permutations)
+                res.to_csv(out / f"gsea_{name}.tsv", sep="\t", index=False, float_format="%.5g")
+                fig_gsea_bars(res, f"GO terms of the {label} drivers, {low} → {high}", out, f"fig_gsea_{name}", formats, top=args.top,
+                              both=True, up_label=f"move the score towards {high}", down_label=f"move the score towards {low}")
+                summary["gsea"] = info
             for k in ("score_gap_high_minus_baseline", "sum_of_attributions"):
                 summary[k] = float(np.mean([s[k] for s in per_summary]))
             pos = units["attribution"] > 0
@@ -316,11 +348,14 @@ def cmd_drivers(args) -> int:
                   f"top 50 units carry {summary['share_of_attribution']['top_50_units']:.0%} of the attribution"
                   + (f"; {int(robust.sum())} units are among the top {args.top_units} in at least 3 of 4 seeds, "
                      f"rank correlation between seeds {summary['rank_correlation_between_seeds']:.2f}" if len(bundles) > 1 else ""))
-    except ValueError as e:
+    except (ValueError, ImportError) as e:
         _info(f"error: {e}")
         return 2
-    _write_json({"models": [str(p) for p in paths], "phase_head": cfg.phase_head, "fit": cfg.fit, "classes": list(classes),
-                 "unit_min_correlation": args.unit_r, "contrasts": summaries}, out / f"drivers_{args.head}.json")
+    report = {"models": [str(p) for p in paths], "phase_head": cfg.phase_head, "fit": cfg.fit, "classes": list(classes),
+              "unit_min_correlation": args.unit_r, "contrasts": summaries}
+    if axis:
+        report["axis"] = {"summary": str(args.axis), "name": axis["name"], "column": axis["column"], "score": axis["method"]}
+    _write_json(report, out / f"drivers_{label}.json")
     _info(f"wrote the driver tables and figures to {out}")
     return 0
 
@@ -477,6 +512,7 @@ def _model_figures(args, names: list, out: Path, formats: tuple) -> tuple[dict, 
     """Draw the figures that need the model. Returns (metrics, all checks passed)."""
     from .figures.checks import all_agree, compare_metrics
     from .figures.gene_correlates import fig_factor_gene_correlates
+    from .figures.gsea import fig_gsea_batch
     from .figures.leakage import fig_study_leakage
     from .figures.pca import fig_batch_genes, fig_pca_batch
     from .figures.test_eval import fig_factor_test_eval, misclassified_table
@@ -510,12 +546,14 @@ def _model_figures(args, names: list, out: Path, formats: tuple) -> tuple[dict, 
     draw = {"pca_batch": lambda: fig_pca_batch(ctx, out, formats), "batch_genes": lambda: fig_batch_genes(ctx, out, formats),
             "factor_test_eval": test_eval, "factor_umaps": lambda: fig_factor_umaps(ctx, out, formats),
             "factor_gene_correlates": lambda: fig_factor_gene_correlates(ctx, out, formats),
-            "study_leakage": lambda: fig_study_leakage(ctx, out, formats), "threshold_curves": thresholds}
+            "study_leakage": lambda: fig_study_leakage(ctx, out, formats), "threshold_curves": thresholds,
+            "gsea": lambda: fig_gsea_batch(ctx, out, formats, permutations=args.gsea_permutations, gene_sets=args.gene_sets,
+                                           threads=args.threads or 4)}
     for name in names:
         try:
             metrics[name] = draw[name]()
             _info(f"  {name}: done")
-        except ValueError as e:
+        except (ValueError, ImportError) as e:
             metrics[name], ok = {"error": str(e)}, False
             _info(f"  {name}: error: {e}")
     if "test_metrics_vs_manifest" in metrics and not all_agree(metrics["test_metrics_vs_manifest"]):
@@ -725,6 +763,11 @@ def build_parser() -> argparse.ArgumentParser:
     def add_device(sp):
         sp.add_argument("--device", default="auto", choices=["auto", "cpu", "cuda"])
 
+    def add_gsea(sp):
+        sp.add_argument("--gene-sets", metavar="TSV", help="gene-set table for the enrichment (term, namespace, name, genes; "
+                        "default: the package's GO sets, reference/go_gene_sets_ecocyc.tsv.gz)")
+        sp.add_argument("--gsea-permutations", type=int, default=10000, metavar="N", help="permutations of the enrichment test (10000)")
+
     def add_tables(sp):
         sp.add_argument("--counts", required=True, help="joined count table of the atlas (features x samples)")
         sp.add_argument("--metadata", required=True, help="sample metadata (metadata_v2.tsv)")
@@ -828,6 +871,13 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--steps", type=int, default=32, help="points along the path of the integrated gradients")
     sp.add_argument("--study-boot", type=int, default=200, metavar="N",
                     help="draws of the high-class studies for the study_sd / study_in_top / study_same_sign columns (0: none)")
+    sp.add_argument("--axis", metavar="SUMMARY_JSON", help="attribute an `axes` dimension instead of a head: the "
+                    "axis_<name>_summary.json that `axes` wrote for this bundle (classes = the axis's fitted categories; "
+                    "only the bundle in --models is used)")
+    sp.add_argument("--axis-score", default="ordinal", choices=["ordinal", "anchor"], help="which score of the axis (ordinal)")
+    sp.add_argument("--gsea", action="store_true", help="also the GO-term enrichment of the genes ranked by attribution "
+                    "(gsea_<contrast>.tsv, fig_gsea_<contrast>; needs gseapy)")
+    add_gsea(sp)
     sp.add_argument("--out", required=True)
     sp.add_argument("--formats", default="pdf,png")
     add_device(sp)
@@ -942,6 +992,7 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--strict", action="store_true", help="exit 1 when a figure fails or the embedding or the TEST metrics "
                                                           "differ from those stored in the bundle")
     sp.add_argument("--threads", type=int, help="torch CPU threads")
+    add_gsea(sp)
     add_device(sp)
     sp.set_defaults(func=cmd_figures)
 

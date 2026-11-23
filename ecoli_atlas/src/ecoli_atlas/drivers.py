@@ -57,11 +57,61 @@ def study_balanced_weights(gse: np.ndarray) -> np.ndarray:
     return (1.0 / n) / (1.0 / n).sum()
 
 
-def integrated_gradients(model, X: torch.Tensor, C: torch.Tensor, base: torch.Tensor, head: str, device,
+def axis_score(weights, mean, sd):
+    """Score function of an `ecoli_atlas axes` axis: its weights apply to the embedding columns
+    standardised by the mean and SD of the axis's fitted samples (``read_axis``)."""
+    w = torch.as_tensor(np.asarray(weights, dtype=np.float32))
+    m = torch.as_tensor(np.asarray(mean, dtype=np.float32))
+    s = torch.as_tensor(np.asarray(sd, dtype=np.float32))
+
+    def score(model, x: torch.Tensor, c: torch.Tensor) -> torch.Tensor:
+        z = model(x, c, sample=False, train_blocks=True)["mu"]
+        return ((z - m.to(z.device)) / s.to(z.device)) @ w.to(z.device)
+    return score
+
+
+def read_axis(summary_path, embedding: pd.DataFrame, method: str = "ordinal") -> dict:
+    """An axis written by `ecoli_atlas axes` (``axis_<name>_summary.json`` beside its
+    ``axis_<name>_scores.tsv``) for the bundle whose ``embedding.tsv`` is given: its name, fitted
+    categories in order, the category of every sample, and the score's weights with the mean and SD
+    of the fitted samples' embedding (``axes`` standardises the columns by these)."""
+    import json
+    from pathlib import Path
+    p = Path(summary_path)
+    if not p.name.endswith("_summary.json"):
+        raise ValueError(f"{p}: give the axis_<name>_summary.json that `axes` wrote")
+    summary = json.loads(p.read_text())
+    scores = pd.read_csv(p.with_name(p.name.replace("_summary.json", "_scores.tsv")), sep="\t", index_col=0, keep_default_na=False)
+    scores.index = scores.index.astype(str)
+    if method not in summary["weights"]:
+        raise ValueError(f"{p}: no {method!r} weights (has {sorted(summary['weights'])})")
+    cols = summary["embedding_columns"]
+    missing = [c for c in cols if c not in embedding.columns]
+    if missing:
+        raise ValueError(f"{p}: the axis was fitted on embedding columns {missing[:3]}... that this bundle does not have")
+    fitted = scores.index[scores["role"] == "fitted"]
+    Z = embedding.reindex(fitted)[cols].to_numpy(dtype=np.float64)
+    if np.isnan(Z).any():
+        raise ValueError(f"{p}: fitted samples of the axis are not in this bundle's embedding.tsv: was it made with another bundle?")
+    sd = Z.std(0)
+    sd[sd == 0] = 1.0
+    full = np.zeros(embedding.shape[1])
+    m_full, sd_full = np.zeros(embedding.shape[1]), np.ones(embedding.shape[1])
+    idx = [list(embedding.columns).index(c) for c in cols]
+    full[idx], m_full[idx], sd_full[idx] = summary["weights"][method], Z.mean(0), sd
+    holdout = set(summary.get("holdout", []))
+    return {"name": p.name[len("axis_"):-len("_summary.json")], "column": summary.get("column", ""),
+            "categories": [c for c in summary["categories"] if c not in holdout],
+            "category": scores["category"].astype(str), "weights": full, "mean": m_full, "sd": sd_full, "method": method}
+
+
+def integrated_gradients(model, X: torch.Tensor, C: torch.Tensor, base: torch.Tensor, head, device,
                          steps: int = 32, chunk: int = 256) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Attribution of every feature for every row of ``X`` relative to ``base`` (midpoint rule
-    over ``steps`` points of the line). Returns (attributions, score of the sample, score of the
-    baseline with the sample's covariates)."""
+    over ``steps`` points of the line). ``head`` is a head name or a score function
+    ``(model, x, c) -> score per row`` (``axis_score``). Returns (attributions, score of the sample,
+    score of the baseline with the sample's covariates)."""
+    score = head if callable(head) else (lambda m, x, c: head_score(m, x, c, head))
     model.eval()
     base = base.to(device)
     attr, s_end, s_base = [], [], []
@@ -71,11 +121,11 @@ def integrated_gradients(model, X: torch.Tensor, C: torch.Tensor, base: torch.Te
         total = torch.zeros_like(x)
         for k in range(steps):
             xi = (base + (k + 0.5) / steps * delta).detach().requires_grad_(True)
-            total += torch.autograd.grad(head_score(model, xi, c, head).sum(), xi)[0]
+            total += torch.autograd.grad(score(model, xi, c).sum(), xi)[0]
         attr.append((delta * total / steps).detach().cpu())
         with torch.no_grad():
-            s_end.append(head_score(model, x, c, head).cpu())
-            s_base.append(head_score(model, base.expand_as(x), c, head).cpu())
+            s_end.append(score(model, x, c).cpu())
+            s_base.append(score(model, base.expand_as(x), c).cpu())
     return torch.cat(attr).numpy(), torch.cat(s_end).numpy(), torch.cat(s_base).numpy()
 
 
@@ -104,20 +154,30 @@ def gene_drivers(model, data: TrainingData, head: str, low: str, high: str, devi
     for name in (low, high):
         if name not in classes:
             raise ValueError(f"{head}: {name!r} is not one of its classes {classes}")
-    y, gse = data.y_fit[head], data.gse_codes
+    y = data.y_fit[head]
     lo, hi = np.where(y == classes.index(low))[0], np.where(y == classes.index(high))[0]
+    return contrast_drivers(model, data, head, lo, hi, head, low, high, device, steps)
+
+
+def contrast_drivers(model, data: TrainingData, score, lo: np.ndarray, hi: np.ndarray, label: str, low: str, high: str,
+                     device, steps: int = 32) -> tuple[pd.DataFrame, dict, np.ndarray]:
+    """``gene_drivers`` for any score (a head name or a score function such as ``axis_score``) and
+    any two groups of rows of ``data`` (``lo``: the baseline class, ``hi``: the class attributed)."""
+    head = label
+    gse = data.gse_codes
     if not len(lo) or not len(hi):
         raise ValueError(f"{head}: no sample of {low!r} or of {high!r}")
+    score_fn = score if callable(score) else (lambda m, x, c: head_score(m, x, c, score))
     w_lo, w_hi = study_balanced_weights(gse[lo]), study_balanced_weights(gse[hi])
     X = data.X.numpy()
     base = torch.tensor(w_lo @ X[lo], dtype=torch.float32)[None, :]
-    attr, s_hi, s_base = integrated_gradients(model, data.X[torch.as_tensor(hi)], data.C[torch.as_tensor(hi)], base, head, device, steps)
+    attr, s_hi, s_base = integrated_gradients(model, data.X[torch.as_tensor(hi)], data.C[torch.as_tensor(hi)], base, score_fn, device, steps)
     mean_attr = w_hi @ attr
     logx = X * data.zscore.sd + data.zscore.mu                              # log2 normalised expression
     both = np.concatenate([lo, hi])
     with torch.no_grad():
-        score = np.concatenate([head_score(model, data.X[torch.as_tensor(both[i:i + 2048])].to(device),
-                                           data.C[torch.as_tensor(both[i:i + 2048])].to(device), head).cpu().numpy()
+        score = np.concatenate([score_fn(model, data.X[torch.as_tensor(both[i:i + 2048])].to(device),
+                                         data.C[torch.as_tensor(both[i:i + 2048])].to(device)).cpu().numpy()
                                 for i in range(0, len(both), 2048)])
     table = pd.DataFrame({
         "feature": data.fs.ids,

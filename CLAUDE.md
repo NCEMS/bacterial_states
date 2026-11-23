@@ -176,7 +176,13 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   `ecoli_atlas drivers` (`drivers.py`) ranks the genes that move a head's score between two of its
   classes by integrated gradients; attribution sign = effect on the score, `direction` = up or down in the data.
   It averages over the `seed_<n>` bundles of a sweep and adds the attributions up over expression
-  units (neighbouring same-strand genes correlated within studies); the unit table is the one to read. The medium call is rich (complex
+  units (neighbouring same-strand genes correlated within studies); the unit table is the one to read. `drivers --axis
+  axis_<name>_summary.json` attributes an `axes` dimension instead of a head (its saved weights apply to the embedding
+  columns standardised over the axis's fitted samples, not to the raw `embedding.tsv`). Gene-set enrichment (`gsea.py`,
+  gseapy, two-sided preranked, GO sets in `reference/go_gene_sets_ecocyc.tsv.gz` built by `scripts/go_gene_sets.py` from
+  the EcoCyc GAF, genes matched by lower-case symbol) is the `figures` panel `gsea` (between-study ranking of
+  `batch_genes`, MG1655 and BW25113) and `drivers --gsea` (genes ranked by signed attribution). The v1 paper's GSEA was
+  R fgsea, one-sided (`outputs/GSEA/runGSEA.ipynb`); its NES and p-values are not comparable with these. The medium call is rich (complex
   broth) against minimal (salts and a carbon source); every medium in between has no label. A study gives at most `study_cap` samples per epoch (default: the size
   of the second-largest study; only GSE206047 is cut), and within one class of a call it counts for at
   most `label_cap` samples (default: the second-largest study of that class; `data.label_weights`). Splits are by whole study and, as in v1, TEST and
@@ -300,7 +306,7 @@ measured covariates remove ~0.01-0.02 of it). Order:
 
 Atlas model, second stage: refinement of the missing-gene calls (decoder mean, coverage), corrected counts,
 hyper-parameter search; the root `README.md` and the two
-`examples/*/README.md` still describe the v1 atlas commands. GSEA,
+`examples/*/README.md` still describe the v1 atlas commands.
 `atlas_build/` cleanup (`combine_counts.sh` assumes the old column layout), container rebuild from
 `environment.yaml` (drop entrez-direct/pytorch), LICENSE file, tutorial-data bundle, real hosting
 URLs, a Snakefile rule that emits an atlas-ready counts TSV.

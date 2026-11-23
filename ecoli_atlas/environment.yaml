@@ -12,6 +12,7 @@
 name: ecoli_atlas
 channels:
   - conda-forge
+  - bioconda
 dependencies:
   - python=3.12
   - pip
@@ -23,4 +24,5 @@ dependencies:
   - pyyaml
   - matplotlib>=3.8    # `figures`
   - seaborn>=0.13
+  - gseapy>=1.1         # gene-set enrichment (`figures` gsea, `drivers --gsea`)
   - pytest

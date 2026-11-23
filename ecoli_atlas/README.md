@@ -39,7 +39,8 @@ pip install -e "./ecoli_atlas[dev]"
 pytest ecoli_atlas/tests
 ```
 
-The environment has the CPU build of PyTorch. A single training run takes minutes on 8 CPU threads
+The environment has the CPU build of PyTorch, and gseapy (bioconda) for the gene-set enrichment of
+`figures` and `drivers --gsea`; with pip it comes with the `figures` extra (`pip install -e "./ecoli_atlas[figures]"`). A single training run takes minutes on 8 CPU threads
 (about 3 s per epoch on 6,800 samples); a GPU is worth it for seed sweeps and cross-validation. For
 a GPU node:
 
@@ -488,6 +489,7 @@ ecoli_atlas figures $T --models outputs/models --out outputs/figures [--only NAM
 |---|---|---|
 | `pca_batch` | `fig_pca_mg1655_batch`, `fig_pca_bw_batch`, `fig_pca_strain_all_complex`, `pca_log_expression_coords.tsv` | PCA of the log2 normalised expression (no model): MG1655 and BW25113 in one condition (exponential, untreated wild type, rich medium) coloured by study, and the rich-medium samples by strain |
 | `batch_genes` | `fig_batch_genes`, `batch_genes.tsv` | the genes that differ most between studies within those two subsets |
+| `gsea` | `fig_gsea_batch_mg1655`, `fig_gsea_batch_bw25113`, `fig_gsea_batch_scatter`, `gsea_batch_<strain>.tsv` | GO-term enrichment of the whole between-study ranking of `batch_genes` in each strain: the 20 terms with the largest NES, and the NES of every term in MG1655 against BW25113 (see [Gene-set enrichment](#gene-set-enrichment)) |
 | `factor_test_eval` | `fig_factor_test_eval`, `phase_misclassified.tsv` | confusion matrix of each call on TEST; the samples whose phase call is wrong |
 | `factor_umaps` | `fig_factor_umaps`, `fig_factor_umaps_overlay`, `umap_factor_coords.tsv` | UMAP of each head's block, by label and by training pool / TEST |
 | `factor_gene_correlates` | `fig_factor_gene_correlates`, `factor_gene_correlations.{txt,tsv}` | Spearman rho of every gene's expression with each head's probability (the `.txt` lists the top 50 each way, for gene-set enrichment) |
@@ -634,6 +636,49 @@ attributions between seeds, the top units of each kind that hold in at least thr
 seeds, and the number of units among the top rows in at least three of four seeds and in at least
 three quarters of the study draws. `fig_units_*` and `fig_drivers_*` show the top `--top` rows of each direction; with several
 seeds a row that does not hold in three of four seeds is drawn pale.
+
+**Drivers of an axis** (`--axis axis_<name>_summary.json`): the same for a dimension made by
+`axes` on this bundle. The score is the axis's score (`--axis-score ordinal`, default, or `anchor`),
+its weights applied to the embedding columns standardised over the axis's fitted samples, as `axes`
+fits them; the classes are the axis's fitted categories (default contrast: first against last).
+Only the bundle in `--models` is used (an axis belongs to one embedding, not to the seeds beside
+it). Output names start with `axis_<name>` (`drivers_axis_<name>_<low>_to_<high>.tsv`, ...). An
+axis that leans on the residual block also brings in what the residual carries besides the axis
+(culture environment, strain): read its drivers with `study_in_top`.
+
+```bash
+ecoli_atlas axes --models outputs/models --metadata atlas_data/metadata_v2.tsv --axis oxygen:oxygen:aerobic,anaerobic_fermentation --out outputs/axes_oxygen
+ecoli_atlas drivers $T --models outputs/models --axis outputs/axes_oxygen/axis_oxygen_summary.json --gsea --out outputs/drivers_oxygen
+```
+
+**GO terms** (`--gsea`): the genes ranked by their signed attribution (seed mean) are tested
+against the GO sets (see [Gene-set enrichment](#gene-set-enrichment)): `gsea_<contrast>.tsv` and
+`fig_gsea_<contrast>` (terms whose genes move the score towards the high class on the left, towards
+the low class on the right), and the counts and top terms in the JSON (`gsea`).
+
+### Gene-set enrichment
+
+`figures` (`gsea`) and `drivers --gsea` run a preranked GSEA (gseapy, every gene weighted the same,
+two-sided: a positive NES means the term's genes sit at the top of the ranking, a negative NES at the
+bottom) of GO terms of 5 to 500 ranked genes, 10,000 permutations (`--gsea-permutations`), so the
+smallest p-value is 1e-4; `fdr` is gseapy's FDR q-value. Genes are matched by lower-case symbol;
+about 90% of the CDS features are in a GO set. Result tables have `term`, `name`, `namespace`,
+`size`, `es`, `nes`, `pval`, `fdr` and `lead_genes`.
+
+The GO sets ship with the package (`reference/go_gene_sets_ecocyc.tsv.gz`, 4,112 terms, 126 KB):
+the EcoCyc annotations of E. coli K-12 (`ECOLI-mod.gaf`, direct annotations, NOT qualifiers left
+out) with the term names and namespaces of `go-basic.obo`; the file's header gives both versions.
+Gene Ontology data are CC BY 4.0 (geneontology.org). Rebuild with newer files:
+
+```bash
+curl -LO https://current.geneontology.org/annotations/gaf/ECOLI-mod.gaf.gz
+curl -LO https://current.geneontology.org/ontology/go-basic.obo
+python ecoli_atlas/scripts/go_gene_sets.py --gaf ECOLI-mod.gaf.gz --obo go-basic.obo \
+    --out ecoli_atlas/src/ecoli_atlas/reference/go_gene_sets_ecocyc.tsv.gz
+```
+
+`--gene-sets TSV` uses another table of the same columns (`term`, `namespace`, `name`, `genes` as
+comma-separated symbols), e.g. RegulonDB regulons or EcoCyc pathways.
 
 ## On a SLURM cluster
 
