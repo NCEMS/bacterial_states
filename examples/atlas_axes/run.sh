@@ -11,17 +11,20 @@ MODELS=${MODELS:-$ROOT/outputs/models}
 EA=$ROOT/bin/ecoli_atlas
 axes() { $EA axes --models "$MODELS" --metadata $DATA/metadata_v2.tsv --where treated=false --where standard_rnaseq=true "$@"; }
 
-# growth phase: fitted from early exponential to stationary; lag and the late stationary levels only scored (extrapolation)
-axes --axis phase:growth_phase:lag,early_exponential,mid_exponential,transition,stationary,late_stationary,long_term_stationary \
-     --holdout lag --holdout late_stationary --holdout long_term_stationary \
+# growth phase: fitted from mid exponential to stationary. Only samples whose phase GEO states (per sample or for the
+# whole study), as in the phase call's scoring: phases inferred from sampling times (mostly GSE206047, microplate time
+# courses) are left out
+axes --axis phase:growth_phase:mid_exponential,transition,stationary \
+     --where growth_phase_basis=stated,study_default \
      --series $DATA/time_courses.tsv --out axes/phase
 # oxygen: fitted on aerobic against anaerobic fermentation; microaerobic (one study, GSE189154, TEST) and anaerobic
 # respiration (two studies) are held out and only scored, as an interpolation test
 axes --axis oxygen:oxygen:aerobic,microaerobic,anaerobic_respiration,anaerobic_fermentation \
      --holdout microaerobic --holdout anaerobic_respiration --out axes/oxygen
-# carbon source in defined minimal media: sugars against glycerol and organic acids (each sample keeps its own value)
+# carbon source in defined minimal media: sugars against glycerol and organic acids (each sample keeps its own value);
+# exponential samples only, so that the stated carbon source is the one the cells use (in stationary phase it is gone)
 axes --axis carbon:carbon_source:sugar=glucose+other_sugar,non_sugar=glycerol+organic_acid \
-     --where medium_class=defined_minimal --out axes/carbon
+     --where medium_class=defined_minimal --where growth_phase=early_exponential,mid_exponential --out axes/carbon
 # glycerol against the other stated carbon sources, defined minimal media
 axes --axis glycerol:carbon_source:non_glycerol=glucose+other_sugar+organic_acid,glycerol=glycerol \
      --where medium_class=defined_minimal --out axes/glycerol

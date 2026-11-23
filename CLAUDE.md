@@ -180,7 +180,7 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   preranked: one-sided `prerank_one_sided` (numpy, = fgsea scoreType pos, gseaParam 0; default of the `figures` panel) or
   two-sided gseapy (default of `drivers` and the case studies), `--gsea-sides`; GO sets in `reference/go_gene_sets_ecocyc.tsv.gz` built by `scripts/go_gene_sets.py` from
   the EcoCyc GAF, genes matched by lower-case symbol) is the `figures` panel `gsea` (between-study ranking of
-  `batch_genes`, MG1655 and BW25113) and `drivers --gsea` (genes ranked by signed attribution). The v1 paper's GSEA was
+  `batch_genes`, MG1655 and BW25113) and `drivers --gsea` (genes ranked by signed attribution, apart for the genes up and down in the high class: `gsea_<contrast>_up|down`). The v1 paper's GSEA was
   R fgsea, one-sided (`outputs/v1_originals/GSEA/runGSEA.ipynb`); the one-sided test reproduces it on the v1 rankings
   (NES r 0.9998; `work/gsea_one_sided/validate.py`), the two-sided NES and p-values are not comparable with it.
   Curated modules (`modules.py`, `drivers --modules TSV`): module net attribution against an operon-aware size-matched

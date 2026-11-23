@@ -83,9 +83,10 @@ def test_drivers_of_an_axis_with_gsea(trained, train_args, atlas_files, tmp_path
     assert report["axis"]["name"] == "phase" and report["classes"] == ["mid_exponential", "stationary"]
     assert summary["sum_of_attributions"] == pytest.approx(summary["score_gap_high_minus_baseline"], rel=0.05)   # completeness
     assert table.head(10)["feature"].isin(set(feat["Feature_ID"][:10])).sum() >= 6
-    gsea = pd.read_csv(out / f"gsea_{name}.tsv", sep="\t").set_index("term")
-    assert gsea.loc["T:PHASE", "nes"] > 0 and summary["gsea"]["terms_tested"] == 2
-    assert (out / f"fig_gsea_{name}.png").stat().st_size > 5000
+    gsea = pd.read_csv(out / f"gsea_{name}_up.tsv", sep="\t").set_index("term")       # the phase genes rise: in the up ranking
+    assert gsea.loc["T:PHASE", "nes"] > 0 and summary["gsea"]["up"]["terms_tested"] >= 1
+    assert (out / f"fig_gsea_{name}_up.png").stat().st_size > 5000 and "down" in summary["gsea"]
+    assert not (out / f"gsea_{name}.tsv").exists()
     # an axis summary that is not one, or a category the axis does not have, is refused
     assert main(args[:-9] + ["--axis", str(tmp_path / "sets.tsv")]) == 2
     assert main(args + ["--contrast", "mid_exponential:nope"]) == 2

@@ -367,16 +367,25 @@ def cmd_drivers(args) -> int:
             fig_drivers(genes, label, low, high, out, formats, top=args.top)
             fig_drivers(units, label, low, high, out, formats, top=args.top, label="unit", name="units")
             summary = dict(per_summary[0])
-            if args.gsea:                   # GO terms of the genes ranked by their signed attribution (seed mean)
+            if args.gsea:   # GO terms, apart for the genes higher and lower in the high class, each ranked by signed attribution
                 from .figures.gsea import fig_gsea_bars
                 from .gsea import ranking_by_symbol, run as run_gsea
                 sym = genes["symbol"] if "symbol" in genes.columns else genes["feature"]
-                res, info = run_gsea(ranking_by_symbol(genes["attribution"], sym.where(sym != "", "")), args.gene_sets,
-                                     permutations=args.gsea_permutations, sides=args.gsea_sides or "two")
-                res.to_csv(out / f"gsea_{name}.tsv", sep="\t", index=False, float_format="%.5g")
-                fig_gsea_bars(res, f"GO terms of the {label} drivers, {low} → {high}", out, f"fig_gsea_{name}", formats, top=args.top,
-                              both=True, up_label=f"move the score towards {high}", down_label=f"move the score towards {low}")
-                summary["gsea"] = info
+                summary["gsea"] = {}
+                for d, word in (("up", "higher"), ("down", "lower")):
+                    sub = genes["direction"] == d
+                    try:
+                        res, info = run_gsea(ranking_by_symbol(genes.loc[sub, "attribution"], sym[sub].where(sym[sub] != "", "")),
+                                             args.gene_sets, permutations=args.gsea_permutations, sides=args.gsea_sides or "two")
+                    except ValueError as e:                     # too few genes of one direction for any set
+                        summary["gsea"][d] = {"skipped": str(e)}
+                        continue
+                    res.to_csv(out / f"gsea_{name}_{d}.tsv", sep="\t", index=False, float_format="%.5g")
+                    fig_gsea_bars(res, f"GO terms of the {label} drivers, {low} → {high}: genes {word} in {high} ({int(sub.sum())})",
+                                  out, f"fig_gsea_{name}_{d}", formats, top=args.top, both=True,
+                                  up_label=f"{word} in {high}, change moves the score towards {high}",
+                                  down_label=f"{word} in {high}, change moves the score towards {low}")
+                    summary["gsea"][d] = info
             if args.modules:                # curated modules scored with the attributions of every seed and study
                 from .figures.modules import fig_modules
                 from .modules import score_modules, summary as module_summary

@@ -760,10 +760,13 @@ ecoli_atlas axes --models outputs/models --metadata atlas_data/metadata_v2.tsv -
 ecoli_atlas drivers $T --models outputs/models --axis work/axes_oxygen/axis_oxygen_summary.json --gsea --out work/drivers_oxygen
 ```
 
-**GO terms** (`--gsea`): the genes ranked by their signed attribution (seed mean) are tested
-against the GO sets (see [Gene-set enrichment](#gene-set-enrichment)): `gsea_<contrast>.tsv` and
-`fig_gsea_<contrast>` (terms whose genes move the score towards the high class on the left, towards
-the low class on the right), and the counts and top terms in the JSON (`gsea`).
+**GO terms** (`--gsea`): two tests, one for the genes higher in the high class (`direction` up) and one for those
+lower in it (down), each ranking its genes by their signed attribution (seed mean) against the GO sets (see
+[Gene-set enrichment](#gene-set-enrichment)): `gsea_<contrast>_up.tsv` / `_down.tsv` and `fig_gsea_<contrast>_up` /
+`_down`, each with the terms whose genes' change moves the score towards the high class on the left and towards the
+low class on the right; the counts and top terms per direction in the JSON (`gsea`). A ribosomal protein term, for
+example, is in the `down` test (lower in stationary phase) on the side that moves the score towards stationary. Split
+this way, a term says both which way its genes change and what that change does to the call.
 
 ### Gene-set enrichment
 
