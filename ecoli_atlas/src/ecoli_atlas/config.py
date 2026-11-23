@@ -112,9 +112,9 @@ class TrainConfig:
     n_candidates: int = 500
     fold_study_weight: float = 1.0
     withheld_studies: tuple = ("GSE224463",)                                  # projected only, in no split
-    # forced into TEST: the case studies, and GSE67402, the worked example (examples/GSE67402_*), kept out of training so that
-    # the example stays out of sample (it was already TEST in the split of 2026-11-21)
-    test_studies: tuple = ("GSE128997", "GSE189154", "GSE78756", "GSE80451", "GSE67402")
+    # forced into TEST, so that the examples and case studies stay out of sample: GSE128997 (UTI), GSE189154 (oxygen),
+    # GSE271069 (glucose against casamino acids, examples/GSE271069_*) and GSE67402 (examples/GSE67402_*)
+    test_studies: tuple = ("GSE128997", "GSE189154", "GSE271069", "GSE67402")
     # a study's samples above this number are drawn at random each epoch, so that one very large
     # study does not weigh more than a large ordinary one; None = size of the second-largest study
     study_cap: int | None = None

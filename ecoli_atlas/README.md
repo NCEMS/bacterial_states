@@ -239,8 +239,8 @@ equivalent, and it leaves 8 of the 44 TEST studies and 75 of the 302 fold studie
 | `split` 1, no `cv_fold` | the other samples of those studies: fitted, never scored; in cross-validation they are left out of the fit together with their study's fold |
 | `split` 0 | projected only: the withheld study `GSE224463`, and the samples of TEST studies that are not reference samples |
 
-The four case-study studies (`GSE128997`, `GSE189154`, `GSE78756`, `GSE80451`) are always TEST
-(`config.py`). A study with more than the TEST share of the reference samples stays in the training pool.
+The studies of the examples and case studies (`GSE128997`, `GSE189154`, `GSE271069`, `GSE67402`) are
+always TEST (`config.py`). A study with more than the TEST share of the reference samples stays in the training pool.
 
 All statistics (size-factor reference, z-scores, covariate scaling) come from the reference samples
 of the training pool.
