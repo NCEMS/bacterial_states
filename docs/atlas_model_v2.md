@@ -248,8 +248,8 @@ used is the coverage-based `dna_fraction_est`.
 - DNA is taken as even along the chromosome. In the 127 atlas samples above 5% DNA the background
   near the replication origin is 1.2 times that near the terminus (median; 0.9–1.5 for 80% of
   them), so a position term would change the DNA reads by about ±10% and is left out.
-- **Outcome.** Two 8-seed sweeps against the model without the term (`outputs/models_v2_dna`,
-  `outputs/models_v2_dna_decoder`): the decoder term alone left the calls unchanged and the count
+- **Outcome.** Two 8-seed sweeps against the model without the term (`outputs/sweeps/models_v2_dna`,
+  `outputs/sweeps/models_v2_dna_decoder`): the decoder term alone left the calls unchanged and the count
   fit slightly worse, with a learned factor of 0.31 instead of 1. With the input correction, twins
   with 5 and 20% DNA at normal depth landed near their DNA-free parent (strain block 42 → 2
   replicate distances at 20%), but shallow libraries moved much further away (250,000 pairs with

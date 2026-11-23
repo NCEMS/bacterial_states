@@ -116,7 +116,7 @@ trained with.
   head's output on them is reported as a check.
 - Lab strain (`lab_strain`): `strain_group` K-12, B, C or W (the laboratory lineages) → `lab`; any other
   known group (pathogens, natural isolates, probiotic strains) → `non_lab`; no label where the group is
-  empty. The probability column is `p_lab`. A bundle trained for other calls (`outputs/models_v2_k12`
+  empty. The probability column is `p_lab`. A bundle trained for other calls (`outputs/sweeps/models_v2_k12`
   has a `k12` call, K-12 against the rest) is refused by this version.
 
 **Sample selection.** `qc_table.py mark-model --metadata metadata_v2.tsv --min-cds-reads 200000 --max-dna-fraction 0.10`
@@ -131,14 +131,14 @@ T="--counts atlas_data/atlas_v2_counts.tsv --metadata atlas_data/metadata_v2.tsv
 
 # the study split only (splits.csv), then the figures of the data
 ecoli_atlas train $T --out outputs/models --split-only
-ecoli_atlas figures --metadata atlas_data/metadata_v2.tsv --splits outputs/models --out outputs/figures
+ecoli_atlas figures --metadata atlas_data/metadata_v2.tsv --splits outputs/models --out examples/atlas_model_figures/figures
 
 # train on that split and evaluate on the held-out studies
 ecoli_atlas train $T --out outputs/models --splits outputs/models/splits.csv [--device cuda]
 ecoli_atlas train $T --out outputs/models --splits outputs/models/splits.csv --seeds 1,2,3,4 --cv
 
 # evaluate a bundle again; embed new samples
-ecoli_atlas evaluate $T --models outputs/models --out outputs/models_eval
+ecoli_atlas evaluate $T --models outputs/models --out work/evaluation
 ecoli_atlas embed --ingest-results my_run --models outputs/models --out embedded     # an inGEST run directory
 ecoli_atlas prepare --ingest-results my_run --out prepared [--metadata my_samples.tsv]   # the same tables, to look at or join
 ecoli_atlas embed --counts prepared/counts.tsv --qc prepared/qc.tsv --antisense prepared/antisense_counts.tsv \
@@ -163,7 +163,7 @@ one `splits.csv` can be compared directly. The manifest records `fit` and `embed
 
 ```bash
 for FIT in two-stage one-pass unstructured; do
-  ecoli_atlas train $T --fit $FIT --out outputs/models_${FIT//-/_} --splits outputs/models/splits.csv \
+  ecoli_atlas train $T --fit $FIT --out outputs/sweeps/models_${FIT//-/_} --splits outputs/models/splits.csv \
       --seeds 1,2,3,4,5,6,7,8 --cv --device cuda
 done
 ```
@@ -190,7 +190,7 @@ done
   alike. The seeds are still ranked on the mean out-of-fold AUROC.
 
 ```bash
-ecoli_atlas train $T --phase-head ordinal --out outputs/models_ordinal --splits outputs/models/splits.csv --seeds 1,2,3,4 --cv
+ecoli_atlas train $T --phase-head ordinal --out outputs/sweeps/models_ordinal --splits outputs/models/splits.csv --seeds 1,2,3,4 --cv
 ```
 
 ### Phase-order term (`train --phase-order-weight`)
@@ -219,7 +219,7 @@ series within a study and then over studies. `seed_sweep.tsv` gets `test_series_
 (withheld), GSE67402 and GSE226643 (TEST).
 
 ```bash
-ecoli_atlas train $T --time-series atlas_data/time_courses.tsv --phase-order-weight 0.3 --out outputs/models_order_w0.3 \
+ecoli_atlas train $T --time-series atlas_data/time_courses.tsv --phase-order-weight 0.3 --out outputs/sweeps/models_order_w0.3 \
     --splits outputs/models/splits.csv --seeds 1,2,3,4,5,6,7,8 --cv
 ```
 
@@ -414,7 +414,7 @@ expression. It is handled by leaving the worst libraries out:
 Two corrections exist in the code and are **off** (`train --dna-decoder`, `--dna-inputs`): an
 additive DNA term in the decoder's count mean (`models.count_log_mean`, expected reads from
 `data.dna_density`) and taking the expected DNA reads off the counts the encoders see. Tried on
-the atlas (2026-11-21, `outputs/models_v2_dna`, `outputs/models_v2_dna_decoder`): the decoder term
+the atlas (2026-11-21, `outputs/sweeps/models_v2_dna`, `outputs/sweeps/models_v2_dna_decoder`): the decoder term
 changed nothing useful; the input correction brought libraries with 5 and 20% added DNA back to
 their DNA-free twins at normal depth, but made shallow libraries much worse and gave no net gain
 on the atlas.
@@ -485,7 +485,7 @@ source, genotype class, stress family and strain group of the samples in the spl
 With `--models` and the three tables, also the model figures (`--only` selects by the names below):
 
 ```bash
-ecoli_atlas figures $T --models outputs/models --out outputs/figures [--only NAMES] [--strict]
+ecoli_atlas figures $T --models outputs/models --out examples/atlas_model_figures/figures [--only NAMES] [--strict]
 ```
 
 | Name | Files | What it shows |
@@ -509,7 +509,7 @@ with the manifest's `cv_metrics` but are not expected to be identical on another
 ### `casestudy`
 
 ```bash
-ecoli_atlas casestudy {uti,oxygen,glu-cas,all} $T --models outputs/models --out outputs/figures
+ecoli_atlas casestudy {uti,oxygen,glu-cas,all} $T --models outputs/models --out OUT     # the examples write into examples/<study>/casestudy
 ```
 
 Case studies on the embedding, each on a held-out (TEST) study. Each writes its figures, its
@@ -537,7 +537,7 @@ ecoli_atlas axes --models outputs/models --metadata atlas_data/metadata_v2.tsv \
     --axis phase:growth_phase:lag,early_exponential,mid_exponential,transition,stationary,late_stationary,long_term_stationary \
     --where treated=false --where standard_rnaseq=true --holdout lag --holdout late_stationary --holdout long_term_stationary \
     --axis medium:medium_class:complex,defined_rich,minimal_plus_hydrolysate,defined_minimal \
-    --series time_courses.tsv --out outputs/axes
+    --series time_courses.tsv --out examples/atlas_axes/axes
 ```
 
 - **Ordinal score:** a proportional-odds model, one linear score of the embedding with a threshold
@@ -565,9 +565,8 @@ ecoli_atlas axes --models outputs/models --metadata atlas_data/metadata_v2.tsv \
   new samples come from (the worked example `examples/GSE67402_*` does both).
 
 The example axes of the paper (growth phase, oxygen, sugar against non-sugar carbon sources and glycerol, the last two in
-defined minimal media) are one script, rerun after every refit:
-`MODELS=<bundle directory> bash ecoli_atlas/scripts/axes_examples.sh` (output: `OUT`, default `outputs/axes_examples`;
-from the repository root, in the `ecoli_atlas` environment; one folder per axis).
+defined minimal media) and their drivers are the example `examples/atlas_axes/` (`bash examples/atlas_axes/run.sh` in the
+`ecoli_atlas` environment; `MODELS=<bundle>` for another bundle; one folder per axis under `axes/` and `drivers/`).
 
 Output per axis: `axis_<name>_scores.tsv` (category, role, both scores per sample),
 `axis_<name>_summary.json` (rank correlation; share of within-study sample pairs in the order of
@@ -583,8 +582,8 @@ and the groups of co-transcribed genes, whose change moves the head's score from
 the high class.
 
 ```bash
-ecoli_atlas drivers $T --models outputs/models_ordinal --out outputs/drivers_ordinal   # all seeds of the sweep
-ecoli_atlas drivers $T --models outputs/models --head medium --out outputs/drivers_medium
+ecoli_atlas drivers $T --models outputs/sweeps/models_ordinal --out work/drivers_ordinal   # all seeds of the sweep
+ecoli_atlas drivers $T --models outputs/models --head medium --gsea --out examples/atlas_drivers/drivers/medium
 ```
 
 - **Method:** integrated gradients of the head's score (`phase_logit` for the phase head) along the
@@ -653,8 +652,8 @@ An axis that leans on the residual block also brings in what the residual carrie
 (culture environment, strain): read its drivers with `study_in_top`.
 
 ```bash
-ecoli_atlas axes --models outputs/models --metadata atlas_data/metadata_v2.tsv --axis oxygen:oxygen:aerobic,anaerobic_fermentation --out outputs/axes_oxygen
-ecoli_atlas drivers $T --models outputs/models --axis outputs/axes_oxygen/axis_oxygen_summary.json --gsea --out outputs/drivers_oxygen
+ecoli_atlas axes --models outputs/models --metadata atlas_data/metadata_v2.tsv --axis oxygen:oxygen:aerobic,anaerobic_fermentation --out work/axes_oxygen
+ecoli_atlas drivers $T --models outputs/models --axis work/axes_oxygen/axis_oxygen_summary.json --gsea --out work/drivers_oxygen
 ```
 
 **GO terms** (`--gsea`): the genes ranked by their signed attribution (seed mean) are tested
@@ -694,5 +693,5 @@ not run on ARM GPU nodes.
 ```bash
 sbatch ecoli_atlas/scripts/slurm_train.sh
 SEEDS=1,2,3,4,5,6,7,8 CV=1 sbatch ecoli_atlas/scripts/slurm_train.sh
-FIT=one-pass OUT=outputs/models_one_pass SPLITS=outputs/models/splits.csv sbatch ecoli_atlas/scripts/slurm_train.sh
+FIT=one-pass OUT=outputs/sweeps/models_one_pass SPLITS=outputs/models/splits.csv sbatch ecoli_atlas/scripts/slurm_train.sh
 ```

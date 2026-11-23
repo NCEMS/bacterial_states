@@ -28,13 +28,13 @@ Never `git add` any of these (all in `.gitignore`): `resources/`, `old_resources
 | Local path | What | Status |
 |---|---|---|
 | `resources/{vg,annotation,centrifuge,container}` | inGEST reference bundle (13 GB) | downloaded; `resources/container/rnaseq_vg.sif` is the image |
-| `atlas_data/` | `atlas_v2_counts.tsv`, `atlas_v2_antisense_counts.tsv`, `atlas_v2_samples.tsv` (from `collect_results.py`), `metadata_v2.tsv`, `sample_qc.tsv` | training inputs of the model on this branch. `merged_count_table.txt`, `metadata_revised.csv` and the NCBI feature table there are the v1 inputs (used by `main`) |
+| `atlas_data/` | `atlas_v2_counts.tsv`, `atlas_v2_antisense_counts.tsv`, `atlas_v2_samples.tsv` (from `collect_results.py`), `metadata_v2.tsv`, `sample_qc.tsv` | training inputs of the atlas model. `merged_count_table.txt`, `metadata_revised.csv` and the NCBI feature table there are the v1 inputs (see v1 history) |
 | `work/atlas_full/results/<batch>/` | the atlas recount: 102 batches plus re-runs (`PE_R01`) | source of the three `atlas_v2_*` tables and of the `full_*` columns |
-| `outputs/models/`, `outputs/figures/`, `outputs/axes_examples/` | bundle, figures and example axes of the current model (unversioned paths: the package does not label directories with v1 / v2; only downloaded release packages carry a version) | written by `ecoli_atlas train` / `figures` / `scripts/axes_examples.sh`. Sweeps go to their own `outputs/models_<name>/` |
-| `outputs/v1_originals/` | the v1 originals, moved there on 2026-11-22 (user decision) to free their paths: `models/`, `atlas/` (Colab-trained bundle and its atlas; published as `ecoli_atlas_models_v1.tar.gz` in the `resources-v1` release), `figures/` (Colab reference figures, mixed sessions), `predictions/` (`final_embedding.csv`, 3342 samples), `factor_gene_correlations.txt` (GSEA list) | **never overwrite or commit**; not readable by this branch's code. `main` still expects them at `outputs/models` etc. |
+| `outputs/models/` | the current model bundle (8 seeds; GSE271069 in TEST since 2026-11-22; unversioned path: only downloaded release packages carry a version) | written by `ecoli_atlas train`. `outputs/` holds only `models/`, `sweeps/` (every sweep and variant bundle, `outputs/sweeps/models_<name>/`), `archive/` (earlier bundles, e.g. `models_2026-11-22`, and earlier paper outputs) and `v1_originals/` |
+| `outputs/v1_originals/` | the v1 originals, moved there on 2026-11-22 (user decision) to free their paths: `models/`, `atlas/` (Colab-trained bundle and its atlas; published as `ecoli_atlas_models_v1.tar.gz` in the `resources-v1` release), `figures/` (Colab reference figures, mixed sessions), `predictions/` (`final_embedding.csv`, 3342 samples), `factor_gene_correlations.txt` (GSEA list) | **never overwrite or commit**; not readable by the current code |
 | `outputs/v1_originals/{models_repro,models_repro_sweep,atlas_repro,figures_repro,predictions_paper1}/` | v1 refits and reproductions made on `main`, moved there with the originals (2026-11-22) | kept for comparison |
 | `work/neighbors_*/` | `ecoli_atlas neighbors` runs (oxygen studies, withheld GSE224463) | scratch |
-| `examples/<GSE>_<name>/` | worked examples; only `config.yaml`, `samples.csv`, `README.md` are tracked, everything a run writes there (`sra/`, `results/`, `atlas/`, logs) is ignored | run directories with `results_dir: "results"` |
+| `examples/<name>/` | one folder per example (`examples/README.md` is the index): read-based ones (`GSE67402_*`, `GSE271069_*`: `config.yaml`, `samples.csv`, `run.sh ingest|atlas`) and atlas-only ones (`atlas_model_figures`, `atlas_drivers`, `atlas_axes`, `GSE189154_oxygen`, `GSE128997_uti`, `GSE224463_withheld_study`); only `README.md`, `run.sh`, `config.yaml`, `samples.csv` are tracked, everything a run writes there is ignored | each `run.sh` runs from its folder against `../../outputs/models` (`MODELS=` for another bundle). Paper figures, case studies, axes and drivers are made by the examples, not written to `outputs/` |
 | `work/experiment3/` | the tutorial run (4 samples) used for verification | a run directory; results in `experiment3_results/` |
 | `notebooks/` | the two original Colab notebooks | read-only reference; never edit or commit |
 | `raw_data/` | original Drive dump incl. unused files and the Contreras paper data | `Contreras Paper/Paper1_all_samples_counts.tsv` is the inference test case |
@@ -68,7 +68,7 @@ cd work/experiment3 && ecoli_ingest check && ecoli_ingest run -n        # tutori
 T="--counts atlas_data/atlas_v2_counts.tsv --metadata atlas_data/metadata_v2.tsv --qc atlas_data/sample_qc.tsv \
    --features resources/annotation/GCF_000005845.2_ASM584v2_counting_v2.features.tsv"
 ecoli_atlas train $T --out outputs/models --split-only                      # splits.csv only
-ecoli_atlas figures --metadata atlas_data/metadata_v2.tsv --splits outputs/models --out outputs/figures
+ecoli_atlas figures --metadata atlas_data/metadata_v2.tsv --splits outputs/models --out examples/atlas_model_figures/figures
 ecoli_atlas train $T --out outputs/models --splits outputs/models/splits.csv --device cpu --threads 8
 ```
 
@@ -86,7 +86,7 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   features.tsv,rfam_merge_report.tsv}`, built by `ecoli_ingest/build/build_annotation.py` from the
   unmodified NCBI GFF and the Rfam hit table (both kept in `work/ingest_update/ncbi/`). Never
   hand-edit it; the older `_genomic.gff` / `_siRNA.gff` / `.bed` there were edited by hand and are
-  used by `main` only. NCBI entries win over duplicate Rfam hits (same strand, or
+  used by the v1 code only. NCBI entries win over duplicate Rfam hits (same strand, or
   opposite strand to an NCBI ncRNA gene); `RFAM_EXCLUDE` lists the families
   left out (REP repeats, DnaX frameshift element, SECIS).
 - Feature ids are `<Type>_<locus_tag>_<symbol>` (`CDS_b0002_thrA`, `ncRNA_b4577_sgrS`, also `tRNA_`,
@@ -147,7 +147,7 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   on their labelled samples, then the residual encoder and count decoder on all training samples with
   the blocks frozen. Lab strain = `strain_group` K-12/B/C/W (the laboratory lineages) against the other known groups.
   A K-12-against-the-rest call (`k12`) was tried on 2026-11-20 and dropped: with missing genes masked, B, C and W strains
-  sit with K-12 in the blocks not trained on strain (`work/strain_axis/`). `outputs/models_v2_k12` is that sweep; the
+  sit with K-12 in the blocks not trained on strain (`work/strain_axis/`). `outputs/sweeps/models_v2_k12` is that sweep; the
   current code refuses it (`ModelBundle.load` checks the bundle's calls).
   Genes a strain lacks are called from the counts (`preprocess.missing_genes`, on by default) and masked:
   out of the size factor, the gene statistics and the count likelihood, 0 as encoder input;
@@ -161,7 +161,7 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   (`low_depth`, `cds_reads`, config `min_cds_reads`): outside the trained depths. No general shallow-means-stationary
   trend in the atlas (thinned deep samples kept their call), but GSE67402 thinned to 200 k was called stationary. The two corrections (`train --dna-decoder`: additive term in the
   count mean; `--dna-inputs`: expected DNA reads taken off the encoder inputs; `data.dna_density`) are off: tried on 2026-11-21, no gain on
-  the atlas and the input correction harms shallow libraries (`outputs/models_v2_dna*`, `work/dna_term/`).
+  the atlas and the input correction harms shallow libraries (`outputs/sweeps/models_v2_dna*`, `work/dna_term/`).
   `ecoli_atlas axes` places samples on ordered axes of an embedding (ordinal and anchor scores, always
   scored without the sample's study; `--holdout` for extrapolation tests); its example inputs and runs
   are in `work/axes_example/`.
@@ -179,7 +179,7 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   gseapy, two-sided preranked, GO sets in `reference/go_gene_sets_ecocyc.tsv.gz` built by `scripts/go_gene_sets.py` from
   the EcoCyc GAF, genes matched by lower-case symbol) is the `figures` panel `gsea` (between-study ranking of
   `batch_genes`, MG1655 and BW25113) and `drivers --gsea` (genes ranked by signed attribution). The v1 paper's GSEA was
-  R fgsea, one-sided (`outputs/GSEA/runGSEA.ipynb`); its NES and p-values are not comparable with these. The medium call is rich (complex
+  R fgsea, one-sided (`outputs/v1_originals/GSEA/runGSEA.ipynb`); its NES and p-values are not comparable with these. The medium call is rich (complex
   broth) against minimal (salts and a carbon source); every medium in between has no label. A study gives at most `study_cap` samples per epoch (default: the size
   of the second-largest study; only GSE206047 is cut), and within one class of a call it counts for at
   most `label_cap` samples (default: the second-largest study of that class; `data.label_weights`). Splits are by whole study and, as in v1, TEST and
@@ -217,7 +217,7 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   `data.MIN_STRAND_FRACTION`, `qc_table.MIN_STRAND_FRACTION`, prescreen `--min-strand-fraction`); a `strandedness:
   forward|reverse` in the inGEST config is checked against the measured fractions (`strand_mismatch`), not trusted;
   `ecoli_atlas` `embed` / `prepare` / `train` refuse a sample below the bar or without strand fractions.
-  Both write into `outputs/figures/`; never into `outputs/v1_originals/` (v1 originals and
+  They run as examples (`examples/atlas_model_figures`, `examples/<study>/casestudy`); never into `outputs/v1_originals/` (v1 originals and
   refits), and never into a bundle (out-of-fold scores made for `threshold_curves` stay beside the
   figures). Run the two test suites in their own envs:
   `pytest ecoli_atlas/tests` (ecoli_atlas), `pytest ecoli_ingest/tests` (ecoli_ingest).
@@ -257,8 +257,8 @@ measured covariates remove ~0.01-0.02 of it). Order:
    left against the covariates; twin pairs agree better than raw, once twins exist. The decoded product also reports how
    much within-study contrast it keeps against the split-half noise ceiling.
 2. BUILT 2026-11-21 as `train --gc-offset` (`models.GCTerm`; GC columns out of the linear term; scale in the manifest).
-   Learned scale (outputs/models_v2_gcterm): 0.62, z took the rest (GC-slope R2 from z 0.33 -> 0.57), NLL +0.6 SD: the split
-   is not identified. `--gc-scale fixed` (outputs/models_v2_gcterm_fixed): decoded GC trend 0.13 (learned 0.42), NLL 6.224,
+   Learned scale (outputs/sweeps/models_v2_gcterm): 0.62, z took the rest (GC-slope R2 from z 0.33 -> 0.57), NLL +0.6 SD: the split
+   is not identified. `--gc-scale fixed` (outputs/sweeps/models_v2_gcterm_fixed): decoded GC trend 0.13 (learned 0.42), NLL 6.224,
    z GC-slope R2 0.55 overall / 0.36 within conditions / 0.20 within replicates (linear term: 0.30 / 0.13): both variants put
    more GC into z, so the linear term stays the default and the QC module (`work/qc_module/`) takes the work over. Mechanistic GC offset in the decoder: gc_slope * x_g + gc_curv * x_g^2 from each gene's GC profile, one learned
    scale (the gene-level check gave factor 1.05, R2 0.39; `work/gc_bias/`); same idea for fragment size x gene length.
@@ -297,7 +297,7 @@ measured covariates remove ~0.01-0.02 of it). Order:
    Removing the 6 DNA directions from z after training takes the leak to 0 and keeps kNN, but the decoded within-study
    treatment contrasts fall from r 0.80 to 0.67 (`bio_checks_k6.txt`): the directions are entangled with biology for
    the decoder. `train --dna-penalty W` (within-replicate R2 of DNA from the residual, in the loss) is the DEFAULT, W = 1
-   (2026-11-22, user decision; outputs/models_v2_dnapen_w1): z -> DNA within replicates 0.38 -> -0.03, decoded treatment
+   (2026-11-22, user decision; outputs/sweeps/models_v2_dnapen_w1): z -> DNA within replicates 0.38 -> -0.03, decoded treatment
    contrasts r 0.80 kept, kNN phase / medium / lab strain 0.78 / 0.89 / 0.86, matched same-study 0.67 -> 0.60, TEST NLL
    6.220 (6.206 without). Open: GC between studies within matched conditions came back to R2 0.15 (0.03 without the
    penalty, 0.30 baseline); within replicates it stays at 0.01.
@@ -306,8 +306,7 @@ measured covariates remove ~0.01-0.02 of it). Order:
 5. A nonlinear covariate branch on c alone (kept out of f(z)), only if the replicate measures show it is needed.
 
 Atlas model, second stage: refinement of the missing-gene calls (decoder mean, coverage), corrected counts,
-hyper-parameter search; the examples reorganisation (plan
-`~/.claude/plans/dapper-drifting-pixel-of-d511ddbb-878a-44e8-8762-9b5981f57e47.md`, Part A).
+hyper-parameter search; the re-run of the GSE271069 example from its reads (`examples/GSE271069_*/run.sh ingest`).
 `atlas_build/` cleanup (`combine_counts.sh` assumes the old column layout), container rebuild from
 `environment.yaml` (drop entrez-direct/pytorch), LICENSE file, tutorial-data bundle, real hosting
 URLs, a Snakefile rule that emits an atlas-ready counts TSV.
@@ -319,7 +318,8 @@ other repository file).
 - Code release `v1.0.0` (factor encoders, `verify-models`, `download` of the v1 bundles); data release `resources-v1`
   (v1 model `ecoli_atlas_models_v1.tar.gz` and the old hand-edited annotation `_genomic.gff` / `_siRNA.gff` / `.bed`).
 - v1 originals and refits in `outputs/v1_originals/` (never overwritten, not readable by the current code); the v1
-  paper's GSEA notebook (R fgsea, one-sided) in `outputs/GSEA/runGSEA.ipynb`, moving to `outputs/v1_originals/GSEA/`.
+  paper's GSEA notebook (R fgsea, one-sided) in `outputs/v1_originals/GSEA/runGSEA.ipynb`; the v1-era runs of the two read-based examples
+  in `outputs/v1_originals/examples/`.
 - v1 training inputs `atlas_data/merged_count_table.txt` (all libraries counted unstranded, 4,493 genes by b-number,
   made without fastp `--detect_adapter_for_pe`) and `atlas_data/metadata_revised.csv` (3,393 rows); never overwritten.
   Counts of the current inGEST do not match the v1 model.

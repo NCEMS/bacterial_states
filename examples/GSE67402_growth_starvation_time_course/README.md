@@ -14,8 +14,8 @@ these samples is out of sample.
 per sample) are tracked. Everything the commands below write (`sra/`, `results/`, `checkpoints/`,
 `benchmarks/`, `atlas/`, logs) stays in this folder and is ignored by git.
 
-The numbers below are from the run of 2026-11-22 (the current inGEST counting and atlas model,
-default settings).
+The numbers below are from the inGEST run of 2026-11-22 and the atlas step of 2026-11-23 with the current model
+(`outputs/models`). `run.sh ingest` and `run.sh atlas` run the commands of sections 1-3.
 
 ## 1. inGEST: reads to counts
 
@@ -87,30 +87,31 @@ depth, `+` GC bias filled:
 
 | Hours | rep1 | rep2 | rep3 |
 |---|---|---|---|
-| 3 | 0.02 | 0.00 | 0.00 |
+| 3 | 1.00 | 0.31 | 0.01 |
 | 4 | 0.00 | 0.00 | 0.00 |
-| 5 | (stopped by QC) | 0.00 | 0.00 |
-| 6 | 0.00 | 0.00 | 0.00 |
+| 5 | (stopped by QC) | 0.00 | 0.51 |
+| 6 | 0.01 | 0.02 | 0.00 |
 | 8 | 1.00 | 1.00 | 1.00 * |
 | 24 | 1.00 *+ | 1.00 | 1.00 *+ |
 | 48 | 1.00 *+ | 1.00 * | 1.00 *+ |
 | 168 | 1.00 * | 1.00 | 1.00 |
 | 336 | 1.00 | 1.00 | 1.00 |
 
-Every sample from 3 to 6 h is called exponential and every sample from 8 h on stationary. The
-model places the switch between 6 and 8 hours, as DESeq2 does, although the GEO text labels the
-8 h samples mid-exponential. The phase score (`z1` in `embedding.tsv`) tells the same: 0.41-0.53
-for the growing samples (`t003h_rep1`, -0.22, is the least clear) and -2.36 to -2.39 from 8 h on.
+Every sample from 8 h on is called stationary, and 9 of the 11 samples from 3 to 6 h exponential; the model places
+the switch between 6 and 8 hours, as DESeq2 does, although the GEO text labels the 8 h samples mid-exponential. The
+exceptions are `t003h_rep1` (called stationary) and `t005h_rep3` (0.51, on the boundary). They are seed-dependent: the
+bundle's model is the seed chosen on out-of-fold scores (seed 1), and of its eight seeds six call every 3-6 h sample
+exponential (`t003h_rep1` is the least clear sample with seven of the eight seeds). The phase score (`z1` in `embedding.tsv`) tells
+the same: -0.8 to 0.4 for the growing samples, -1.84 for `t003h_rep1`, and -2.12 to -1.86 from 8 h on.
 
 **Medium and strain.** All 26 samples are called lab strain (REL606 is a lab strain). The medium
-call is minimal through 24 h; from 48 h on it moves toward rich and is firmly rich by one week
-(`p_minimal` 0.005-0.06 at 168 and 336 h). This follows the time spent starving, not the entry into
+call is minimal through 48 h and moves to rich with starvation: two of three one-week samples
+(`p_minimal` 0.08 and 0.09) and all two-week samples (0.001-0.003) are called rich. This follows the time spent starving, not the entry into
 stationary phase (the 8 h samples are still clearly minimal), and it is not caused by depth or by
 the filled GC bias: the deep one-week libraries stay rich when thinned to 50,000 reads or given the
 study-median GC. The atlas has no minimal-medium samples starved for days; in long starvation the
 biosynthetic genes that mark minimal medium shut down, and the cells may also live on what dead
-cells release. The two 48 h replicates still called minimal are the two shallowest libraries of the
-example (46,000 and 21,000 reads on CDS).
+cells release.
 
 ## 3. Both dimensions along the time course
 
@@ -133,12 +134,12 @@ defined minimal (1).
 
 | Hours | Growth phase | Medium |
 |---|---|---|
-| 3-6 | 0.21-0.40 | 0.94-1.16 |
-| 8 | 0.82-0.90 | 0.77-1.10 |
-| 24 | 0.86-0.91 | 0.73-0.75 |
-| 48 | 0.91-0.98 | 0.45-0.68 |
-| 168 | 0.97-0.99 | 0.44-0.59 |
-| 336 | 0.94-0.99 | 0.46-0.52 |
+| 3-6 | 0.03-0.45 | 0.72-0.97 |
+| 8 | 0.45-0.49 | 0.46-0.65 |
+| 24 | 0.49-0.63 | 0.44-0.71 |
+| 48 | 0.67-0.72 | 0.63-0.78 |
+| 168 | 0.70-0.72 | 0.38-0.72 |
+| 336 | 0.68-0.73 | 0.31-0.38 |
 
 | Look at | What it shows |
 |---|---|
@@ -146,11 +147,10 @@ defined minimal (1).
 | `atlas/axes/fig_axis_phase_series.png`, `fig_axis_medium_series.png` | each dimension against time, one line per replicate |
 | `atlas/axes/axis_*_scores.tsv` | the scores of every sample (`role` = query for the new ones) |
 
-The samples start among the atlas's exponential samples in minimal media, move to the stationary
-level between 6 and 8 h, and then drift down the medium dimension with time in starvation. On the
-continuous dimension the drift stops about halfway (0.45-0.6 at one and two weeks, between the
-atlas's defined rich media, 0.32, and minimal media, 0.97): the starved cells look less minimal
-than growing ones, not like cells in a complex medium.
+The samples start among the atlas's exponential samples in minimal media, move about halfway up the growth-phase
+dimension between 6 and 8 h and further over the first two days (0.7, below the atlas's stationary median of 1), and
+then drift down the medium dimension with time in starvation, to 0.31-0.38 at two weeks, close to the atlas's defined
+rich media (0.24; defined minimal 0.97, complex -0.02): the long-starved cells look much less minimal than growing ones.
 
 ## Not covered here
 

@@ -20,6 +20,8 @@ the model is not fitted on it. `samples.csv` gives medium, time point, replicate
 > **Results pending.** This example is being re-run from the reads with the current counting and
 > the atlas model trained with this study in TEST; the numbers will be filled in from that run.
 
+`run.sh ingest` (in the `ecoli_ingest` environment) and then `run.sh atlas` (in `ecoli_atlas`) run the commands below.
+
 ## 1. inGEST
 
 ```bash
