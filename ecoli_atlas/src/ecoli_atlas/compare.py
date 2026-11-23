@@ -112,6 +112,19 @@ class Atlas:
             meta = meta.join(extra[[c for c in extra.columns if c not in meta.columns and c != "GSE"]])
         return cls(emb, calls_frame(raw), meta, layout_from_manifest(manifest), manifest, d)
 
+    def without_studies(self, gses) -> "Atlas":
+        """The atlas without the samples of the studies ``gses`` (e.g. the study the query samples come from, whose own
+        atlas copies would otherwise be their nearest neighbours)."""
+        gses = {str(g) for g in gses}
+        if not gses:
+            return self
+        if self.metadata is None or "gse" not in self.metadata.columns:
+            raise ValueError("the atlas has no study column, so no study can be excluded")
+        keep = ~self.metadata.reindex(self.embedding.index)["gse"].astype(str).isin(gses).to_numpy()
+        ids = self.embedding.index[keep]
+        return Atlas(self.embedding.loc[ids], None if self.predictions is None else self.predictions.reindex(ids),
+                     self.metadata.reindex(ids), self.layout, self.manifest, self.source)
+
     @property
     def studies(self) -> np.ndarray | None:
         if self.metadata is not None and "gse" in self.metadata.columns:
@@ -418,6 +431,33 @@ def group_summary(query: pd.DataFrame, atlas: Atlas, neighbors: pd.DataFrame, su
     return pd.DataFrame(rows).set_index("group")
 
 
+GROUP_NEIGHBOR_KEYS = ("gse", "strain_name", "genotype_class", "treatment", "growth_phase", "base_medium")
+
+
+def group_neighbors(neighbors: pd.DataFrame, labels: pd.Series, order: list) -> pd.DataFrame:
+    """The pooled neighbours of each group of query samples by atlas study and, where the atlas metadata has them,
+    strain, genotype class, treatment, growth phase and base medium: one row per group and combination, the number of
+    neighbours (``n_neighbors``), their share of the group's neighbours (``share``), how many of the group's samples
+    have one of them among their neighbours (``n_query_samples``) and their mean distance. Groups in ``order``, rows by
+    ``n_neighbors``."""
+    nb = neighbors.assign(group=neighbors["query"].map(labels.to_dict()))
+    keys = [c for c in GROUP_NEIGHBOR_KEYS if c in nb.columns]
+    nb[keys] = nb[keys].astype(object).where(nb[keys].notna(), "").astype(str)
+    rows = []
+    for g in order:
+        sub = nb[nb["group"] == g]
+        if sub.empty:
+            continue
+        t = (sub.groupby(keys, sort=False)
+             .agg(n_neighbors=("atlas_sample", "size"), n_query_samples=("query", "nunique"), mean_distance=("distance", "mean"))
+             .reset_index())
+        t["share"] = t["n_neighbors"] / len(sub)
+        t.insert(0, "group", g)
+        rows.append(t.sort_values(["n_neighbors", "mean_distance"], ascending=[False, True]))
+    cols = ["group", *keys, "n_neighbors", "share", "n_query_samples", "mean_distance"]
+    return pd.concat(rows, ignore_index=True)[cols] if rows else pd.DataFrame(columns=cols)
+
+
 def compare(query: pd.DataFrame, atlas: Atlas, out_dir: str | Path, k: int = 15, metric: str = "cosine",
             blocks="all", query_predictions: pd.DataFrame | None = None, heads=DEFAULT_HEADS,
             do_umap: bool = False, seed: int = 77, log=None, metadata: pd.DataFrame | None = None,
@@ -483,7 +523,8 @@ def compare(query: pd.DataFrame, atlas: Atlas, out_dir: str | Path, k: int = 15,
     if labels is not None:
         groups = group_summary(query, atlas, nb, summary, labels, order, query_predictions, metric, blocks, heads)
         groups.to_csv(out / "group_summary.tsv", sep="\t")
-        log(f"{len(groups)} groups by {group_by}: wrote {out / 'group_summary.tsv'}")
+        group_neighbors(nb, labels, order).to_csv(out / "group_neighbors.tsv", sep="\t", index=False, float_format="%.5g")
+        log(f"{len(groups)} groups by {group_by}: wrote {out / 'group_summary.tsv'} and group_neighbors.tsv")
 
     a_xy = q_xy = None
     if do_umap:

@@ -2,7 +2,12 @@
 axis on the atlas embedding, its AUROC per study, and the genes along it (mean within-study rho).
 
 The axis is fitted on the samples it is drawn for, so ``pooled_auroc`` is an in-sample number;
-``auroc_leave_one_out`` scores every sample with an axis fitted without it."""
+``auroc_leave_one_out`` scores every sample with an axis fitted without it.
+
+Pathway analysis (``gsea=True`` and/or ``modules``): the genes ranked by their mean within-study rho with the axis are
+tested by preranked GSEA (``ecoli_atlas.gsea``, two-sided; positive NES = towards low oxygen) against GO terms and
+against a curated module table (`ecoli_atlas download modules`: KEGG pathways and modules, RegulonDB regulons,
+iModulons)."""
 from __future__ import annotations
 
 import json
@@ -11,14 +16,16 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from ..figures.plotting import BLUE, RED, correlate_barh, savefig, spearman_series
+from ..figures.plotting import BLUE, RED, savefig, spearman_series
+from .pathways import pathway_analysis
 
 OXYGEN_CASE_STUDIES = ("GSE189154",)
 LOW = ("anaerobic", "microaerobic")
 N_TOP = 10
 
 
-def run_oxygen(ctx, out_dir, formats=("pdf", "png"), studies=OXYGEN_CASE_STUDIES, log=None) -> dict:
+def run_oxygen(ctx, out_dir, formats=("pdf", "png"), studies=OXYGEN_CASE_STUDIES, log=None, gsea: bool = False,
+               modules=None, gene_sets=None, permutations: int = 10000, sides: str = "two") -> dict:
     import matplotlib.pyplot as plt
     from sklearn.metrics import roc_auc_score
     from .axis import lopo_axis, oriented_lda_score
@@ -87,13 +94,6 @@ def run_oxygen(ctx, out_dir, formats=("pdf", "png"), studies=OXYGEN_CASE_STUDIES
     fig.tight_layout()
     savefig(fig, out, "fig_oxygen_lda_projection", formats)
 
-    fig, ax = plt.subplots(figsize=(8, 5))
-    correlate_barh(ax, rho, N_TOP, f"Genes along the oxygen axis\n{len(rows)} samples, {len(studies)} "
-                   + ("study" if len(studies) == 1 else "studies"),
-                   "mean within-study Spearman rho    (aerobic  <-->  low oxygen)", fontsize=9, xlim=(-1, 1))
-    fig.tight_layout()
-    savefig(fig, out, "fig_oxygen_axis_genes", formats)
-
     pd.DataFrame({"gene": rho.index, "mean_within_study_rho": rho.values}).sort_values("mean_within_study_rho", ascending=False)\
         .to_csv(out / "oxygen_axis_genes.tsv", sep="\t", index=False, float_format="%.6f")
     pd.DataFrame({"sample": np.asarray(ctx.ids)[rows], "gse": study, "oxygen": oxygen[rows], "oxygen_class": np.where(y == 1, "low", "aerobic"),
@@ -102,5 +102,8 @@ def run_oxygen(ctx, out_dir, formats=("pdf", "png"), studies=OXYGEN_CASE_STUDIES
     result = {"studies": studies, "n_samples": int(len(rows)), "embedding_dim": int(E.shape[1]), "pooled_auroc": auroc,
               "auroc_leave_one_out": auroc_loo, "per_study": per_study, "toward_low_oxygen": list(rho.tail(N_TOP).iloc[::-1].index),
               "toward_aerobic": list(rho.head(N_TOP).index)}
+    result |= pathway_analysis(rho, out, "oxygen", "low oxygen", "aerobic", formats, gsea, modules, gene_sets, permutations, log,
+                               sides=sides)
     (out / "oxygen_metrics.json").write_text(json.dumps(result, indent=2, default=str))
     return result
+

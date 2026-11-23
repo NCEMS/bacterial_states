@@ -70,6 +70,8 @@ MODULE_SOURCES = {
             "link_pathway_eco.txt": ("https://rest.kegg.jp/link/pathway/eco", None),
             "list_module.txt": ("https://rest.kegg.jp/list/module", None),
             "link_module_eco.txt": ("https://rest.kegg.jp/link/module/eco", None),
+            "brite_pathways.keg": ("https://rest.kegg.jp/get/br:br08901", None),     # classes A/B of the pathway maps
+            "brite_modules.keg": ("https://rest.kegg.jp/get/br:ko00002", None),      # classes A/B/C of the modules
         },
     },
 }

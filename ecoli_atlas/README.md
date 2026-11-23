@@ -327,6 +327,14 @@ genes of at least 600 bp at depth 5). `embed --fill-missing-gc study` embeds suc
 and curvature of the other samples of their study (`--studies`, else the whole table), `--fill-missing-gc atlas` with
 the training mean; `samples.tsv` says which (`gc_filled`) and `embed` warns. Such libraries are usually also below
 the depth gate (`low_depth`), outside the depths the model was trained on.
+
+`embed --seeds` also embeds the samples with every `seed_<n>` model of a bundle trained with several seeds:
+`seeds/seed_<n>/` (embedding and predictions of each seed) and `predictions_seeds.tsv` (per call: median, min and
+max probability over the seeds, `<p>_n_called` = the number of seeds at 0.5 or above, and the median, min and max of
+the log-odds). The bundle's own model is one of the seeds (the one chosen on out-of-fold scores), and
+`predictions.tsv` stays its call. The spread is how much a call depends on the randomness of training, with the data
+and the split fixed; it does not include the sampling noise of the sample's counts, and every seed can agree on a
+wrong call for a sample unlike the training data.
 Centrifuge is not needed. For a bundle made before the covariate choice, the older list
 applies, and a run made with `centrifuge: false` gets the atlas mean for the other-genus value, with
 a warning. The
@@ -465,6 +473,7 @@ the output directory of `embed`.
 | `neighbors.tsv` | per new sample its `-k` (15) nearest atlas samples: distance, study, curated labels, the model's calls; with `--atlas-metadata` also strain, medium, growth phase, carbon source, oxygen, treatment, genotype |
 | `summary.tsv` | per new sample: nearest atlas sample, most frequent study among the neighbours, the neighbours' vote on every call (`<call>_knn_vote`, `_knn_frac`, `_knn_n_labelled`) and whether the model's own call agrees (`<call>_agree`), mean neighbour distance within every block (`<block>_knn_dist`), novelty |
 | `query_distances.tsv` | distances between the new samples |
+| `group_neighbors.tsv` | with `--metadata` and `--group-by`: the pooled neighbours of each group by atlas study, strain, genotype class, treatment, growth phase and base medium (the last five with `--atlas-metadata`): number and share of the group's neighbours, how many of its samples have one there, mean distance |
 | `group_summary.tsv`, `fig_*` | with `--metadata` and `--group-by`: one row per group (calls, votes, top studies, distance within the group and to the previous group) and the figures `fig_query_distances`, `fig_head_by_group`, `fig_neighbor_labels`, with `--umap` also `fig_umap_groups` |
 | `umap_atlas.tsv`, `umap_query.tsv`, `umap.png` | with `--umap`: a UMAP fitted on the atlas with the new samples projected onto it |
 
@@ -474,6 +483,22 @@ k-th neighbour within the same distance of every atlas sample to the samples of 
 1, the sample is farther from the atlas than almost any atlas sample is from the rest of it.
 `--blocks phase,residual` restricts the distances to those blocks; `--metric` is cosine (default) or
 euclidean. Without `--metadata` / `--group-by` / `--plots` only the tables are written.
+`--exclude-study GSE` (repeatable) leaves that study's atlas samples out of every table: when the new samples come from
+a study the atlas holds already (a TEST study recounted, as in `examples/GSE147611_greAB_deletion`), their own atlas
+copies would otherwise be their nearest neighbours.
+
+### `extract`: atlas studies as new samples
+
+```bash
+ecoli_atlas extract GSE224463 --models outputs/models --seeds --out atlas
+```
+
+The bundle holds the embedding and the calls of every atlas sample (training, TEST and withheld studies). `extract`
+writes those of the named studies in the layout of `embed` (`embedding.tsv`, `predictions.tsv`, `samples.tsv` with
+each sample's study and split, `extract.json`; with `--seeds` also `seeds/seed_<n>/` and `predictions_seeds.tsv`), so
+`axes --query`, `compare` and the call figures can be used on a study the atlas holds. Give the study to their
+`--exclude-study`, or its own atlas rows are its nearest neighbours (`axes` refuses query samples that are also atlas
+samples). Example: `examples/GSE224463_rpoS_stress_time_courses`.
 
 ### `neighbors`: studies of the atlas against the rest of it
 
@@ -551,9 +576,9 @@ ecoli_atlas figures $T --models outputs/models --out examples/atlas_model_figure
 
 | Name | Files | What it shows |
 |---|---|---|
-| `pca_batch` | `fig_pca_mg1655_batch`, `fig_pca_bw_batch`, `fig_pca_strain_all_complex`, `pca_log_expression_coords.tsv` | PCA of the log2 normalised expression (no model): MG1655 and BW25113 in one condition (exponential, untreated wild type, rich medium) coloured by study, and the rich-medium samples by strain |
+| `pca_batch` | `fig_pca_mg1655_batch`, `fig_pca_bw_batch`, `fig_pca_strain_all_complex`, `pca_log_expression_coords.tsv` | PCA of the log2 normalised expression (no model): MG1655 and BW25113 in one condition (exponential, untreated wild type, LB: one medium, `pca.MATCHED_MEDIUM`) coloured by study, and the rich-medium samples by strain |
 | `batch_genes` | `fig_batch_genes`, `batch_genes.tsv` | the genes that differ most between studies within those two subsets |
-| `gsea` | `fig_gsea_batch_mg1655`, `fig_gsea_batch_bw25113`, `fig_gsea_batch_scatter`, `gsea_batch_<strain>.tsv` | GO-term enrichment of the whole between-study ranking of `batch_genes` in each strain: the 20 terms with the largest NES, and the NES of every term in MG1655 against BW25113 (see [Gene-set enrichment](#gene-set-enrichment)) |
+| `gsea` | `fig_gsea_batch_mg1655`, `fig_gsea_batch_bw25113`, `fig_gsea_batch_scatter`, `gsea_batch_<strain>.tsv` | GO-term enrichment of the whole between-study ranking of `batch_genes` in each strain: the 20 terms with the largest NES, and the NES of every term in MG1655 against BW25113 (see [Gene-set enrichment](#gene-set-enrichment)). With `--modules TSV` also the module table: `gsea_batch_modules_<strain>.tsv` and one scatter per database, `fig_gsea_batch_scatter_{regulondb,kegg_pathway,kegg_module}` |
 | `head_test_eval` | `fig_head_test_eval`, `phase_misclassified.tsv` | confusion matrix of each call on TEST; the samples whose phase call is wrong |
 | `head_scores` | `fig_head_scores`, `head_scores.tsv` | each head's score (the log-odds of its call, i.e. its one-dimensional block) by class, training pool and TEST, with the AUROC of each split |
 | `head_gene_correlates` | `fig_head_gene_correlates`, `head_gene_correlations.{txt,tsv}` | Spearman rho of every gene's expression with each head's probability (the `.txt` lists the top 50 each way, for gene-set enrichment) |
@@ -573,19 +598,24 @@ with the manifest's `cv_metrics` but are not expected to be identical on another
 ecoli_atlas casestudy {uti,oxygen,glu-cas,all} $T --models outputs/models --out OUT     # the examples write into examples/<study>/casestudy
 ```
 
-Case studies on the embedding, each on a held-out (TEST) study. Each writes its figures, its
+Case studies on the embedding, each on a held-out (TEST) study. Each writes its figures (if any), its
 sample and gene tables and `<name>_metrics.json`; `casestudy_metrics.json` collects them.
 
 - `uti` (GSE128997): infection against urine culture, paired by patient isolate. The isolates'
   samples are centred per patient, and each patient is scored on a discriminant fitted without it
-  (sign test, Wilcoxon, permutation of the labels within pairs). `fig_uti_axis` shows the genes
-  along that axis.
+  (sign test, Wilcoxon, permutation of the labels within pairs). The genes along that axis are in
+  `uti_axis_genes.tsv`; with `--gsea` / `--modules` their pathway analysis as for `oxygen` (positive NES = towards UTI).
 - `oxygen` (default GSE189154; `--oxygen-studies`): aerobic against anaerobic or microaerobic,
   untreated samples of studies outside the training pool. One discriminant
-  (`fig_oxygen_lda_projection`, `fig_oxygen_axis_genes`); the AUROC is given in sample and with
-  every sample scored by an axis fitted without it.
+  (`fig_oxygen_lda_projection`; the genes along it in `oxygen_axis_genes.tsv`); the AUROC is given in sample and with
+  every sample scored by an axis fitted without it. Pathway analysis of the genes along the axis (preranked GSEA of their
+  mean within-study rho, two-sided, positive NES = towards low oxygen): `--gsea` against the GO terms
+  (`oxygen_gsea_go.tsv`, `fig_oxygen_gsea_go`), `--modules atlas_data/modules/modules.tsv` against KEGG pathways and
+  modules, RegulonDB regulons and iModulons (`oxygen_gsea_modules.tsv`, with `database` and `category` columns; one
+  figure per database, `fig_oxygen_gsea_<database>`); `--gene-sets`,
+  `--gsea-permutations` as for `drivers`.
 - `glu-cas` (GSE271069): glucose against casamino acids, paired by growth phase
-  (`fig_glu_cas_axis`, `fig_glu_cas_lda_projection`, `fig_glu_cas_axis_genes`). The study is a
+  (`fig_glu_cas_lda_projection`; the genes along the axis in `glu_cas_gene_correlations.tsv`). The study is a
   forced TEST study; the metrics say whether the bundle was fitted on its samples (`fitted_by_the_model`).
 
 ### `axes`: ordered categories as dimensions of the embedding
@@ -618,12 +648,24 @@ ecoli_atlas axes --models outputs/models --metadata atlas_data/metadata_v2.tsv \
   to named blocks (`phase`, `medium`, `lab_strain`, `residual`).
 - `--series` is a table `sample, series, x[, x_label]` of ordered series (time courses), drawn as
   trajectories of the ordinal score, or `PATH:SERIES_COLUMN:X_COLUMN` for any sample table (CSV or TSV,
-  first column the sample id), e.g. `samples.csv:replicate:time_h`.
+  first column the sample id), e.g. `samples.csv:replicate:time_h`; a fourth field names a panel column
+  (`samples.csv:replicate:time_min:panel`, or a column `panel` of the table) and draws one panel per value instead of one
+  per study. One colour per series, marker shape = the
+  sample's category. `--series-x` sets the x axis: `categorical` (the positions as categories labelled with their
+  values, the series side by side within each), `linear`, `log`, or `auto` (default: categorical with at most 12
+  positions in a panel, else log when they span more than 20-fold, else linear).
 - `--query DIR` places new samples (an `embed` output made with the same bundle) on the axes: they are
   only scored, by the model of all fitted samples, get `role` = query in the score tables and are drawn
   over the map of two axes, joined along their series. `--query-study` names their study (default
   `query`); `--exclude-study GSE` leaves an atlas study out of the fits and the tables, e.g. the study the
-  new samples come from (the worked example `examples/GSE67402_*` does both).
+  new samples come from (the worked example `examples/GSE67402_*` does both). With the `predictions.tsv` of the
+  `embed` folder the calls are drawn too, on their 0-1 scale: `fig_heads_series` (along `--series`) and
+  `fig_heads_phase_by_medium` (P(stationary) against P(minimal), the atlas from the bundle's `predictions.tsv` behind).
+- `--seeds` fits every axis again on the embedding of each `seed_<n>` model of the bundle (same samples, same
+  scaling) and adds `ordinal_seed_median/min/max`, `anchor_seed_median/min/max` and `n_seeds` to the score tables,
+  `axis_<name>_seed_scores.tsv` (every seed's ordinal score) and every seed's score as a small dot in the series
+  figures. `--query` samples must then be embedded with `embed --seeds`; with `--series` the share of seeds making each
+  call is also drawn as one stacked bar per sample (`fig_heads_seed_votes`).
 
 The example axes of the paper (growth phase, oxygen, sugar against non-sugar carbon sources and glycerol, the last two in
 defined minimal media) and their drivers are the example `examples/atlas_axes/` (`bash examples/atlas_axes/run.sh` in the
@@ -724,12 +766,21 @@ the low class on the right), and the counts and top terms in the JSON (`gsea`).
 
 ### Gene-set enrichment
 
-`figures` (`gsea`) and `drivers --gsea` run a preranked GSEA (gseapy, every gene weighted the same,
-two-sided: a positive NES means the term's genes sit at the top of the ranking, a negative NES at the
-bottom) of GO terms of 5 to 500 ranked genes, 10,000 permutations (`--gsea-permutations`), so the
-smallest p-value is 1e-4; `fdr` is gseapy's FDR q-value. Genes are matched by lower-case symbol;
-about 90% of the CDS features are in a GO set. Result tables have `term`, `name`, `namespace`,
-`size`, `es`, `nes`, `pval`, `fdr` and `lead_genes`.
+`figures` (`gsea`), `drivers --gsea` and the case studies (`--gsea`, `--modules`) run a preranked GSEA (every gene
+weighted the same) of gene sets of 5 to 500 ranked genes, 10,000 permutations (`--gsea-permutations`), so the
+smallest p-value is 1e-4. Two tests (`--gsea-sides`):
+
+- `one` (default of the `figures` panel `gsea`): are a set's genes at the top of the ranking? fgsea's
+  `scoreType = "pos"` test with `gseaParam = 0`, written in numpy (`gsea.prerank_one_sided`): ES = the largest
+  positive deviation of the running sum, null = random sets of the same size, NES = ES / mean null ES (a set with no
+  enrichment near 1, one at the bottom near 0, never negative), `fdr` = Benjamini-Hochberg. It gives the same ES as
+  gseapy for sets at the top of a ranking and agrees with R fgsea (NES r 0.9998 on the same rankings).
+- `two` (default of `drivers` and the case studies, gseapy): top or bottom; a positive NES means the term's genes sit
+  at the top of the ranking, a negative NES at the bottom, and a set with no enrichment still gets an NES near +1 or
+  -1; `fdr` is gseapy's FDR q-value.
+
+Genes are matched by lower-case symbol; about 90% of the CDS features are in a GO set. Result tables have `term`,
+`database`, `name`, `namespace`, `category`, `size`, `es`, `nes`, `pval`, `fdr` and `lead_genes`.
 
 The GO sets ship with the package (`reference/go_gene_sets_ecocyc.tsv.gz`, 4,112 terms, 126 KB):
 the EcoCyc annotations of E. coli K-12 (`ECOLI-mod.gaf`, direct annotations, NOT qualifiers left
@@ -769,9 +820,9 @@ ecoli_atlas drivers $T --models outputs/models --head phase --modules atlas_data
 
 | Source | Modules | Fetched from |
 |---|---|---|
-| `regulondb` | RegulonDB regulons of transcription factors and sigma factors (377 modules), with the activated and repressed parts of a regulator that does both | `TRN.csv` of [SBRG/precise1k](https://github.com/SBRG/precise1k) (MIT licence), pinned to one commit and checked by SHA-256 |
+| `regulondb` | RegulonDB regulons of transcription factors and sigma factors split by direction (290 modules): the genes a regulator activates, `X (activated)`, and those it represses, `X (repressed)`; links of unknown or dual effect are left out | `TRN.csv` of [SBRG/precise1k](https://github.com/SBRG/precise1k) (MIT licence), pinned to one commit and checked by SHA-256 |
 | `imodulon` | PRECISE-1K iModulons (200): the `imodulon_size` genes with the largest weight | `M.csv`, `imodulon_table.csv` of the same commit |
-| `kegg` | KEGG pathways (global maps left out) and modules of E. coli K-12 MG1655 (241) | the KEGG REST service (`rest.kegg.jp`; free for academic use, not to be redistributed; the retrieval date is in the table's header and in `modules_manifest.json`) |
+| `kegg` | KEGG pathways (global maps left out) and modules of E. coli K-12 MG1655 (241), each with its KEGG class B as `category` (BRITE br08901 for pathways, ko00002 for modules) | the KEGG REST service (`rest.kegg.jp`; free for academic use, not to be redistributed; the retrieval date is in the table's header and in `modules_manifest.json`) |
 
 Members are mapped to the counting annotation by locus tag (b-number), else by symbol (`--features`, default the
 annotation under `resources/`). EcoCyc is not fetched (it needs a licence): an EcoCyc export, or any list of gene sets,

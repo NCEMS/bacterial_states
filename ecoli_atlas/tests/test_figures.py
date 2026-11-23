@@ -1,6 +1,8 @@
 import json
 
+import numpy as np
 import pandas as pd
+import pytest
 
 from ecoli_atlas.cli import main
 
@@ -98,4 +100,25 @@ def test_case_studies(trained, train_args, atlas_files, tmp_path):
     meta.loc[meta.index[tr[1::2]], "amino_acids_supplied"] = "false"
     res = run_glu_cas(ctx, out, ("png",), study="GSE00", n_perm=20)
     assert res["fitted_by_the_model"] == (ctx.split[tr] == 1).any() and res["lda"]["treatments"] == {"CAS": 5, "GLU": 5}
-    assert res["paired"]["n_pairs"] == 2 and (out / "fig_glu_cas_axis.png").exists() and (out / "fig_glu_cas_lda_projection.png").exists()
+    assert res["paired"]["n_pairs"] == 2 and (out / "fig_glu_cas_lda_projection.png").exists()
+    assert not list(out.glob("*axis_genes*.png")) and not (out / "fig_glu_cas_axis.png").exists() and not (out / "fig_uti_axis.png").exists()
+    assert (out / "uti_axis_genes.tsv").exists() and (out / "glu_cas_gene_correlations.tsv").exists()   # the gene tables stay
+
+
+def test_case_study_pathway_analysis(tmp_path):
+    """The pathway analysis of a case-study axis: preranked GSEA of the gene ranking against a gene-set table, positive
+    NES for a set at the top of the ranking, one table and figure per kind of gene set."""
+    pytest.importorskip("gseapy")
+    from ecoli_atlas.casestudy.pathways import pathway_analysis
+    genes = [f"g{i:03d}" for i in range(200)]
+    rho = pd.Series(np.linspace(1, -1, 200), index=genes)
+    sets = pd.DataFrame({"term": ["kegg:top", "imodulon:bottom", "kegg:mixed"], "namespace": ["kegg_pathway", "imodulon_x", "kegg_pathway"],
+                         "name": ["top set", "bottom set", "mixed set"],
+                         "genes": [",".join(genes[:15]), ",".join(genes[-15:]), ",".join(genes[::13])]})
+    sets.to_csv(tmp_path / "modules.tsv", sep="\t", index=False)
+    res = pathway_analysis(rho, tmp_path, "oxygen", "low oxygen", "aerobic", ("png",), False, tmp_path / "modules.tsv", None, 200, lambda *a: None)
+    t = pd.read_csv(tmp_path / "oxygen_gsea_modules.tsv", sep="\t").set_index("term")
+    assert t.loc["kegg:top", "nes"] > 0 > t.loc["imodulon:bottom", "nes"] and t.loc["imodulon:bottom", "namespace"] == "imodulon_x"
+    assert t.loc["kegg:top", "database"] == "KEGG pathway" and t.loc["imodulon:bottom", "database"] == "iModulon"
+    assert "gsea_modules" in res and "gsea_go" not in res                 # one figure per database
+    assert (tmp_path / "fig_oxygen_gsea_kegg_pathway.png").exists() and (tmp_path / "fig_oxygen_gsea_imodulon.png").exists()

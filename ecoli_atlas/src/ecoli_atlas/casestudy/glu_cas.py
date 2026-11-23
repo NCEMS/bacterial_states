@@ -12,7 +12,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from ..figures.plotting import BLUE, RED, correlate_barh, savefig, spearman_series
+from ..figures.plotting import BLUE, RED, savefig, spearman_series
 
 GLU_CAS_STUDY = "GSE271069"
 POS, NEG = "GLU", "CAS"
@@ -37,7 +37,7 @@ def glu_cas_design(ctx, study: str = GLU_CAS_STUDY) -> pd.DataFrame:
 def run_glu_cas(ctx, out_dir, formats=("pdf", "png"), study: str = GLU_CAS_STUDY, n_perm: int = 1000, log=None) -> dict:
     import matplotlib.pyplot as plt
     from sklearn.metrics import roc_auc_score
-    from .axis import center_by_group, oriented_lda_score, paired_axis_test, perm_p_text
+    from .axis import center_by_group, oriented_lda_score, paired_axis_test
     log = log or ctx.log
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
@@ -60,13 +60,6 @@ def run_glu_cas(ctx, out_dir, formats=("pdf", "png"), study: str = GLU_CAS_STUDY
             f"{NEG} in {test['correct']}/{test['n_pairs']} (sign p={test['p_sign']:.4f}, permutation p={test['p_perm']:.4f})")
         d["axis_oof"] = test["axis_oof"]
         corr = spearman_series(ctx.logx[d["row"].to_numpy()], d["axis_oof"].to_numpy(), ctx.gene_names).sort_values()
-        fig, ax = plt.subplots(figsize=(8, 6.5))
-        correlate_barh(ax, corr, N_GENES_PAIRED,
-                       f"Glucose (red) vs Casamino Acids (blue)\nn={len(d)}, {test['n_pairs']} growth phases | "
-                       f"{test['correct']}/{test['n_pairs']}, permutation {perm_p_text(test)}",
-                       "Spearman rho vs out-of-fold condition axis")
-        fig.tight_layout()
-        savefig(fig, out, "fig_glu_cas_axis", formats)
         d.drop(columns=["row"]).to_csv(out / "glu_cas_paired_samples.tsv", sep="\t", index=False, float_format="%.6g")
         result["paired"] = {"n_samples": int(len(d)), "groups": sorted(d["pair_group"].unique()),
                             **{k: v for k, v in test.items() if k != "axis_oof"},
@@ -101,11 +94,6 @@ def run_glu_cas(ctx, out_dir, formats=("pdf", "png"), study: str = GLU_CAS_STUDY
         ax.spines[sp].set_visible(False)
     fig.tight_layout()
     savefig(fig, out, "fig_glu_cas_lda_projection", formats)
-
-    fig, ax = plt.subplots(figsize=(8, 5))
-    correlate_barh(ax, rho, N_TOP, f"Genes along the {POS} vs {NEG} axis", f"Spearman rho ({NEG} <--> {POS})", fontsize=9, xlim=(-1.05, 1.05))
-    fig.tight_layout()
-    savefig(fig, out, "fig_glu_cas_axis_genes", formats)
 
     pd.DataFrame({"gene": rho.index, "spearman_rho": rho.values}).sort_values("spearman_rho", ascending=False)\
         .to_csv(out / "glu_cas_gene_correlations.tsv", sep="\t", index=False, float_format="%.6f")

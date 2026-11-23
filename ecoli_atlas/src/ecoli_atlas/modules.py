@@ -4,8 +4,11 @@ Module tables have the columns of the gene-set tables of ``gsea`` (``term``, ``n
 comma-separated gene symbols or locus tags), so one table serves both `drivers --modules` and `--gsea --gene-sets`.
 ``build_module_table`` makes one from the sources that `ecoli_atlas download modules` fetches (``download.MODULE_SOURCES``):
 
-  regulondb:<regulator>        RegulonDB regulon (gene-level TRN of SBRG/precise1k), with its activated (``+``) and
-                               repressed (``-``) parts as modules of their own when the regulator does both
+  regulondb:<regulator>+ / -   RegulonDB regulon (gene-level TRN of SBRG/precise1k) split by the direction of the
+                               regulation: the genes a regulator activates (``+``, "(activated)") and those it represses
+                               (``-``, "(repressed)"); links of unknown or dual effect are left out (sigma factors: activated).
+                               ``category`` marks a regulator with known effects in one direction only: "activator
+                               only", "repressor only" or "sigma factor" (empty when it has sets in both directions)
   imodulon:<name>              PRECISE-1K iModulon: the ``imodulon_size`` genes with the largest |weight|
   kegg:<pathway or module>     KEGG pathway or module of E. coli K-12 (global overview maps left out)
 
@@ -46,6 +49,27 @@ def _feature_maps(features: pd.DataFrame) -> tuple[dict, dict]:
     return by_locus, {s.lower(): s for s in sym if s}
 
 
+def kegg_categories(kegg_dir) -> dict:
+    """KEGG classes from the BRITE hierarchies ``brite_pathways.keg`` (br08901) and ``brite_modules.keg`` (ko00002):
+    map number ("00010") or module ("M00001") -> (class A, class B), e.g. ("Metabolism", "Carbohydrate metabolism").
+    Empty when the files are absent (a module table built before they were downloaded)."""
+    out = {}
+    for fname, leaf in (("brite_pathways.keg", "C"), ("brite_modules.keg", "D")):
+        path = Path(kegg_dir) / fname
+        if not path.exists():
+            continue
+        a = b = ""
+        for line in open(path, encoding="utf-8"):
+            tag, rest = line[:1], line[1:].strip()
+            if tag == "A":
+                a, b = re.sub(r"<[^>]+>", "", rest), ""
+            elif tag == "B":
+                b = rest
+            elif tag == leaf and rest:
+                out[rest.split()[0]] = (a, b)
+    return out
+
+
 def build_module_table(source_dir, features: pd.DataFrame, sources=("precise1k", "kegg")) -> tuple[pd.DataFrame, dict]:
     """The module table (term, namespace, name, n_genes, genes as symbols) from the files that
     ``download.download_module_sources`` wrote under ``source_dir``; members are mapped to the symbols of the counting
@@ -54,26 +78,30 @@ def build_module_table(source_dir, features: pd.DataFrame, sources=("precise1k",
     by_locus, by_sym = _feature_maps(features)
     rows, stats = [], defaultdict(lambda: [0, 0, 0])
 
-    def add(source, namespace, term, name, members):
+    def add(source, namespace, term, name, members, category=""):
         listed = list(dict.fromkeys(m for m in members if m))
         genes = list(dict.fromkeys(g for g in (by_locus.get(m) or by_sym.get(m.lower()) for m in listed) if g))
         st = stats[source]
         st[0] += 1; st[1] += len(listed); st[2] += len(genes)
         if genes:
-            rows.append({"term": term, "namespace": namespace, "name": name, "n_genes": len(genes), "genes": ",".join(genes)})
+            rows.append({"term": term, "namespace": namespace, "name": name, "category": category, "n_genes": len(genes),
+                         "genes": ",".join(genes)})
 
     if "precise1k" in sources:
         trn = pd.read_csv(src / "precise1k" / "TRN.csv")
         trn = trn[trn["source"].isin(["RegulonDB_TF", "RegulonDB_sigma"])]
         for reg, sub in trn.groupby("regulator"):
+            # one set per direction of the regulation: the genes the regulator activates and those it represses; links
+            # of unknown or dual effect ("?") are left out, and no set holds a whole regulon of mixed directions
             kind = "sigma_regulon" if (sub["source"] == "RegulonDB_sigma").all() else "tf_regulon"
             ids = [b if isinstance(b, str) and b else g for b, g in zip(sub["gene_id"], sub["gene_name"])]
-            add("regulondb", f"regulondb_{kind}", f"regulondb:{reg}", reg, ids)
             eff = sub["effect"].fillna("?").to_numpy()
-            for e, tag in (("+", "activated"), ("-", "repressed")):
+            both = "+" in eff and "-" in eff
+            for e, tag, only in (("+", "activated", "activator only"), ("-", "repressed", "repressor only")):
                 part = [i for i, x in zip(ids, eff) if x == e]
-                if part and len(part) < len(ids):
-                    add("regulondb", f"regulondb_{kind}_{tag}", f"regulondb:{reg}{e}", f"{reg} ({tag})", part)
+                if part:                                 # category: empty for a regulator with sets in both directions
+                    cat = "sigma factor" if kind == "sigma_regulon" else ("" if both else only)
+                    add("regulondb", f"regulondb_{kind}_{tag}", f"regulondb:{reg}{e}", f"{reg} ({tag})", part, cat)
         M = pd.read_csv(src / "precise1k" / "M.csv", index_col=0)
         tab = pd.read_csv(src / "precise1k" / "imodulon_table.csv", index_col=0)
         for im in M.columns:
@@ -85,6 +113,7 @@ def build_module_table(source_dir, features: pd.DataFrame, sources=("precise1k",
                 f"imodulon:{im}", im, [str(b) for b in top])
     if "kegg" in sources:
         kd = src / "kegg"
+        category = kegg_categories(kd)
         names = {}
         for fname in ("list_pathway_eco.txt", "list_module.txt"):
             for line in open(kd / fname, encoding="utf-8"):
@@ -98,8 +127,10 @@ def build_module_table(source_dir, features: pd.DataFrame, sources=("precise1k",
             for p, gs in sets.items():
                 if kind == "pathway" and re.match(r"eco01[12]\d\d", p):
                     continue                                   # global and overview maps
-                add("kegg", f"kegg_{kind}", f"kegg:{p}", names.get(p, names.get(p.replace("eco_", ""), p)), gs)
-    table = pd.DataFrame(rows, columns=["term", "namespace", "name", "n_genes", "genes"])
+                key = p[3:] if kind == "pathway" else p.split("_")[-1]          # eco00010 -> 00010, eco_M00001 -> M00001
+                add("kegg", f"kegg_{kind}", f"kegg:{p}", names.get(p, names.get(p.replace("eco_", ""), p)), gs,
+                    category.get(key, ("", ""))[1])
+    table = pd.DataFrame(rows, columns=["term", "namespace", "name", "category", "n_genes", "genes"])
     return table, {k: {"modules": v[0], "members_listed": v[1], "members_matched": v[2]} for k, v in stats.items()}
 
 

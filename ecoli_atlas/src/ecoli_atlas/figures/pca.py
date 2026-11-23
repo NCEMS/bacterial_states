@@ -14,12 +14,17 @@ STRAINS = {"MG1655": r"mg[\s_-]?1655", "BW25113": r"bw[\s_-]?25113"}
 COORDS_FILE = "pca_log_expression_coords.tsv"
 
 
+MATCHED_MEDIUM = "LB"          # the one medium of the matched subsets (the rich media differ: LB, Mueller-Hinton, ...)
+
+
 def matched_subsets(ctx) -> dict:
-    """MG1655 and BW25113 samples that are exponential, untreated wild type and in a rich medium;
-    ``_rich`` is every rich-medium sample."""
+    """MG1655 and BW25113 samples that are exponential, untreated wild type and grown in LB (``MATCHED_MEDIUM``: one
+    medium, so that the differences between studies are not those between the rich media they used); ``_rich`` is every
+    rich-medium sample."""
     strain = pd.Series(ctx.column("strain_name")).str.lower()
     rich = ctx.labels("medium") == "rich"
-    base = (ctx.labels("phase") == "exponential") & rich & (ctx.column("is_wild_type") == "true") & (ctx.column("treated") == "false")
+    lb = np.asarray(ctx.column("base_medium")) == MATCHED_MEDIUM
+    base = (ctx.labels("phase") == "exponential") & rich & lb & (ctx.column("is_wild_type") == "true") & (ctx.column("treated") == "false")
     out = {name: strain.map(lambda s: bool(re.search(pat, s))).to_numpy() & base for name, pat in STRAINS.items()}
     out["_rich"] = rich
     return out
@@ -71,7 +76,7 @@ def fig_pca_batch(ctx, out_dir, formats) -> dict:
         mask = subsets[name]
         result["subsets"][name] = {"n_samples": int(mask.sum()), "n_studies": int(len(np.unique(ctx.gse[mask])))}
         fig, ax = plt.subplots(figsize=(8.5, 5.5))
-        _scatter(ax, xy, ev, ctx.gse, mask, "study", f"{name}, exponential, untreated wild type, rich medium, by study", topn=10)
+        _scatter(ax, xy, ev, ctx.gse, mask, "study", f"{name}, exponential, untreated wild type, {MATCHED_MEDIUM}, by study", topn=10)
         fig.tight_layout()
         savefig(fig, out_dir, fn, formats)
     fig, ax = plt.subplots(figsize=(9.5, 6))

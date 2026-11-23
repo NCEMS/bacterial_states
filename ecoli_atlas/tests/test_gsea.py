@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 
 from ecoli_atlas.cli import main
-from ecoli_atlas.gsea import coverage, prerank, ranking_by_symbol, read_gene_sets
+from ecoli_atlas.gsea import _positive_es, coverage, prerank, prerank_one_sided, ranking_by_symbol, read_gene_sets, run
 
 
 def test_the_package_go_sets_load_with_their_release():
@@ -35,6 +35,30 @@ def test_prerank_is_two_sided(tmp_path):
     assert res.loc["TOP", "nes"] > 1.5 and res.loc["BOTTOM", "nes"] < -1.5 and abs(res.loc["SPREAD", "nes"]) < 1.5
     assert res.loc["TOP", "fdr"] < 0.05 and res.loc["BOTTOM", "fdr"] < 0.05 and res.loc["TOP", "name"] == "top"
     assert res["pval"].min() >= 1 / 200
+
+
+def test_prerank_one_sided_asks_for_the_top_of_the_ranking():
+    """The fgsea scoreType "pos" test with gseaParam 0: a set at the top is enriched, one at the bottom is not (ES near
+    0, not negative), a spread set sits near NES 1; the ES is the maximum of the unweighted running sum."""
+    genes = [f"g{i:03d}" for i in range(200)]
+    ranking = pd.Series(np.linspace(2, -2, 200), index=genes)
+    sets = {"TOP": genes[:15], "BOTTOM": genes[-15:], "SPREAD": genes[::13], "TINY": genes[:3]}
+    terms = pd.DataFrame({"namespace": "biological_process", "name": ["top", "bottom", "spread", "tiny"]}, index=list(sets))
+    res = prerank_one_sided(ranking, sets, terms, permutations=2000, min_size=5, seed=1).set_index("term")
+    assert "TINY" not in res.index and (res["nes"] >= 0).all() and (res["es"] >= 0).all()
+    assert res.loc["TOP", "es"] == pytest.approx(1.0) and res.loc["TOP", "pval"] < 0.001 and res.loc["TOP", "fdr"] < 0.01
+    assert res.loc["BOTTOM", "nes"] < 0.2 and res.loc["BOTTOM", "pval"] > 0.9 and 0.4 < res.loc["SPREAD", "nes"] < 2.0
+    assert res.loc["TOP", "lead_genes"].split(",") == genes[:15] and res.loc["TOP", "database"] == "GO"
+    # the closed form against a direct running sum
+    rng = np.random.default_rng(0)
+    for _ in range(20):
+        n, k = 50, int(rng.integers(2, 20))
+        pos = np.sort(rng.choice(n, k, replace=False))
+        hit = np.isin(np.arange(n), pos)
+        walk = np.cumsum(np.where(hit, 1 / k, -1 / (n - k)))
+        assert _positive_es(pos, k, n) == pytest.approx(max(walk.max(), 0.0))
+    with pytest.raises(ValueError, match="sides"):
+        run(ranking, sides="both")
 
 
 def test_drivers_of_an_axis_with_gsea(trained, train_args, atlas_files, tmp_path):

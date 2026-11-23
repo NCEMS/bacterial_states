@@ -9,7 +9,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from ..figures.plotting import correlate_barh, savefig, spearman_series
+from ..figures.plotting import spearman_series
+from .pathways import pathway_analysis
 
 UTI_STUDY = "GSE128997"
 POS, NEG = "UTI", "UR"
@@ -33,9 +34,9 @@ def uti_design(ctx, study: str = UTI_STUDY) -> pd.DataFrame:
     return d.sort_values(["patient", "cond"]).reset_index(drop=True)
 
 
-def run_uti(ctx, out_dir, formats=("pdf", "png"), study: str = UTI_STUDY, n_perm: int = 1000, log=None) -> dict:
-    import matplotlib.pyplot as plt
-    from .axis import center_by_group, paired_axis_test, perm_p_text
+def run_uti(ctx, out_dir, formats=("pdf", "png"), study: str = UTI_STUDY, n_perm: int = 1000, log=None, gsea: bool = False,
+            modules=None, gene_sets=None, permutations: int = 10000, sides: str = "two") -> dict:
+    from .axis import center_by_group, paired_axis_test
     log = log or ctx.log
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
@@ -51,14 +52,6 @@ def run_uti(ctx, out_dir, formats=("pdf", "png"), study: str = UTI_STUDY, n_perm
     d["axis_oof"] = test["axis_oof"]
     corr = spearman_series(ctx.logx[rows], d["axis_oof"].to_numpy(), ctx.gene_names).sort_values()
 
-    fig, ax = plt.subplots(figsize=(8, 6.5))
-    correlate_barh(ax, corr, N_GENES_SHOWN,
-                   f"{POS} (red) vs {NEG} (blue)\nn={len(d)}, {test['n_pairs']} patients | "
-                   f"{test['correct']}/{test['n_pairs']}, permutation {perm_p_text(test)}",
-                   "Spearman rho vs out-of-fold condition axis")
-    fig.tight_layout()
-    savefig(fig, out, "fig_uti_axis", formats)
-
     pd.DataFrame({"gene": corr.index, "spearman_rho": corr.values}).sort_values("spearman_rho", ascending=False)\
         .to_csv(out / "uti_axis_genes.tsv", sep="\t", index=False, float_format="%.6f")
     d.drop(columns=["row"]).to_csv(out / "uti_samples.tsv", sep="\t", index=False, float_format="%.6g")
@@ -66,5 +59,7 @@ def run_uti(ctx, out_dir, formats=("pdf", "png"), study: str = UTI_STUDY, n_perm
               "conditions": {str(k): int(v) for k, v in d["cond"].value_counts().items()},
               **{k: v for k, v in test.items() if k != "axis_oof"},
               f"toward_{POS}": list(corr.tail(N_GENES_SHOWN).iloc[::-1].index), f"toward_{NEG}": list(corr.head(N_GENES_SHOWN).index)}
+    result |= pathway_analysis(corr, out, "uti", POS, f"{NEG} (urine culture)", formats, gsea, modules, gene_sets, permutations, log,
+                               axis_label=f"{POS} vs urine culture", sides=sides)
     (out / "uti_metrics.json").write_text(json.dumps(result, indent=2, default=str))
     return result

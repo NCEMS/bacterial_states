@@ -372,7 +372,7 @@ def cmd_drivers(args) -> int:
                 from .gsea import ranking_by_symbol, run as run_gsea
                 sym = genes["symbol"] if "symbol" in genes.columns else genes["feature"]
                 res, info = run_gsea(ranking_by_symbol(genes["attribution"], sym.where(sym != "", "")), args.gene_sets,
-                                     permutations=args.gsea_permutations)
+                                     permutations=args.gsea_permutations, sides=args.gsea_sides or "two")
                 res.to_csv(out / f"gsea_{name}.tsv", sep="\t", index=False, float_format="%.5g")
                 fig_gsea_bars(res, f"GO terms of the {label} drivers, {low} → {high}", out, f"fig_gsea_{name}", formats, top=args.top,
                               both=True, up_label=f"move the score towards {high}", down_label=f"move the score towards {low}")
@@ -409,7 +409,7 @@ def cmd_drivers(args) -> int:
             summaries.append(summary)
             _info(f"{name}: {summary['n_samples'][high]} {high} samples in {summary['n_studies'][high]} studies; "
                   f"top 50 units carry {summary['share_of_attribution']['top_50_units']:.0%} of the attribution"
-                  + (f"; {int(robust.sum())} units are among the top {args.top_units} in at least 3 of 4 seeds, "
+                  + (f"; {int(robust.sum())} units are among the top {args.top_units} in at least {int(np.ceil(0.75 * len(bundles)))} of {len(bundles)} seeds, "
                      f"rank correlation between seeds {summary['rank_correlation_between_seeds']:.2f}" if len(bundles) > 1 else ""))
     except (ValueError, ImportError) as e:
         _info(f"error: {e}")
@@ -498,6 +498,27 @@ def cmd_embed(args) -> int:
         if key in res:
             res[key].to_csv(out / f"{key}.tsv", sep="\t", float_format="%.6g")
             written.append(f"{key}.tsv")
+    if args.seeds:                               # every seed of the bundle: the spread of the calls (and of the axes, `axes --seeds`)
+        from .seeds import SEED_PREDICTIONS_FILE, SEEDS_DIR, seed_dirs, seed_prediction_summary
+        dirs = seed_dirs(args.models)
+        if not dirs:
+            _info(f"error: --seeds: {args.models} has no seed_<n> bundles (a bundle trained with one seed)")
+            return 1
+        per_seed = {}
+        for d in dirs:
+            try:
+                r = embed_counts(ModelBundle.load(d, device), counts, qc, device, args.min_feature_coverage, antisense,
+                                 studies=_studies_arg(args.studies), pool=not args.no_pool, fill_missing_gc=args.fill_missing_gc)
+            except (ValueError, FileNotFoundError) as exc:
+                _info(f"error: --seeds, {d.name}: {exc}")
+                return 1
+            sd = out / SEEDS_DIR / d.name
+            sd.mkdir(parents=True, exist_ok=True)
+            r["embedding"].to_csv(sd / "embedding.tsv", sep="\t", float_format="%.6g")
+            r["predictions"].to_csv(sd / "predictions.tsv", sep="\t", float_format="%.6g")
+            per_seed[d.name] = r["predictions"]
+        seed_prediction_summary(per_seed).to_csv(out / SEED_PREDICTIONS_FILE, sep="\t", float_format="%.6g")
+        written.append(f"{SEED_PREDICTIONS_FILE} ({len(dirs)} seeds; each in {SEEDS_DIR}/)")
     _info(f"embedded {len(res['embedding'])} samples ({res['coverage'].fraction:.1%} of the model features present); "
           f"wrote embedding.tsv, predictions.tsv, samples.tsv, covariates.tsv, missing_genes.tsv, feature_coverage.tsv"
           + "".join(f", {w}" for w in written) + (" and qc.tsv" if args.ingest_results else "") + f" to {out}")
@@ -511,6 +532,13 @@ def _blocks_arg(value):
 def cmd_compare(args) -> int:
     from .compare import Atlas, calls_frame, compare, read_embedding, read_sample_table
     atlas = Atlas.load(args.models, args.atlas_metadata)
+    if args.exclude_study:                       # e.g. the query's own study, when the atlas holds its samples already
+        n0 = len(atlas.embedding)
+        try:
+            atlas = atlas.without_studies(args.exclude_study)
+        except ValueError as e:
+            raise SystemExit(f"error: {e}")
+        _info(f"left {n0 - len(atlas.embedding)} atlas samples of {', '.join(args.exclude_study)} out of the neighbours")
     query = read_embedding(args.embeddings)
     emb_dir = Path(args.embeddings) if Path(args.embeddings).is_dir() else Path(args.embeddings).parent
     pred_path = Path(args.predictions) if args.predictions else emb_dir / "predictions.tsv"
@@ -626,6 +654,7 @@ def _model_figures(args, names: list, out: Path, formats: tuple) -> tuple[dict, 
             "head_gene_correlates": lambda: fig_head_gene_correlates(ctx, out, formats),
             "study_leakage": lambda: fig_study_leakage(ctx, out, formats), "threshold_curves": thresholds,
             "gsea": lambda: fig_gsea_batch(ctx, out, formats, permutations=args.gsea_permutations, gene_sets=args.gene_sets,
+                                           sides=args.gsea_sides or "one", modules=args.modules,
                                            threads=args.threads or 4)}
     for name in names:
         try:
@@ -695,8 +724,10 @@ def cmd_casestudy(args) -> int:
     apply_style()
     out, formats = Path(args.out), tuple(args.formats.split(","))
     out.mkdir(parents=True, exist_ok=True)
-    run = {"uti": lambda: run_uti(ctx, out, formats, n_perm=args.n_perm),
-           "oxygen": lambda: run_oxygen(ctx, out, formats, studies=args.oxygen_studies.split(",")),
+    pw = {"gsea": args.gsea, "modules": args.modules, "gene_sets": args.gene_sets, "permutations": args.gsea_permutations,
+          "sides": args.gsea_sides or "two"}
+    run = {"uti": lambda: run_uti(ctx, out, formats, n_perm=args.n_perm, **pw),
+           "oxygen": lambda: run_oxygen(ctx, out, formats, studies=args.oxygen_studies.split(","), **pw),
            "glu-cas": lambda: run_glu_cas(ctx, out, formats, n_perm=args.n_perm)}
     path = out / "casestudy_metrics.json"
     metrics = json.loads(path.read_text()) if path.exists() else {}
@@ -713,30 +744,59 @@ def cmd_casestudy(args) -> int:
 
 
 def _series_table(spec: str, query_study: str | None = None) -> pd.DataFrame:
-    """--series: a table (sample, series, x[, x_label]), or ``PATH:SERIES_COLUMN:X_COLUMN`` for any sample table (CSV or
-    TSV, first column the sample id), e.g. ``samples.csv:replicate:time_h``; then the series are named after the
-    query study (or the column) and its values."""
+    """--series: a table (sample, series, x[, x_label][, panel]), or ``PATH:SERIES_COLUMN:X_COLUMN[:PANEL_COLUMN]`` for
+    any sample table (CSV or TSV, first column the sample id), e.g. ``samples.csv:replicate:time_h``; then the series are
+    named after the query study (or the column) and its values. A panel column draws the series in one panel per value
+    instead of one per study."""
     if Path(spec).exists() or spec.count(":") < 2:
-        t = pd.read_csv(spec, sep="\t", dtype={"sample": str, "series": str})
+        t = pd.read_csv(spec, sep="\t", dtype={"sample": str, "series": str, "panel": str})
         lacking = {"sample", "series", "x"} - set(t.columns)
         if lacking:
             raise ValueError(f"{spec} lacks columns {sorted(lacking)}")
         return t
-    path, scol, xcol = spec.rsplit(":", 2)
+    parts = spec.rsplit(":", 3)
+    if len(parts) == 4 and Path(parts[0]).exists():
+        path, scol, xcol, pcol = parts
+    else:
+        (path, scol, xcol), pcol = spec.rsplit(":", 2), None
     t = pd.read_csv(path, sep="," if path.endswith(".csv") else "\t", dtype=str, keep_default_na=False)
     t = t.set_index(t.columns[0])
-    for c in (scol, xcol):
-        if c not in t.columns:
+    for c in (scol, xcol, pcol):
+        if c is not None and c not in t.columns:
             raise KeyError(f"{path} has no column {c!r}")
-    prefix = f"{query_study} " if query_study else ""
-    return pd.DataFrame({"sample": t.index.astype(str).str.strip(), "series": [f"{prefix}{scol} {v}" for v in t[scol]],
-                         "x": pd.to_numeric(t[xcol], errors="coerce").to_numpy(), "x_label": xcol}).dropna(subset=["x"])
+    prefix = f"{query_study} " if query_study and pcol is None else ""
+    out = pd.DataFrame({"sample": t.index.astype(str).str.strip(), "series": [f"{prefix}{scol} {v}" for v in t[scol]],
+                        "x": pd.to_numeric(t[xcol], errors="coerce").to_numpy(), "x_label": xcol})
+    if pcol is not None:
+        out["panel"] = t[pcol].astype(str).to_numpy()
+    return out.dropna(subset=["x"])
+
+
+def cmd_extract(args) -> int:
+    from .extract import extract_studies
+    gses = list(args.gse)
+    if args.gse_file:
+        gses += [ln.strip() for ln in Path(args.gse_file).read_text().splitlines() if ln.strip() and not ln.startswith("#")]
+    if not gses:
+        _info("error: name at least one study (GSE)")
+        return 2
+    try:
+        res = extract_studies(args.models, gses, args.out, seeds=args.seeds)
+    except (ValueError, FileNotFoundError) as e:
+        _info(f"error: {e}")
+        return 1
+    if res["missing_studies"]:
+        _info(f"warning: not in the atlas of {args.models}: {', '.join(res['missing_studies'])}")
+    _info(f"extracted {res['n_samples']} samples of {', '.join(res['studies'])}"
+          + (f" with {len(res['seeds'])} seeds" if res["seeds"] else "") + f" to {args.out} (embedding.tsv, predictions.tsv"
+          + (", predictions_seeds.tsv, seeds/" if res["seeds"] else "") + "); give the studies to --exclude-study of `axes` / `compare`")
+    return 0
 
 
 def cmd_axes(args) -> int:
     from .axes import AxisSpec, axis_scores, category_frame, load_embedding, summarize
     from .data import read_table
-    from .figures.axes import fig_axes_map, fig_axis_distributions, fig_axis_series
+    from .figures.axes import fig_axes_map, fig_axis_distributions, fig_axis_series, fig_heads_map, fig_heads_seed_votes, fig_heads_series
     from .figures.plotting import apply_style
     try:
         specs = [AxisSpec.parse(a, args.holdout or ()) for a in args.axis]
@@ -754,6 +814,8 @@ def cmd_axes(args) -> int:
         return 1
     meta = meta.loc[emb.index]
     query_ids: list = []
+    query_heads = None
+    atlas_ids = list(emb.index)
     if args.query:                               # new samples (`embed` output): only scored, never fitted
         qpath = Path(args.query)
         qpath = qpath / "embedding.tsv" if qpath.is_dir() else qpath
@@ -770,6 +832,9 @@ def cmd_axes(args) -> int:
                                                   else f"{len(clash)} sample names are also atlas samples ({clash[:5]})"))
             return 1
         query_ids = list(q.index)
+        if (qpath.parent / "predictions.tsv").exists():       # the head calls of `embed`, drawn along with the axes
+            query_heads = pd.read_csv(qpath.parent / "predictions.tsv", sep="\t", index_col=0)
+            query_heads.index = query_heads.index.astype(str)
         emb = pd.concat([emb, q[list(emb.columns)]])
         splits = pd.concat([splits, pd.DataFrame({"gse": args.query_study, "split": 3}, index=q.index)])
         meta = pd.concat([meta, pd.DataFrame("", index=q.index, columns=meta.columns)])
@@ -784,6 +849,37 @@ def cmd_axes(args) -> int:
         except (ValueError, FileNotFoundError, KeyError) as e:
             _info(f"error: --series: {e}")
             return 1
+    seed_Z, seed_heads = {}, None
+    if args.seeds:                               # the same axes fitted on every seed's embedding: the spread of the scores
+        from .seeds import SEEDS_DIR, seed_dirs
+        dirs = seed_dirs(args.models)
+        if not dirs:
+            _info(f"error: --seeds: {args.models} has no seed_<n> bundles (a bundle trained with one seed)")
+            return 1
+        qdir = (Path(args.query) if Path(args.query).is_dir() else Path(args.query).parent) if query_ids else None
+        for d in dirs:
+            e, _, _ = load_embedding(d, args.blocks)
+            e = e.reindex(atlas_ids)
+            if query_ids:
+                qp = qdir / SEEDS_DIR / d.name / "embedding.tsv"
+                if not qp.exists():
+                    _info(f"error: --seeds: no {qp}; embed the --query samples with `embed --seeds`")
+                    return 1
+                qs = pd.read_csv(qp, sep="\t", index_col=0)
+                qs.index = qs.index.astype(str)
+                e = pd.concat([e, qs.reindex(query_ids)[list(e.columns)]])
+            if e.isna().any().any():
+                _info(f"error: --seeds: the embedding of {d.name} lacks samples of the bundle's embedding")
+                return 1
+            seed_Z[d.name] = e.to_numpy(dtype=np.float64)
+        if query_ids:                            # each seed's calls of the query samples, for fig_heads_series
+            seed_heads = {}
+            for d in dirs:
+                f = qdir / SEEDS_DIR / d.name / "predictions.tsv"
+                if f.exists():
+                    seed_heads[d.name] = pd.read_csv(f, sep="\t", index_col=0)
+                    seed_heads[d.name].index = seed_heads[d.name].index.astype(str)
+            seed_heads = seed_heads or None
     out, formats = Path(args.out), tuple(args.formats.split(","))
     out.mkdir(parents=True, exist_ok=True)
     apply_style()
@@ -799,6 +895,22 @@ def cmd_axes(args) -> int:
         scores.index.name = "sample"
         if query_ids:
             scores.loc[query_ids, "role"] = "query"
+        if seed_Z:
+            from .seeds import spread
+            try:
+                per = {n: axis_scores(Z, frame, spec, n_folds=args.folds, seed=args.seed, l2=args.l2)["scores"] for n, Z in seed_Z.items()}
+            except ValueError as e:
+                _info(f"error: --seeds: {e}")
+                return 1
+            for m in ("ordinal", "anchor"):
+                sp_ = spread(pd.DataFrame({n: r[m] for n, r in per.items()}))
+                for k in ("median", "min", "max"):
+                    scores[f"{m}_seed_{k}"] = sp_[k]
+            scores["n_seeds"] = len(per)
+            seed_scores = pd.DataFrame({n: r["ordinal"] for n, r in per.items()}).rename_axis("sample")
+            seed_scores.to_csv(out / f"axis_{spec.name}_seed_scores.tsv", sep="\t", float_format="%.5g")
+        else:
+            seed_scores = None
         if spec.members:                          # grouped categories: keep the column value of each sample
             scores.insert(scores.columns.get_loc("category") + 1, "value",
                           meta[spec.column].astype(str).str.strip().reindex(scores.index).where(scores["category"] != "", ""))
@@ -813,7 +925,7 @@ def cmd_axes(args) -> int:
         _write_json(summary, out / f"axis_{spec.name}_summary.json")
         fig_axis_distributions(scores, spec, res["thresholds"], out, formats)
         if series is not None:
-            fig_axis_series(scores, series, spec, out, formats)
+            fig_axis_series(scores, series, spec, out, formats, seeds=seed_scores, x_axis=args.series_x)
         done[spec.name] = (scores, spec)
         m = summary["methods"]["ordinal"]["all"]
         ws = m["within_study"]
@@ -824,6 +936,18 @@ def cmd_axes(args) -> int:
         for j in range(i + 1, len(names)):
             fig_axes_map(done[names[i]][0], done[names[i]][1], done[names[j]][0], done[names[j]][1], out, formats,
                          query=query_ids, series=series)
+    if query_heads is not None:                  # the calls on their own 0-1 scale, next to the axis scores
+        atlas_heads = None
+        apath = Path(args.models) / "predictions.tsv"
+        if apath.exists():
+            atlas_heads = pd.read_csv(apath, sep="\t", index_col=0)
+            atlas_heads.index = atlas_heads.index.astype(str)
+            atlas_heads = atlas_heads.loc[atlas_heads.index.intersection(emb.index)]   # without --exclude-study studies
+        if series is not None:
+            fig_heads_series(query_heads, series, out, formats, seeds=seed_heads, x_axis=args.series_x)
+            if seed_heads:
+                fig_heads_seed_votes(query_heads, series, seed_heads, out, formats)
+        fig_heads_map(atlas_heads, query_heads, out, formats, series=series)
     _info(f"wrote the axis tables and figures to {out}")
     return 0
 
@@ -846,6 +970,9 @@ def build_parser() -> argparse.ArgumentParser:
         sp.add_argument("--gene-sets", metavar="TSV", help="gene-set table for the enrichment (term, namespace, name, genes; "
                         "default: the package's GO sets, reference/go_gene_sets_ecocyc.tsv.gz)")
         sp.add_argument("--gsea-permutations", type=int, default=10000, metavar="N", help="permutations of the enrichment test (10000)")
+        sp.add_argument("--gsea-sides", choices=["one", "two"], help="one: are a set's genes at the top of the ranking (fgsea "
+                        "scoreType pos, NES >= 0); two: top or bottom (gseapy, NES signed). Default: one for the `figures` "
+                        "panel gsea, two for drivers and case studies")
 
     def add_tables(sp):
         sp.add_argument("--counts", required=True, help="joined count table of the atlas (features x samples)")
@@ -991,6 +1118,10 @@ def build_parser() -> argparse.ArgumentParser:
                     "samples (study; --studies, else the whole table) or the atlas training mean (atlas), instead of refusing them; "
                     "samples.tsv says which (gc_filled). Such libraries are usually below the depth gate too")
     sp.add_argument("--min-feature-coverage", type=float, default=0.9)
+    sp.add_argument("--seeds", action="store_true",
+                    help="also embed with every seed_<n> model of the bundle: predictions_seeds.tsv (median, min, max and the number "
+                    "of seeds making each call) and seeds/seed_<n>/ (embedding and predictions, for `axes --seeds`). The spread "
+                    "is the dependence on training randomness only, not the sampling noise of the counts")
     sp.add_argument("--corrected-counts", action="store_true",
                     help="write corrected_counts.tsv: the observed counts with the technical part swapped for that of a reference "
                     "library (paired-end, the atlas's mean technical values, no GC bias): the decoder's covariate term moved to the "
@@ -1017,7 +1148,11 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--umap", action="store_true")
     sp.add_argument("--seed", type=int, default=77)
     sp.add_argument("--metadata", help="table of the new samples (first column = sample id; CSV or TSV, e.g. the samples.tsv of `prepare`)")
-    sp.add_argument("--group-by", help="metadata column(s), comma-separated: write group_summary.tsv and the group figures")
+    sp.add_argument("--group-by", help="metadata column(s), comma-separated: write group_summary.tsv, group_neighbors.tsv (the pooled "
+                    "neighbours of each group by atlas study, strain, genotype, treatment, ...) and the group figures")
+    sp.add_argument("--exclude-study", action="append", metavar="GSE",
+                    help="leave the atlas samples of this study out of the neighbours (repeatable), e.g. the study the new samples "
+                    "come from when the atlas holds it already, so that its own copies are not their nearest neighbours")
     sp.add_argument("--order-by", help="metadata column that orders the groups (numeric when it parses, e.g. a time)")
     sp.add_argument("--color-by", help="metadata column that colours the new samples in the UMAP (default: the groups)")
     sp.add_argument("--plots", action="store_true", help="write the figures even without --group-by")
@@ -1062,6 +1197,15 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--out", required=True, help="HTML file to write")
     sp.set_defaults(func=cmd_view)
 
+    sp = sub.add_parser("extract", help="the samples of atlas studies as an `embed` output (embedding, calls, optionally every "
+                                         "seed), for `axes --query`, `compare` and the call figures")
+    sp.add_argument("gse", nargs="*", help="GSE accessions")
+    sp.add_argument("--gse-file", help="text file with one GSE per line")
+    sp.add_argument("--models", required=True, help="model bundle")
+    sp.add_argument("--seeds", action="store_true", help="also every seed_<n> model of the bundle: seeds/ and predictions_seeds.tsv")
+    sp.add_argument("--out", required=True)
+    sp.set_defaults(func=cmd_extract)
+
     sp = sub.add_parser("axes", help="place the samples on ordered axes of the embedding (growth phase, medium, ...)")
     sp.add_argument("--models", required=True, help="bundle directory (embedding.tsv, manifest.json, splits.csv)")
     sp.add_argument("--metadata", required=True)
@@ -1074,13 +1218,23 @@ def build_parser() -> argparse.ArgumentParser:
                     help="only samples with these metadata values get a category; repeatable")
     sp.add_argument("--blocks", default="all", help="embedding blocks to use, comma-separated (default: the whole embedding)")
     sp.add_argument("--series", help="ordered series, e.g. time courses, drawn as trajectories: a table (sample, series, x[, x_label]), or "
-                    "PATH:SERIES_COLUMN:X_COLUMN for any sample table (first column the sample id), e.g. samples.csv:replicate:time_h")
+                    "PATH:SERIES_COLUMN:X_COLUMN[:PANEL_COLUMN] for any sample table (first column the sample id), e.g. "
+                    "samples.csv:replicate:time_h; a panel column (also a column `panel` of the table) draws one panel per value")
+    sp.add_argument("--series-x", default="auto", choices=["auto", "categorical", "linear", "log"],
+                    help="x axis of the series figures: the positions as categories (labelled with their values, the series side "
+                    "by side), linear or log; auto (default): categorical with at most 12 positions in a panel, else log when "
+                    "they span more than 20-fold, else linear")
     sp.add_argument("--query", help="new samples to place on the axes: an `embed` output directory (or its embedding.tsv) made with the "
-                    "same bundle; they are only scored, by the model of all fitted samples, and drawn over the map of two axes")
+                    "same bundle; they are only scored, by the model of all fitted samples, and drawn over the map of two axes. With the "
+                    "directory's predictions.tsv the calls (probabilities, 0-1) are drawn too: fig_heads_series, fig_heads_phase_by_medium")
     sp.add_argument("--query-study", default="query", help="study label of the --query samples (default: query)")
     sp.add_argument("--exclude-study", action="append", metavar="GSE",
                     help="leave the atlas samples of this study out of the fits and the tables (repeatable), e.g. the study the "
                     "--query samples come from, so that it stays unseen")
+    sp.add_argument("--seeds", action="store_true",
+                    help="also fit every axis on the embedding of each seed_<n> model of the bundle: <method>_seed_median/min/max in "
+                    "the score tables, axis_<name>_seed_scores.tsv, and every seed's score as small dots in the series figures. --query samples must have been "
+                    "embedded with `embed --seeds`. The spread is the dependence on training randomness only")
     sp.add_argument("--folds", type=int, default=5, help="study folds of the out-of-fold scores")
     sp.add_argument("--l2", type=float, default=1.0, help="ridge penalty of the ordinal model")
     sp.add_argument("--seed", type=int, default=0)
@@ -1093,6 +1247,8 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--metadata", required=True, help="sample metadata (metadata_v2.tsv)")
     sp.add_argument("--splits", help="splits.csv, or a bundle directory that holds one (default: --models)")
     sp.add_argument("--models", help="model bundle; with it and the three tables below the model figures are drawn too")
+    sp.add_argument("--modules", metavar="TSV", help="gsea panel: also the sets of a module table (atlas_data/modules/modules.tsv "
+                    "from `ecoli_atlas download modules`), one scatter per database (RegulonDB, KEGG pathway, KEGG module)")
     sp.add_argument("--counts", help="joined count table of the atlas")
     sp.add_argument("--qc", help="QC table (sample_qc.tsv)")
     sp.add_argument("--antisense", help="antisense count table of the atlas, when the bundle was trained with one")
@@ -1113,10 +1269,15 @@ def build_parser() -> argparse.ArgumentParser:
     add_tables(sp)
     sp.add_argument("--models", required=True, help="model bundle")
     sp.add_argument("--oxygen-studies", default=",".join(OXYGEN_CASE_STUDIES), help="comma-separated studies of the oxygen case study")
+    sp.add_argument("--gsea", action="store_true", help="oxygen, uti: preranked GSEA of the genes along the axis against GO terms "
+                    "(<name>_gsea_go.tsv, fig_<name>_gsea_go)")
+    sp.add_argument("--modules", metavar="TSV", help="oxygen, uti: the same against a curated module table (atlas_data/modules/modules.tsv "
+                    "from `ecoli_atlas download modules`: KEGG pathways and modules, RegulonDB regulons, iModulons; <name>_gsea_modules.tsv, one figure per database)")
     sp.add_argument("--n-perm", type=int, default=1000, help="permutations of the paired tests")
     sp.add_argument("--out", required=True)
     sp.add_argument("--formats", default="pdf,png")
     sp.add_argument("--threads", type=int, help="torch CPU threads")
+    add_gsea(sp)
     add_device(sp)
     sp.set_defaults(func=cmd_casestudy)
     return p

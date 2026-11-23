@@ -1024,3 +1024,81 @@ def test_embed_fills_missing_gc(trained, atlas_files):
     assert filled.loc["GSM0000", "full_gc_slope"] == qc.loc["GSM0000", "full_gc_slope"]
     with pytest.raises(ValueError, match="no sample of the study"):
         fill_gc_values(qc, ["GSM0001"], "study", bundle.scaler)
+
+
+def test_embed_and_axes_over_the_seeds_of_a_sweep(train_args, atlas_files, tmp_path):
+    """`embed --seeds` scores new samples with every seed (predictions_seeds.tsv, seeds/seed_<n>/), and `axes --seeds`
+    fits the axes on every seed's embedding and gives each sample the median, min and max over the seeds."""
+    sweep = tmp_path / "sweep"
+    assert main(["train", *train_args, "--out", str(sweep), "--epochs", "4", "--seeds", "1,2", "--device", "cpu", "--test-frac", "0.2"]) == 0
+    query = ["GSM0000", "GSM0001", "GSM0100", "GSM0101"]
+    counts = read_counts(atlas_files["counts"])[query]
+    counts.columns = [f"new{i}" for i in range(len(query))]
+    counts.to_csv(tmp_path / "counts.tsv", sep="\t")
+    qc = pd.read_csv(atlas_files["qc"], sep="\t", dtype=str, keep_default_na=False).set_index("GSM").loc[query]
+    qc.index = pd.Index(counts.columns, name="GSM")
+    qc.to_csv(tmp_path / "qc.tsv", sep="\t")
+    emb_out = tmp_path / "embedded"
+    args = ["embed", "--counts", str(tmp_path / "counts.tsv"), "--qc", str(tmp_path / "qc.tsv"), "--out", str(emb_out), "--device", "cpu"]
+    assert main(args + ["--models", str(sweep), "--seeds"]) == 0
+    seeds = pd.read_csv(emb_out / "predictions_seeds.tsv", sep="\t", index_col=0)
+    per = {s: pd.read_csv(emb_out / "seeds" / f"seed_{s}" / "predictions.tsv", sep="\t", index_col=0) for s in (1, 2)}
+    assert list(seeds.index) == list(counts.columns) and (seeds["n_seeds"] == 2).all()
+    both = pd.concat([per[1]["p_minimal"], per[2]["p_minimal"]], axis=1)
+    assert np.allclose(seeds["p_minimal_min"], both.min(axis=1), atol=1e-5) and np.allclose(seeds["p_minimal_max"], both.max(axis=1), atol=1e-5)
+    assert seeds["p_minimal_n_called"].between(0, 2).all() and (seeds["p_minimal_logit_min"] <= seeds["p_minimal_logit_max"]).all()
+    main_pred = pd.read_csv(emb_out / "predictions.tsv", sep="\t", index_col=0)    # the bundle's own model is one of the seeds
+    chosen = json.loads((sweep / "manifest.json").read_text())["seed"]
+    assert np.allclose(main_pred["p_minimal"], per[chosen]["p_minimal"], atol=1e-5)
+    assert main(args + ["--models", str(sweep / "seed_1"), "--seeds"]) == 1                 # one seed's bundle has no seed_<n>
+    # axes over the seeds, with the query samples
+    meta = train_args[train_args.index("--metadata") + 1]
+    pd.DataFrame({"sample": counts.columns, "rep": "r1", "hours": [1, 2, 3, 4]}).to_csv(tmp_path / "samples.csv", index=False)
+    out = tmp_path / "axes"
+    ax = ["axes", "--models", str(sweep), "--metadata", meta, "--out", str(out), "--formats", "png", "--query", str(emb_out),
+          "--axis", "phase:growth_phase:mid_exponential,stationary", "--axis", "medium:medium_class:complex,defined_minimal",
+          "--series", f"{tmp_path / 'samples.csv'}:rep:hours"]
+    assert main(ax + ["--seeds"]) == 0
+    s = pd.read_csv(out / "axis_phase_scores.tsv", sep="\t", index_col=0)
+    per_seed = pd.read_csv(out / "axis_phase_seed_scores.tsv", sep="\t", index_col=0)
+    assert list(per_seed.columns) == ["seed_1", "seed_2"] and (s["n_seeds"] == 2).all()
+    assert np.allclose(s["ordinal_seed_min"], per_seed.min(axis=1), equal_nan=True)
+    assert np.allclose(s["ordinal"], per_seed[f"seed_{chosen}"], equal_nan=True, atol=1e-4)  # the bundle's axis is the chosen seed's
+    assert s.loc[list(counts.columns), "ordinal_seed_median"].notna().all()
+    assert {"fig_axis_phase_series.png", "fig_heads_series.png", "fig_heads_phase_by_medium.png",
+            "fig_heads_seed_votes.png"} <= {p.name for p in out.iterdir()}
+    # a query embedded without --seeds is refused
+    plain = tmp_path / "plain"
+    assert main(["embed", "--counts", str(tmp_path / "counts.tsv"), "--qc", str(tmp_path / "qc.tsv"), "--out", str(plain), "--device", "cpu",
+                 "--models", str(sweep)]) == 0
+    assert main([a if a != str(emb_out) else str(plain) for a in ax] + ["--seeds"]) == 1
+
+
+def test_extract_writes_an_atlas_study_as_new_samples(train_args, tmp_path):
+    """`extract`: a study of the bundle in the layout of `embed` (with every seed), usable by `axes --query` with
+    --exclude-study and a panel column in --series."""
+    sweep = tmp_path / "sweep"
+    assert main(["train", *train_args, "--out", str(sweep), "--epochs", "4", "--seeds", "1,2", "--device", "cpu", "--test-frac", "0.2"]) == 0
+    pred = pd.read_csv(sweep / "predictions.tsv", sep="\t", index_col=0, dtype={"gse": str})
+    gse = pred["gse"].value_counts().index[0]
+    ids = list(pred.index[pred["gse"] == gse].astype(str))
+    out = tmp_path / "study"
+    assert main(["extract", gse, "--models", str(sweep), "--seeds", "--out", str(out)]) == 0
+    emb = pd.read_csv(out / "embedding.tsv", sep="\t", index_col=0)
+    full = pd.read_csv(sweep / "embedding.tsv", sep="\t", index_col=0)
+    assert list(emb.index.astype(str)) == ids and np.allclose(emb.to_numpy(), full.loc[emb.index].to_numpy(), atol=1e-5)
+    p = pd.read_csv(out / "predictions.tsv", sep="\t", index_col=0)
+    assert np.allclose(p["p_minimal"], pred.loc[p.index, "p_minimal"], atol=1e-5)
+    assert set(p["medium"]) <= {"rich", "minimal"} and ((p["p_minimal"] >= 0.5) == (p["medium"] == "minimal")).all()
+    assert (out / "seeds" / "seed_2" / "embedding.tsv").exists() and (pd.read_csv(out / "predictions_seeds.tsv", sep="\t")["n_seeds"] == 2).all()
+    assert main(["extract", "GSE_NONE", "--models", str(sweep), "--out", str(tmp_path / "none")]) == 1
+    # on the axes as query samples, with one panel per value of a panel column
+    meta = train_args[train_args.index("--metadata") + 1]
+    pd.DataFrame({"sample": ids, "rep": "r1", "t": np.arange(len(ids)), "arm": ["a" if i % 2 else "b" for i in range(len(ids))]}).to_csv(
+        tmp_path / "s.csv", index=False)
+    ax = ["axes", "--models", str(sweep), "--metadata", meta, "--formats", "png", "--query", str(out), "--axis",
+          "medium:medium_class:complex,defined_minimal", "--series", f"{tmp_path / 's.csv'}:rep:t:arm", "--seeds"]
+    assert main(ax + ["--out", str(tmp_path / "clash")]) == 1                     # its samples are atlas samples
+    assert main(ax + ["--exclude-study", gse, "--out", str(tmp_path / "axes")]) == 0
+    names = {f.name for f in (tmp_path / "axes").iterdir()}
+    assert {"fig_axis_medium_series.png", "fig_heads_series.png", "fig_heads_seed_votes.png"} <= names

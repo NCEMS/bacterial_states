@@ -5,6 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
+from ..gsea import database_of
 from .plotting import GREY, savefig
 
 UP, DOWN = "#b2182b", "#2166ac"
@@ -28,7 +29,7 @@ def fig_modules(table: pd.DataFrame, title: str, high: str, low: str, out_dir, n
         for bar, b in zip(bars, sub["boot_in_top"]):
             bar.set_alpha(1.0 if b >= 0.75 else 0.35)
         ax.set_yticks(y)
-        ax.set_yticklabels([f"{n} ({s})" for n, s in zip(sub["name"], sub["size"])], fontsize=9)
+        ax.set_yticklabels([f"{database_of(ns_)}:{n} ({s})" for ns_, n, s in zip(sub["namespace"], sub["name"], sub["size"])], fontsize=9)
         ax.axvline(0, color=GREY, lw=0.8)
         ax.set_title(ns, fontsize=11)
         ax.set_xlabel("z of the module's attribution")

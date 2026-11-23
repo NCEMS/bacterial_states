@@ -146,6 +146,34 @@ def test_compare_command(trained, atlas_files, embedded, tmp_path):
     assert (tmp_path / "out" / "fig_umap_groups.png").exists() and len(pd.read_csv(tmp_path / "out" / "umap_atlas.tsv", sep="\t")) == 119
     with pytest.raises(SystemExit, match="lacks column"):
         main(base + ["--out", str(tmp_path / "bad"), "--metadata", str(embedded["meta"]), "--group-by", "nope"])
+    # the pooled neighbours of each group, by study (and strain, treatment, ... where the atlas metadata has them)
+    gn = pd.read_csv(tmp_path / "out" / "group_neighbors.tsv", sep="\t", keep_default_na=False)
+    assert list(dict.fromkeys(gn["group"])) == ["depleted", "total"] and "gse" in gn.columns
+    sizes = {"depleted": 6, "total": 1}
+    for grp, d in gn.groupby("group"):
+        assert d["n_neighbors"].sum() == 5 * sizes[grp] and d["share"].sum() == pytest.approx(1.0, abs=1e-4)
+        assert d["n_query_samples"].between(1, sizes[grp]).all() and list(d["n_neighbors"]) == sorted(d["n_neighbors"], reverse=True)
+
+
+def test_compare_leaves_out_studies(trained, atlas_files, embedded, atlas, tmp_path):
+    """--exclude-study: the query samples are copies of atlas samples; without their studies none of them is a
+    neighbour, and every table is made from the rest of the atlas."""
+    own = sorted(set(atlas.metadata.loc[QUERY, "gse"].astype(str)))
+    args = ["compare", "--embeddings", str(embedded["dir"]), "--models", str(trained), "-k", "5", "--atlas-metadata",
+            str(atlas_files["metadata"]), "--metadata", str(embedded["meta"]), "--group-by", "library", "--formats", "png",
+            "--out", str(tmp_path / "out")]
+    for g in own:
+        args += ["--exclude-study", g]
+    assert main(args) == 0
+    nb = pd.read_csv(tmp_path / "out" / "neighbors.tsv", sep="\t", dtype={"gse": str})
+    assert not set(nb["gse"]) & set(own) and not set(nb["atlas_sample"]) & set(QUERY)
+    s = pd.read_csv(tmp_path / "out" / "summary.tsv", sep="\t", index_col=0)
+    assert (s["nearest_distance"] > 1e-6).all()
+    gn = pd.read_csv(tmp_path / "out" / "group_neighbors.tsv", sep="\t", dtype={"gse": str})
+    assert not set(gn["gse"]) & set(own)
+    reduced = atlas.without_studies(own)
+    assert len(reduced.embedding) == len(atlas.embedding) - atlas.metadata["gse"].astype(str).isin(own).sum()
+    assert reduced.without_studies([]) is reduced
 
 
 def test_neighbors_command(trained, atlas_files, atlas, tmp_path):

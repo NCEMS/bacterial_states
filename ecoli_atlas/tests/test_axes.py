@@ -155,6 +155,11 @@ def test_cli_scores_new_samples(tmp_path):
     q.index = [f"new{i}" for i in range(len(q))]
     (tmp_path / "embedded").mkdir()
     q.to_csv(tmp_path / "embedded" / "embedding.tsv", sep="\t")
+    rng = np.random.RandomState(1)
+    pd.DataFrame({"p_stationary": rng.uniform(size=len(q)), "p_minimal": rng.uniform(size=len(q)), "p_lab": 1.0},
+                 index=pd.Index(q.index, name="sample")).to_csv(tmp_path / "embedded" / "predictions.tsv", sep="\t")
+    pd.DataFrame({"p_stationary": rng.uniform(size=len(emb)), "p_minimal": rng.uniform(size=len(emb)), "phase_label": "stationary",
+                  "medium_label": ""}, index=emb.index).to_csv(models / "predictions.tsv", sep="\t")
     pd.DataFrame({"sample_id": q.index, "rep": "r1", "hours": np.arange(len(q)) + 1}).to_csv(tmp_path / "samples.csv", index=False)
     out = tmp_path / "out"
     args = ["axes", "--models", str(models), "--metadata", str(tmp_path / "meta.tsv"), "--out", str(out), "--formats", "png",
@@ -165,7 +170,11 @@ def test_cli_scores_new_samples(tmp_path):
     assert not set(g01) & set(s.index)                                   # the excluded study is gone
     new = s.loc[list(q.index)]
     assert (new["role"] == "query").all() and (new["gse"] == "NEW").all() and new["ordinal"].notna().all()
-    assert {"fig_axis_letter_series.png", "fig_axes_letter_by_copy.png"} <= {p.name for p in out.iterdir()}
+    assert {"fig_axis_letter_series.png", "fig_axes_letter_by_copy.png", "fig_heads_series.png",
+            "fig_heads_phase_by_medium.png"} <= {p.name for p in out.iterdir()}
+    for x_axis in ("categorical", "linear", "log"):                 # every x axis of the series figures
+        assert main(args + ["--series-x", x_axis, "--out", str(tmp_path / f"x_{x_axis}")]) == 0
+        assert (tmp_path / f"x_{x_axis}" / "fig_axis_letter_series.png").exists()
     # a query embedded with another bundle (other columns) is refused
     q.rename(columns={"z1": "x1"}).to_csv(tmp_path / "embedded" / "embedding.tsv", sep="\t")
     assert main(args) == 1

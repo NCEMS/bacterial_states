@@ -12,10 +12,10 @@ from ecoli_atlas.modules import build_module_table, membership, read_module_tabl
 def _sources(d):
     p = d / "precise1k"
     p.mkdir(parents=True)
-    pd.DataFrame({"regulator": ["ArcA", "ArcA", "ArcA", "RpoS", "RpoS"], "gene_name": ["cyoA", "sdhC", "hyaA", "osmY", "dps"],
-                  "gene_id": ["b0432", "b0721", "b0972", "b4376", "b0812"], "effect": ["-", "-", "+", "+", "+"],
-                  "evidence": [1, 1, 0, 1, 1], "source": ["RegulonDB_TF", "RegulonDB_TF", "RegulonDB_TF", "RegulonDB_sigma", "RegulonDB_sigma"]
-                  }).to_csv(p / "TRN.csv", index=False)
+    pd.DataFrame({"regulator": ["ArcA", "ArcA", "ArcA", "ArcA", "RpoS", "RpoS"], "gene_name": ["cyoA", "sdhC", "hyaA", "thrC", "osmY", "dps"],
+                  "gene_id": ["b0432", "b0721", "b0972", "b0004", "b4376", "b0812"], "effect": ["-", "-", "+", "?", "+", "+"],
+                  "evidence": [1, 1, 0, 1, 1, 1],
+                  "source": ["RegulonDB_TF"] * 4 + ["RegulonDB_sigma"] * 2}).to_csv(p / "TRN.csv", index=False)
     pd.DataFrame({"Fur-1": [3.0, -0.1, 2.5, 0.05], "Empty": [0.1, 0.2, 0.3, 0.4]}, index=["b0001", "b0002", "b0003", "b0004"]).to_csv(p / "M.csv")
     pd.DataFrame({"imodulon_size": [2, 0], "system_category": ["Metabolism", "Unknown"]}, index=["Fur-1", "Empty"]).to_csv(p / "imodulon_table.csv")
     k = d / "kegg"
@@ -24,6 +24,9 @@ def _sources(d):
     (k / "link_pathway_eco.txt").write_text("eco:b0001\tpath:eco00010\neco:b0002\tpath:eco00010\neco:b0001\tpath:eco01100\n")
     (k / "list_module.txt").write_text("M00001\tGlycolysis core\n")
     (k / "link_module_eco.txt").write_text("eco:b0003\tmd:eco_M00001\neco:b9999\tmd:eco_M00001\n")
+    (k / "brite_pathways.keg").write_text("+C\tMap number\n!\nAMetabolism\nB  Carbohydrate metabolism\nC    00010  Glycolysis\n")
+    (k / "brite_modules.keg").write_text("+D\tModule\n!\nAPathway modules\nB  Carbohydrate metabolism\nC    Central\n"
+                                         "D      M00001  Glycolysis core [PATH:map00010]\n")
 
 
 def test_build_module_table_from_the_sources(tmp_path):
@@ -32,10 +35,15 @@ def test_build_module_table_from_the_sources(tmp_path):
                          "Locus_Tag": ["b0001", "b0002", "b0003", "b0004", "b0432", "b0721", "b0972", "b4376", "b0812"]})
     t, stats = build_module_table(tmp_path / "src", feat)
     rows = t.set_index("term")
-    assert rows.loc["regulondb:ArcA", "genes"] == "cyoA,sdhC,hyaA"
+    # regulons only by direction: no whole-regulon set, the unknown-effect link (thrC) in none
+    assert "regulondb:ArcA" not in rows.index and "regulondb:RpoS" not in rows.index
     assert rows.loc["regulondb:ArcA-", "genes"] == "cyoA,sdhC" and rows.loc["regulondb:ArcA+", "genes"] == "hyaA"
-    assert "regulondb:RpoS+" not in rows.index                    # all activated: no separate part
-    assert rows.loc["regulondb:RpoS", "namespace"] == "regulondb_sigma_regulon"
+    assert rows.loc["regulondb:ArcA+", "name"] == "ArcA (activated)" and rows.loc["regulondb:ArcA-", "name"] == "ArcA (repressed)"
+    assert rows.loc["regulondb:RpoS+", "genes"] == "osmY,dps" and rows.loc["regulondb:RpoS+", "namespace"] == "regulondb_sigma_regulon_activated"
+    assert not t.loc[t["term"].str.startswith("regulondb"), "genes"].str.contains("thrC").any()
+    assert rows.loc["regulondb:ArcA+", "category"] == "" == rows.loc["regulondb:ArcA-", "category"]     # both directions
+    assert rows.loc["regulondb:RpoS+", "category"] == "sigma factor"
+    assert rows.loc["kegg:eco00010", "category"] == "Carbohydrate metabolism" == rows.loc["kegg:eco_M00001", "category"]
     assert rows.loc["imodulon:Fur-1", "genes"] == "thrL,thrB" and "imodulon:Empty" not in rows.index
     assert rows.loc["kegg:eco00010", "name"] == "Glycolysis" and "kegg:eco01100" not in rows.index      # overview map dropped
     assert rows.loc["kegg:eco_M00001", "genes"] == "thrB" and stats["kegg"]["members_matched"] < stats["kegg"]["members_listed"]
@@ -43,7 +51,7 @@ def test_build_module_table_from_the_sources(tmp_path):
     back = read_module_table(tmp_path / "m.tsv")
     assert len(back) == len(t) and (tmp_path / "m.tsv").read_text().startswith("# test header")
     kept, G = membership(back, feat["Symbol"], feat["Locus_Tag"], min_size=2, max_size=3)
-    assert set(kept["term"]) == {"regulondb:ArcA", "regulondb:ArcA-", "regulondb:RpoS", "imodulon:Fur-1", "kegg:eco00010"}
+    assert set(kept["term"]) == {"regulondb:ArcA-", "regulondb:RpoS+", "imodulon:Fur-1", "kegg:eco00010"}
     assert G.shape == (len(feat), len(kept)) and G.sum() == sum(kept["genes"].str.count(",") + 1)
 
 
