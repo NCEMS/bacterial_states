@@ -137,10 +137,10 @@ def fig_gsea_by_database(res: pd.DataFrame, title: str, out_dir, name: str, form
 
 
 def fig_gsea_scatter(a: pd.DataFrame, b: pd.DataFrame, label_a: str, label_b: str, out_dir, name: str, formats,
-                     top: int = 10, off_diagonal: int = 0, title: str | None = None) -> pd.DataFrame:
+                     top: int = 9, off_diagonal: int = 0, title: str | None = None) -> pd.DataFrame:
     """NES of every term tested in both rankings, ``a`` against ``b``, with the dashed line y = x.
     The ``top`` terms with the largest |NES_a| + |NES_b| among those with FDR < 0.05 in either are
-    labelled (default 10), and optionally the ``off_diagonal`` terms with FDR < 0.05 in either on which the two rankings
+    labelled (default 9; for RegulonDB the sets of `fig_batch_tracking`), and optionally the ``off_diagonal`` terms with FDR < 0.05 in either on which the two rankings
     disagree most (largest |NES_a - NES_b|; with two-sided NES only those of opposite signs; default none). Returns the
     joined table."""
     import matplotlib.pyplot as plt

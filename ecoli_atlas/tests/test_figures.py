@@ -122,3 +122,29 @@ def test_case_study_pathway_analysis(tmp_path):
     assert t.loc["kegg:top", "database"] == "KEGG pathway" and t.loc["imodulon:bottom", "database"] == "iModulon"
     assert "gsea_modules" in res and "gsea_go" not in res                 # one figure per database
     assert (tmp_path / "fig_oxygen_gsea_kegg_pathway.png").exists() and (tmp_path / "fig_oxygen_gsea_imodulon.png").exists()
+
+
+def test_batch_tracking_plot(tmp_path):
+    """fig_batch_tracking from a per-study table: panels ordered by the between-study spread summed over the strains,
+    one y span for every panel, r of each set with the ribosomal proteins; the top sets from the batch GSEA tables."""
+    from ecoli_atlas.figures.batch_tracking import plot_batch_tracking, spreads, top_sets
+    rng = np.random.default_rng(0)
+    rib = rng.uniform(11, 16, 12)
+    t = pd.DataFrame({"strain": ["MG1655"] * 8 + ["BW25113"] * 4, "gse": [f"G{i}" for i in range(12)], "n": rng.integers(1, 9, 12),
+                      "regulondb:RpoS+": 20 - rib + rng.normal(0, 0.1, 12), "regulondb:Crp+": 15 - 0.5 * rib,
+                      "regulondb:FliA+": np.where(np.arange(12) % 3 == 0, 12.0, 5.0), "ribosome": rib})
+    res = plot_batch_tracking(t, tmp_path, ("png",), {"regulondb:RpoS+": "RpoS (activated)"})
+    assert list(res["sets"]) == list(spreads(t, ["regulondb:RpoS+", "regulondb:Crp+", "regulondb:FliA+"]).index)
+    assert list(res["sets"])[0] == "regulondb:FliA+" and res["sets"]["regulondb:RpoS+"]["r_with_ribosome"] < -0.9
+    assert res["y_span_log2"] == pytest.approx(8.0) and (tmp_path / "fig_batch_tracking.png").exists()
+    assert res["sets"]["regulondb:RpoS+"]["r2"] > 0.95 and res["sets"]["regulondb:FliA+"]["r2"] < 0.3
+    assert res["sets"]["regulondb:RpoS+"]["residual_sd"] < 0.2 < res["sets"]["regulondb:FliA+"]["residual_sd"]
+    assert top_sets(tmp_path) is None                                        # no GSEA tables
+    for s, nes in (("mg1655", [3.0, 2.0, 1.0]), ("bw25113", [1.0, 2.5, 4.0])):
+        pd.DataFrame({"term": ["regulondb:A+", "regulondb:B-", "kegg:x"], "database": ["RegulonDB", "RegulonDB", "KEGG pathway"],
+                      "nes": nes, "fdr": [0.01, 0.01, 0.01]}).to_csv(tmp_path / f"gsea_batch_modules_{s}.tsv", sep="\t", index=False)
+    top = top_sets(tmp_path)
+    assert list(top["term"]) == ["regulondb:B-", "regulondb:A+"] and top["nes_sum"].tolist() == [4.5, 4.0]
+    t2 = t.rename(columns={"regulondb:RpoS+": "regulondb:B-", "regulondb:Crp+": "regulondb:A+"}).drop(columns="regulondb:FliA+")
+    res = plot_batch_tracking(t2, tmp_path, ("png",), nes=top)
+    assert list(res["sets"]) == ["regulondb:B-", "regulondb:A+"]                   # in the order of the NES sum

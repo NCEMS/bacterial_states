@@ -618,6 +618,7 @@ def _model_figures(args, names: list, out: Path, formats: tuple) -> tuple[dict, 
     """Draw the figures that need the model. Returns (metrics, all checks passed)."""
     from .figures.checks import all_agree, compare_metrics
     from .figures.gene_correlates import fig_head_gene_correlates
+    from .figures.batch_tracking import fig_batch_tracking
     from .figures.gsea import fig_gsea_batch
     from .figures.leakage import fig_study_leakage
     from .figures.pca import fig_batch_genes, fig_pca_batch
@@ -655,7 +656,8 @@ def _model_figures(args, names: list, out: Path, formats: tuple) -> tuple[dict, 
             "study_leakage": lambda: fig_study_leakage(ctx, out, formats), "threshold_curves": thresholds,
             "gsea": lambda: fig_gsea_batch(ctx, out, formats, permutations=args.gsea_permutations, gene_sets=args.gene_sets,
                                            sides=args.gsea_sides or "one", modules=args.modules,
-                                           threads=args.threads or 4)}
+                                           threads=args.threads or 4),
+            "batch_tracking": lambda: fig_batch_tracking(ctx, out, formats, modules=args.modules)}
     for name in names:
         try:
             metrics[name] = draw[name]()
