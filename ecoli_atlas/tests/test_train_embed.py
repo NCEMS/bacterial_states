@@ -361,6 +361,21 @@ def test_drivers_average_over_the_seeds_of_a_sweep(train_args, tmp_path):
     assert len(summary["models"]) == 3 and -1 <= summary["contrasts"][0]["rank_correlation_between_seeds"] <= 1
     assert main(["drivers", *train_args, "--models", str(sweep), "--out", str(out / "one"), "--device", "cpu", "--formats", "png", "--one-model"]) == 0
     assert "n_seeds" not in pd.read_csv(out / "one" / "drivers_phase_exponential_to_stationary.tsv", sep="\t").columns
+    # an axis of the sweep's bundle: fitted again on every seed's embedding, the seeds averaged
+    from ecoli_atlas.drivers import read_axis, refit_axis
+    meta = train_args[train_args.index("--metadata") + 1]
+    assert main(["axes", "--models", str(sweep), "--metadata", meta, "--out", str(tmp_path / "axes"), "--formats", "png",
+                 "--axis", "phase:growth_phase:mid_exponential,stationary"]) == 0
+    emb = pd.read_csv(sweep / "embedding.tsv", sep="\t", index_col=0)
+    emb.index = emb.index.astype(str)
+    axis = read_axis(tmp_path / "axes" / "axis_phase_summary.json", emb)
+    again = refit_axis(axis, emb)                                     # the same embedding gives the same axis
+    for k in ("weights", "mean", "sd"):
+        assert np.allclose(again[k], axis[k], rtol=1e-6, atol=1e-9)
+    assert main(["drivers", *train_args, "--models", str(sweep), "--out", str(out / "axis"), "--device", "cpu", "--formats", "png",
+                 "--axis", str(tmp_path / "axes" / "axis_phase_summary.json"), "--study-boot", "0"]) == 0
+    table = pd.read_csv(out / "axis" / "drivers_axis_phase_mid_exponential_to_stationary.tsv", sep="\t")
+    assert (table["n_seeds"] == 3).all() and len(json.loads((out / "axis" / "drivers_axis_phase.json").read_text())["models"]) == 3
 
 
 def test_genes_missing_from_a_strain_are_called_masked_and_not_fitted(atlas_files, tmp_path):

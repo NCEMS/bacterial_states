@@ -640,10 +640,15 @@ seeds a row that does not hold in three of four seeds is drawn pale.
 **Drivers of an axis** (`--axis axis_<name>_summary.json`): the same for a dimension made by
 `axes` on this bundle. The score is the axis's score (`--axis-score ordinal`, default, or `anchor`),
 its weights applied to the embedding columns standardised over the axis's fitted samples, as `axes`
-fits them; the classes are the axis's fitted categories (default contrast: first against last).
-Only the bundle in `--models` is used (an axis belongs to one embedding, not to the seeds beside
-it). Output names start with `axis_<name>` (`drivers_axis_<name>_<low>_to_<high>.tsv`, ...). An
-axis that leans on the residual block also brings in what the residual carries besides the axis
+fits them; the classes are the axis's fitted categories (default contrast: first against last, and
+every neighbouring pair). With the `seed_<n>` bundles of a sweep the axis is fitted again on each
+seed's embedding (the same fitted samples, model and 0-1 scaling as `axes`, so the seeds' scores are
+on one scale) and the seeds are averaged as for a head; `--one-model` uses the axis as fitted on the
+bundle itself. Axis drivers depend more on the seed than head drivers (phase axis, units, one seed
+against another: top-50 overlap 0.72, phase head 0.80), and averaging the 8 seeds brings the phase
+axis's drivers close to the phase head's (top-50 overlap 0.68 with one seed, 0.76 with eight, against a
+ceiling of 0.78). Output names start with `axis_<name>` (`drivers_axis_<name>_<low>_to_<high>.tsv`, ...).
+An axis that leans on the residual block also brings in what the residual carries besides the axis
 (culture environment, strain): read its drivers with `study_in_top`.
 
 ```bash

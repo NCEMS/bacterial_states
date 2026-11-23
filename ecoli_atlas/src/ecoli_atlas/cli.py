@@ -227,7 +227,7 @@ def cmd_drivers(args) -> int:
     from .config import HEADS
     from .data import build_training
     from .drivers import (axis_score, combine_seeds, contrast_drivers, default_contrasts, expression_units, gene_drivers, read_axis,
-                          study_bootstrap, unit_matrix, unit_table)
+                          refit_axis, study_bootstrap, unit_matrix, unit_table)
     from .features import read_feature_table
     from .figures.drivers import fig_drivers
     from .figures.plotting import apply_style
@@ -237,13 +237,16 @@ def cmd_drivers(args) -> int:
     device = pick_device(args.device)
     root = Path(args.models)
     seed_dirs = sorted((d for d in root.glob("seed_*") if (d / MANIFEST_FILE).exists()), key=lambda d: int(d.name.split("_")[1]))
-    paths = seed_dirs if (seed_dirs and not args.one_model and not args.axis) else [root]
-    axis = None
-    if args.axis:                    # an axis is fitted on one bundle's embedding: that bundle only, not the seeds beside it
+    paths = seed_dirs if (seed_dirs and not args.one_model) else [root]
+    axis, axis_by_path = None, {}
+    if args.axis:   # the axis as `axes` fitted it on --models; with the seeds of a sweep, fitted again on each seed's embedding
         try:
-            emb = pd.read_csv(root / "embedding.tsv", sep="\t", index_col=0)
-            emb.index = emb.index.astype(str)
-            axis = read_axis(args.axis, emb, args.axis_score)
+            def embedding_of(d):
+                e = pd.read_csv(d / "embedding.tsv", sep="\t", index_col=0)
+                e.index = e.index.astype(str)
+                return e
+            axis = read_axis(args.axis, embedding_of(root), args.axis_score)
+            axis_by_path = {p: (axis if p == root else refit_axis(axis, embedding_of(p))) for p in paths}
         except (OSError, ValueError, KeyError) as e:
             _info(f"error: --axis: {e}")
             return 2
@@ -259,7 +262,6 @@ def cmd_drivers(args) -> int:
     classes = axis["categories"] if axis else data.fit_classes[args.head]
     if axis:
         category = axis["category"].reindex([str(i) for i in data.ids]).fillna("").to_numpy()
-        score = axis_score(axis["weights"], axis["mean"], axis["sd"])
         _info(f"axis {axis['name']} ({axis['method']} score), fitted categories {classes}")
     _info(f"{len(bundles)} model(s) from {root}" + (" (the seeds of the sweep)" if len(bundles) > 1 else ""))
     try:
@@ -281,10 +283,12 @@ def cmd_drivers(args) -> int:
         summaries = []
         for low, high in contrasts:
             per_gene, per_unit, per_summary, per_study = [], [], [], []
-            for b in bundles:
+            for p, b in zip(paths, bundles):
                 if axis:
+                    ax = axis_by_path[p]
                     lo, hi = np.where(category == low)[0], np.where(category == high)[0]
-                    table, summary, study_attr = contrast_drivers(b.model, data, score, lo, hi, label, low, high, device, steps=args.steps)
+                    table, summary, study_attr = contrast_drivers(b.model, data, axis_score(ax["weights"], ax["mean"], ax["sd"]), lo, hi,
+                                                                  label, low, high, device, steps=args.steps)
                 else:
                     table, summary, study_attr = gene_drivers(b.model, data, args.head, low, high, device, steps=args.steps)
                 per_study.append(study_attr)
@@ -725,7 +729,8 @@ def cmd_axes(args) -> int:
             scores.insert(scores.columns.get_loc("category") + 1, "value",
                           meta[spec.column].astype(str).str.strip().reindex(scores.index).where(scores["category"] != "", ""))
         scores.to_csv(out / f"axis_{spec.name}_scores.tsv", sep="\t", float_format="%.5g")
-        summary = summarize(scores, spec) | {"column": spec.column, "blocks": args.blocks, "where": where, "thresholds": res["thresholds"],
+        summary = summarize(scores, spec) | {"column": spec.column, "blocks": args.blocks, "where": where, "l2": args.l2, "folds": args.folds,
+                                             "thresholds": res["thresholds"],
                                              "weights": res["weights"], "embedding_columns": list(emb.columns)}
         if spec.members:
             summary["members"] = {c: list(spec.values_of(c)) for c in spec.categories}
@@ -872,8 +877,8 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--study-boot", type=int, default=200, metavar="N",
                     help="draws of the high-class studies for the study_sd / study_in_top / study_same_sign columns (0: none)")
     sp.add_argument("--axis", metavar="SUMMARY_JSON", help="attribute an `axes` dimension instead of a head: the "
-                    "axis_<name>_summary.json that `axes` wrote for this bundle (classes = the axis's fitted categories; "
-                    "only the bundle in --models is used)")
+                    "axis_<name>_summary.json that `axes` wrote for this bundle (classes = the axis's fitted categories); with "
+                    "the seed_<n> bundles of a sweep, the axis is fitted again on each seed's embedding and the seeds are averaged")
     sp.add_argument("--axis-score", default="ordinal", choices=["ordinal", "anchor"], help="which score of the axis (ordinal)")
     sp.add_argument("--gsea", action="store_true", help="also the GO-term enrichment of the genes ranked by attribution "
                     "(gsea_<contrast>.tsv, fig_gsea_<contrast>; needs gseapy)")

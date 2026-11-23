@@ -178,7 +178,8 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   It averages over the `seed_<n>` bundles of a sweep and adds the attributions up over expression
   units (neighbouring same-strand genes correlated within studies); the unit table is the one to read. `drivers --axis
   axis_<name>_summary.json` attributes an `axes` dimension instead of a head (its saved weights apply to the embedding
-  columns standardised over the axis's fitted samples, not to the raw `embedding.tsv`). Gene-set enrichment (`gsea.py`,
+  columns standardised over the axis's fitted samples, not to the raw `embedding.tsv`); with a sweep it refits the
+  axis on every seed's embedding (`refit_axis`, identical to running `axes` on that seed) and averages the seeds. Gene-set enrichment (`gsea.py`,
   gseapy, two-sided preranked, GO sets in `reference/go_gene_sets_ecocyc.tsv.gz` built by `scripts/go_gene_sets.py` from
   the EcoCyc GAF, genes matched by lower-case symbol) is the `figures` panel `gsea` (between-study ranking of
   `batch_genes`, MG1655 and BW25113) and `drivers --gsea` (genes ranked by signed attribution). The v1 paper's GSEA was

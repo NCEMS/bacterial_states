@@ -100,9 +100,38 @@ def read_axis(summary_path, embedding: pd.DataFrame, method: str = "ordinal") ->
     idx = [list(embedding.columns).index(c) for c in cols]
     full[idx], m_full[idx], sd_full[idx] = summary["weights"][method], Z.mean(0), sd
     holdout = set(summary.get("holdout", []))
-    return {"name": p.name[len("axis_"):-len("_summary.json")], "column": summary.get("column", ""),
-            "categories": [c for c in summary["categories"] if c not in holdout],
-            "category": scores["category"].astype(str), "weights": full, "mean": m_full, "sd": sd_full, "method": method}
+    categories = [c for c in summary["categories"] if c not in holdout]
+    return {"name": p.name[len("axis_"):-len("_summary.json")], "column": summary.get("column", ""), "categories": categories,
+            "category": scores["category"].astype(str), "weights": full, "mean": m_full, "sd": sd_full, "method": method,
+            "columns": cols, "fitted": list(fitted), "fitted_rank": scores.loc[fitted, "category"].map(categories.index).to_numpy(),
+            "fitted_gse": scores.loc[fitted, "gse"].astype(str).to_numpy(), "l2": float(summary.get("l2", 1.0))}
+
+
+def refit_axis(axis: dict, embedding: pd.DataFrame) -> dict:
+    """``axis`` (from ``read_axis``) fitted again on another embedding of the same samples (another
+    seed of the sweep), the way `axes` fits it: the same fitted samples and categories, the same
+    model and sample weights, and the score scaled so that the median of the first fitted category
+    is 0 and of the last 1, which puts the seeds' scores, and so their attributions, on one scale."""
+    from .axes import AnchorModel, OrdinalModel, sample_weights, unit_scale
+    missing = [c for c in axis["columns"] if c not in embedding.columns]
+    if missing:
+        raise ValueError(f"axis {axis['name']}: this embedding has no columns {missing[:3]}")
+    Z = embedding.reindex(axis["fitted"])[axis["columns"]].to_numpy(dtype=np.float64)
+    if np.isnan(Z).any():
+        raise ValueError(f"axis {axis['name']}: fitted samples missing from this embedding")
+    rank, study = np.asarray(axis["fitted_rank"]), np.asarray(axis["fitted_gse"])
+    lo, hi = 0, len(axis["categories"]) - 1
+    rows = np.arange(len(rank))
+    if axis["method"] == "ordinal":
+        model = OrdinalModel(axis["l2"]).fit(Z, rank, sample_weights(rank, study))
+    else:
+        ends = np.isin(rank, (lo, hi))
+        model = AnchorModel().fit(Z[ends], rank[ends] == hi, sample_weights(rank[ends], study[ends]))
+    _, b = unit_scale(model.score(Z), rank, rows, lo, hi)
+    idx = [list(embedding.columns).index(c) for c in axis["columns"]]
+    w, m, sd = np.zeros(embedding.shape[1]), np.zeros(embedding.shape[1]), np.ones(embedding.shape[1])
+    w[idx], m[idx], sd[idx] = model.w / b, model.mu, model.sd
+    return axis | {"weights": w, "mean": m, "sd": sd}
 
 
 def integrated_gradients(model, X: torch.Tensor, C: torch.Tensor, base: torch.Tensor, head, device,
