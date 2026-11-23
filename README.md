@@ -62,7 +62,8 @@ One folder per example under `examples/`, each with a README (the question, the 
 | [`GSE147611_greAB_deletion`](examples/GSE147611_greAB_deletion/README.md) | the smallest one: K-12 W3110 wild type against a greA greB deletion in LB, 3 + 3 samples of about 2 million read pairs, from reads to counts, DESeq2 and the atlas | SRA reads; `run.sh ingest`, then `run.sh atlas` |
 | [`GSE67402_growth_starvation_time_course`](examples/GSE67402_growth_starvation_time_course/README.md) | *E. coli* B REL606 in glucose minimal medium, 3 h to 2 weeks: reads to counts (inGEST) to the embedding, calls and axes, step by step | SRA reads; `run.sh ingest`, then `run.sh atlas` |
 | [`GSE271069_nutrient_stress_time_course`](examples/GSE271069_nutrient_stress_time_course/README.md) | K-12 MG1655, glucose against casamino acids through exponential and stationary phase: a medium × time design from reads to the atlas | SRA reads; `run.sh ingest`, then `run.sh atlas` |
-| [`atlas_model_figures`](examples/atlas_model_figures/README.md) | the training data, TEST performance, batch structure and its GO terms | atlas tables |
+| [`atlas_model_figures`](examples/atlas_model_figures/README.md) | the training data, TEST performance, head scores and study leakage | atlas tables |
+| [`atlas_lab_strain_LB_variation`](examples/atlas_lab_strain_LB_variation/README.md) | how LB exponential cultures of the lab strains differ between studies, and which differences follow the growth rate | atlas tables |
 | [`atlas_drivers`](examples/atlas_drivers/README.md) | the genes, GO terms and gene modules that move each call | atlas tables |
 | [`atlas_axes`](examples/atlas_axes/README.md) | growth phase, oxygen and carbon source as dimensions of the embedding, and their genes | atlas tables |
 | [`GSE189154_oxygen`](examples/GSE189154_oxygen/README.md) | low oxygen against aerobic growth in a held-out study | atlas tables |

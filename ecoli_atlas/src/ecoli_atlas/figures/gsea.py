@@ -1,6 +1,6 @@
-"""Figures of gene-set enrichment (``ecoli_atlas.gsea``): the top terms of one ranking, the terms of two
-rankings against each other, and the `gsea` panel of `ecoli_atlas figures` (GO terms of the genes that
-differ most between studies of MG1655 and of BW25113, the ranking of `batch_genes`)."""
+"""Figures of gene-set enrichment (``ecoli_atlas.gsea``): the top terms of one ranking (one figure, or one per
+database), and the `gsea` panel of `ecoli_atlas figures` (the sets of the genes that differ most between the LB
+exponential studies of the laboratory strains)."""
 from __future__ import annotations
 
 import numpy as np
@@ -80,18 +80,20 @@ def _slug(text: str) -> str:
 
 
 def fig_gsea_by_database(res: pd.DataFrame, title: str, out_dir, name: str, formats, top: int = 10,
-                         up_label: str = "top of the ranking", down_label: str = "bottom of the ranking", databases=None) -> list:
+                         up_label: str = "top of the ranking", down_label: str = "bottom of the ranking", databases=None,
+                         down: bool = True) -> list:
     """One figure per database (``databases`` gives the order; default: as they come), ``<name>_<database>``: the
     ``top`` terms with the largest positive NES above and the most negative below, the term names as labels
     (with the term's category in brackets when the table has one, e.g. KEGG ``Ribosome [Translation]``). The width
-    follows the longest label. Terms with FDR >= 0.05 are drawn pale. Returns the figure names written."""
+    follows the longest label. Terms with FDR >= 0.05 are drawn pale. ``down=False`` (one-sided tests): the top panel
+    only. Returns the figure names written."""
     import matplotlib.pyplot as plt
     dbs = [d for d in (databases or list(dict.fromkeys(res["database"]))) if (res["database"] == d).any()]
     written = []
     for d in dbs:
         sub_all = res[res["database"] == d]
         parts = [(sub_all[sub_all["nes"] > 0].sort_values("nes", ascending=False).head(top), up_label, UP),
-                 (sub_all[sub_all["nes"] < 0].sort_values("nes").head(top), down_label, DOWN)]
+                 (sub_all[sub_all["nes"] < 0].sort_values("nes").head(top), down_label, DOWN)][:2 if down else 1]
         labels, arrows = [], []
         for sub, _, _ in parts:
             reg = _regulon_arrows(sub)
@@ -107,7 +109,7 @@ def fig_gsea_by_database(res: pd.DataFrame, title: str, out_dir, name: str, form
         n = max(1, max(len(p[0]) for p in parts))
         longest = max([len(x) for lab in labels for x in lab] or [10])
         width = 5.5 + 0.085 * longest                    # inches: the bars plus the labels at fontsize 10
-        fig, axes = plt.subplots(2, 1, figsize=(width, 2 * (0.33 * n + 1.2) + 0.6), squeeze=False)
+        fig, axes = plt.subplots(len(parts), 1, figsize=(width, len(parts) * (0.33 * n + 1.2) + 0.6), squeeze=False)
         xmax = float(sub_all["nes"].abs().max()) * 1.05
         for ax, (sub, side, col), lab, arr in zip(axes[:, 0], parts, labels, arrows):
             y = np.arange(len(sub))[::-1]
@@ -121,7 +123,7 @@ def fig_gsea_by_database(res: pd.DataFrame, title: str, out_dir, name: str, form
                 _draw_arrows(ax, y, arr)
             ax.set_ylim(-0.6, n - 0.4)
             ax.set_xlim(0, xmax)
-            ax.set_xlabel("|NES|", fontsize=11)
+            ax.set_xlabel("|NES|" if down else "NES", fontsize=11)
             ax.set_title(side, fontsize=12)
             ax.spines[["top", "right"]].set_visible(False)
         fig.suptitle(f"{d}: {title}", fontsize=13)
@@ -136,108 +138,54 @@ def fig_gsea_by_database(res: pd.DataFrame, title: str, out_dir, name: str, form
     return written
 
 
-def fig_gsea_scatter(a: pd.DataFrame, b: pd.DataFrame, label_a: str, label_b: str, out_dir, name: str, formats,
-                     top: int = 9, off_diagonal: int = 0, title: str | None = None) -> pd.DataFrame:
-    """NES of every term tested in both rankings, ``a`` against ``b``, with the dashed line y = x.
-    The ``top`` terms with the largest |NES_a| + |NES_b| among those with FDR < 0.05 in either are
-    labelled (default 9; for RegulonDB the sets of `fig_batch_tracking`), and optionally the ``off_diagonal`` terms with FDR < 0.05 in either on which the two rankings
-    disagree most (largest |NES_a - NES_b|; with two-sided NES only those of opposite signs; default none). Returns the
-    joined table."""
-    import matplotlib.pyplot as plt
-    c = a[["term", "name", "nes", "fdr"]].merge(b[["term", "nes", "fdr"]], on="term", suffixes=("_a", "_b"))
-    sig = (c["fdr_a"] < FDR) | (c["fdr_b"] < FDR)
-    fig, ax = plt.subplots(figsize=(15, 9))
-    fig.subplots_adjust(left=0.07, right=0.6)
-    ax.scatter(c.loc[~sig, "nes_a"], c.loc[~sig, "nes_b"], s=10, color="0.75", alpha=0.6, label=f"FDR ≥ {FDR} in both")
-    ax.scatter(c.loc[sig, "nes_a"], c.loc[sig, "nes_b"], s=18, color="#1f77b4", alpha=0.85, label=f"FDR < {FDR} in either")
-    lim = float(np.nanmax(np.abs(c[["nes_a", "nes_b"]].to_numpy()))) * 1.08 if len(c) else 1.0
-    low = 0.0 if len(c) and (c[["nes_a", "nes_b"]].to_numpy() >= 0).all() else -lim      # one-sided NES: from 0
-    ax.plot([low, lim], [low, lim], ls="--", color=GREY, lw=1)
-    ax.axhline(0, color="0.85", lw=0.8, zorder=0)
-    ax.axvline(0, color="0.85", lw=0.8, zorder=0)
-    pick = c[sig].assign(both=lambda d: d["nes_a"].abs() + d["nes_b"].abs()).sort_values("both", ascending=False).head(top)
-    one_sided = len(c) > 0 and bool((c[["nes_a", "nes_b"]].to_numpy() >= 0).all())
-    # off the diagonal, where the rankings disagree: two-sided, NES of opposite signs; one-sided, the largest differences
-    disagree = c[sig] if one_sided else c[sig & (np.sign(c["nes_a"]) != np.sign(c["nes_b"]))]
-    off = disagree.assign(gap=(disagree["nes_a"] - disagree["nes_b"]).abs()).sort_values("gap", ascending=False)
-    off = off[~off["term"].isin(pick["term"])].head(off_diagonal)
-    pick = pd.concat([pick, off])
-    # labels in a column right of the plot, each at its point's height, pushed apart only as far as needed to keep a
-    # minimum gap (and kept inside the plot), each joined to its point by a thin line
-    pick = pick.sort_values("nes_b")
-    n_lab = len(pick)
-    if n_lab:
-        span = lim - low
-        gap = min(span / 16, 0.94 * span / max(n_lab - 1, 1))
-        ys = pick["nes_b"].to_numpy(dtype=float).clip(low + 0.03 * span, lim - 0.03 * span)
-        for i in range(1, n_lab):                       # push up
-            ys[i] = max(ys[i], ys[i - 1] + gap)
-        over = ys[-1] - (lim - 0.03 * span)
-        if over > 0:                                    # too high: shift down, then keep the gaps from the top
-            ys[-1] -= over
-            for i in range(n_lab - 2, -1, -1):
-                ys[i] = min(ys[i], ys[i + 1] - gap)
-        for (_, r), yt in zip(pick.iterrows(), ys):
-            ax.annotate(r["name"] or r["term"], (r["nes_a"], r["nes_b"]), xytext=(lim * 1.04, yt), textcoords="data",
-                        fontsize=9, ha="left", va="center", annotation_clip=False,
-                        arrowprops=dict(arrowstyle="-", color="0.65", lw=0.5, shrinkA=0, shrinkB=2),
-                        bbox=dict(boxstyle="round,pad=0.2", fc="#fff3a0", alpha=0.8, ec="none"))
-    ax.set_xlim(low, lim)
-    ax.set_ylim(low, lim)
-    ax.set_xlabel(f"{label_a} NES", fontsize=12)
-    ax.set_ylabel(f"{label_b} NES", fontsize=12)
-    ax.legend(loc="lower right", fontsize=9, frameon=False)
-    if title:
-        ax.set_title(title, fontsize=13)
-    ax.spines[["top", "right"]].set_visible(False)
-    savefig(fig, out_dir, name, formats)
-    return c
-
-
 BATCH_MODULE_DATABASES = ("RegulonDB", "KEGG pathway", "KEGG module")
 
 
 def fig_gsea_batch(ctx, out_dir, formats, permutations: int = 10000, gene_sets=None, threads: int = 4, sides: str = "one",
-                   modules=None, module_databases=BATCH_MODULE_DATABASES) -> dict:
-    """The `gsea` panel: GO enrichment of the between-study variability ranking (`batch_genes`) of
-    MG1655 and of BW25113 (exponential, untreated wild type, LB: ``pca.matched_subsets``). Writes
-    `gsea_batch_<strain>.tsv`, `fig_gsea_batch_<strain>` (top 20 terms by NES) and `fig_gsea_batch_scatter`.
-    ``sides="one"`` (default): which processes are the most study-variable; "two" also
-    gives the least variable ones, with negative NES. With ``modules`` (a module table of `ecoli_atlas download
-    modules`) the same test of its sets: `gsea_batch_modules_<strain>.tsv` and one scatter per database of
-    ``module_databases``, `fig_gsea_batch_scatter_<database>`."""
+                   modules=None, module_databases=BATCH_MODULE_DATABASES, top: int = 20) -> dict:
+    """The `gsea` panel: enrichment of the between-study variability ranking of every LB exponential study of the
+    laboratory strains (``pca.lab_subsets``: MG1655, BW25113 and the other K-12, B, C and W strains; exponential,
+    untreated wild type, LB), pooled: genes by the SD of their per-study means (each strain of a study apart). A gene called missing from a sample's
+    strain is left out of that sample's study mean (a strain's deletions would otherwise top the ranking). Writes `gsea_batch.tsv` and
+    `fig_gsea_batch_go` (the ``top`` GO terms by NES). ``sides="one"`` (default): which processes are the most
+    study-variable; "two" also gives the least variable ones, with negative NES, in a second panel. With ``modules``
+    (a module table of `ecoli_atlas download modules`) the same test of its sets: `gsea_batch_modules.tsv` and one bar
+    figure per database of ``module_databases``, `fig_gsea_batch_<database>`. RegulonDB is tested as whole regulons
+    (``modules.whole_regulons``: activated and repressed targets together), since the ranking has no direction."""
     from ..gsea import run
-    from .pca import batch_ranking, matched_subsets
-    subsets = matched_subsets(ctx)
-    results, mod_results, summary = {}, {}, {}
-    for strain, color in (("MG1655", "#1f77b4"), ("BW25113", "#d62728")):
-        ranking, n_s, n_st = batch_ranking(ctx.logx, ctx.gene_names, ctx.gse, subsets[strain])
-        if ranking is None:
-            summary[strain] = {"n_samples": int(n_s), "n_studies": int(n_st), "skipped": "fewer than 3 samples or 2 studies"}
-            continue
-        res, info = run(ranking.set_axis([str(g).lower() for g in ranking.index]), gene_sets, permutations=permutations,
-                        threads=threads, sides=sides)
-        res.to_csv(f"{out_dir}/gsea_batch_{strain.lower()}.tsv", sep="\t", index=False, float_format="%.5g")
-        fig_gsea_bars(res, f"{strain}: top enriched GO terms (n={n_s} samples, {n_st} studies)", out_dir,
-                      f"fig_gsea_batch_{strain.lower()}", formats, color=color)
-        results[strain] = res
-        summary[strain] = {"n_samples": int(n_s), "n_studies": int(n_st), "sides": sides} | info
-        if modules:
-            mres, minfo = run(ranking.set_axis([str(g).lower() for g in ranking.index]), modules, permutations=permutations,
-                              threads=threads, sides=sides)
-            mres.to_csv(f"{out_dir}/gsea_batch_modules_{strain.lower()}.tsv", sep="\t", index=False, float_format="%.5g")
-            mod_results[strain] = mres
-            summary[strain]["modules"] = minfo
-    if len(results) == 2:
-        joined = fig_gsea_scatter(results["MG1655"], results["BW25113"], "MG1655", "BW25113", out_dir, "fig_gsea_batch_scatter", formats)
-        summary["nes_correlation"] = float(np.corrcoef(joined["nes_a"], joined["nes_b"])[0, 1]) if len(joined) > 2 else None
-    if len(mod_results) == 2:
-        summary["module_nes_correlation"] = {}
-        for d in module_databases:
-            a, b = (mod_results[s][mod_results[s]["database"] == d] for s in ("MG1655", "BW25113"))
-            if a.empty or b.empty:
-                continue
-            j = fig_gsea_scatter(a, b, "MG1655", "BW25113", out_dir, f"fig_gsea_batch_scatter_{_slug(d)}", formats,
-                                 title=f"{d}: the most study-variable sets")
-            summary["module_nes_correlation"][d] = float(np.corrcoef(j["nes_a"], j["nes_b"])[0, 1]) if len(j) > 2 else None
+    from .pca import batch_ranking, lab_subsets
+    subsets = lab_subsets(ctx)
+    mask = np.logical_or.reduce(list(subsets.values()))
+    missing = ctx.data.M.numpy() if ctx.data.M is not None else None
+    unit = np.asarray([f"{g}|{n}" for g, n in zip(ctx.gse, ctx.column("strain_name"))], dtype=object)   # a study's strains apart
+    ranking, n_s, n_st = batch_ranking(ctx.logx, ctx.gene_names, unit, mask, missing=missing)
+    per_group = {g: {"n_samples": int(m.sum()), "n_studies": int(len(pd.unique(ctx.gse[m])))} for g, m in subsets.items()}
+    summary = {"n_samples": int(n_s), "n_studies": int(n_st), "groups": per_group, "sides": sides,
+               "genes_called_missing": int(missing[mask].any(0).sum()) if missing is not None else 0}
+    if ranking is None:
+        return summary | {"skipped": "fewer than 3 samples or 2 studies"}
+    ranking = ranking.set_axis([str(g).lower() for g in ranking.index])
+    both = sides == "two"
+    title = f"the most study-variable sets ({n_st} LB exponential studies × strains, lab strains, {n_s} samples)"
+    try:
+        res, info = run(ranking, gene_sets, permutations=permutations, threads=threads, sides=sides)
+    except ValueError as e:                              # e.g. too few ranked genes for any set (small test tables)
+        return summary | {"skipped": str(e)}
+    res.to_csv(f"{out_dir}/gsea_batch.tsv", sep="\t", index=False, float_format="%.5g")
+    fig_gsea_by_database(res.assign(database="GO"), title, out_dir, "fig_gsea_batch", formats, top=top,
+                         up_label="most study-variable", down_label="least study-variable", down=both)
+    summary["go"] = info
+    if modules:
+        import tempfile
+        from ..modules import read_module_table, whole_regulons
+        with tempfile.TemporaryDirectory() as tmp:          # whole regulons: the ranking has no sign, so no direction
+            path = f"{tmp}/modules_whole_regulons.tsv"
+            whole_regulons(read_module_table(modules)).to_csv(path, sep="\t", index=False)
+            mres, minfo = run(ranking, path, permutations=permutations, threads=threads, sides=sides)
+        minfo["gene_sets"] = f"{modules} (RegulonDB: whole regulons)"
+        mres.to_csv(f"{out_dir}/gsea_batch_modules.tsv", sep="\t", index=False, float_format="%.5g")
+        summary["modules"] = minfo
+        summary["module_figures"] = fig_gsea_by_database(mres, title, out_dir, "fig_gsea_batch", formats, top=top,
+                                                         up_label="most study-variable", down_label="least study-variable",
+                                                         databases=list(module_databases), down=both)
     return summary

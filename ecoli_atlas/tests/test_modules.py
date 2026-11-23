@@ -90,3 +90,19 @@ def test_drivers_with_modules(trained, train_args, atlas_files, tmp_path):
 def test_download_modules_dry_run(tmp_path):
     assert main(["download", "modules", "--dest", str(tmp_path / "mods"), "--dry-run"]) == 0
     assert not (tmp_path / "mods").exists()
+
+
+def test_whole_regulons():
+    """RegulonDB sets by direction merge into one set per regulator (genes once, no category); others unchanged."""
+    from ecoli_atlas.modules import whole_regulons
+    t = pd.DataFrame({"term": ["regulondb:Crp+", "regulondb:Crp-", "regulondb:RpoS+", "kegg:eco00010"],
+                      "namespace": ["regulondb_tf_regulon_activated", "regulondb_tf_regulon_repressed",
+                                    "regulondb_sigma_regulon_activated", "kegg_pathway"],
+                      "name": ["Crp (activated)", "Crp (repressed)", "RpoS (activated)", "Glycolysis"],
+                      "category": ["", "", "sigma factor", "Carbohydrate metabolism"], "size": ["2", "2", "1", "2"],
+                      "genes": ["a,b", "b,c", "d", "e,f"]})
+    w = whole_regulons(t).set_index("term")
+    assert list(w.index) == ["regulondb:Crp", "regulondb:RpoS", "kegg:eco00010"]
+    assert w.loc["regulondb:Crp", "genes"] == "a,b,c" and w.loc["regulondb:Crp", "name"] == "Crp"
+    assert w.loc["regulondb:Crp", "namespace"] == "regulondb_tf_regulon" and w.loc["regulondb:RpoS", "category"] == ""
+    assert w.loc["kegg:eco00010", "category"] == "Carbohydrate metabolism"

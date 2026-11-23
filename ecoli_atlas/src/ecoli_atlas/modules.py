@@ -153,6 +153,23 @@ def read_module_table(path) -> pd.DataFrame:
     return t
 
 
+def whole_regulons(table: pd.DataFrame) -> pd.DataFrame:
+    """The module table with each regulator's RegulonDB sets by direction (``regulondb:<regulator>+`` / ``-``) merged
+    into one set of all its targets, ``regulondb:<regulator>`` (name: the regulator; no category);
+    every other row unchanged. For rankings without a sign (e.g. between-study variability), where the direction of
+    regulation says nothing."""
+    terms = table["term"].astype(str)
+    directed = terms.str.match(r"^regulondb:.+[+-]$")
+    rows = []
+    for reg, sub in table[directed].groupby(terms[directed].str[:-1], sort=False):
+        genes = list(dict.fromkeys(g for gs in sub["genes"] for g in str(gs).split(",") if g))
+        ns = str(sub["namespace"].iloc[0]).removesuffix("_activated").removesuffix("_repressed")
+        rows.append({"term": reg, "namespace": ns, "name": reg.split(":", 1)[1], "category": "", "size": str(len(genes)),
+                     "genes": ",".join(genes)})
+    cols = list(dict.fromkeys([*table.columns, "category", "size"]))
+    return pd.concat([pd.DataFrame(rows), table[~directed]], ignore_index=True).reindex(columns=cols).fillna("")
+
+
 def membership(table: pd.DataFrame, symbols, locus_tags, min_size: int = 3, max_size: int = 500) -> tuple[pd.DataFrame, np.ndarray]:
     """(modules kept, features x modules 0/1 matrix): members matched to the model features by lower-case symbol or
     locus tag; modules with ``min_size``..``max_size`` model features are kept."""

@@ -3,6 +3,7 @@ expression, and the genes that differ most between studies of one strain in one 
 from __future__ import annotations
 
 import re
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -27,6 +28,21 @@ def matched_subsets(ctx) -> dict:
     base = (ctx.labels("phase") == "exponential") & rich & lb & (ctx.column("is_wild_type") == "true") & (ctx.column("treated") == "false")
     out = {name: strain.map(lambda s: bool(re.search(pat, s))).to_numpy() & base for name, pat in STRAINS.items()}
     out["_rich"] = rich
+    return out
+
+
+OTHER_LAB = "other lab strain"
+LAB_GROUPS = ("K-12", "B", "C", "W")      # strain_group of the laboratory lineages
+
+
+def lab_subsets(ctx) -> dict:
+    """MG1655 and BW25113 of ``matched_subsets`` and ``OTHER_LAB``: the other laboratory strains (``LAB_GROUPS``) in the
+    same conditions (exponential, untreated wild type, LB)."""
+    subsets = matched_subsets(ctx)
+    base = ((ctx.labels("phase") == "exponential") & subsets["_rich"] & (ctx.column("base_medium") == MATCHED_MEDIUM)
+            & (ctx.column("is_wild_type") == "true") & (ctx.column("treated") == "false"))
+    out = {s: subsets[s] for s in STRAINS}
+    out[OTHER_LAB] = base & np.isin(ctx.column("strain_group"), LAB_GROUPS) & ~np.logical_or.reduce(list(out.values()))
     return out
 
 
@@ -89,19 +105,28 @@ def fig_pca_batch(ctx, out_dir, formats) -> dict:
     return result
 
 
-def batch_ranking(M: np.ndarray, genes, gse: np.ndarray, mask: np.ndarray, min_mean: float = 1.0):
-    """Every gene with a mean of at least ``min_mean`` in a matched subset, ranked by the between-study
-    SD of its per-study mean (replicate noise averaged out), largest first. Returns (ranking or None
-    when the subset has fewer than 3 samples or 2 studies, samples, studies)."""
+def batch_ranking(M: np.ndarray, genes, gse: np.ndarray, mask: np.ndarray, min_mean: float = 1.0, missing=None,
+                  min_studies: int = 3):
+    """Every gene with a mean of at least ``min_mean`` in a matched subset, ranked by the between-study SD of its
+    per-study mean (replicate noise averaged out), largest first. ``missing`` (samples x genes, True where the gene is
+    called missing from the sample's strain): those values are left out, so a study whose strain lacks a gene does
+    not count for that gene, which then needs ``min_studies`` studies (or all of them, when there are fewer). Returns
+    (ranking or None when the subset has fewer than 3 samples or 2 studies, samples, studies)."""
     rows = np.where(mask)[0]
     g = gse[rows]
     studies = pd.unique(g)
     if len(rows) < 3 or len(studies) < 2:
         return None, len(rows), len(studies)
-    sub = M[rows]
-    per_study_mean = np.vstack([sub[g == s].mean(0) for s in studies])
-    keep = sub.mean(0) >= min_mean
-    score = pd.Series(per_study_mean.std(0)[keep], index=np.asarray(list(genes), dtype=object)[keep])
+    sub = M[rows].astype(float)
+    if missing is not None:
+        sub = np.where(np.asarray(missing[rows], dtype=bool), np.nan, sub)
+    with np.errstate(invalid="ignore"), warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)
+        per_study_mean = np.vstack([np.nanmean(sub[g == s], 0) for s in studies])
+        n_studies = np.isfinite(per_study_mean).sum(0)
+        sd = np.nanstd(per_study_mean, 0)
+        keep = (np.nanmean(sub, 0) >= min_mean) & (n_studies >= min(min_studies, len(studies)))
+    score = pd.Series(sd[keep], index=np.asarray(list(genes), dtype=object)[keep])
     return score.sort_values(ascending=False), len(rows), len(studies)
 
 

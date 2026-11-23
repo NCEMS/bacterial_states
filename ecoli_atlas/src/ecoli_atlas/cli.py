@@ -657,7 +657,7 @@ def _model_figures(args, names: list, out: Path, formats: tuple) -> tuple[dict, 
             "gsea": lambda: fig_gsea_batch(ctx, out, formats, permutations=args.gsea_permutations, gene_sets=args.gene_sets,
                                            sides=args.gsea_sides or "one", modules=args.modules,
                                            threads=args.threads or 4),
-            "batch_tracking": lambda: fig_batch_tracking(ctx, out, formats, modules=args.modules)}
+            "batch_tracking": lambda: fig_batch_tracking(ctx, out, formats, modules=args.modules, x=args.tracking_x)}
     for name in names:
         try:
             metrics[name] = draw[name]()
@@ -1251,6 +1251,9 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--models", help="model bundle; with it and the three tables below the model figures are drawn too")
     sp.add_argument("--modules", metavar="TSV", help="gsea panel: also the sets of a module table (atlas_data/modules/modules.tsv "
                     "from `ecoli_atlas download modules`), one scatter per database (RegulonDB, KEGG pathway, KEGG module)")
+    sp.add_argument("--tracking-x", choices=("ribosome", "phase"), default="ribosome",
+                    help="batch_tracking panel: x axis, the mean log2 expression of the ribosomal proteins (default) or "
+                    "the study's mean phase ordinal score")
     sp.add_argument("--counts", help="joined count table of the atlas")
     sp.add_argument("--qc", help="QC table (sample_qc.tsv)")
     sp.add_argument("--antisense", help="antisense count table of the atlas, when the bundle was trained with one")
