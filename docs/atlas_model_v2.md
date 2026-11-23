@@ -10,14 +10,13 @@ on counts from the revised inGEST (`docs/counting.md`); the QC the recount saves
 in `docs/atlas_qc_inputs.md`.
 
 
-> **As implemented (2026-11-20).** To keep the embedding comparable with the first atlas model, the
-> implementation keeps that model's block layout and two-stage fit instead of the single jointly
-> trained embedding described below: supervised blocks for growth phase (6), medium type (12) and
-> lab strain (4: the laboratory lineages K-12, B, C and W against all other known strain groups),
-> each fitted on its labelled samples, then a residual block (24) fitted with the
-> count decoder on all training samples while the blocks are frozen. This brings back a lab-strain
-> call (decisions 3 and 4 below are superseded on that point). TEST and the folds hold reference
-> samples only, as before. The count likelihood, feature groups and covariates are as described here.
+> **As implemented.** Instead of the single jointly trained embedding described below, the model has
+> a block layout and a two-stage fit: one supervised block per call (growth phase, medium type and
+> lab strain, the laboratory lineages K-12, B, C and W against all other known strain groups; one
+> dimension each since 2026-11-21), each fitted on its labelled samples, then a residual block (24)
+> fitted with the count decoder on all training samples while the blocks are frozen. There is a
+> lab-strain call (goals 3 and 4 below are superseded on that point). TEST and the folds hold
+> reference samples only. The count likelihood, feature groups and covariates are as described here.
 
 ## Goals
 
@@ -25,25 +24,20 @@ in `docs/atlas_qc_inputs.md`.
    study, library protocol or sequencing run they come from.
 2. A decoder returns batch-corrected counts.
 3. Two supervised calls: growth phase (exponential or stationary) and medium type (complex or
-   defined). The v1 `is_lab_strain` call is dropped.
+   defined).
 4. No strain label enters the model. Genes a strain does not have are inferred from the counts.
    Regulatory differences between strains stay in the embedding.
 
-## What v1 does and why it changes
+## Design choices and why
 
-Numbers are from the v1 training data (`atlas_data/`: 3,393 metadata rows, of which 3,306 samples
-in 159 studies have counts; label counts refer to the metadata rows) and the v1 code
-(`ecoli_atlas/src/ecoli_atlas/`).
-
-| v1 | Consequence | v2 |
-|---|---|---|
-| Input is a per-gene z-score of linear CPM (`preprocess.py`) | A few induced samples set each gene's sd; repression is squeezed between zero and the mean; samples outside the 926 fit samples get extreme values | z-score of log values |
-| CPM denominator keeps ssrA (5% of counts at the median, up to 38%) | Every gene shifts when one RNA does | Size factor from CDS and pseudogenes, median of ratios |
-| Decoder reconstructs z-scored CPM with MSE (`losses.py`) | Cannot return counts; low counts in shallow samples weigh as much as high counts | Negative binomial on raw counts |
-| A gene missing from the strain is a zero, i.e. a strongly negative input | 773 samples lack 200 or more MG1655 genes; K-12 versus other strains is the second expression PC | Missing genes inferred and masked |
-| No QC or protocol information is used | Study explains 50–90% of the variance of every leading PC; growth phase 7% or less | QC covariates go to encoder and decoder |
-| Three classifier encoders trained separately, frozen, joined to a residual autoencoder (46 dims) | Reconstruction and alignment losses shape only the residual block | One jointly trained model |
-| `early_stationary` (229) counted as stationary | Transitional samples blur the phase call | Clean classes only |
+| Choice | Why |
+|---|---|
+| Input is a per-gene z-score of log values | A z-score of linear CPM lets a few induced samples set each gene's sd and squeezes repression between zero and the mean |
+| Size factor from CDS and pseudogenes, median of ratios | A CPM denominator that keeps ssrA (5% of counts at the median, up to 38%) shifts every gene when one RNA does |
+| Negative binomial on raw counts | A decoder of z-scored CPM with MSE cannot return counts, and low counts in shallow samples would weigh as much as high counts |
+| Genes missing from a strain inferred and masked | A missing gene would otherwise be a zero, a strongly negative input; hundreds of samples lack 200 or more MG1655 genes |
+| QC covariates | Study explains 50–90% of the variance of every leading expression PC, growth phase 7% or less |
+| Clean phase classes only | Transitional samples counted as stationary blur the phase call |
 
 ## 1. Feature groups
 
@@ -57,16 +51,14 @@ Groups follow the `Type`, `Source` and `Rfam` columns of
 | depleted | rRNA (22), tRNA (86) | no | no | no; summarized as covariates |
 
 Only rRNA and tRNA are removed as inputs, because those are the classes that depletion and size
-selection change by orders of magnitude (rRNA is 1.4% of v1 counts at the median and above 50% in
-630 samples). The other RNAs are inputs like any gene. They are left out of the size factor only,
+selection change by orders of magnitude (rRNA is a small share of counts at the median and above 50% in
+hundreds of samples). The other RNAs are inputs like any gene. They are left out of the size factor only,
 so that one abundant RNA cannot move the scale of every gene.
 
 **Check before training.** For each non-mRNA input feature, compute the between-study share of
 variance of its log ratio to mRNA reads and compare it with mRNA genes of similar abundance.
 Features that behave like rRNA are moved to the depleted group. RNAs shorter than about 200 nt are
-the likely candidates, since size selection removes them in some protocols. v1 cannot answer this:
-it contains ssrA only, and the ssrA shares computed so far are shares of all counts, so they are
-mixed with the rRNA share.
+the likely candidates, since size selection removes them in some protocols.
 
 ## 2. Normalization
 
@@ -89,13 +81,12 @@ recognize the study. Gene length needs no correction because every gene has its 
 
 Their reads are not model features. Each sample gets four covariates: the log ratio of 16S, 23S,
 5S and tRNA reads to mRNA reads. 5S and tRNA are separate from 16S/23S because depletion probes
-and size selection act on them differently (in v1 the tRNA share correlates with the third
-expression PC, Spearman −0.55).
+and size selection act on them differently (the tRNA share correlates with a leading expression PC).
 
 ## 4. Genes missing from a strain
 
 Counting is against MG1655, so a gene that a strain lacks gives a zero that means "no gene", not
-"gene off". v1 examples: BW25113 has no `araA`, `araB`, `rhaA`, `rhaB` reads; DH10B none for
+"gene off". Examples: BW25113 has no `araA`, `araB`, `rhaA`, `rhaB` reads; DH10B none for
 `fimH`, `leuD`, `mrr`; C strains none for `ompT`, `gatZ`; clinical and ECOR isolates lack the e14,
 CP4-6 and CP4-57 prophages.
 
@@ -278,7 +269,7 @@ One model, trained jointly.
   technical terms add in log space, which is what makes the correction in section 7 well defined.
 - **Heads on `z`:** two linear classifiers with class-weighted cross-entropy; samples without a
   label do not contribute.
-  - Growth phase: `exponential` (1,742 in v1) against `stationary` (234). `lag`,
+  - Growth phase: `exponential` against `stationary`. `lag`,
     `early_exponential` and `transition` (which includes late exponential) carry no label in training and serve
     as a check: they should fall between the two classes. `late_stationary` carries no label
     either and is not a check: it is left out of every phase evaluation (decided 2026-11-19).
@@ -290,12 +281,11 @@ One model, trained jointly.
     < stationary) and time points inside a culture series (`atlas_data/time_courses.tsv`, 10
     studies, 43 series; GSE224463, GSE67402 and GSE226643 held out). It never compares studies.
     Scored by `series_order` / `cv_series_order` (within-series time order of the phase score).
-  - Medium type: complex against defined (`medium_type`, 1,117 and 1,080 in v1).
-- **Alignment terms**, as in v1 (`losses.py`, `train_residual.py`): samples of matching control
+  - Medium type: rich against minimal (`medium_type`).
+- **Alignment terms** (`losses.py`): samples of matching control
   conditions from different studies are pulled together, samples of different conditions within a
   study are pushed apart, and batches are built from whole studies.
-- **Output of `embed`:** `z`, the two head probabilities, the absent-gene calls. The per-factor
-  embedding blocks of v1 no longer exist.
+- **Output of `embed`:** `z`, the head probabilities, the absent-gene calls.
 
 Two additions are held back until the diagnostics in section 8 ask for them:
 
@@ -337,6 +327,5 @@ Everything is measured on studies held out from training (`splits.py`, `metrics.
 - Medium type is nearly constant within a study (3 of 115 labelled studies contain both types),
   and only 9 studies contain both growth phases. A protocol effect that coincides with a
   condition across all its studies cannot be separated from the condition.
-- 33% of the v1 metadata rows have no growth phase label and 35% no medium type.
 - The check of section 1 and all covariates of section 5 depend on the recount; nothing in this
   document has been trained or measured yet.

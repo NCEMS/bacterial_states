@@ -137,8 +137,7 @@ def classify(run: dict, min_reads: int) -> list[str]:
     return flags
 
 
-def build(out_dir: str, min_reads: int, refresh: bool, atlas_samples: str | None, old_qc: str | None,
-          log=lambda m: print(m, file=sys.stderr)) -> dict:
+def build(out_dir: str, min_reads: int, refresh: bool, log=lambda m: print(m, file=sys.stderr)) -> dict:
     os.makedirs(out_dir, exist_ok=True)
     runs_path, study_runs_path = os.path.join(out_dir, "ena_runs.tsv"), os.path.join(out_dir, "ena_study_runs.tsv")
     if refresh or not os.path.exists(runs_path):
@@ -198,28 +197,15 @@ def build(out_dir: str, min_reads: int, refresh: bool, atlas_samples: str | None
             known.add(r["run_accession"])
             n_no_taxon += 1
 
-    atlas = set()
-    if atlas_samples:
-        with open(atlas_samples, encoding="utf-8") as fh:
-            atlas = set(fh.readline().rstrip("\n").split("\t")[1:])
-    qc = {}
-    if old_qc:
-        for row in read_tsv(old_qc):
-            qc[row["sample"]] = row
     for r in runs:
         flags = classify(r, min_reads)
         if r["study_accession"] in mixed:
             r["review"] = ",".join(x for x in ("mixed_organism_study", r["review"]) if x)
         r["flags"] = ",".join(flags)
         r["status"] = flags[0] if flags else "candidate"
-        key = f"{r['GSM']}_{r['run_accession']}"
-        r["in_atlas_v1"] = "yes" if key in atlas else "no"
-        frac = qc.get(key, {}).get("strandedness_fraction", "")
-        r["old_qc_reverse_fraction"] = frac if frac not in ("", "NA") else ""
-        r["in_old_qc"] = "yes" if key in qc else "no"
 
-    run_cols = ["run_accession", "GSM", "GSE", "status", "flags", "library_type_match", "review", "in_atlas_v1", "in_old_qc",
-                "old_qc_reverse_fraction"] + [f for f in RUN_FIELDS if f != "run_accession"]
+    run_cols = ["run_accession", "GSM", "GSE", "status", "flags", "library_type_match", "review"] + \
+        [f for f in RUN_FIELDS if f != "run_accession"]
     write_tsv(os.path.join(out_dir, "runs.tsv"), runs, run_cols)
 
     # samples: runs merged per GSM
@@ -231,11 +217,6 @@ def build(out_dir: str, min_reads: int, refresh: bool, atlas_samples: str | None
     for gsm, rs in sorted(by_gsm.items()):
         ok = [r for r in rs if r["status"] == "candidate"]
         layouts = sorted({r["library_layout"] for r in rs})
-        fr = [float(r["old_qc_reverse_fraction"]) for r in rs if r["old_qc_reverse_fraction"]]
-        old_strand = ""
-        if fr:
-            mean = sum(fr) / len(fr)
-            old_strand = "reverse" if mean > 0.8 else "forward" if mean < 0.2 else "unstranded"
         samples.append({
             "GSM": gsm, "GSE": rs[0]["GSE"],
             "status": ("candidate" if len(layouts) == 1 else "mixed_layout") if len(ok) == len(rs) else
@@ -244,12 +225,10 @@ def build(out_dir: str, min_reads: int, refresh: bool, atlas_samples: str | None
             "reads": sum(int(r["read_count"] or 0) for r in rs), "scientific_name": rs[0]["scientific_name"],
             "tax_id": rs[0]["tax_id"], "library_selection": rs[0]["library_selection"],
             "instrument_model": rs[0]["instrument_model"], "first_public": min(r["first_public"] for r in rs),
-            "in_atlas_v1": "yes" if any(r["in_atlas_v1"] == "yes" for r in rs) else "no",
-            "old_qc_strand": old_strand, "review": rs[0]["review"], "sample_title": rs[0]["sample_title"], "study_title": rs[0]["study_title"],
+            "review": rs[0]["review"], "sample_title": rs[0]["sample_title"], "study_title": rs[0]["study_title"],
         })
     sample_cols = ["GSM", "GSE", "status", "n_runs", "runs", "layout", "reads", "scientific_name", "tax_id",
-                   "library_selection", "instrument_model", "first_public", "in_atlas_v1", "old_qc_strand",
-                   "review", "sample_title", "study_title"]
+                   "library_selection", "instrument_model", "first_public", "review", "sample_title", "study_title"]
     write_tsv(os.path.join(out_dir, "samples.tsv"), samples, sample_cols)
 
     by_gse = defaultdict(list)
@@ -260,7 +239,6 @@ def build(out_dir: str, min_reads: int, refresh: bool, atlas_samples: str | None
         st = Counter(s["status"] for s in ss)
         acc = by_gsm[ss[0]["GSM"]][0]["study_accession"]
         studies.append({"GSE": gse, "study_accession": acc, "n_samples": len(ss), "n_candidate": st["candidate"],
-                        "n_in_atlas_v1": sum(s["in_atlas_v1"] == "yes" for s in ss),
                         "status_counts": ";".join(f"{k}={v}" for k, v in st.most_common()),
                         "other_organisms": ";".join(f"{k}={v}" for k, v in other.get(acc, Counter()).most_common(3)),
                         "first_public": min(s["first_public"] for s in ss), "study_title": ss[0]["study_title"]})
@@ -287,17 +265,6 @@ def build(out_dir: str, min_reads: int, refresh: bool, atlas_samples: str | None
         add(f"candidates to review, {label}: {len(hit)} samples in {len({s['GSE'] for s in hit})} studies")
     add("library type matches among GEO runs (a run can match several): " + str(dict(Counter(
         k for r in runs if r["GSE"] and r["GSM"] for k in r["library_type_match"].split(",") if k))))
-    if atlas:
-        in_atlas = [s for s in samples if s["in_atlas_v1"] == "yes"]
-        found = {f"{r['GSM']}_{r['run_accession']}" for r in runs}
-        add(f"\natlas v1: {len(atlas)} run-level samples; {len(atlas & found)} found in the ENA list "
-            f"({len(atlas - found)} not found), in {len(in_atlas)} GEO samples")
-        add("  status now of the GEO samples that are in atlas v1: " + str(dict(Counter(s["status"] for s in in_atlas))))
-        add("  old-QC strand of atlas v1 samples that are still candidates: " + str(dict(Counter(
-            s["old_qc_strand"] or "no record" for s in in_atlas if s["status"] == "candidate"))))
-        add(f"  candidates not in atlas v1: {sum(s['in_atlas_v1'] == 'no' for s in cand)} samples in "
-            f"{len({s['GSE'] for s in cand if s['in_atlas_v1'] == 'no'})} studies "
-            f"({len({s['GSE'] for s in cand} - {s['GSE'] for s in in_atlas})} studies with no sample in atlas v1)")
     text = "\n".join(lines) + "\n"
     with open(os.path.join(out_dir, "summary.txt"), "w", encoding="utf-8") as fh:
         fh.write(text)
@@ -310,10 +277,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--out-dir", required=True)
     ap.add_argument("--min-reads", type=int, default=500_000, help="runs with fewer reads are excluded")
     ap.add_argument("--refresh", action="store_true", help="download from ENA again even if the files exist")
-    ap.add_argument("--atlas-samples", help="count table whose header lists the atlas v1 samples (GSM_SRR)")
-    ap.add_argument("--old-qc", help="quality_control.tsv of the atlas v1 screen")
     args = ap.parse_args(argv)
-    build(args.out_dir, args.min_reads, args.refresh, args.atlas_samples, args.old_qc)
+    build(args.out_dir, args.min_reads, args.refresh)
     return 0
 
 

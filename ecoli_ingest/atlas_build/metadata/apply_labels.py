@@ -5,11 +5,11 @@ Run from the repository root (see docs/metadata_v2.md). Environment: LABEL_DIR (
 this file), DIGEST_DIR (default: digest/ beside this file; the digests written by geo_digest.py),
 ONLY (comma-separated GSEs to restrict to).
 
-Usage: apply_labels.py SOFT_DIR samples.tsv OUT_PREFIX [--v1 metadata_revised.csv] [--qc sample_qc.tsv]
+Usage: apply_labels.py SOFT_DIR samples.tsv OUT_PREFIX [--qc sample_qc.tsv]
 With --qc: adds pre_decision, pre_reasons and usable (standard_rnaseq true and prescreen pass) and
 writes OUT_PREFIX_counts_usable.tsv (class counts over usable samples only).
 Writes OUT_PREFIX.tsv (one row per GSM), OUT_PREFIX_evidence.tsv, OUT_PREFIX_problems.tsv,
-OUT_PREFIX_counts.tsv (samples and studies per class) and, with --v1, OUT_PREFIX_vs_v1.tsv.
+OUT_PREFIX_counts.tsv (samples and studies per class).
 """
 import csv, json, re, sys, pathlib, collections
 import yaml
@@ -47,7 +47,6 @@ def lump(name, spec, row):
 
 def main():
     soft_dir, samples_tsv, prefix = pathlib.Path(sys.argv[1]), sys.argv[2], sys.argv[3]
-    v1 = sys.argv[sys.argv.index("--v1") + 1] if "--v1" in sys.argv else None
     status = {r["GSM"]: r["status"] for r in csv.DictReader(open(samples_tsv), delimiter="\t")}
     rows, evidence, problems = [], [], []
     only = set(filter(None, __import__("os").environ.get("ONLY", "").split(",")))
@@ -132,25 +131,6 @@ def main():
                         v = v or "(empty)"; cnt[v] += 1; st[v].add(r["GSE"])
                 for v, n in cnt.most_common(): w.writerow([k, "lumped" if k in LUMPED else "fine", v, n, len(st[v])])
     print(f"{len(rows)} samples in {len({r['GSE'] for r in rows})} studies; {len(set(problems))} problems")
-    if v1:
-        old = {}
-        for r in csv.DictReader(open(v1)): old.setdefault(r["sample_id"].split("_")[0], r)
-        ph = {"exponential": "exponential", "stationary": "stationary", "late_stationary": "stationary"}
-        cmp = [("growth_phase", "phase2", lambda x: ph.get(x, "(other:" + x + ")")),
-               ("medium_type", "medium_type", lambda x: {"complex": "rich", "defined": "minimal"}.get(x, "(other:" + x + ")")),
-               ("oxygen", "anaerobic", lambda x: {"aerobic": "false", "aeorbic": "false", "anaerobic": "true"}.get(x, "(other:" + x + ")")),
-               ("carbon_source", "glucose", lambda x: "true" if x == "glucose" else "false")]
-        with open(prefix + "_vs_v1.tsv", "w", newline="") as fh:
-            w = csv.writer(fh, delimiter="\t"); w.writerow(["label", "v1", "v2", "v2_fine", "samples", "studies", "example_GSE"])
-            for oc, nc, f in cmp:
-                tab = collections.defaultdict(lambda: [0, set()])
-                for r in rows:
-                    o = old.get(r["GSM"])
-                    if o is None: continue
-                    a = f(o[oc]) if o[oc] else "(empty)"; b = r.get(nc) or "(empty)"
-                    fine = r.get(LUMPED[nc]["from"], "") if a != b else ""
-                    t = tab[(a, b, fine)]; t[0] += 1; t[1].add(r["GSE"])
-                for (a, b, fine), (n, s) in sorted(tab.items()): w.writerow([oc, a, b, fine, n, len(s), ",".join(sorted(s)[:4])])
 
 if __name__ == "__main__":
     main()

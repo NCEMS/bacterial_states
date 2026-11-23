@@ -2,9 +2,8 @@
 al. (GSE271069), on the atlas embedding. CAS samples are those with ``amino_acids_supplied`` true;
 samples of the two media in the same growth phase form a pair group.
 
-For the first atlas this study was an outside test, embedded from its own count table. It is now
-part of the atlas, so the samples are read from the atlas tables, and the metrics say which split
-they are in: when they are in the training pool the model has been fitted on them."""
+The study is part of the atlas tables and a forced TEST study (``TrainConfig.test_studies``); the
+metrics say which split its samples are in, so a bundle fitted on them shows it."""
 from __future__ import annotations
 
 import json

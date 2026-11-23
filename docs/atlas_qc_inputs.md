@@ -1,8 +1,8 @@
 # QC to save during the atlas recount
 
-Status: implemented in the inGEST workflow on `ingest-update` (2026-11-15), except the technical
-twins at the end. It lists what a full inGEST run keeps per sample so that the atlas model
-(`docs/atlas_model_v2.md`, on the `update-atlas` branch) can use library and sequencing properties
+Status: implemented in the inGEST workflow (2026-11-15), except the technical twins at the end.
+It lists what a full inGEST run keeps per sample so that the atlas model
+(`docs/atlas_model_v2.md`) can use library and sequencing properties
 as inputs. "Today" in the table below describes the workflow before this change; the section
 "What the workflow writes" describes it now. Alignments (`.gam`, `_sort.bam`) are deleted after the recount, so anything
 that needs them has to be computed during the run.

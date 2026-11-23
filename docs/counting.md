@@ -1,7 +1,6 @@
 # How inGEST counts reads
 
-This describes the counting of inGEST 2 (`resources-v2`). It replaces the counting used for the
-`resources-v1` atlas and is **not compatible with it** (see the last section).
+This describes the counting of inGEST (`resources-v2`), on which the atlas model is trained.
 
 ## Features
 
@@ -82,11 +81,3 @@ orientation used for every sample.
 
 Paired-end reads are always trimmed with `fastp --detect_adapter_for_pe`. The former config key
 `fastp_detect_adapter_for_pe` is ignored (with a warning).
-
-## Compatibility with the atlas
-
-The published atlas model (`ecoli_atlas_models_v1`) was trained on counts made differently: all
-libraries counted as unstranded, 4,493 genes, no small RNAs, reads on overlapping genes discarded,
-ids by gene symbol or b-number. Counts from this branch must not be embedded with that model. Use
-the `main` branch to produce counts for it. Recounting the atlas samples with this method and
-retraining is a separate task; the `Locus_Tag` column is the key to use for it.

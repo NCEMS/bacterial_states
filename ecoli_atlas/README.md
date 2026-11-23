@@ -3,8 +3,8 @@
 Embeds *E. coli* RNA-seq samples with an encoder–decoder trained on thousands of public samples
 counted with Ecoli_inGEST, and places new samples in that embedding.
 
-The embedding has one block per call and a residual block, 27 dimensions, and is fitted in the
-two stages of the first atlas model (count model and covariates: [`docs/atlas_model_v2.md`](../docs/atlas_model_v2.md)):
+The embedding has one block per call and a residual block, 27 dimensions, and is fitted in two
+stages (count model and covariates: [`docs/atlas_model_v2.md`](../docs/atlas_model_v2.md)):
 
 | Block | Dimensions | Fitted on |
 |---|---|---|
@@ -13,10 +13,10 @@ two stages of the first atlas model (count model and covariates: [`docs/atlas_mo
 | lab strain (`lab_strain`: lab / non-lab) | 1 | training samples with a known strain group |
 | residual | 24 | all training samples, blocks frozen |
 
-The first model had 6 / 12 / 4 / 24 (46 dimensions). Sweeps with the call blocks cut to one dimension each
-lost nothing: the same calls, the same neighbours inside each block, the residual no richer; the decoder's TEST
+Sweeps with call blocks of 6 / 12 / 4 dimensions against one dimension each found that one dimension
+loses nothing: the same calls, the same neighbours inside each block, the residual no richer; the decoder's TEST
 NLL rose by about one seed SD (`work/phase_dims/NOTES.md`). `train --block-dims` changes the sizes
-(`phase=6,medium=12,lab_strain=4` for v1's, `residual=16`; blocks not named keep theirs). The bundle records them (`embedding_blocks` in `manifest.json`), and `embed`, `evaluate` and
+(e.g. `phase=6,medium=12,lab_strain=4`, `residual=16`; blocks not named keep theirs). The bundle records them (`embedding_blocks` in `manifest.json`), and `embed`, `evaluate` and
 `figures` read them from there.
 
 - **Block encoders:** z-scored log expression → the block; a linear head on the block gives the
@@ -27,8 +27,7 @@ NLL rose by about one seed SD (`work/phase_dims/NOTES.md`). `train --block-dims`
 - **Alignment terms** (residual stage, on the whole embedding): samples of one study known to
   differ are kept apart; matching control conditions of different studies are drawn together.
 
-This is the first stage of the design. Not yet in the model: batch-corrected counts. The earlier (v1) model and its
-`verify-models` command are in the `v1.0.0` code release and the `resources-v1` data release.
+This is the first stage of the design. Not yet in the model: batch-corrected counts.
 
 ## Install
 
@@ -371,7 +370,7 @@ What the encoders see (default since 2026-11-22): counts with each library's mea
 only (`--no-encoder-covariates`). The decoder is unchanged: it predicts the raw counts, with its linear covariate term
 on all covariates. On the atlas this took GC out of the embedding (GC-slope R2 from z 0.24 -> 0.03 within biological
 replicate groups, 0.33 -> 0.02 over all samples) with a slightly better TEST NLL (6.206 against 6.217;
-`work/qc_module/NOTES.md`). `--no-clean-inputs --encoder-covariates` give the earlier model; bundles made before keep
+`work/qc_module/NOTES.md`). `--no-clean-inputs --encoder-covariates` give the fit without the cleaning; bundles made that way keep
 it. `embed` repeats the cleaning and needs each sample's GC fit, which the QC record has. `train --qc-module` adds the
 decoder's GC term at fixed scale and the genomic-DNA term on top; it is not the default (it kept GC in z across
 samples). The manifest reports the encoder side under `encoder_inputs`.
@@ -456,7 +455,7 @@ the output directory of `embed`.
 | `neighbors.tsv` | per new sample its `-k` (15) nearest atlas samples: distance, study, curated labels, the model's calls; with `--atlas-metadata` also strain, medium, growth phase, carbon source, oxygen, treatment, genotype |
 | `summary.tsv` | per new sample: nearest atlas sample, most frequent study among the neighbours, the neighbours' vote on every call (`<call>_knn_vote`, `_knn_frac`, `_knn_n_labelled`) and whether the model's own call agrees (`<call>_agree`), mean neighbour distance within every block (`<block>_knn_dist`), novelty |
 | `query_distances.tsv` | distances between the new samples |
-| `group_summary.tsv`, `fig_*` | with `--metadata` and `--group-by`: one row per group (calls, votes, top studies, distance within the group and to the previous group) and the figures `fig_query_distances`, `fig_factor_by_group`, `fig_neighbor_labels`, with `--umap` also `fig_umap_groups` |
+| `group_summary.tsv`, `fig_*` | with `--metadata` and `--group-by`: one row per group (calls, votes, top studies, distance within the group and to the previous group) and the figures `fig_query_distances`, `fig_head_by_group`, `fig_neighbor_labels`, with `--umap` also `fig_umap_groups` |
 | `umap_atlas.tsv`, `umap_query.tsv`, `umap.png` | with `--umap`: a UMAP fitted on the atlas with the new samples projected onto it |
 
 The votes use the curated labels of the atlas samples (the labels the calls were trained on);
@@ -483,8 +482,7 @@ Without a bundle, two figures of the data, from the metadata and a `splits.csv`:
 studies, with `split_balance.tsv`) and `fig_corpus_composition` (pies of phase, medium, carbon
 source, genotype class, stress family and strain group of the samples in the split).
 
-With `--models` and the three tables, also the figures of the earlier model's paper, made for this
-model (`--only` selects by the names below):
+With `--models` and the three tables, also the model figures (`--only` selects by the names below):
 
 ```bash
 ecoli_atlas figures $T --models outputs/models --out outputs/figures [--only NAMES] [--strict]
@@ -495,9 +493,9 @@ ecoli_atlas figures $T --models outputs/models --out outputs/figures [--only NAM
 | `pca_batch` | `fig_pca_mg1655_batch`, `fig_pca_bw_batch`, `fig_pca_strain_all_complex`, `pca_log_expression_coords.tsv` | PCA of the log2 normalised expression (no model): MG1655 and BW25113 in one condition (exponential, untreated wild type, rich medium) coloured by study, and the rich-medium samples by strain |
 | `batch_genes` | `fig_batch_genes`, `batch_genes.tsv` | the genes that differ most between studies within those two subsets |
 | `gsea` | `fig_gsea_batch_mg1655`, `fig_gsea_batch_bw25113`, `fig_gsea_batch_scatter`, `gsea_batch_<strain>.tsv` | GO-term enrichment of the whole between-study ranking of `batch_genes` in each strain: the 20 terms with the largest NES, and the NES of every term in MG1655 against BW25113 (see [Gene-set enrichment](#gene-set-enrichment)) |
-| `factor_test_eval` | `fig_factor_test_eval`, `phase_misclassified.tsv` | confusion matrix of each call on TEST; the samples whose phase call is wrong |
-| `factor_umaps` | `fig_factor_umaps`, `fig_factor_umaps_overlay`, `umap_factor_coords.tsv` | UMAP of each head's block, by label and by training pool / TEST |
-| `factor_gene_correlates` | `fig_factor_gene_correlates`, `factor_gene_correlations.{txt,tsv}` | Spearman rho of every gene's expression with each head's probability (the `.txt` lists the top 50 each way, for gene-set enrichment) |
+| `head_test_eval` | `fig_head_test_eval`, `phase_misclassified.tsv` | confusion matrix of each call on TEST; the samples whose phase call is wrong |
+| `head_scores` | `fig_head_scores`, `head_scores.tsv` | each head's score (the log-odds of its call, i.e. its one-dimensional block) by class, training pool and TEST, with the AUROC of each split |
+| `head_gene_correlates` | `fig_head_gene_correlates`, `head_gene_correlations.{txt,tsv}` | Spearman rho of every gene's expression with each head's probability (the `.txt` lists the top 50 each way, for gene-set enrichment) |
 | `study_leakage` | `fig_study_leakage` | share of a TEST sample's 25 nearest neighbours from its own study, in the z-scored expression and in the embedding |
 | `threshold_curves` | `fig_threshold_curves`, `cv_predictions.tsv` | balanced accuracy against the threshold on the out-of-fold probabilities |
 
@@ -514,7 +512,7 @@ with the manifest's `cv_metrics` but are not expected to be identical on another
 ecoli_atlas casestudy {uti,oxygen,glu-cas,all} $T --models outputs/models --out outputs/figures
 ```
 
-The case studies of the earlier model, on this model's embedding. Each writes its figures, its
+Case studies on the embedding, each on a held-out (TEST) study. Each writes its figures, its
 sample and gene tables and `<name>_metrics.json`; `casestudy_metrics.json` collects them.
 
 - `uti` (GSE128997): infection against urine culture, paired by patient isolate. The isolates'
@@ -526,9 +524,8 @@ sample and gene tables and `<name>_metrics.json`; `casestudy_metrics.json` colle
   (`fig_oxygen_lda_projection`, `fig_oxygen_axis_genes`); the AUROC is given in sample and with
   every sample scored by an axis fitted without it.
 - `glu-cas` (GSE271069): glucose against casamino acids, paired by growth phase
-  (`fig_glu_cas_axis`, `fig_glu_cas_lda_projection`, `fig_glu_cas_axis_genes`). For the earlier
-  model this study was an outside test. It is now in the training pool, and the metrics say so
-  (`fitted_by_the_model`).
+  (`fig_glu_cas_axis`, `fig_glu_cas_lda_projection`, `fig_glu_cas_axis_genes`). The study is a
+  forced TEST study; the metrics say whether the bundle was fitted on its samples (`fitted_by_the_model`).
 
 ### `axes`: ordered categories as dimensions of the embedding
 

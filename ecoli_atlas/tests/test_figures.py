@@ -2,7 +2,6 @@ import json
 
 import pandas as pd
 
-from ecoli_atlas.config import HParams
 from ecoli_atlas.cli import main
 
 
@@ -34,17 +33,17 @@ def test_model_figures(trained, train_args, tmp_path):
     args = ["figures", *train_args, "--models", str(trained), "--out", str(figs), "--formats", "png", "--device", "cpu", "--strict"]
     assert main(args) == 0
     for name in ("split_balance", "corpus_composition", "pca_mg1655_batch", "pca_bw_batch", "pca_strain_all_complex", "batch_genes",
-                 "factor_test_eval", "factor_umaps", "factor_umaps_overlay", "factor_gene_correlates", "study_leakage", "threshold_curves"):
+                 "head_test_eval", "head_scores", "head_gene_correlates", "study_leakage", "threshold_curves"):
         assert (figs / f"fig_{name}.png").stat().st_size > 3000, name
     m = json.loads((figs / "figure_metrics.json").read_text())
     assert m["embedding_check"]["max_abs_diff"] < 1e-4                      # the bundle's embedding.tsv is made again
     assert m["test_metrics_vs_manifest"] and all(v["agree"] for v in m["test_metrics_vs_manifest"].values())
     assert set(m["study_leakage"]["rates"]) == {"input", "blocks", "embedding"}
-    assert m["factor_umaps"]["phase"]["block_dim"] == HParams().block_dims["phase"]
+    assert m["head_scores"]["phase"]["auroc"]["train"] > 0.8 and (figs / "head_scores.tsv").exists()
     # phase raises the first ten genes of the synthetic atlas: they lead the correlates of the phase call
-    corr = pd.read_csv(figs / "factor_gene_correlations.tsv", sep="\t")
-    top = corr[corr["factor"] == "phase"].sort_values("spearman_rho", ascending=False).head(10)
-    assert set(top["gene"]) <= {f"g{i:03d}" for i in range(10)} and "Top 50 Positive" in (figs / "factor_gene_correlations.txt").read_text()
+    corr = pd.read_csv(figs / "head_gene_correlations.tsv", sep="\t")
+    top = corr[corr["head"] == "phase"].sort_values("spearman_rho", ascending=False).head(10)
+    assert set(top["gene"]) <= {f"g{i:03d}" for i in range(10)} and "Top 50 Positive" in (figs / "head_gene_correlations.txt").read_text()
     # the bundle has no cv_predictions.tsv: the folds were fitted once and kept beside the figures
     cv = pd.read_csv(figs / "cv_predictions.tsv", sep="\t", index_col=0)
     assert m["cv_predictions"] == str(figs / "cv_predictions.tsv") and set(cv["cv_fold"]) == {1, 2, 3}

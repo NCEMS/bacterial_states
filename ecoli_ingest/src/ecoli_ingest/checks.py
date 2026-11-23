@@ -91,7 +91,7 @@ def check_resources(cfg: dict, resources: Path | None, rundir: Path) -> list[Che
         p = resource_path(cfg, key, resources, rundir)
         if p is not None:
             out.append(Check(label, OK if _exists(p) else FAIL, str(p)))
-    # in the core bundle since resources-v2; a resources directory from resources-v1 lacks it
+    # in the core bundle since resources-v2; an older resources directory lacks it
     p = resource_path(cfg, "genome_fasta", resources, rundir)
     if p is not None:
         out.append(Check("reference genome FASTA (GC bias)", OK if _exists(p) else WARN,

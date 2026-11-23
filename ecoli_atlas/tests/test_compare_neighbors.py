@@ -113,7 +113,7 @@ def test_compare_tables(atlas, embedded, tmp_path):
     assert np.isclose(g.loc[24, "phase_prob_stationary"], calls.loc[members, "phase_prob_stationary"].mean(), atol=1e-5)
     assert np.isclose(g.loc[24, "within_group_distance"], D.loc[members[0], members[1]], atol=1e-5)
     assert np.isnan(g["distance_to_previous"].iloc[0]) and g["distance_to_previous"].iloc[1:].notna().all()
-    assert {p.stem for p in out.glob("fig_*.png")} == {"fig_query_distances", "fig_factor_by_group", "fig_neighbor_labels"}     # no UMAP requested
+    assert {p.stem for p in out.glob("fig_*.png")} == {"fig_query_distances", "fig_head_by_group", "fig_neighbor_labels"}     # no UMAP requested
     with pytest.raises(ValueError, match="metadata lacks rows"):
         compare(query, atlas, tmp_path / "x", k=5, metadata=qmeta.iloc[:-1], group_by="time_h")
     with pytest.raises(ValueError, match="need --metadata"):

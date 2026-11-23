@@ -36,7 +36,7 @@ FITS = ("two_stage", "one_pass", "unstructured")
 # purity), intergenic share, trimming shares, cycles and mate-2 length (read-1 lengths), other genus.
 # The GC bias is the within-gene fit of the QC record (inGEST gc_bias.py; `work/gc_bias/`): it shifts
 # by 0.17 SD with phase, against 0.79 for the read GC share, which it replaces. The instrument flags
-# were dropped after models_v2_techqc: shuffling them changed TEST NLL by -0.005..+0.002 over seeds 1-4
+# were dropped: shuffling them changed TEST NLL by -0.005..+0.002 over seeds 1-4
 # (train +0.003), i.e. they fitted the training studies only (`work/qc_blocks/NOTES.md`).
 COVARIATES = ("paired", "fragment_q25", "fragment_q50", "fragment_q75",           # layout, fragment sizes (paired-end)
               "length_q05_r1", "length_q50_r1", "length_q95_r1",                  # read lengths after trimming
@@ -50,8 +50,7 @@ GC_SCALES = ("learned", "fixed")     # the scale of the decoder's GC term (Train
 @dataclass
 class HParams:
     # the embedding is [one block per call | residual block]. One dimension per call (user decision 2026-11-21):
-    # v1's 6 / 12 / 4 held nothing more than the call's score (`work/phase_dims/NOTES.md`, sweeps
-    # models_v2_cov11_order_w1{,_phase1,_blocks1}); the residual keeps v1's 24
+    # blocks of 6 / 12 / 4 held nothing more than the call's score (`work/phase_dims/NOTES.md`)
     block_dims: dict = field(default_factory=lambda: {"phase": 1, "medium": 1, "lab_strain": 1})
     res_dim: int = 24
     # block encoders (one small classifier per call, fitted on its labelled samples only)

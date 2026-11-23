@@ -1,6 +1,6 @@
 """Training of the atlas model. Three fits (``TrainConfig.fit``):
 
-two_stage     as for the first atlas model. (1) One block encoder per call, each fitted on the
+two_stage     (1) One block encoder per call, each fitted on the
               training samples that have a label for it, with a class-weighted cross-entropy.
               (2) With the blocks frozen, the residual encoder and the count decoder on all
               training samples, with the loss below without its head term.

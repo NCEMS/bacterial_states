@@ -2,7 +2,7 @@
 
   fig_query_distances   heatmap of the distances between the new samples
   fig_umap_groups       atlas UMAP with the new samples coloured by group (needs ``--umap``)
-  fig_factor_by_group   predicted class probability per factor along the ordered groups
+  fig_head_by_group   predicted class probability per head along the ordered groups
   fig_neighbor_labels   what the atlas neighbours of each group are (curated labels, studies)
 
 The last two need groups (``--group-by``). Colours: one blue ramp for ordered (numeric) groups, a
@@ -131,21 +131,21 @@ def plot_umap_groups(atlas_xy: pd.DataFrame, query_xy: pd.DataFrame, color=None,
     return fig
 
 
-def _prob_columns(predictions: pd.DataFrame, factors) -> dict:
+def _prob_columns(predictions: pd.DataFrame, heads) -> dict:
     """Per call, its probability column (of the positive class: `stationary`, `minimal`, `lab`)."""
     out = {}
-    for f in factors:
+    for f in heads:
         cols = sorted(c for c in predictions.columns if c.startswith(f"{f}_prob_"))
         if cols:
             out[f] = cols[-1]
     return out
 
 
-def plot_factor_by_group(predictions: pd.DataFrame, labels: pd.Series, order, factors, group_name: str = "group"):
+def plot_head_by_group(predictions: pd.DataFrame, labels: pd.Series, order, heads, group_name: str = "group"):
     plt = _plt()
     preds = predictions.copy()
     preds.index = preds.index.astype(str)
-    shown = _prob_columns(preds, factors)
+    shown = _prob_columns(preds, heads)
     if not shown:
         return None
     lab = labels.reindex(preds.index)
@@ -190,10 +190,10 @@ def neighbor_composition(neighbors: pd.DataFrame, values: pd.Series, labels: pd.
     return tab
 
 
-def plot_neighbor_labels(neighbors: pd.DataFrame, atlas, labels: pd.Series, order, factors, group_name: str = "group"):
+def plot_neighbor_labels(neighbors: pd.DataFrame, atlas, labels: pd.Series, order, heads, group_name: str = "group"):
     plt = _plt()
     panels = []
-    for f in factors:
+    for f in heads:
         src = atlas.label_source(f)
         if src is not None:
             panels.append((f"neighbours' {f.replace('_', ' ')}", neighbors["atlas_sample"].map(src.to_dict())))
@@ -229,7 +229,7 @@ def write_all(out_dir, atlas, neighbors: pd.DataFrame, summary: pd.DataFrame, di
               predictions: pd.DataFrame | None = None, labels: pd.Series | None = None, order=None,
               color: pd.Series | None = None, color_order=None, color_name: str = "group",
               group_name: str | None = None, atlas_xy: pd.DataFrame | None = None, query_xy: pd.DataFrame | None = None,
-              factors=(), formats=("pdf", "png"), trajectory: bool | None = None) -> list:
+              heads=(), formats=("pdf", "png"), trajectory: bool | None = None) -> list:
     """Write every figure the inputs allow; returns the names written."""
     out = Path(out_dir)
     written = []
@@ -247,6 +247,6 @@ def write_all(out_dir, atlas, neighbors: pd.DataFrame, summary: pd.DataFrame, di
         save(plot_umap_groups(atlas_xy, query_xy, color, color_order, color_name, labels, order, traj), "fig_umap_groups")
     if labels is not None:
         if predictions is not None:
-            save(plot_factor_by_group(predictions, labels, order, factors, group_name), "fig_factor_by_group")
-        save(plot_neighbor_labels(neighbors, atlas, labels, order, factors, group_name), "fig_neighbor_labels")
+            save(plot_head_by_group(predictions, labels, order, heads, group_name), "fig_head_by_group")
+        save(plot_neighbor_labels(neighbors, atlas, labels, order, heads, group_name), "fig_neighbor_labels")
     return written

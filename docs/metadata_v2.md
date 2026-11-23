@@ -1,8 +1,8 @@
 # Sample metadata v2: labels read from the GEO text
 
 Per-sample categorical and true/false labels for the atlas candidates, read from the text the
-submitters gave to GEO. They replace `atlas_data/metadata_revised.csv` (v1, 3,393 rows) as the
-source of supervised labels for the v2 model ([atlas_model_v2.md](atlas_model_v2.md)).
+submitters gave to GEO. They are the source of the supervised labels of the atlas model
+([atlas_model_v2.md](atlas_model_v2.md)).
 
 State on 2026-11-15: 560 of the 619 candidate studies are labelled (10,181 samples); the other 59
 have no sample that passes the prescreen and were not read. 7,829 samples in 432 studies are
@@ -37,8 +37,7 @@ M=ecoli_ingest/atlas_build/metadata                       # needs pyyaml
 python $M/fetch_geo_soft.py work/atlas_manifest/studies.tsv work/geo_text/soft 1.5
 python $M/geo_digest.py work/geo_text/soft work/metadata_v2/digest work/atlas_manifest/samples.tsv
 DIGEST_DIR=work/metadata_v2/digest python $M/apply_labels.py work/geo_text/soft \
-    work/atlas_manifest/samples.tsv atlas_data/metadata_v2 \
-    --v1 atlas_data/metadata_revised.csv --qc atlas_data/sample_qc.tsv
+    work/atlas_manifest/samples.tsv atlas_data/metadata_v2 --qc atlas_data/sample_qc.tsv
 ```
 
 `apply_labels.py` must report `0 problems`: every value is in the scheme, every label has a basis
@@ -136,6 +135,3 @@ A fine class is meant for training only if at least 10 studies and 100 samples c
 - Seven samples are wild type in GSE221706 and a deletion in their later copies in GSE252784.
 - Apart from genotype, the labels were read once; the check is the agreement between duplicate
   deposits.
-- `atlas_data/metadata_v2_vs_v1.tsv` lists the agreement with v1. Where both give a phase or a
-  medium type they agree on about 97% of samples; the v1 labels of GSE224463 follow GEO fields
-  that are wrong for that study.

@@ -515,13 +515,13 @@ def _figure_context(args):
 def _model_figures(args, names: list, out: Path, formats: tuple) -> tuple[dict, bool]:
     """Draw the figures that need the model. Returns (metrics, all checks passed)."""
     from .figures.checks import all_agree, compare_metrics
-    from .figures.gene_correlates import fig_factor_gene_correlates
+    from .figures.gene_correlates import fig_head_gene_correlates
     from .figures.gsea import fig_gsea_batch
     from .figures.leakage import fig_study_leakage
     from .figures.pca import fig_batch_genes, fig_pca_batch
-    from .figures.test_eval import fig_factor_test_eval, misclassified_table
+    from .figures.test_eval import fig_head_test_eval, misclassified_table
     from .figures.thresholds import CV_FILE, cv_metrics, fig_threshold_curves, load_cv_predictions
-    from .figures.umaps import fig_factor_umaps
+    from .figures.head_scores import fig_head_scores
     ctx, tables, splits = _figure_context(args)
     manifest = ctx.bundle.manifest
     metrics = {"models": str(args.models), "embedding_check": ctx.embedding_check(args.models)}
@@ -529,7 +529,7 @@ def _model_figures(args, names: list, out: Path, formats: tuple) -> tuple[dict, 
     _info(f"model figures for {len(ctx.ids)} samples; embedding against the bundle's: {metrics['embedding_check']}")
 
     def test_eval():
-        res = fig_factor_test_eval(ctx, out, formats)
+        res = fig_head_test_eval(ctx, out, formats)
         metrics["test_metrics_vs_manifest"] = compare_metrics(res, manifest.get("test_metrics"))
         metrics["phase_misclassified"] = misclassified_table(ctx, out)
         return res
@@ -548,8 +548,8 @@ def _model_figures(args, names: list, out: Path, formats: tuple) -> tuple[dict, 
         return fig_threshold_curves(cv, out, formats)
 
     draw = {"pca_batch": lambda: fig_pca_batch(ctx, out, formats), "batch_genes": lambda: fig_batch_genes(ctx, out, formats),
-            "factor_test_eval": test_eval, "factor_umaps": lambda: fig_factor_umaps(ctx, out, formats),
-            "factor_gene_correlates": lambda: fig_factor_gene_correlates(ctx, out, formats),
+            "head_test_eval": test_eval, "head_scores": lambda: fig_head_scores(ctx, out, formats),
+            "head_gene_correlates": lambda: fig_head_gene_correlates(ctx, out, formats),
             "study_leakage": lambda: fig_study_leakage(ctx, out, formats), "threshold_curves": thresholds,
             "gsea": lambda: fig_gsea_batch(ctx, out, formats, permutations=args.gsea_permutations, gene_sets=args.gene_sets,
                                            threads=args.threads or 4)}
@@ -845,7 +845,7 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--phase-order-weight", type=float, default=0.0,
                     help="weight of the phase-order term of the phase block (0 = off): a ranking loss on the phase score over pairs of samples "
                     "whose order along the growth curve is known, inside a study (phase levels) or a culture series (--time-series)")
-    sp.add_argument("--block-dims", help="sizes of embedding blocks, e.g. phase=6,medium=12,lab_strain=4 (v1's) or residual=16 (default: 1 per call, "
+    sp.add_argument("--block-dims", help="sizes of embedding blocks, e.g. phase=6,medium=12,lab_strain=4 or residual=16 (default: 1 per call, "
                     "residual 24; blocks not named keep their size). The bundle records the sizes")
     sp.add_argument("--no-pool", action="store_true", help="do not pool the missing-gene calls over a study's samples of one strain")
     sp.add_argument("--no-mask-missing", action="store_true", help="treat genes a strain does not have as measured zeros "

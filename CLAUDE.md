@@ -14,10 +14,9 @@ Two independently installable packages in one repo (GitHub `NCEMS/bacterial_stat
   count likelihood, trained on the recounted atlas (`docs/atlas_model_v2.md`, first stage). CLI:
   `prepare`, `train`, `embed`, `evaluate`, `figures` (data composition and the model figures), `casestudy`,
   `axes` (ordered categories as dimensions of the embedding), `drivers`, `compare` (new samples against the
-  atlas of a bundle) and `neighbors` (atlas studies against the rest of it), both ported from `main`.
-  **On this branch it replaces the published model in place**: the v1 package (factor encoders,
-  `verify-models`, `download`) is on `main`
-  only; port from there (`git show main:<path>`), do not keep v1 copies here.
+  atlas of a bundle) and `neighbors` (atlas studies against the rest of it). Everything is on `main`
+  (`update-atlas` and `ingest-update` were merged on 2026-11-22). The v1 package is only in the code release
+  `v1.0.0`; see "v1 history" at the end.
 - `bin/ecoli_ingest`, `bin/ecoli_atlas` run either CLI from the checkout without `pip install`.
 
 ## Data lives outside git — hard rules
@@ -31,7 +30,7 @@ Never `git add` any of these (all in `.gitignore`): `resources/`, `old_resources
 | `resources/{vg,annotation,centrifuge,container}` | inGEST reference bundle (13 GB) | downloaded; `resources/container/rnaseq_vg.sif` is the image |
 | `atlas_data/` | `atlas_v2_counts.tsv`, `atlas_v2_antisense_counts.tsv`, `atlas_v2_samples.tsv` (from `collect_results.py`), `metadata_v2.tsv`, `sample_qc.tsv` | training inputs of the model on this branch. `merged_count_table.txt`, `metadata_revised.csv` and the NCBI feature table there are the v1 inputs (used by `main`) |
 | `work/atlas_full/results/<batch>/` | the atlas recount: 102 batches plus re-runs (`PE_R01`) | source of the three `atlas_v2_*` tables and of the `full_*` columns |
-| `outputs/models/`, `outputs/figures/`, `outputs/axes_examples/` | bundle, figures and example axes of the model on this branch (unversioned paths: the package does not label directories with v1 / v2; only downloaded release packages carry a version) | written by `ecoli_atlas train` / `figures` / `scripts/axes_examples.sh`. Sweeps go to their own `outputs/models_<name>/` |
+| `outputs/models/`, `outputs/figures/`, `outputs/axes_examples/` | bundle, figures and example axes of the current model (unversioned paths: the package does not label directories with v1 / v2; only downloaded release packages carry a version) | written by `ecoli_atlas train` / `figures` / `scripts/axes_examples.sh`. Sweeps go to their own `outputs/models_<name>/` |
 | `outputs/v1_originals/` | the v1 originals, moved there on 2026-11-22 (user decision) to free their paths: `models/`, `atlas/` (Colab-trained bundle and its atlas; published as `ecoli_atlas_models_v1.tar.gz` in the `resources-v1` release), `figures/` (Colab reference figures, mixed sessions), `predictions/` (`final_embedding.csv`, 3342 samples), `factor_gene_correlations.txt` (GSEA list) | **never overwrite or commit**; not readable by this branch's code. `main` still expects them at `outputs/models` etc. |
 | `outputs/v1_originals/{models_repro,models_repro_sweep,atlas_repro,figures_repro,predictions_paper1}/` | v1 refits and reproductions made on `main`, moved there with the originals (2026-11-22) | kept for comparison |
 | `work/neighbors_*/` | `ecoli_atlas neighbors` runs (oxygen studies, withheld GSE224463) | scratch |
@@ -82,9 +81,7 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   `ecoli_ingest/paths.py` (`RESOURCE_FILES`). Keep them in sync.
 - Workflow tool list has one source of truth: `ecoli_ingest/environment.yaml`
   (`build/Singularity.def` installs it). `workflow/envs/rnaseq_vg.yaml` is the legacy image env.
-- **Branch `ingest-update` is a main revision of inGEST counting** (see `docs/counting.md`); it
-  stays off `main` until adopted, and there is no backward compatibility with the old counting.
-  Its counts do not match the published v1 atlas model: make counts for that model (`outputs/v1_originals/models`) on `main`.
+- inGEST counting is described in `docs/counting.md`; there is no backward compatibility with the v1 counting.
 - Counting annotation: `resources/annotation/GCF_000005845.2_ASM584v2_counting_v2.{gff,bed,
   features.tsv,rfam_merge_report.tsv}`, built by `ecoli_ingest/build/build_annotation.py` from the
   unmodified NCBI GFF and the Rfam hit table (both kept in `work/ingest_update/ncbi/`). Never
@@ -128,8 +125,7 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   DNA-spiked twins (`atlas_build/twins/make_twins.py`, `work/dna_calibration/`); the antisense fit
   is kept as `dna_fraction_fit` only. `gc_bias` in the record (`gc_bias.py`: GC slope and curvature of the coverage
   inside genes) needs the reference FASTA `annotation/GCF_000005845.2_ASM584v2_genomic.fna`, in the core bundle since `resources-v2`
-  (`check` warns when it is absent; the record then has no `gc_bias`). The atlas model design is on branch `update-atlas`
-  (`work/worktrees/update-atlas`); model code does not go on `ingest-update`.
+  (`check` warns when it is absent; the record then has no `gc_bias`).
 - Sample metadata v2 (`docs/metadata_v2.md`): `atlas_build/metadata/` holds the label scheme, one
   curated `labels/<GSE>.json` per study and the scripts; `apply_labels.py` writes
   `atlas_data/metadata_v2.tsv` and must report `0 problems`. Change labels in the JSON files or
@@ -212,8 +208,7 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
 - Argparse only (no click/typer); keep both packages free of each other's imports so they can be
   split into separate repos / bioconda recipes later.
 - `ecoli_atlas figures` draws the data composition (`fig_split_balance`, `fig_corpus_composition`)
-  from the metadata and a `splits.csv`, and with `--models` and the tables the paper figures of v1
-  for this model (`figures/context.py` puts the tables through the bundle as `evaluate` does;
+  from the metadata and a `splits.csv`, and with `--models` and the tables the model figures (`figures/context.py` puts the tables through the bundle as `evaluate` does;
   `figure_metrics.json` checks the embedding and the TEST metrics against the bundle; `--strict`).
   `ecoli_atlas casestudy` has `uti`, `oxygen` (GSE189154 only; GSE78756 and GSE80451 are unstranded, never used) and
   `glu-cas` (GSE271069, forced into TEST since 2026-11-22; the model trained on it before).
@@ -311,8 +306,25 @@ measured covariates remove ~0.01-0.02 of it). Order:
 5. A nonlinear covariate branch on c alone (kept out of f(z)), only if the replicate measures show it is needed.
 
 Atlas model, second stage: refinement of the missing-gene calls (decoder mean, coverage), corrected counts,
-hyper-parameter search; the root `README.md` and the two
-`examples/*/README.md` still describe the v1 atlas commands.
+hyper-parameter search; the examples reorganisation (plan
+`~/.claude/plans/dapper-drifting-pixel-of-d511ddbb-878a-44e8-8762-9b5981f57e47.md`, Part A).
 `atlas_build/` cleanup (`combine_counts.sh` assumes the old column layout), container rebuild from
 `environment.yaml` (drop entrez-direct/pytorch), LICENSE file, tutorial-data bundle, real hosting
 URLs, a Snakefile rule that emits an atlas-ready counts TSV.
+
+## v1 history
+
+The only place in the repository where v1 is described (user rule 2026-11-22: no v1 history, terms or paths in any
+other repository file).
+- Code release `v1.0.0` (factor encoders, `verify-models`, `download` of the v1 bundles); data release `resources-v1`
+  (v1 model `ecoli_atlas_models_v1.tar.gz` and the old hand-edited annotation `_genomic.gff` / `_siRNA.gff` / `.bed`).
+- v1 originals and refits in `outputs/v1_originals/` (never overwritten, not readable by the current code); the v1
+  paper's GSEA notebook (R fgsea, one-sided) in `outputs/GSEA/runGSEA.ipynb`, moving to `outputs/v1_originals/GSEA/`.
+- v1 training inputs `atlas_data/merged_count_table.txt` (all libraries counted unstranded, 4,493 genes by b-number,
+  made without fastp `--detect_adapter_for_pe`) and `atlas_data/metadata_revised.csv` (3,393 rows); never overwritten.
+  Counts of the current inGEST do not match the v1 model.
+- v1 model: three classifier encoders (blocks 6 / 12 / 4) plus a residual autoencoder (24), z-scored CPM input, MSE
+  decoder; the current model keeps its two-stage fit and residual size, with one dimension per call.
+- The comparison of metadata v2 with v1 labels (`atlas_data/metadata_v2_vs_v1.tsv`) and the v1-atlas columns of the
+  candidate manifest were made by code that is now removed (`apply_labels.py --v1`, `build_manifest.py
+  --atlas-samples/--old-qc`); `sample_qc.tsv` loses its `in_atlas_v1` column at the next `qc_table.py` write.

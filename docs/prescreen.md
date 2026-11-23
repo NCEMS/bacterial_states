@@ -1,15 +1,14 @@
 # Prescreening atlas candidates and the sample QC table
 
-Branch `ingest-update`. The counting on this branch accepts strand-specific libraries only
-([counting.md](counting.md)), and strandedness is not in the metadata. The prescreen runs the
+inGEST counts strand-specific libraries only ([counting.md](counting.md)), and strandedness is not
+in the metadata. The prescreen runs the
 inGEST steps on a small read subsample of every candidate sample so that only usable samples are
 processed in full.
 
 ## 1. Candidate manifest
 
 ```bash
-python ecoli_ingest/atlas_build/preprocessing/build_manifest.py --out-dir work/atlas_manifest \
-    --atlas-samples atlas_data/merged_count_table.txt --old-qc raw_data/quality_control.tsv
+python ecoli_ingest/atlas_build/preprocessing/build_manifest.py --out-dir work/atlas_manifest
 ```
 
 One ENA search (*E. coli* and all strains, RNA-Seq) gives `runs.tsv`, `samples.tsv` (one row per
@@ -88,7 +87,7 @@ after alignment.
 
 | Columns | Content |
 |---|---|
-| `GSM` … `in_atlas_v1` | identity and manifest status |
+| `GSM` … `twin_of` | identity and manifest status |
 | `pre_*` | prescreen metrics, with the run, read number, date and pipeline commit |
 | `pre_decision`, `pre_reasons` | `pass`, `fail`, `incomplete` or `error`, and why |
 | `full_*` | the same metrics from a complete inGEST run, with the results directory and date |
@@ -140,15 +139,14 @@ atlas should be reported with and without it; `qc_table.py summary` prints both.
 
 ## 4. Setting up a node
 
-1. Clone the repository and check out `ingest-update`.
+1. Clone the repository (branch `main`).
 2. `mamba env create -f ecoli_ingest/environment.yaml` (includes sra-tools and pigz), then
    `conda activate ecoli_ingest`.
 3. Copy `resources/vg`, `resources/centrifuge` and the four
-   `resources/annotation/GCF_000005845.2_ASM584v2_counting_v2.*` files. The v2 annotation is in
+   `resources/annotation/GCF_000005845.2_ASM584v2_counting_v2.*` files. The annotation is in
    the `resources-v2` core bundle; alternatively rebuild it with `build/build_annotation.py` from
    `work/ingest_update/ncbi/`.
-4. Copy `work/atlas_manifest/` or rebuild it (step 1 above; the comparison options need
-   `atlas_data/merged_count_table.txt` and `raw_data/quality_control.tsv`).
+4. Copy `work/atlas_manifest/` or rebuild it (step 1 above).
 5. Needs: outbound HTTPS to NCBI and ENA; about 9 GB of `/dev/shm` for the Centrifuge index plus
    under 1 GB of memory per running sample; local scratch of about 200 MB per running sample.
 

@@ -4,7 +4,7 @@
 One row per GEO sample (GSM). Columns:
   identity   GSM, GSE, runs, n_runs, layout, reads, bases, scientific_name, tax_id, library_strategy,
              library_source, library_selection, instrument_platform, instrument_model, first_public,
-             manifest_status, review, in_atlas_v1, twin_of (the GSM a technical twin was made from; a
+             manifest_status, review, twin_of (the GSM a technical twin was made from; a
              twin's row is keyed <GSM>__<variant>), study_candidates (candidate samples in the study) and large_study
              (yes when that is at least LARGE_STUDY_MIN: statistics over the atlas should be reported
              with and without such a study)
@@ -49,7 +49,7 @@ import gc_bias  # noqa: E402  (workflow script; qc_metrics puts the scripts on t
 
 IDENTITY = ["GSM", "GSE", "runs", "n_runs", "layout", "reads", "bases", "scientific_name", "tax_id",
             "library_strategy", "library_source", "library_selection", "instrument_platform", "instrument_model",
-            "first_public", "manifest_status", "review", "in_atlas_v1", "study_candidates", "large_study", "twin_of"]
+            "first_public", "manifest_status", "review", "study_candidates", "large_study", "twin_of"]
 RUN_FIELDS = ("library_strategy", "library_source", "instrument_platform")      # taken from the manifest's runs.tsv
 LARGE_STUDY_MIN = 500      # candidate samples; such a study can dominate statistics, so report with and without it
 PRE_INFO = ["pre_run", "pre_spots", "pre_source", "pre_date", "pre_pipeline", "pre_error"]

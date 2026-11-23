@@ -20,7 +20,7 @@ def test_metrics(ctx) -> dict:
     return head_metrics(ctx.data.y_eval, ctx.probs, ctx.data.te_rows)
 
 
-def fig_factor_test_eval(ctx, out_dir, formats) -> dict:
+def fig_head_test_eval(ctx, out_dir, formats) -> dict:
     import matplotlib.pyplot as plt
     metrics = test_metrics(ctx)
     heads = [h for h in HEADS if h in metrics]
@@ -45,7 +45,7 @@ def fig_factor_test_eval(ctx, out_dir, formats) -> dict:
     for ax in axes[len(heads):]:
         ax.axis("off")
     fig.tight_layout()
-    savefig(fig, out_dir, "fig_factor_test_eval", formats)
+    savefig(fig, out_dir, "fig_head_test_eval", formats)
     return metrics
 
 

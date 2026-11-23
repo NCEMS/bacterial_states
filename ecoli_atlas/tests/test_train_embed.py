@@ -902,7 +902,7 @@ def test_phase_order_term_follows_time_along_the_fitted_series(atlas_files, tmp_
     from ecoli_atlas.metrics import within_series_order
     from ecoli_atlas.train import order_pair_sampler
     fs = FeatureSet.from_table(read_feature_table(atlas_files["features"]))
-    # v1's block sizes: with a 6-d phase block the score has no reason to follow time without the term. A 1-d block
+    # blocks of 6 / 12 / 4: with a 6-d phase block the score has no reason to follow time without the term. A 1-d block
     # already orders 0.8 of the synthetic pairs without it (as on the atlas, where one dimension follows time best)
     hp = HParams(enc_width=32, dec_width=32, block_width=16, res_dim=4, block_dims={"phase": 6, "medium": 12, "lab_strain": 4})
     off = TrainConfig(seed=3, test_frac=0.2, n_candidates=50, epochs=2, block_epochs=80, batch=40, hparams=hp)

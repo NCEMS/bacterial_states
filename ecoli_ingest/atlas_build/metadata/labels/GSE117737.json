@@ -1,6 +1,6 @@
 {
  "gse": "GSE117737",
- "notes": "CONFLICT resolved 2026-11-15: GSM3566396 is stationary (growth-stage field); its title says 'WT log phase' but the v1 counts show osmY, dps, otsB and gadB 16-50 fold above the three log-phase samples and ribosomal protein genes and fis lower. | CONFLICT: GSM3566396 has 'Stationary phase' in ch:growth stage but its title starts 'RNA-seq WT log phase' (then 'related to ... stationary phase'); growth_phase left out for it. Only the four standard RNA-seq (Ribo-Zero) wild-type samples are candidates; the SEnd-seq, rne(ts), knockout and bicyclomycin samples are not. Shaking is only described for the ChIP fixation, so culture_mode left out. WT re-read: wild-type MG1655 -> wild_type.",
+ "notes": "CONFLICT resolved 2026-11-15: GSM3566396 is stationary (growth-stage field); its title says 'WT log phase' but its counts show osmY, dps, otsB and gadB 16-50 fold above the three log-phase samples and ribosomal protein genes and fis lower. | CONFLICT: GSM3566396 has 'Stationary phase' in ch:growth stage but its title starts 'RNA-seq WT log phase' (then 'related to ... stationary phase'); growth_phase left out for it. Only the four standard RNA-seq (Ribo-Zero) wild-type samples are candidates; the SEnd-seq, rne(ts), knockout and bicyclomycin samples are not. Shaking is only described for the ChIP fixation, so culture_mode left out. WT re-read: wild-type MG1655 -> wild_type.",
  "default": {
   "base_medium": {
    "v": "LB",

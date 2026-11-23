@@ -23,7 +23,7 @@ import pandas as pd
 
 from . import __version__
 from .artifacts import SPLITS_FILE
-from .compare import DEFAULT_FACTORS, NEIGHBOR_META_COLS, Atlas, knn, label_votes, novelty, per_block_distances, umap_fit
+from .compare import DEFAULT_HEADS, NEIGHBOR_META_COLS, Atlas, knn, label_votes, novelty, per_block_distances, umap_fit
 from .splits import bucket_labels, load_splits
 
 BUCKET_ORDER = ("test", "fold", "train_only", "withheld", "projected", "no_split")
@@ -59,7 +59,7 @@ def select_query(atlas: Atlas, gses) -> tuple[pd.DataFrame, pd.Series, dict]:
     return query, gse_of.loc[mask], {"found": found, "missing": missing}
 
 
-def study_summary(neighbors: pd.DataFrame, summary: pd.DataFrame, query_meta: pd.DataFrame, factors, n_top: int = 5) -> pd.DataFrame:
+def study_summary(neighbors: pd.DataFrame, summary: pd.DataFrame, query_meta: pd.DataFrame, heads, n_top: int = 5) -> pd.DataFrame:
     rows = []
     for gse, s in summary.groupby("query_gse", sort=True):
         nb = neighbors[neighbors["query"].isin(s.index)]
@@ -69,7 +69,7 @@ def study_summary(neighbors: pd.DataFrame, summary: pd.DataFrame, query_meta: pd
             vc = nb["gse"].dropna().astype(str).value_counts()
             rec["n_neighbor_studies"] = int(len(vc))
             rec["top_neighbor_studies"] = ";".join(f"{g}:{c}" for g, c in vc.head(n_top).items())
-        for f in factors:
+        for f in heads:
             if f"{f}_knn_vote" in s.columns:
                 votes = s[f"{f}_knn_vote"].dropna().astype(str)
                 rec[f"{f}_dominant_vote"] = votes.value_counts().idxmax() if len(votes) else None
@@ -88,7 +88,7 @@ def study_summary(neighbors: pd.DataFrame, summary: pd.DataFrame, query_meta: pd
 
 def run_neighbors(gses, models_dir, out_dir, metadata=None, k: int = 15, metric: str = "cosine", blocks="all",
                   exclude_same_study: bool = True, do_umap: bool = False, seed: int = 77,
-                  allow_missing: bool = False, factors=DEFAULT_FACTORS, log=None) -> dict:
+                  allow_missing: bool = False, heads=DEFAULT_HEADS, log=None) -> dict:
     """``models_dir``: the bundle whose embedding is the atlas. ``metadata``: the atlas sample
     metadata (optional; adds descriptive columns)."""
     log = log or (lambda *_: None)
@@ -119,7 +119,7 @@ def run_neighbors(gses, models_dir, out_dir, metadata=None, k: int = 15, metric:
     summary["query_gse"] = q_gse.reindex(summary.index).values
     summary["query_split_bucket"] = bucket.reindex(summary.index).values
     if atlas.metadata is not None:
-        meta_cols = [c for c in NEIGHBOR_META_COLS if c in atlas.metadata.columns and c != "gse" and c not in factors]
+        meta_cols = [c for c in NEIGHBOR_META_COLS if c in atlas.metadata.columns and c != "gse" and c not in heads]
         summary = summary.join(atlas.metadata.reindex(summary.index)[meta_cols].add_prefix("query_"))
     first = nb[nb["rank"] == 1].set_index("query")
     summary["nearest_atlas_sample"] = first["atlas_sample"].reindex(summary.index)
@@ -131,9 +131,9 @@ def run_neighbors(gses, models_dir, out_dir, metadata=None, k: int = 15, metric:
         summary["top_study"] = g.agg(lambda s: s.value_counts().idxmax()).reindex(summary.index)
         summary["top_study_frac"] = g.agg(lambda s: s.value_counts(normalize=True).max()).reindex(summary.index)
         summary["top_studies"] = g.agg(lambda s: ";".join(f"{a}:{b:.2f}" for a, b in s.value_counts(normalize=True).head(5).items())).reindex(summary.index)
-    votes = label_votes(nb, atlas, factors)
+    votes = label_votes(nb, atlas, heads)
     summary = summary.join(votes)
-    for f in factors:
+    for f in heads:
         if f"{f}_knn_vote" not in summary.columns:
             continue
         if atlas.metadata is not None and f in atlas.metadata.columns:
@@ -160,7 +160,7 @@ def run_neighbors(gses, models_dir, out_dir, metadata=None, k: int = 15, metric:
         _umap_plot(a_xy, summary, out / "umap.png")
     summary.to_csv(out / "summary.tsv", sep="\t")
 
-    ss = study_summary(nb, summary, atlas.metadata, factors)
+    ss = study_summary(nb, summary, atlas.metadata, heads)
     ss.to_csv(out / "study_summary.tsv", sep="\t")
     report.update({"created_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(), "ecoli_atlas_version": __version__,
                    "models_dir": str(models_dir), "metadata": None if metadata is None else str(metadata),

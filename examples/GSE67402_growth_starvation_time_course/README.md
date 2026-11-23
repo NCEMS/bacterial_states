@@ -14,8 +14,8 @@ these samples is out of sample.
 per sample) are tracked. Everything the commands below write (`sra/`, `results/`, `checkpoints/`,
 `benchmarks/`, `atlas/`, logs) stays in this folder and is ignored by git.
 
-The numbers below are from the run of 2026-11-22 (inGEST counting of branch `ingest-update`; the
-atlas model of branch `update-atlas`, default settings).
+The numbers below are from the run of 2026-11-22 (the current inGEST counting and atlas model,
+default settings).
 
 ## 1. inGEST: reads to counts
 

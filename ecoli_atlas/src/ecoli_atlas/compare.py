@@ -36,7 +36,7 @@ MANIFEST_FILE = "manifest.json"
 # columns of the atlas sample metadata shown beside every neighbour
 NEIGHBOR_META_COLS = ("gse",) + tuple(HEADS) + ("strain_name", "strain_group", "medium_type", "base_medium", "growth_phase", "carbon_source",
                       "oxygen", "treatment", "genotype_class")
-DEFAULT_FACTORS = tuple(HEADS)
+DEFAULT_HEADS = tuple(HEADS)
 
 
 def read_sample_table(path: str | Path) -> pd.DataFrame:
@@ -64,7 +64,7 @@ def calls_frame(predictions: pd.DataFrame) -> pd.DataFrame:
 
 
 def layout_from_manifest(manifest: dict) -> pd.DataFrame:
-    rows = [{"block": b["block"], "kind": "residual" if b["block"] == "residual" else "factor", "start": int(b["start"]),
+    rows = [{"block": b["block"], "kind": "residual" if b["block"] == "residual" else "head", "start": int(b["start"]),
              "end": int(b["end"]), "width": int(b["end"]) - int(b["start"])} for b in manifest["embedding_blocks"]]
     return pd.DataFrame(rows)
 
@@ -132,14 +132,14 @@ class Atlas:
                 cols += list(self.embedding.columns[int(b["start"]):int(b["end"])])
         return cols
 
-    def label_source(self, factor: str) -> pd.Series | None:
+    def label_source(self, head: str) -> pd.Series | None:
         """Atlas labels of a call: the curated labels when the atlas has any, else the model's calls."""
-        if self.metadata is not None and factor in self.metadata.columns:
-            s = self.metadata.reindex(self.embedding.index)[factor]
+        if self.metadata is not None and head in self.metadata.columns:
+            s = self.metadata.reindex(self.embedding.index)[head]
             if s.notna().any():
                 return s.astype(object).where(s.notna(), None)
-        if self.predictions is not None and f"{factor}_pred" in self.predictions.columns:
-            return self.predictions.reindex(self.embedding.index)[f"{factor}_pred"].astype(object)
+        if self.predictions is not None and f"{head}_pred" in self.predictions.columns:
+            return self.predictions.reindex(self.embedding.index)[f"{head}_pred"].astype(object)
         return None
 
 
@@ -211,9 +211,9 @@ def knn(query: pd.DataFrame, atlas: Atlas, k: int = 15, metric: str = "cosine", 
     return out
 
 
-def label_votes(neighbors: pd.DataFrame, atlas: Atlas, factors=DEFAULT_FACTORS) -> pd.DataFrame:
+def label_votes(neighbors: pd.DataFrame, atlas: Atlas, heads=DEFAULT_HEADS) -> pd.DataFrame:
     out = pd.DataFrame(index=pd.Index(neighbors["query"].unique(), name="sample"))
-    for f in factors:
+    for f in heads:
         src = atlas.label_source(f)
         if src is None:
             continue
@@ -361,10 +361,10 @@ def group_order(labels: pd.Series, metadata: pd.DataFrame, order_by: str | None 
 
 def group_summary(query: pd.DataFrame, atlas: Atlas, neighbors: pd.DataFrame, summary: pd.DataFrame,
                   labels: pd.Series, order: list, query_predictions: pd.DataFrame | None = None,
-                  metric: str = "cosine", blocks="all", factors=DEFAULT_FACTORS) -> pd.DataFrame:
+                  metric: str = "cosine", blocks="all", heads=DEFAULT_HEADS) -> pd.DataFrame:
     """One row per group of query samples, in ``order``.
 
-    n; per factor the fraction of samples called each class (``<f>_called_<class>``), the mean class
+    n; per head the fraction of samples called each class (``<f>_called_<class>``), the mean class
     probability (``<f>_prob_<class>``), the majority label among the pooled neighbours
     (``<f>_knn_vote`` / ``_knn_frac``) and how often the encoder agrees with a sample's own vote
     (``<f>_agree``); ``top_studies`` of the pooled neighbours; mean nearest distance and novelty
@@ -377,13 +377,13 @@ def group_summary(query: pd.DataFrame, atlas: Atlas, neighbors: pd.DataFrame, su
         preds = query_predictions.copy()
         preds.index = preds.index.astype(str)
         preds = preds.reindex(query.index)
-    src = {f: atlas.label_source(f) for f in factors}
+    src = {f: atlas.label_source(f) for f in heads}
     rows, prev_centroid = [], None
     for g in order:
         members = list(labels.index[labels == g])
         row = {"group": g, "n": len(members), "samples": ";".join(members)}
         nb = neighbors[neighbors["query"].isin(members)]
-        for f in factors:
+        for f in heads:
             if preds is not None and f"{f}_pred" in preds.columns:
                 called = preds.loc[members, f"{f}_pred"].astype(str).value_counts(normalize=True)
                 for cls in sorted(preds[f"{f}_pred"].dropna().astype(str).unique()):
@@ -419,7 +419,7 @@ def group_summary(query: pd.DataFrame, atlas: Atlas, neighbors: pd.DataFrame, su
 
 
 def compare(query: pd.DataFrame, atlas: Atlas, out_dir: str | Path, k: int = 15, metric: str = "cosine",
-            blocks="all", query_predictions: pd.DataFrame | None = None, factors=DEFAULT_FACTORS,
+            blocks="all", query_predictions: pd.DataFrame | None = None, heads=DEFAULT_HEADS,
             do_umap: bool = False, seed: int = 77, log=None, metadata: pd.DataFrame | None = None,
             group_by=None, order_by: str | None = None, color_by: str | None = None, plots: bool = False,
             formats=("pdf", "png"), trajectory: bool | None = None) -> pd.DataFrame:
@@ -455,12 +455,12 @@ def compare(query: pd.DataFrame, atlas: Atlas, out_dir: str | Path, k: int = 15,
         summary["top_study"] = top.reindex(summary.index)
         summary["top_study_frac"] = frac.reindex(summary.index)
 
-    votes = label_votes(nb, atlas, factors)
+    votes = label_votes(nb, atlas, heads)
     summary = summary.join(votes)
     if query_predictions is not None:
         qp = query_predictions.copy()
         qp.index = qp.index.astype(str)
-        for f in factors:
+        for f in heads:
             if f"{f}_pred" in qp.columns and f"{f}_knn_vote" in summary.columns:
                 summary[f"{f}_encoder_pred"] = qp[f"{f}_pred"].reindex(summary.index).astype(str)
                 summary[f"{f}_agree"] = summary[f"{f}_encoder_pred"] == summary[f"{f}_knn_vote"].astype(str)
@@ -481,7 +481,7 @@ def compare(query: pd.DataFrame, atlas: Atlas, out_dir: str | Path, k: int = 15,
     qd.to_csv(out / "query_distances.tsv", sep="\t")
     groups = None
     if labels is not None:
-        groups = group_summary(query, atlas, nb, summary, labels, order, query_predictions, metric, blocks, factors)
+        groups = group_summary(query, atlas, nb, summary, labels, order, query_predictions, metric, blocks, heads)
         groups.to_csv(out / "group_summary.tsv", sep="\t")
         log(f"{len(groups)} groups by {group_by}: wrote {out / 'group_summary.tsv'}")
 
@@ -523,7 +523,7 @@ def compare(query: pd.DataFrame, atlas: Atlas, out_dir: str | Path, k: int = 15,
                                               color=color, color_order=color_order if color is not None else None,
                                               color_name=color_by or (group_by if isinstance(group_by, str) else "group"),
                                               group_name=group_by if isinstance(group_by, str) or group_by is None else " | ".join(group_by),
-                                              atlas_xy=a_xy, query_xy=q_xy, factors=factors, formats=formats,
+                                              atlas_xy=a_xy, query_xy=q_xy, heads=heads, formats=formats,
                                               trajectory=trajectory)
             log("figures: " + ", ".join(written))
         except ImportError:

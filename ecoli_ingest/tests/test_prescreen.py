@@ -235,11 +235,11 @@ def test_qc_table_prescreen_then_full_run(tmp_path):
     with open(manifest / "samples.tsv", "w", newline="") as fh:
         w = csv.writer(fh, delimiter="\t")
         w.writerow(["GSM", "GSE", "status", "runs", "layout", "scientific_name", "tax_id", "instrument_model",
-                    "review", "in_atlas_v1"])
-        w.writerow(["GSM1", "GSE9", "candidate", "SRR1", "PAIRED", "Escherichia coli", "562", "NovaSeq", "", "yes"])
+                    "review"])
+        w.writerow(["GSM1", "GSE9", "candidate", "SRR1", "PAIRED", "Escherichia coli", "562", "NovaSeq", ""])
         for i in range(qc_table.LARGE_STUDY_MIN):
-            w.writerow([f"GSM9{i:04d}", "GSE8", "candidate", "SRR9", "PAIRED", "Escherichia coli", "562", "NovaSeq", "", "no"])
-        w.writerow(["GSM2", "GSE9", "candidate", "SRR2,SRR3", "PAIRED", "Escherichia coli", "562", "NovaSeq", "", "no"])
+            w.writerow([f"GSM9{i:04d}", "GSE8", "candidate", "SRR9", "PAIRED", "Escherichia coli", "562", "NovaSeq", ""])
+        w.writerow(["GSM2", "GSE9", "candidate", "SRR2,SRR3", "PAIRED", "Escherichia coli", "562", "NovaSeq", ""])
         w.writerow(["GSM3", "GSE9", "low_reads", "SRR4", "SINGLE", "Escherichia coli", "562", "NovaSeq", "", "no"])
     with open(manifest / "runs.tsv", "w", newline="") as fh:
         w = csv.writer(fh, delimiter="\t")
@@ -263,7 +263,7 @@ def test_qc_table_prescreen_then_full_run(tmp_path):
     assert (rows["GSM1"]["study_candidates"], rows["GSM1"]["large_study"]) == ("2", "no")       # GSM3 is not a candidate
     assert (rows["GSM90000"]["study_candidates"], rows["GSM90000"]["large_study"]) == (str(qc_table.LARGE_STUDY_MIN), "yes")
     assert rows["GSM1"]["pre_decision"] == "pass" and rows["GSM1"]["pre_strand_call"] == "reverse"
-    assert rows["GSM1"]["in_atlas_v1"] == "yes" and rows["GSM1"]["pre_run"] == "SRR1"
+    assert rows["GSM1"]["review"] == "" and rows["GSM1"]["pre_run"] == "SRR1"
     assert (rows["GSM1"]["library_strategy"], rows["GSM1"]["instrument_platform"], rows["GSM1"]["bases"]) == ("RNA-Seq", "ILLUMINA", "300")
     assert rows["GSM2"]["bases"] == "500" and rows["GSM2"]["library_source"] == "GENOMIC/TRANSCRIPTOMIC"   # two runs
     assert rows["GSM2"]["pre_decision"] == "error" and rows["GSM2"]["pre_error"] == "fetch: no reads"

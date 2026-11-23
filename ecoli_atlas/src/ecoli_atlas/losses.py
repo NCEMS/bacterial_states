@@ -12,7 +12,7 @@ MIN_MINORITY_FRACTION = 0.40
 def class_weights(lab_rows: np.ndarray, n_classes: int, beta: float = EFFECTIVE_NUM_BETA,
                   min_minority_frac: float = MIN_MINORITY_FRACTION, sample_weight: np.ndarray | None = None) -> np.ndarray:
     """Effective-number-of-samples class weights (Cui et al.), with the minority class floored at
-    ``min_minority_frac`` of the weighted signal for binary factors. With ``sample_weight`` a
+    ``min_minority_frac`` of the weighted signal for binary calls. With ``sample_weight`` a
     class counts the sum of its samples' weights."""
     has = lab_rows >= 0
     w = np.ones(len(lab_rows)) if sample_weight is None else np.asarray(sample_weight, dtype=np.float64)
