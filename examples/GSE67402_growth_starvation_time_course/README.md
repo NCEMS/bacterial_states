@@ -65,13 +65,15 @@ at 336 h. The culture changes little during growth and switches between 6 and 8 
 ```bash
 conda activate ecoli_atlas
 M=../../outputs/models                       # the atlas model bundle
-ecoli_atlas embed --ingest-results . --models $M --fill-missing-gc study --out atlas
+ecoli_atlas embed --ingest-results . --models $M --fill-missing-gc study --seeds --out atlas
 ```
 
 `embed` reads the counts, antisense counts and QC records of the run directory and writes, per
 sample, the embedding (`atlas/embedding.tsv`: phase, medium and lab-strain scores and the 24-d
 residual), the three calls (`atlas/predictions.tsv`) and the sample table (`atlas/samples.tsv`).
-It printed two warnings, both worth reading:
+With `--seeds` it also embeds the samples with each of the bundle's eight seed models (`atlas/seeds/seed_<n>/`)
+and writes `atlas/predictions_seeds.tsv`: for every call the median, minimum and maximum probability over the seeds
+and the number of seeds that make it (`p_stationary_n_called`, ...). It printed two warnings, both worth reading:
 
 - **`--fill-missing-gc study`.** Four libraries (`t024h_rep1`, `t024h_rep3`, `t048h_rep1`,
   `t048h_rep3`, 21,000-67,000 reads on CDS) are too shallow for the GC-bias fit of the QC record,
@@ -100,8 +102,9 @@ depth, `+` GC bias filled:
 Every sample from 8 h on is called stationary, and 9 of the 11 samples from 3 to 6 h exponential; the model places
 the switch between 6 and 8 hours, as DESeq2 does, although the GEO text labels the 8 h samples mid-exponential. The
 exceptions are `t003h_rep1` (called stationary) and `t005h_rep3` (0.51, on the boundary). They are seed-dependent: the
-bundle's model is the seed chosen on out-of-fold scores (seed 1), and of its eight seeds six call every 3-6 h sample
-exponential (`t003h_rep1` is the least clear sample with seven of the eight seeds). The phase score (`z1` in `embedding.tsv`) tells
+bundle's model is the seed chosen on out-of-fold scores (seed 1), and over the eight seeds (`predictions_seeds.tsv`)
+`t003h_rep1` is called stationary by 2 and `t005h_rep3` by 1, every other 3-6 h sample by none; from 8 h on every
+sample is called stationary by all eight seeds except `t008h_rep2` (7). The phase score (`z1` in `embedding.tsv`) tells
 the same: -0.8 to 0.4 for the growing samples, -1.84 for `t003h_rep1`, and -2.12 to -1.86 from 8 h on.
 
 **Medium and strain.** All 26 samples are called lab strain (REL606 is a lab strain). The medium
@@ -125,32 +128,67 @@ ecoli_atlas axes --models $M --metadata ../../atlas_data/metadata_v2.tsv \
     --axis phase:growth_phase:lag,early_exponential,mid_exponential,transition,stationary,late_stationary,long_term_stationary \
     --holdout lag --holdout late_stationary --holdout long_term_stationary \
     --axis medium:medium_class:complex,defined_rich,minimal_plus_hydrolysate,defined_minimal \
-    --where treated=false --where standard_rnaseq=true --series samples.csv:replicate:time_h --out atlas/axes
+    --where treated=false --where standard_rnaseq=true --series samples.csv:replicate:time_h --seeds --out atlas/axes
 ```
 
 Each dimension is scaled so that its first fitted category of the atlas has median 0 and its last
 median 1: growth phase from mid exponential (0) to stationary (1), medium from complex (0) to
-defined minimal (1).
+defined minimal (1). With `--seeds` every axis is also fitted on the embedding of each of the eight seeds, the same
+way and on the same scale; the score tables get `ordinal_seed_median` / `_min` / `_max`, `axis_<name>_seed_scores.tsv`
+has every seed's score, and the series figures draw each seed's score as a small dot beside the sample. The table
+gives the range over the replicates of the bundle's model (seed 1) and of the median over the seeds:
 
-| Hours | Growth phase | Medium |
-|---|---|---|
-| 3-6 | 0.03-0.45 | 0.72-0.97 |
-| 8 | 0.45-0.49 | 0.46-0.65 |
-| 24 | 0.49-0.63 | 0.44-0.71 |
-| 48 | 0.67-0.72 | 0.63-0.78 |
-| 168 | 0.70-0.72 | 0.38-0.72 |
-| 336 | 0.68-0.73 | 0.31-0.38 |
+| Hours | Growth phase, seed 1 | Growth phase, seed median | Medium, seed 1 | Medium, seed median |
+|---|---|---|---|---|
+| 3-6 | 0.03-0.45 | 0.13-0.38 | 0.72-0.97 | 0.94-1.15 |
+| 8 | 0.45-0.49 | 0.63-0.76 | 0.46-0.65 | 0.76-1.00 |
+| 24 | 0.49-0.63 | 0.80-0.83 | 0.44-0.71 | 0.70-0.76 |
+| 48 | 0.67-0.72 | 0.87-0.94 | 0.63-0.78 | 0.69-0.81 |
+| 168 | 0.70-0.72 | 0.91-0.93 | 0.38-0.72 | 0.47-0.77 |
+| 336 | 0.68-0.73 | 0.86-0.95 | 0.31-0.38 | 0.41-0.42 |
 
 | Look at | What it shows |
 |---|---|
 | `atlas/axes/fig_axes_phase_by_medium.png` | the atlas on both dimensions, the 26 samples on top, joined in time order per replicate |
-| `atlas/axes/fig_axis_phase_series.png`, `fig_axis_medium_series.png` | each dimension against time, one line per replicate |
-| `atlas/axes/axis_*_scores.tsv` | the scores of every sample (`role` = query for the new ones) |
+| `atlas/axes/fig_axis_phase_series.png`, `fig_axis_medium_series.png` | each dimension against time (the time points as categories, the replicates side by side, one colour each), each seed's score as a small dot |
+| `atlas/axes/axis_*_scores.tsv` | the scores of every sample (`role` = query for the new ones), with the median, min and max over the seeds |
+| `atlas/axes/axis_*_seed_scores.tsv` | every seed's score of every sample |
+| `atlas/axes/fig_heads_series.png` | the three calls (probabilities from `atlas/predictions.tsv`, 0-1) against time, the replicates side by side at each time point, each seed's call as a small dot |
+| `atlas/axes/fig_heads_seed_votes.png` | how many of the eight seeds make each call: one bar per sample, red = share of seeds calling stationary / minimal / lab, blue = the rest |
+| `atlas/axes/fig_heads_phase_by_medium.png` | P(stationary) against P(minimal): the atlas (GSE67402 left out) coloured by its labels, the 26 samples on top |
 
-The samples start among the atlas's exponential samples in minimal media, move about halfway up the growth-phase
-dimension between 6 and 8 h and further over the first two days (0.7, below the atlas's stationary median of 1), and
-then drift down the medium dimension with time in starvation, to 0.31-0.38 at two weeks, close to the atlas's defined
-rich media (0.24; defined minimal 0.97, complex -0.02): the long-starved cells look much less minimal than growing ones.
+The samples start among the atlas's exponential samples in minimal media, move up the growth-phase dimension between
+6 and 8 h and further over the first two days, and then drift down the medium dimension with time in starvation: the
+long-starved cells look much less minimal than growing ones (with seed 1, 0.31-0.38 at two weeks, close to the atlas's
+defined rich media at 0.24; defined minimal 0.97, complex -0.02).
+
+**How far they go depends on the seed.** Seed 1 is the lowest of the eight seeds on the growth-phase dimension from
+8 h on: it puts the samples of 48 h and later at about 0.7, below the atlas's stationary median of 1, while the other
+seeds put them at 0.73-1.05 and the seed median is 0.86-0.95. So the plateau below 1 is mostly a property of seed 1,
+not of the samples. On the medium dimension seeds 1 and 3 are the lowest for the growing samples (medians per time
+point 0.82-0.93 and 0.89-1.11, the other seeds 0.96-1.19), and the drop with starvation is in every seed but seed 5
+(two weeks: 0.20-0.52 for the others, 0.84 for seed 5). The range over the seeds of one sample is 0.22-0.47 on the
+growth-phase dimension and 0.22-0.64 on the medium dimension, widest from 8 h on, where the samples are least like
+the training data.
+
+**The calls on their 0-1 scale.** `axes` also draws the calls of section 2 (`fig_heads_series`,
+`fig_heads_phase_by_medium`) when `--query` is an `embed` folder with its `predictions.tsv`. They are the
+probabilities the heads give, not dimensions fitted on ordered categories:
+
+| Hours | P(stationary) | P(minimal) |
+|---|---|---|
+| 3-6 | 0.00-0.02 (`t003h_rep1` 1.00, `t003h_rep2` 0.31, `t005h_rep3` 0.51) | 1.00 |
+| 8-48 | 1.00 | 1.00 |
+| 168 | 1.00 | 1.00, 0.08, 0.09 |
+| 336 | 1.00 | 0.001-0.003 |
+
+Both calls saturate, and so do most seeds (the small dots of `fig_heads_series`): the spread is in the number of seeds
+on each side of 0.5 more than in the probabilities. Every sample from 8 h on has P(stationary) 1.00, so the probabilities do not show the further
+movement over the first two days that the phase dimension shows (seed median 0.63-0.76 at 8 h to 0.87-0.94 at 48 h). The medium
+call stays at 1.00 through 48 h and then drops to rich (the two rich one-week samples by 6 of 8 seeds, the two-week
+samples by 7 of 8), while the medium dimension drifts down gradually. The atlas
+looks the same on this map: almost all of its samples sit in the four corners. Use the calls for the class and the
+dimensions for how far a sample has gone.
 
 ## Not covered here
 

@@ -1,0 +1,77 @@
+# Ecoli_inGEST run configuration. Written by `ecoli_ingest init`; edit and then run
+# `ecoli_ingest check` followed by `ecoli_ingest run` in this directory.
+#
+# Paths are relative to this directory. Outputs go to results/ next to this file.
+
+# GEO GSE147611 ("Nascent RNA sequencing identifies a widespread sigma70-dependent pausing
+# regulated by Gre factors in bacteria"): E. coli K-12 W3110 wild type and its greA greB deletion mutant in LB,
+# mid-exponential phase; three biological replicates each, paired-end, about 2 million read pairs per library.
+# Only the six RNA-seq samples of the series are listed (it also holds nascent-RNA libraries).
+# A TEST study of the Ecoli_ATLAS model: the model was not fitted on it.
+
+experiment: "GSE147611"
+
+# Results directory (default would be GSE271069_results/; the folder already names the study).
+results_dir: "results"
+
+# One entry per sample. Give r2 for paired-end data. If ANY sample lacks r2 the whole run is
+# treated as single-end. `condition` is the DESeq2 grouping variable; an optional `condition2`
+# is added to the model as a second factor.
+#
+# Reads can be given as
+#   r1 / r2:    one file, or a list of files that are concatenated in order (e.g. several lanes);
+#               r2 must list as many files as r1
+#   accession:  an SRA/GEO id (SRR/ERR/DRR run, SRX experiment, SRS/SAMN sample or GSM) or a list
+#               of them. The reads are fetched into `sra_dir` during the run (see `sra_method`
+#               below) and the layout (single/paired) is taken from the archive. Study ids (GSE,
+#               SRP, PRJNA) are not accepted: list their GSM/SRR ids as separate samples.
+samples:
+  wt_rep1:   # wild type (sigma70WT_RNA-seq_rep1)
+    accession: "GSM4435425"
+    condition: "wt"
+  wt_rep2:   # wild type (sigma70WT_RNA-seq_rep2)
+    accession: "GSM4435426"
+    condition: "wt"
+  wt_rep3:   # wild type (sigma70WT_RNA-seq_rep3)
+    accession: "GSM4435427"
+    condition: "wt"
+  greAB_rep1:   # greA greB deletion (sigma70greAB-_RNA-seq_rep1)
+    accession: "GSM4435428"
+    condition: "greAB"
+  greAB_rep2:   # greA greB deletion (sigma70greAB-_RNA-seq_rep2)
+    accession: "GSM4435429"
+    condition: "greAB"
+  greAB_rep3:   # greA greB deletion (sigma70greAB-_RNA-seq_rep3)
+    accession: "GSM4435430"
+    condition: "greAB"
+
+# DESeq2 contrasts as [factor, reference_level, test_level]. The reference is listed first.
+deseq2:
+  contrasts:
+    - ["condition", "wt", "greAB"]
+
+# Centrifuge contamination screen (needs the index from `ecoli_ingest download`). Set false to skip
+# it: Centrifuge is then not run, its gate is ignored and it is left out of the MultiQC report.
+# Off in this example to keep the run short; the species gate then does not apply.
+centrifuge: false
+
+# Quality-control gates. A sample that fails any configured gate is excluded from alignment and
+# counting (see checkpoints/qc_failures.json). Remove a line to disable that gate.
+species_gate: true
+fastp_min_kept_percentage: 75.0
+
+# Samples given by accession: where downloads and the resolution cache go (default: sra/ in this
+# directory; point several run directories at one shared directory to download each run once) and
+# how many runs are fetched at the same time (`ecoli_ingest run --max-downloads N` overrides).
+# sra_method: auto = sra-tools (prefetch + fasterq-dump, from NCBI) first and the ENA FASTQ files as
+# the backup; "sra-tools" or "ena" = that source only.
+# sra_dir: "sra"
+# max_downloads: 4
+
+# Reference resources default to the standard files in the resources directory and normally need
+# no changes. Uncomment to override individual files.
+# ref: "GCF_000005845_2_ASM584v2_genomic#0#NC_000913.3"
+# vg_index: "/path/to/resources/vg/ecoli_graph_test"
+# annotation_gff: "/path/to/resources/annotation/GCF_000005845.2_ASM584v2_counting_v2.gff"
+# annotation_bed: "/path/to/resources/annotation/GCF_000005845.2_ASM584v2_counting_v2.bed"
+# centrifuge_index_path: "/path/to/resources/centrifuge/p_compressed+h+v"

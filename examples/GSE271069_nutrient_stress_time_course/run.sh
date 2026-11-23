@@ -14,6 +14,7 @@ case "${1:-}" in
   atlas)
     $ROOT/bin/ecoli_atlas embed --ingest-results . --models "$MODELS" --out atlas/embedded
     $ROOT/bin/ecoli_atlas compare --embeddings atlas/embedded --models "$MODELS" --out atlas/compared \
+      --atlas-metadata $DATA/metadata_v2.tsv --exclude-study GSE271069 \
       --metadata samples.csv --group-by condition --order-by order
     T="--counts $DATA/atlas_v2_counts.tsv --antisense $DATA/atlas_v2_antisense_counts.tsv --metadata $DATA/metadata_v2.tsv
        --qc $DATA/sample_qc.tsv --time-series $DATA/time_courses.tsv

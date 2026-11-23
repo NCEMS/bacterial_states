@@ -1,0 +1,7 @@
+sample_id,condition,replicate,accession,geo_title
+wt_rep1,wt,1,GSM4435425,sigma70WT_RNA-seq_rep1
+wt_rep2,wt,2,GSM4435426,sigma70WT_RNA-seq_rep2
+wt_rep3,wt,3,GSM4435427,sigma70WT_RNA-seq_rep3
+greAB_rep1,greAB,1,GSM4435428,sigma70greAB-_RNA-seq_rep1
+greAB_rep2,greAB,2,GSM4435429,sigma70greAB-_RNA-seq_rep2
+greAB_rep3,greAB,3,GSM4435430,sigma70greAB-_RNA-seq_rep3

@@ -14,7 +14,7 @@ Two independently installable packages in one repo (GitHub `NCEMS/bacterial_stat
   count likelihood, trained on the recounted atlas (`docs/atlas_model_v2.md`, first stage). CLI:
   `prepare`, `train`, `embed`, `evaluate`, `figures` (data composition and the model figures), `casestudy`,
   `axes` (ordered categories as dimensions of the embedding), `drivers`, `compare` (new samples against the
-  atlas of a bundle), `neighbors` (atlas studies against the rest of it) and `view` (one self-contained HTML page with an
+  atlas of a bundle), `extract` (atlas studies as an `embed` output, for the tools made for new samples), `neighbors` (atlas studies against the rest of it) and `view` (one self-contained HTML page with an
   interactive 3-D map of a bundle's atlas; `viewer/`, presets in `viewer/presets.json`). Everything is on `main`
   (`update-atlas` and `ingest-update` were merged on 2026-11-22). The v1 package is only in the code release
   `v1.0.0`; see "v1 history" at the end.
@@ -35,7 +35,7 @@ Never `git add` any of these (all in `.gitignore`): `resources/`, `old_resources
 | `outputs/v1_originals/` | the v1 originals, moved there on 2026-11-22 (user decision) to free their paths: `models/`, `atlas/` (Colab-trained bundle and its atlas; published as `ecoli_atlas_models_v1.tar.gz` in the `resources-v1` release), `figures/` (Colab reference figures, mixed sessions), `predictions/` (`final_embedding.csv`, 3342 samples), `factor_gene_correlations.txt` (GSEA list) | **never overwrite or commit**; not readable by the current code |
 | `outputs/v1_originals/{models_repro,models_repro_sweep,atlas_repro,figures_repro,predictions_paper1}/` | v1 refits and reproductions made on `main`, moved there with the originals (2026-11-22) | kept for comparison |
 | `work/neighbors_*/` | `ecoli_atlas neighbors` runs (oxygen studies, withheld GSE224463) | scratch |
-| `examples/<name>/` | one folder per example (`examples/README.md` is the index): read-based ones (`GSE67402_*`, `GSE271069_*`: `config.yaml`, `samples.csv`, `run.sh ingest|atlas`) and atlas-only ones (`atlas_model_figures`, `atlas_drivers`, `atlas_axes`, `GSE189154_oxygen`, `GSE128997_uti`, `GSE224463_withheld_study`); only `README.md`, `run.sh`, `config.yaml`, `samples.csv` are tracked, everything a run writes there is ignored | each `run.sh` runs from its folder against `../../outputs/models` (`MODELS=` for another bundle). Paper figures, case studies, axes and drivers are made by the examples, not written to `outputs/` |
+| `examples/<name>/` | one folder per example (`examples/README.md` is the index): read-based ones (`GSE147611_*`, `GSE67402_*`, `GSE271069_*`: `config.yaml`, `samples.csv`, `run.sh ingest|atlas`) and atlas-only ones (`atlas_model_figures`, `atlas_drivers`, `atlas_axes`, `GSE189154_oxygen`, `GSE128997_uti`, `GSE224463_rpoS_stress_time_courses`); only `README.md`, `run.sh`, `config.yaml`, `samples.csv` are tracked, everything a run writes there is ignored | each `run.sh` runs from its folder against `../../outputs/models` (`MODELS=` for another bundle). Paper figures, case studies, axes and drivers are made by the examples, not written to `outputs/` |
 | `work/experiment3/` | the tutorial run (4 samples) used for verification | a run directory; results in `experiment3_results/` |
 | `notebooks/` | the two original Colab notebooks | read-only reference; never edit or commit |
 | `raw_data/` | original Drive dump incl. unused files and the Contreras paper data | `Contreras Paper/Paper1_all_samples_counts.tsv` is the inference test case |
@@ -177,10 +177,12 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   axis_<name>_summary.json` attributes an `axes` dimension instead of a head (its saved weights apply to the embedding
   columns standardised over the axis's fitted samples, not to the raw `embedding.tsv`); with a sweep it refits the
   axis on every seed's embedding (`refit_axis`, identical to running `axes` on that seed) and averages the seeds. Gene-set enrichment (`gsea.py`,
-  gseapy, two-sided preranked, GO sets in `reference/go_gene_sets_ecocyc.tsv.gz` built by `scripts/go_gene_sets.py` from
+  preranked: one-sided `prerank_one_sided` (numpy, = fgsea scoreType pos, gseaParam 0; default of the `figures` panel) or
+  two-sided gseapy (default of `drivers` and the case studies), `--gsea-sides`; GO sets in `reference/go_gene_sets_ecocyc.tsv.gz` built by `scripts/go_gene_sets.py` from
   the EcoCyc GAF, genes matched by lower-case symbol) is the `figures` panel `gsea` (between-study ranking of
   `batch_genes`, MG1655 and BW25113) and `drivers --gsea` (genes ranked by signed attribution). The v1 paper's GSEA was
-  R fgsea, one-sided (`outputs/v1_originals/GSEA/runGSEA.ipynb`); its NES and p-values are not comparable with these.
+  R fgsea, one-sided (`outputs/v1_originals/GSEA/runGSEA.ipynb`); the one-sided test reproduces it on the v1 rankings
+  (NES r 0.9998; `work/gsea_one_sided/validate.py`), the two-sided NES and p-values are not comparable with it.
   Curated modules (`modules.py`, `drivers --modules TSV`): module net attribution against an operon-aware size-matched
   null, study bootstrap, seeds; tables from `ecoli_atlas download modules` (regulondb + imodulon from SBRG/precise1k pinned
   commit with SHA-256, KEGG REST with retrieval date; `download.MODULE_SOURCES`; nothing shipped) into

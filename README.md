@@ -54,13 +54,22 @@ ecoli_atlas compare --embeddings embedded --models outputs/models --out compared
 
 ## Worked examples
 
-Complete runs from GEO accessions to atlas neighbours, each a run directory with its `config.yaml`,
-`samples.csv` and a README that walks through the commands and the results:
+One folder per example under `examples/`, each with a README (the question, the commands and what came out) and a
+`run.sh` that runs it against the model in `outputs/models`. [`examples/README.md`](examples/README.md) is the index.
 
-| Example | Data |
-|---|---|
-| [`examples/GSE67402_growth_starvation_time_course`](examples/GSE67402_growth_starvation_time_course/README.md) | *E. coli* B REL606, glucose minimal medium, 3 h to 2 weeks (36 samples) |
-| [`examples/GSE271069_nutrient_stress_time_course`](examples/GSE271069_nutrient_stress_time_course/README.md) | K-12 MG1655, glucose vs casamino acids through exponential and stationary phase (16 samples) |
+| Example | What it shows | Needs |
+|---|---|---|
+| [`GSE147611_greAB_deletion`](examples/GSE147611_greAB_deletion/README.md) | the smallest one: K-12 W3110 wild type against a greA greB deletion in LB, 3 + 3 samples of about 2 million read pairs, from reads to counts, DESeq2 and the atlas | SRA reads; `run.sh ingest`, then `run.sh atlas` |
+| [`GSE67402_growth_starvation_time_course`](examples/GSE67402_growth_starvation_time_course/README.md) | *E. coli* B REL606 in glucose minimal medium, 3 h to 2 weeks: reads to counts (inGEST) to the embedding, calls and axes, step by step | SRA reads; `run.sh ingest`, then `run.sh atlas` |
+| [`GSE271069_nutrient_stress_time_course`](examples/GSE271069_nutrient_stress_time_course/README.md) | K-12 MG1655, glucose against casamino acids through exponential and stationary phase: a medium × time design from reads to the atlas | SRA reads; `run.sh ingest`, then `run.sh atlas` |
+| [`atlas_model_figures`](examples/atlas_model_figures/README.md) | the training data, TEST performance, batch structure and its GO terms | atlas tables |
+| [`atlas_drivers`](examples/atlas_drivers/README.md) | the genes, GO terms and gene modules that move each call | atlas tables |
+| [`atlas_axes`](examples/atlas_axes/README.md) | growth phase, oxygen and carbon source as dimensions of the embedding, and their genes | atlas tables |
+| [`GSE189154_oxygen`](examples/GSE189154_oxygen/README.md) | low oxygen against aerobic growth in a held-out study | atlas tables |
+| [`GSE128997_uti`](examples/GSE128997_uti/README.md) | infection against urine culture, paired by patient isolate | atlas tables |
+| [`GSE224463_rpoS_stress_time_courses`](examples/GSE224463_rpoS_stress_time_courses/README.md) | a study the model never saw: wild type and Δ*rpoS* through stationary-phase entry, cold and high osmolarity; its atlas neighbours, calls over the seeds and growth phase along each time course | the model bundle |
+
+"Atlas tables" are the training-data release in `atlas_data/` and the counting annotation in `resources/annotation/`.
 
 ## Repository layout
 
@@ -72,7 +81,7 @@ bacterial_states/
 │   └── atlas_build/         # scripts used to build the atlas corpus (not user-facing)
 ├── ecoli_atlas/             # Python package (src layout), tests, SLURM template
 ├── bin/                     # run either CLI from the checkout without installing
-├── examples/                # worked examples: config.yaml, samples.csv, README.md (outputs are not committed)
+├── examples/                # one folder per example: README.md, run.sh (+ config.yaml, samples.csv); outputs not committed
 ├── docs/                    # additional guides (CyVerse)
 ├── CLAUDE.md                # conventions for working in this repo
 └── (local, not committed)   resources/ atlas_data/ outputs/ work/ notebooks/
