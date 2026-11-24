@@ -55,6 +55,14 @@ pip install --no-deps --require-hashes -r ecoli_atlas/requirements-cuda.txt
 python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"
 ```
 
+The pip torch does not search the environment's `lib/`, so `import torch` loads the system `libstdc++`; on an
+older system that one is too old for libraries imported after torch (optuna's `sqlite3` fails with ``CXXABI_1.3.15'
+not found``). After `conda activate ecoli_atlas`, in the shell or the job script, put the environment's libraries first:
+
+```bash
+export LD_LIBRARY_PATH="$CONDA_PREFIX/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+```
+
 **Apptainer image (CPU).** The same linux-64 lock and the package, without models or data:
 
 ```bash
