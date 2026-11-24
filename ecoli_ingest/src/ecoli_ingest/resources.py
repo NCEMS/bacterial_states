@@ -1,21 +1,23 @@
-"""Resource bundles: manifest generation/verification and the download stub.
+"""Resource bundles (manifest generation/verification, download) and the container image.
 
 The core bundle is an asset of the GitHub release `resources-v2` of NCEMS/bacterial_states; the Centrifuge
 index is fetched from its authors' public bucket. Both are checked against the packaged manifest
-after unpacking. The container image (5.3 GB) is over the 2 GB limit for release assets and has no
-download URL yet: for it `download` prints the interim CyVerse instructions. Every URL lives in
-BUNDLE_URLS below and nowhere else.
+after unpacking. The Apptainer image belongs to the code version, not to the data release: an ORAS
+artifact `ghcr.io/ncems/ecoli_ingest:<version>` on the GitHub container registry, pulled with the
+container runtime and checked against the SHA-256 of the .sif pinned below. Every URL lives in
+BUNDLE_URLS / CONTAINER_URL below and nowhere else.
 """
 from __future__ import annotations
 
 import hashlib
 import os
+import subprocess
 import sys
 import tarfile
 import urllib.request
 from pathlib import Path
 
-from . import paths
+from . import __version__, paths
 
 RESOURCES_VERSION = "v2"
 # assets of the GitHub data release `resources-<version>` (code releases are tagged vX.Y.Z)
@@ -25,23 +27,29 @@ RELEASE_URL = f"https://github.com/NCEMS/bacterial_states/releases/download/reso
 BUNDLES = {
     "core": ("vg", "annotation"),
     "centrifuge": ("centrifuge",),
-    "container": ("container",),
 }
-BUNDLE_SIZES = {"core": "175 MB download, 676 MB unpacked", "centrifuge": "5.4 GB download, 6.9 GB unpacked", "container": "~5.3 GB"}
+BUNDLE_SIZES = {"core": "175 MB download, 676 MB unpacked", "centrifuge": "5.4 GB download, 6.9 GB unpacked"}
 BUNDLE_URLS = {
     "core": f"{RELEASE_URL}/ecoli_ingest_core_{RESOURCES_VERSION}.tar.gz",
     # upstream prebuilt index from the Centrifuge authors (Kim et al. 2016; built 2016). The file name
     # is not versioned, so pin the S3 object version; the manifest checksums are verified after unpacking
     "centrifuge": "https://genome-idx.s3.amazonaws.com/centrifuge/p_compressed%2Bh%2Bv.tar.gz"
                   "?versionId=KoqnkfTuATv3a5Cq9hBzQxwFWYRx90aj",
-    "container": f"https://TBD/ncems/bacterial_states/ecoli_ingest_container_{RESOURCES_VERSION}.tar.gz",
 }
 # directory (relative to the resources dir) a bundle's tarball is unpacked into; our own tarballs carry
 # their top-level directories, the upstream Centrifuge tarball has its .cf files at the root
 BUNDLE_SUBDIR = {"centrifuge": "centrifuge"}
-# downloaded by `ecoli_ingest download` when no bundle is named; the container needs --with-container
+# downloaded by `ecoli_ingest download` when no bundle is named; the container needs --with-apptainer
 DEFAULT_BUNDLES = ("core", "centrifuge")
-CYVERSE_LEGACY_PATH = "/iplant/home/shared/NCEMS/working-groups/bacterial-states/resources.tar.gz"
+
+# Apptainer image of this code version (built by release/build_container.sh from locks/linux-64.txt, pushed at
+# each code release vX.Y.Z). The tag can be moved, so the pull is checked against the SHA-256 of the .sif
+# file pinned here; None until the image of this version is published.
+CONTAINER_URL = f"oras://ghcr.io/ncems/ecoli_ingest:{__version__}"
+CONTAINER_SHA256: str | None = None
+CONTAINER_SIZE = "~2-3 GB"
+# everything `ecoli_ingest download` accepts
+DOWNLOADS = (*BUNDLES, "container")
 
 MANIFEST_COLUMNS = ("path", "sha256", "bytes", "bundle")
 
@@ -126,19 +134,50 @@ def _check_member(member: tarfile.TarInfo, target: Path) -> None:
         raise ValueError(f"refusing to unpack {member.name!r}: outside {target}")
 
 
+def download_container(dest: Path, dry_run: bool = False, log=None, runtime: str | None = None) -> int:
+    """Pull the image of this version into <dest>/container/ and check its SHA-256."""
+    from . import container   # container imports paths only
+
+    log = log or sys.stderr
+    target = paths.container_image(dest)
+    print(f"bundle   : container ({CONTAINER_SIZE})", file=log)
+    print(f"url      : {CONTAINER_URL}", file=log)
+    print(f"target   : {target}", file=log)
+    if CONTAINER_SHA256 is None:
+        print(f"\nThe image of ecoli_ingest {__version__} has not been published yet. Build it with", file=log)
+        print("    release/build_container.sh ecoli_ingest      (in a checkout of the repository)", file=log)
+        print(f"and put it at {target}, or use the conda environment (--container never).", file=log)
+        return 2
+    if dry_run:
+        return 0
+    runtime = runtime or container.find_runtime()
+    if runtime is None:
+        print("no container runtime (apptainer/singularity) found; set ECOLI_INGEST_APPTAINER", file=log)
+        return 1
+    target.parent.mkdir(parents=True, exist_ok=True)
+    part = target.with_name(".partial_" + target.name)
+    rc = subprocess.run([runtime, "pull", "--force", str(part), CONTAINER_URL]).returncode
+    if rc != 0 or not part.exists():
+        print(f"{runtime} pull failed (exit {rc})", file=log)
+        part.unlink(missing_ok=True)
+        return 1
+    digest = sha256_of(part)
+    if digest != CONTAINER_SHA256:
+        print(f"checksum mismatch: got {digest}, expected {CONTAINER_SHA256}; image left at {part}", file=log)
+        return 1
+    part.replace(target)
+    print("checksum ok", file=log)
+    return 0
+
+
 def download(bundle: str, dest: Path, dry_run: bool = False, log=None) -> int:
+    if bundle == "container":
+        return download_container(dest, dry_run=dry_run, log=log)
     log = log or sys.stderr
     url = BUNDLE_URLS[bundle]
     print(f"bundle   : {bundle} ({BUNDLE_SIZES[bundle]})", file=log)
     print(f"url      : {url}", file=log)
     print(f"target   : {dest}", file=log)
-    if "TBD" in url:
-        print("\nThe download location for this bundle has not been published yet.", file=log)
-        print("Interim: fetch the complete resources tarball from CyVerse with GoCommands", file=log)
-        print(f"    gocmd get --progress -f --icat {CYVERSE_LEGACY_PATH}", file=log)
-        print(f"    tar -xvzf resources.tar.gz -C {dest.parent}", file=log)
-        print("then `mv resources/build resources/container` (the image lives in container/ now).", file=log)
-        return 2
     if dry_run:
         return 0
     target = dest / BUNDLE_SUBDIR.get(bundle, "")

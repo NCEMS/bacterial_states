@@ -169,15 +169,8 @@ def test_cli_run_max_downloads_default():
     assert build_parser().parse_args(["run", "--max-downloads", "2"]).max_downloads == 2
 
 
-def test_container_image_legacy_layout(tmp_path):
-    (tmp_path / "build").mkdir()
-    (tmp_path / "build" / "rnaseq_vg.sif").write_bytes(b"")
-    img, legacy = paths.container_image(tmp_path)
-    assert legacy and img.name == "rnaseq_vg.sif"
-    (tmp_path / "container").mkdir()
-    (tmp_path / "container" / "rnaseq_vg.sif").write_bytes(b"")
-    img, legacy = paths.container_image(tmp_path)
-    assert not legacy and img.parent.name == "container"
+def test_container_image_path(tmp_path):
+    assert paths.container_image(tmp_path) == tmp_path / "container" / "ecoli_ingest.sif"
 
 
 def test_centrifuge_on_unless_switched_off():

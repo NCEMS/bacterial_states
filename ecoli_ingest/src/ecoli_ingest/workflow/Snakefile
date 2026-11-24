@@ -722,9 +722,12 @@ def _package_commit():
         return ""
 
 def _package_version():
+    # __version__ of the package this Snakefile belongs to (read from its source, so a stale install record or a
+    # run inside the container, where only the bound package directory is present, gives the right version)
+    import re
     try:
-        from importlib.metadata import version
-        return version("ecoli_ingest")
+        text = open(os.path.join(workflow.basedir, os.pardir, "__init__.py"), encoding="utf-8").read()
+        return re.search(r'__version__\s*=\s*"([^"]+)"', text).group(1)
     except Exception:
         return ""
 

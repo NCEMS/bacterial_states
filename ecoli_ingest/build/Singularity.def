@@ -1,23 +1,61 @@
+# Apptainer image of Ecoli_inGEST: the workflow tools of locks/linux-64.txt (the exact environment of the atlas
+# recount) and the ecoli_ingest package itself. Build with release/build_container.sh, which stages the package
+# tree and fills in VERSION / REVISION; %files paths are relative to that staging directory.
+#
+#   apptainer run ecoli_ingest_<version>.sif check|run ...     # the launcher inside the image
+#   ecoli_ingest run --container always                        # the host launcher, tools from the image
 Bootstrap: docker
-From: continuumio/miniconda3
+From: mambaorg/micromamba:2.10.0-debian13-slim@sha256:e1476182cd40eb1f7c0cfae4adec9bfd78f3d7f05c61368306abfdc8939c1198
+
+%arguments
+    VERSION=unset
+    REVISION=unset
 
 %files
-    ../environment.yaml /env.yaml
+    ecoli_ingest /opt/src/ecoli_ingest
 
 %post
-    conda config --add channels conda-forge
-    conda config --add channels bioconda
-    conda config --add channels defaults
-    conda install -y mamba
-    mamba env create -f /env.yaml
-    conda clean -a -y
+    set -eu
+    export MAMBA_ROOT_PREFIX=/opt/conda
+    # the explicit lock: no solve, every package by URL and MD5
+    micromamba install --yes --name base --file /opt/src/ecoli_ingest/locks/linux-64.txt
+    /opt/conda/bin/python -m pip install --no-deps --no-build-isolation --no-index --no-cache-dir /opt/src/ecoli_ingest
+    micromamba clean --all --yes
+    rm -rf /opt/conda/pkgs /root/.cache
 
 %environment
-    source /opt/conda/etc/profile.d/conda.sh
-    conda activate ecoli_ingest
-    export PATH=/opt/conda/envs/ecoli_ingest/bin:$PATH
+    export MAMBA_ROOT_PREFIX=/opt/conda
+    export CONDA_PREFIX=/opt/conda
+    export PATH=/opt/conda/bin:$PATH
+    # what `conda activate` would do (JAVA_HOME of openjdk for FastQC, R's variables)
+    for f in /opt/conda/etc/conda/activate.d/*.sh; do
+        [ -r "$f" ] && . "$f"
+    done
+    unset f
 
 %labels
-    Author Alexis_Morrissey_NCEMS_PSU
-    Version 2.0.0
+    org.opencontainers.image.title ecoli_ingest
+    org.opencontainers.image.version {{ VERSION }}
+    org.opencontainers.image.revision {{ REVISION }}
+    org.opencontainers.image.source https://github.com/NCEMS/bacterial_states
+    org.opencontainers.image.licenses MIT
 
+%test
+    set -eu
+    tmp=$(mktemp -d)
+    python /opt/src/ecoli_ingest/src/ecoli_ingest/workflow/scripts/sample_qc.py versions --out "$tmp/versions.json"
+    python /opt/src/ecoli_ingest/build/check_versions.py --env /opt/src/ecoli_ingest/environment.yaml \
+        --versions "$tmp/versions.json"
+    for exe in prefetch fasterq-dump pigz centrifuge-kreport geneBody_coverage.py Rscript; do
+        command -v "$exe" >/dev/null || { echo "missing: $exe" >&2; exit 1; }
+    done
+    Rscript -e 'suppressPackageStartupMessages(library(DESeq2))'
+    test "$(python -c 'import ecoli_ingest; print(ecoli_ingest.__version__)')" = "{{ VERSION }}"
+    rm -rf "$tmp"
+
+%runscript
+    exec ecoli_ingest "$@"
+
+%help
+    Ecoli_inGEST {{ VERSION }} ({{ REVISION }}): `apptainer run <image> --help`.
+    Resource bundles are not in the image: `ecoli_ingest download`, then bind the resources directory.

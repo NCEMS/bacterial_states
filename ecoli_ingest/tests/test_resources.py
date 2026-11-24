@@ -7,7 +7,7 @@ def test_bundle_of():
     assert resources.bundle_of("vg/ecoli_graph_test.d2.gbz") == "core"
     assert resources.bundle_of("annotation/x.gff") == "core"
     assert resources.bundle_of("centrifuge/p_compressed+h+v.1.cf") == "centrifuge"
-    assert resources.bundle_of("container/rnaseq_vg.sif") == "container"
+    assert resources.bundle_of(paths.CONTAINER_IMAGE) is None          # pulled from the registry, not a bundle
     assert resources.bundle_of("linear/ecoli_linear.gbz") is None  # not distributed
 
 
@@ -40,17 +40,46 @@ def test_packaged_manifest_is_consistent():
         assert paths.RESOURCE_FILES["vg_index"] + suffix in rels
     for key in ("annotation_gff", "annotation_bed", "genome_fasta"):
         assert paths.RESOURCE_FILES[key] in rels
-    assert paths.CONTAINER_IMAGE in rels
+    assert paths.CONTAINER_IMAGE not in rels
     assert all(r[3] in resources.BUNDLES for r in rows)
 
 
-def test_download_stub_prints_interim_instructions(tmp_path, capsys):
+def test_container_url_is_this_version():
+    from ecoli_ingest import __version__
+    assert resources.CONTAINER_URL == f"oras://ghcr.io/ncems/ecoli_ingest:{__version__}"
+
+
+def test_container_unpublished_points_to_the_build(tmp_path, monkeypatch):
     import io
+    monkeypatch.setattr(resources, "CONTAINER_SHA256", None)
     buf = io.StringIO()
-    rc = resources.download("container", tmp_path / "res", dry_run=True, log=buf)
-    assert rc == 2  # the image is too large for a release asset; URL still TBD
+    assert resources.download("container", tmp_path / "res", dry_run=True, log=buf) == 2
     out = buf.getvalue()
-    assert "gocmd get" in out and "TBD" in out and str(tmp_path / "res") in out
+    assert "build_container.sh" in out and str(tmp_path / "res" / paths.CONTAINER_IMAGE) in out
+
+
+def _fake_runtime(tmp_path, payload: bytes) -> str:
+    """A stand-in for `apptainer pull --force <dest> <url>` that writes payload to <dest>."""
+    exe = tmp_path / "fake_apptainer"
+    exe.write_text("#!/bin/sh\nprintf '%s' '" + payload.decode() + "' > \"$3\"\n")
+    exe.chmod(0o755)
+    return str(exe)
+
+
+def test_container_pull_checks_sha256(tmp_path, monkeypatch):
+    import hashlib
+    import io
+    payload = b"not-really-a-sif"
+    res = tmp_path / "res"
+    monkeypatch.setattr(resources, "CONTAINER_SHA256", hashlib.sha256(payload).hexdigest())
+    rt = _fake_runtime(tmp_path, payload)
+    assert resources.download_container(res, log=io.StringIO(), runtime=rt) == 0
+    assert (res / paths.CONTAINER_IMAGE).read_bytes() == payload
+    monkeypatch.setattr(resources, "CONTAINER_SHA256", "0" * 64)
+    (res / paths.CONTAINER_IMAGE).unlink()
+    buf = io.StringIO()
+    assert resources.download_container(res, log=buf, runtime=rt) == 1
+    assert "checksum mismatch" in buf.getvalue() and not (res / paths.CONTAINER_IMAGE).exists()
 
 
 def test_core_is_a_release_asset():

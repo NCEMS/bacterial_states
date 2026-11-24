@@ -1,0 +1,74 @@
+# Build the Apptainer images of ecoli_ingest and ecoli_atlas with release/build_container.sh and push them to
+# the GitHub container registry as ORAS artifacts: oras://ghcr.io/ncems/<package>:<version>.
+#
+#  * a pushed code tag vX.Y.Z builds both images and pushes them (the tag must equal the packages' __version__);
+#  * "Run workflow" (workflow_dispatch) builds one or both; pushing is opt-in there.
+#
+# After a push: pin the printed SHA-256 (job summary) as CONTAINER_SHA256 in ecoli_ingest/src/ecoli_ingest/resources.py
+# and IMAGE_SHA256 in ecoli_atlas/src/ecoli_atlas/download.py, and check that both packages are public.
+name: containers
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      package:
+        description: which image
+        type: choice
+        options: [both, ecoli_ingest, ecoli_atlas]
+        default: both
+      push:
+        description: push to ghcr.io/ncems
+        type: boolean
+        default: false
+permissions:
+  contents: read
+  packages: write
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [ecoli_ingest, ecoli_atlas]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Skip packages not asked for
+        id: want
+        run: |
+          want=${{ github.event_name == 'push' || inputs.package == 'both' || inputs.package == matrix.package }}
+          echo "build=$want" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        if: steps.want.outputs.build == 'true'
+      - name: Tag and package version agree
+        if: steps.want.outputs.build == 'true' && github.event_name == 'push'
+        run: |
+          v=$(sed -n 's/^__version__ = "\(.*\)"$/\1/p' ${{ matrix.package }}/src/${{ matrix.package }}/__init__.py)
+          test "v$v" = "${GITHUB_REF_NAME}" || { echo "tag ${GITHUB_REF_NAME} but ${{ matrix.package }} is $v"; exit 1; }
+      - name: Free disk space (preinstalled toolchains the build does not use)
+        if: steps.want.outputs.build == 'true'
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          df -h /
+      - uses: eWaterCycle/setup-apptainer@v2
+        if: steps.want.outputs.build == 'true'
+      - name: Build (runs the image's %test)
+        if: steps.want.outputs.build == 'true'
+        run: SUDO_BUILD=1 release/build_container.sh ${{ matrix.package }} "$RUNNER_TEMP/images" | tee build.txt
+      - name: Push
+        if: steps.want.outputs.build == 'true' && (github.event_name == 'push' || inputs.push)
+        run: |
+          sif=$(ls "$RUNNER_TEMP"/images/${{ matrix.package }}_*.sif)
+          v=$(basename "$sif" .sif); v=${v#${{ matrix.package }}_}
+          echo "${{ secrets.GITHUB_TOKEN }}" | apptainer registry login --username "${{ github.actor }}" --password-stdin oras://ghcr.io
+          apptainer push "$sif" "oras://ghcr.io/ncems/${{ matrix.package }}:$v"
+          apptainer pull --force back.sif "oras://ghcr.io/ncems/${{ matrix.package }}:$v"
+          test "$(sha256sum < back.sif)" = "$(sha256sum < "$sif")"
+      - name: Summary
+        if: steps.want.outputs.build == 'true'
+        run: |
+          { echo "### ${{ matrix.package }}"; echo '```'; cat build.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: steps.want.outputs.build == 'true'
+        with:
+          name: ${{ matrix.package }}-sha256
+          path: ${{ runner.temp }}/images/*.sha256

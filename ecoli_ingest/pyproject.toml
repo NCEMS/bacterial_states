@@ -30,7 +30,6 @@ where = ["src"]
 ecoli_ingest = [
     "workflow/Snakefile",
     "workflow/scripts/*",
-    "workflow/envs/*",
     "config/*",
     "resources.manifest.tsv",
 ]

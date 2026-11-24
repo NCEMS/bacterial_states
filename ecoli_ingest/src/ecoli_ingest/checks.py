@@ -6,7 +6,7 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
-from . import container, paths, runconfig
+from . import __version__, container, paths, runconfig
 
 OK, WARN, FAIL = "ok", "warn", "FAIL"
 MIN_STRAND_FRACTION = 0.8    # mirrors workflow/scripts/call_strandedness.py MIN_FRACTION: unstranded libraries are never counted
@@ -58,10 +58,15 @@ def check_mode(mode: str, resources: Path | None) -> list[Check]:
         if resources is None:
             out.append(Check("container image", FAIL, "no resources directory"))
         else:
-            img, legacy = paths.container_image(resources)
+            img = paths.container_image(resources)
             if img.exists():
-                out.append(Check("container image", WARN if legacy else OK,
-                                 f"{img}" + ("  (legacy build/ layout; rename to container/)" if legacy else "")))
+                version = container.image_version(rt, img) if rt else None
+                if version == __version__:
+                    out.append(Check("container image", OK, f"{img} (ecoli_ingest {version})"))
+                else:
+                    out.append(Check("container image", WARN,
+                                     f"{img} is " + (f"version {version}" if version else "of unknown version")
+                                     + f", this launcher is {__version__}; run `ecoli_ingest download container`"))
             else:
                 out.append(Check("container image", FAIL,
                                  f"{img} not found; run `ecoli_ingest download container` or use --container never"))

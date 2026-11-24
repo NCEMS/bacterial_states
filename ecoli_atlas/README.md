@@ -32,21 +32,39 @@ This is the first stage of the design. Not yet in the model: batch-corrected cou
 ## Install
 
 ```bash
-mamba env create -f ecoli_atlas/environment.yaml
+conda create -n ecoli_atlas --file ecoli_atlas/locks/linux-64.txt   # osx-64.txt / osx-arm64.txt on a Mac (macOS 12+)
 conda activate ecoli_atlas
-pip install -e "./ecoli_atlas[dev]"
+pip install --no-deps -e ./ecoli_atlas
 pytest ecoli_atlas/tests
 ```
+
+The lock files list every package by URL and checksum (no solve). `environment.yaml` pins every direct
+dependency to the versions the model bundle was made with (`mamba env create -f ecoli_atlas/environment.yaml`
+gives them with newly solved indirect dependencies); `tests/test_environment.py` checks the pins against the
+locks and against the bundle's `manifest.json`. Maintainers change a pin there and rewrite the locks with
+`python release/make_locks.py ecoli_atlas --platform linux-64 --platform osx-64 --platform osx-arm64`.
 
 The environment has the CPU build of PyTorch, and gseapy (bioconda) for the gene-set enrichment of
 `figures` and `drivers --gsea`; with pip it comes with the `figures` extra (`pip install -e "./ecoli_atlas[figures]"`). A single training run takes minutes on 8 CPU threads
 (about 3 s per epoch on 6,800 samples); a GPU is worth it for seed sweeps and cross-validation. For
-a GPU node:
+a GPU node, replace it by the CUDA build of the same torch (hash-checked wheels):
 
 ```bash
-pip install --force-reinstall torch --index-url https://download.pytorch.org/whl/cu126
+conda remove -n ecoli_atlas --force -y pytorch pytorch-cpu libtorch
+pip install --no-deps --require-hashes -r ecoli_atlas/requirements-cuda.txt
 python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"
 ```
+
+**Apptainer image (CPU).** The same linux-64 lock and the package, without models or data:
+
+```bash
+apptainer pull ecoli_atlas.sif oras://ghcr.io/ncems/ecoli_atlas:2.0.0
+sha256sum ecoli_atlas.sif                       # against IMAGE_SHA256 in src/ecoli_atlas/download.py
+apptainer run --bind $PWD ecoli_atlas.sif embed --models outputs/models ...
+```
+
+The image is built by `release/build_container.sh ecoli_atlas` from `build/Singularity.def`; its `%test`
+checks python, numpy and torch against the pins.
 
 Without installing, `bin/ecoli_atlas` runs the CLI from the checkout if the dependencies are present.
 
@@ -514,8 +532,7 @@ the treated samples of a TEST study).
 
 Writes one self-contained HTML page that opens in any web browser, with no server. The
 `ecoli_atlas` conda environment (`environment.yaml`) has everything it needs (plotly and
-umap-learn); an environment made before they were added gets them with
-`mamba env update -n ecoli_atlas -f ecoli_atlas/environment.yaml`, and a pip install with
+umap-learn); a pip install gets them with
 `pip install "ecoli-atlas[view]"`. Without plotly the page loads plotly.js from a CDN (`--plotly cdn`, smaller file, needs a network
 connection), or `--plotly PATH` inlines a local `plotly.min.js`. `--no-umap` skips the UMAP layouts,
 which take a few minutes for the whole atlas. The page holds:

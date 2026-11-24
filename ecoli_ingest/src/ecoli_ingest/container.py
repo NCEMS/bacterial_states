@@ -28,6 +28,20 @@ def find_runtime() -> str | None:
     return None
 
 
+def image_version(runtime: str, image: Path) -> str | None:
+    """The `org.opencontainers.image.version` label of an image, or None if it cannot be read."""
+    import json
+    import subprocess
+    try:
+        r = subprocess.run([runtime, "inspect", "--labels", "--json", str(image)],
+                           capture_output=True, text=True, timeout=120)
+        data = json.loads(r.stdout)
+    except (OSError, subprocess.TimeoutExpired, json.JSONDecodeError):
+        return None
+    labels = data.get("data", {}).get("attributes", {}).get("labels", {}) if isinstance(data, dict) else {}
+    return labels.get("org.opencontainers.image.version")
+
+
 def missing_tools(tools: Iterable[str] = TOOLS_REQUIRED) -> list[str]:
     return [t for t in tools if shutil.which(t) is None]
 
