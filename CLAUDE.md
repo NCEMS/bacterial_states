@@ -315,8 +315,11 @@ measured covariates remove ~0.01-0.02 of it). Order:
 5. A nonlinear covariate branch on c alone (kept out of f(z)), only if the replicate measures show it is needed.
 
 Atlas model, second stage: refinement of the missing-gene calls (decoder mean, coverage), corrected counts,
-hyper-parameter search (`tune` BUILT 2026-11-23; to run: `scripts/slurm_tune.sh`, then 8-seed `--cv` sweeps of front points
-against the current recipe); the re-run of the GSE271069 example from its reads (`examples/GSE271069_*/run.sh ingest`).
+hyper-parameter search (`tune` BUILT 2026-11-23; study `work/hpo/study1`, 160 trials, run 2026-11-24: the current model is KEPT,
+user decision. The front's small block encoders raised out-of-fold phase AUROC but lost within-study phase order and kNN phase
+(8/8 seeds) with no TEST gain; the best variant (trial 31's residual and decoder with the current blocks and loss weights,
+`outputs/sweeps/models_hpo_31_blocks0_losses0`) gave NLL -0.055 and 13% lower decoded replicate spread, at the cost of a
+same-study rate of 0.345 vs 0.323 and lower kNN lab strain; sweeps in `outputs/sweeps/models_hpo_*`); the re-run of the GSE271069 example from its reads (`examples/GSE271069_*/run.sh ingest`).
 `atlas_build/` cleanup (`combine_counts.sh` assumes the old column layout), container rebuild from
 `environment.yaml` (drop entrez-direct/pytorch), LICENSE file, tutorial-data bundle, real hosting
 URLs, a Snakefile rule that emits an atlas-ready counts TSV.
