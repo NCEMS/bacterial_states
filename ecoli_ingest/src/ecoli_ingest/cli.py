@@ -101,7 +101,7 @@ def cmd_run(args) -> int:
     inner = container.snakemake_command(
         snakefile=paths.snakefile(), rundir=rundir, configfile=configfile, resources=Path(os.path.realpath(res)),
         cores=args.cores, targets=args.target, dry_run=args.dry_run, extra=extra,
-        resource_limits={"download_slots": args.max_downloads})
+        resource_limits={"download_slots": args.max_downloads}, commit=paths.package_commit())
     uses_sra = runconfig.uses_accessions(cfg)
     if uses_sra:
         # downloads land here; it must exist before the bind list is computed (missing paths are dropped)
@@ -111,7 +111,7 @@ def cmd_run(args) -> int:
         cmd = inner
     else:
         runtime = container.find_runtime()
-        image, _legacy = paths.container_image(res)
+        image = paths.container_image(res)
         bind_sources: list = [paths.package_root(), rundir, res, configfile]
         for s in runconfig.samples(cfg):
             for f in s.r1 + (s.r2 or []):
@@ -141,7 +141,7 @@ def cmd_shell(args) -> int:
     if runtime is None:
         _err("no container runtime found")
         return 1
-    image, _ = paths.container_image(res)
+    image = paths.container_image(res)
     if not image.exists():
         _err(f"container image not found: {image}")
         return 1
@@ -154,9 +154,9 @@ def cmd_shell(args) -> int:
 def cmd_download(args) -> int:
     # an explicit --resources is the target even if it does not exist yet
     dest = Path(args.resources) if args.resources else (paths.find_resources() or paths.default_resources_target())
-    unknown = [b for b in args.bundles if b not in resources.BUNDLES]
+    unknown = [b for b in args.bundles if b not in resources.DOWNLOADS]
     if unknown:
-        _err(f"unknown bundle(s) {', '.join(unknown)}; choose from {', '.join(sorted(resources.BUNDLES))}")
+        _err(f"unknown bundle(s) {', '.join(unknown)}; choose from {', '.join(sorted(resources.DOWNLOADS))}")
         return 2
     bundles = list(args.bundles or resources.DEFAULT_BUNDLES)
     if args.without_centrifuge and "centrifuge" in bundles:
@@ -244,11 +244,11 @@ def build_parser() -> argparse.ArgumentParser:
     sp = sub.add_parser("download", help="download resource bundles (default: core + centrifuge)")
     sp.add_argument("bundles", nargs="*", metavar="BUNDLE",
                     help="core = vg index + annotation; centrifuge = contamination index (from the Centrifuge "
-                         "authors); container = Apptainer image. Default: " + " ".join(resources.DEFAULT_BUNDLES))
+                         "authors); container = Apptainer image of this version. Default: " + " ".join(resources.DEFAULT_BUNDLES))
     sp.add_argument("--without-centrifuge", action="store_true",
                     help="skip the Centrifuge index (5.4 GB); for runs with `centrifuge: false`")
     sp.add_argument("--with-apptainer", action="store_true",
-                    help="also download the Apptainer image (~5.3 GB); only needed for --container always/auto "
+                    help="also download the Apptainer image (" + resources.CONTAINER_SIZE + "); only needed for --container always/auto "
                          "without the conda environment")
     sp.add_argument("--dry-run", action="store_true")
     sp.set_defaults(func=cmd_download)

@@ -714,17 +714,28 @@ rule featurecounts_combined:
 # Alignments are not kept for the atlas, so what needs them is taken here: coverage track,
 # fragment sizes, species statistics. `<sample>.qc.json` then gathers everything about a sample.
 def _package_commit():
+    # the commit of the package this Snakefile belongs to: given by the launcher (`package_commit`, looked up on the
+    # host: the container has no git), else from git, else from the REVISION file the image build writes
+    if config.get("package_commit"):
+        return str(config["package_commit"])
     import subprocess
     try:
         return subprocess.run(["git", "-C", workflow.basedir, "rev-parse", "--short", "HEAD"], capture_output=True,
                               text=True, check=True).stdout.strip()
     except Exception:
+        pass
+    try:
+        return open(os.path.join(workflow.basedir, os.pardir, "REVISION"), encoding="utf-8").read().strip()
+    except OSError:
         return ""
 
 def _package_version():
+    # __version__ of the package this Snakefile belongs to (read from its source, so a stale install record or a
+    # run inside the container, where only the bound package directory is present, gives the right version)
+    import re
     try:
-        from importlib.metadata import version
-        return version("ecoli_ingest")
+        text = open(os.path.join(workflow.basedir, os.pardir, "__init__.py"), encoding="utf-8").read()
+        return re.search(r'__version__\s*=\s*"([^"]+)"', text).group(1)
     except Exception:
         return ""
 

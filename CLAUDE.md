@@ -29,7 +29,7 @@ Never `git add` any of these (all in `.gitignore`): `resources/`, `old_resources
 
 | Local path | What | Status |
 |---|---|---|
-| `resources/{vg,annotation,centrifuge,container}` | inGEST reference bundle (13 GB) | downloaded; `resources/container/rnaseq_vg.sif` is the image |
+| `resources/{vg,annotation,centrifuge,container}` | inGEST reference bundle (13 GB) | downloaded; the image goes to `resources/container/ecoli_ingest.sif` (`download container`); the old `rnaseq_vg.sif` there is not used by the code |
 | `atlas_data/` | `atlas_v2_counts.tsv`, `atlas_v2_antisense_counts.tsv`, `atlas_v2_samples.tsv` (from `collect_results.py`), `metadata_v2.tsv`, `sample_qc.tsv` | training inputs of the atlas model. `merged_count_table.txt`, `metadata_revised.csv` and the NCBI feature table there are the v1 inputs (see v1 history) |
 | `work/atlas_full/results/<batch>/` | the atlas recount: 102 batches plus re-runs (`PE_R01`) | source of the three `atlas_v2_*` tables and of the `full_*` columns |
 | `outputs/models/` | the current model bundle (8 seeds; GSE271069 in TEST since 2026-11-22; unversioned path: only downloaded release packages carry a version) | written by `ecoli_atlas train`. `outputs/` holds only `models/`, `sweeps/` (every sweep and variant bundle, `outputs/sweeps/models_<name>/`), `archive/` (earlier bundles, e.g. `models_2026-11-22`, and earlier paper outputs) and `v1_originals/` |
@@ -50,7 +50,11 @@ the per-file checksums of the core bundle are in `resources.manifest.tsv`, the a
 `metadata_v2*` with its GEO text and evidence, `sample_qc.tsv`, `time_courses.tsv`, `atlas_v2_missing_genes.tsv`
 (= `outputs/models/missing_genes.tsv`); models = `outputs/models/` with every seed. `resources-v1` (built in
 `work/release_v1/`) holds the v1 model and the old annotation. The Centrifuge index comes from the Centrifuge
-authors' bucket (`genome-idx.s3.amazonaws.com/centrifuge/`), and the container image is still a placeholder (`TBD`).
+authors' bucket (`genome-idx.s3.amazonaws.com/centrifuge/`). The Apptainer images belong to the code version, not to a
+data release: assets `<pkg>_<version>.sif` of the code release `v<version>` (user decision 2026-11-23; the images are
+~1.1 and ~0.8 GiB, under the 2 GiB asset limit; GHCR only if one outgrows it) (`resources.CONTAINER_URL`,
+`download.IMAGE_URL`), checked against a pinned SHA-256 (`CONTAINER_SHA256`, `IMAGE_SHA256`; `None` until the image of that
+version is uploaded). Zenodo archive of both images and the locks at the paper release.
 Bundle file names are `ecoli_ingest_*` / `ecoli_atlas_*` (other microbes may follow).
 
 ## Git
@@ -81,8 +85,15 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
 - The Snakefile must stay runnable with `--directory <rundir> --configfile <rundir>/config.yaml`
   and `--config resources_dir=…`; resource defaults are in the Snakefile header and mirrored in
   `ecoli_ingest/paths.py` (`RESOURCE_FILES`). Keep them in sync.
-- Workflow tool list has one source of truth: `ecoli_ingest/environment.yaml`
-  (`build/Singularity.def` installs it). `workflow/envs/rnaseq_vg.yaml` is the legacy image env.
+- Workflow tool list has one source of truth: `ecoli_ingest/environment.yaml`. Both `environment.yaml` files pin every
+  direct dependency to one version (inGEST: the versions of the atlas recount's `tool_versions.json`; ATLAS: the bundle's
+  `manifest.json` environment; `tests/test_environment.py` checks both), no pip sections. `locks/<platform>.txt`
+  (linux-64, osx-64, osx-arm64; conda explicit files, URL + MD5) are written by `release/make_locks.py` and never edited
+  by hand; the inGEST linux-64 lock is the exported recount env (`--from-env`), the others are solved (glibc 2.28,
+  macOS 12). GPU torch: `ecoli_atlas/requirements-cuda.txt` (hash-pinned, `--no-deps`, same torch). Images:
+  `ecoli_ingest/build/Singularity.def` and `ecoli_atlas/container/Singularity.def` (`ecoli_atlas/build/` is gitignored pip output) install the linux-64 lock on a digest-pinned micromamba base, plus the package;
+  `release/build_container.sh <pkg>` builds (needs root or fakeroot: not on this cluster) and prints the push command.
+  No support for the old image or layout (`rnaseq_vg.sif`, `resources/build/`; user decision 2026-11-23).
 - inGEST counting is described in `docs/counting.md`; there is no backward compatibility with the v1 counting.
 - Counting annotation: `resources/annotation/GCF_000005845.2_ASM584v2_counting_v2.{gff,bed,
   features.tsv,rfam_merge_report.tsv}`, built by `ecoli_ingest/build/build_annotation.py` from the
@@ -238,9 +249,7 @@ by globbing `checkpoints/passed/*.pass` instead of `checkpoints.qc_passed_sample
 the QC checkpoint is re-run in a directory that already has pass files, rules planned before it
 (featureCounts, the checkpoint's own inputs) use the old sample list; a second `ecoli_ingest run
 -- --forcerun featurecounts_combined` repairs it. (2) Centrifuge takes up to 75 min for 4 GB of
-reads per mate. (3) `sra-tools` + `pigz` are in `environment.yaml` but must be installed into an
-existing `ecoli_ingest` env (`mamba install -n ecoli_ingest -c bioconda sra-tools pigz`); the
-container needs a rebuild to get them.
+reads per mate.
 
 Next after the DNA term is settled (user, 2026-11-21): how the QC covariates enter the model. The model is not trained
 without QC (user decision: no hiding of covariates in training), and `embed` refuses samples without QC values (except, on request, a missing GC fit: `embed --fill-missing-gc
@@ -320,9 +329,9 @@ user decision. The front's small block encoders raised out-of-fold phase AUROC b
 (8/8 seeds) with no TEST gain; the best variant (trial 31's residual and decoder with the current blocks and loss weights,
 `outputs/sweeps/models_hpo_31_blocks0_losses0`) gave NLL -0.055 and 13% lower decoded replicate spread, at the cost of a
 same-study rate of 0.345 vs 0.323 and lower kNN lab strain; sweeps in `outputs/sweeps/models_hpo_*`); the re-run of the GSE271069 example from its reads (`examples/GSE271069_*/run.sh ingest`).
-`atlas_build/` cleanup (`combine_counts.sh` assumes the old column layout), container rebuild from
-`environment.yaml` (drop entrez-direct/pytorch), LICENSE file, tutorial-data bundle, real hosting
-URLs, a Snakefile rule that emits an atlas-ready counts TSV.
+`atlas_build/` cleanup (`combine_counts.sh` assumes the old column layout; `postprocessing/process.py` names the old
+image path), first build and push of both images (then pin their SHA-256), LICENSE file, tutorial-data bundle, a
+Snakefile rule that emits an atlas-ready counts TSV.
 
 ## v1 history
 

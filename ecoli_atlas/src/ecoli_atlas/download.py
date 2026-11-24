@@ -3,7 +3,10 @@
 
 Each bundle pins the SHA-256 of its archive. The archives are built reproducibly, so the same files
 always give the same checksum; a download that does not match is rejected before anything is
-unpacked. A new archive needs a new version (ATLAS_DATA_VERSION) and a new checksum here."""
+unpacked. A new archive needs a new version (ATLAS_DATA_VERSION) and a new checksum here.
+
+The Apptainer image (CPU) belongs to the code version: an asset of the code release v<version>
+(`curl -LO <IMAGE_URL>`, then `sha256sum` against IMAGE_SHA256)."""
 from __future__ import annotations
 
 import hashlib
@@ -14,9 +17,15 @@ import tempfile
 import urllib.request
 from pathlib import Path
 
+from . import __version__
+
 ATLAS_DATA_VERSION = "v2"
 # assets of the GitHub data release `resources-<version>` (code releases are tagged vX.Y.Z)
 RELEASE_URL = f"https://github.com/NCEMS/bacterial_states/releases/download/resources-{ATLAS_DATA_VERSION}"
+# Apptainer image of this code version (release/build_container.sh), an asset of the code release v<version>;
+# check the download against IMAGE_SHA256 (None until this version's image is published)
+IMAGE_URL = f"https://github.com/NCEMS/bacterial_states/releases/download/v{__version__}/ecoli_atlas_{__version__}.sif"
+IMAGE_SHA256: str | None = None
 ENV_DATA = "ECOLI_ATLAS_DATA"
 ENV_MODELS = "ECOLI_ATLAS_MODELS"
 ENV_DATA_ROOT = "BS_DATA_ROOT"

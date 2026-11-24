@@ -25,15 +25,12 @@ pip install ./ecoli_ingest          # or use bin/ecoli_ingest without installing
 
 ## Download the resources
 
-The container image is not a release asset (it is over the 2 GB limit), so for the container path
-use GoCommands with the shared CyVerse folder, which holds the complete older resources tarball:
-
 ```bash
-gocmd init                           # your CyVerse credentials
-gocmd get --progress -f -K --icat /iplant/home/shared/NCEMS/working-groups/bacterial-states/resources.tar.gz
-tar -xvzf resources.tar.gz
-mv resources/build resources/container      # the image now lives in container/
+ecoli_ingest download --with-apptainer      # core + centrifuge + the image of this version, checksums verified
 ```
+
+The image (an asset of the code release of your version) is downloaded into
+`resources/container/ecoli_ingest.sif`; run it with the Apptainer installed above (`ECOLI_INGEST_APPTAINER`).
 
 ## Run
 

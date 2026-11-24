@@ -1,0 +1,73 @@
+# Apptainer image of Ecoli_ATLAS (CPU): the environment of locks/linux-64.txt and the ecoli_atlas package. No
+# models or data in the image: bind a directory with them and point ECOLI_ATLAS_MODELS / ECOLI_ATLAS_DATA (or
+# --models / --metadata ...) at it. Build with release/build_container.sh, which stages the package tree and
+# fills in VERSION / REVISION; %files paths are relative to that staging directory.
+#
+#   apptainer run ecoli_atlas_<version>.sif embed --models /data/models ...
+#   apptainer exec ecoli_atlas_<version>.sif pytest /opt/src/ecoli_atlas/tests
+# GPU training stays in the conda environment (requirements-cuda.txt).
+Bootstrap: docker
+# mambaorg/micromamba:2.10.0-debian13-slim, pinned by digest (apptainer refuses a tag together with a digest)
+From: mambaorg/micromamba@sha256:e1476182cd40eb1f7c0cfae4adec9bfd78f3d7f05c61368306abfdc8939c1198
+
+%arguments
+    VERSION=unset
+    REVISION=unset
+
+%files
+    ecoli_atlas /opt/src/ecoli_atlas
+
+%post
+    set -eu
+    export MAMBA_ROOT_PREFIX=/opt/conda
+    # the explicit lock: no solve, every package by URL and MD5
+    micromamba install --yes --name base --file /opt/src/ecoli_atlas/locks/linux-64.txt
+    /opt/conda/bin/python -m pip install --no-deps --no-build-isolation --no-index --no-cache-dir /opt/src/ecoli_atlas
+    micromamba clean --all --yes
+    rm -rf /opt/conda/pkgs /root/.cache
+
+%environment
+    export MAMBA_ROOT_PREFIX=/opt/conda
+    export CONDA_PREFIX=/opt/conda
+    export PATH=/opt/conda/bin:$PATH
+    export MPLBACKEND=Agg
+    # the image is read-only: numba (umap-learn) caches its compiled functions outside it
+    export NUMBA_CACHE_DIR=${NUMBA_CACHE_DIR:-/tmp/numba_cache_$(id -u)}
+    for f in /opt/conda/etc/conda/activate.d/*.sh; do
+        case "$f" in */activate-*_linux-64.sh) continue ;; esac   # compiler wrappers, if any: unused, bash-only syntax
+        [ -r "$f" ] && . "$f"
+    done
+    unset f
+
+%labels
+    org.opencontainers.image.title ecoli_atlas
+    org.opencontainers.image.version {{ VERSION }}
+    org.opencontainers.image.revision {{ REVISION }}
+    org.opencontainers.image.source https://github.com/NCEMS/bacterial_states
+    org.opencontainers.image.licenses MIT
+
+%test
+    set -eu
+    python - <<'EOF'
+import re, sys
+import numpy, torch, yaml
+import ecoli_atlas
+pins = {}
+for dep in yaml.safe_load(open("/opt/src/ecoli_atlas/environment.yaml"))["dependencies"]:
+    name, _, version = dep.split("#")[0].strip().partition("=")
+    pins[name] = version
+have = {"python": "%d.%d.%d" % sys.version_info[:3], "numpy": numpy.__version__,
+        "pytorch-cpu": torch.__version__.split("+")[0]}
+bad = {k: (v, pins[k]) for k, v in have.items() if v != pins[k]}
+assert not bad, f"versions differ from environment.yaml: {bad}"
+assert ecoli_atlas.__version__ == "{{ VERSION }}", ecoli_atlas.__version__
+print("versions match the pins:", have)
+EOF
+    ecoli_atlas --help >/dev/null
+
+%runscript
+    exec ecoli_atlas "$@"
+
+%help
+    Ecoli_ATLAS {{ VERSION }} ({{ REVISION }}), CPU build: `apptainer run <image> --help`.
+    Models and data are not in the image: `ecoli_atlas download models`, then bind that directory.

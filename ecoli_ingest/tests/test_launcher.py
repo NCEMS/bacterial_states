@@ -169,15 +169,8 @@ def test_cli_run_max_downloads_default():
     assert build_parser().parse_args(["run", "--max-downloads", "2"]).max_downloads == 2
 
 
-def test_container_image_legacy_layout(tmp_path):
-    (tmp_path / "build").mkdir()
-    (tmp_path / "build" / "rnaseq_vg.sif").write_bytes(b"")
-    img, legacy = paths.container_image(tmp_path)
-    assert legacy and img.name == "rnaseq_vg.sif"
-    (tmp_path / "container").mkdir()
-    (tmp_path / "container" / "rnaseq_vg.sif").write_bytes(b"")
-    img, legacy = paths.container_image(tmp_path)
-    assert not legacy and img.parent.name == "container"
+def test_container_image_path(tmp_path):
+    assert paths.container_image(tmp_path) == tmp_path / "container" / "ecoli_ingest.sif"
 
 
 def test_centrifuge_on_unless_switched_off():
@@ -217,3 +210,20 @@ def test_init_without_centrifuge(tmp_path):
     assert main(["init", "-d", str(tmp_path), "--force", "--without-centrifuge"]) == 0
     cfg = runconfig.load_config(tmp_path / "config.yaml")
     assert cfg["centrifuge"] is False and not runconfig.centrifuge_enabled(cfg)
+
+
+def test_commit_is_passed_to_snakemake():
+    base = dict(snakefile=Path("/pkg/Snakefile"), rundir=Path("/run"), configfile=Path("/run/config.yaml"),
+                resources=Path("/res"))
+    cmd = container.snakemake_command(**base, commit="abc1234")
+    i = cmd.index("--config")
+    assert cmd[i + 1:i + 3] == ["resources_dir=/res", "package_commit=abc1234"]
+    assert not any(a.startswith("package_commit=") for a in container.snakemake_command(**base))
+
+
+def test_package_commit_from_git_or_revision_file(tmp_path, monkeypatch):
+    assert paths.package_commit()                       # this checkout is a git repository
+    monkeypatch.setattr(paths, "package_root", lambda: tmp_path)
+    assert paths.package_commit() == ""                 # neither git nor a REVISION file
+    (tmp_path / "REVISION").write_text("df0f5af\n")
+    assert paths.package_commit() == "df0f5af"          # the image's copy

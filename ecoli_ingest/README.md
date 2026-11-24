@@ -18,12 +18,17 @@ Pick one of the two paths. Both give the same `ecoli_ingest` command.
 ```bash
 git clone https://github.com/NCEMS/bacterial_states.git
 cd bacterial_states
-mamba env create -f ecoli_ingest/environment.yaml     # or: conda env create ...
+conda create -n ecoli_ingest --file ecoli_ingest/locks/linux-64.txt   # osx-64.txt / osx-arm64.txt on a Mac
 conda activate ecoli_ingest
-pip install -e ./ecoli_ingest
+pip install --no-deps -e ./ecoli_ingest
 ```
 
-This works on Linux and on macOS, both Apple Silicon and Intel (macOS 10.15 or later), with the
+The lock files list every package of the environment by URL and checksum, so there is no solve and
+everyone gets the same tools; `linux-64.txt` is the environment the atlas recount ran in.
+`environment.yaml` pins every direct dependency to the same versions (`mamba env create -f
+ecoli_ingest/environment.yaml` gives them with newly solved indirect dependencies).
+
+This works on Linux and on macOS, both Apple Silicon and Intel (macOS 12 or later), with the
 same commands. bioconda builds vg and Centrifuge for Linux only, so `environment.yaml` also lists
 the [barricklab channel](https://github.com/barricklab/conda), which has macOS builds of the same
 versions (vg 1.63.1 and Centrifuge 1.0.4.2); on Linux both still come from bioconda. The
@@ -37,8 +42,13 @@ index (`mamba clean --index-cache`) and try again.
 
 ```bash
 pip install ./ecoli_ingest            # only dependency: pyyaml
-ecoli_ingest download --with-apptainer   # core + centrifuge + the image (<resources>/container/rnaseq_vg.sif)
+ecoli_ingest download --with-apptainer   # core + centrifuge + the image (<resources>/container/ecoli_ingest.sif)
 ```
+
+The image is built from `locks/linux-64.txt`, so it has the same tools as path A on Linux. It belongs to
+the code version (an asset of the code release `v<version>`) and `download` checks it against the
+SHA-256 pinned in the package; `check` warns when the image and the launcher are different versions.
+The image also contains the launcher: `apptainer run ecoli_ingest.sif check` works without a host install.
 
 `ecoli_ingest` detects which path you are on: if `snakemake` and `vg` are on your `PATH` it runs
 directly, otherwise it wraps the run in the container (`--container never|always` overrides).
@@ -50,7 +60,7 @@ Without installing you can also run `bin/ecoli_ingest` from the checkout.
 ```bash
 ecoli_ingest download                       # core + centrifuge (the default set)
 ecoli_ingest download --without-centrifuge  # core only, for runs with `centrifuge: false`
-ecoli_ingest download --with-apptainer      # ... plus the Apptainer image (~5.3 GB), only for install path B
+ecoli_ingest download --with-apptainer      # ... plus the Apptainer image (~1.2 GB), only for install path B
 ecoli_ingest download core                  # or name bundles one at a time: core, centrifuge, container
 ```
 
@@ -58,12 +68,11 @@ ecoli_ingest download core                  # or name bundles one at a time: cor
 |---|---|---|---|
 | `core` | vg graph index, counting annotation, reference genome FASTA | 175 MB download, 676 MB unpacked | this project ([release `resources-v2`](https://github.com/NCEMS/bacterial_states/releases/tag/resources-v2)) |
 | `centrifuge` | `p_compressed+h+v` contamination index, not needed with `centrifuge: false` | 5.4 GB download, 6.9 GB unpacked | the Centrifuge authors' prebuilt index (`genome-idx.s3.amazonaws.com/centrifuge/`, pinned S3 object version) |
-| `container` | Apptainer image `rnaseq_vg.sif` | ~5.3 GB | this project (CyVerse for now, see below) |
+| `container` | Apptainer image `ecoli_ingest.sif` of this version | ~1.2 GB | this project (asset `ecoli_ingest_<version>.sif` of the code release `v<version>`) |
 
-Downloads are checked against the packaged SHA-256 manifest. The `container` image is too large
-for a GitHub release asset and has no download URL yet; for it the command prints the interim
-CyVerse instructions (`gocmd get .../bacterial-states/resources.tar.gz`, the complete older
-resources tarball; after extracting, rename `resources/build` to `resources/container`).
+Downloads are checked against the packaged SHA-256 manifest (the image against its pinned
+SHA-256). Until the image of a version is published, `download container` says so and points to
+`release/build_container.sh`.
 
 The resources directory is found in this order: `--resources DIR`, `$ECOLI_INGEST_RESOURCES`,
 `$BS_DATA_ROOT/resources`, `./resources`, `~/.local/share/ecoli_ingest/resources`.
@@ -78,7 +87,7 @@ resources/
 ├── annotation/GCF_000005845.2_ASM584v2_counting_v2.rfam_merge_report.tsv  # fate of every Rfam hit
 ├── annotation/GCF_000005845.2_ASM584v2_genomic.fna           # NC_000913.3; GC bias in the QC record
 ├── centrifuge/p_compressed+h+v.{1,2,3}.cf                    # not needed with centrifuge: false
-└── container/rnaseq_vg.sif                                   # optional
+└── container/ecoli_ingest.sif                                # optional (install path B)
 ```
 
 ## 3. Run
@@ -158,7 +167,7 @@ Each run is fetched by one job, set with `sra_method` in `config.yaml`:
 Both sources give the same reads with the same names (`@SRR1945242.1 <instrument name>/1`), so
 results do not depend on which one served a run. sra-tools need temporary disk space in `sra_dir`
 for the uncompressed FASTQ of the runs being converted (about ten times the compressed size) and
-are part of `environment.yaml`; the published container image predates them and falls back to ENA.
+are part of `environment.yaml` and of the image.
 Runs for which ENA holds only the SRA archive can be fetched with sra-tools only.
 
 ### Tutorial data
@@ -247,7 +256,13 @@ for [Ecoli_ATLAS](../ecoli_atlas/README.md) until the atlas has been recounted.
 - The counting annotation is rebuilt with `build/build_annotation.py` from the unmodified NCBI
   GFF and a `cmscan` table of Rfam hits; see [docs/counting.md](../docs/counting.md).
 - Maintainers: `ecoli_ingest manifest` regenerates `resources.manifest.tsv` (sha256 of every
-  resource file, used by `check --verify` and `download`). The container is rebuilt from
-  `build/Singularity.def`, which installs `environment.yaml`.
+  resource file, used by `check --verify` and `download`).
+- Maintainers, environment: change a pin in `environment.yaml`, then `python release/make_locks.py
+  ecoli_ingest --platform linux-64 --platform osx-64 --platform osx-arm64` rewrites `locks/`
+  (`--from-env NAME` exports an existing environment as the linux-64 lock instead of solving).
+- Maintainers, image: `release/build_container.sh ecoli_ingest` builds `build/Singularity.def` (the
+  linux-64 lock on a digest-pinned micromamba base; its `%test` checks the tool versions against the
+  pins with `build/check_versions.py`), writes the SHA-256 and prints the upload command (an asset of
+  the code release `v<version>`). Pin the SHA-256 as `CONTAINER_SHA256` in `resources.py`.
 - Scripts used to build the atlas corpus (pangenome index, batch SRA processing) are kept under
   `atlas_build/` and are not part of the user-facing workflow.

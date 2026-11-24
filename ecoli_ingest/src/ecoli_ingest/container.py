@@ -28,6 +28,20 @@ def find_runtime() -> str | None:
     return None
 
 
+def image_version(runtime: str, image: Path) -> str | None:
+    """The `org.opencontainers.image.version` label of an image, or None if it cannot be read."""
+    import json
+    import subprocess
+    try:
+        r = subprocess.run([runtime, "inspect", "--labels", "--json", str(image)],
+                           capture_output=True, text=True, timeout=120)
+        data = json.loads(r.stdout)
+    except (OSError, subprocess.TimeoutExpired, json.JSONDecodeError):
+        return None
+    labels = data.get("data", {}).get("attributes", {}).get("labels", {}) if isinstance(data, dict) else {}
+    return labels.get("org.opencontainers.image.version")
+
+
 def missing_tools(tools: Iterable[str] = TOOLS_REQUIRED) -> list[str]:
     return [t for t in tools if shutil.which(t) is None]
 
@@ -65,7 +79,8 @@ def compute_binds(paths: Iterable[str | os.PathLike]) -> list[str]:
 
 def snakemake_command(*, snakefile: Path, rundir: Path, configfile: Path, resources: Path,
                       cores: str = "all", targets: Sequence[str] = ("all",), dry_run: bool = False,
-                      extra: Sequence[str] = (), resource_limits: dict[str, int] | None = None) -> list[str]:
+                      extra: Sequence[str] = (), resource_limits: dict[str, int] | None = None,
+                      commit: str | None = None) -> list[str]:
     cmd = [
         "snakemake",
         "--snakefile", str(snakefile),
@@ -73,6 +88,9 @@ def snakemake_command(*, snakefile: Path, rundir: Path, configfile: Path, resour
         "--configfile", str(configfile),
         "--config", f"resources_dir={resources}",
     ]
+    if commit:
+        # recorded in tool_versions.json / the QC records; the container has no git, so the launcher looks it up
+        cmd.append(f"package_commit={commit}")
     if resource_limits:
         # e.g. download_slots=N caps concurrent `sra_download` jobs (see the Snakefile)
         cmd.append("--resources")

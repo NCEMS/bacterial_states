@@ -30,9 +30,9 @@ where = ["src"]
 ecoli_ingest = [
     "workflow/Snakefile",
     "workflow/scripts/*",
-    "workflow/envs/*",
     "config/*",
     "resources.manifest.tsv",
+    "REVISION",   # written by release/build_container.sh into the image's copy (no git there)
 ]
 
 [tool.pytest.ini_options]

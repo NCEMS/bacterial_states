@@ -13,8 +13,7 @@ RESOURCE_FILES = {
     "genome_fasta": "annotation/GCF_000005845.2_ASM584v2_genomic.fna",     # NC_000913.3; GC bias in the QC record
     "centrifuge_index_path": "centrifuge/p_compressed+h+v",
 }
-CONTAINER_IMAGE = "container/rnaseq_vg.sif"
-LEGACY_CONTAINER_IMAGE = "build/rnaseq_vg.sif"  # layout of the original CyVerse tarball
+CONTAINER_IMAGE = "container/ecoli_ingest.sif"   # written by `ecoli_ingest download container`
 
 VG_SUFFIXES = (".d2.gbz", ".d2.dist", ".d2.min", ".d2.shortread.zipcodes")
 VG_OPTIONAL_SUFFIXES = (".d2.k15.min",)  # used automatically for reads shorter than 50 bp
@@ -27,6 +26,22 @@ ENV_RUNTIME = "ECOLI_INGEST_APPTAINER"
 
 def package_root() -> Path:
     return Path(str(files("ecoli_ingest")))
+
+
+def package_commit() -> str:
+    """Short git commit of the package source: from git when it is a checkout, else from the REVISION file that
+    release/build_container.sh writes into the image's copy; "" when neither is there."""
+    import subprocess
+    root = package_root()
+    try:
+        return subprocess.run(["git", "-C", str(root), "rev-parse", "--short", "HEAD"], capture_output=True,
+                              text=True, check=True, timeout=30).stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        pass
+    try:
+        return (root / "REVISION").read_text(encoding="utf-8").strip()
+    except OSError:
+        return ""
 
 
 def workflow_dir() -> Path:
@@ -100,10 +115,6 @@ def default_resources_target(explicit: str | os.PathLike | None = None) -> Path:
     return resources_candidates(explicit)[0]
 
 
-def container_image(resources: Path) -> tuple[Path, bool]:
-    """Return (path, is_legacy_layout) for the container image inside a resources directory."""
-    new = resources / CONTAINER_IMAGE
-    legacy = resources / LEGACY_CONTAINER_IMAGE
-    if not new.exists() and legacy.exists():
-        return legacy, True
-    return new, False
+def container_image(resources: Path) -> Path:
+    """The container image inside a resources directory."""
+    return resources / CONTAINER_IMAGE

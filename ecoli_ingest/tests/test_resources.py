@@ -7,7 +7,7 @@ def test_bundle_of():
     assert resources.bundle_of("vg/ecoli_graph_test.d2.gbz") == "core"
     assert resources.bundle_of("annotation/x.gff") == "core"
     assert resources.bundle_of("centrifuge/p_compressed+h+v.1.cf") == "centrifuge"
-    assert resources.bundle_of("container/rnaseq_vg.sif") == "container"
+    assert resources.bundle_of(paths.CONTAINER_IMAGE) is None          # pulled from the registry, not a bundle
     assert resources.bundle_of("linear/ecoli_linear.gbz") is None  # not distributed
 
 
@@ -40,17 +40,42 @@ def test_packaged_manifest_is_consistent():
         assert paths.RESOURCE_FILES["vg_index"] + suffix in rels
     for key in ("annotation_gff", "annotation_bed", "genome_fasta"):
         assert paths.RESOURCE_FILES[key] in rels
-    assert paths.CONTAINER_IMAGE in rels
+    assert paths.CONTAINER_IMAGE not in rels
     assert all(r[3] in resources.BUNDLES for r in rows)
 
 
-def test_download_stub_prints_interim_instructions(tmp_path, capsys):
+def test_container_url_is_this_version():
+    from ecoli_ingest import __version__
+    assert resources.CONTAINER_URL == (f"https://github.com/NCEMS/bacterial_states/releases/download/"
+                                       f"v{__version__}/ecoli_ingest_{__version__}.sif")
+
+
+def test_container_unpublished_points_to_the_build(tmp_path, monkeypatch):
     import io
+    monkeypatch.setattr(resources, "CONTAINER_SHA256", None)
     buf = io.StringIO()
-    rc = resources.download("container", tmp_path / "res", dry_run=True, log=buf)
-    assert rc == 2  # the image is too large for a release asset; URL still TBD
+    assert resources.download("container", tmp_path / "res", dry_run=True, log=buf) == 2
     out = buf.getvalue()
-    assert "gocmd get" in out and "TBD" in out and str(tmp_path / "res") in out
+    assert "build_container.sh" in out and str(tmp_path / "res" / paths.CONTAINER_IMAGE) in out
+
+
+def test_container_download_checks_sha256(tmp_path, monkeypatch):
+    import hashlib
+    import io
+    payload = b"not-really-a-sif"
+    src = tmp_path / "ecoli_ingest.sif"
+    src.write_bytes(payload)
+    res = tmp_path / "res"
+    monkeypatch.setattr(resources, "CONTAINER_URL", src.as_uri())
+    monkeypatch.setattr(resources, "CONTAINER_SHA256", hashlib.sha256(payload).hexdigest())
+    assert resources.download_container(res, log=io.StringIO()) == 0
+    assert (res / paths.CONTAINER_IMAGE).read_bytes() == payload
+    (res / paths.CONTAINER_IMAGE).unlink()
+    monkeypatch.setattr(resources, "CONTAINER_SHA256", "0" * 64)
+    buf = io.StringIO()
+    assert resources.download_container(res, log=buf) == 1
+    assert "checksum mismatch" in buf.getvalue()
+    assert not (res / paths.CONTAINER_IMAGE).exists() and not list((res / "container").glob(".partial_*"))
 
 
 def test_core_is_a_release_asset():
