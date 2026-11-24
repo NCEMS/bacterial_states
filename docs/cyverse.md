@@ -29,8 +29,8 @@ pip install ./ecoli_ingest          # or use bin/ecoli_ingest without installing
 ecoli_ingest download --with-apptainer      # core + centrifuge + the image of this version, checksums verified
 ```
 
-The image is pulled from the GitHub container registry with the Apptainer found above
-(`ECOLI_INGEST_APPTAINER`) into `resources/container/ecoli_ingest.sif`.
+The image (an asset of the code release of your version) is downloaded into
+`resources/container/ecoli_ingest.sif`; run it with the Apptainer installed above (`ECOLI_INGEST_APPTAINER`).
 
 ## Run
 

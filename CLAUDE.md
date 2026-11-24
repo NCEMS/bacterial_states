@@ -50,9 +50,10 @@ the per-file checksums of the core bundle are in `resources.manifest.tsv`, the a
 (= `outputs/models/missing_genes.tsv`); models = `outputs/models/` with every seed. `resources-v1` (built in
 `work/release_v1/`) holds the v1 model and the old annotation. The Centrifuge index comes from the Centrifuge
 authors' bucket (`genome-idx.s3.amazonaws.com/centrifuge/`). The Apptainer images belong to the code version, not to a
-data release: ORAS artifacts `oras://ghcr.io/ncems/{ecoli_ingest,ecoli_atlas}:<version>` (`resources.CONTAINER_URL`,
-`download.IMAGE_URL`), checked against a pinned SHA-256 of the .sif (`CONTAINER_SHA256`, `IMAGE_SHA256`; `None` until the
-image of that version is pushed). Zenodo archive of both images and the locks at the paper release.
+data release: assets `<pkg>_<version>.sif` of the code release `v<version>` (user decision 2026-11-23; the images are
+~1.1 and ~0.8 GiB, under the 2 GiB asset limit; GHCR only if one outgrows it) (`resources.CONTAINER_URL`,
+`download.IMAGE_URL`), checked against a pinned SHA-256 (`CONTAINER_SHA256`, `IMAGE_SHA256`; `None` until the image of that
+version is uploaded). Zenodo archive of both images and the locks at the paper release.
 Bundle file names are `ecoli_ingest_*` / `ecoli_atlas_*` (other microbes may follow).
 
 ## Git

@@ -46,7 +46,7 @@ ecoli_ingest download --with-apptainer   # core + centrifuge + the image (<resou
 ```
 
 The image is built from `locks/linux-64.txt`, so it has the same tools as path A on Linux. It belongs to
-the code version (`oras://ghcr.io/ncems/ecoli_ingest:<version>`) and `download` checks it against the
+the code version (an asset of the code release `v<version>`) and `download` checks it against the
 SHA-256 pinned in the package; `check` warns when the image and the launcher are different versions.
 The image also contains the launcher: `apptainer run ecoli_ingest.sif check` works without a host install.
 
@@ -60,7 +60,7 @@ Without installing you can also run `bin/ecoli_ingest` from the checkout.
 ```bash
 ecoli_ingest download                       # core + centrifuge (the default set)
 ecoli_ingest download --without-centrifuge  # core only, for runs with `centrifuge: false`
-ecoli_ingest download --with-apptainer      # ... plus the Apptainer image (~2-3 GB), only for install path B
+ecoli_ingest download --with-apptainer      # ... plus the Apptainer image (~1.2 GB), only for install path B
 ecoli_ingest download core                  # or name bundles one at a time: core, centrifuge, container
 ```
 
@@ -68,7 +68,7 @@ ecoli_ingest download core                  # or name bundles one at a time: cor
 |---|---|---|---|
 | `core` | vg graph index, counting annotation, reference genome FASTA | 175 MB download, 676 MB unpacked | this project ([release `resources-v2`](https://github.com/NCEMS/bacterial_states/releases/tag/resources-v2)) |
 | `centrifuge` | `p_compressed+h+v` contamination index, not needed with `centrifuge: false` | 5.4 GB download, 6.9 GB unpacked | the Centrifuge authors' prebuilt index (`genome-idx.s3.amazonaws.com/centrifuge/`, pinned S3 object version) |
-| `container` | Apptainer image `ecoli_ingest.sif` of this version | ~2-3 GB | this project (GitHub container registry, `oras://ghcr.io/ncems/ecoli_ingest:<version>`) |
+| `container` | Apptainer image `ecoli_ingest.sif` of this version | ~1.2 GB | this project (asset `ecoli_ingest_<version>.sif` of the code release `v<version>`) |
 
 Downloads are checked against the packaged SHA-256 manifest (the image against its pinned
 SHA-256). Until the image of a version is published, `download container` says so and points to
@@ -262,7 +262,7 @@ for [Ecoli_ATLAS](../ecoli_atlas/README.md) until the atlas has been recounted.
   (`--from-env NAME` exports an existing environment as the linux-64 lock instead of solving).
 - Maintainers, image: `release/build_container.sh ecoli_ingest` builds `build/Singularity.def` (the
   linux-64 lock on a digest-pinned micromamba base; its `%test` checks the tool versions against the
-  pins with `build/check_versions.py`), writes the SHA-256 and prints the `push` command. After the
-  push, pin the SHA-256 as `CONTAINER_SHA256` in `resources.py`.
+  pins with `build/check_versions.py`), writes the SHA-256 and prints the upload command (an asset of
+  the code release `v<version>`). Pin the SHA-256 as `CONTAINER_SHA256` in `resources.py`.
 - Scripts used to build the atlas corpus (pangenome index, batch SRA processing) are kept under
   `atlas_build/` and are not part of the user-facing workflow.

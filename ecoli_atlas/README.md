@@ -58,9 +58,9 @@ python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_
 **Apptainer image (CPU).** The same linux-64 lock and the package, without models or data:
 
 ```bash
-apptainer pull ecoli_atlas.sif oras://ghcr.io/ncems/ecoli_atlas:2.0.0
-sha256sum ecoli_atlas.sif                       # against IMAGE_SHA256 in src/ecoli_atlas/download.py
-apptainer run --bind $PWD ecoli_atlas.sif embed --models outputs/models ...
+curl -LO https://github.com/NCEMS/bacterial_states/releases/download/v2.0.0/ecoli_atlas_2.0.0.sif   # ~0.8 GB
+sha256sum ecoli_atlas_2.0.0.sif                 # against IMAGE_SHA256 in src/ecoli_atlas/download.py
+apptainer run --bind $PWD ecoli_atlas_2.0.0.sif embed --models outputs/models ...
 ```
 
 The image is built by `release/build_container.sh ecoli_atlas` from `container/Singularity.def` (`build/` is pip's output folder); its `%test`

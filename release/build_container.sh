@@ -3,15 +3,15 @@
 #
 #   release/build_container.sh ecoli_ingest|ecoli_atlas [OUTDIR]        # OUTDIR default: work/containers
 #
-# Writes OUTDIR/<package>_<version>.sif and .sif.sha256 and prints the push command. The image installs the
+# Writes OUTDIR/<package>_<version>.sif and .sif.sha256 and prints the upload command. The image installs the
 # package's locks/linux-64.txt (no solve) on a digest-pinned base, so the same commit gives the same package set.
 # A tree with uncommitted changes in the package is refused unless ALLOW_DIRTY=1 (the label then says +dirty).
 # Every cache and temporary directory of the build goes under OUTDIR, never into $HOME.
 #
-# Publishing (the maintainer, after `apptainer registry login --username <github user> oras://ghcr.io`):
-#   apptainer push OUTDIR/<package>_<version>.sif oras://ghcr.io/ncems/<package>:<version>
+# Publishing (the maintainer): attach the image to the code release v<version> (release assets: at most 2 GiB),
+#   gh release upload v<version> OUTDIR/<package>_<version>.sif     (or the release's web page)
 # then pin the printed SHA-256 in ecoli_ingest/src/ecoli_ingest/resources.py (CONTAINER_SHA256) or
-# ecoli_atlas/src/ecoli_atlas/download.py (IMAGE_SHA256) and make the package public on GitHub.
+# ecoli_atlas/src/ecoli_atlas/download.py (IMAGE_SHA256).
 set -euo pipefail
 
 pkg=${1:-}
@@ -65,4 +65,6 @@ sha=$(sha256sum "$sif" | cut -d' ' -f1)
 echo "$sha  $(basename "$sif")" > "$sif.sha256"
 echo "image  : $sif ($(du -h "$sif" | cut -f1))"
 echo "sha256 : $sha"
-echo "push   : $runtime push $sif oras://ghcr.io/ncems/$pkg:$version"
+bytes=$(stat -c %s "$sif")
+[ "$bytes" -lt 2147483648 ] || echo "WARNING: $bytes bytes, over the 2 GiB limit of a GitHub release asset" >&2
+echo "upload : gh release upload v$version $sif"

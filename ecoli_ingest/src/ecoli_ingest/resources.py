@@ -2,16 +2,14 @@
 
 The core bundle is an asset of the GitHub release `resources-v2` of NCEMS/bacterial_states; the Centrifuge
 index is fetched from its authors' public bucket. Both are checked against the packaged manifest
-after unpacking. The Apptainer image belongs to the code version, not to the data release: an ORAS
-artifact `ghcr.io/ncems/ecoli_ingest:<version>` on the GitHub container registry, pulled with the
-container runtime and checked against the SHA-256 of the .sif pinned below. Every URL lives in
-BUNDLE_URLS / CONTAINER_URL below and nowhere else.
+after unpacking. The Apptainer image belongs to the code version, not to the data release: an asset
+`ecoli_ingest_<version>.sif` of the code release `v<version>`, downloaded over HTTPS and checked against
+the SHA-256 pinned below. Every URL lives in BUNDLE_URLS / CONTAINER_URL below and nowhere else.
 """
 from __future__ import annotations
 
 import hashlib
 import os
-import subprocess
 import sys
 import tarfile
 import urllib.request
@@ -42,12 +40,13 @@ BUNDLE_SUBDIR = {"centrifuge": "centrifuge"}
 # downloaded by `ecoli_ingest download` when no bundle is named; the container needs --with-apptainer
 DEFAULT_BUNDLES = ("core", "centrifuge")
 
-# Apptainer image of this code version (built by release/build_container.sh from locks/linux-64.txt, pushed at
-# each code release vX.Y.Z). The tag can be moved, so the pull is checked against the SHA-256 of the .sif
-# file pinned here; None until the image of this version is published.
-CONTAINER_URL = f"oras://ghcr.io/ncems/ecoli_ingest:{__version__}"
+# Apptainer image of this code version: built by release/build_container.sh from locks/linux-64.txt and attached
+# to the code release v<version> (release assets are limited to 2 GiB; the image is ~1.1 GiB). The download is
+# checked against the SHA-256 pinned here; None until the image of this version is published.
+CODE_RELEASE_URL = f"https://github.com/NCEMS/bacterial_states/releases/download/v{__version__}"
+CONTAINER_URL = f"{CODE_RELEASE_URL}/ecoli_ingest_{__version__}.sif"
 CONTAINER_SHA256: str | None = None
-CONTAINER_SIZE = "~2-3 GB"
+CONTAINER_SIZE = "~1.2 GB"
 # everything `ecoli_ingest download` accepts
 DOWNLOADS = (*BUNDLES, "container")
 
@@ -134,10 +133,8 @@ def _check_member(member: tarfile.TarInfo, target: Path) -> None:
         raise ValueError(f"refusing to unpack {member.name!r}: outside {target}")
 
 
-def download_container(dest: Path, dry_run: bool = False, log=None, runtime: str | None = None) -> int:
-    """Pull the image of this version into <dest>/container/ and check its SHA-256."""
-    from . import container   # container imports paths only
-
+def download_container(dest: Path, dry_run: bool = False, log=None) -> int:
+    """Download the image of this version into <dest>/container/ and check its SHA-256."""
     log = log or sys.stderr
     target = paths.container_image(dest)
     print(f"bundle   : container ({CONTAINER_SIZE})", file=log)
@@ -150,21 +147,26 @@ def download_container(dest: Path, dry_run: bool = False, log=None, runtime: str
         return 2
     if dry_run:
         return 0
-    runtime = runtime or container.find_runtime()
-    if runtime is None:
-        print("no container runtime (apptainer/singularity) found; set ECOLI_INGEST_APPTAINER", file=log)
-        return 1
     target.parent.mkdir(parents=True, exist_ok=True)
     part = target.with_name(".partial_" + target.name)
-    rc = subprocess.run([runtime, "pull", "--force", str(part), CONTAINER_URL]).returncode
-    if rc != 0 or not part.exists():
-        print(f"{runtime} pull failed (exit {rc})", file=log)
+    h = hashlib.sha256()
+    print("downloading ...", file=log, flush=True)
+    try:
+        # streamed into a partial file; the image only takes its name once the checksum matches
+        with urllib.request.urlopen(CONTAINER_URL) as resp, open(part, "wb") as fh:
+            for block in iter(lambda: resp.read(1 << 24), b""):
+                h.update(block)
+                fh.write(block)
+    except OSError as e:
+        print(f"download failed: {e}", file=log)
         part.unlink(missing_ok=True)
         return 1
-    digest = sha256_of(part)
+    digest = h.hexdigest()
     if digest != CONTAINER_SHA256:
-        print(f"checksum mismatch: got {digest}, expected {CONTAINER_SHA256}; image left at {part}", file=log)
+        print(f"checksum mismatch: got {digest}, expected {CONTAINER_SHA256}", file=log)
+        part.unlink(missing_ok=True)
         return 1
+    part.chmod(0o755)
     part.replace(target)
     print("checksum ok", file=log)
     return 0
