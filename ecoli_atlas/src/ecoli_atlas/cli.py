@@ -32,6 +32,11 @@ def cmd_download(args) -> int:
         args.bundles = [b for b in args.bundles if b != "modules"]
         if not args.bundles:
             return rc
+    if "image" in args.bundles:
+        rc = max(rc, dl.download_image(Path(args.dest) if args.dest else None, dry_run=args.dry_run))
+        args.bundles = [b for b in args.bundles if b != "image"]
+        if not args.bundles:
+            return rc
     bundles = list(dl.BUNDLES) if "all" in args.bundles else args.bundles
     for b in bundles:
         rc = max(rc, dl.download(b, Path(args.dest) if args.dest else None, dry_run=args.dry_run))
@@ -1059,9 +1064,10 @@ def build_parser() -> argparse.ArgumentParser:
     from .download import BUNDLES
     sp = sub.add_parser("download", help="download the data bundles of the release: training-data (into atlas_data/), "
                         "models (into outputs/)")
-    sp.add_argument("bundles", nargs="+", choices=sorted(BUNDLES) + ["all", "modules"],
-                    help="training-data, models, all (both), or modules (curated gene modules for drivers --modules: fetched "
-                         "from their sources and built into atlas_data/modules/modules.tsv)")
+    sp.add_argument("bundles", nargs="+", choices=sorted(BUNDLES) + ["all", "modules", "image"],
+                    help="training-data, models, all (both), modules (curated gene modules for drivers --modules: fetched "
+                         "from their sources and built into atlas_data/modules/modules.tsv), or image (the Apptainer image "
+                         "of this major version's environment, ~0.8 GB, into container/; not part of all)")
     sp.add_argument("--features", help="modules: the counting feature table to map genes to (default: "
                     "resources/annotation/GCF_000005845.2_ASM584v2_counting_v2.features.tsv)")
     sp.add_argument("--dest", help="directory to unpack into (default: atlas_data/ or outputs/ under $BS_DATA_ROOT or here)")

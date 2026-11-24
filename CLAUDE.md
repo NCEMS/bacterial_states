@@ -58,7 +58,8 @@ refuse a changed lock: a new lock = a new environment id and image, never a repl
 `org.ncems.environment` / `org.ncems.lock-sha256` (`ecoli_ingest check` compares the lock label). The host launchers run
 their own code in them (inGEST: the host Snakefile; ATLAS: `ECOLI_ATLAS_SRC`, or `ECOLI_ATLAS_IMAGE` with `bin/ecoli_atlas`);
 the package copy inside serves only `apptainer run` without an install. Downloads are checked against a pinned SHA-256
-(`CONTAINER_SHA256`, `IMAGE_SHA256`; `None` until the image is uploaded). The user builds the images on a separate AWS
+(`CONTAINER_SHA256`, `IMAGE_SHA256`; env2 pinned 2026-11-24, built at 04ae568: `ecoli_ingest download container`,
+`ecoli_atlas download image`). The user builds the images on a separate AWS
 (Amazon Linux 2023) machine and publishes them; ~1.1 and ~0.8 GiB, under the 2 GiB asset limit. No CUDA image: the CUDA
 stack is ~4.9 GB compressed (measured 2026-11-24). Zenodo archive of both images and the locks at the paper release.
 Bundle file names are `ecoli_ingest_*` / `ecoli_atlas_*` (other microbes may follow).

@@ -61,3 +61,28 @@ def test_pinned_checksums_match_release_archives():
     for info in dl.BUNDLES.values():
         archive = RELEASE / info["url"].rsplit("/", 1)[1]
         assert hashlib.sha256(archive.read_bytes()).hexdigest() == info["sha256"], archive.name
+
+
+def test_image_download_checks_the_pinned_sha256(tmp_path, monkeypatch):
+    from ecoli_atlas import download
+    from ecoli_atlas.cli import main
+    payload = b"not really an image"
+    src = tmp_path / "src.sif"
+    src.write_bytes(payload)
+    monkeypatch.setattr(download, "IMAGE_URL", src.as_uri())
+    monkeypatch.setattr(download, "IMAGE_SHA256", hashlib.sha256(payload).hexdigest())
+    target = download.image_path(tmp_path / "dest")
+    assert target.name == f"ecoli_atlas_env{download.IMAGE_ENV}.sif"
+    assert main(["download", "image", "--dest", str(tmp_path / "dest")]) == 0
+    assert target.read_bytes() == payload
+    target.unlink()
+    monkeypatch.setattr(download, "IMAGE_SHA256", "0" * 64)                       # a mismatch leaves nothing behind
+    assert main(["download", "image", "--dest", str(tmp_path / "dest")]) == 1
+    assert not list((tmp_path / "dest").iterdir())
+    monkeypatch.setattr(download, "IMAGE_SHA256", None)
+    assert download.download_image(tmp_path / "dest", dry_run=True) == 2          # unpublished: says so
+
+
+def test_image_pin_is_published():
+    from ecoli_atlas import download
+    assert download.IMAGE_SHA256 and len(download.IMAGE_SHA256) == 64

@@ -8,7 +8,9 @@ repo="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
 if [ -n "${ECOLI_ATLAS_IMAGE:-}" ]; then
   runtime=${ECOLI_ATLAS_APPTAINER:-$(command -v apptainer || command -v singularity || true)}
   [ -n "$runtime" ] || { echo "ECOLI_ATLAS_IMAGE is set, but no apptainer/singularity is on PATH" >&2; exit 1; }
-  exec "$runtime" run --bind "$repo,$PWD${ECOLI_ATLAS_BIND:+,$ECOLI_ATLAS_BIND}" \
+  binds=$repo
+  case "$PWD/" in "$repo"/*) ;; *) binds="$binds,$PWD" ;; esac        # the current directory, unless inside the checkout
+  exec "$runtime" run --bind "$binds${ECOLI_ATLAS_BIND:+,$ECOLI_ATLAS_BIND}" \
     --env "ECOLI_ATLAS_SRC=$repo/ecoli_atlas/src" "$ECOLI_ATLAS_IMAGE" "$@"
 fi
 PYTHONPATH="$repo/ecoli_atlas/src${PYTHONPATH:+:$PYTHONPATH}" exec python3 -m ecoli_atlas.cli "$@"

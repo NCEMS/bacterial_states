@@ -87,8 +87,9 @@ environment of a major version, not of one release: `ecoli_atlas_env2.sif` in th
 gets a new environment id and a new image). It also holds the package as of its build:
 
 ```bash
-curl -LO https://github.com/NCEMS/bacterial_states/releases/download/containers-v2/ecoli_atlas_env2.sif   # ~0.8 GB
-sha256sum ecoli_atlas_env2.sif                  # against IMAGE_SHA256 in src/ecoli_atlas/download.py
+ecoli_atlas download image --dest .              # ~0.8 GB, checked against IMAGE_SHA256; or by hand:
+#   curl -LO https://github.com/NCEMS/bacterial_states/releases/download/containers-v2/ecoli_atlas_env2.sif
+#   sha256sum ecoli_atlas_env2.sif               # against IMAGE_SHA256 in src/ecoli_atlas/download.py
 apptainer run --bind $PWD ecoli_atlas_env2.sif embed --models outputs/models ...         # the package copy in the image
 ECOLI_ATLAS_IMAGE=$PWD/ecoli_atlas_env2.sif bin/ecoli_atlas embed --models outputs/models ...   # this checkout's code
 ```

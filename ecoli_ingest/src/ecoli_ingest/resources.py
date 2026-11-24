@@ -52,7 +52,7 @@ CONTAINER_LOCK_SHA256 = "52f727342d6ffdce0add4f030c930b980a065817c716c2abec7cca2
 CONTAINER_RELEASE_URL = ("https://github.com/NCEMS/bacterial_states/releases/download/"
                          f"containers-v{CONTAINER_ENV.split('.')[0]}")
 CONTAINER_URL = f"{CONTAINER_RELEASE_URL}/ecoli_ingest_env{CONTAINER_ENV}.sif"
-CONTAINER_SHA256: str | None = None
+CONTAINER_SHA256: str | None = "19be5ba51343cc4b1c2788cab4f0a230f18fb9ee029652261043e73272d801b4"
 CONTAINER_SIZE = "~1.2 GB"
 # everything `ecoli_ingest download` accepts
 DOWNLOADS = (*BUNDLES, "container")

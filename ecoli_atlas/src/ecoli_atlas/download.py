@@ -32,7 +32,8 @@ IMAGE_ENV = "2"
 IMAGE_LOCK_SHA256 = "8c0447c27d7bb0905ebcdcdc7083063f88703beaee7b0f51460dcbbeb0c91545"   # locks/linux-64.txt
 IMAGE_URL = (f"https://github.com/NCEMS/bacterial_states/releases/download/containers-v{IMAGE_ENV.split('.')[0]}/"
              f"ecoli_atlas_env{IMAGE_ENV}.sif")
-IMAGE_SHA256: str | None = None
+IMAGE_SHA256: str | None = "4df77b0e6d7b431098c286a691da5af87fe14addaa6ff01e2d07f049f208aa9c"
+IMAGE_SIZE = "~0.8 GB"
 ENV_DATA = "ECOLI_ATLAS_DATA"
 ENV_MODELS = "ECOLI_ATLAS_MODELS"
 ENV_DATA_ROOT = "BS_DATA_ROOT"
@@ -168,6 +169,48 @@ def download(bundle: str, dest: Path | None = None, dry_run: bool = False, log=N
                 tar.extractall(dest, members=members)
     finally:
         tmp_path.unlink(missing_ok=True)
+    return 0
+
+
+def image_path(dest: Path | None = None) -> Path:
+    """Where `download image` puts the image: <dest, default <data root>/container>/ecoli_atlas_env<IMAGE_ENV>.sif."""
+    return (Path(dest) if dest else data_root() / "container") / f"ecoli_atlas_env{IMAGE_ENV}.sif"
+
+
+def download_image(dest: Path | None = None, dry_run: bool = False, log=None) -> int:
+    """Download the Apptainer image of this environment (IMAGE_URL) and check it against IMAGE_SHA256; the file only
+    takes its name once the checksum matches."""
+    log = log or sys.stderr
+    target = image_path(dest)
+    print(f"bundle   : image ({IMAGE_SIZE}, Apptainer, environment {IMAGE_ENV})", file=log)
+    print(f"url      : {IMAGE_URL}", file=log)
+    print(f"target   : {target}", file=log)
+    if IMAGE_SHA256 is None:
+        print(f"\nThe image of environment {IMAGE_ENV} has not been published yet: build it with "
+              "release/build_container.sh ecoli_atlas (in a checkout), or use the conda environment.", file=log)
+        return 2
+    if dry_run:
+        return 0
+    target.parent.mkdir(parents=True, exist_ok=True)
+    part = target.with_name(".partial_" + target.name)
+    h = hashlib.sha256()
+    try:
+        with urllib.request.urlopen(IMAGE_URL) as resp, open(part, "wb") as fh:
+            for block in iter(lambda: resp.read(1 << 24), b""):
+                h.update(block)
+                fh.write(block)
+    except OSError as e:
+        print(f"error: download failed: {e}", file=log)
+        part.unlink(missing_ok=True)
+        return 1
+    if h.hexdigest() != IMAGE_SHA256:
+        print(f"error: checksum mismatch for the image: got {h.hexdigest()}, expected {IMAGE_SHA256}", file=log)
+        part.unlink(missing_ok=True)
+        return 1
+    part.chmod(0o755)
+    part.replace(target)
+    print("checksum ok", file=log)
+    print(f"run: apptainer run --bind $PWD {target} --help", file=log)
     return 0
 
 
