@@ -210,3 +210,20 @@ def test_init_without_centrifuge(tmp_path):
     assert main(["init", "-d", str(tmp_path), "--force", "--without-centrifuge"]) == 0
     cfg = runconfig.load_config(tmp_path / "config.yaml")
     assert cfg["centrifuge"] is False and not runconfig.centrifuge_enabled(cfg)
+
+
+def test_commit_is_passed_to_snakemake():
+    base = dict(snakefile=Path("/pkg/Snakefile"), rundir=Path("/run"), configfile=Path("/run/config.yaml"),
+                resources=Path("/res"))
+    cmd = container.snakemake_command(**base, commit="abc1234")
+    i = cmd.index("--config")
+    assert cmd[i + 1:i + 3] == ["resources_dir=/res", "package_commit=abc1234"]
+    assert not any(a.startswith("package_commit=") for a in container.snakemake_command(**base))
+
+
+def test_package_commit_from_git_or_revision_file(tmp_path, monkeypatch):
+    assert paths.package_commit()                       # this checkout is a git repository
+    monkeypatch.setattr(paths, "package_root", lambda: tmp_path)
+    assert paths.package_commit() == ""                 # neither git nor a REVISION file
+    (tmp_path / "REVISION").write_text("df0f5af\n")
+    assert paths.package_commit() == "df0f5af"          # the image's copy

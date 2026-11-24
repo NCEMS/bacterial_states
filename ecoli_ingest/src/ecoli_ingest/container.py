@@ -79,7 +79,8 @@ def compute_binds(paths: Iterable[str | os.PathLike]) -> list[str]:
 
 def snakemake_command(*, snakefile: Path, rundir: Path, configfile: Path, resources: Path,
                       cores: str = "all", targets: Sequence[str] = ("all",), dry_run: bool = False,
-                      extra: Sequence[str] = (), resource_limits: dict[str, int] | None = None) -> list[str]:
+                      extra: Sequence[str] = (), resource_limits: dict[str, int] | None = None,
+                      commit: str | None = None) -> list[str]:
     cmd = [
         "snakemake",
         "--snakefile", str(snakefile),
@@ -87,6 +88,9 @@ def snakemake_command(*, snakefile: Path, rundir: Path, configfile: Path, resour
         "--configfile", str(configfile),
         "--config", f"resources_dir={resources}",
     ]
+    if commit:
+        # recorded in tool_versions.json / the QC records; the container has no git, so the launcher looks it up
+        cmd.append(f"package_commit={commit}")
     if resource_limits:
         # e.g. download_slots=N caps concurrent `sra_download` jobs (see the Snakefile)
         cmd.append("--resources")

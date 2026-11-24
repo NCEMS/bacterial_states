@@ -101,7 +101,7 @@ def cmd_run(args) -> int:
     inner = container.snakemake_command(
         snakefile=paths.snakefile(), rundir=rundir, configfile=configfile, resources=Path(os.path.realpath(res)),
         cores=args.cores, targets=args.target, dry_run=args.dry_run, extra=extra,
-        resource_limits={"download_slots": args.max_downloads})
+        resource_limits={"download_slots": args.max_downloads}, commit=paths.package_commit())
     uses_sra = runconfig.uses_accessions(cfg)
     if uses_sra:
         # downloads land here; it must exist before the bind list is computed (missing paths are dropped)

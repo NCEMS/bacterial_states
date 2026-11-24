@@ -39,6 +39,8 @@ stage="$out/stage_$pkg"
 rm -rf "$stage"
 mkdir -p "$stage"
 (cd "$root" && git ls-files -z --cached --others --exclude-standard -- "$pkg" | tar --null -T - -cf -) | tar -xf - -C "$stage"
+# the image has no git: the package records its commit from this file (ecoli_ingest: tool_versions.json, QC records)
+echo "$revision" > "$stage/$pkg/src/$pkg/REVISION"
 
 export APPTAINER_CACHEDIR=${APPTAINER_CACHEDIR:-$out/cache} SINGULARITY_CACHEDIR=${SINGULARITY_CACHEDIR:-$out/cache}
 export APPTAINER_TMPDIR=${APPTAINER_TMPDIR:-$out/tmp} SINGULARITY_TMPDIR=${SINGULARITY_TMPDIR:-$out/tmp}

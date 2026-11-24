@@ -28,6 +28,22 @@ def package_root() -> Path:
     return Path(str(files("ecoli_ingest")))
 
 
+def package_commit() -> str:
+    """Short git commit of the package source: from git when it is a checkout, else from the REVISION file that
+    release/build_container.sh writes into the image's copy; "" when neither is there."""
+    import subprocess
+    root = package_root()
+    try:
+        return subprocess.run(["git", "-C", str(root), "rev-parse", "--short", "HEAD"], capture_output=True,
+                              text=True, check=True, timeout=30).stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        pass
+    try:
+        return (root / "REVISION").read_text(encoding="utf-8").strip()
+    except OSError:
+        return ""
+
+
 def workflow_dir() -> Path:
     return package_root() / "workflow"
 
