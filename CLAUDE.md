@@ -89,7 +89,7 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   (linux-64, osx-64, osx-arm64; conda explicit files, URL + MD5) are written by `release/make_locks.py` and never edited
   by hand; the inGEST linux-64 lock is the exported recount env (`--from-env`), the others are solved (glibc 2.28,
   macOS 12). GPU torch: `ecoli_atlas/requirements-cuda.txt` (hash-pinned, `--no-deps`, same torch). Images:
-  `<pkg>/build/Singularity.def` installs the linux-64 lock on a digest-pinned micromamba base, plus the package;
+  `ecoli_ingest/build/Singularity.def` and `ecoli_atlas/container/Singularity.def` (`ecoli_atlas/build/` is gitignored pip output) install the linux-64 lock on a digest-pinned micromamba base, plus the package;
   `release/build_container.sh <pkg>` builds (needs root or fakeroot: not on this cluster) and prints the push command.
   No support for the old image or layout (`rnaseq_vg.sif`, `resources/build/`; user decision 2026-11-23).
 - inGEST counting is described in `docs/counting.md`; there is no backward compatibility with the v1 counting.

@@ -63,7 +63,7 @@ sha256sum ecoli_atlas.sif                       # against IMAGE_SHA256 in src/ec
 apptainer run --bind $PWD ecoli_atlas.sif embed --models outputs/models ...
 ```
 
-The image is built by `release/build_container.sh ecoli_atlas` from `build/Singularity.def`; its `%test`
+The image is built by `release/build_container.sh ecoli_atlas` from `container/Singularity.def` (`build/` is pip's output folder); its `%test`
 checks python, numpy and torch against the pins.
 
 Without installing, `bin/ecoli_atlas` runs the CLI from the checkout if the dependencies are present.

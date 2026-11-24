@@ -45,6 +45,8 @@ export APPTAINER_TMPDIR=${APPTAINER_TMPDIR:-$out/tmp} SINGULARITY_TMPDIR=${SINGU
 mkdir -p "$APPTAINER_CACHEDIR" "$APPTAINER_TMPDIR"
 
 sif="$out/${pkg}_${version}.sif"
+# ecoli_atlas/build/ is pip's output folder (ignored), so that package keeps its definition in container/
+def="$pkg/container/Singularity.def"; [ -f "$stage/$def" ] || def="$pkg/build/Singularity.def"
 # unprivileged builds need fakeroot (a /etc/subuid entry); SUDO_BUILD=1 runs only the build step with sudo instead
 # (a CI runner); as root neither is needed
 if [ "$(id -u)" = 0 ]; then build=("$runtime" build)
@@ -53,7 +55,7 @@ else build=("$runtime" build --fakeroot)
 fi
 echo "building $sif ($pkg $version, $revision) with ${build[*]}" >&2
 (cd "$stage" && "${build[@]}" --force --build-arg VERSION="$version" --build-arg REVISION="$revision" \
-   "$sif" "$pkg/build/Singularity.def")
+   "$sif" "$def")
 [ "${SUDO_BUILD:-0}" = 1 ] && sudo chown "$(id -u):$(id -g)" "$sif"
 rm -rf "$stage"
 

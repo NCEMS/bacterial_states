@@ -84,7 +84,7 @@ bacterial_states/
 │   ├── locks/               # the exact environment per platform (conda explicit files)
 │   ├── build/               # Apptainer definition for the optional image
 │   └── atlas_build/         # scripts used to build the atlas corpus (not user-facing)
-├── ecoli_atlas/             # Python package (src layout), tests, SLURM template, environment.yaml, locks/, build/
+├── ecoli_atlas/             # Python package (src layout), tests, SLURM template, environment.yaml, locks/, container/
 ├── bin/                     # run either CLI from the checkout without installing
 ├── release/                 # data release archives, conda lock files, container builds (maintainers)
 ├── examples/                # one folder per example: README.md, run.sh (+ config.yaml, samples.csv); outputs not committed
