@@ -95,3 +95,10 @@ def within_study_order(score: np.ndarray, level: np.ndarray, gse: np.ndarray, ro
     return {"n_studies": len(per_study), "n_pairs": int(total),
             "share_in_order_mean_over_studies": float(np.mean(per_study)) if per_study else None,
             "share_in_order": right / total if total else None}
+
+
+def mean_auroc(block: dict | None) -> float:
+    """The mean AUROC over the heads of a head-metrics block (``train.head_metrics``), NaN without one; the score
+    that ranks the seeds of a sweep and the head objective of `tune`."""
+    vals = [v["auroc"] for v in (block or {}).values() if v.get("auroc") is not None and not np.isnan(v["auroc"])]
+    return float(np.mean(vals)) if vals else float("nan")

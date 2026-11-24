@@ -281,11 +281,46 @@ With `--cv`, `cv_predictions.tsv` has the out-of-fold scores: every sample of th
 (reference or not), scored by the model that was fitted without its study, in the columns of
 `predictions.tsv` plus `cv_fold`, `reference` and `phase_level` (0 exponential, 1 transition,
 2 stationary, -1 not on the scale). The out-of-fold metrics use its `reference` rows, the
-within-study order all rows.
+within-study order all rows. The manifest's `cv_counts` is the count fit of the same held-out samples
+(NLL per feature and median log-count correlation, pooled and per fold): the out-of-fold NLL, `cv_nll` in
+`seed_sweep.tsv`.
+
+`--hparams FILE.json` sets network sizes, loss weights and epochs: a JSON object over the fields of
+`config.HParams` (`res_dim`, `enc_width`, `kl_w`, `block_dropout`, ...) and `epochs`, `block_epochs`, `batch`,
+`block_batch`, e.g. a `best/trial_<n>.json` of `tune`. Unknown keys are refused; `--block-dims` and `--epochs`
+override the file.
 
 With `--seeds`, every seed is in `seed_<s>/` and `seed_sweep.tsv` lists their TEST and (with `--cv`)
 out-of-fold metrics. One seed is copied to the output directory: the one with the best mean
 out-of-fold AUROC with `--cv`, otherwise the first. Seeds are never ranked on TEST.
+
+### `tune`: hyper-parameter search
+
+```bash
+pip install 'ecoli_atlas[tune]'        # optuna
+ecoli_atlas tune $T --antisense atlas_data/atlas_v2_antisense_counts.tsv --time-series atlas_data/time_courses.tsv \
+    --phase-order-weight 1 --splits outputs/models/splits.csv --out work/hpo/study1 --trials 40 --device cuda
+```
+
+Optuna (multivariate TPE) over the network sizes, loss weights and epochs (`tune.SPACE`: residual size, encoder and
+decoder widths and depths, dropout, learning rates, weight decay, `kl_w`, `push_w`, `ctrl_w`, `push_margin`,
+`cov_rank`, epochs and batch of both stages, block width, depth and dropout). Each trial fits the study folds of the
+given `splits.csv` (as `train --cv`) and has two objectives, kept as a Pareto front: the out-of-fold count NLL
+(`cv_counts`, lower is better) and the mean out-of-fold AUROC of the heads (the score that ranks seeds). TEST is
+not used. All other settings come from the command line, as for `train`, and are the same in every trial
+(`study_config.json`; a run with different ones in the same directory is refused). Trial 0 is the current
+configuration.
+
+The study is kept in `<out>/study.journal`: running `tune` again resumes it, and several workers (one per GPU) can
+share one directory. `--trials` counts the trials of one worker, `--max-total-trials` (160) those of the study.
+After every trial it rewrites `trials.tsv` (every trial: parameters `p_*`, objectives, per-head out-of-fold AUROC
+and balanced accuracy, phase order, state), `pareto.tsv` (the front, by NLL), `best/trial_<n>.json` (the front) and
+`hparams/trial_<n>.json` (every completed trial), the last two in the format of `train --hparams`. `--trial-seeds 1,2`
+scores a trial on the mean of two seeds. A worker stopped by SIGTERM (the SLURM time limit) marks its trial failed;
+`--fail-running` clears trials left running by a hard kill (only with no other worker running).
+
+A point of the front is then confirmed as an ordinary seed sweep with `--cv`:
+`train $T ... --hparams work/hpo/study1/best/trial_<n>.json --seeds 1,2,3,4,5,6,7,8 --cv --out outputs/sweeps/models_hpo_<n>`.
 
 ### Evaluation report
 
@@ -842,4 +877,14 @@ not run on ARM GPU nodes.
 sbatch ecoli_atlas/scripts/slurm_train.sh
 SEEDS=1,2,3,4,5,6,7,8 CV=1 sbatch ecoli_atlas/scripts/slurm_train.sh
 FIT=one-pass OUT=outputs/sweeps/models_one_pass SPLITS=outputs/models/splits.csv sbatch ecoli_atlas/scripts/slurm_train.sh
+```
+
+`scripts/slurm_tune.sh` runs `tune` as an array of workers on one study (default 4 workers of 40 trials into
+`work/hpo/study1`, at most 160 trials; submitting it again resumes the study):
+
+```bash
+sbatch ecoli_atlas/scripts/slurm_tune.sh
+sbatch --array=0-7 --export=ALL,TRIALS=20 ecoli_atlas/scripts/slurm_tune.sh
+HPARAMS=work/hpo/study1/best/trial_12.json TIME_SERIES=1 PHASE_ORDER_WEIGHT=1 SEEDS=1,2,3,4,5,6,7,8 CV=1 \
+  SPLITS=outputs/models/splits.csv OUT=outputs/sweeps/models_hpo_12 sbatch ecoli_atlas/scripts/slurm_train.sh
 ```

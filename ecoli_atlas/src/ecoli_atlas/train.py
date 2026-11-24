@@ -363,11 +363,15 @@ def cross_validate(tables: AtlasTables, fs: FeatureSet, cfg: TrainConfig, splits
     fold's studies. Scored on the labels of ``y_eval``. ``phase_order`` is the within-study order of
     the phase score (``metrics.within_study_order``) over every sample of the held-out studies.
     ``predictions`` has the out-of-fold scores of those samples (reference or not; the metrics use the
-    reference samples, ``phase_order`` all), in the columns of ``predictions.tsv``. ``cache`` (a
-    dict) keeps the training data of every fold for the next seed (``data.prepared``)."""
+    reference samples, ``phase_order`` all), in the columns of ``predictions.tsv``. ``counts`` is the
+    count fit (``evaluate.count_fit``) of those held-out samples, pooled over the folds and per fold: the
+    out-of-fold NLL per feature. ``cache`` (a dict) keeps the training data of every fold for the next seed
+    (``data.prepared``)."""
+    from .evaluate import count_fit_values
     folds = sorted(int(k) for k in splits.loc[splits["split"] == 1, "cv_fold"].dropna().unique())
     probs = None
     ordered = splits.loc[tables.ids]
+    nll, cors, per_fold = [], [], {}
     for k in folds:
         fit_rows = np.where((ordered["split"].to_numpy() == 1) & (study_fold(ordered) != k))[0]     # TrainingData.fit_rows(k)
         data = prepared(cache, ("fold", k), tables, fs, cfg, splits, fit_rows=fit_rows)
@@ -386,6 +390,11 @@ def cross_validate(tables: AtlasTables, fs: FeatureSet, cfg: TrainConfig, splits
         for h in HEADS:
             held_probs[h][held] = enc["probs"][h][held]
         phase_score[held] = enc["scores"]["phase"][held]
+        if len(held):
+            a, b = count_fit_values(model, data, held, device)
+            nll.append(a), cors.append(b)
+            per_fold[str(k)] = {"n": int(len(held)), "nll_per_feature": float(a.mean()),
+                                "log_count_correlation_median": float(np.median(b))}
     pool = np.where((splits["split"].to_numpy() == 1) & splits["cv_fold"].notna().to_numpy())[0]
     scored = np.where(~np.isnan(phase_score))[0]
     pred = pd.DataFrame({"gse": data.splits["gse"].to_numpy(), "cv_fold": study_fold(data.splits),
@@ -400,6 +409,10 @@ def cross_validate(tables: AtlasTables, fs: FeatureSet, cfg: TrainConfig, splits
     pred = pred.iloc[scored].astype({"cv_fold": int})
     out = {"metrics": head_metrics(y, probs, pool), "probs": probs, "predictions": pred,
            "phase_order": within_study_order(phase_score, data.phase_level, data.gse_codes, scored)}
+    if nll:
+        a, b = np.concatenate(nll), np.concatenate(cors)
+        out["counts"] = {"n": int(len(a)), "nll_per_feature": float(a.mean()), "log_count_correlation_median": float(np.median(b)),
+                         "folds": per_fold}
     if data.series is not None and (data.series >= 0).any():
         out["series_order"] = within_series_order(phase_score, data.series, data.series_x, data.splits["gse"].to_numpy(), scored)
     return out

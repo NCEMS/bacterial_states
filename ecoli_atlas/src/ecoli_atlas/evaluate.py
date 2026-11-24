@@ -39,6 +39,15 @@ MIN_PER_CLASS = 2      # samples of each phase class a study needs for the fold-
 
 @torch.no_grad()
 def count_fit(model, data: TrainingData, rows: np.ndarray, device, chunk: int = 1024) -> dict:
+    nll, cors = count_fit_values(model, data, rows, device, chunk)
+    return {"n": int(len(rows)), "nll_per_feature": float(nll.mean()), "log_count_correlation_median": float(np.median(cors))}
+
+
+@torch.no_grad()
+def count_fit_values(model, data: TrainingData, rows: np.ndarray, device, chunk: int = 1024) -> tuple:
+    """Per sample of ``rows``: the count NLL per feature (over the genes the sample has) and the correlation of the
+    observed with the expected log counts."""
+    model.eval()
     nll, cors = [], []
     for i in range(0, len(rows), chunk):
         rt = torch.as_tensor(rows[i:i + chunk])
@@ -51,8 +60,7 @@ def count_fit(model, data: TrainingData, rows: np.ndarray, device, chunk: int = 
         a, b = torch.log1p(y), torch.log1p(torch.exp(log_mean.clamp(max=30)))
         a, b = (a - masked_mean(a, keep, dim=1)[:, None]) * keep, (b - masked_mean(b, keep, dim=1)[:, None]) * keep
         cors.append(((a * b).sum(1) / torch.sqrt((a ** 2).sum(1) * (b ** 2).sum(1)).clamp_min(1e-12)).cpu().numpy())
-    nll, cors = np.concatenate(nll), np.concatenate(cors)
-    return {"n": int(len(rows)), "nll_per_feature": float(nll.mean()), "log_count_correlation_median": float(np.median(cors))}
+    return np.concatenate(nll), np.concatenate(cors)
 
 
 @torch.no_grad()

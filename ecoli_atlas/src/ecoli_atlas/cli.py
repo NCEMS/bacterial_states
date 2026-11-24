@@ -153,6 +153,8 @@ def _fit_and_save(tables, fs, cfg, splits, device, seed: int, out: Path, cv: boo
     if cv:
         cvr = cross_validate(tables, fs, cfg, splits, device, seed=seed, log=_info, cache=cache)
         extra |= {"cv_metrics": cvr["metrics"], "cv_phase_order": cvr["phase_order"]}
+        if "counts" in cvr:
+            extra["cv_counts"] = cvr["counts"]
         if "series_order" in cvr:
             extra["cv_series_order"] = cvr["series_order"]
     manifest = save_bundle(out, model, data, cfg, device, seed, metrics=ev["report"]["heads"].get("test", {}), extra=extra)
@@ -169,15 +171,49 @@ def _fit_and_save(tables, fs, cfg, splits, device, seed: int, out: Path, cv: boo
 
 
 def _mean_auroc(block: dict) -> float:
-    vals = [v["auroc"] for v in (block or {}).values() if v.get("auroc") is not None and not np.isnan(v["auroc"])]
-    return float(np.mean(vals)) if vals else float("nan")
+    from .metrics import mean_auroc
+    return mean_auroc(block)
 
 
-def cmd_train(args) -> int:
-    import torch
+# training fields of TrainConfig that `--hparams` may set beside the HParams fields
+HPARAMS_TRAINING_FIELDS = ("epochs", "block_epochs", "batch", "block_batch")
+
+
+def read_hparams(path) -> dict:
+    """The `--hparams` JSON: an object over HParams fields and HPARAMS_TRAINING_FIELDS. Unknown keys are an error."""
+    from dataclasses import fields
+    from .config import HParams
+    try:
+        d = json.loads(Path(path).read_text())
+    except (OSError, ValueError) as exc:
+        raise SystemExit(f"--hparams {path}: {exc}") from None
+    if not isinstance(d, dict):
+        raise SystemExit(f"--hparams {path}: not a JSON object")
+    known = {f.name for f in fields(HParams)} | set(HPARAMS_TRAINING_FIELDS)
+    unknown = sorted(set(d) - known)
+    if unknown:
+        raise SystemExit(f"--hparams {path}: unknown keys {', '.join(unknown)} (known: {', '.join(sorted(known))})")
+    return d
+
+
+def apply_hparams(cfg, d: dict) -> None:
+    """Set the values of a `--hparams` object on ``cfg`` (HParams fields on cfg.hparams, the rest on cfg)."""
+    from dataclasses import replace
+    hp = {k: v for k, v in d.items() if k not in HPARAMS_TRAINING_FIELDS}
+    if "block_dims" in hp:
+        hp["block_dims"] = cfg.hparams.block_dims | dict(hp["block_dims"])
+    cfg.hparams = replace(cfg.hparams, **hp)
+    for k in HPARAMS_TRAINING_FIELDS:
+        if k in d:
+            setattr(cfg, k, int(d[k]))
+
+
+def _train_config(args):
+    """The TrainConfig of `train` (and `tune`) from the command line."""
     from .config import TrainConfig
-    from .splits import SPLIT_COLUMNS
     cfg = TrainConfig(seed=args.seed, fit=args.fit.replace("-", "_"), phase_head=args.phase_head)
+    if getattr(args, "hparams", None):
+        apply_hparams(cfg, read_hparams(args.hparams))
     for name in ("epochs", "study_cap", "label_cap", "test_frac"):
         if getattr(args, name) is not None:
             setattr(cfg, name, getattr(args, name))
@@ -197,6 +233,13 @@ def cmd_train(args) -> int:
         except ValueError as err:
             raise SystemExit(str(err)) from None
         _info("embedding blocks: " + ", ".join(f"{h} {d}" for h, d in cfg.hparams.block_dims.items()) + f", residual {cfg.hparams.res_dim}")
+    return cfg
+
+
+def cmd_train(args) -> int:
+    import torch
+    from .splits import SPLIT_COLUMNS
+    cfg = _train_config(args)
     if args.threads:
         torch.set_num_threads(args.threads)
     out = Path(args.out)
@@ -222,7 +265,8 @@ def cmd_train(args) -> int:
         for h, m in manifests[s]["test_metrics"].items():
             cvm = (manifests[s].get("cv_metrics") or {}).get(h, {})
             rows.append({"seed": s, "head": h, "test_balanced_acc": m["balanced_acc"], "test_auroc": m["auroc"],
-                         "cv_balanced_acc": cvm.get("balanced_acc"), "cv_auroc": cvm.get("auroc")}
+                         "cv_balanced_acc": cvm.get("balanced_acc"), "cv_auroc": cvm.get("auroc"),
+                         "cv_nll": (manifests[s].get("cv_counts") or {}).get("nll_per_feature")}
                         | ({"test_order": manifests[s]["phase_order"]["test"]["share_in_order_mean_over_studies"],
                             "cv_order": (manifests[s].get("cv_phase_order") or {}).get("share_in_order_mean_over_studies")}
                            | ({"test_series_order": ((manifests[s].get("series_order") or {}).get("test") or {}).get("share_in_order"),
@@ -239,6 +283,22 @@ def cmd_train(args) -> int:
         shutil.copy2(f, out / f.name)
     _info(f"{len(seeds)} seeds; seed {chosen} copied to {out} "
           + ("(best mean out-of-fold AUROC)" if args.cv else "(the first; give --cv to rank the seeds)"))
+    return 0
+
+
+def cmd_tune(args) -> int:
+    import torch
+    from .tune import run_tune
+    if args.hparams:
+        raise SystemExit("tune: --hparams sets what the search varies; give the fixed settings by their own flags")
+    cfg = _train_config(args)
+    if args.threads:
+        torch.set_num_threads(args.threads)
+    tables, fs, splits = _training_inputs(args, cfg)
+    device = pick_device(args.device)
+    seeds = tuple(int(s) for s in args.trial_seeds.split(","))
+    run_tune(tables, fs, cfg, splits, device, args.out, args.trials, max_total=args.max_total_trials, trial_seeds=seeds,
+             sampler_seed=args.sampler_seed, max_epochs=args.max_epochs, reset_running=args.fail_running, log=_info)
     return 0
 
 
@@ -1016,6 +1076,54 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--out", required=True)
     sp.set_defaults(func=cmd_prepare)
 
+    def add_train_config(sp):
+        """The flags that make the TrainConfig (`_train_config`), shared by `train` and `tune`."""
+        sp.add_argument("--fit", default="two-stage", choices=["two-stage", "one-pass", "unstructured"],
+                        help="two-stage: block encoders first, then residual and decoder with the blocks frozen (default); "
+                             "one-pass: the same blocks, all fitted together; unstructured: one embedding without blocks")
+        sp.add_argument("--phase-head", default="binary", choices=["binary", "ordinal"],
+                        help="binary: exponential against stationary (default); ordinal: one score over "
+                             "exponential < transition < stationary, the call being stationary against the rest")
+        sp.add_argument("--epochs", type=int)
+        sp.add_argument("--study-cap", type=int, help="samples of one study used per epoch (default: size of the second-largest study)")
+        sp.add_argument("--label-cap", type=int, help="samples of one class that one study may count for in a call's loss "
+                                                      "(default: for every class the size of the second-largest study in it)")
+        sp.add_argument("--test-frac", type=float)
+        sp.add_argument("--dna-decoder", action="store_true", help="add a genomic-DNA term to the expected counts (off by default)")
+        sp.add_argument("--dna-inputs", action="store_true", help="take the expected genomic-DNA reads off the counts the encoders see (off by default)")
+        sp.add_argument("--gc-offset", action="store_true",
+                        help="mechanistic GC bias in the decoder: each library's GC fit (gc_slope, gc_curv) at every feature's GC content, "
+                        "with one learned scale; the two GC covariates then leave the linear covariate term (off by default)")
+        sp.add_argument("--gc-scale", choices=["learned", "fixed"], default="learned",
+                        help="with --gc-offset: fit the term's scale (learned, default) or hold it at 1, the gene-level value of the "
+                        "measured fit (fixed), so the decoder cannot split the GC effect between the term and the embedding")
+        sp.add_argument("--feature-gc", help="with --gc-offset or --clean-inputs: GC content of the features (Feature_ID, Length, GC); "
+                        "default: the table for the inGEST counting annotation shipped with the package")
+        sp.add_argument("--clean-inputs", action=argparse.BooleanOptionalAction, default=True,
+                        help="take each library's measured GC offset off the counts the encoders see (default); "
+                        "--no-clean-inputs: the raw counts, as before 2026-11-22")
+        sp.add_argument("--encoder-covariates", action=argparse.BooleanOptionalAction, default=False,
+                        help="give the technical covariates to the residual encoder too (--no-encoder-covariates, expression only, "
+                        "is the default)")
+        sp.add_argument("--dna-penalty", type=float, default=1.0,
+                        help="weight of the genomic-DNA penalty on the residual block (default 1; 0 = off): the R2 of the DNA estimate "
+                        "from the residual within biological replicate groups (metadata_v2 replicate_group), added to the loss; left out "
+                        "when the metadata has no replicate groups")
+        sp.add_argument("--qc-module", action="store_true",
+                        help="all technical terms in one module: --gc-offset --gc-scale fixed --dna-decoder --clean-inputs "
+                        "--no-encoder-covariates")
+        sp.add_argument("--phase-order-weight", type=float, default=0.0,
+                        help="weight of the phase-order term of the phase block (0 = off): a ranking loss on the phase score over pairs of samples "
+                        "whose order along the growth curve is known, inside a study (phase levels) or a culture series (--time-series)")
+        sp.add_argument("--block-dims", help="sizes of embedding blocks, e.g. phase=6,medium=12,lab_strain=4 or residual=16 (default: 1 per call, "
+                        "residual 24; blocks not named keep their size). The bundle records the sizes")
+        sp.add_argument("--no-pool", action="store_true", help="do not pool the missing-gene calls over a study's samples of one strain")
+        sp.add_argument("--no-mask-missing", action="store_true", help="treat genes a strain does not have as measured zeros "
+                        "(default: they are called from the counts and left out of the fit)")
+        sp.add_argument("--hparams", metavar="JSON", help="network sizes, loss weights and epochs as a JSON object over the fields of "
+                        "config.HParams and epochs, block_epochs, batch, block_batch (e.g. best/trial_<n>.json of `tune`); "
+                        "--block-dims and --epochs override it")
+
     sp = sub.add_parser("train", help="train the atlas model and evaluate it on the held-out studies")
     add_tables(sp)
     sp.add_argument("--out", required=True, help="output directory for the bundle")
@@ -1024,51 +1132,30 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--seed", type=int, default=77, help="seed of the split and, without --seeds, of the model")
     sp.add_argument("--seeds", help="comma-separated model seeds, all trained on the same split (each in seed_<s>/)")
     sp.add_argument("--cv", action="store_true", help="also fit the study folds for out-of-fold metrics (ranks --seeds)")
-    sp.add_argument("--fit", default="two-stage", choices=["two-stage", "one-pass", "unstructured"],
-                    help="two-stage: block encoders first, then residual and decoder with the blocks frozen (default); "
-                         "one-pass: the same blocks, all fitted together; unstructured: one embedding without blocks")
-    sp.add_argument("--phase-head", default="binary", choices=["binary", "ordinal"],
-                    help="binary: exponential against stationary (default); ordinal: one score over "
-                         "exponential < transition < stationary, the call being stationary against the rest")
-    sp.add_argument("--epochs", type=int)
-    sp.add_argument("--study-cap", type=int, help="samples of one study used per epoch (default: size of the second-largest study)")
-    sp.add_argument("--label-cap", type=int, help="samples of one class that one study may count for in a call's loss "
-                                                  "(default: for every class the size of the second-largest study in it)")
-    sp.add_argument("--test-frac", type=float)
-    sp.add_argument("--dna-decoder", action="store_true", help="add a genomic-DNA term to the expected counts (off by default)")
-    sp.add_argument("--dna-inputs", action="store_true", help="take the expected genomic-DNA reads off the counts the encoders see (off by default)")
-    sp.add_argument("--gc-offset", action="store_true",
-                    help="mechanistic GC bias in the decoder: each library's GC fit (gc_slope, gc_curv) at every feature's GC content, "
-                    "with one learned scale; the two GC covariates then leave the linear covariate term (off by default)")
-    sp.add_argument("--gc-scale", choices=["learned", "fixed"], default="learned",
-                    help="with --gc-offset: fit the term's scale (learned, default) or hold it at 1, the gene-level value of the "
-                    "measured fit (fixed), so the decoder cannot split the GC effect between the term and the embedding")
-    sp.add_argument("--feature-gc", help="with --gc-offset or --clean-inputs: GC content of the features (Feature_ID, Length, GC); "
-                    "default: the table for the inGEST counting annotation shipped with the package")
-    sp.add_argument("--clean-inputs", action=argparse.BooleanOptionalAction, default=True,
-                    help="take each library's measured GC offset off the counts the encoders see (default); "
-                    "--no-clean-inputs: the raw counts, as before 2026-11-22")
-    sp.add_argument("--encoder-covariates", action=argparse.BooleanOptionalAction, default=False,
-                    help="give the technical covariates to the residual encoder too (--no-encoder-covariates, expression only, "
-                    "is the default)")
-    sp.add_argument("--dna-penalty", type=float, default=1.0,
-                    help="weight of the genomic-DNA penalty on the residual block (default 1; 0 = off): the R2 of the DNA estimate "
-                    "from the residual within biological replicate groups (metadata_v2 replicate_group), added to the loss; left out "
-                    "when the metadata has no replicate groups")
-    sp.add_argument("--qc-module", action="store_true",
-                    help="all technical terms in one module: --gc-offset --gc-scale fixed --dna-decoder --clean-inputs "
-                    "--no-encoder-covariates")
-    sp.add_argument("--phase-order-weight", type=float, default=0.0,
-                    help="weight of the phase-order term of the phase block (0 = off): a ranking loss on the phase score over pairs of samples "
-                    "whose order along the growth curve is known, inside a study (phase levels) or a culture series (--time-series)")
-    sp.add_argument("--block-dims", help="sizes of embedding blocks, e.g. phase=6,medium=12,lab_strain=4 or residual=16 (default: 1 per call, "
-                    "residual 24; blocks not named keep their size). The bundle records the sizes")
-    sp.add_argument("--no-pool", action="store_true", help="do not pool the missing-gene calls over a study's samples of one strain")
-    sp.add_argument("--no-mask-missing", action="store_true", help="treat genes a strain does not have as measured zeros "
-                    "(default: they are called from the counts and left out of the fit)")
+    add_train_config(sp)
     sp.add_argument("--threads", type=int, help="torch CPU threads")
     add_device(sp)
     sp.set_defaults(func=cmd_train)
+
+    sp = sub.add_parser("tune", help="hyper-parameter search (Optuna): network sizes, loss weights and epochs, scored out of fold "
+                        "on the study folds (count NLL and mean head AUROC, a Pareto front); never on TEST")
+    add_tables(sp)
+    sp.add_argument("--splits", required=True, help="the splits.csv of the model (fixed for the whole study)")
+    sp.add_argument("--out", required=True, help="study directory: study.journal, trials.tsv, pareto.tsv, best/trial_<n>.json; "
+                    "an existing study there is resumed (several workers may share it)")
+    sp.add_argument("--trials", type=int, default=40, help="trials run by this worker (40)")
+    sp.add_argument("--max-total-trials", type=int, default=160,
+                    help="stop once the study holds this many trials over all workers and runs (160)")
+    sp.add_argument("--trial-seeds", default="1", help="comma-separated model seeds fitted per trial; the objectives are their mean (1)")
+    sp.add_argument("--sampler-seed", type=int, help="seed of the TPE sampler (give each worker its own)")
+    sp.add_argument("--fail-running", action="store_true",
+                    help="first mark trials left running by a killed worker as failed (only when no other worker runs)")
+    sp.add_argument("--max-epochs", type=int, help=argparse.SUPPRESS)          # smoke runs: caps epochs and block_epochs
+    sp.add_argument("--seed", type=int, default=77, help=argparse.SUPPRESS)
+    add_train_config(sp)
+    sp.add_argument("--threads", type=int, help="torch CPU threads")
+    add_device(sp)
+    sp.set_defaults(func=cmd_tune)
 
     sp = sub.add_parser("evaluate", help="evaluate a trained bundle again on the training tables")
     add_tables(sp)

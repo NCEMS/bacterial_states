@@ -13,6 +13,9 @@
 #   FIT=one-pass OUT=outputs/sweeps/models_one_pass SPLITS=outputs/models/splits.csv sbatch ecoli_atlas/scripts/slurm_train.sh
 #                                                         # another way of fitting, on the same split
 #   MASK=0 OUT=outputs/sweeps/models_unmasked ... sbatch ...  # without the missing-gene calls (zeros of absent genes are fitted)
+#   HPARAMS=work/hpo/study1/best/trial_12.json TIME_SERIES=1 PHASE_ORDER_WEIGHT=1 SEEDS=1,2,3,4,5,6,7,8 CV=1 \
+#     SPLITS=outputs/models/splits.csv OUT=outputs/sweeps/models_hpo_12 sbatch ecoli_atlas/scripts/slurm_train.sh
+#                                                         # a point of a `tune` front, with the settings of the current model
 #
 # Run from the repository root. Name an x86 GPU type in --gpus (v100s, v100, a100, l40s): the conda
 # environment does not run on ARM GPU nodes. The pip build of torch in the `ecoli_atlas` environment
@@ -43,4 +46,7 @@ SPLITS=${SPLITS:-$OUT/splits.csv}
 [[ "${POOL:-1}" == 0 ]] && args+=(--no-pool)                          # POOL=0: missing-gene calls per sample only
 [[ "${MASK:-1}" == 0 ]] && args+=(--no-mask-missing)                  # MASK=0: genes a strain lacks stay measured zeros
 [[ -n "${FIT:-}" ]] && args+=(--fit "$FIT")                           # two-stage (default), one-pass or unstructured
+[[ -n "${HPARAMS:-}" ]] && args+=(--hparams "$HPARAMS")               # network sizes, loss weights, epochs (best/trial_<n>.json of `tune`)
+[[ "${TIME_SERIES:-0}" == 1 ]] && args+=(--time-series "$DATA/time_courses.tsv")   # time pairs of the phase-order term
+[[ -n "${PHASE_ORDER_WEIGHT:-}" ]] && args+=(--phase-order-weight "$PHASE_ORDER_WEIGHT")
 python -m ecoli_atlas.cli train "${args[@]}"

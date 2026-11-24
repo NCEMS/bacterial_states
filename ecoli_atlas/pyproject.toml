@@ -22,6 +22,7 @@ dependencies = [
 figures = ["matplotlib>=3.8", "seaborn>=0.13", "gseapy>=1.1"]
 umap = ["umap-learn>=0.5"]
 view = ["plotly>=5", "umap-learn>=0.5"]
+tune = ["optuna>=4"]
 dev = ["pytest>=7"]
 
 [project.scripts]

@@ -12,7 +12,8 @@ Two independently installable packages in one repo (GitHub `NCEMS/bacterial_stat
   image (`--container always`); `auto` picks based on whether `snakemake` and `vg` are on PATH.
 - **`ecoli_atlas/`** — Ecoli_ATLAS. Pure-Python (torch, sklearn, pandas) encoder–decoder with a
   count likelihood, trained on the recounted atlas (`docs/atlas_model_v2.md`, first stage). CLI:
-  `prepare`, `train`, `embed`, `evaluate`, `figures` (data composition and the model figures), `casestudy`,
+  `prepare`, `train` (`--hparams` JSON), `tune` (Optuna search over network sizes, loss weights and epochs on the study folds:
+  out-of-fold NLL and mean head AUROC as a Pareto front, never TEST; `tune.py`, `scripts/slurm_tune.sh`), `embed`, `evaluate`, `figures` (data composition and the model figures), `casestudy`,
   `axes` (ordered categories as dimensions of the embedding), `drivers`, `compare` (new samples against the
   atlas of a bundle), `extract` (atlas studies as an `embed` output, for the tools made for new samples), `neighbors` (atlas studies against the rest of it) and `view` (one self-contained HTML page with an
   interactive 3-D map of a bundle's atlas; `viewer/`, presets in `viewer/presets.json`). Everything is on `main`
@@ -314,7 +315,8 @@ measured covariates remove ~0.01-0.02 of it). Order:
 5. A nonlinear covariate branch on c alone (kept out of f(z)), only if the replicate measures show it is needed.
 
 Atlas model, second stage: refinement of the missing-gene calls (decoder mean, coverage), corrected counts,
-hyper-parameter search; the re-run of the GSE271069 example from its reads (`examples/GSE271069_*/run.sh ingest`).
+hyper-parameter search (`tune` BUILT 2026-11-23; to run: `scripts/slurm_tune.sh`, then 8-seed `--cv` sweeps of front points
+against the current recipe); the re-run of the GSE271069 example from its reads (`examples/GSE271069_*/run.sh ingest`).
 `atlas_build/` cleanup (`combine_counts.sh` assumes the old column layout), container rebuild from
 `environment.yaml` (drop entrez-direct/pytorch), LICENSE file, tutorial-data bundle, real hosting
 URLs, a Snakefile rule that emits an atlas-ready counts TSV.
