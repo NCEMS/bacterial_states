@@ -5,7 +5,8 @@
 #   apptainer run ecoli_ingest_<version>.sif check|run ...     # the launcher inside the image
 #   ecoli_ingest run --container always                        # the host launcher, tools from the image
 Bootstrap: docker
-From: mambaorg/micromamba:2.10.0-debian13-slim@sha256:e1476182cd40eb1f7c0cfae4adec9bfd78f3d7f05c61368306abfdc8939c1198
+# mambaorg/micromamba:2.10.0-debian13-slim, pinned by digest (apptainer refuses a tag together with a digest)
+From: mambaorg/micromamba@sha256:e1476182cd40eb1f7c0cfae4adec9bfd78f3d7f05c61368306abfdc8939c1198
 
 %arguments
     VERSION=unset
