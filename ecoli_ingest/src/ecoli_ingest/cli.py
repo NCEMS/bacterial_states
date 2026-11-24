@@ -268,3 +268,7 @@ def main(argv: list[str] | None = None) -> int:
     if getattr(args, "target", None) is None and hasattr(args, "target"):
         args.target = ["all"]
     return args.func(args)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
