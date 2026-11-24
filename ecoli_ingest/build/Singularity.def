@@ -30,6 +30,7 @@ From: mambaorg/micromamba@sha256:e1476182cd40eb1f7c0cfae4adec9bfd78f3d7f05c61368
     export PATH=/opt/conda/bin:$PATH
     # what `conda activate` would do (JAVA_HOME of openjdk for FastQC, R's variables)
     for f in /opt/conda/etc/conda/activate.d/*.sh; do
+        case "$f" in */activate-*_linux-64.sh) continue ;; esac   # compiler wrappers (R's dependencies): unused, bash-only syntax
         [ -r "$f" ] && . "$f"
     done
     unset f

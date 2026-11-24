@@ -34,6 +34,7 @@ From: mambaorg/micromamba@sha256:e1476182cd40eb1f7c0cfae4adec9bfd78f3d7f05c61368
     # the image is read-only: numba (umap-learn) caches its compiled functions outside it
     export NUMBA_CACHE_DIR=${NUMBA_CACHE_DIR:-/tmp/numba_cache_$(id -u)}
     for f in /opt/conda/etc/conda/activate.d/*.sh; do
+        case "$f" in */activate-*_linux-64.sh) continue ;; esac   # compiler wrappers, if any: unused, bash-only syntax
         [ -r "$f" ] && . "$f"
     done
     unset f
