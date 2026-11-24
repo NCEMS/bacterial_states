@@ -32,10 +32,13 @@ fastq ──► Ecoli_inGEST ──► counts ──► Ecoli_ATLAS embed ──
 Both can be installed and used independently, on Linux or macOS (Apple Silicon or Intel). Data bundles are fetched with
 `ecoli_ingest download …` and `ecoli_atlas download …` from the
 [`resources-v2` release](https://github.com/NCEMS/bacterial_states/releases/tag/resources-v2) of this repository (the
-Centrifuge index comes from its authors). The Apptainer images belong to the code version and are assets of the
-code release `v<version>` (`ecoli_ingest_<version>.sif`, ~1.2 GB; `ecoli_atlas_<version>.sif`, CPU, ~0.8 GB).
-Both environments are pinned: `environment.yaml` pins every direct dependency, `locks/<platform>.txt` lists every
-package with its checksum (linux-64, osx-64, osx-arm64), and the images are built from the linux-64 locks.
+Centrifuge index comes from its authors). The Apptainer images are the environments of a major version, not of one
+code release: assets of the release `containers-v2` (`ecoli_ingest_env2.sif`, ~1.2 GB; `ecoli_atlas_env2.sif`, CPU,
+~0.8 GB) that serve every 2.x release, since the locks do not change within it; the launchers run their own code in
+them. Both environments are pinned: `environment.yaml` pins every direct dependency, `locks/<platform>.txt` lists every
+package with its checksum (linux-64, osx-64, osx-arm64), and the images are built from the linux-64 locks. Ecoli_ATLAS
+has two: `environment.yaml` for using the model (the image) and `environment-train.yaml` for GPU training and `tune`
+(the same pins plus optuna and pytest, CUDA torch swapped in).
 
 ## Quick start
 

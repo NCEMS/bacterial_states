@@ -27,7 +27,13 @@ FEATURES=${FEATURES:-resources/annotation/GCF_000005845.2_ASM584v2_counting_v2.f
 OUT=${OUT:-outputs/models}
 REPO=${REPO:-$PWD}
 
-set +u; conda activate ecoli_atlas; set -u
+# the training environment (environment-train.yaml, CUDA torch from requirements-cuda.txt); CONDA_ENV= picks another
+set +u
+if ! conda activate "${CONDA_ENV:-ecoli_atlas_train}" 2>/dev/null; then
+  echo "conda env ${CONDA_ENV:-ecoli_atlas_train} not found; using ecoli_atlas" >&2
+  conda activate ecoli_atlas
+fi
+set -u
 export PYTHONPATH="$REPO/ecoli_atlas/src${PYTHONPATH:+:$PYTHONPATH}"
 nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv
 python -c "import torch; assert torch.cuda.is_available(), 'CUDA is not available to torch'; print('torch', torch.__version__, torch.cuda.get_device_name(0))"

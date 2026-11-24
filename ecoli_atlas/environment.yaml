@@ -1,4 +1,6 @@
-# Conda environment for Ecoli_ATLAS.
+# Conda environment for USING Ecoli_ATLAS: embed, compare, prepare, figures, view, drivers, axes, casestudy,
+# neighbors, extract, and `train` on CPU. The Apptainer image is this environment (locks/linux-64.txt).
+# For GPU training and `tune` use environment-train.yaml (these pins plus optuna and pytest; CUDA torch on top).
 #
 # Exact environment (recommended):
 #   conda create -n ecoli_atlas --file ecoli_atlas/locks/linux-64.txt     # or osx-64 / osx-arm64
@@ -9,14 +11,10 @@
 #
 # Every direct dependency is pinned to the version the current model bundle was made with
 # (outputs/models/manifest.json records python, numpy and torch); the lock files in locks/ are made
-# from this file by release/make_locks.py and build/Singularity.def installs the linux-64 lock.
+# from this file by release/make_locks.py and container/Singularity.def installs the linux-64 lock.
 #
-# PyTorch here is the CPU build, which is enough for `embed`, `compare`, `figures`, `view` and for a
-# single training run (minutes on 8 threads). For seed sweeps and cross-validation on a GPU node,
-# replace it in the same environment by the pinned CUDA build of the same torch (hash-checked; it brings
-# its own CUDA libraries, only the node's NVIDIA driver is used):
-#   conda remove -n ecoli_atlas --force -y pytorch pytorch-cpu libtorch
-#   pip install --no-deps --require-hashes -r ecoli_atlas/requirements-cuda.txt
+# PyTorch here is the CPU build, which is enough for every command and for a single training run (minutes on
+# 8 threads). Seed sweeps, cross-validation and `tune` belong on a GPU node, in environment-train.yaml.
 name: ecoli_atlas
 channels:
   - conda-forge
@@ -28,12 +26,10 @@ dependencies:
   - pandas=3.1.1
   - scipy=1.18.1
   - scikit-learn=1.9.1
-  - pytorch-cpu=2.14.1   # CPU build; see above for a GPU node
+  - pytorch-cpu=2.14.1   # CPU build; GPU training: environment-train.yaml
   - pyyaml=6.0.3
   - matplotlib-base=3.11.2   # `figures`; -base: no Qt GUI stack (files are written, never shown)
   - seaborn=0.13.2
   - gseapy=1.3.2         # gene-set enrichment (`figures` gsea, `drivers --gsea`); bioconda
   - umap-learn=0.5.12    # UMAP layouts of `view`, `compare --umap`
   - plotly=7.1.0         # `view`: plotly.js inlined into the page
-  - optuna=5.0.0         # hyper-parameter search
-  - pytest=9.2.0

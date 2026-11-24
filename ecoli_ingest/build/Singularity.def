@@ -1,9 +1,10 @@
-# Apptainer image of Ecoli_inGEST: the workflow tools of locks/linux-64.txt (the exact environment of the atlas
-# recount) and the ecoli_ingest package itself. Build with release/build_container.sh, which stages the package
-# tree and fills in VERSION / REVISION; %files paths are relative to that staging directory.
+# Apptainer image of Ecoli_inGEST: the environment of a major version, i.e. the workflow tools of locks/linux-64.txt
+# (the exact environment of the atlas recount), plus the ecoli_ingest package as of the build. Build with
+# release/build_container.sh, which stages the package tree and fills in VERSION / REVISION (the package copy) and
+# ENVIRONMENT / LOCK_SHA256 (the environment); %files paths are relative to that staging directory.
 #
-#   apptainer run ecoli_ingest_<version>.sif check|run ...     # the launcher inside the image
-#   ecoli_ingest run --container always                        # the host launcher, tools from the image
+#   ecoli_ingest run --container always                  # the host launcher: its own Snakefile, tools from the image
+#   apptainer run ecoli_ingest_env<id>.sif check|run ... # the launcher copied into the image at its build
 Bootstrap: docker
 # mambaorg/micromamba:2.10.0-debian13-slim, pinned by digest (apptainer refuses a tag together with a digest)
 From: mambaorg/micromamba@sha256:e1476182cd40eb1f7c0cfae4adec9bfd78f3d7f05c61368306abfdc8939c1198
@@ -11,6 +12,8 @@ From: mambaorg/micromamba@sha256:e1476182cd40eb1f7c0cfae4adec9bfd78f3d7f05c61368
 %arguments
     VERSION=unset
     REVISION=unset
+    ENVIRONMENT=unset
+    LOCK_SHA256=unset
 
 %files
     ecoli_ingest /opt/src/ecoli_ingest
@@ -39,11 +42,14 @@ From: mambaorg/micromamba@sha256:e1476182cd40eb1f7c0cfae4adec9bfd78f3d7f05c61368
     org.opencontainers.image.title ecoli_ingest
     org.opencontainers.image.version {{ VERSION }}
     org.opencontainers.image.revision {{ REVISION }}
+    org.ncems.environment {{ ENVIRONMENT }}
+    org.ncems.lock-sha256 {{ LOCK_SHA256 }}
     org.opencontainers.image.source https://github.com/NCEMS/bacterial_states
     org.opencontainers.image.licenses MIT
 
 %test
     set -eu
+    test "$(sha256sum /opt/src/ecoli_ingest/locks/linux-64.txt | cut -d' ' -f1)" = "{{ LOCK_SHA256 }}"
     tmp=$(mktemp -d)
     python /opt/src/ecoli_ingest/src/ecoli_ingest/workflow/scripts/sample_qc.py versions --out "$tmp/versions.json"
     python /opt/src/ecoli_ingest/build/check_versions.py --env /opt/src/ecoli_ingest/environment.yaml \
@@ -59,5 +65,6 @@ From: mambaorg/micromamba@sha256:e1476182cd40eb1f7c0cfae4adec9bfd78f3d7f05c61368
     exec ecoli_ingest "$@"
 
 %help
-    Ecoli_inGEST {{ VERSION }} ({{ REVISION }}): `apptainer run <image> --help`.
+    Ecoli_inGEST environment {{ ENVIRONMENT }} (lock {{ LOCK_SHA256 }}); launcher copy {{ VERSION }} ({{ REVISION }}).
+    `ecoli_ingest run --container always` on the host, or `apptainer run <image> --help`.
     Resource bundles are not in the image: `ecoli_ingest download`, then bind the resources directory.

@@ -45,10 +45,13 @@ pip install ./ecoli_ingest            # only dependency: pyyaml
 ecoli_ingest download --with-apptainer   # core + centrifuge + the image (<resources>/container/ecoli_ingest.sif)
 ```
 
-The image is built from `locks/linux-64.txt`, so it has the same tools as path A on Linux. It belongs to
-the code version (an asset of the code release `v<version>`) and `download` checks it against the
-SHA-256 pinned in the package; `check` warns when the image and the launcher are different versions.
-The image also contains the launcher: `apptainer run ecoli_ingest.sif check` works without a host install.
+The image is built from `locks/linux-64.txt`, so it has the same tools as path A on Linux. It is the
+environment of a major version, not of one release: `ecoli_ingest_env2.sif` in the release `containers-v2` serves
+every 2.x release, because the host launcher runs its own Snakefile and scripts in it and the lock does not change
+within 2.x (`resources.CONTAINER_ENV`, `CONTAINER_LOCK_SHA256`; a changed lock gets a new environment id and a new
+image). `download` checks it against the SHA-256 pinned in the package; `check` warns when the image's environment
+(its `org.ncems.lock-sha256` label) is not the one the launcher pins. The image also contains a copy of the launcher
+as of its build: `apptainer run ecoli_ingest.sif check` works without a host install.
 
 `ecoli_ingest` detects which path you are on: if `snakemake` and `vg` are on your `PATH` it runs
 directly, otherwise it wraps the run in the container (`--container never|always` overrides).
@@ -68,10 +71,10 @@ ecoli_ingest download core                  # or name bundles one at a time: cor
 |---|---|---|---|
 | `core` | vg graph index, counting annotation, reference genome FASTA | 175 MB download, 676 MB unpacked | this project ([release `resources-v2`](https://github.com/NCEMS/bacterial_states/releases/tag/resources-v2)) |
 | `centrifuge` | `p_compressed+h+v` contamination index, not needed with `centrifuge: false` | 5.4 GB download, 6.9 GB unpacked | the Centrifuge authors' prebuilt index (`genome-idx.s3.amazonaws.com/centrifuge/`, pinned S3 object version) |
-| `container` | Apptainer image `ecoli_ingest.sif` of this version | ~1.2 GB | this project (asset `ecoli_ingest_<version>.sif` of the code release `v<version>`) |
+| `container` | Apptainer image `ecoli_ingest.sif` of this major version's environment | ~1.2 GB | this project (asset `ecoli_ingest_env2.sif` of the release `containers-v2`) |
 
 Downloads are checked against the packaged SHA-256 manifest (the image against its pinned
-SHA-256). Until the image of a version is published, `download container` says so and points to
+SHA-256). Until the image of an environment is published, `download container` says so and points to
 `release/build_container.sh`.
 
 The resources directory is found in this order: `--resources DIR`, `$ECOLI_INGEST_RESOURCES`,
@@ -261,8 +264,10 @@ for [Ecoli_ATLAS](../ecoli_atlas/README.md) until the atlas has been recounted.
   ecoli_ingest --platform linux-64 --platform osx-64 --platform osx-arm64` rewrites `locks/`
   (`--from-env NAME` exports an existing environment as the linux-64 lock instead of solving).
 - Maintainers, image: `release/build_container.sh ecoli_ingest` builds `build/Singularity.def` (the
-  linux-64 lock on a digest-pinned micromamba base; its `%test` checks the tool versions against the
-  pins with `build/check_versions.py`), writes the SHA-256 and prints the upload command (an asset of
-  the code release `v<version>`). Pin the SHA-256 as `CONTAINER_SHA256` in `resources.py`.
+  linux-64 lock on a digest-pinned micromamba base; its `%test` checks the lock checksum and the tool versions
+  against the pins with `build/check_versions.py`), writes the SHA-256 and prints the upload command (an asset of
+  the release `containers-v<major>`). It refuses a lock whose SHA-256 is not `CONTAINER_LOCK_SHA256`: a changed lock
+  needs a new `CONTAINER_ENV` and a new image, never a replaced one. Pin the image's SHA-256 as `CONTAINER_SHA256`
+  in `resources.py`. Any Linux x86_64 machine with git and Apptainer builds it (root, fakeroot or `SUDO_BUILD=1`).
 - Scripts used to build the atlas corpus (pangenome index, batch SRA processing) are kept under
   `atlas_build/` and are not part of the user-facing workflow.

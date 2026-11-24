@@ -28,8 +28,13 @@ def find_runtime() -> str | None:
     return None
 
 
-def image_version(runtime: str, image: Path) -> str | None:
-    """The `org.opencontainers.image.version` label of an image, or None if it cannot be read."""
+# labels the images carry (release/build_container.sh): the environment id and the SHA-256 of the lock it installs
+LABEL_ENVIRONMENT = "org.ncems.environment"
+LABEL_LOCK = "org.ncems.lock-sha256"
+
+
+def image_labels(runtime: str, image: Path) -> dict:
+    """The labels of an image ({} if they cannot be read)."""
     import json
     import subprocess
     try:
@@ -37,9 +42,14 @@ def image_version(runtime: str, image: Path) -> str | None:
                            capture_output=True, text=True, timeout=120)
         data = json.loads(r.stdout)
     except (OSError, subprocess.TimeoutExpired, json.JSONDecodeError):
-        return None
+        return {}
     labels = data.get("data", {}).get("attributes", {}).get("labels", {}) if isinstance(data, dict) else {}
-    return labels.get("org.opencontainers.image.version")
+    return labels if isinstance(labels, dict) else {}
+
+
+def image_version(runtime: str, image: Path) -> str | None:
+    """The `org.opencontainers.image.version` label of an image: the version of the package copy inside it."""
+    return image_labels(runtime, image).get("org.opencontainers.image.version")
 
 
 def missing_tools(tools: Iterable[str] = TOOLS_REQUIRED) -> list[str]:

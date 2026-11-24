@@ -1,4 +1,4 @@
-# ecoli_atlas osx-64 lock, solved from environment.yaml (CONDA_OVERRIDE_OSX=12.0), 2026-11-23
+# ecoli_atlas osx-64 lock, solved from environment.yaml (CONDA_OVERRIDE_OSX=12.0), 2026-11-23; on 2026-11-24 the training-only packages were taken out (optuna, pytest and the 10 packages only they need, as a fresh solve of the use pins confirmed)
 # made by release/make_locks.py; install with: conda create -n ecoli_atlas --file <this file>
 # platform: osx-64
 @EXPLICIT
@@ -68,14 +68,11 @@ https://conda.anaconda.org/conda-forge/osx-64/python-3.12.16-h6907cb8_0_cpython.
 https://conda.anaconda.org/conda-forge/osx-64/brotli-1.2.1-ha9642f3_1.conda#beb1aeeb7001165f67a5ef6667d3a145
 https://conda.anaconda.org/conda-forge/noarch/certifi-2026.11.20-pyhd8ed1ab_0.conda#b2f5cabdd5426f1f88a3efe00cde8909
 https://conda.anaconda.org/conda-forge/noarch/cloudpickle-3.1.3-pyh5ded981_0.conda#ace8fcab8fce1b26619fdfaaf0864512
-https://conda.anaconda.org/conda-forge/noarch/colorama-0.4.6-pyhd8ed1ab_1.conda#962b9857ee8e7018c22f2776ffa0b2d7
-https://conda.anaconda.org/conda-forge/noarch/colorlog-6.12.0-pyhfa0c392_0.conda#6e6d2dc146007c0b1562b9a1c8f3a7aa
 https://conda.anaconda.org/conda-forge/noarch/cpython-3.12.16-py312hd8ed1ab_0.conda#43352168a612c5c29c468bbd46ebdfa6
 https://conda.anaconda.org/conda-forge/noarch/cycler-0.12.1-pyhcf101f3_2.conda#4c2a8fef270f6c69591889b93f9f55c1
 https://conda.anaconda.org/conda-forge/noarch/filelock-4.3.1-pyh5ded981_0.conda#fe7f58607b070f7e7e7788f0cd00abaa
 https://conda.anaconda.org/conda-forge/noarch/fsspec-2026.9.0-pyhd8ed1ab_0.conda#42de5cd170647599a84f468a42fabb89
 https://conda.anaconda.org/conda-forge/noarch/idna-3.20-pyh5ded981_0.conda#ee73be987f9de9ea5c2fdaeefa7b6491
-https://conda.anaconda.org/conda-forge/noarch/iniconfig-2.3.1-pyhd8ed1ab_0.conda#c0a803d97dd09da7e2c8b0fdfaa5739b
 https://conda.anaconda.org/conda-forge/noarch/interface_meta-1.3.0-pyhd8ed1ab_1.conda#97f07ae607e01877f0454fce4c833e40
 https://conda.anaconda.org/conda-forge/osx-64/kiwisolver-1.5.1-py312ha5a0930_4.conda#491a868cfb6fdab17ddb0bd8220d3902
 https://conda.anaconda.org/conda-forge/osx-64/lcms2-2.20-h4e6bd4b_0.conda#96d4b91eb07dc095bd530b0f5453225d
@@ -92,9 +89,7 @@ https://conda.anaconda.org/conda-forge/noarch/networkx-3.7-pyhc364b38_0.conda#dd
 https://conda.anaconda.org/conda-forge/osx-64/openjpeg-2.5.4-he4eae51_1.conda#c4bd1f22c5f2fcefa2f41c81942df622
 https://conda.anaconda.org/conda-forge/noarch/packaging-26.3-pyhc364b38_0.conda#936687ed80f295a1f5dbcf8bd34c252c
 https://conda.anaconda.org/conda-forge/noarch/pathspec-1.1.1-pyhd8ed1ab_0.conda#11adc78451c998c0fd162584abfa3559
-https://conda.anaconda.org/conda-forge/noarch/pluggy-1.7.0-pyh5ded981_0.conda#50c6bcd41b7ceaaeeea8852e3198663e
 https://conda.anaconda.org/conda-forge/noarch/pybind11-global-3.0.4-pyh648e204_0.conda#e594cb485091100204e0b77cb5709896
-https://conda.anaconda.org/conda-forge/noarch/pygments-2.21.0-pyhcf101f3_0.conda#2882dee445dfa45b0c5afce3ffb7730a
 https://conda.anaconda.org/conda-forge/noarch/pyopengl-3.1.10-pyh534df25_2.conda#dae7cd715f93d0e2f12af26dd3777328
 https://conda.anaconda.org/conda-forge/noarch/pyparsing-3.3.3-pyh5ded981_0.conda#8bf43ae1312e9b966063459e04c20fa7
 https://conda.anaconda.org/conda-forge/noarch/python-tzdata-2026.6-pyh5ded981_0.conda#cddcce875e2021c3a5b9dbecffb70d92
@@ -107,13 +102,11 @@ https://conda.anaconda.org/conda-forge/noarch/typing_extensions-4.16.0-pyhcf101f
 https://conda.anaconda.org/conda-forge/osx-64/unicodedata2-18.0.0-py312h6ea13a3_1.conda#d6f271713274e5745e3c6483b9ebba87
 https://conda.anaconda.org/conda-forge/noarch/urllib3-2.8.0-pyh5ded981_1.conda#8ce0b6bfc873bf2c25b083dd5ee29489
 https://conda.anaconda.org/conda-forge/osx-64/wrapt-2.5.2-py312h8be31a5_0.conda#3edbd6e58d61c1c24875366aac0c41f8
-https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.2-pyh5ded981_0.conda#3a99defa674883e167603f141728de7e
 https://conda.anaconda.org/conda-forge/noarch/exceptiongroup-1.3.2-pyh5ded981_0.conda#0af4199bba4905751d25634be9caf7bc
 https://conda.anaconda.org/conda-forge/osx-64/fontconfig-2.18.4-h0555eca_0.conda#6cb48b5af37e2d3c29ac996d11bb3883
 https://conda.anaconda.org/conda-forge/osx-64/fonttools-4.68.0-py312h9d40a6d_2.conda#b9134758416027e1d0ec9155cf1eb50f
 https://conda.anaconda.org/conda-forge/osx-64/freetype-2.14.3-h694c41f_2.conda#570430c9aa9a903221d33e393dd21059
 https://conda.anaconda.org/conda-forge/osx-64/gmpy2-2.3.2-py312hb319121_2.conda#d355299ec0bed3f024bc1e3023373c88
-https://conda.anaconda.org/conda-forge/noarch/importlib-metadata-10.0.0-pyh5ded981_0.conda#8401f0ee3de84b5a549c47cf3038909b
 https://conda.anaconda.org/conda-forge/noarch/jinja2-3.1.6-pyhcf101f3_1.conda#04558c96691bed63104678757beb4f8d
 https://conda.anaconda.org/conda-forge/noarch/joblib-1.6.0-pyhcf101f3_0.conda#4ebc70ef1af2e21cdc8edb1bfa1ec28d
 https://conda.anaconda.org/conda-forge/osx-64/libgfortran-16.2.0-h7e5c614_7.conda#efff7b31ffdf1b64c2c4a8b5f89e9fc0
@@ -122,20 +115,16 @@ https://conda.anaconda.org/conda-forge/noarch/plotly-7.1.0-pyhd8ed1ab_0.conda#78
 https://conda.anaconda.org/conda-forge/noarch/pybind11-3.0.4-pyh293190f_0.conda#2e57132f130bffcb5a8b17092b2871bc
 https://conda.anaconda.org/conda-forge/noarch/python-dateutil-4.0.0-pyh5ded981_0.conda#32ce63457e76085c204f2db1ec8fef01
 https://conda.anaconda.org/conda-forge/noarch/python-gil-3.12.16-hd8ed1ab_0.conda#4541180b99fd60eb8725b220e5c7fdd9
-https://conda.anaconda.org/conda-forge/osx-64/sqlalchemy-2.1.9-py312h8be31a5_0.conda#dba60c7367465ac662a1e890e7c6d3e6
 https://conda.anaconda.org/conda-forge/osx-64/tbb-2021.13.0-hf9f308f_9.conda#cf0f73877b6b1d92fc95490d2f153783
 https://conda.anaconda.org/conda-forge/noarch/typing-extensions-4.16.0-h69aa097_0.conda#c680b5747e8c4c8f23dca0bb7042a8fc
 https://conda.anaconda.org/conda-forge/noarch/wheel-0.48.0-pyhd8ed1ab_0.conda#9a2124517bfd5d792e0f7b86eefdfeb8
 https://conda.anaconda.org/conda-forge/noarch/_python_abi3_support-1.0-hd8ed1ab_3.conda#3845f3d75991bae0fb90884662f4327c
 https://conda.anaconda.org/conda-forge/osx-64/cairo-1.18.6-h5791faa_0.conda#0f4816120b8af052d460ad3262b450c6
-https://conda.anaconda.org/conda-forge/noarch/mako-1.4.3-pyh5ded981_0.conda#0d84bee9b44deacb36e520634446146b
 https://conda.anaconda.org/conda-forge/osx-64/mkl-2023.2.0-h694c41f_50502.conda#0bdfc939c8542e0bc6041cbd9a900219
 https://conda.anaconda.org/conda-forge/osx-64/optree-0.20.0-py312hababfa3_3.conda#a75b5e1b9bb1e5b9fa3a733b86b6be85
 https://conda.anaconda.org/conda-forge/noarch/pip-26.2.2-pyh8b19718_2.conda#475fb40617684d16415f574187bc974b
-https://conda.anaconda.org/conda-forge/noarch/pytest-9.2.0-pyhc364b38_1.conda#f0cfded84ced11a9dfb3790c4c1c0b63
 https://conda.anaconda.org/conda-forge/noarch/scikit-build-core-1.1.2-pyhcb39dcd_0.conda#4e5881f78c5631e21ad0baaac00af3b3
 https://conda.anaconda.org/conda-forge/noarch/sympy-1.14.0-pyh2585a3b_106.conda#32d866e43b25275f61566b9391ccb7b5
-https://conda.anaconda.org/conda-forge/noarch/alembic-1.20.1-pyh5ded981_0.conda#3533ebb7cc0d99c1dda5b96c5590cd76
 https://conda.anaconda.org/conda-forge/osx-64/charset-normalizer-3.5.3-h86c1381_0.conda#d6af04b78552715690d5c1ecfa4b9503
 https://conda.anaconda.org/conda-forge/osx-64/libblas-3.9.0-20_osx64_mkl.conda#160fdc97a51d66d51dc782fb67d35205
 https://conda.anaconda.org/conda-forge/osx-64/libharfbuzz-15.0.0-h2974713_0.conda#320bba29f3d33ba44f64734dc2dd69e5
@@ -147,7 +136,6 @@ https://conda.anaconda.org/conda-forge/osx-64/libtorch-2.14.1-cpu_mkl_he0efe64_1
 https://conda.anaconda.org/conda-forge/osx-64/numpy-2.5.4-py312h66ee8b4_0.conda#0c970e7ea98a6236a2aa429fee49c2cc
 https://conda.anaconda.org/conda-forge/osx-64/contourpy-1.4.0-py312hcba6f97_1.conda#b4c10bcef5b6b512b5e85cf7c1f8f26e
 https://conda.anaconda.org/conda-forge/osx-64/numba-0.68.1-py312h9a5cd42_1.conda#f0f915143d1b52f2fa8aba142a88e21a
-https://conda.anaconda.org/conda-forge/noarch/optuna-5.0.0-pyhd8ed1ab_0.conda#0c7fb5552f0be48ddef6996494c12930
 https://conda.anaconda.org/conda-forge/osx-64/pandas-3.1.1-np2py312h3da1a71_0.conda#f340d19338cbfa77a7fbc456391faff7
 https://conda.anaconda.org/conda-forge/noarch/patsy-1.0.3-pyhcf101f3_0.conda#13e1355debaf21a0b8c2726697ebb01b
 https://conda.anaconda.org/conda-forge/osx-64/pytorch-2.14.1-cpu_mkl_py312_h78ffc80_102.conda#9b7a9025134f48b6c748aeba3ecd9c75

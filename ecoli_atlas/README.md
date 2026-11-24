@@ -31,48 +31,73 @@ This is the first stage of the design. Not yet in the model: batch-corrected cou
 
 ## Install
 
+Two environments, one inside the other:
+
+| | `environment.yaml`: using the model | `environment-train.yaml`: training |
+|---|---|---|
+| For | `embed`, `compare`, `prepare`, `figures`, `view`, `drivers`, `axes`, `casestudy`, `neighbors`, `extract`, and `train` on CPU | seed sweeps and cross-validation on a GPU node, `tune`, the tests |
+| Packages | the scientific stack with the CPU build of PyTorch | every pin of the use environment at the same version, plus optuna and pytest; CUDA torch swapped in |
+| Locks | `locks/linux-64.txt`, `osx-64.txt`, `osx-arm64.txt` | `locks/train-linux-64.txt` (Linux x86_64 only) |
+| Image | the Apptainer image is this environment | none (the CUDA stack is ~5 GB compressed, over the 2 GiB release-asset limit) |
+
+**Using the model:**
+
 ```bash
 conda create -n ecoli_atlas --file ecoli_atlas/locks/linux-64.txt   # osx-64.txt / osx-arm64.txt on a Mac (macOS 12+)
 conda activate ecoli_atlas
 pip install --no-deps -e ./ecoli_atlas
+```
+
+**Training** (a GPU node; the SLURM scripts activate `ecoli_atlas_train`, or the environment named by `CONDA_ENV`):
+
+```bash
+conda create -n ecoli_atlas_train --file ecoli_atlas/locks/train-linux-64.txt
+conda activate ecoli_atlas_train
+pip install --no-deps -e ./ecoli_atlas
+# the CUDA build of the same torch (hash-checked wheels; they bring their own CUDA libraries, only the node's driver is used)
+conda remove -n ecoli_atlas_train --force -y pytorch pytorch-cpu libtorch
+pip install --no-deps --require-hashes -r ecoli_atlas/requirements-cuda.txt
+python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"
 pytest ecoli_atlas/tests
 ```
 
 The lock files list every package by URL and checksum (no solve). `environment.yaml` pins every direct
 dependency to the versions the model bundle was made with (`mamba env create -f ecoli_atlas/environment.yaml`
 gives them with newly solved indirect dependencies); `tests/test_environment.py` checks the pins against the
-locks and against the bundle's `manifest.json`. Maintainers change a pin there and rewrite the locks with
-`python release/make_locks.py ecoli_atlas --platform linux-64 --platform osx-64 --platform osx-arm64`.
-
-The environment has the CPU build of PyTorch, and gseapy (bioconda) for the gene-set enrichment of
-`figures` and `drivers --gsea`; with pip it comes with the `figures` extra (`pip install -e "./ecoli_atlas[figures]"`). A single training run takes minutes on 8 CPU threads
-(about 3 s per epoch on 6,800 samples); a GPU is worth it for seed sweeps and cross-validation. For
-a GPU node, replace it by the CUDA build of the same torch (hash-checked wheels):
-
-```bash
-conda remove -n ecoli_atlas --force -y pytorch pytorch-cpu libtorch
-pip install --no-deps --require-hashes -r ecoli_atlas/requirements-cuda.txt
-python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"
-```
+locks and the bundle's `manifest.json`, that the training environment repeats every use pin, and that the use locks
+hold no training-only package. Maintainers change a pin in both files and rewrite the locks with
+`python release/make_locks.py ecoli_atlas --platform linux-64 --platform osx-64 --platform osx-arm64` and
+`python release/make_locks.py ecoli_atlas --env train --platform linux-64`. gseapy (bioconda) serves the gene-set
+enrichment of `figures` and `drivers --gsea`; with pip it comes with the `figures` extra
+(`pip install -e "./ecoli_atlas[figures]"`), optuna with `tune`, pytest with `dev`. A single training run takes
+minutes on 8 CPU threads (about 3 s per epoch on 6,800 samples); a GPU is worth it for seed sweeps, cross-validation
+and `tune`.
 
 The pip torch does not search the environment's `lib/`, so `import torch` loads the system `libstdc++`; on an
 older system that one is too old for libraries imported after torch (optuna's `sqlite3` fails with ``CXXABI_1.3.15'
-not found``). After `conda activate ecoli_atlas`, in the shell or the job script, put the environment's libraries first:
+not found``). After `conda activate ecoli_atlas_train`, in the shell or the job script, put the environment's libraries first:
 
 ```bash
 export LD_LIBRARY_PATH="$CONDA_PREFIX/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 ```
 
-**Apptainer image (CPU).** The same linux-64 lock and the package, without models or data:
+**Apptainer image (CPU).** The use environment (`locks/linux-64.txt`), without models or data. It is the
+environment of a major version, not of one release: `ecoli_atlas_env2.sif` in the release `containers-v2` serves every
+2.x release, because the lock does not change within it (`download.IMAGE_ENV`, `IMAGE_LOCK_SHA256`; a changed lock
+gets a new environment id and a new image). It also holds the package as of its build:
 
 ```bash
-curl -LO https://github.com/NCEMS/bacterial_states/releases/download/v2.0.0/ecoli_atlas_2.0.0.sif   # ~0.8 GB
-sha256sum ecoli_atlas_2.0.0.sif                 # against IMAGE_SHA256 in src/ecoli_atlas/download.py
-apptainer run --bind $PWD ecoli_atlas_2.0.0.sif embed --models outputs/models ...
+curl -LO https://github.com/NCEMS/bacterial_states/releases/download/containers-v2/ecoli_atlas_env2.sif   # ~0.8 GB
+sha256sum ecoli_atlas_env2.sif                  # against IMAGE_SHA256 in src/ecoli_atlas/download.py
+apptainer run --bind $PWD ecoli_atlas_env2.sif embed --models outputs/models ...         # the package copy in the image
+ECOLI_ATLAS_IMAGE=$PWD/ecoli_atlas_env2.sif bin/ecoli_atlas embed --models outputs/models ...   # this checkout's code
 ```
 
-The image is built by `release/build_container.sh ecoli_atlas` from `container/Singularity.def` (`build/` is pip's output folder); its `%test`
-checks python, numpy and torch against the pins.
+With `ECOLI_ATLAS_IMAGE` set, `bin/ecoli_atlas` runs the checkout's code in the image (the checkout and the current
+directory are bound; `ECOLI_ATLAS_BIND=dir1,dir2` binds more). The same by hand:
+`apptainer run --bind <checkout> --env ECOLI_ATLAS_SRC=<checkout>/ecoli_atlas/src <image> ...`. The image is built by
+`release/build_container.sh ecoli_atlas` from `container/Singularity.def` (`build/` is pip's output folder); its `%test`
+checks the lock checksum and python, numpy and torch against the pins.
 
 Without installing, `bin/ecoli_atlas` runs the CLI from the checkout if the dependencies are present.
 
@@ -323,7 +348,7 @@ out-of-fold AUROC with `--cv`, otherwise the first. Seeds are never ranked on TE
 ### `tune`: hyper-parameter search
 
 ```bash
-pip install 'ecoli_atlas[tune]'        # optuna
+pip install 'ecoli_atlas[tune]'        # optuna (in the training environment)
 ecoli_atlas tune $T --antisense atlas_data/atlas_v2_antisense_counts.tsv --time-series atlas_data/time_courses.tsv \
     --phase-order-weight 1 --splits outputs/models/splits.csv --out work/hpo/study1 --trials 40 --device cuda
 ```

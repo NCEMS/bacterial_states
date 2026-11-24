@@ -1,11 +1,14 @@
-# Apptainer image of Ecoli_ATLAS (CPU): the environment of locks/linux-64.txt and the ecoli_atlas package. No
-# models or data in the image: bind a directory with them and point ECOLI_ATLAS_MODELS / ECOLI_ATLAS_DATA (or
-# --models / --metadata ...) at it. Build with release/build_container.sh, which stages the package tree and
-# fills in VERSION / REVISION; %files paths are relative to that staging directory.
+# Apptainer image of Ecoli_ATLAS (CPU): the environment of a major version (the packages of locks/linux-64.txt), plus
+# the ecoli_atlas package as of the build. No models or data in the image: bind a directory with them and point
+# ECOLI_ATLAS_MODELS / ECOLI_ATLAS_DATA (or --models / --metadata ...) at it. Build with release/build_container.sh,
+# which stages the package tree and fills in VERSION / REVISION (the package copy) and ENVIRONMENT / LOCK_SHA256 (the
+# environment); %files paths are relative to that staging directory.
 #
-#   apptainer run ecoli_atlas_<version>.sif embed --models /data/models ...
-#   apptainer exec ecoli_atlas_<version>.sif pytest /opt/src/ecoli_atlas/tests
-# GPU training stays in the conda environment (requirements-cuda.txt).
+#   apptainer run ecoli_atlas_env<id>.sif embed --models /data/models ...       # the package copied in at the build
+#   apptainer run --env ECOLI_ATLAS_SRC=$PWD/ecoli_atlas/src ecoli_atlas_env<id>.sif embed ...   # your checkout's code
+#   apptainer exec ecoli_atlas_env<id>.sif pytest /opt/src/ecoli_atlas/tests
+# CPU torch only: the CUDA build adds ~5 GB compressed (over the 2 GiB release-asset limit); GPU training stays in
+# the conda environment (requirements-cuda.txt).
 Bootstrap: docker
 # mambaorg/micromamba:2.10.0-debian13-slim, pinned by digest (apptainer refuses a tag together with a digest)
 From: mambaorg/micromamba@sha256:e1476182cd40eb1f7c0cfae4adec9bfd78f3d7f05c61368306abfdc8939c1198
@@ -13,6 +16,8 @@ From: mambaorg/micromamba@sha256:e1476182cd40eb1f7c0cfae4adec9bfd78f3d7f05c61368
 %arguments
     VERSION=unset
     REVISION=unset
+    ENVIRONMENT=unset
+    LOCK_SHA256=unset
 
 %files
     ecoli_atlas /opt/src/ecoli_atlas
@@ -43,11 +48,14 @@ From: mambaorg/micromamba@sha256:e1476182cd40eb1f7c0cfae4adec9bfd78f3d7f05c61368
     org.opencontainers.image.title ecoli_atlas
     org.opencontainers.image.version {{ VERSION }}
     org.opencontainers.image.revision {{ REVISION }}
+    org.ncems.environment {{ ENVIRONMENT }}
+    org.ncems.lock-sha256 {{ LOCK_SHA256 }}
     org.opencontainers.image.source https://github.com/NCEMS/bacterial_states
     org.opencontainers.image.licenses MIT
 
 %test
     set -eu
+    test "$(sha256sum /opt/src/ecoli_atlas/locks/linux-64.txt | cut -d' ' -f1)" = "{{ LOCK_SHA256 }}"
     python - <<'EOF'
 import re, sys
 import numpy, torch, yaml
@@ -66,8 +74,16 @@ EOF
     ecoli_atlas --help >/dev/null
 
 %runscript
+    # ECOLI_ATLAS_SRC: the src/ directory of an ecoli_atlas checkout or install (bound into the container) to run
+    # instead of the copy made at the build; the environment is the same for every release of this major version
+    if [ -n "${ECOLI_ATLAS_SRC:-}" ]; then
+        [ -f "$ECOLI_ATLAS_SRC/ecoli_atlas/cli.py" ] || { echo "ECOLI_ATLAS_SRC=$ECOLI_ATLAS_SRC: no ecoli_atlas/cli.py there (bound?)" >&2; exit 2; }
+        export PYTHONPATH="$ECOLI_ATLAS_SRC${PYTHONPATH:+:$PYTHONPATH}"
+        exec python -m ecoli_atlas.cli "$@"
+    fi
     exec ecoli_atlas "$@"
 
 %help
-    Ecoli_ATLAS {{ VERSION }} ({{ REVISION }}), CPU build: `apptainer run <image> --help`.
+    Ecoli_ATLAS environment {{ ENVIRONMENT }} (lock {{ LOCK_SHA256 }}), CPU build; package copy {{ VERSION }} ({{ REVISION }}).
+    `apptainer run <image> --help`; set ECOLI_ATLAS_SRC to the src/ of a (bound) checkout to run that code instead.
     Models and data are not in the image: `ecoli_atlas download models`, then bind that directory.

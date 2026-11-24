@@ -44,10 +44,35 @@ def test_packaged_manifest_is_consistent():
     assert all(r[3] in resources.BUNDLES for r in rows)
 
 
-def test_container_url_is_this_version():
+def test_container_url_is_the_environment_image():
     from ecoli_ingest import __version__
+    major = resources.CONTAINER_ENV.split(".")[0]
+    assert major == __version__.split(".")[0], "the image's environment belongs to this major version"
     assert resources.CONTAINER_URL == (f"https://github.com/NCEMS/bacterial_states/releases/download/"
-                                       f"v{__version__}/ecoli_ingest_{__version__}.sif")
+                                       f"containers-v{major}/ecoli_ingest_env{resources.CONTAINER_ENV}.sif")
+
+
+def test_container_lock_pin_is_the_linux_lock():
+    """A changed lock needs a new environment id and image (release/build_container.sh refuses otherwise)."""
+    import hashlib
+    lock = Path(__file__).resolve().parents[1] / "locks" / "linux-64.txt"
+    assert hashlib.sha256(lock.read_bytes()).hexdigest() == resources.CONTAINER_LOCK_SHA256, (
+        "locks/linux-64.txt changed: set a new CONTAINER_ENV and CONTAINER_LOCK_SHA256 in resources.py and build its image")
+
+
+def test_check_compares_the_image_environment(tmp_path, monkeypatch):
+    from ecoli_ingest import checks, container
+    img = paths.container_image(tmp_path)
+    img.parent.mkdir(parents=True)
+    img.write_bytes(b"")
+    monkeypatch.setattr(container, "find_runtime", lambda: "/usr/bin/apptainer")
+    for labels, status in (({container.LABEL_ENVIRONMENT: resources.CONTAINER_ENV,
+                             container.LABEL_LOCK: resources.CONTAINER_LOCK_SHA256}, checks.OK),
+                           ({container.LABEL_ENVIRONMENT: "1", container.LABEL_LOCK: "0" * 64}, checks.WARN),
+                           ({"org.opencontainers.image.version": "2.0.0"}, checks.WARN)):        # an image without the labels
+        monkeypatch.setattr(container, "image_labels", lambda rt, image, labels=labels: labels)
+        found = [c for c in checks.check_mode("always", tmp_path) if c.name == "container image"]
+        assert len(found) == 1 and found[0].status == status, (labels, found)
 
 
 def test_container_unpublished_points_to_the_build(tmp_path, monkeypatch):

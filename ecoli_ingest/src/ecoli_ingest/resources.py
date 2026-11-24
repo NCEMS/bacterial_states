@@ -2,9 +2,11 @@
 
 The core bundle is an asset of the GitHub release `resources-v2` of NCEMS/bacterial_states; the Centrifuge
 index is fetched from its authors' public bucket. Both are checked against the packaged manifest
-after unpacking. The Apptainer image belongs to the code version, not to the data release: an asset
-`ecoli_ingest_<version>.sif` of the code release `v<version>`, downloaded over HTTPS and checked against
-the SHA-256 pinned below. Every URL lives in BUNDLE_URLS / CONTAINER_URL below and nowhere else.
+after unpacking. The Apptainer image is the environment of a major version, not of one code release: the
+tools of locks/linux-64.txt, `ecoli_ingest_env<CONTAINER_ENV>.sif` in the GitHub release `containers-v<major>`,
+downloaded over HTTPS and checked against the SHA-256 pinned below. The host launcher runs its own Snakefile and
+scripts in it, so every 2.x release uses the same image as long as the lock does not change. Every URL lives in
+BUNDLE_URLS / CONTAINER_URL below and nowhere else.
 """
 from __future__ import annotations
 
@@ -15,7 +17,7 @@ import tarfile
 import urllib.request
 from pathlib import Path
 
-from . import __version__, paths
+from . import paths
 
 RESOURCES_VERSION = "v2"
 # assets of the GitHub data release `resources-<version>` (code releases are tagged vX.Y.Z)
@@ -40,11 +42,16 @@ BUNDLE_SUBDIR = {"centrifuge": "centrifuge"}
 # downloaded by `ecoli_ingest download` when no bundle is named; the container needs --with-apptainer
 DEFAULT_BUNDLES = ("core", "centrifuge")
 
-# Apptainer image of this code version: built by release/build_container.sh from locks/linux-64.txt and attached
-# to the code release v<version> (release assets are limited to 2 GiB; the image is ~1.1 GiB). The download is
-# checked against the SHA-256 pinned here; None until the image of this version is published.
-CODE_RELEASE_URL = f"https://github.com/NCEMS/bacterial_states/releases/download/v{__version__}"
-CONTAINER_URL = f"{CODE_RELEASE_URL}/ecoli_ingest_{__version__}.sif"
+# Apptainer image: the environment of locks/linux-64.txt (built by release/build_container.sh, which refuses a lock
+# whose SHA-256 is not CONTAINER_LOCK_SHA256). One image per environment, normally one per major version: a change of
+# the lock needs a new CONTAINER_ENV ("2.1", or the next major) and a new image, never a replaced one, so that every
+# release keeps the image it pins. Release assets are limited to 2 GiB; the image is ~1.1 GiB. The download is
+# checked against CONTAINER_SHA256, None until the image of this environment is published.
+CONTAINER_ENV = "2"
+CONTAINER_LOCK_SHA256 = "52f727342d6ffdce0add4f030c930b980a065817c716c2abec7cca2b5c616930"   # locks/linux-64.txt
+CONTAINER_RELEASE_URL = ("https://github.com/NCEMS/bacterial_states/releases/download/"
+                         f"containers-v{CONTAINER_ENV.split('.')[0]}")
+CONTAINER_URL = f"{CONTAINER_RELEASE_URL}/ecoli_ingest_env{CONTAINER_ENV}.sif"
 CONTAINER_SHA256: str | None = None
 CONTAINER_SIZE = "~1.2 GB"
 # everything `ecoli_ingest download` accepts
@@ -134,14 +141,14 @@ def _check_member(member: tarfile.TarInfo, target: Path) -> None:
 
 
 def download_container(dest: Path, dry_run: bool = False, log=None) -> int:
-    """Download the image of this version into <dest>/container/ and check its SHA-256."""
+    """Download the image of this environment (CONTAINER_ENV) into <dest>/container/ and check its SHA-256."""
     log = log or sys.stderr
     target = paths.container_image(dest)
     print(f"bundle   : container ({CONTAINER_SIZE})", file=log)
     print(f"url      : {CONTAINER_URL}", file=log)
     print(f"target   : {target}", file=log)
     if CONTAINER_SHA256 is None:
-        print(f"\nThe image of ecoli_ingest {__version__} has not been published yet. Build it with", file=log)
+        print(f"\nThe image of environment {CONTAINER_ENV} has not been published yet. Build it with", file=log)
         print("    release/build_container.sh ecoli_ingest      (in a checkout of the repository)", file=log)
         print(f"and put it at {target}, or use the conda environment (--container never).", file=log)
         return 2

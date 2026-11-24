@@ -6,7 +6,7 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
-from . import __version__, container, paths, runconfig
+from . import container, paths, runconfig
 
 OK, WARN, FAIL = "ok", "warn", "FAIL"
 MIN_STRAND_FRACTION = 0.8    # mirrors workflow/scripts/call_strandedness.py MIN_FRACTION: unstranded libraries are never counted
@@ -60,13 +60,17 @@ def check_mode(mode: str, resources: Path | None) -> list[Check]:
         else:
             img = paths.container_image(resources)
             if img.exists():
-                version = container.image_version(rt, img) if rt else None
-                if version == __version__:
-                    out.append(Check("container image", OK, f"{img} (ecoli_ingest {version})"))
+                # the launcher runs its own Snakefile in the image, so what has to match is the environment (the lock)
+                from .resources import CONTAINER_ENV, CONTAINER_LOCK_SHA256
+                labels = container.image_labels(rt, img) if rt else {}
+                env, lock = labels.get(container.LABEL_ENVIRONMENT), labels.get(container.LABEL_LOCK)
+                if lock == CONTAINER_LOCK_SHA256:
+                    out.append(Check("container image", OK, f"{img} (environment {env})"))
                 else:
                     out.append(Check("container image", WARN,
-                                     f"{img} is " + (f"version {version}" if version else "of unknown version")
-                                     + f", this launcher is {__version__}; run `ecoli_ingest download container`"))
+                                     f"{img} is " + (f"environment {env}" if env else "an image without an environment label")
+                                     + f", this launcher needs environment {CONTAINER_ENV} (lock {CONTAINER_LOCK_SHA256[:12]}); "
+                                       "run `ecoli_ingest download container`"))
             else:
                 out.append(Check("container image", FAIL,
                                  f"{img} not found; run `ecoli_ingest download container` or use --container never"))

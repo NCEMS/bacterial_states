@@ -3,8 +3,10 @@
     python release/make_locks.py ecoli_ingest --platform linux-64 --from-env ecoli_ingest
     python release/make_locks.py ecoli_ingest --platform osx-64 --platform osx-arm64
     python release/make_locks.py ecoli_atlas  --platform linux-64 --platform osx-64 --platform osx-arm64
+    python release/make_locks.py ecoli_atlas  --env train --platform linux-64     # environment-train.yaml
 
-A lock is `<package>/locks/<platform>.txt` in conda's explicit format (one package URL with its MD5 per
+A lock is `<package>/locks/<platform>.txt` (`--env train`: `<package>/locks/train-<platform>.txt`, from
+`environment-train.yaml`, the training environment of ecoli_atlas) in conda's explicit format (one package URL with its MD5 per
 line), installable with `conda create -n NAME --file <lock>` or `micromamba create -n NAME -f <lock>`
 without a solve. Each lock is either
 
@@ -116,8 +118,14 @@ def main(argv=None) -> int:
     ap.add_argument("package", choices=PACKAGES)
     ap.add_argument("--platform", action="append", choices=PLATFORMS, required=True)
     ap.add_argument("--from-env", metavar="NAME", help="export linux-64 from this environment instead of solving")
+    ap.add_argument("--env", choices=("use", "train"), default="use",
+                    help="use: environment.yaml -> locks/<platform>.txt (default); train: environment-train.yaml -> "
+                         "locks/train-<platform>.txt (ecoli_atlas only)")
     args = ap.parse_args(argv)
-    yml = ROOT / args.package / "environment.yaml"
+    yml = ROOT / args.package / ("environment.yaml" if args.env == "use" else "environment-train.yaml")
+    if not yml.is_file():
+        raise SystemExit(f"{yml} not found")
+    prefix, env_name = ("", args.package) if args.env == "use" else ("train-", f"{args.package}_train")
     channels, pins = read_env(yml)
     outdir = ROOT / args.package / "locks"
     outdir.mkdir(exist_ok=True)
@@ -127,18 +135,18 @@ def main(argv=None) -> int:
                 raise SystemExit("--from-env exports the host environment: linux-64 only")
             urls, how = export(args.from_env), f"exported from the environment `{args.from_env}`"
         else:
-            urls, how = solve(channels, pins, platform), "solved from environment.yaml (" + ", ".join(
+            urls, how = solve(channels, pins, platform), f"solved from {yml.name} (" + ", ".join(
                 f"{k}={v}" for k, v in OVERRIDES[platform].items()) + ")"
         bad = check_pins(pins, urls)
         if bad:
             raise SystemExit(f"{platform}: lock does not match {yml}:\n  " + "\n  ".join(bad))
         text = "\n".join([
-            f"# {args.package} {platform} lock, {how}, {dt.date.today().isoformat()}",
-            f"# made by release/make_locks.py; install with: conda create -n {args.package} --file <this file>",
+            f"# {args.package}{' training' if prefix else ''} {platform} lock, {how}, {dt.date.today().isoformat()}",
+            f"# made by release/make_locks.py; install with: conda create -n {env_name} --file <this file>",
             f"# platform: {platform}",
             "@EXPLICIT",
             *urls, ""])
-        path = outdir / f"{platform}.txt"
+        path = outdir / f"{prefix}{platform}.txt"
         path.write_text(text)
         print(f"{path.relative_to(ROOT)}: {len(urls)} packages", file=sys.stderr)
     return 0

@@ -5,8 +5,10 @@ Each bundle pins the SHA-256 of its archive. The archives are built reproducibly
 always give the same checksum; a download that does not match is rejected before anything is
 unpacked. A new archive needs a new version (ATLAS_DATA_VERSION) and a new checksum here.
 
-The Apptainer image (CPU) belongs to the code version: an asset of the code release v<version>
-(`curl -LO <IMAGE_URL>`, then `sha256sum` against IMAGE_SHA256)."""
+The Apptainer image (CPU) is the environment of a major version, not of one code release: the packages of
+locks/linux-64.txt, `ecoli_atlas_env<IMAGE_ENV>.sif` in the GitHub release `containers-v<major>` (`curl -LO <IMAGE_URL>`,
+then `sha256sum` against IMAGE_SHA256). It also holds the package as of its build, for `apptainer run` without an
+install; with ECOLI_ATLAS_SRC bound in, it runs that code instead (see container/Singularity.def)."""
 from __future__ import annotations
 
 import hashlib
@@ -17,14 +19,19 @@ import tempfile
 import urllib.request
 from pathlib import Path
 
-from . import __version__
 
 ATLAS_DATA_VERSION = "v2"
 # assets of the GitHub data release `resources-<version>` (code releases are tagged vX.Y.Z)
 RELEASE_URL = f"https://github.com/NCEMS/bacterial_states/releases/download/resources-{ATLAS_DATA_VERSION}"
-# Apptainer image of this code version (release/build_container.sh), an asset of the code release v<version>;
-# check the download against IMAGE_SHA256 (None until this version's image is published)
-IMAGE_URL = f"https://github.com/NCEMS/bacterial_states/releases/download/v{__version__}/ecoli_atlas_{__version__}.sif"
+# Apptainer image: the environment of locks/linux-64.txt (release/build_container.sh, which refuses a lock whose
+# SHA-256 is not IMAGE_LOCK_SHA256). One image per environment, normally one per major version: a change of the lock
+# needs a new IMAGE_ENV ("2.1", or the next major) and a new image, never a replaced one. CPU torch only: the CUDA
+# stack is ~5 GB compressed, over the 2 GiB limit of a release asset; GPU work uses the conda environment
+# (requirements-cuda.txt). Check the download against IMAGE_SHA256, None until the image is published.
+IMAGE_ENV = "2"
+IMAGE_LOCK_SHA256 = "8c0447c27d7bb0905ebcdcdc7083063f88703beaee7b0f51460dcbbeb0c91545"   # locks/linux-64.txt
+IMAGE_URL = (f"https://github.com/NCEMS/bacterial_states/releases/download/containers-v{IMAGE_ENV.split('.')[0]}/"
+             f"ecoli_atlas_env{IMAGE_ENV}.sif")
 IMAGE_SHA256: str | None = None
 ENV_DATA = "ECOLI_ATLAS_DATA"
 ENV_MODELS = "ECOLI_ATLAS_MODELS"

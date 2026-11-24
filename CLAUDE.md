@@ -50,11 +50,17 @@ the per-file checksums of the core bundle are in `resources.manifest.tsv`, the a
 `metadata_v2*` with its GEO text and evidence, `sample_qc.tsv`, `time_courses.tsv`, `atlas_v2_missing_genes.tsv`
 (= `outputs/models/missing_genes.tsv`); models = `outputs/models/` with every seed. `resources-v1` (built in
 `work/release_v1/`) holds the v1 model and the old annotation. The Centrifuge index comes from the Centrifuge
-authors' bucket (`genome-idx.s3.amazonaws.com/centrifuge/`). The Apptainer images belong to the code version, not to a
-data release: assets `<pkg>_<version>.sif` of the code release `v<version>` (user decision 2026-11-23; the images are
-~1.1 and ~0.8 GiB, under the 2 GiB asset limit; GHCR only if one outgrows it) (`resources.CONTAINER_URL`,
-`download.IMAGE_URL`), checked against a pinned SHA-256 (`CONTAINER_SHA256`, `IMAGE_SHA256`; `None` until the image of that
-version is uploaded). Zenodo archive of both images and the locks at the paper release.
+authors' bucket (`genome-idx.s3.amazonaws.com/centrifuge/`). The Apptainer images are the environment of a major
+version, not of a code release (user decision 2026-11-24, replacing per-release images): `<pkg>_env<id>.sif` in the
+release `containers-v<major>` (`resources.CONTAINER_ENV` / `download.IMAGE_ENV` = "2"), built from the linux-64 lock whose
+SHA-256 is pinned beside the id (`CONTAINER_LOCK_SHA256`, `IMAGE_LOCK_SHA256`; tests and `release/build_container.sh`
+refuse a changed lock: a new lock = a new environment id and image, never a replaced one), labelled
+`org.ncems.environment` / `org.ncems.lock-sha256` (`ecoli_ingest check` compares the lock label). The host launchers run
+their own code in them (inGEST: the host Snakefile; ATLAS: `ECOLI_ATLAS_SRC`, or `ECOLI_ATLAS_IMAGE` with `bin/ecoli_atlas`);
+the package copy inside serves only `apptainer run` without an install. Downloads are checked against a pinned SHA-256
+(`CONTAINER_SHA256`, `IMAGE_SHA256`; `None` until the image is uploaded). The user builds the images on a separate AWS
+(Amazon Linux 2023) machine and publishes them; ~1.1 and ~0.8 GiB, under the 2 GiB asset limit. No CUDA image: the CUDA
+stack is ~4.9 GB compressed (measured 2026-11-24). Zenodo archive of both images and the locks at the paper release.
 Bundle file names are `ecoli_ingest_*` / `ecoli_atlas_*` (other microbes may follow).
 
 ## Git
@@ -90,9 +96,14 @@ Temporary files go in the session scratchpad or under `work/`, never in the pack
   `manifest.json` environment; `tests/test_environment.py` checks both), no pip sections. `locks/<platform>.txt`
   (linux-64, osx-64, osx-arm64; conda explicit files, URL + MD5) are written by `release/make_locks.py` and never edited
   by hand; the inGEST linux-64 lock is the exported recount env (`--from-env`), the others are solved (glibc 2.28,
-  macOS 12). GPU torch: `ecoli_atlas/requirements-cuda.txt` (hash-pinned, `--no-deps`, same torch). Images:
+  macOS 12). ATLAS has two environments (user decision 2026-11-24): `environment.yaml` = using the model (no optuna or
+  pytest; locks for 3 platforms; the image) and `environment-train.yaml` = the same pins plus optuna and pytest
+  (`locks/train-linux-64.txt`, `make_locks.py --env train`; conda env `ecoli_atlas_train`, which the SLURM scripts
+  activate, falling back to `ecoli_atlas`). GPU torch: `ecoli_atlas/requirements-cuda.txt` (hash-pinned, `--no-deps`, same
+  torch), swapped into the training environment. Images:
   `ecoli_ingest/build/Singularity.def` and `ecoli_atlas/container/Singularity.def` (`ecoli_atlas/build/` is gitignored pip output) install the linux-64 lock on a digest-pinned micromamba base, plus the package;
-  `release/build_container.sh <pkg>` builds (needs root or fakeroot: not on this cluster) and prints the push command.
+  `release/build_container.sh <pkg>` builds (needs root or fakeroot: not on this cluster; the user builds on AWS) and prints
+  the upload command.
   No support for the old image or layout (`rnaseq_vg.sif`, `resources/build/`; user decision 2026-11-23).
 - inGEST counting is described in `docs/counting.md`; there is no backward compatibility with the v1 counting.
 - Counting annotation: `resources/annotation/GCF_000005845.2_ASM584v2_counting_v2.{gff,bed,

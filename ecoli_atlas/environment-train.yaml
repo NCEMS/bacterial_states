@@ -1,0 +1,34 @@
+# Conda environment for TRAINING Ecoli_ATLAS on a GPU node: seed sweeps, cross-validation, `tune`, and the tests.
+# Every pin of environment.yaml (the environment for using the model, which the Apptainer image holds), at the same
+# version, plus optuna (`tune`) and pytest; tests/test_environment.py checks that the two agree. Linux x86_64 only.
+#
+#   conda create -n ecoli_atlas_train --file ecoli_atlas/locks/train-linux-64.txt
+#   conda activate ecoli_atlas_train
+#   pip install --no-deps -e ./ecoli_atlas
+# then replace the CPU torch by the pinned CUDA build of the same torch (hash-checked; it brings its own CUDA
+# libraries, only the node's NVIDIA driver is used; this is the torch the current model bundle records):
+#   conda remove -n ecoli_atlas_train --force -y pytorch pytorch-cpu libtorch
+#   pip install --no-deps --require-hashes -r ecoli_atlas/requirements-cuda.txt
+#   export LD_LIBRARY_PATH="$CONDA_PREFIX/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"   # see README (pip torch, libstdc++)
+name: ecoli_atlas_train
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  # the pins of environment.yaml
+  - python=3.12.16
+  - pip=26.2.2
+  - numpy=2.5.4
+  - pandas=3.1.1
+  - scipy=1.18.1
+  - scikit-learn=1.9.1
+  - pytorch-cpu=2.14.1   # replaced by requirements-cuda.txt on a GPU node
+  - pyyaml=6.0.3
+  - matplotlib-base=3.11.2
+  - seaborn=0.13.2
+  - gseapy=1.3.2
+  - umap-learn=0.5.12
+  - plotly=7.1.0
+  # training only
+  - optuna=5.0.0         # `tune`
+  - pytest=9.2.0

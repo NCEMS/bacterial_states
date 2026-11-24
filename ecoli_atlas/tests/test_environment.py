@@ -1,4 +1,5 @@
-"""environment.yaml pins every dependency exactly; the lock files and the model bundle agree with it."""
+"""environment.yaml (using the model; the image) and environment-train.yaml (training: the same pins plus optuna and
+pytest) pin every dependency exactly; the lock files and the model bundle agree with them."""
 import json
 from pathlib import Path
 
@@ -9,15 +10,19 @@ from ecoli_atlas import download
 
 PKG = Path(__file__).resolve().parents[1]
 ENV = PKG / "environment.yaml"
-LOCKS = sorted((PKG / "locks").glob("*.txt"))
+TRAIN_ENV = PKG / "environment-train.yaml"
+LOCKS = sorted(p for p in (PKG / "locks").glob("*.txt") if not p.name.startswith("train-"))
+TRAIN_LOCKS = sorted((PKG / "locks").glob("train-*.txt"))
+TRAIN_ONLY = {"optuna", "pytest"}           # what the training environment adds to the use environment
+TRAIN_EXTRAS = {"tune", "dev"}               # pyproject extras that belong to the training environment
 # what the bundle manifest records (artifacts.environment) -> conda package of environment.yaml
 MANIFEST_PACKAGES = {"python": "python", "numpy": "numpy", "torch": "pytorch-cpu"}
 
 
-def _pins():
+def _pins(path=ENV):
     pins = {}
-    for dep in yaml.safe_load(ENV.read_text())["dependencies"]:
-        assert isinstance(dep, str), f"no pip sections in {ENV.name}: {dep}"
+    for dep in yaml.safe_load(path.read_text())["dependencies"]:
+        assert isinstance(dep, str), f"no pip sections in {path.name}: {dep}"
         name, sep, version = dep.split("#")[0].strip().partition("=")
         pins[name] = version if sep else None
     return pins
@@ -34,28 +39,46 @@ def _lock(path):
 
 
 def test_every_dependency_is_pinned_to_one_version():
-    for name, version in _pins().items():
-        assert version and not version.startswith(("=", "<", ">")) and "*" not in version and "," not in version, name
+    for path in (ENV, TRAIN_ENV):
+        for name, version in _pins(path).items():
+            assert version and not version.startswith(("=", "<", ">")) and "*" not in version and "," not in version, name
+
+
+def test_train_environment_is_the_use_environment_plus_training():
+    use, train = _pins(), _pins(TRAIN_ENV)
+    assert {n: v for n, v in train.items() if n in use} == use, "environment-train.yaml repeats every use pin, same version"
+    assert set(train) - set(use) == TRAIN_ONLY
 
 
 def test_pyproject_dependencies_are_pinned():
     import tomllib
     proj = tomllib.loads((PKG / "pyproject.toml").read_text())["project"]
-    names = [d.split(">")[0].split("<")[0].split("=")[0].strip() for d in proj["dependencies"]]
-    for extra in proj["optional-dependencies"].values():
-        names += [d.split(">")[0].split("<")[0].split("=")[0].strip() for d in extra]
+    def names(deps):
+        return [d.split(">")[0].split("<")[0].split("=")[0].strip() for d in deps]
+    use_names = names(proj["dependencies"])
+    train_names = []
+    for extra, deps in proj["optional-dependencies"].items():
+        (train_names if extra in TRAIN_EXTRAS else use_names).extend(names(deps))
     conda = {"torch": "pytorch-cpu", "matplotlib": "matplotlib-base"}      # pip name -> conda package
-    pins = _pins()
-    assert not [n for n in names if conda.get(n, n) not in pins], "every pyproject dependency is in environment.yaml"
+    assert not [n for n in use_names if conda.get(n, n) not in _pins()], "every use dependency is in environment.yaml"
+    assert not [n for n in train_names if conda.get(n, n) not in _pins(TRAIN_ENV)], "tune/dev extras are in environment-train.yaml"
 
 
-@pytest.mark.parametrize("lock", LOCKS, ids=[p.stem for p in LOCKS])
+@pytest.mark.parametrize("lock", LOCKS + TRAIN_LOCKS, ids=[p.stem for p in LOCKS + TRAIN_LOCKS])
 def test_lock_matches_pins(lock):
     have = _lock(lock)
-    assert lock.read_text().splitlines()[2] == f"# platform: {lock.stem}"
-    bad = {n: (v, have.get(n)) for n, v in _pins().items() if have.get(n) != v}
-    assert not bad, f"{lock.name} disagrees with environment.yaml: {bad}"
+    train = lock.name.startswith("train-")
+    assert lock.read_text().splitlines()[2] == f"# platform: {lock.stem.removeprefix('train-')}"
+    pins = _pins(TRAIN_ENV if train else ENV)
+    bad = {n: (v, have.get(n)) for n, v in pins.items() if have.get(n) != v}
+    assert not bad, f"{lock.name} disagrees with {(TRAIN_ENV if train else ENV).name}: {bad}"
     assert not [n for n in have if n.startswith(("nvidia-", "cuda-"))], "the locked torch is the CPU build"
+    if not train:
+        assert not TRAIN_ONLY & set(have), "the use environment (and the image) has no training-only packages"
+
+
+def test_train_lock_exists():
+    assert (PKG / "locks" / "train-linux-64.txt") in TRAIN_LOCKS
 
 
 def test_linux_lock_exists():
@@ -79,3 +102,15 @@ def test_pins_match_the_model_bundle():
     for key, package in MANIFEST_PACKAGES.items():
         if key in env:
             assert str(env[key]).split("+")[0] == pins[package], f"bundle {key} {env[key]}, pinned {pins[package]}"
+
+
+def test_image_is_the_environment_of_this_major_version():
+    import hashlib
+    from ecoli_atlas import __version__
+    major = download.IMAGE_ENV.split(".")[0]
+    assert major == __version__.split(".")[0]
+    assert download.IMAGE_URL == ("https://github.com/NCEMS/bacterial_states/releases/download/"
+                                  f"containers-v{major}/ecoli_atlas_env{download.IMAGE_ENV}.sif")
+    # a changed lock needs a new environment id and image (release/build_container.sh refuses otherwise)
+    assert hashlib.sha256((PKG / "locks" / "linux-64.txt").read_bytes()).hexdigest() == download.IMAGE_LOCK_SHA256, (
+        "locks/linux-64.txt changed: set a new IMAGE_ENV and IMAGE_LOCK_SHA256 in download.py and build its image")
