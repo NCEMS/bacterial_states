@@ -208,7 +208,9 @@ ecoli_atlas neighbors GSE224463 --models outputs/models --out neighbors [--metad
 ecoli_atlas view --models outputs/models --metadata atlas_data/metadata_v2.tsv \
     --studies atlas_data/metadata_v2_studies.tsv --sample-text atlas_data/metadata_v2_sample_text.tsv \
     --counts atlas_data/atlas_v2_counts.tsv --qc atlas_data/sample_qc.tsv \
-    [--embeddings embedded=my_samples] --out atlas_view.html
+    [--time-series atlas_data/time_courses.tsv] [--modules atlas_data/modules/modules.tsv] \
+    [--embeddings embedded=my_samples [--overlay-metadata my_samples.csv] [--overlay-series replicate:time_h] \
+     [--overlay-counts my_run/results/all_samples_counts.tsv]] --out atlas_view.html
 ```
 
 ### Ways of fitting (`train --fit`)
@@ -634,14 +636,40 @@ which take a few minutes for the whole atlas. The page holds:
   The study card shows the GEO title, summary and overall design, links to PubMed, BioProject and
   SRA, and the curation notes.
 - **Examples.** These are preset views of single studies (growth-phase series, a biofilm, rich
-  against minimal medium, a strain panel, the withheld study, the case studies). They are kept
+  against minimal medium, a strain panel, the withheld study, the case studies, the read-based examples of `examples/`). They are kept
   in `src/ecoli_atlas/viewer/presets.json` (`id`, `title`, `gse`, `layout`, `color_by`,
   `caption`, optionally `pcs`: the three columns to draw, counted from 0); `--presets FILE` replaces them, and presets whose studies are not in the bundle are
   dropped.
 - **Your samples** (`--embeddings DIR[=NAME]`, repeatable: output directories of `embed` made
   with the same bundle). They are drawn as diamonds, projected onto the atlas fit of every layout.
   Clicking one lists its `-k` nearest atlas samples in the whole embedding (`--metric`, default
-  cosine as in `compare`) and their studies.
+  cosine as in `compare`) and their studies. The "Your samples" tab lists them with their calls and turns the camera
+  to them. A sample sheet is optional (`--overlay-metadata [NAME=]FILE`, csv or tsv, first column = the sample ids of
+  the `embed` output): its columns then colour and group your samples (a column of numbers with more than 12 values on
+  a colour scale, every other column by value) and appear in the hover text and the sample panel.
+  `--overlay-series COLUMN[:ORDER_COLUMN]` joins the samples that share a value of COLUMN by a line, in the order of
+  ORDER_COLUMN (e.g. `replicate:time_h`: one line per replicate through its time points). With several `--embeddings`
+  sets, name the set of each sheet (`NAME=FILE`) or give the sheets in the order of the sets.
+- **Regulons** (`--modules`, the table of `ecoli_atlas download modules`; needs `--counts`). The Regulon box colours
+  the map by the expression of a RegulonDB set: for every regulator the genes it activates and those it represses, as
+  separate sets, all of them whatever their size (290 with the current table; the iModulon and KEGG rows of the
+  table are not used). Typing a regulator picks its set; typing a gene lists the sets that hold it. The value of a
+  set in a sample is the mean over the set's genes of their standardised log expression (log2 of the size-factor
+  normalised count; per gene minus its mean and divided by its SD over the atlas samples), minus the sample's
+  median over all genes. Genes called missing in a sample are left out for it. The median is taken off because a
+  shallow library has more genes without reads and would sit low in every set. Each set has its own symmetric colour
+  scale (red above the atlas mean, blue below). The Regulon tab lists the set's genes and flags sets of fewer than 5
+  genes. A value is the expression of the regulator's targets, not its activity, and regulons that share targets
+  move together. Your samples get values when their count table is given (`--overlay-counts [NAME=]FILE`, the inGEST
+  `all_samples_counts.tsv`). The set is part of the page's link (`#regulon=regulondb:Fur-`). Adds about 3 MB to the page.
+- **Time courses** (`--time-series`, `time_courses.tsv`: `sample`, `series`, `x`, `x_label`). In study mode a line
+  joins the samples of each series in the order of `x`; a cross marks the last one. "Lines" switches them off.
+- **Seeds.** A bundle with `seed_<n>` folders gives, per call, the number of seeds that make the same call as the
+  bundle's model: a colour option ("seeds that agree") and a column of the sample panel (e.g. 7/8). Your samples get
+  it when `embed --seeds` wrote `predictions_seeds.tsv`.
+- **Motion.** A change of layout or axes moves the points to their new places; picking a study or an example turns
+  the camera to it ("Overview" turns it back); "Rotate" turns the scene until the next mouse press on the plot. The
+  moves are skipped when the browser asks for reduced motion.
 
 The study and sample text come from `ecoli_ingest/atlas_build/metadata/study_text.py` (see
 `docs/metadata_v2.md`). Without `--studies` / `--sample-text` the page still works, but without the

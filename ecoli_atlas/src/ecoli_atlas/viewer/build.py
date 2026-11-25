@@ -114,10 +114,11 @@ def encode_field(name: str, values: pd.Series, kind: str | None = None) -> dict:
     return {"name": name, "kind": "cat", "levels": levels, "values": [-1 if v is None else code[v] for v in strs]}
 
 
-def load_overlay(dirs: list[str]) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """(embedding, calls + probabilities, info, covariates or None) of `embed` output directories;
-    ``DIR`` or ``DIR=NAME``. The covariates come from ``covariates.tsv`` (written by `embed`)."""
-    embs, probs, infos, covs = [], [], [], []
+def load_overlay(dirs: list[str]) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame | None, list[dict]]:
+    """(embedding, calls + probabilities, info, covariates or None, sets) of `embed` output directories;
+    ``DIR`` or ``DIR=NAME``. The covariates come from ``covariates.tsv`` (written by `embed`). ``sets``: per
+    directory its name, path, the samples' own ids and their ids in the page."""
+    embs, probs, infos, covs, sets = [], [], [], [], []
     for spec in dirs:
         path, _, name = spec.partition("=")
         d = Path(path)
@@ -139,27 +140,148 @@ def load_overlay(dirs: list[str]) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFr
             cov = pd.read_csv(base / "covariates.tsv", sep="\t", index_col=0)
             cov.index = cov.index.astype(str)
             cov = cov.reindex(emb.index)
+        own = list(emb.index)
         emb.index = [f"{name}:{s}" if len(dirs) > 1 else s for s in emb.index]
+        sets.append({"name": name, "dir": base, "samples": own, "ids": list(emb.index)})
         pred.index, info.index = emb.index, emb.index
         if cov is not None:
             cov.index = emb.index
             covs.append(cov)
         info["sample"] = [s.split(":", 1)[-1] for s in emb.index]
         embs.append(emb), probs.append(pred), infos.append(info)
-    return pd.concat(embs), pd.concat(probs), pd.concat(infos), (pd.concat(covs) if covs else None)
+    names = [s["name"] for s in sets]
+    if len(set(names)) < len(names):
+        raise ValueError(f"two sets of your samples have the same name ({names}); name them with --embeddings DIR=NAME")
+    return pd.concat(embs), pd.concat(probs), pd.concat(infos), (pd.concat(covs) if covs else None), sets
+
+
+def _per_set(specs: list[str] | None, sets: list[dict], what: str) -> dict:
+    """``[NAME=]FILE`` options of the sets of your samples -> {set name: file}. Without names, one file goes to the
+    only set, or the files to the sets in their order."""
+    out, unnamed = {}, []
+    names = {s["name"] for s in sets}
+    for spec in specs or []:
+        name, sep, path = str(spec).partition("=")
+        if sep and name in names:
+            out[name] = path
+        else:
+            unnamed.append(str(spec))
+    free = [s["name"] for s in sets if s["name"] not in out]
+    if len(unnamed) > len(free) or (unnamed and len(unnamed) != len(free) and len(free) > 1):
+        raise ValueError(f"{what}: {len(unnamed)} file(s) without a set name for the sets {free}; give NAME=FILE")
+    out.update(dict(zip(free, unnamed)))
+    return out
+
+
+def read_sheet(path) -> pd.DataFrame:
+    """A sample sheet (csv or tsv): first column = sample id, the other columns as text."""
+    df = pd.read_csv(path, sep=None, engine="python", dtype=str, keep_default_na=False, comment="#")
+    df = df.set_index(df.columns[0])
+    df.index = df.index.astype(str).str.strip()
+    return df
+
+
+def overlay_sheets(specs: list[str] | None, sets: list[dict], log=print) -> pd.DataFrame | None:
+    """The sample sheets of your samples as one table over the page's sample ids (None without sheets)."""
+    files = _per_set(specs, sets, "--overlay-metadata")
+    if not files:
+        return None
+    parts = []
+    for s in sets:
+        if s["name"] not in files:
+            parts.append(pd.DataFrame(index=s["ids"]))
+            continue
+        sheet = read_sheet(files[s["name"]])
+        lacking = [x for x in s["samples"] if x not in sheet.index]
+        if len(lacking) == len(s["samples"]):
+            raise ValueError(f"{files[s['name']]}: none of the samples of {s['name']} is in its first column "
+                             f"(e.g. {s['samples'][:3]}; the sheet has {list(sheet.index[:3])})")
+        if lacking:
+            log(f"{files[s['name']]}: no row for {len(lacking)} sample(s) of {s['name']}, e.g. {lacking[:3]}")
+        part = sheet[~sheet.index.duplicated()].reindex(s["samples"])
+        part.index = s["ids"]
+        parts.append(part)
+    return pd.concat(parts).fillna("")
+
+
+def sheet_field(name: str, values: pd.Series) -> dict:
+    """A sheet column: numeric when every value is a number and there are many of them, else categorical."""
+    given = [v for v in values if not _missing(v)]
+    x = pd.to_numeric(pd.Series(given, dtype=object), errors="coerce")
+    return encode_field(name, values, "num" if len(given) and x.notna().all() and x.nunique() > 12 else "cat")
+
+
+def series_of_sheet(sheet: pd.DataFrame, spec: str, sets: list[dict]) -> list[dict]:
+    """``COLUMN[:ORDER_COLUMN]`` -> the series of your samples: per set and value of COLUMN, the samples in the order
+    of ORDER_COLUMN (numbers when it holds numbers; the sheet's row order without it)."""
+    col, _, order = spec.partition(":")
+    for c in (col, order):
+        if c and c not in sheet.columns:
+            raise ValueError(f"--overlay-series: the sample sheet has no column {c!r} (it has {list(sheet.columns)})")
+    pos = {s: j for j, s in enumerate(sheet.index)}
+    out = []
+    for s in sets:
+        sub = sheet.loc[s["ids"]]
+        for value, grp in sub[sub[col] != ""].groupby(col, sort=False):
+            if order:
+                key = pd.to_numeric(grp[order], errors="coerce")
+                grp = grp.assign(_k=key if key.notna().all() else grp[order]).sort_values("_k", kind="stable")
+            if len(grp) > 1:
+                out.append({"name": f"{col} {value}" + (f" ({s['name']})" if len(sets) > 1 else ""), "idx": [pos[i] for i in grp.index],
+                            "x": grp[order].tolist() if order else [], "x_label": order})
+    return out
+
+
+def atlas_series(path, ids: list) -> list[dict]:
+    """The time courses of the atlas (``time_courses.tsv``: sample, series, x, x_label) as lists of sample
+    indices in the order of x; a series needs two samples of the atlas."""
+    t = pd.read_csv(path, sep="\t", dtype={"sample": str, "series": str})
+    missing = {"sample", "series", "x"} - set(t.columns)
+    if missing:
+        raise ValueError(f"{path}: the time-series table lacks the column(s) {sorted(missing)}")
+    pos = {s: i for i, s in enumerate(ids)}
+    t = t[t["sample"].isin(pos)].assign(x=lambda d: pd.to_numeric(d["x"], errors="coerce")).dropna(subset=["x"])
+    out = []
+    for name, grp in t.groupby("series", sort=False):
+        grp = grp.sort_values("x", kind="stable")
+        if len(grp) > 1:
+            out.append({"name": str(name), "idx": [pos[s] for s in grp["sample"]], "x": [round(float(v), 4) for v in grp["x"]],
+                        "x_label": str(grp["x_label"].iloc[0]) if "x_label" in grp.columns else ""})
+    return out
+
+
+def seed_agreement(models: Path, raw: pd.DataFrame) -> tuple[dict, int]:
+    """Per call, the number of the bundle's seeds (``seed_<n>/predictions.tsv``) on the side of the bundle's
+    call (probability 0.5), and the number of seeds; ({}, 0) for a bundle without seeds."""
+    files = sorted(models.glob("seed_*/predictions.tsv"))
+    out = {}
+    if len(files) < 2:
+        return out, 0
+    seeds = []
+    for f in files:
+        t = pd.read_csv(f, sep="\t", index_col=0)
+        t.index = t.index.astype(str)
+        seeds.append(t.reindex(raw.index))
+    for h, (_, pos) in HEADS.items():
+        c = f"p_{pos}"
+        if c not in raw.columns or not all(c in t.columns for t in seeds):
+            continue
+        main = pd.to_numeric(raw[c], errors="coerce")
+        same = sum(((pd.to_numeric(t[c], errors="coerce") >= 0.5) == (main >= 0.5)).astype(float) for t in seeds)
+        out[h] = same.where(main.notna() & np.all([t[c].notna() for t in seeds], axis=0))
+    return out, len(files)
 
 
 def atlas_covariates(manifest: dict, ids: list, counts=None, qc=None, log=print) -> pd.DataFrame | None:
     """The model's covariates of the atlas samples before scaling, computed as in `train`: the
-    composition columns from the count table (``counts``), the QC columns from the QC table
+    composition columns from the count table (``counts``, as read by ``read_counts``), the QC columns from the QC table
     (``qc``). Columns that cannot be computed from what was given are left out."""
     from ..data import COMPOSITION_NAMES, qc_covariates, read_table
     parts = []
     if counts is not None:
         from ..features import FeatureSet
-        from ..io import read_counts
         from ..preprocess import align_counts, composition_covariates
-        table = read_counts(counts)
+        table = counts
         lacking = sorted(set(ids) - set(table.columns))
         if lacking:
             log(f"{len(lacking)} atlas samples are not in the count table (e.g. {lacking[:3]}); no composition values for them")
@@ -251,8 +373,17 @@ def page_layout(L: dict, layouts: list[dict]) -> dict:
 def build_payload(models: str | Path, metadata: str | Path | None = None, studies: str | Path | None = None,
                   sample_text: str | Path | None = None, embeddings: list[str] | None = None, presets: str | Path | None = None,
                   umap: bool = True, k: int = 10, metric: str = "cosine", seed: int = 77, title: str | None = None,
-                  counts: str | Path | None = None, qc: str | Path | None = None, n_pcs: int = 10, log=print) -> dict:
+                  counts: str | Path | None = None, qc: str | Path | None = None, n_pcs: int = 10,
+                  modules: str | Path | None = None, time_series: str | Path | None = None,
+                  overlay_metadata: list[str] | None = None, overlay_series: str | None = None,
+                  overlay_counts: list[str] | None = None, log=print) -> dict:
     d = Path(models)
+    if modules is not None and counts is None:
+        raise ValueError("--modules needs the count table of the atlas samples (--counts): the regulon values are computed from it")
+    if not embeddings and (overlay_metadata or overlay_series or overlay_counts):
+        raise ValueError("--overlay-metadata, --overlay-series and --overlay-counts describe your own samples; give them with --embeddings")
+    if overlay_series and not overlay_metadata:
+        raise ValueError("--overlay-series names columns of the sample sheet; give the sheet with --overlay-metadata")
     manifest = json.loads((d / "manifest.json").read_text())
     emb = read_embedding(d)
     raw = pd.read_csv(d / "predictions.tsv", sep="\t", index_col=0, dtype={"gse": str, "split": str})
@@ -293,16 +424,25 @@ def build_payload(models: str | Path, metadata: str | Path | None = None, studie
     fields.append(encode_field("condition", cond))
     if stext is not None:
         fields.append(encode_field("title_group", tgrp))
-    cov = atlas_covariates(manifest, ids, counts, qc, log=log)
+    agreement, n_seeds = seed_agreement(d, raw)
+    for h, series in agreement.items():
+        fields.append(encode_field(f"{h}_seed_agreement", series, "num"))
+    count_table = None
+    if counts is not None:
+        from ..io import read_counts
+        count_table = read_counts(counts)
+    cov = atlas_covariates(manifest, ids, count_table, qc, log=log)
     qc_fields = []
     if cov is not None:
         for c, series in covariate_columns(cov).items():
             fields.append(encode_field(f"cov:{c}", series, "num" if pd.api.types.is_numeric_dtype(series) else "cat"))
             qc_fields.append(f"cov:{c}")
 
-    overlay = overlay_probs = overlay_info = overlay_cov = None
+    overlay = overlay_probs = overlay_info = overlay_cov = sheet = None
+    overlay_sets = []
     if embeddings:
-        overlay, overlay_probs, overlay_info, overlay_cov = load_overlay(embeddings)
+        overlay, overlay_probs, overlay_info, overlay_cov, overlay_sets = load_overlay(embeddings)
+        sheet = overlay_sheets(overlay_metadata, overlay_sets, log=log)
         missing = [c for c in emb.columns if c not in overlay.columns]
         if missing:
             raise ValueError(f"the embedded samples lack embedding columns {missing[:5]}; embed them with this bundle")
@@ -322,7 +462,7 @@ def build_payload(models: str | Path, metadata: str | Path | None = None, studie
                  "n_studies": len(study_info), "built": date.today().isoformat(), "version": __version__,
                  "embedding_dim": emb.shape[1], "blocks": manifest.get("embedding_blocks", []),
                  "heads": {h: list(v) for h, v in HEADS.items()}, "label_fields": [c for c in LABEL_FIELDS if c in meta.columns],
-                 "has_text": stext is not None, "has_studies": stable is not None, "qc_fields": qc_fields},
+                 "has_text": stext is not None, "has_studies": stable is not None, "qc_fields": qc_fields, "n_seeds": n_seeds},
         "ids": ids,
         "fields": fields,
         "layouts": [page_layout(L, layouts) for L in layouts],
@@ -347,7 +487,56 @@ def build_payload(models: str | Path, metadata: str | Path | None = None, studie
             for c, series in covariate_columns(overlay_cov).items():
                 ov["covariates"][f"cov:{c}"] = (_round(series, 4) if pd.api.types.is_numeric_dtype(series)
                                                 else [None if _missing(v) else str(v) for v in series])
+        seeds_n, seeds_called = {}, {}
+        for s in overlay_sets:                       # `embed --seeds`: the calls of every seed of the bundle
+            f = s["dir"] / "predictions_seeds.tsv"
+            if f.exists():
+                t = pd.read_csv(f, sep="\t", index_col=0)
+                t.index = t.index.astype(str)
+                t = t.reindex(s["samples"])
+                seeds_n.update(zip(s["ids"], t["n_seeds"]))
+                for h, (_, pos) in HEADS.items():
+                    if f"p_{pos}_n_called" in t.columns:
+                        seeds_called.setdefault(h, {}).update(zip(s["ids"], t[f"p_{pos}_n_called"]))
+        if seeds_called:
+            ov["n_seeds"] = [None if pd.isna(seeds_n.get(i, np.nan)) else int(seeds_n[i]) for i in overlay.index]
+            ov["seed_agreement"] = {}
+            for h, called in seeds_called.items():
+                if h not in ov["calls"]:
+                    continue
+                side = [c == ov["calls"][h]["positive"] for c in ov["calls"][h]["call"]]
+                ov["seed_agreement"][h] = [None if n is None or pd.isna(called.get(i, np.nan)) else int(called[i] if up else n - called[i])
+                                           for i, n, up in zip(overlay.index, ov["n_seeds"], side)]
+        if sheet is not None:
+            ov["fields"] = [sheet_field(c, sheet[c]) for c in sheet.columns if (sheet[c] != "").any()]
+            if overlay_series:
+                ov["series"] = series_of_sheet(sheet, overlay_series, overlay_sets)
         payload["overlay"] = ov
+    if time_series is not None:
+        payload["series"] = atlas_series(time_series, ids)
+    if modules is not None:
+        import torch
+        from ..artifacts import PREPROCESSING_FILE
+        from ..features import FeatureSet
+        from ..io import read_counts
+        from .regulons import build_regulons
+        ref_log = torch.load(d / PREPROCESSING_FILE, map_location="cpu", weights_only=True)["ref_log"].numpy().astype(np.float64)
+        own = None
+        if overlay_sets:
+            files = _per_set(overlay_counts, overlay_sets, "--overlay-counts")
+            own = [(s["ids"], s["samples"], read_counts(files[s["name"]]) if s["name"] in files else None,
+                    s["dir"] / "missing_genes.tsv") for s in overlay_sets]
+            if not files:
+                log("no counts of your samples (--overlay-counts): they get no regulon values")
+        payload["regulons"] = build_regulons(modules, count_table, FeatureSet.from_dict(manifest["features"]), ref_log, ids,
+                                             missing_path=d / "missing_genes.tsv", overlay=own, log=log)
+        mf = Path(modules).parent / "modules_manifest.json"
+        if mf.exists():
+            urls = [v.get("url", "") for v in (json.loads(mf.read_text()).get("sources", {}).get("precise1k", {}) or {}).values()]
+            commit = next((m.group(1) for m in (re.search(r"/precise1k/([0-9a-f]{7,40})/", u) for u in urls) if m), "")
+            payload["regulons"]["source"] = "RegulonDB, as the regulatory network of SBRG/precise1k" + (f" (commit {commit[:10]})" if commit else "")
+    elif overlay_counts:
+        raise ValueError("--overlay-counts is used for the regulon values only; give --modules too")
     payload["presets"] = load_presets(presets, set(study_info), {L["name"] for L in layouts}, log=log)
     return payload
 

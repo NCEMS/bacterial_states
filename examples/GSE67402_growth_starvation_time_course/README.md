@@ -15,7 +15,7 @@ per sample) are tracked. Everything the commands below write (`sra/`, `results/`
 `benchmarks/`, `atlas/`, logs) stays in this folder and is ignored by git.
 
 The numbers below are from the inGEST run of 2026-11-22 and the atlas step of 2026-11-23 with the current model
-(`outputs/models`). `run.sh ingest` and `run.sh atlas` run the commands of sections 1-3.
+(`outputs/models`). `run.sh ingest` and `run.sh atlas` run the commands of sections 1-4.
 
 ## 1. inGEST: reads to counts
 
@@ -189,6 +189,15 @@ call stays at 1.00 through 48 h and then drops to rich (the two rich one-week sa
 samples by 7 of 8), while the medium dimension drifts down gradually. The atlas
 looks the same on this map: almost all of its samples sit in the four corners. Use the calls for the class and the
 dimensions for how far a sample has gone.
+
+## 4. The time course in the atlas, as a page
+
+`run.sh atlas` ends by writing `atlas/atlas_view.html` (`run.sh view` writes it alone): one HTML file with a 3-D map of
+the atlas and the samples of this run in it. `--overlay-metadata samples.csv --overlay-series replicate:time_h` joins
+the samples of each replicate by a line in the order of their time points, so the three cultures can be followed
+through the map; in the "Your samples" tab, "colour by time h" colours them by time point. The sample panel shows how
+many of the 8 seeds make each call (`embed --seeds` wrote them), e.g. 2/8 for the stationary call of `t003h_rep1`. See
+section 3 of [GSE147611_greAB_deletion](../GSE147611_greAB_deletion/README.md) for what the page offers.
 
 ## Not covered here
 

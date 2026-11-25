@@ -642,7 +642,9 @@ def cmd_view(args) -> int:
         out = write_view(args.out, plotly_js=args.plotly, log=_info, models=args.models, metadata=args.metadata,
                          studies=args.studies, sample_text=args.sample_text, embeddings=args.embeddings or None,
                          presets=args.presets, umap=not args.no_umap, k=args.k, metric=args.metric, seed=args.seed,
-                         title=args.title, counts=args.counts, qc=args.qc, n_pcs=args.n_pcs)
+                         title=args.title, counts=args.counts, qc=args.qc, n_pcs=args.n_pcs, modules=args.modules,
+                         time_series=args.time_series, overlay_metadata=args.overlay_metadata or None,
+                         overlay_series=args.overlay_series, overlay_counts=args.overlay_counts or None)
     except (ValueError, FileNotFoundError) as exc:
         _info(f"error: {exc}")
         return 1
@@ -1288,6 +1290,19 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--counts", help="count table of the atlas samples (atlas_v2_counts.tsv): adds the composition covariates "
                     "(mRNA reads, rRNA and tRNA ratios)")
     sp.add_argument("--qc", help="QC table of the atlas samples (sample_qc.tsv): adds the QC covariates of the model")
+    sp.add_argument("--overlay-metadata", action="append", metavar="[NAME=]FILE",
+                    help="optional sample sheet of your samples (csv or tsv, first column = the sample ids of the `embed` output): "
+                         "its columns can colour and group your samples; repeatable, NAME = the set of --embeddings")
+    sp.add_argument("--overlay-series", metavar="COLUMN[:ORDER_COLUMN]",
+                    help="join your samples with the same value of this sheet column by a line, in the order of ORDER_COLUMN "
+                         "(e.g. replicate:time_h for time courses)")
+    sp.add_argument("--overlay-counts", action="append", metavar="[NAME=]FILE",
+                    help="count table of your samples (the inGEST all_samples_counts.tsv), for their regulon values (with --modules)")
+    sp.add_argument("--modules", metavar="TSV",
+                    help="module table of `ecoli_atlas download modules`: its RegulonDB sets (every regulator's activated and "
+                         "repressed genes) become a colouring of the map, mean standardised expression of a set's genes; needs --counts")
+    sp.add_argument("--time-series", metavar="TSV",
+                    help="time courses of the atlas (time_courses.tsv: sample, series, x, x_label): drawn as lines in a study")
     sp.add_argument("--presets", help="JSON list of example views (default: the examples shipped with the package)")
     sp.add_argument("--no-umap", action="store_true", help="skip the UMAP layouts (they need umap-learn and take a few minutes)")
     sp.add_argument("--n-pcs", type=int, default=10, help="principal components kept per PCA layout; the page draws any three (default 10)")

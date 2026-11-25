@@ -25,8 +25,15 @@ window.addEventListener("error", function (e) {
     <label>Layout <select id="layout"></select></label>
     <span id="pcs" class="pcs" hidden><label>X <select id="pc-x"></select></label><label>Y <select id="pc-y"></select></label><label>Z <select id="pc-z"></select></label></span>
     <label>Colour <select id="color"></select></label>
+    <span id="regulon-box" class="search regulon" hidden>
+      <input id="regulon" type="search" placeholder="Regulon: regulator or gene" list="regulon-list" autocomplete="off" title="colour the map by the expression of a RegulonDB set">
+      <datalist id="regulon-list"></datalist>
+      <button id="regulon-clear" title="back to the colour menu">×</button>
+    </span>
     <span class="splits" id="splits"></span>
     <label class="size">Size <input id="size" type="range" min="1" max="8" step="0.5" value="2.5"></label>
+    <label id="lines-box" class="check" hidden title="join the samples of a time course by a line"><input id="lines" type="checkbox" checked> Lines</label>
+    <button id="rotate" title="turn the scene slowly; a mouse press on the plot stops it">Rotate</button>
     <button id="reset" title="leave study mode, clear the selection">Overview</button>
   </div>
 </header>
@@ -38,10 +45,14 @@ window.addEventListener("error", function (e) {
     <nav class="tabs">
       <button data-tab="sample" class="active">Sample</button>
       <button data-tab="study">Study</button>
+      <button data-tab="regulon" hidden>Regulon</button>
+      <button data-tab="mine" hidden>Your samples</button>
       <button data-tab="about">About</button>
     </nav>
     <section id="tab-sample" class="tab active"><p class="muted">Hover over a point to see the sample; click it to open it here.</p></section>
     <section id="tab-study" class="tab"><p class="muted">Pick a study with the search box, an example, or the “Show this study” button of a sample.</p></section>
+    <section id="tab-regulon" class="tab"></section>
+    <section id="tab-mine" class="tab"></section>
     <section id="tab-about" class="tab"></section>
   </aside>
 </main>

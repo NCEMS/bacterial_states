@@ -16,7 +16,10 @@ Two independently installable packages in one repo (GitHub `NCEMS/bacterial_stat
   out-of-fold NLL and mean head AUROC as a Pareto front, never TEST; `tune.py`, `scripts/slurm_tune.sh`), `embed`, `evaluate`, `figures` (data composition and the model figures), `casestudy`,
   `axes` (ordered categories as dimensions of the embedding), `drivers`, `compare` (new samples against the
   atlas of a bundle), `extract` (atlas studies as an `embed` output, for the tools made for new samples), `neighbors` (atlas studies against the rest of it) and `view` (one self-contained HTML page with an
-  interactive 3-D map of a bundle's atlas; `viewer/`, presets in `viewer/presets.json`). Everything is on `main`
+  interactive 3-D map of a bundle's atlas; `viewer/`, presets in `viewer/presets.json`; optional: `--modules` colours by RegulonDB sets only, all of them
+  (`viewer/regulons.py`; user decision 2026-11-25: no iModulons, KEGG or single genes), `--time-series` lines, `--overlay-metadata` sample sheet /
+  `--overlay-series` / `--overlay-counts` for own samples, seed agreement from `seed_<n>/`; check any page change in a real browser: Playwright
+  Chromium with `--use-angle=swiftshader`, `work/viewer_check/`; the read-based examples write `atlas/atlas_view.html`, `run.sh view`). Everything is on `main`
   (`update-atlas` and `ingest-update` were merged on 2026-11-22). The v1 package is only in the code release
   `v1.0.0`; see "v1 history" at the end.
 - `bin/ecoli_ingest`, `bin/ecoli_atlas` run either CLI from the checkout without `pip install`.

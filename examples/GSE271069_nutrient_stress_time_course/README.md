@@ -95,3 +95,8 @@ P2, P3 and S2 (GSE295494 for P2, GSE224463 for P3, GSE225096 for S1 and S2). `gr
 embedding separates the 16 samples by medium (AUROC 1.00 in sample). Paired by growth phase (the three phases with both
 media), glucose is above casamino acids in 3 of 3 phases scored without that phase, the most three pairs can give
 (sign test p = 0.125, permutation p = 0.25). See the [Ecoli_ATLAS README](../../ecoli_atlas/README.md).
+
+**The samples in the atlas, as a page.** `run.sh atlas` ends by writing `atlas/atlas_view.html` (`run.sh view` writes it
+alone): one HTML file with a 3-D map of the atlas and the 16 samples of this run in it, coloured by any column of
+`samples.csv` (medium, time point, condition) in the "Your samples" tab. See section 3 of
+[GSE147611_greAB_deletion](../GSE147611_greAB_deletion/README.md) for what the page offers.

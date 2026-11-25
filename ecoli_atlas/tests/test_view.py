@@ -165,3 +165,116 @@ def test_umap_layouts(trained):
     preds = pd.read_csv(trained / "predictions.tsv", sep="\t", index_col=0).reindex(emb.index)
     names = [L["name"] for L in build_layouts(emb, manifest["embedding_blocks"], preds, emb.iloc[:3], preds.iloc[:3], umap=True, log=lambda m: None)]
     assert "umap_all" in names and "umap_residual" in names
+
+
+def test_regulon_values():
+    from ecoli_atlas.viewer import regulons as rg
+    ids = ["CDS_b0001_aaaA", "CDS_b0002_bbbB", "CDS_b0003_cccC", "ncRNA_RF00001", "CDS_b0004_dddD"]
+    assert rg.feature_symbols(ids) == (["aaaA", "bbbB", "cccC", "RF00001", "dddD"], ["b0001", "b0002", "b0003", "", "b0004"])
+    table = pd.DataFrame({"term": ["regulondb:X+", "regulondb:X-", "imodulon:1", "regulondb:Y+"], "name": ["X (activated)", "X (repressed)", "im", "Y (activated)"],
+                          "category": ["", "", "", "activator only"], "genes": ["aaaa,BBBB,zzzZ", "b0003", "aaaA", "nope"]})
+    sets = rg.regulon_sets(table, ids)
+    assert [s["term"] for s in sets] == ["regulondb:X+", "regulondb:X-", "regulondb:Y+"]       # RegulonDB only, every size
+    assert sets[0]["members"] == [0, 1] and sets[0]["absent"] == ["zzzZ"] and sets[1]["members"] == [2] and sets[2]["members"] == []
+    with pytest.raises(ValueError, match="no RegulonDB sets"):
+        rg.regulon_sets(table[table["term"] == "imodulon:1"], ids)
+    # values: mean of the standardised genes the sample has, minus the sample's median over all genes
+    E = np.array([[1.0, 2.0, 5.0, 0.0, 3.0], [3.0, 2.0, 1.0, 0.0, 3.0], [2.0, np.nan, 3.0, 0.0, 9.0], [np.nan, np.nan, 3.0, 0.0, 9.0]])
+    mu, sd = rg.gene_stats(E)
+    assert np.isnan(sd[3]) and mu[1] == 2.0                                                    # a gene that does not vary has no SD
+    V = rg.set_values(E, mu, sd, sets)
+    Z = (E - mu) / sd
+    assert V[0, 0] == pytest.approx(np.nanmean(Z[0, :2]) - np.nanmedian(Z[0]))
+    assert V[2, 0] == pytest.approx(Z[2, 0] - np.nanmedian(Z[2]))                              # the gene the sample lacks is left out
+    assert np.isnan(V[3, 0]) and np.isnan(V[:, 2]).all()                                       # none of the set's genes; a set without model genes
+    # one byte per value: 0 = none, the ends of the scale are the limit
+    v = np.array([np.nan, -2.0, -0.5, 0.0, 0.25, 0.5, 7.0])
+    back = rg.decode(rg.encode(v, 0.5), 0.5)
+    assert np.isnan(back[0]) and back[1] == -0.5 and back[-1] == 0.5 and np.allclose(back[2:6], v[2:6], atol=0.5 / 127)
+    assert rg.limits(np.array([[0.1, 3.0], [-0.2, -4.0], [np.nan, 1.0]])).tolist() == [0.5, pytest.approx(3.99, abs=0.02)]
+
+
+def test_missing_matrix(tmp_path):
+    from ecoli_atlas.viewer.regulons import missing_matrix
+    pd.DataFrame({"sample": ["s2", "s2", "zz"], "feature": ["f1", "unknown", "f2"]}).to_csv(tmp_path / "missing_genes.tsv", sep="\t", index=False)
+    M = missing_matrix(tmp_path / "missing_genes.tsv", ["s1", "s2"], ["f1", "f2"])
+    assert M.tolist() == [[False, False], [True, False]]                                       # other samples and features are ignored
+    assert not missing_matrix(tmp_path / "absent.tsv", ["s1"], ["f1"]).any() and not missing_matrix(None, ["s1"], ["f1"]).any()
+
+
+def test_view_regulons_series_and_sheet(trained, atlas_files, query_dir, tmp_path):
+    from ecoli_atlas.viewer.regulons import decode
+    ids = list(read_embedding(trained).index)
+    modules = tmp_path / "modules.tsv"
+    modules.write_text("# a comment line\nterm\tnamespace\tname\tcategory\tn_genes\tgenes\n"
+                       "regulondb:Pha+\tregulondb_tf_regulon_activated\tPha (activated)\tactivator only\t10\t" + ",".join(f"g{i:03d}" for i in range(10)) + "\n"
+                       "regulondb:Med+\tregulondb_tf_regulon_activated\tMed (activated)\t\t3\tg010,b0011,G012\n"
+                       "kegg:eco1\tkegg_pathway\tA pathway\t\t2\tg020,g021\n")
+    series = tmp_path / "time_courses.tsv"
+    pd.DataFrame({"sample": ["GSM0002", "GSM0000", "GSM0001", "GSM0100", "absent"], "series": ["a", "a", "a", "b", "b"], "x": [3, 1, 2, 1, 2],
+                  "x_label": "hours"}).to_csv(series, sep="\t", index=False)
+    sheet = tmp_path / "samples.csv"
+    sheet.write_text("sample_id,condition,replicate,time_h\nmine2,late,1,24\nmine0,early,1,3\nmine1,early,1,6\n")
+    counts = read_counts(atlas_files["counts"])[QUERY]
+    counts.columns = ["mine0", "mine1", "mine2"]
+    counts.to_csv(tmp_path / "mine_counts.tsv", sep="\t")
+    common = dict(metadata=atlas_files["metadata"], counts=atlas_files["counts"], qc=atlas_files["qc"], umap=False, log=lambda m: None)
+    p = build_payload(trained, modules=modules, time_series=series, embeddings=[f"{query_dir}=mine"], overlay_metadata=[str(sheet)],
+                      overlay_series="replicate:time_h", overlay_counts=[f"mine={tmp_path / 'mine_counts.tsv'}"], **common)
+    json.dumps(p, allow_nan=False)
+    R = p["regulons"]
+    assert [s["term"] for s in R["sets"]] == ["regulondb:Pha+", "regulondb:Med+"] and len(R["sets"][0]["genes"]) == 10
+    assert R["sets"][1]["genes"] == ["g010", "g011", "g012"]                                   # by symbol, locus tag, any case
+    v = decode(R["sets"][0]["values"], R["sets"][0]["limit"])
+    assert len(v) == len(ids)
+    phase = pd.read_csv(atlas_files["metadata"], sep="\t", index_col=0)["growth_phase"].reindex(ids)
+    assert np.nanmean(v[(phase == "stationary").to_numpy()]) > np.nanmean(v[(phase == "mid_exponential").to_numpy()]) + 0.5   # the fixture's phase genes
+    # your samples are atlas samples under new names: the same values
+    vo = decode(R["overlay"][0], R["sets"][0]["limit"])
+    np.testing.assert_allclose(vo, v[[ids.index(g) for g in QUERY]], atol=0.05)
+    # time courses of the atlas in the order of x; a series needs two atlas samples
+    assert p["series"] == [{"name": "a", "idx": [ids.index("GSM0000"), ids.index("GSM0001"), ids.index("GSM0002")], "x": [1.0, 2.0, 3.0], "x_label": "hours"}]
+    # the sample sheet: columns of your samples, in the page's sample order; a series through them by time
+    ov = p["overlay"]
+    f = {x["name"]: x for x in ov["fields"]}
+    assert set(f) == {"condition", "replicate", "time_h"} and [f["condition"]["levels"][k] for k in f["condition"]["values"]] == ["early", "early", "late"]
+    assert ov["series"] == [{"name": "replicate 1", "idx": [0, 1, 2], "x": ["3", "6", "24"], "x_label": "time_h"}]
+    assert "seed_agreement" not in ov and p["meta"]["n_seeds"] == 0
+    # all of it is optional, and the options that need another one say so
+    q = build_payload(trained, embeddings=[str(query_dir)], **common)
+    assert "regulons" not in q and "series" not in q and "fields" not in q["overlay"] and "series" not in q["overlay"]
+    r = build_payload(trained, modules=modules, embeddings=[str(query_dir)], **common)
+    assert np.isnan(decode(r["regulons"]["overlay"][0], 1.0)).all()                            # no counts of your samples: no values
+    with pytest.raises(ValueError, match="--counts"):
+        build_payload(trained, modules=modules, umap=False, log=lambda m: None)
+    with pytest.raises(ValueError, match="--embeddings"):
+        build_payload(trained, overlay_metadata=[str(sheet)], umap=False, log=lambda m: None)
+    with pytest.raises(ValueError, match="no column 'day'"):
+        build_payload(trained, embeddings=[str(query_dir)], overlay_metadata=[str(sheet)], overlay_series="replicate:day", **common)
+    out = tmp_path / "full.html"
+    assert main(["view", "--models", str(trained), "--counts", str(atlas_files["counts"]), "--modules", str(modules), "--time-series", str(series),
+                 "--embeddings", f"{query_dir}=mine", "--overlay-metadata", str(sheet), "--overlay-series", "replicate:time_h",
+                 "--overlay-counts", str(tmp_path / "mine_counts.tsv"), "--metadata", str(atlas_files["metadata"]),
+                 "--no-umap", "--plotly", "cdn", "--out", str(out)]) == 0
+    assert payload_of(out.read_text())["regulons"]["sets"][0]["name"] == "Pha (activated)"
+
+
+def test_seed_agreement(tmp_path):
+    from ecoli_atlas.viewer.build import seed_agreement
+    raw = pd.DataFrame({"p_stationary": [0.9, 0.2, np.nan, 0.6], "p_minimal": [0.1, 0.1, 0.1, 0.1]}, index=["a", "b", "c", "d"])
+    assert seed_agreement(tmp_path, raw) == ({}, 0)                                            # a bundle without seeds
+    for n, ps in enumerate([[0.9, 0.2, 0.5, 0.6], [0.8, 0.7, 0.5, 0.4], [0.7, 0.1, 0.5, 0.3]], start=1):
+        (tmp_path / f"seed_{n}").mkdir()
+        pd.DataFrame({"p_stationary": ps, "p_minimal": 0.2}, index=["a", "b", "c", "d"]).to_csv(tmp_path / f"seed_{n}" / "predictions.tsv", sep="\t")
+    agree, n = seed_agreement(tmp_path, raw)
+    assert n == 3 and set(agree) == {"phase", "medium"}                                        # no p_lab in these tables
+    assert agree["phase"].tolist()[:2] == [3.0, 2.0] and np.isnan(agree["phase"]["c"]) and agree["phase"]["d"] == 1.0
+    assert agree["medium"].tolist() == [3.0] * 4
+
+
+def test_shipped_presets():
+    from importlib import resources
+    presets = json.loads(resources.files("ecoli_atlas.viewer").joinpath("presets.json").read_text(encoding="utf-8"))
+    assert len({p["id"] for p in presets}) == len(presets) >= 11
+    assert all({"id", "title", "gse", "layout", "color_by", "caption"} <= set(p) and p["gse"] for p in presets)
+    assert any(p["gse"] == ["GSE147611"] for p in presets)

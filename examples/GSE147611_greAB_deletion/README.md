@@ -11,7 +11,7 @@ TEST study of the atlas model: the model was not fitted on it.
 
 **Files here.** `config.yaml` (the inGEST run configuration) and `samples.csv` (condition and replicate per sample) are
 tracked. Everything the commands below write (`sra/`, `results/`, `checkpoints/`, `benchmarks/`, `atlas/`, logs) stays
-in this folder and is ignored by git. `run.sh ingest` and `run.sh atlas` run the commands of sections 1 and 2.
+in this folder and is ignored by git. `run.sh ingest` and `run.sh atlas` run the commands of sections 1 to 3.
 
 The numbers below are from the run of 2026-11-23 with the current model (`outputs/models`).
 
@@ -98,6 +98,38 @@ and closer (mean distance 0.10-0.12 for its main studies against 0.15-0.24 for t
 samples with a perturbed transcription and RNA machinery: a tagged RNA polymerase subunit, an *hfq* deletion and an
 antibiotic against transcription. That fits a strain without Gre factors, but it rests on 15 neighbours per sample;
 read it as a lead, not as a result.
+
+## 3. Your samples in the atlas, as a page
+
+```bash
+D=../../atlas_data
+ecoli_atlas view --models $M --metadata $D/metadata_v2.tsv --counts $D/atlas_v2_counts.tsv --qc $D/sample_qc.tsv \
+    --studies $D/metadata_v2_studies.tsv --sample-text $D/metadata_v2_sample_text.tsv --time-series $D/time_courses.tsv \
+    --modules $D/modules/modules.tsv --overlay-counts results/all_samples_counts.tsv \
+    --embeddings atlas/embedded=GSE147611_inGEST --overlay-metadata samples.csv --out atlas/atlas_view.html
+```
+
+`run.sh atlas` ends with this command and `run.sh view` runs it alone (about two minutes, most of it the UMAP layouts;
+`run.sh` leaves out the tables that are not there). It writes one HTML file of 15 MB that opens in a web browser without
+a server or a network connection: the 7,731 atlas samples as a 3-D map, and the six samples of this inGEST run in it as
+diamonds. Nothing is retrained or rebuilt for this: the samples were placed by `embed` in step 2, and the page projects
+them onto the same layouts as the atlas.
+
+- **Your samples** tab: the six samples with their calls. `samples.csv` is optional; with it, "colour by" offers its
+  columns (here `condition`: wild type against the deletion), and "Turn the camera to them" brings them to the middle.
+- **Click a diamond**: its calls, its QC values as percentiles of the atlas, the row of the sample sheet and its
+  nearest atlas samples. Each sample's nearest neighbour is its own atlas copy at distance 0.000 (the atlas holds these
+  libraries); the first neighbours from other studies follow at 0.07 to 0.13.
+- **Example** menu: "Worked example: wild type and a greA greB deletion (GSE147611)" draws the atlas copies of the
+  study; the other ten examples are single studies of the atlas (growth-phase series, a biofilm, media, strains, the
+  held-out studies).
+- **Regulon** box (needs the module table of `ecoli_atlas download modules`): type a regulator or a gene to colour the
+  map by the expression of a RegulonDB set. Because the page was given the run's count table (`--overlay-counts`), the
+  diamonds are coloured too. In this run, among the sets of ten or more genes in which the three mutant libraries all
+  lie on one side of the three wild-type ones, the largest differences are lower NanR-, GntR- and AgaR-repressed genes
+  in the mutant (by 1.7, 1.1 and 0.9 SD) and higher CdaR-, Nac- and FadR-activated and LexA-repressed genes (by 0.3 to
+  0.4 SD). These are means of standardised expression over a set, from three libraries a side: use them to find what
+  to look at in the DESeq2 table, not as a test.
 
 ## Not covered here
 

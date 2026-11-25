@@ -5,7 +5,7 @@
     "gse": ["GSE152619"],
     "layout": "block_phase",
     "color_by": "growth_phase",
-    "caption": "One K-12 culture in LB sampled from mid-exponential to long-term stationary phase. Along the phase axis the samples move from the exponential end to the stationary end; the late and long-term stationary samples fall back toward the middle (p(stationary) about 0.02)."
+    "caption": "One K-12 culture in LB sampled from mid-exponential (4 h) to long-term stationary phase (192 h). Along the phase axis the samples move from the exponential end to the stationary end: the 8 h samples lie in between (p(stationary) about 0.9) and every sample from 24 h on is called stationary."
   },
   {
     "id": "biofilm_depth",
@@ -13,7 +13,7 @@
     "gse": ["GSE197541"],
     "layout": "block_phase",
     "color_by": "p_stationary",
-    "caption": "Five K-12 biofilms (b1 to b5) cut into bins by depth, next to a planktonic time course of the same strain (7.6 h to 28 h). Colour is p(stationary): the deepest bins (about 700 µm and more) and the 25 h and 28 h cultures are called stationary. The Study tab lists the samples by their GEO titles."
+    "caption": "Five K-12 biofilms (b1 to b5) cut into bins by depth, next to a planktonic time course of the same strain (7.6 h to 28 h; the lines follow its two replicates). Colour is p(stationary): the bins nearest the surface (up to about 200 µm, with one exception) are called exponential and the deeper ones stationary; the planktonic cultures are called stationary from 11 h on. The Study tab lists the samples by their GEO titles."
   },
   {
     "id": "phase_rel606_starvation",
@@ -21,7 +21,7 @@
     "gse": ["GSE67402"],
     "layout": "block_phase",
     "color_by": "title_group",
-    "caption": "E. coli B REL606 in glucose-limited Davis minimal medium, sampled from 3 h to 336 h. This study is in the TEST split: the model never saw it in training."
+    "caption": "E. coli B REL606 in glucose-limited Davis minimal medium, sampled from 3 h to 336 h; seven of its libraries are in the atlas. This study is in the TEST split: the model never saw it in training. The 4 h and 6 h samples are called exponential and those from 24 h on stationary; one 3 h library with few reads is called stationary too, by 2 of the 8 seeds only."
   },
   {
     "id": "phase_large_study",
@@ -49,11 +49,11 @@
   },
   {
     "id": "withheld_study",
-    "title": "Withheld study: 179 cold and osmotic shock samples (GSE224463)",
+    "title": "Withheld study: stationary-phase entry, cold and osmotic shock (GSE224463)",
     "gse": ["GSE224463"],
     "layout": "pca_all",
     "color_by": "condition",
-    "caption": "This study was withheld from training and only projected into the atlas. It shows how a large new study lands among the training samples."
+    "caption": "179 samples of wild type and an rpoS deletion. This study was withheld from training and only projected into the atlas. It shows how a large new study lands among the training samples (examples/GSE224463_rpoS_stress_time_courses)."
   },
   {
     "id": "case_upec",
@@ -77,6 +77,14 @@
     "gse": ["GSE271069"],
     "layout": "block_phase",
     "color_by": "growth_phase",
-    "caption": "A worked example in examples/ of the repository and a TEST study: K-12 sampled through growth into late stationary phase. The transition samples sit between the two ends of the phase axis."
+    "caption": "A worked example in examples/ of the repository and a TEST study: K-12 sampled through growth into late stationary phase, in glucose and in casamino acids. The late stationary samples are called stationary; the first stationary time point is not (glucose: p(stationary) 0.00, casamino acids: about 0.4), and the exponential and transition samples sit at the exponential end of the phase axis."
+  },
+  {
+    "id": "worked_small",
+    "title": "Worked example: wild type and a greA greB deletion (GSE147611)",
+    "gse": ["GSE147611"],
+    "layout": "pca_all",
+    "color_by": "condition",
+    "caption": "The smallest read-based example in examples/ of the repository (examples/GSE147611_greAB_deletion): three wild-type and three deletion libraries in LB at mid-exponential phase. The wild-type samples are TEST samples, the deletion samples are projected only. All six are called exponential, rich medium and lab strain."
   }
 ]

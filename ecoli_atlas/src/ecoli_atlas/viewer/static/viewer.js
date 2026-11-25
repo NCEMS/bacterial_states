@@ -3,6 +3,7 @@
 (function () {
   "use strict";
   const D = JSON.parse(document.getElementById("atlas-data").textContent);
+  const plot = document.getElementById("plot");
   const N = D.ids.length;
   const F = {};                       // field name -> field
   D.fields.forEach(f => { F[f.name] = f; });
@@ -14,6 +15,10 @@
     "#7f7f7f", "#aec7e8", "#ffbb78", "#98df8a", "#ff9896", "#c5b0d5", "#c49c94", "#f7b6d2", "#9edae5", "#dbdb8d", "#393b79",
     "#637939", "#8c6d31", "#843c39", "#7b4173"];
   const MAX_LEVELS = 20, OTHER = "#c8c8c8", MISSING = "#e6e6e6", FADED = "#cfcfcf", OVERLAY = ["#e6007e", "#00a087", "#3c5488", "#f39b7f"];
+  const OVF = {};                     // sheet column of your samples -> field
+  ((OV && OV.fields) || []).forEach(f => { OVF[f.name] = f; });
+  const R = D.regulons || null;       // regulon sets: one byte per sample and set
+  const DIVERGING = [[0, "#2166ac"], [0.25, "#92c5de"], [0.5, "#f2f2f2"], [0.75, "#f4a582"], [1, "#b2182b"]];
   const HEAD_POS = {};                // head -> positive class
   Object.entries(D.meta.heads).forEach(([h, v]) => { HEAD_POS[h] = v[1]; });
   const NICE = {
@@ -21,7 +26,8 @@
     phase_label: "phase label (curated)", medium_label: "medium label (curated)", lab_strain_label: "lab-strain label (curated)",
     phase_call: "phase call (model)", medium_call: "medium call (model)", lab_strain_call: "lab-strain call (model)",
     p_stationary: "p(stationary)", p_minimal: "p(minimal medium)", p_lab: "p(lab strain)", phase_logit: "phase logit",
-    n_missing_genes: "genes called missing"
+    n_missing_genes: "genes called missing", phase_seed_agreement: "phase call: seeds that agree",
+    medium_seed_agreement: "medium call: seeds that agree", lab_strain_seed_agreement: "lab-strain call: seeds that agree"
   };
   const COV = {                       // QC and composition covariates of the model (fields "cov:<name>")
     log_mrna_reads: "mRNA reads (log10)", log_16S_to_mrna: "16S / mRNA reads (log10)", log_23S_to_mrna: "23S / mRNA reads (log10)",
@@ -50,6 +56,26 @@
   const gseOf = i => val("gse", i);
   const text = (name, i) => (D.sample_text && D.sample_text[name]) ? D.sample_text[name][i] || "" : "";
   const fmtP = p => (p === "" || p == null) ? "" : Number(p).toFixed(3);
+  function ovVal(name, j) {           // value of a sheet column, or of "call:<head>", for your sample j ('' when missing)
+    if (name.startsWith("call:")) { const c = (OV.calls || {})[name.slice(5)]; return c ? (c.call[j] || "") : ""; }
+    const f = OVF[name];
+    if (!f) return "";
+    const v = f.values[j];
+    if (f.kind === "cat") return v < 0 ? "" : f.levels[v];
+    return v == null ? "" : v;
+  }
+  const regCache = {};
+  function regulonValues(k, overlay) {   // values of set k for the atlas samples (or yours); null = no value
+    const key = (overlay ? "o" : "a") + k;
+    if (regCache[key]) return regCache[key];
+    const src = overlay ? (R.overlay ? R.overlay[k] : null) : R.sets[k].values;
+    if (!src) return null;
+    const bytes = atob(src), lim = R.sets[k].limit, out = new Array(bytes.length);
+    for (let i = 0; i < bytes.length; i++) { const c = bytes.charCodeAt(i); out[i] = c === 0 ? null : ((c - 1) / 127 - 1) * lim; }
+    regCache[key] = out;
+    return out;
+  }
+  const seedsOf = (h, i) => (F[h + "_seed_agreement"] && val(h + "_seed_agreement", i) !== "") ? `${val(h + "_seed_agreement", i)}/${D.meta.n_seeds}` : "";
 
   // studies -> sample indices
   const studySamples = {};
@@ -74,6 +100,7 @@
   for (let j = 0; j < NO; j++) {
     const lines = [`<b>${esc(OV.sample[j])}</b> · your samples: ${esc(OV.set[j])}`];
     Object.keys(OV.calls || {}).forEach(h => { const c = OV.calls[h]; lines.push(`${esc(h.replace("_", " "))}: ${esc(c.call[j])} (p=${fmtP(c.p[j])})`); });
+    Object.keys(OVF).slice(0, 5).forEach(c => { const v = ovVal(c, j); if (v !== "") lines.push(`${esc(c.replace(/_/g, " "))}: ${esc(v)}`); });
     const nb = OV.neighbors[j][0];
     if (nb) lines.push(`nearest atlas sample: ${esc(D.ids[nb[0]])} (${esc(gseOf(nb[0]))})`);
     ovHover.push(lines.join("<br>"));
@@ -92,7 +119,11 @@
     selected: null,                  // {kind: "atlas"|"overlay", i}
     hl: null,                        // atlas index highlighted from a table row
     caption: null,
-    cols: {}                         // layout name -> the three columns drawn (layouts with selectable columns)
+    cols: {},                        // layout name -> the three columns drawn (layouts with selectable columns)
+    regulon: null,                   // index of the regulon set that colours the map
+    lines: true,                     // time courses as lines
+    ovColor: null,                   // your samples coloured by a sheet column or "call:<head>"; null = by set
+    rotate: false
   };
   const colsOf = lay => S.cols[lay.name] || lay.default || [0, 1, 2];
 
@@ -102,7 +133,8 @@
     const lay = $("layout");
     D.layouts.forEach(l => { const o = document.createElement("option"); o.value = l.name; o.textContent = l.label; lay.appendChild(o); });
     const col = $("color");
-    const groups = [["Model", ["split", "phase_call", "medium_call", "lab_strain_call", "p_stationary", "p_minimal", "p_lab", "phase_logit", "n_missing_genes"]],
+    const groups = [["Model", ["split", "phase_call", "medium_call", "lab_strain_call", "p_stationary", "p_minimal", "p_lab", "phase_logit", "n_missing_genes",
+      "phase_seed_agreement", "medium_seed_agreement", "lab_strain_seed_agreement"]],
       ["Curated labels", ["phase_label", "medium_label", "lab_strain_label"].concat(D.meta.label_fields)],
       ["QC covariates", D.meta.qc_fields || []], ["Study", ["gse"]]];
     groups.forEach(([title, names]) => {
@@ -128,15 +160,32 @@
       o.label = (D.studies[g].title || "") + ` (${D.studies[g].n})`; dl.appendChild(o);
     });
     lay.value = S.layout; col.value = S.color;
-    lay.addEventListener("change", () => { S.layout = lay.value; fillPcs(); draw(); writeHash(); });
+    lay.addEventListener("change", () => { const from = positions(); S.layout = lay.value; fillPcs(); draw(from); writeHash(); });
     ["pc-x", "pc-y", "pc-z"].forEach((id, d) => $(id).addEventListener("change", e => {
-      const l = L[S.layout], c = colsOf(l).slice();
-      c[d] = +e.target.value; S.cols[l.name] = c; draw(); writeHash();
+      const from = positions(), l = L[S.layout], c = colsOf(l).slice();
+      c[d] = +e.target.value; S.cols[l.name] = c; draw(from); writeHash();
     }));
     fillPcs();
-    col.addEventListener("change", () => { S.color = col.value; draw(); });
+    col.addEventListener("change", () => { S.color = col.value; if (S.regulon !== null) setRegulon(null, true); else draw(); });
+    // regulons
+    $("regulon-box").hidden = !R;
+    document.querySelector('.tabs button[data-tab="regulon"]').hidden = !R;
+    if (R) {
+      $("regulon-list").innerHTML = R.sets.map(t => `<option value="${esc(t.name)}" label="${t.genes.length} genes"></option>`).join("");
+      $("regulon").addEventListener("keydown", e => { if (e.key === "Enter") regulonSearch($("regulon").value); });
+      $("regulon").addEventListener("change", e => { if (R.sets.some(t => t.name === e.target.value.trim())) regulonSearch(e.target.value); });
+      $("regulon-clear").addEventListener("click", () => setRegulon(null));
+      renderRegulon();
+    }
+    // time courses, rotation, your samples
+    const anySeries = (D.series || []).length || (OV && (OV.series || []).length);
+    $("lines-box").hidden = !anySeries;
+    $("lines").addEventListener("change", e => { S.lines = e.target.checked; draw(); });
+    $("rotate").addEventListener("click", () => setRotate(!S.rotate));
+    document.querySelector('.tabs button[data-tab="mine"]').hidden = !OV;
+    if (OV) renderMine();
     $("size").addEventListener("input", e => { S.size = +e.target.value; draw(); });
-    $("reset").addEventListener("click", () => { S.study = null; S.selected = null; S.hl = null; S.onlyGroup = null; setCaption(null); draw(); renderSample(); renderStudy(); writeHash(); });
+    $("reset").addEventListener("click", () => { S.study = null; S.selected = null; S.hl = null; S.onlyGroup = null; setCaption(null); draw(); renderSample(); renderStudy(); writeHash(); flyHome(); });
     pre.addEventListener("change", () => { if (pre.value !== "") applyPreset(D.presets[+pre.value]); });
     $("search").addEventListener("keydown", e => { if (e.key === "Enter") search($("search").value); });
     $("search").addEventListener("change", e => { if (D.studies[e.target.value.trim()]) search(e.target.value); });
@@ -225,6 +274,7 @@
     if (!keepSelection) S.selected = null;
     draw(); renderStudy(); if (!keepSelection) renderSample();
     showTab("study"); writeHash();
+    flyTo(studyIndices(gses).filter(visible));
   }
 
   function defaultStudyColor(gses) {     // label conditions when they split the study, else GEO titles
@@ -273,10 +323,14 @@
     return { x: idx.map(fx), y: idx.map(fy), z: idx.map(fz) };
   }
 
+  let regNow = null;                   // the regulon values being drawn (atlas samples), for the hover text
+  const fmtReg = v => (v > 0 ? "+" : "") + v.toFixed(2) + " SD";
+  const hoverText = i => (regNow && regNow[i] != null) ? `${hover[i]}<br><b>${esc(R.sets[S.regulon].name)}</b>: ${fmtReg(regNow[i])}` : hover[i];
+
   function pointTrace(lay, idx, opts) {
     const c = xyz(lay, idx);
     return Object.assign({
-      type: "scatter3d", mode: "markers", x: c.x, y: c.y, z: c.z, customdata: idx, text: idx.map(i => hover[i]),
+      type: "scatter3d", mode: "markers", x: c.x, y: c.y, z: c.z, customdata: idx, text: idx.map(hoverText),
       hoverinfo: "text", hoverlabel: { align: "left" }, marker: { size: S.size, opacity: 0.85, line: { width: 0 } }
     }, opts);
   }
@@ -294,6 +348,82 @@
     return out;
   }
 
+  function regulonTraces(lay, idx, size) {   // atlas samples coloured by the set's value, on the set's own symmetric scale
+    const t = R.sets[S.regulon], v = regNow;
+    const have = idx.filter(i => v[i] != null), miss = idx.filter(i => v[i] == null);
+    const out = [pointTrace(lay, have, {
+      name: t.name, showlegend: false,
+      marker: { size, opacity: 0.9, color: have.map(i => v[i]), colorscale: DIVERGING, cmin: -t.limit, cmax: t.limit,
+        colorbar: { title: { text: `${t.name} · mean of ${t.genes.length} gene${t.genes.length === 1 ? "" : "s"} (SD from the atlas mean)`, side: "right" }, thickness: 12, len: 0.6 } }
+    })];
+    if (miss.length) out.push(pointTrace(lay, miss, { name: "none of the set's genes", marker: { size, color: MISSING, opacity: 0.6 } }));
+    return out;
+  }
+
+  function overlayTraces(lay) {        // your samples: diamonds, by set, by a sheet column or call, or by the regulon value
+    const base = (jj, name, marker) => {
+      const c = xyz(lay, jj, "overlay");
+      return { type: "scatter3d", mode: "markers", name, x: c.x, y: c.y, z: c.z, customdata: jj.map(j => -1 - j),
+        text: jj.map(j => ovHover[j] + (ovReg && ovReg[j] != null ? `<br><b>${esc(R.sets[S.regulon].name)}</b>: ${fmtReg(ovReg[j])}` : "")),
+        hoverinfo: "text", hoverlabel: { align: "left" },
+        marker: Object.assign({ size: S.size * 2.6, symbol: "diamond", line: { width: 1, color: "#000" } }, marker) };
+    };
+    const all = OV.ids.map((_, j) => j), out = [];
+    const ovReg = S.regulon !== null ? regulonValues(S.regulon, true) : null;
+    if (ovReg) {
+      const t = R.sets[S.regulon], have = all.filter(j => ovReg[j] != null);
+      if (have.length) {
+        out.push(base(have, `your samples (${have.length})`, { color: have.map(j => ovReg[j]), colorscale: DIVERGING, cmin: -t.limit, cmax: t.limit, showscale: false }));
+        const rest = all.filter(j => ovReg[j] == null);
+        if (rest.length) out.push(base(rest, `your samples without a value (${rest.length})`, { color: MISSING }));
+        return out;
+      }
+    }
+    const field = S.ovColor;
+    if (field && OVF[field] && OVF[field].kind === "num") {
+      const have = all.filter(j => ovVal(field, j) !== ""), rest = all.filter(j => ovVal(field, j) === "");
+      out.push(base(have, `your samples: ${field} (${have.length})`, { color: have.map(j => ovVal(field, j)), colorscale: "Viridis", showscale: false }));
+      if (rest.length) out.push(base(rest, `your samples: not given (${rest.length})`, { color: MISSING }));
+      return out;
+    }
+    const by = new Map();
+    all.forEach(j => { const v = field ? (ovVal(field, j) === "" ? "not given" : String(ovVal(field, j))) : OV.set[j]; if (!by.has(v)) by.set(v, []); by.get(v).push(j); });
+    const keys = field ? [...by.keys()].sort(natural) : [...by.keys()];
+    ovColors = {};
+    keys.forEach((k, n) => {
+      const color = k === "not given" && field ? MISSING : (keys.length <= OVERLAY.length ? OVERLAY[n] : PALETTE[n % PALETTE.length]);
+      ovColors[k] = color;
+      out.push(base(by.get(k), `your samples: ${k} (${by.get(k).length})`, { color }));
+    });
+    return out;
+  }
+  let ovColors = {};                   // group of your samples -> colour (for the "Your samples" tab)
+
+  function lineTraces(lay) {           // time courses: a line through each series in its order, a cross on its last sample
+    if (!S.lines) return [];
+    const out = [];
+    const one = (list, key, color, name) => {
+      if (!list.length) return;
+      const x = [], y = [], z = [], ex = [], ey = [], ez = [];
+      list.forEach(sr => {
+        const c = xyz(lay, sr.idx, key);
+        x.push(...c.x, null); y.push(...c.y, null); z.push(...c.z, null);
+        const n = sr.idx.length - 1; ex.push(c.x[n]); ey.push(c.y[n]); ez.push(c.z[n]);
+      });
+      out.push({ type: "scatter3d", mode: "lines", name: `${name} (${list.length})`, x, y, z, hoverinfo: "skip", connectgaps: false,
+        line: { color, width: key === "overlay" ? 2.5 : 4 } });
+      out.push({ type: "scatter3d", mode: "markers", name: "last sample of a time course", showlegend: false, x: ex, y: ey, z: ez, hoverinfo: "skip",
+        marker: { size: S.size * 2.2, symbol: "cross", color, line: { width: 0 } } });
+    };
+    if (S.study && D.series) {
+      const inStudy = new Set(studyIndices(S.study));
+      one(D.series.map(sr => Object.assign({}, sr, { idx: sr.idx.filter(i => inStudy.has(i) && visible(i)) })).filter(sr => sr.idx.length > 1),
+        "atlas", "#444", "time courses");
+    }
+    if (OV && OV.series) one(OV.series, "overlay", "#7a0043", "your time courses");
+    return out;
+  }
+
   function categoricalTraces(lay, idx, field, size, legendgroup) {
     if (field === "gse" && new Set(idx.map(gseOf)).size > MAX_LEVELS) {
       return [pointTrace(lay, idx, { name: "studies", showlegend: false, marker: { size, opacity: 0.85, color: idx.map(i => hashColor(gseOf(i))) } })];
@@ -305,12 +435,13 @@
 
   let groupColors = {};                // study mode: group value -> colour (for the study panel)
 
-  function draw() {
+  function buildTraces() {
     const lay = L[S.layout];
     const traces = [];
     const all = [];
     for (let i = 0; i < N; i++) if (visible(i)) all.push(i);
     groupColors = {};
+    regNow = S.regulon !== null ? regulonValues(S.regulon) : null;
     if (S.study) {
       const inStudy = new Set(studyIndices(S.study));
       const field = S.studyColor;
@@ -320,7 +451,8 @@
         traces.push(pointTrace(lay, bg, { name: "other atlas samples", marker: { size: Math.max(1, S.size * 0.7), color: FADED, opacity: 0.25 } }));
       }
       const big = S.size * 2.2;
-      if (F[field] && F[field].kind === "num") traces.push(...numericTrace(lay, idx, field, nice(field), big));
+      if (regNow) traces.push(...regulonTraces(lay, idx, big));
+      else if (F[field] && F[field].kind === "num") traces.push(...numericTrace(lay, idx, field, nice(field), big));
       else {
         let groups = colorGroups(field, idx) || [];
         groups.forEach(g => { groupColors[g.name.replace(/ \(\d+ values\)$/, "")] = g.color; });
@@ -334,21 +466,12 @@
       }
     } else {
       const field = S.color;
-      if (F[field].kind === "num") traces.push(...numericTrace(lay, all, field, nice(field), S.size));
+      if (regNow) traces.push(...regulonTraces(lay, all, S.size));
+      else if (F[field].kind === "num") traces.push(...numericTrace(lay, all, field, nice(field), S.size));
       else traces.push(...categoricalTraces(lay, all, field, S.size));
     }
-    if (OV) {
-      const sets = [...new Set(OV.set)];
-      sets.forEach((s, k) => {
-        const jj = []; OV.set.forEach((v, j) => { if (v === s) jj.push(j); });
-        const c = xyz(lay, jj, "overlay");
-        traces.push({
-          type: "scatter3d", mode: "markers", name: `your samples: ${s} (${jj.length})`, x: c.x, y: c.y,
-          z: c.z, customdata: jj.map(j => -1 - j), text: jj.map(j => ovHover[j]), hoverinfo: "text",
-          hoverlabel: { align: "left" }, marker: { size: S.size * 2.6, symbol: "diamond", color: OVERLAY[k % OVERLAY.length], line: { width: 1, color: "#000" } }
-        });
-      });
-    }
+    traces.push(...lineTraces(lay));
+    if (OV) traces.push(...overlayTraces(lay));
     const mark = [];
     if (S.selected) mark.push(S.selected);
     if (S.hl !== null) mark.push({ kind: "atlas", i: S.hl });
@@ -363,14 +486,110 @@
       traces.push({ type: "scatter3d", mode: "markers", name: "selected", showlegend: false, hoverinfo: "skip", x, y, z,
         marker: { size: sz, symbol: "circle-open", color: col, line: { width: 3, color: col } } });
     }
+    return traces;
+  }
+
+  function sceneLayout() {
+    const lay = L[S.layout];
     const ax = t => ({ title: { text: t, font: { size: 11 } }, showspikes: false, zeroline: false, gridcolor: "#e6e6e6", backgroundcolor: "#fafaf8" });
-    const layout = {
+    return {
       uirevision: S.layout, margin: { l: 0, r: 0, t: 0, b: 0 }, paper_bgcolor: "#fafaf8",
       legend: { x: 0, y: 1, bgcolor: "rgba(255,255,255,0.75)", font: { size: 11 }, itemsizing: "constant" },
       scene: { xaxis: ax(lay.axes[colsOf(lay)[0]]), yaxis: ax(lay.axes[colsOf(lay)[1]]), zaxis: ax(lay.axes[colsOf(lay)[2]]), aspectmode: "cube" },
       hovermode: "closest"
     };
-    Plotly.react("plot", traces, layout, { responsive: true, displaylogo: false, modeBarButtonsToRemove: ["resetCameraLastSave3d"] });
+  }
+  const CONFIG = { responsive: true, displaylogo: false, modeBarButtonsToRemove: ["resetCameraLastSave3d"] };
+
+  // Motion. A change of layout or axes moves the points from their old places to the new ones; every other
+  // redraw is immediate. Each draw gets a number, so a later draw ends a running move.
+  const MOVE_MS = 650, MAX_MOVING = 60000;
+  const still = () => window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let drawNo = 0, lastDraw = Promise.resolve(), moving = false;
+  const positions = () => buildTraces().map(t => ({ x: t.x, y: t.y, z: t.z }));
+  const ease = t => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+  function draw(from) {                // from: positions() taken before the change of layout, to move from
+    const no = ++drawNo;
+    const traces = buildTraces();
+    const n = traces.reduce((a, t) => a + t.x.length, 0);
+    const can = from && !still() && n <= MAX_MOVING && from.length === traces.length && from.every((f, k) => f.x.length === traces[k].x.length);
+    if (!can) { moving = false; lastDraw = Plotly.react("plot", traces, sceneLayout(), CONFIG); return; }
+    const to = traces.map(t => ({ x: t.x, y: t.y, z: t.z }));
+    traces.forEach((t, k) => { t.x = from[k].x; t.y = from[k].y; t.z = from[k].z; });
+    moving = true;
+    const mix = (a, b, w) => a.map((v, i) => (v == null || b[i] == null) ? b[i] : v + (b[i] - v) * w);
+    lastDraw = Plotly.react("plot", traces, sceneLayout(), CONFIG).then(() => new Promise(done => {
+      const t0 = performance.now();
+      const step = () => {
+        if (no !== drawNo) { done(); return; }                    // a later draw took over
+        const w = Math.min(1, (performance.now() - t0) / MOVE_MS), e = ease(w);
+        Plotly.restyle("plot", { x: to.map((t, k) => w < 1 ? mix(from[k].x, t.x, e) : t.x), y: to.map((t, k) => w < 1 ? mix(from[k].y, t.y, e) : t.y),
+          z: to.map((t, k) => w < 1 ? mix(from[k].z, t.z, e) : t.z) }).then(() => {
+          if (w < 1 && no === drawNo) requestAnimationFrame(step); else { if (no === drawNo) moving = false; done(); }
+        });
+      };
+      requestAnimationFrame(step);
+    }));
+  }
+
+  // Camera. plotly's camera lives in the scene's own units: the axis ranges fill a cube of side 1 around 0.
+  const HOME = { center: { x: 0, y: 0, z: 0 }, eye: { x: 1.25, y: 1.25, z: 1.25 }, up: { x: 0, y: 0, z: 1 } };
+  const CAM_MS = 700;
+  let camNo = 0;
+  const camera = () => { const c = (plot._fullLayout.scene || {}).camera || HOME; return JSON.parse(JSON.stringify({ center: c.center, eye: c.eye, up: c.up })); };
+  function sceneUnits(c) {             // data coordinates -> scene units
+    const sc = plot._fullLayout.scene, out = {};
+    ["x", "y", "z"].forEach(a => { const r = sc[a + "axis"].range; out[a] = (c[a] - (r[0] + r[1]) / 2) / (r[1] - r[0]); });
+    return out;
+  }
+  function moveCamera(target, ms) {
+    const no = ++camNo;
+    setRotate(false);
+    lastDraw.then(() => {
+      if (no !== camNo) return;
+      if (still() || !ms) { Plotly.relayout("plot", { "scene.camera": target }); return; }
+      const from = camera(), t0 = performance.now();
+      const mixP = (a, b, w) => ({ x: a.x + (b.x - a.x) * w, y: a.y + (b.y - a.y) * w, z: a.z + (b.z - a.z) * w });
+      const step = () => {
+        if (no !== camNo) return;
+        const w = Math.min(1, (performance.now() - t0) / ms), e = ease(w);
+        Plotly.relayout("plot", { "scene.camera": { center: mixP(from.center, target.center, e), eye: mixP(from.eye, target.eye, e), up: target.up } })
+          .then(() => { if (w < 1) requestAnimationFrame(step); });
+      };
+      requestAnimationFrame(step);
+    });
+  }
+  function flyTo(idx, key) {           // turn the camera to samples idx: their centre in the middle, as close as their spread allows
+    if (!idx.length) return;
+    lastDraw.then(() => {
+      const c = xyz(L[S.layout], idx, key || "atlas"), u = { x: [], y: [], z: [] };
+      idx.forEach((_, k) => { const p = sceneUnits({ x: c.x[k], y: c.y[k], z: c.z[k] }); u.x.push(p.x); u.y.push(p.y); u.z.push(p.z); });
+      const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
+      const center = { x: mean(u.x), y: mean(u.y), z: mean(u.z) };
+      const radius = Math.max(...idx.map((_, k) => Math.hypot(u.x[k] - center.x, u.y[k] - center.y, u.z[k] - center.z)));
+      const now = camera(), d = { x: now.eye.x - now.center.x, y: now.eye.y - now.center.y, z: now.eye.z - now.center.z };
+      const len = Math.hypot(d.x, d.y, d.z) || 1, dist = Math.min(2.2, Math.max(0.9, 0.7 + 2.6 * radius));
+      moveCamera({ center, eye: { x: center.x + d.x / len * dist, y: center.y + d.y / len * dist, z: center.z + d.z / len * dist }, up: now.up }, CAM_MS);
+    });
+  }
+  function flyHome() { moveCamera(HOME, CAM_MS); }
+
+  function setRotate(on) {             // turn the scene slowly about the vertical axis until the next mouse press on the plot
+    if (on === S.rotate) return;
+    S.rotate = on;
+    $("rotate").classList.toggle("on", on);
+    if (!on) return;
+    camNo++;
+    let last = performance.now();
+    const step = () => {
+      if (!S.rotate) return;
+      const t = performance.now(), a = (t - last) / 1000 * 0.35; last = t;      // radians per second
+      const c = camera(), dx = c.eye.x - c.center.x, dy = c.eye.y - c.center.y;
+      c.eye.x = c.center.x + dx * Math.cos(a) - dy * Math.sin(a); c.eye.y = c.center.y + dx * Math.sin(a) + dy * Math.cos(a);
+      Plotly.relayout("plot", { "scene.camera": c }).then(() => { if (S.rotate) requestAnimationFrame(step); });
+    };
+    lastDraw.then(() => requestAnimationFrame(step));
   }
 
   // ------------------------------------------------------------------ panels
@@ -415,9 +634,9 @@
   function callsTable(i) {
     let rows = "";
     Object.keys(HEAD_POS).forEach(h => {
-      rows += `<tr><td class="k">${esc(h.replace("_", " "))}</td><td>${esc(val(h + "_call", i))}</td><td>${fmtP(val("p_" + HEAD_POS[h], i))}</td><td>${esc(val(h + "_label", i)) || "<span class='muted'>–</span>"}</td></tr>`;
+      rows += `<tr><td class="k">${esc(h.replace("_", " "))}</td><td>${esc(val(h + "_call", i))}</td><td>${fmtP(val("p_" + HEAD_POS[h], i))}</td>${D.meta.n_seeds ? `<td>${seedsOf(h, i)}</td>` : ""}<td>${esc(val(h + "_label", i)) || "<span class='muted'>–</span>"}</td></tr>`;
     });
-    return `<table><tr><th>call</th><th>model</th><th>p(${Object.values(HEAD_POS).join("/")})</th><th>curated label</th></tr>${rows}</table>`;
+    return `<table><tr><th>call</th><th>model</th><th>p(${Object.values(HEAD_POS).join("/")})</th>${D.meta.n_seeds ? "<th title='seeds of the model that make the same call'>seeds</th>" : ""}<th>curated label</th></tr>${rows}</table>`;
   }
 
   function renderSample() {
@@ -438,6 +657,7 @@
     if (val("n_missing_genes", i) !== "") extra.push(`${val("n_missing_genes", i)} genes called missing`);
     if (extra.length) h += `<p class="muted">${esc(extra.join(" · "))}</p>`;
     if (val("condition", i)) h += `<p class="muted">condition within the study: ${esc(val("condition", i))}</p>`;
+    if (regNow) h += `<p><b>${esc(R.sets[S.regulon].name)}</b>: ${regNow[i] == null ? "none of the set's genes" : fmtReg(regNow[i])}</p>`;
     h += `<h3>Curated metadata</h3><table>`;
     D.meta.label_fields.forEach(c => {
       const v = val(c, i);
@@ -462,9 +682,18 @@
 
   function renderOverlaySample(j) {
     const el = $("tab-sample");
-    let h = `<h2>${esc(OV.sample[j])}</h2><p class="muted">your samples: ${esc(OV.set[j])}</p><h3>Model</h3><table><tr><th>call</th><th>model</th><th>p</th></tr>`;
-    Object.keys(OV.calls || {}).forEach(k => { const c = OV.calls[k]; h += `<tr><td class="k">${esc(k.replace("_", " "))}</td><td>${esc(c.call[j])}</td><td>${fmtP(c.p[j])}</td></tr>`; });
+    const sa = OV.seed_agreement || null;
+    let h = `<h2>${esc(OV.sample[j])}</h2><p class="muted">your samples: ${esc(OV.set[j])}</p>`;
+    const sheet = Object.keys(OVF).filter(c => ovVal(c, j) !== "");
+    if (sheet.length) h += `<h3>Sample sheet</h3><table>` + sheet.map(c => `<tr><td class="k">${esc(c.replace(/_/g, " "))}</td><td>${esc(ovVal(c, j))}</td></tr>`).join("") + `</table>`;
+    h += `<h3>Model</h3><table><tr><th>call</th><th>model</th><th>p</th>${sa ? "<th title='seeds of the model that make the same call'>seeds</th>" : ""}</tr>`;
+    Object.keys(OV.calls || {}).forEach(k => {
+      const c = OV.calls[k];
+      h += `<tr><td class="k">${esc(k.replace("_", " "))}</td><td>${esc(c.call[j])}</td><td>${fmtP(c.p[j])}</td>${sa ? `<td>${sa[k] && sa[k][j] != null ? sa[k][j] + "/" + OV.n_seeds[j] : ""}</td>` : ""}</tr>`;
+    });
     h += `</table>`;
+    const rv = S.regulon !== null ? regulonValues(S.regulon, true) : null;
+    if (rv) h += `<p><b>${esc(R.sets[S.regulon].name)}</b>: ${rv[j] == null ? "no value" : fmtReg(rv[j])}</p>`;
     if (OV.n_missing_genes) h += `<p class="muted">${OV.n_missing_genes[j]} genes called missing</p>`;
     if (OV.covariates) h += qcTable(n => { const c = OV.covariates[n]; return c ? (c[j] == null ? "" : c[j]) : ""; });
     h += `<h3>Nearest atlas samples (${esc(OV.metric)} distance, whole embedding)</h3><table><tr><th>#</th><th>sample</th><th>study</th><th>dist</th><th>phase / medium</th></tr>`;
@@ -548,6 +777,77 @@
     });
   }
 
+  // ------------------------------------------------------------------ regulons
+  function setRegulon(k, keepColor) {
+    S.regulon = k;
+    $("regulon").value = k === null ? "" : R.sets[k].name;
+    draw(); renderRegulon(); renderSample(); if (S.study) renderStudy();
+    if (k !== null) showTab("regulon");
+    writeHash();
+  }
+  function regulonSearch(q) {          // a set by its name, or the sets that hold a gene
+    q = (q || "").trim();
+    if (!R || !q) return;
+    const lo = q.toLowerCase();
+    const exact = R.sets.findIndex(t => t.name.toLowerCase() === lo || t.term.toLowerCase() === lo);
+    if (exact >= 0) { setRegulon(exact); return; }
+    const hits = [];
+    R.sets.forEach((t, k) => {
+      const gene = t.genes.concat(t.absent).find(g => g.toLowerCase() === lo);
+      if (gene) hits.push([k, `holds ${gene}`]);
+      else if (t.name.toLowerCase().includes(lo)) hits.push([k, ""]);
+    });
+    hits.sort((x, y) => (x[1] !== "") - (y[1] !== ""));          // sets of that name first, then the sets that hold the gene
+    if (hits.length === 1) { setRegulon(hits[0][0]); return; }
+    renderRegulon({ q, hits }); showTab("regulon");
+  }
+  function renderRegulon(found) {
+    const el = $("tab-regulon");
+    let h = "";
+    if (found) {
+      h += `<h2>Regulon sets matching “${esc(found.q)}”</h2><p class="muted">${found.hits.length} sets (by name, or holding a gene of that name)</p><div class="results">` +
+        found.hits.map(([k, why]) => `<div data-k="${k}"><b>${esc(R.sets[k].name)}</b> · ${R.sets[k].genes.length} genes ${why ? `<span class="muted">${esc(why)}</span>` : ""}</div>`).join("") + `</div>`;
+    }
+    if (S.regulon !== null) {
+      const t = R.sets[S.regulon], n = t.genes.length;
+      h += `<h2>${esc(t.name)}</h2><p class="muted">${esc(R.source || "RegulonDB")}${t.category ? " · " + esc(t.category) : ""}</p>`;
+      h += `<p>The map is coloured by the mean expression of the ${n} gene${n === 1 ? "" : "s"} of this set: each gene's log expression as SDs from its mean over the atlas, averaged over the genes the sample has, compared with the sample's other genes. Red is above the atlas mean, blue below; the scale ends at ±${t.limit} SD.</p>`;
+      if (n < 5) h += `<p><span class="pill warn">${n} gene${n === 1 ? "" : "s"}</span> A set this small is the expression of ${n === 1 ? "one gene" : "a few genes"}, not a regulon-wide signal.</p>`;
+      h += `<p class="muted">This is the expression of the regulator's targets, not its activity; regulons that share targets rise and fall together.</p>`;
+      h += `<div class="row-actions"><button id="regulon-off">Back to the colour menu</button></div>`;
+      h += `<h3>Genes (${n})</h3><p class="genes">${t.genes.map(esc).join(" ") || "<span class='muted'>none in the model</span>"}</p>`;
+      if (t.absent.length) h += `<h3>Not in the model (${t.absent.length})</h3><p class="genes muted">${t.absent.map(esc).join(" ")}</p>`;
+    } else if (!found) {
+      h += `<p class="muted">Type a regulator (Fur, CRP, RpoS …) or a gene in the Regulon box to colour the map by the expression of a RegulonDB set. ${R.sets.length} sets: the genes each regulator activates and those it represses.</p>`;
+    }
+    el.innerHTML = h;
+    el.querySelectorAll("[data-k]").forEach(d => d.addEventListener("click", () => setRegulon(+d.dataset.k)));
+    if ($("regulon-off")) $("regulon-off").addEventListener("click", () => setRegulon(null));
+  }
+
+  // ------------------------------------------------------------------ your samples
+  function renderMine() {
+    const el = $("tab-mine");
+    const opts = [["", "set"]].concat(Object.keys(OVF).map(c => [c, c.replace(/_/g, " ")]), Object.keys(OV.calls || {}).map(k => ["call:" + k, k.replace("_", " ") + " call"]));
+    let h = `<h2>Your samples <span class="muted">${NO}</span></h2>`;
+    h += `<div class="row-actions"><label class="muted">colour by <select id="mine-color">` + opts.map(([v, t]) => `<option value="${esc(v)}" ${v === (S.ovColor || "") ? "selected" : ""}>${esc(t)}</option>`).join("") +
+      `</select></label><button id="mine-fly">Turn the camera to them</button></div>`;
+    if (!Object.keys(OVF).length) h += `<p class="muted">No sample sheet in this page (build it with --overlay-metadata to colour and group your samples by condition).</p>`;
+    const heads = Object.keys(OV.calls || {});
+    h += `<table><tr><th></th><th>sample</th>${S.ovColor ? `<th>${esc(S.ovColor.replace(/^call:/, "").replace(/_/g, " "))}</th>` : ""}` + heads.map(k => `<th>p(${esc(OV.calls[k].positive)})</th>`).join("") + `</tr>`;
+    OV.ids.forEach((_, j) => {
+      const g = S.ovColor ? (ovVal(S.ovColor, j) === "" ? "not given" : String(ovVal(S.ovColor, j))) : OV.set[j];
+      h += `<tr class="click" data-j="${j}"><td><span class="swatch" style="background:${ovColors[g] || MISSING}"></span></td><td>${esc(OV.sample[j])}</td>${S.ovColor ? `<td>${esc(g)}</td>` : ""}` +
+        heads.map(k => `<td>${fmtP(OV.calls[k].p[j])}</td>`).join("") + `</tr>`;
+    });
+    h += `</table>`;
+    if ((OV.series || []).length) h += `<p class="muted">${OV.series.length} series joined by lines (the cross marks the last sample of each).</p>`;
+    el.innerHTML = h;
+    $("mine-color").addEventListener("change", e => { S.ovColor = e.target.value || null; draw(); renderMine(); });
+    $("mine-fly").addEventListener("click", () => flyTo(OV.ids.map((_, j) => j), "overlay"));
+    el.querySelectorAll("tr[data-j]").forEach(r => r.addEventListener("click", () => select({ kind: "overlay", i: +r.dataset.j })));
+  }
+
   function renderAbout() {
     const m = D.meta;
     let h = `<h2>About this map</h2><p>${m.n_atlas.toLocaleString()} RNA-seq samples of <i>E. coli</i> in ${m.n_studies} GEO studies, embedded by the model <b>${esc(m.bundle)}</b> (ecoli_atlas ${esc(m.version)}, page built ${esc(m.built)}).</p>`;
@@ -555,7 +855,11 @@
     h += `<h3>Layouts</h3><table>` + D.layouts.map(l => `<tr><td class="k">${esc(l.label)}</td><td>${l.axes.slice(0, 3).map(esc).join(" · ")}${l.choose ? ` · … (${l.axes.length} columns; pick any three with X / Y / Z)` : ""}</td></tr>`).join("") + `</table>`;
     h += `<p class="muted">PCA and UMAP are fitted on the atlas samples; your samples are projected onto the same fit. Distances between neighbours are computed in the full embedding, not in the 3-D map.</p>`;
     h += `<h3>Using the map</h3><p>Drag to rotate, scroll to zoom, right-drag to pan. Click a legend entry to hide a group, double-click to show it alone. Click a point to open the sample; “Show this study” draws its study on top of the rest of the atlas, grouped by the labels that differ between its samples. The split filters show training samples, the held-out TEST studies and projected samples (in the atlas but not fitted).</p>`;
-    if (OV) h += `<p>Your samples (${NO}) are drawn as diamonds; clicking one lists its nearest atlas samples.</p>`;
+    if (OV) h += `<p>Your samples (${NO}) are drawn as diamonds; clicking one lists its nearest atlas samples. The “Your samples” tab lists them and colours them by a column of your sample sheet.</p>`;
+    if (R) h += `<h3>Regulons</h3><p>The Regulon box colours the map by the expression of a RegulonDB set (${R.sets.length} sets from ${esc(R.source || "RegulonDB")}): the mean over the set's genes of their log expression, each gene as SDs from its mean over the atlas, minus the sample's median over all genes. Genes a strain lacks are left out for its samples.</p>`;
+    if ((D.series || []).length) h += `<h3>Time courses</h3><p>In a study with time courses (${D.series.length} in the atlas) a line joins the samples of each course in their order; a cross marks the last one. “Lines” switches them off.</p>`;
+    if (m.n_seeds) h += `<p class="muted">Seeds: the model was fitted ${m.n_seeds} times from different random starts; “seeds that agree” counts the fits that make the same call as the model of this page.</p>`;
+    h += `<p class="muted">“Rotate” turns the scene until the next mouse press. A change of layout moves the points to their new places.</p>`;
     $("tab-about").innerHTML = h;
   }
 
@@ -566,6 +870,7 @@
     if (S.selected && S.selected.kind === "atlas") p.set("sample", D.ids[S.selected.i]);
     if (S.layout) p.set("layout", S.layout);
     if (S.cols[S.layout]) p.set("pcs", S.cols[S.layout].join(","));
+    if (S.regulon !== null) p.set("regulon", R.sets[S.regulon].term);
     try { history.replaceState(null, "", "#" + p.toString()); } catch (e) { /* file:// in some browsers */ }
   }
   function readHash() {
@@ -576,6 +881,10 @@
       if (l.choose && c.length === 3 && c.every((k, d) => l.choose[d].includes(k))) S.cols[l.name] = c;
       fillPcs();
     }
+    if (R && p.get("regulon")) {
+      const k = R.sets.findIndex(t => t.term === p.get("regulon"));
+      if (k >= 0) { S.regulon = k; $("regulon").value = R.sets[k].name; renderRegulon(); }
+    }
     const s = p.get("sample");
     if (s && idIndex[s] !== undefined) { S.selected = { kind: "atlas", i: idIndex[s] }; renderSample(); }
     if (p.get("study")) { enterStudy(p.get("study").split(","), null, true); return true; }
@@ -585,7 +894,7 @@
   // ------------------------------------------------------------------ start
   fillControls();
   if (!readHash()) draw();
-  const plot = $("plot");
+  if (OV) renderMine();
   // plotly_click is not used: a 3-D scene emits it from inside its render loop (and again on every
   // re-render), so redrawing in its handler re-enters the handler until the stack overflows, and a
   // plain click often emits nothing. Instead the point under the mouse is tracked with hover events
@@ -596,7 +905,8 @@
     hovered = (pt && pt.customdata !== undefined && pt.customdata !== null) ? pt.customdata : null;
   });
   plot.on("plotly_unhover", () => { hovered = null; });
-  plot.addEventListener("pointerdown", e => { downAt = [e.clientX, e.clientY]; }, true);
+  plot.addEventListener("pointerdown", e => { downAt = [e.clientX, e.clientY]; setRotate(false); camNo++; }, true);
+  plot.addEventListener("wheel", () => { setRotate(false); camNo++; }, { capture: true, passive: true });
   plot.addEventListener("pointerup", e => {
     const still = downAt && Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) < 5;
     downAt = null;
@@ -605,5 +915,6 @@
     const c = hovered;
     setTimeout(() => select(c < 0 ? { kind: "overlay", i: -1 - c } : { kind: "atlas", i: c }), 0);
   }, true);
-  window.atlasViewer = { data: D, state: S, draw, enterStudy, select, applyPreset };
+  window.atlasViewer = { data: D, state: S, draw, enterStudy, select, applyPreset, setRegulon, regulonSearch, regulonValues, flyTo, flyHome,
+    setRotate, camera, isMoving: () => moving, ready: () => lastDraw };
 })();
