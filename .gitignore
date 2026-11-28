@@ -30,13 +30,17 @@ config.yaml
 !ecoli_ingest/src/ecoli_ingest/config/config.template.yaml
 *.log
 
-# ---- examples: one folder per example, kept in git as README.md, run.sh (+ config.yaml, samples.csv) -----
+# ---- examples: one folder per example, kept in git as README.md, run.sh (+ config.yaml, samples.csv, scripts/ and
+# ---- the input tables of an example with its own analysis) ----
 # Everything a run writes inside examples/<name>/ (downloads in sra/, results, figures, logs) stays untracked.
 /examples/*/*
 !/examples/*/config.yaml
 !/examples/*/README.md
 !/examples/*/samples.csv
 !/examples/*/run.sh
+!/examples/*/scripts/
+!/examples/atlas_lab_strain_exponential_LB_comparison/reads.tsv
+!/examples/atlas_lab_strain_exponential_LB_comparison/sample_states.tsv
 
 # ---- python --------------------------------------------------------------------------------
 __pycache__/

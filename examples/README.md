@@ -11,6 +11,7 @@ bundle). Everything a run writes stays in the folder and is not tracked by git.
 | [GSE271069_nutrient_stress_time_course](GSE271069_nutrient_stress_time_course/README.md) | a two-factor design (medium × time) from reads to the atlas, and glucose against casamino acids | `run.sh ingest`, then `run.sh atlas` |
 | [atlas_model_figures](atlas_model_figures/README.md) | the training data, TEST performance, head scores and study leakage | atlas tables |
 | [atlas_lab_strain_LB_variation](atlas_lab_strain_LB_variation/README.md) | how LB exponential cultures of the lab strains differ between studies: genes, GO terms, regulons, KEGG, and which follow the growth rate (paper Figure 2) | atlas tables (module table for regulons and KEGG) |
+| [atlas_lab_strain_exponential_LB_comparison](atlas_lab_strain_exponential_LB_comparison/README.md) | the genotypes behind the flagellar on / off split of those LB cultures: an IS1 upstream of flhDC, the two MG1655 stocks, from the samples' reads (breseq) | `run.sh figures`: atlas tables and module table; `run.sh all`: the reads, breseq, a big disk |
 | [atlas_drivers](atlas_drivers/README.md) | the genes and GO terms that move each call | atlas tables |
 | [atlas_axes](atlas_axes/README.md) | growth phase, oxygen and carbon source as dimensions of the embedding, and their genes | atlas tables |
 | [GSE189154_oxygen](GSE189154_oxygen/README.md) | low oxygen against aerobic growth in a held-out study | atlas tables |

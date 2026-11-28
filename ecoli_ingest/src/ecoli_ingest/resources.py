@@ -28,7 +28,7 @@ BUNDLES = {
     "core": ("vg", "annotation"),
     "centrifuge": ("centrifuge",),
 }
-BUNDLE_SIZES = {"core": "175 MB download, 676 MB unpacked", "centrifuge": "5.4 GB download, 6.9 GB unpacked"}
+BUNDLE_SIZES = {"core": "178 MB download, 688 MB unpacked", "centrifuge": "5.4 GB download, 6.9 GB unpacked"}
 BUNDLE_URLS = {
     "core": f"{RELEASE_URL}/ecoli_ingest_core_{RESOURCES_VERSION}.tar.gz",
     # upstream prebuilt index from the Centrifuge authors (Kim et al. 2016; built 2016). The file name

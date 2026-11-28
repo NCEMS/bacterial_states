@@ -69,7 +69,7 @@ ecoli_ingest download core                  # or name bundles one at a time: cor
 
 | Bundle | Contents | Size | Source |
 |---|---|---|---|
-| `core` | vg graph index, counting annotation, reference genome FASTA | 175 MB download, 676 MB unpacked | this project ([release `resources-v2`](https://github.com/NCEMS/bacterial_states/releases/tag/resources-v2)) |
+| `core` | vg graph index, counting annotation, reference genome FASTA and its GenBank file | 178 MB download, 688 MB unpacked | this project ([release `resources-v2`](https://github.com/NCEMS/bacterial_states/releases/tag/resources-v2)) |
 | `centrifuge` | `p_compressed+h+v` contamination index, not needed with `centrifuge: false` | 5.4 GB download, 6.9 GB unpacked | the Centrifuge authors' prebuilt index (`genome-idx.s3.amazonaws.com/centrifuge/`, pinned S3 object version) |
 | `container` | Apptainer image `ecoli_ingest.sif` of this major version's environment | ~1.2 GB | this project (asset `ecoli_ingest_env2.sif` of the release `containers-v2`) |
 
@@ -89,6 +89,8 @@ resources/
 ├── annotation/GCF_000005845.2_ASM584v2_counting_v2.features.tsv           # feature list with overlaps
 ├── annotation/GCF_000005845.2_ASM584v2_counting_v2.rfam_merge_report.tsv  # fate of every Rfam hit
 ├── annotation/GCF_000005845.2_ASM584v2_genomic.fna           # NC_000913.3; GC bias in the QC record
+├── annotation/GCF_000005845.2_ASM584v2_genomic.gbff          # NCBI GenBank of NC_000913.3 (not used by the workflow;
+│                                                             #   breseq in examples/atlas_lab_strain_exponential_LB_comparison)
 ├── centrifuge/p_compressed+h+v.{1,2,3}.cf                    # not needed with centrifuge: false
 └── container/ecoli_ingest.sif                                # optional (install path B)
 ```

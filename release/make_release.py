@@ -8,7 +8,8 @@ a time stamp, so the same files always give the same bytes and SHA-256. Writes t
 (+ resources.manifest.tsv, per file) and ecoli_atlas/src/ecoli_atlas/download.py (per archive).
 
 Bundles (paths relative to --root; the name in the archive is what the download unpacks into its target):
-  ecoli_ingest_core_<v>.tar.gz       resources/ -> vg/*, annotation/ (counting annotation, reference genome FASTA)
+  ecoli_ingest_core_<v>.tar.gz       resources/ -> vg/*, annotation/ (counting annotation, reference genome FASTA and
+                                     its NCBI GenBank flat file, for breseq)
                                      unpacked into the inGEST resources directory
   ecoli_atlas_training_data_<v>.tar.gz   atlas_data/ -> the training tables, the metadata with its GEO text and
                                      evidence, and the genes called missing per sample; unpacked into atlas_data/
@@ -37,6 +38,7 @@ CORE_FILES = (
     "annotation/GCF_000005845.2_ASM584v2_counting_v2.gff",
     "annotation/GCF_000005845.2_ASM584v2_counting_v2.rfam_merge_report.tsv",
     "annotation/GCF_000005845.2_ASM584v2_genomic.fna",
+    "annotation/GCF_000005845.2_ASM584v2_genomic.gbff",
 )
 TRAINING_FILES = (                 # (source under --root, name in the archive)
     ("atlas_data/atlas_v2_counts.tsv", "atlas_v2_counts.tsv"),

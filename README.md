@@ -26,7 +26,7 @@ fastq ──► Ecoli_inGEST ──► counts ──► Ecoli_ATLAS embed ──
 | What | Snakemake RNA-seq workflow: QC gates, `vg giraffe` pangenome alignment, featureCounts, DESeq2, MultiQC | PyTorch encoder–decoder: train, embed new samples, compare with the atlas |
 | Install | conda env from `ecoli_ingest/locks/` + `pip install -e ./ecoli_ingest` (or any Python + Apptainer image) | conda env from `ecoli_atlas/locks/` + `pip install -e ./ecoli_atlas` (or the Apptainer image, CPU) |
 | Command | `ecoli_ingest init / check / run` in your run directory | `ecoli_atlas prepare / embed / compare / train` |
-| Data (downloaded separately) | graph index, counting annotation and genome FASTA (175 MB download, 676 MB unpacked); Centrifuge DB (6.9 GB, optional); container image (~1.2 GB, optional) | trained model with its atlas embedding and all 8 seeds (312 MB download); training data with the metadata, its GEO text and the missing-gene calls (100 MB download) |
+| Data (downloaded separately) | graph index, counting annotation and genome FASTA with its GenBank file (178 MB download, 688 MB unpacked); Centrifuge DB (6.9 GB, optional); container image (~1.2 GB, optional) | trained model with its atlas embedding and all 8 seeds (312 MB download); training data with the metadata, its GEO text and the missing-gene calls (100 MB download) |
 | Docs | [ecoli_ingest/README.md](ecoli_ingest/README.md) | [ecoli_atlas/README.md](ecoli_atlas/README.md) |
 
 Both can be installed and used independently, on Linux or macOS (Apple Silicon or Intel). Data bundles are fetched with
